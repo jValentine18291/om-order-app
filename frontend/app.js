@@ -187,13 +187,12 @@ async function startScanner() {
     return;
   }
   await stopScanner();
-  const F = Html5QrcodeSupportedFormats;
-  const formats = [F.CODE_128, F.CODE_39, F.CODE_93, F.EAN_13, F.EAN_8, F.UPC_A, F.UPC_E, F.ITF, F.CODABAR, F.QR_CODE];
+  const formats = [Html5QrcodeSupportedFormats.CODE_128];
   scanner = new Html5Qrcode("reader", { verbose: false, formatsToSupport: formats });
   try {
     await scanner.start(
       { facingMode: "environment" },
-      { fps: 10, qrbox: { width: 280, height: 140 } },
+      { fps: 10, qrbox: { width: 300, height: 110 } },
       onScan,
       () => {}
       );
