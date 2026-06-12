@@ -347,14 +347,24 @@ async function stopOcrCamera() {
 // Pull a SKU-shaped token out of raw OCR text: a brand prefix (letters) followed
 // by a long number (e.g. "SZEN 140051111"). OM SKUs have a 5+ digit run, so this
 // ignores short rack/bin codes like "BK3410" or "R3D6" that share the label.
+// OCR sometimes confuses letters/digits inside the number — we fix the common ones.
+function fixDigits(s) {
+  return s
+    .replace(/O/g, "0").replace(/Q/g, "0").replace(/D/g, "0")
+    .replace(/I/g, "1").replace(/L/g, "1")
+    .replace(/S/g, "5").replace(/B/g, "8").replace(/Z/g, "2").replace(/G/g, "6");
+}
 function extractSku(text) {
   if (!text) return null;
   const cleaned = text.toUpperCase().replace(/[^A-Z0-9 \n]/g, " ");
-  const matches = [...cleaned.matchAll(/([A-Z]{2,6})\s*(\d{5,12})/g)];
+  // Allow the "number" part to contain OCR-confused letters; we repair them after.
+  const matches = [...cleaned.matchAll(/([A-Z]{2,6})\s*([0-9OQDILSBZG]{5,12})/g)];
   if (!matches.length) return null;
-  // Prefer the candidate with the longest digit run — that's the real part number.
+  // Prefer the candidate with the longest run — that's the real part number.
   matches.sort((a, b) => b[2].length - a[2].length);
-  return matches[0][1] + " " + matches[0][2];
+  const brand = matches[0][1];
+  const number = fixDigits(matches[0][2]);
+  return brand + " " + number;
 }
 
 async function captureAndRead() {
@@ -366,16 +376,41 @@ async function captureAndRead() {
   ocrBusy = true;
   ocrStatus('<span class="led"></span> Reading…');
 
-  // Grab the current frame to a canvas (full resolution for best OCR).
+  const vw = video.videoWidth || 1280;
+  const vh = video.videoHeight || 720;
+
+  // Crop to a central horizontal band — the user aims the SKU line into the guide.
+  // This drops the surrounding label noise (barcode, rack codes) so OCR focuses
+  // only on the printed part number. Band = full width, middle ~28% of height.
+  const bandH = Math.round(vh * 0.28);
+  const bandY = Math.round((vh - bandH) / 2);
+
+  // Upscale 2x — Tesseract is far more accurate on larger characters.
+  const scale = 2;
   const canvas = document.createElement("canvas");
-  canvas.width = video.videoWidth || 1280;
-  canvas.height = video.videoHeight || 720;
+  canvas.width = vw * scale;
+  canvas.height = bandH * scale;
   const ctx = canvas.getContext("2d");
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(video, 0, bandY, vw, bandH, 0, 0, canvas.width, canvas.height);
+
+  // Grayscale + contrast boost so crisp black text pops from the label background.
+  try {
+    const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const d = img.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const g = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+      // Soft threshold: push toward black/white without going fully binary.
+      const v = g < 110 ? Math.max(0, g - 40) : Math.min(255, g + 40);
+      d[i] = d[i + 1] = d[i + 2] = v;
+    }
+    ctx.putImageData(img, 0, 0);
+  } catch (_) { /* if getImageData is blocked, proceed with the colour crop */ }
 
   try {
     const { data } = await Tesseract.recognize(canvas, "eng", {
       tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ",
+      // PSM 6 = treat the image as a single uniform block of text (one line band).
+      tessedit_pageseg_mode: "6",
     });
     const raw = (data && data.text ? data.text : "").trim();
     const sku = extractSku(raw);
@@ -383,7 +418,7 @@ async function captureAndRead() {
       ocrStatus(`<span class="led"></span> Read ${escapeHtml(sku)}`);
       addByCode(sku);
     } else {
-      ocrStatus('<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> No code found — steady the camera and try again');
+      ocrStatus('<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> No code found — line the text up in the guide and try again');
     }
   } catch (e) {
     ocrStatus('<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> Could not read — try again');

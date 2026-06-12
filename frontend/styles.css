@@ -192,6 +192,20 @@ html, body {
   0%,100% { transform: translateY(-58px); opacity: 0.5; }
   50%     { transform: translateY(58px);  opacity: 1; }
 }
+/* OCR guide — a clear central band showing where to line up the SKU text.
+   Height (28%) matches the crop band used by captureAndRead(). */
+.scanner-frame .ocr-guide {
+  position: absolute; left: 6%; right: 6%; top: 36%; height: 28%;
+  border: 2px solid #4fd1c5; border-radius: 8px;
+  box-shadow: 0 0 0 2000px rgba(0,0,0,0.28);
+  display: flex; align-items: flex-start; justify-content: center;
+  pointer-events: none;
+}
+.scanner-frame .ocr-guide span {
+  position: absolute; bottom: -26px; left: 50%; transform: translateX(-50%);
+  white-space: nowrap; font-size: 12px; font-weight: 600; color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+}
 .scan-hint {
   display: flex; align-items: center; gap: 9px; justify-content: center;
   font-size: 13.5px; color: var(--ink-soft); padding: 2px;
