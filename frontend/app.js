@@ -1,20 +1,18 @@
 // app.js — OM Order Entry
 // State, scanning, lookup, cart, review, submit. No login. Mock backend.
 
-const API = ""; // same origin (server hosts both API and static files)
+const API = "";
 
-// ---- State -----------------------------------------------------------------
-const cart = []; // { item_code, barcode, description, brand, uom, unit_price, quantity }
+const cart = [];
 let scanner = null;
 let scanCooldown = false;
 let currentMode = "scan";
 
-// ---- Helpers ---------------------------------------------------------------
 const $ = (id) => document.getElementById(id);
 const money = (n) => "$" + (Number(n) || 0).toFixed(2);
 
 const ICON = {
-  ok:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
   err: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>',
 };
 
@@ -50,7 +48,6 @@ function showScreen(name) {
   window.scrollTo(0, 0);
 }
 
-// ---- Item lookup (mock master) ---------------------------------------------
 async function lookupItem(code) {
   const res = await fetch(`${API}/api/items/${encodeURIComponent(code)}`);
   if (!res.ok) {
@@ -92,49 +89,18 @@ function setQty(code, qty) {
   renderCart();
 }
 
-// ---- Render cart -----------------------------------------------------------
 const TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/></svg>';
 
 function renderCart() {
   const wrap = $("cart");
   wrap.innerHTML = "";
-
   if (cart.length === 0) {
-    wrap.innerHTML = `
-      <div class="cart-empty">
-        <div class="ico">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#1f6f78" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
-        </div>
-        <strong>No parts yet</strong>
-        <span>Scan a barcode or type a part number to get started.</span>
-      </div>`;
+    wrap.innerHTML = `<div class="cart-empty"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#1f6f78" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg></div><strong>No parts yet</strong><span>Scan a barcode or type a part number to get started.</span></div>`;
   } else {
     for (const l of cart) {
       const el = document.createElement("div");
       el.className = "line";
-      el.innerHTML = `
-        <div class="head">
-          <div class="info">
-            <div class="desc">${escapeHtml(l.description)}</div>
-            <div class="sku mono">${escapeHtml(l.item_code)}</div>
-          </div>
-          <div class="price-col">
-            <span class="price">${money(l.unit_price)}</span>
-            <button class="remove" data-remove="${escapeAttr(l.item_code)}" aria-label="Remove part">${TRASH}</button>
-          </div>
-        </div>
-        <div class="foot">
-          <div class="qty">
-            <button data-dec="${escapeAttr(l.item_code)}" aria-label="Decrease">−</button>
-            <input type="number" min="1" value="${l.quantity}" data-qty="${escapeAttr(l.item_code)}" inputmode="numeric" aria-label="Quantity" />
-            <button data-inc="${escapeAttr(l.item_code)}" aria-label="Increase">+</button>
-          </div>
-          <div class="amt-wrap">
-            <span class="amt-lbl">Line total</span>
-            <span class="amt">${money(l.unit_price * l.quantity)}</span>
-          </div>
-        </div>
-      `;
+      el.innerHTML = `<div class="head"><div class="info"><div class="desc">${escapeHtml(l.description)}</div><div class="sku mono">${escapeHtml(l.item_code)}</div></div><div class="price-col"><span class="price">${money(l.unit_price)}</span><button class="remove" data-remove="${escapeAttr(l.item_code)}" aria-label="Remove part">${TRASH}</button></div></div><div class="foot"><div class="qty"><button data-dec="${escapeAttr(l.item_code)}" aria-label="Decrease">−</button><input type="number" min="1" value="${l.quantity}" data-qty="${escapeAttr(l.item_code)}" inputmode="numeric" aria-label="Quantity" /><button data-inc="${escapeAttr(l.item_code)}" aria-label="Increase">+</button></div><div class="amt-wrap"><span class="amt-lbl">Line total</span><span class="amt">${money(l.unit_price * l.quantity)}</span></div></div>`;
       wrap.appendChild(el);
     }
   }
@@ -151,7 +117,6 @@ function updateSummary() {
   $("to-review-btn").disabled = lines === 0;
 }
 
-// ---- Render review ---------------------------------------------------------
 function renderReview() {
   const wrap = $("review-lines");
   wrap.innerHTML = "";
@@ -163,20 +128,13 @@ function renderReview() {
     qty += l.quantity;
     const el = document.createElement("div");
     el.className = "review-line";
-    el.innerHTML = `
-      <div>
-        <div class="desc">${escapeHtml(l.description)}</div>
-        <div class="sub"><span class="mono">${escapeHtml(l.item_code)}</span> · ${l.quantity} × ${money(l.unit_price)}</div>
-      </div>
-      <div class="amt">${money(amt)}</div>
-    `;
+    el.innerHTML = `<div><div class="desc">${escapeHtml(l.description)}</div><div class="sub"><span class="mono">${escapeHtml(l.item_code)}</span> · ${l.quantity} × ${money(l.unit_price)}</div></div><div class="amt">${money(amt)}</div>`;
     wrap.appendChild(el);
   }
   $("review-total").textContent = money(total);
   $("review-sub").textContent = `${cart.length} part${cart.length === 1 ? "" : "s"} · ${qty} total qty`;
 }
 
-// ---- Submit ----------------------------------------------------------------
 async function submitOrder() {
   $("submit-btn").disabled = true;
   try {
@@ -221,7 +179,6 @@ function resetOrder() {
   if (currentMode === "scan") startScanner();
 }
 
-// ---- Scanner ---------------------------------------------------------------
 function scanStatus(html) { $("scan-status").innerHTML = html; }
 
 async function startScanner() {
@@ -230,14 +187,16 @@ async function startScanner() {
     return;
   }
   await stopScanner();
-  scanner = new Html5Qrcode("reader", { verbose: false });
+  const F = Html5QrcodeSupportedFormats;
+  const formats = [F.CODE_128, F.CODE_39, F.CODE_93, F.EAN_13, F.EAN_8, F.UPC_A, F.UPC_E, F.ITF, F.CODABAR, F.QR_CODE];
+  scanner = new Html5Qrcode("reader", { verbose: false, formatsToSupport: formats });
   try {
     await scanner.start(
       { facingMode: "environment" },
-      { fps: 10, qrbox: { width: 250, height: 160 } },
+      { fps: 10, qrbox: { width: 280, height: 140 } },
       onScan,
       () => {}
-    );
+      );
     scanStatus('<span class="led"></span> Point the camera at a barcode');
   } catch (e) {
     scanStatus('<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> Camera blocked — switch to Type code');
@@ -260,29 +219,26 @@ function onScan(decodedText) {
   setTimeout(() => (scanCooldown = false), 1500);
 }
 
-// ---- Mode toggle -----------------------------------------------------------
 function setMode(mode) {
   currentMode = mode;
   document.querySelectorAll("#mode-toggle button").forEach((b) =>
     b.classList.toggle("on", b.dataset.mode === mode)
-  );
+                                                           );
   $("scan-pane").style.display = mode === "scan" ? "flex" : "none";
   $("manual-pane").style.display = mode === "manual" ? "block" : "none";
   if (mode === "scan") startScanner();
   else { stopScanner(); $("code-input").focus(); }
 }
 
-// ---- Escaping helpers ------------------------------------------------------
 function escapeHtml(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 function escapeAttr(s) { return escapeHtml(s).replace(/"/g, "&quot;"); }
 
-// ---- Event wiring ----------------------------------------------------------
 document.querySelectorAll("#mode-toggle button").forEach((b) =>
   b.addEventListener("click", () => setMode(b.dataset.mode))
-);
+                                                         );
 
 $("lookup-btn").addEventListener("click", () => {
   addByCode($("code-input").value);
@@ -297,7 +253,6 @@ $("code-input").addEventListener("keydown", (e) => {
 });
 $("scan-restart").addEventListener("click", startScanner);
 
-// Cart interactions (event delegation; closest() handles taps on inner SVG)
 $("cart").addEventListener("click", (e) => {
   const rm = e.target.closest("[data-remove]");
   const inc = e.target.closest("[data-inc]");
@@ -328,7 +283,6 @@ $("back-to-entry").addEventListener("click", () => {
 $("submit-btn").addEventListener("click", submitOrder);
 $("new-order-btn").addEventListener("click", resetOrder);
 
-// ---- Boot ------------------------------------------------------------------
 renderCart();
 setMode("scan");
 
