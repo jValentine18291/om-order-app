@@ -218,8 +218,7 @@ function resetOrder() {
   $("code-input").value = "";
   renderCart();
   showScreen("entry");
-  if (currentMode === "scan") startScanner();
-  else if (currentMode === "ocr") startOcrCamera();
+  if (currentMode === "ocr") startOcrCamera();
 }
 
 // ---- Scanner ---------------------------------------------------------------
@@ -557,7 +556,7 @@ async function captureAndRead() {
 function setMode(mode) {
   currentMode = mode;
   document.querySelectorAll("#mode-toggle button").forEach((b) =>
-    b.classList.toggle("active", b.dataset.mode === mode)
+    b.classList.toggle("on", b.dataset.mode === mode)
   );
 
   // Show/hide each pane. Every lookup is guarded so a missing node can never
@@ -565,19 +564,15 @@ function setMode(mode) {
   const uploadPane = $("upload-pane");
   if (uploadPane) uploadPane.style.display = mode === "upload" ? "block" : "none";
 
-  const scanPane = $("scan-pane");
-  if (scanPane) scanPane.style.display = mode === "scan" ? "flex" : "none";
-
   const ocrPane = $("ocr-pane");
   if (ocrPane) ocrPane.style.display = mode === "ocr" ? "flex" : "none";
 
   const manualPane = $("manual-pane");
   if (manualPane) manualPane.style.display = mode === "manual" ? "block" : "none";
 
-  // Camera lifecycle: only the active camera mode runs; the others are stopped.
-  if (mode === "scan") { stopOcrCamera(); startScanner(); }
-  else if (mode === "ocr") { stopScanner(); startOcrCamera(); }
-  else { stopScanner(); stopOcrCamera(); } // upload + manual: both cameras off
+  // Camera lifecycle: only OCR uses a camera now (Scan mode removed).
+  if (mode === "ocr") startOcrCamera();
+  else stopOcrCamera(); // upload + manual: camera off
 
   if (mode === "manual") $("code-input").focus();
 }
@@ -605,8 +600,11 @@ $("code-input").addEventListener("keydown", (e) => {
     $("code-input").value = "";
   }
 });
-$("scan-restart").addEventListener("click", startScanner);
-$("torch-btn").addEventListener("click", toggleTorch);
+// Scan-mode controls removed from UI; guard in case the elements are absent.
+const _scanRestart = $("scan-restart");
+if (_scanRestart) _scanRestart.addEventListener("click", startScanner);
+const _torchBtn = $("torch-btn");
+if (_torchBtn) _torchBtn.addEventListener("click", toggleTorch);
 // Tap anywhere on the camera preview to force a refocus on the label.
 (function () {
   const v = $("reader-video");
@@ -642,8 +640,7 @@ $("to-review-btn").addEventListener("click", () => {
 });
 $("back-to-entry").addEventListener("click", () => {
   showScreen("entry");
-  if (currentMode === "scan") startScanner();
-  else if (currentMode === "ocr") startOcrCamera();
+  if (currentMode === "ocr") startOcrCamera();
 });
 $("submit-btn").addEventListener("click", submitOrder);
 $("new-order-btn").addEventListener("click", resetOrder);
