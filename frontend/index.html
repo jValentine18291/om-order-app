@@ -48,10 +48,6 @@
 
       <div class="toggle" id="mode-toggle">
         <button data-mode="upload">Upload photos</button>
-        <button data-mode="scan">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg>
-          Scan
-        </button>
         <button data-mode="ocr">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 12h8M8 9h8M8 15h5"/></svg>
           Read text
@@ -71,24 +67,6 @@
       </div>
       <!-- Hidden region html5-qrcode needs for file decoding (never shown) -->
       <div id="file-decoder-region" style="display:none"></div>
-
-      <!-- Scan mode -->
-      <div id="scan-pane" style="display:none; flex-direction:column; gap:14px;">
-        <div class="scanner-frame">
-          <video id="reader-video" playsinline muted></video>
-          <div class="reticle"><span class="corner bl"></span><span class="corner br"></span></div>
-          <div class="laser"></div>
-        </div>
-        <div class="scan-hint" id="scan-status"><span class="led"></span> Point at a barcode — tap the view to focus</div>
-        <button class="btn-secondary" id="torch-btn" style="width:100%; display:none;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .8 1.6v.7h6.4v-.7c0-.6.3-1.2.8-1.6A7 7 0 0 0 12 2Z"/></svg>
-          Flashlight
-        </button>
-        <button class="btn-secondary" id="scan-restart" style="width:100%">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
-          Restart camera
-        </button>
-      </div>
 
       <!-- Read-text (OCR) mode — for smeared/damaged labels -->
       <div id="ocr-pane" style="display:none; flex-direction:column; gap:14px;">
