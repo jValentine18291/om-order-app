@@ -44,6 +44,7 @@
       </div>
 
       <div class="toggle" id="mode-toggle">
+        <button data-mode="upload">Upload photos</button>
         <button data-mode="scan" class="on">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg>
           Scan
@@ -94,6 +95,13 @@
       </div>
 
       <!-- Manual mode -->
+      <div id="upload-pane">
+  <p class="eyebrow">Take a photo of each barcode, then upload them all at once.</p>
+  <label class="btn-primary upload-btn" for="batch-input">📷 Upload barcode photos</label>
+  <input id="batch-input" type="file" accept="image/*" multiple hidden />
+  <p class="scanner-msg" id="upload-status"></p>
+</div>
+<div id="file-decoder-region" style="display:none"></div>
       <div id="manual-pane" style="display:none">
         <div class="field">
           <label for="code-input">Part number or barcode</label>
