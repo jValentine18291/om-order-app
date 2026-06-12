@@ -5,8 +5,7 @@
   "main": "server.js",
   "type": "commonjs",
   "engines": {
-    "node": ">=22.5.0"
-  },
+    "node": ">=22.13.0"  },
   "scripts": {
     "start": "node server.js",
     "seed": "node seed.js"
