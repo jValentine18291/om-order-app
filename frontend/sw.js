@@ -1,5 +1,5 @@
 // sw.js — minimal app-shell cache for PWA installability (Phase 1)
-const CACHE = "om-order-v2";
+const CACHE = "om-order-v3";
 const SHELL = [
   "./",
   "./index.html",

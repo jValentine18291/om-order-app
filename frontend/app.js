@@ -219,6 +219,7 @@ function resetOrder() {
   renderCart();
   showScreen("entry");
   if (currentMode === "scan") startScanner();
+  else if (currentMode === "ocr") startOcrCamera();
 }
 
 // ---- Scanner ---------------------------------------------------------------
@@ -308,6 +309,89 @@ function onScan(decodedText) {
   setTimeout(() => (scanCooldown = false), 1500);
 }
 
+// ---- OCR mode (read the printed SKU text on damaged labels) -----------------
+// Reuses a camera stream into #ocr-video; on capture, Tesseract reads the frame,
+// then we pull out the first BRAND+number token (e.g. "SZEN 140051111").
+let ocrStream = null;
+let ocrBusy = false;
+
+function ocrStatus(html) { $("ocr-status").innerHTML = html; }
+
+async function startOcrCamera() {
+  await stopOcrCamera();
+  const video = $("ocr-video");
+  if (!video) return;
+  try {
+    ocrStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" },
+      audio: false,
+    });
+    video.srcObject = ocrStream;
+    video.setAttribute("playsinline", "true");
+    await video.play();
+    ocrStatus('<span class="led"></span> Frame the printed code, then tap Read');
+  } catch (e) {
+    ocrStatus('<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> Camera blocked — switch to Type code');
+  }
+}
+
+async function stopOcrCamera() {
+  if (ocrStream) {
+    try { ocrStream.getTracks().forEach((t) => t.stop()); } catch (_) {}
+    ocrStream = null;
+  }
+  const video = $("ocr-video");
+  if (video) { try { video.srcObject = null; } catch (_) {} }
+}
+
+// Pull a SKU-shaped token out of raw OCR text: a brand prefix (letters) followed
+// by a long number (e.g. "SZEN 140051111"). OM SKUs have a 5+ digit run, so this
+// ignores short rack/bin codes like "BK3410" or "R3D6" that share the label.
+function extractSku(text) {
+  if (!text) return null;
+  const cleaned = text.toUpperCase().replace(/[^A-Z0-9 \n]/g, " ");
+  const matches = [...cleaned.matchAll(/([A-Z]{2,6})\s*(\d{5,12})/g)];
+  if (!matches.length) return null;
+  // Prefer the candidate with the longest digit run — that's the real part number.
+  matches.sort((a, b) => b[2].length - a[2].length);
+  return matches[0][1] + " " + matches[0][2];
+}
+
+async function captureAndRead() {
+  if (ocrBusy) return;
+  const video = $("ocr-video");
+  if (!video || !ocrStream) { ocrStatus('<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> Camera not ready'); return; }
+  if (!window.Tesseract) { ocrStatus('<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> Text reader still loading — try again'); return; }
+
+  ocrBusy = true;
+  ocrStatus('<span class="led"></span> Reading…');
+
+  // Grab the current frame to a canvas (full resolution for best OCR).
+  const canvas = document.createElement("canvas");
+  canvas.width = video.videoWidth || 1280;
+  canvas.height = video.videoHeight || 720;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  try {
+    const { data } = await Tesseract.recognize(canvas, "eng", {
+      tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ",
+    });
+    const raw = (data && data.text ? data.text : "").trim();
+    const sku = extractSku(raw);
+    if (sku) {
+      ocrStatus(`<span class="led"></span> Read ${escapeHtml(sku)}`);
+      addByCode(sku);
+    } else {
+      ocrStatus('<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> No code found — steady the camera and try again');
+    }
+  } catch (e) {
+    ocrStatus('<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> Could not read — try again');
+  } finally {
+    ocrBusy = false;
+  }
+}
+
 // ---- Mode toggle -----------------------------------------------------------
 function setMode(mode) {
   currentMode = mode;
@@ -316,8 +400,12 @@ function setMode(mode) {
   );
   $("scan-pane").style.display = mode === "scan" ? "flex" : "none";
   $("manual-pane").style.display = mode === "manual" ? "block" : "none";
-  if (mode === "scan") startScanner();
-  else { stopScanner(); $("code-input").focus(); }
+  $("ocr-pane").style.display = mode === "ocr" ? "flex" : "none";
+
+  // Start/stop the right camera for the active mode; only one runs at a time.
+  if (mode === "scan") { stopOcrCamera(); startScanner(); }
+  else if (mode === "ocr") { stopScanner(); startOcrCamera(); }
+  else { stopScanner(); stopOcrCamera(); $("code-input").focus(); }
 }
 
 // ---- Escaping helpers ------------------------------------------------------
@@ -344,6 +432,8 @@ $("code-input").addEventListener("keydown", (e) => {
   }
 });
 $("scan-restart").addEventListener("click", startScanner);
+$("ocr-capture").addEventListener("click", captureAndRead);
+$("ocr-restart").addEventListener("click", startOcrCamera);
 
 // Cart interactions (event delegation; closest() handles taps on inner SVG)
 $("cart").addEventListener("click", (e) => {
@@ -366,12 +456,14 @@ $("cart").addEventListener("change", (e) => {
 $("to-review-btn").addEventListener("click", () => {
   if (cart.length === 0) return;
   stopScanner();
+  stopOcrCamera();
   renderReview();
   showScreen("review");
 });
 $("back-to-entry").addEventListener("click", () => {
   showScreen("entry");
   if (currentMode === "scan") startScanner();
+  else if (currentMode === "ocr") startOcrCamera();
 });
 $("submit-btn").addEventListener("click", submitOrder);
 $("new-order-btn").addEventListener("click", resetOrder);
