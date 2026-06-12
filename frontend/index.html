@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="theme-color" content="#f4f6f8" />
+  <title>OM Order Entry</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 4.3A1 1 0 0 0 5.6 19H17"/>
+          <circle cx="9" cy="21" r="1"/><circle cx="16" cy="21" r="1"/>
+        </svg>
+      </div>
+      <h1>Order Entry <span>· OM</span></h1>
+      <span class="pill">Demo</span>
+    </header>
+
+    <!-- Step indicator -->
+    <div class="steps" id="steps">
+      <div class="step active" data-step="entry"><span class="dot">1</span> Build</div>
+      <div class="bar"></div>
+      <div class="step" data-step="review"><span class="dot">2</span> Review</div>
+      <div class="bar"></div>
+      <div class="step" data-step="confirm"><span class="dot">3</span> Done</div>
+    </div>
+
+    <!-- ============ SCREEN: ENTRY ============ -->
+    <section id="screen-entry" class="screen active">
+      <div class="section-head">
+        <p class="eyebrow">Add parts</p>
+        <h2>Which parts do you need?</h2>
+        <p class="lede">Scan a barcode or type a part number to add it to the request.</p>
+      </div>
+
+      <div class="toggle" id="mode-toggle">
+        <button data-mode="scan" class="on">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg>
+          Scan
+        </button>
+        <button data-mode="manual">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          Type code
+        </button>
+      </div>
+
+      <!-- Scan mode -->
+      <div id="scan-pane" style="display:flex; flex-direction:column; gap:14px;">
+        <div class="scanner-frame">
+          <div id="reader"></div>
+          <div class="reticle"><span class="corner bl"></span><span class="corner br"></span></div>
+          <div class="laser"></div>
+        </div>
+        <div class="scan-hint" id="scan-status"><span class="led"></span> Point the camera at a barcode</div>
+        <button class="btn-secondary" id="scan-restart" style="width:100%">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+          Restart camera
+        </button>
+      </div>
+
+      <!-- Manual mode -->
+      <div id="manual-pane" style="display:none">
+        <div class="field">
+          <label for="code-input">Part number or barcode</label>
+          <div class="input-row">
+            <input id="code-input" type="text" inputmode="text" autocomplete="off"
+                   placeholder="e.g. 525IB" />
+            <button class="btn-primary" id="lookup-btn" style="width:auto; padding:0 20px;">Add</button>
+          </div>
+        </div>
+        <div class="scan-hint" id="manual-status" style="justify-content:flex-start; min-height:20px;"></div>
+      </div>
+
+      <div class="section-head" style="margin-top:2px;">
+        <p class="eyebrow">Parts in this request</p>
+      </div>
+      <div class="cart-wrap" id="cart"></div>
+    </section>
+
+    <!-- ============ SCREEN: REVIEW ============ -->
+    <section id="screen-review" class="screen">
+      <div class="section-head">
+        <p class="eyebrow">Almost there</p>
+        <h2>Review your request</h2>
+        <p class="lede">Check the parts and quantities before you submit.</p>
+      </div>
+
+      <div class="review-card" id="review-lines"></div>
+
+      <div class="totals-card">
+        <div>
+          <div class="lbl">Order total</div>
+          <div class="sub" id="review-sub">0 parts</div>
+        </div>
+        <div class="big" id="review-total">$0.00</div>
+      </div>
+
+      <div class="field">
+        <label for="notes-input">Notes for the order <span style="color:var(--ink-faint); font-weight:400;">(optional)</span></label>
+        <textarea id="notes-input" placeholder="Delivery instructions, PO reference, contact…"></textarea>
+      </div>
+    </section>
+
+    <!-- ============ SCREEN: CONFIRM ============ -->
+    <section id="screen-confirm" class="screen">
+      <div class="confirm-card">
+        <div class="check">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <p class="eyebrow">Request submitted</p>
+        <div class="so-chip" id="confirm-so">SO-0000-00000</div>
+        <p class="note">Saved successfully. Keep this number for your records.</p>
+        <div class="confirm-meta">
+          <div class="box"><div class="k">Parts</div><div class="v" id="confirm-items">0</div></div>
+          <div class="box"><div class="k">Total qty</div><div class="v" id="confirm-qty">0</div></div>
+          <div class="box"><div class="k">Amount</div><div class="v" id="confirm-amount">$0</div></div>
+        </div>
+      </div>
+      <button class="btn-primary" id="new-order-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+        Start a new request
+      </button>
+    </section>
+
+    <!-- ============ STICKY FOOTERS ============ -->
+    <div class="footer-bar" id="footer-entry">
+      <div class="summary-card">
+        <div class="left">
+          <strong><span id="line-count">0</span> parts</strong>
+          <span id="qty-count">0</span> total qty
+        </div>
+        <div class="total">
+          <div class="lbl">Total</div>
+          <div class="val" id="entry-total">$0.00</div>
+        </div>
+      </div>
+      <button class="btn-primary" id="to-review-btn" disabled>
+        Review request
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <div class="footer-bar" id="footer-review" style="display:none">
+      <div class="btn-row">
+        <button class="btn-secondary" id="back-to-entry">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back
+        </button>
+        <button class="btn-primary grow-2" id="submit-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg>
+          Submit request
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"><span class="ic" id="toast-ic"></span><span id="toast-msg"></span></div>
+  <script src="./app.js"></script>
+</body>
+</html>

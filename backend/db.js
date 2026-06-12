@@ -1,0 +1,122 @@
+// db.js — SQLite database setup + schema (Phase 1, local dev only)
+//
+// Uses better-sqlite3 when available (recommended; installs cleanly on Windows).
+// Falls back to Node's built-in node:sqlite if the native module isn't present,
+// so the app still runs without a compile step. Both expose the same tiny
+// interface used by server.js: db.exec(), db.prepare(sql).{run,get,all}(),
+// and db.transaction(fn).
+
+const path = require("path");
+const DB_PATH = path.join(__dirname, "om_orders.db");
+
+let db;
+
+try {
+  // ---- Preferred: better-sqlite3 -----------------------------------------
+  const Database = require("better-sqlite3");
+  db = new Database(DB_PATH);
+  db.pragma("journal_mode = WAL");
+  db.pragma("foreign_keys = ON");
+  console.log("[db] using better-sqlite3");
+} catch (err) {
+  // ---- Fallback: node:sqlite (built into Node 22+) -----------------------
+  const { DatabaseSync } = require("node:sqlite");
+  const raw = new DatabaseSync(DB_PATH);
+  raw.exec("PRAGMA journal_mode = WAL;");
+  raw.exec("PRAGMA foreign_keys = ON;");
+
+  // Adapter so server.js code is identical for both drivers.
+  db = {
+    exec: (sql) => raw.exec(sql),
+    pragma: (p) => raw.exec("PRAGMA " + p + ";"),
+    prepare: (sql) => {
+      const stmt = raw.prepare(sql);
+      return {
+        run: (...args) => {
+          const r = stmt.run(...args);
+          return { lastInsertRowid: r.lastInsertRowid, changes: r.changes };
+        },
+        get: (...args) => stmt.get(...args),
+        all: (...args) => stmt.all(...args),
+      };
+    },
+    transaction: (fn) => {
+      return (...args) => {
+        raw.exec("BEGIN");
+        try {
+          const result = fn(...args);
+          raw.exec("COMMIT");
+          return result;
+        } catch (e) {
+          raw.exec("ROLLBACK");
+          throw e;
+        }
+      };
+    },
+  };
+  console.log("[db] using built-in node:sqlite (fallback)");
+}
+
+// ---- Schema ----------------------------------------------------------------
+db.exec(`
+  CREATE TABLE IF NOT EXISTS items (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_code     TEXT    NOT NULL UNIQUE,
+    barcode       TEXT    UNIQUE,
+    description   TEXT    NOT NULL,
+    brand         TEXT,
+    uom           TEXT    DEFAULT 'UNIT',
+    unit_price    REAL    DEFAULT 0,
+    created_at    TEXT    DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS orders (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    so_number     TEXT    NOT NULL UNIQUE,
+    status        TEXT    NOT NULL DEFAULT 'SUBMITTED',
+    notes         TEXT,
+    total_qty     INTEGER NOT NULL DEFAULT 0,
+    total_amount  REAL    NOT NULL DEFAULT 0,
+    created_at    TEXT    DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS order_lines (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id      INTEGER NOT NULL,
+    item_code     TEXT    NOT NULL,
+    description   TEXT    NOT NULL,
+    uom           TEXT    DEFAULT 'UNIT',
+    unit_price    REAL    DEFAULT 0,
+    quantity      INTEGER NOT NULL,
+    line_amount   REAL    NOT NULL DEFAULT 0,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+  );
+
+  CREATE TABLE IF NOT EXISTS counters (
+    name          TEXT    PRIMARY KEY,
+    value         INTEGER NOT NULL
+  );
+`);
+
+db.prepare(
+  "INSERT OR IGNORE INTO counters (name, value) VALUES ('so_number', 0)"
+).run();
+
+// Auto-seed the parts catalogue if it's empty. This matters on cloud hosts
+// (e.g. Render free tier) where the filesystem resets — the app re-seeds
+// itself on startup so the parts list is always present without a manual step.
+const partCount = db.prepare("SELECT COUNT(*) AS n FROM items").get().n;
+if (partCount === 0) {
+  const parts = [
+    ["SZEN 140051111", "140051111", "Shoe Clutch",   "Zenoah", "PCS", 9.50],
+    ["SZEN 165151220", "165151220", "Clutch Spring", "Zenoah", "PCS", 2.50],
+    ["SZEN 591443601", "591443601", "Clutch Drum",   "Zenoah", "PCS", 19.90],
+  ];
+  const ins = db.prepare(
+    "INSERT INTO items (item_code, barcode, description, brand, uom, unit_price) VALUES (?, ?, ?, ?, ?, ?)"
+  );
+  for (const p of parts) ins.run(...p);
+  console.log(`[db] auto-seeded ${parts.length} parts`);
+}
+
+module.exports = db;

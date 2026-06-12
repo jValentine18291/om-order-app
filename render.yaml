@@ -1,0 +1,12 @@
+# Render deployment blueprint for OM Order Entry (Phase 1, test hosting)
+services:
+  - type: web
+    name: om-order-app
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    plan: free
+    envVars:
+      - key: NODE_VERSION
+        value: 22.12.0
