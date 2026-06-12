@@ -1,0 +1,42 @@
+/* ===== Batch upload mode ===== */
+#upload-pane { display: block; }
+.upload-btn {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  cursor: pointer;
+  margin: 8px 0 4px;
+}
+
+/* ===== Failed-photo modal ===== */
+.upload-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(11, 31, 42, 0.55);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; z-index: 9999;
+}
+.upload-modal {
+  background: #fff; border-radius: 16px;
+  width: 100%; max-width: 480px;
+  max-height: 85vh; display: flex; flex-direction: column;
+  overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.3);
+}
+.upload-modal-head { padding: 20px 20px 8px; }
+.upload-modal-head h3 { margin: 0 0 6px; font-size: 1.1rem; color: #0b1f2a; }
+.upload-modal-head p { margin: 0; font-size: .9rem; color: #5a5240; line-height: 1.4; }
+.fail-grid {
+  padding: 12px 20px; overflow-y: auto;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+.fail-thumb { margin: 0; }
+.fail-thumb img {
+  width: 100%; aspect-ratio: 4/3; object-fit: cover;
+  border-radius: 8px; border: 2px solid #f25c05; display: block;
+}
+.fail-thumb figcaption {
+  font-size: .72rem; color: #5a5240; margin-top: 4px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.upload-modal-foot { padding: 12px 20px 20px; }
+.upload-modal-foot .btn-primary { width: 100%; }
