@@ -218,7 +218,7 @@ function resetOrder() {
   $("code-input").value = "";
   renderCart();
   showScreen("entry");
-  if (currentMode === "ocr") startOcrCamera();
+  if (currentMode === "qr") startQrScanner();
 }
 
 // ---- Scanner ---------------------------------------------------------------
@@ -434,6 +434,96 @@ function onScan(decodedText) {
   setTimeout(() => (scanCooldown = false), 1500);
 }
 
+// ---- QR live scanner (QR codes only) ---------------------------------------
+// Reuses the same proven approach as the barcode scanner (native BarcodeDetector,
+// ZXing fallback) but locked to qr_code, into its own #qr-video element.
+let qrStream = null;
+let qrDetectLoop = null;
+let qrZxingReader = null;
+let qrCooldown = false;
+let qrPending = null;
+
+function qrStatus(html) { const el = $("qr-status"); if (el) el.innerHTML = html; }
+
+async function startQrScanner() {
+  await stopQrScanner();
+  const video = $("qr-video");
+  if (!video) return;
+
+  try {
+    qrStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 1280 } },
+      audio: false,
+    });
+    video.srcObject = qrStream;
+    video.setAttribute("playsinline", "true");
+    await video.play();
+    qrStatus('<span class="led"></span> Point at a QR code');
+  } catch (e) {
+    qrStatus('<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> Camera blocked — switch to Type code');
+    return;
+  }
+
+  // Path 1: native / polyfilled BarcodeDetector, QR only
+  if ("BarcodeDetector" in window) {
+    try {
+      const detector = new window.BarcodeDetector({ formats: ["qr_code"] });
+      const tick = async () => {
+        if (!qrStream) return;
+        try {
+          const codes = await detector.detect(video);
+          if (codes && codes.length) onQrCandidate(codes[0].rawValue);
+        } catch (_) {}
+        qrDetectLoop = requestAnimationFrame(tick);
+      };
+      qrDetectLoop = requestAnimationFrame(tick);
+      return;
+    } catch (_) {}
+  }
+
+  // Path 2: ZXing fallback
+  if (window.ZXingBrowser) {
+    try {
+      qrZxingReader = new ZXingBrowser.BrowserQRCodeReader
+        ? new ZXingBrowser.BrowserQRCodeReader()
+        : new ZXingBrowser.BrowserMultiFormatReader();
+      qrZxingReader.decodeFromVideoElement(video, (result) => {
+        if (result) onQrCandidate(result.getText());
+      });
+      return;
+    } catch (_) {}
+  }
+
+  qrStatus('<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> Scanner not supported here — use Type code');
+}
+
+async function stopQrScanner() {
+  if (qrDetectLoop) { cancelAnimationFrame(qrDetectLoop); qrDetectLoop = null; }
+  if (qrZxingReader) { try { qrZxingReader.reset(); } catch (_) {} qrZxingReader = null; }
+  if (qrStream) {
+    try { qrStream.getTracks().forEach((t) => t.stop()); } catch (_) {}
+    qrStream = null;
+  }
+  qrPending = null;
+  const video = $("qr-video");
+  if (video) { try { video.srcObject = null; } catch (_) {} }
+}
+
+// Double-read confirm (kills one-frame misreads), same pattern as the barcode path.
+function onQrCandidate(text) {
+  if (!text || qrCooldown) return;
+  if (text === qrPending) { qrPending = null; onQrScan(text); }
+  else qrPending = text;
+}
+function onQrScan(text) {
+  if (qrCooldown || !text) return;
+  qrCooldown = true;
+  qrPending = null;
+  qrStatus(`<span class="led"></span> Scanned ${escapeHtml(text)}`);
+  addByCode(text);
+  setTimeout(() => (qrCooldown = false), 1500);
+}
+
 // ---- OCR mode (read the printed SKU text on damaged labels) -----------------
 // Reuses a camera stream into #ocr-video; on capture, Tesseract reads the frame,
 // then we pull out the first BRAND+number token (e.g. "SZEN 140051111").
@@ -564,15 +654,15 @@ function setMode(mode) {
   const uploadPane = $("upload-pane");
   if (uploadPane) uploadPane.style.display = mode === "upload" ? "block" : "none";
 
-  const ocrPane = $("ocr-pane");
-  if (ocrPane) ocrPane.style.display = mode === "ocr" ? "flex" : "none";
+  const qrPane = $("qr-pane");
+  if (qrPane) qrPane.style.display = mode === "qr" ? "flex" : "none";
 
   const manualPane = $("manual-pane");
   if (manualPane) manualPane.style.display = mode === "manual" ? "block" : "none";
 
-  // Camera lifecycle: only OCR uses a camera now (Scan mode removed).
-  if (mode === "ocr") startOcrCamera();
-  else stopOcrCamera(); // upload + manual: camera off
+  // Camera lifecycle: only QR mode uses a camera now.
+  if (mode === "qr") startQrScanner();
+  else stopQrScanner(); // upload + manual: camera off
 
   if (mode === "manual") $("code-input").focus();
 }
@@ -610,8 +700,9 @@ if (_torchBtn) _torchBtn.addEventListener("click", toggleTorch);
   const v = $("reader-video");
   if (v) v.addEventListener("click", tapToFocus);
 })();
-$("ocr-capture").addEventListener("click", captureAndRead);
-$("ocr-restart").addEventListener("click", startOcrCamera);
+const _ocrCap = $("ocr-capture"); if (_ocrCap) _ocrCap.addEventListener("click", captureAndRead);
+const _ocrRst = $("ocr-restart"); if (_ocrRst) _ocrRst.addEventListener("click", startOcrCamera);
+const _qrRst = $("qr-restart"); if (_qrRst) _qrRst.addEventListener("click", startQrScanner);
 
 // Cart interactions (event delegation; closest() handles taps on inner SVG)
 $("cart").addEventListener("click", (e) => {
@@ -640,7 +731,7 @@ $("to-review-btn").addEventListener("click", () => {
 });
 $("back-to-entry").addEventListener("click", () => {
   showScreen("entry");
-  if (currentMode === "ocr") startOcrCamera();
+  if (currentMode === "qr") startQrScanner();
 });
 $("submit-btn").addEventListener("click", submitOrder);
 $("new-order-btn").addEventListener("click", resetOrder);

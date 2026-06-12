@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Barcode Detection API polyfill (ZXing-WASM) — gives iPhone Safari a strong
-     image decoder, since iOS lacks the native BarcodeDetector. Only installs
-     itself where the native API is missing. -->
-  <script src="https://fastly.jsdelivr.net/npm/barcode-detector@3/dist/iife/polyfill.min.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
   <meta name="theme-color" content="#f4f6f8" />
@@ -19,6 +15,11 @@
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <!-- html5-qrcode — decodes barcodes from uploaded photos (batch upload mode) -->
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <!-- Barcode Detection API polyfill (ZXing-WASM) — gives iPhone Safari a strong
+       image decoder, since iOS lacks the native BarcodeDetector. The polyfill
+       build only installs itself where the native API is missing (so Android's
+       native detector is left untouched). -->
+  <script src="https://fastly.jsdelivr.net/npm/barcode-detector@3/dist/iife/polyfill.min.js"></script>
 </head>
 <body>
   <div class="app">
@@ -52,9 +53,9 @@
 
       <div class="toggle" id="mode-toggle">
         <button data-mode="upload">Upload photos</button>
-        <button data-mode="ocr">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 12h8M8 9h8M8 15h5"/></svg>
-          Read text
+        <button data-mode="qr">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 21v.01M21 14v.01M14 21v.01"/></svg>
+          Scan QR Code
         </button>
         <button data-mode="manual">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
@@ -72,18 +73,14 @@
       <!-- Hidden region html5-qrcode needs for file decoding (never shown) -->
       <div id="file-decoder-region" style="display:none"></div>
 
-      <!-- Read-text (OCR) mode — for smeared/damaged labels -->
-      <div id="ocr-pane" style="display:none; flex-direction:column; gap:14px;">
+      <!-- Scan QR Code mode — live camera, QR codes only -->
+      <div id="qr-pane" style="display:none; flex-direction:column; gap:14px;">
         <div class="scanner-frame">
-          <video id="ocr-video" playsinline muted></video>
-          <div class="ocr-guide"><span>Line up the part number here</span></div>
+          <video id="qr-video" playsinline muted></video>
+          <div class="reticle"><span class="corner bl"></span><span class="corner br"></span></div>
         </div>
-        <div class="scan-hint" id="ocr-status"><span class="led"></span> Frame the printed code, then tap Read</div>
-        <button class="btn-primary" id="ocr-capture" style="width:100%">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3"/></svg>
-          Read code from label
-        </button>
-        <button class="btn-secondary" id="ocr-restart" style="width:100%">
+        <div class="scan-hint" id="qr-status"><span class="led"></span> Point at a QR code</div>
+        <button class="btn-secondary" id="qr-restart" style="width:100%">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
           Restart camera
         </button>
