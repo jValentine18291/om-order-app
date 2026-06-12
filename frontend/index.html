@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Barcode Detection API polyfill (ZXing-WASM) — gives iPhone Safari a strong
+     image decoder, since iOS lacks the native BarcodeDetector. Only installs
+     itself where the native API is missing. -->
+  <script src="https://fastly.jsdelivr.net/npm/barcode-detector@3/dist/iife/polyfill.min.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
   <meta name="theme-color" content="#f4f6f8" />
