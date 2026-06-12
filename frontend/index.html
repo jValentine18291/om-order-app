@@ -8,7 +8,8 @@
   <link rel="manifest" href="./manifest.json" />
   <link rel="apple-touch-icon" href="./icon-192.png" />
   <link rel="stylesheet" href="./styles.css" />
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <!-- ZXing fallback scanner (used when the device has no native BarcodeDetector, e.g. iPhone Safari) -->
+  <script src="https://unpkg.com/@zxing/browser@0.1.5"></script>
 </head>
 <body>
   <div class="app">
@@ -54,7 +55,7 @@
       <!-- Scan mode -->
       <div id="scan-pane" style="display:flex; flex-direction:column; gap:14px;">
         <div class="scanner-frame">
-          <div id="reader"></div>
+          <video id="reader-video" playsinline muted></video>
           <div class="reticle"><span class="corner bl"></span><span class="corner br"></span></div>
           <div class="laser"></div>
         </div>
