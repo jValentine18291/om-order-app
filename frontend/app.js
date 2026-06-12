@@ -234,7 +234,7 @@ let torchOn = false;
 // Double-read confirm: hold the last candidate; only accept on a second matching read.
 let pendingCode = null;
 
-const STATUS_READY = '<span class="led"></span> Point the camera at a barcode';
+const STATUS_READY = '<span class="led"></span> Point at a barcode — tap the view to focus';
 const STATUS_BLOCKED = '<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> Camera blocked — switch to Type code';
 
 async function startScanner() {
@@ -243,15 +243,18 @@ async function startScanner() {
   if (!video) { scanStatus(STATUS_BLOCKED); return; }
 
   try {
-    // Ask for a high-resolution rear camera with continuous autofocus — sharper
-    // frames decode far more reliably, especially in varied lighting.
+    // Ask for a high-resolution rear camera with continuous autofocus tuned for
+    // close-up labels — sharper frames lock far faster, especially up close.
     videoStream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: { ideal: "environment" },
         width: { ideal: 1920 },
         height: { ideal: 1080 },
         focusMode: { ideal: "continuous" },
-        advanced: [{ focusMode: "continuous" }],
+        // Nudge focus toward a near distance (macro) so a close label snaps sharp
+        // quickly instead of hunting across the whole range. Ignored if unsupported.
+        focusDistance: { ideal: 0.12 },
+        advanced: [{ focusMode: "continuous" }, { focusDistance: 0.12 }],
       },
       audio: false,
     });
@@ -260,6 +263,7 @@ async function startScanner() {
     await video.play();
     scanStatus(STATUS_READY);
     updateTorchButton();
+    applyFocusTuning();
   } catch (e) {
     // Retry with a basic request if the constrained one was rejected.
     try {
@@ -271,6 +275,7 @@ async function startScanner() {
       await video.play();
       scanStatus(STATUS_READY);
       updateTorchButton();
+      applyFocusTuning();
     } catch (e2) {
       scanStatus(STATUS_BLOCKED);
       return;
@@ -334,6 +339,59 @@ async function toggleTorch() {
   torchOn = !torchOn;
   try { await track.applyConstraints({ advanced: [{ torch: torchOn }] }); } catch (_) {}
   updateTorchButton();
+}
+
+// Focus tuning: after the stream starts, apply continuous + near focus if the
+// device exposes those capabilities (constraints in getUserMedia are best-effort,
+// so we re-apply here where capabilities are actually known).
+function applyFocusTuning() {
+  if (!videoStream) return;
+  const track = videoStream.getVideoTracks()[0];
+  if (!track || !track.getCapabilities) return;
+  let caps = {};
+  try { caps = track.getCapabilities() || {}; } catch (_) { return; }
+  const advanced = [];
+  if (caps.focusMode && caps.focusMode.includes("continuous")) {
+    advanced.push({ focusMode: "continuous" });
+  }
+  if (caps.focusDistance) {
+    // Aim near the close end of the supported range for label-distance focus.
+    const near = caps.focusDistance.min +
+      (caps.focusDistance.max - caps.focusDistance.min) * 0.15;
+    advanced.push({ focusDistance: near });
+  }
+  if (advanced.length) {
+    track.applyConstraints({ advanced }).catch(() => {});
+  }
+}
+
+// Tap-to-focus: tapping the preview forces a quick single-shot refocus on the
+// label, then returns to continuous — useful when auto-focus is hunting.
+async function tapToFocus() {
+  if (!videoStream) return;
+  const track = videoStream.getVideoTracks()[0];
+  if (!track || !track.getCapabilities) return;
+  let caps = {};
+  try { caps = track.getCapabilities() || {}; } catch (_) { return; }
+  if (!caps.focusMode) return;
+  try {
+    if (caps.focusMode.includes("single-shot")) {
+      await track.applyConstraints({ advanced: [{ focusMode: "single-shot" }] });
+      // Briefly hold single-shot, then restore continuous for ongoing scanning.
+      setTimeout(() => {
+        if (caps.focusMode.includes("continuous")) {
+          track.applyConstraints({ advanced: [{ focusMode: "continuous" }] }).catch(() => {});
+        }
+      }, 1200);
+    } else if (caps.focusMode.includes("manual") && caps.focusDistance) {
+      const near = caps.focusDistance.min +
+        (caps.focusDistance.max - caps.focusDistance.min) * 0.12;
+      await track.applyConstraints({ advanced: [{ focusMode: "manual", focusDistance: near }] });
+    }
+    // Quick visual pulse so the user knows the tap registered.
+    const frame = $("reader-video");
+    if (frame) { frame.classList.add("focus-pulse"); setTimeout(() => frame.classList.remove("focus-pulse"), 350); }
+  } catch (_) {}
 }
 
 async function stopScanner() {
@@ -536,6 +594,11 @@ $("code-input").addEventListener("keydown", (e) => {
 });
 $("scan-restart").addEventListener("click", startScanner);
 $("torch-btn").addEventListener("click", toggleTorch);
+// Tap anywhere on the camera preview to force a refocus on the label.
+(function () {
+  const v = $("reader-video");
+  if (v) v.addEventListener("click", tapToFocus);
+})();
 $("ocr-capture").addEventListener("click", captureAndRead);
 $("ocr-restart").addEventListener("click", startOcrCamera);
 

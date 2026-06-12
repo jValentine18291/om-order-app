@@ -168,6 +168,13 @@ html, body {
 }
 .scanner-frame video#reader-video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .scanner-frame video { width: 100%; height: 100%; object-fit: cover; }
+/* Tap-to-focus: pointer cursor + a brief ring pulse confirming the tap. */
+#reader-video { cursor: pointer; }
+#reader-video.focus-pulse { animation: focusPulse 0.35s ease-out; }
+@keyframes focusPulse {
+  0%   { box-shadow: inset 0 0 0 3px rgba(79,209,197,0.9); }
+  100% { box-shadow: inset 0 0 0 3px rgba(79,209,197,0); }
+}
 .scanner-frame .reticle {
   position: absolute; inset: 20% 14%; border-radius: 12px;
   box-shadow: 0 0 0 100vmax rgba(13,20,23,0.42);
