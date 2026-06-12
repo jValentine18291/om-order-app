@@ -8,10 +8,13 @@
   <link rel="manifest" href="./manifest.json" />
   <link rel="apple-touch-icon" href="./icon-192.png" />
   <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./batch-upload.css" />
   <!-- ZXing fallback scanner (used when the device has no native BarcodeDetector, e.g. iPhone Safari) -->
   <script src="https://unpkg.com/@zxing/browser@0.1.5"></script>
   <!-- Tesseract.js OCR — reads the printed SKU text on smeared/damaged labels -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <!-- html5-qrcode — decodes barcodes from uploaded photos (batch upload mode) -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
   <div class="app">
@@ -45,7 +48,7 @@
 
       <div class="toggle" id="mode-toggle">
         <button data-mode="upload">Upload photos</button>
-        <button data-mode="scan" class="on">
+        <button data-mode="scan">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg>
           Scan
         </button>
@@ -59,8 +62,18 @@
         </button>
       </div>
 
+      <!-- Upload mode (default) -->
+      <div id="upload-pane">
+        <p class="eyebrow">Take a photo of each barcode, then upload them all at once.</p>
+        <label class="btn-primary upload-btn" for="batch-input">📷 Upload barcode photos</label>
+        <input id="batch-input" type="file" accept="image/*" multiple hidden />
+        <p class="scanner-msg" id="upload-status"></p>
+      </div>
+      <!-- Hidden region html5-qrcode needs for file decoding (never shown) -->
+      <div id="file-decoder-region" style="display:none"></div>
+
       <!-- Scan mode -->
-      <div id="scan-pane" style="display:flex; flex-direction:column; gap:14px;">
+      <div id="scan-pane" style="display:none; flex-direction:column; gap:14px;">
         <div class="scanner-frame">
           <video id="reader-video" playsinline muted></video>
           <div class="reticle"><span class="corner bl"></span><span class="corner br"></span></div>
@@ -95,13 +108,6 @@
       </div>
 
       <!-- Manual mode -->
-      <div id="upload-pane">
-  <p class="eyebrow">Take a photo of each barcode, then upload them all at once.</p>
-  <label class="btn-primary upload-btn" for="batch-input">📷 Upload barcode photos</label>
-  <input id="batch-input" type="file" accept="image/*" multiple hidden />
-  <p class="scanner-msg" id="upload-status"></p>
-</div>
-<div id="file-decoder-region" style="display:none"></div>
       <div id="manual-pane" style="display:none">
         <div class="field">
           <label for="code-input">Part number or barcode</label>
@@ -199,7 +205,6 @@
 
   <div class="toast" id="toast"><span class="ic" id="toast-ic"></span><span id="toast-msg"></span></div>
   <script src="./app.js"></script>
-  <link rel="stylesheet" href="./batch-upload.css" />
-<script src="./batch-upload.js"></script>
+  <script src="./batch-upload.js"></script>
 </body>
 </html>
