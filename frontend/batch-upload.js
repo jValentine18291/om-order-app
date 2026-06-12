@@ -22,60 +22,133 @@ function getFileDecoder() {
   return fileDecoder;
 }
 
-// Pre-process a photo on a canvas before decoding: phone photos are huge (12MP)
-// and the decoder does BETTER on a moderately sized, contrast-boosted image.
-// Downscale longest edge to ~1600px, bump contrast, return a new File.
-async function preprocessImage(file) {
+// Decode a single (already pre-processed) image file. Returns decoded text or null.
+// Strategy: try the device's NATIVE BarcodeDetector first (same fast, accurate
+// engine the live scanner uses — great on Android/Chrome). Where it's missing
+// (notably iPhone Safari), fall back to html5-qrcode, trying several processed
+// versions of the image (bigger scale, grayscale+contrast, small rotations) so
+// glare and slight skew on real labels don't cause a miss.
+
+let _nativeDetector = null;
+async function getNativeDetector() {
+  if (_nativeDetector) return _nativeDetector;
+  // Not cached as "permanently unavailable": the polyfill loads its WASM engine
+  // asynchronously, so an early call might miss it while a later one succeeds.
   try {
-    const bitmap = await createImageBitmap(file);
-    const MAX = 1600;
-    let { width, height } = bitmap;
-    const scale = Math.min(1, MAX / Math.max(width, height));
-    width = Math.round(width * scale);
-    height = Math.round(height * scale);
-
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d", { willReadFrequently: true });
-    ctx.drawImage(bitmap, 0, 0, width, height);
-
-    // Light contrast stretch — helps slightly blurry / low-light barcode shots.
-    const img = ctx.getImageData(0, 0, width, height);
-    const d = img.data;
-    const contrast = 1.25; // 1 = no change
-    const intercept = 128 * (1 - contrast);
-    for (let i = 0; i < d.length; i += 4) {
-      d[i] = d[i] * contrast + intercept;
-      d[i + 1] = d[i + 1] * contrast + intercept;
-      d[i + 2] = d[i + 2] * contrast + intercept;
+    if ("BarcodeDetector" in window) {
+      const supported = await window.BarcodeDetector.getSupportedFormats();
+      if (supported && supported.includes("code_128")) {
+        _nativeDetector = new window.BarcodeDetector({ formats: ["code_128"] });
+      }
     }
-    ctx.putImageData(img, 0, 0);
-
-    const blob = await new Promise((res) =>
-      canvas.toBlob(res, "image/jpeg", 0.92)
-    );
-    if (!blob) return file; // fall back to the original if toBlob failed
-    return new File([blob], file.name, { type: "image/jpeg" });
-  } catch (_) {
-    return file; // any failure: just decode the original photo
-  }
+  } catch (_) { _nativeDetector = null; }
+  return _nativeDetector;
 }
 
-// Decode a single (already pre-processed) image file. Returns decoded text or null.
-async function decodeOneImage(file) {
-  const decoder = getFileDecoder();
-  try {
-    // scanFileV2 returns { decodedText, result }; scanFile returns a string.
-    if (typeof decoder.scanFileV2 === "function") {
-      const out = await decoder.scanFileV2(file, false);
-      return out && out.decodedText ? out.decodedText : null;
-    }
-    const text = await decoder.scanFile(file, false);
-    return text || null;
-  } catch (_) {
-    return null; // library throws when no barcode is found — treat as a miss
+// Build an <img> element from a File (needed for BarcodeDetector + canvas work).
+function fileToImage(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { resolve({ img, url }); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("img load failed")); };
+    img.src = url;
+  });
+}
+
+// Render an image to a canvas at a target longest-edge size, optional rotation
+// (degrees) and optional grayscale+contrast. Returns the canvas.
+function renderToCanvas(img, maxEdge, rotateDeg, grayContrast) {
+  let w = img.naturalWidth || img.width;
+  let h = img.naturalHeight || img.height;
+  const scale = Math.min(1, maxEdge / Math.max(w, h));
+  w = Math.round(w * scale);
+  h = Math.round(h * scale);
+
+  const rad = (rotateDeg || 0) * Math.PI / 180;
+  const canvas = document.createElement("canvas");
+  // For 90/270 rotations swap dimensions; for small angles a square-ish bound is fine.
+  if (rotateDeg === 90 || rotateDeg === 270) { canvas.width = h; canvas.height = w; }
+  else { canvas.width = w; canvas.height = h; }
+
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  ctx.save();
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  if (rad) ctx.rotate(rad);
+  ctx.drawImage(img, -w / 2, -h / 2, w, h);
+  ctx.restore();
+
+  if (grayContrast) {
+    try {
+      const id = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = id.data;
+      const contrast = 1.6, intercept = 128 * (1 - contrast);
+      for (let i = 0; i < d.length; i += 4) {
+        const g = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+        const v = Math.max(0, Math.min(255, g * contrast + intercept));
+        d[i] = d[i + 1] = d[i + 2] = v;
+      }
+      ctx.putImageData(id, 0, 0);
+    } catch (_) {}
   }
+  return canvas;
+}
+
+async function decodeOneImage(file) {
+  // ---- Attempt 1: native BarcodeDetector (fast + accurate where available) ----
+  const native = await getNativeDetector();
+  if (native) {
+    try {
+      const { img, url } = await fileToImage(file);
+      try {
+        // Try the full image, then a larger-rendered canvas if needed.
+        for (const maxEdge of [2000, 3000]) {
+          const canvas = renderToCanvas(img, maxEdge, 0, false);
+          const codes = await native.detect(canvas);
+          if (codes && codes.length && codes[0].rawValue) {
+            return codes[0].rawValue;
+          }
+        }
+      } finally { URL.revokeObjectURL(url); }
+    } catch (_) {}
+  }
+
+  // ---- Attempt 2: html5-qrcode fallback, multiple processed variants ----------
+  // iPhone Safari lands here. Try a sequence of renders that defeat glare/skew.
+  const decoder = getFileDecoder();
+  let imgObj = null;
+  try { imgObj = await fileToImage(file); } catch (_) { imgObj = null; }
+
+  if (imgObj) {
+    const { img, url } = imgObj;
+    try {
+      const variants = [
+        { maxEdge: 1600, rot: 0,  gc: false },
+        { maxEdge: 2400, rot: 0,  gc: false },
+        { maxEdge: 2400, rot: 0,  gc: true  },
+        { maxEdge: 2400, rot: 5,  gc: true  },
+        { maxEdge: 2400, rot: -5, gc: true  },
+        { maxEdge: 2400, rot: 90, gc: false },
+      ];
+      for (const v of variants) {
+        const canvas = renderToCanvas(img, v.maxEdge, v.rot, v.gc);
+        const blob = await new Promise((res) => canvas.toBlob(res, "image/jpeg", 0.95));
+        if (!blob) continue;
+        const f = new File([blob], file.name, { type: "image/jpeg" });
+        try {
+          if (typeof decoder.scanFileV2 === "function") {
+            const out = await decoder.scanFileV2(f, false);
+            if (out && out.decodedText) return out.decodedText;
+          } else {
+            const text = await decoder.scanFile(f, false);
+            if (text) return text;
+          }
+        } catch (_) { /* this variant missed; try the next */ }
+      }
+    } finally { URL.revokeObjectURL(url); }
+  }
+
+  return null; // every attempt missed
 }
 
 // Build a small object-URL thumbnail for a failed photo.
@@ -99,8 +172,7 @@ async function handleBatchFiles(fileList) {
         '<span class="led"></span> Reading photo ' +
         (i + 1) + " of " + files.length + "…";
     }
-    const prepped = await preprocessImage(original);
-    const code = await decodeOneImage(prepped);
+    const code = await decodeOneImage(original);
     if (code) {
       // Reuse the exact same add-to-cart path the scanner/manual entry use.
       // addByCode handles the /api/items lookup, qty bump, toast, etc.
