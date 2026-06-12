@@ -261,6 +261,8 @@ button { font-family: inherit; cursor: pointer; border: none; }
 }
 .btn-secondary svg { width: 17px; height: 17px; }
 .btn-secondary:active { background: var(--surface-2); border-color: var(--primary); }
+/* Flashlight active state — clearly lit so staff know the torch is on. */
+#torch-btn.on { background: var(--primary); color: #fff; border-color: var(--primary); }
 .btn-row { display: flex; gap: 11px; }
 .btn-row > * { flex: 1; }
 .btn-row .grow-2 { flex: 1.6; }

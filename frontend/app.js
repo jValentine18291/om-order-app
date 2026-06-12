@@ -230,6 +230,9 @@ function scanStatus(html) { $("scan-status").innerHTML = html; }
 let videoStream = null;
 let detectLoop = null;
 let zxingReader = null;
+let torchOn = false;
+// Double-read confirm: hold the last candidate; only accept on a second matching read.
+let pendingCode = null;
 
 const STATUS_READY = '<span class="led"></span> Point the camera at a barcode';
 const STATUS_BLOCKED = '<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> Camera blocked — switch to Type code';
@@ -240,17 +243,38 @@ async function startScanner() {
   if (!video) { scanStatus(STATUS_BLOCKED); return; }
 
   try {
+    // Ask for a high-resolution rear camera with continuous autofocus — sharper
+    // frames decode far more reliably, especially in varied lighting.
     videoStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "environment" },
+      video: {
+        facingMode: { ideal: "environment" },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+        focusMode: { ideal: "continuous" },
+        advanced: [{ focusMode: "continuous" }],
+      },
       audio: false,
     });
     video.srcObject = videoStream;
     video.setAttribute("playsinline", "true");
     await video.play();
     scanStatus(STATUS_READY);
+    updateTorchButton();
   } catch (e) {
-    scanStatus(STATUS_BLOCKED);
-    return;
+    // Retry with a basic request if the constrained one was rejected.
+    try {
+      videoStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" }, audio: false,
+      });
+      video.srcObject = videoStream;
+      video.setAttribute("playsinline", "true");
+      await video.play();
+      scanStatus(STATUS_READY);
+      updateTorchButton();
+    } catch (e2) {
+      scanStatus(STATUS_BLOCKED);
+      return;
+    }
   }
 
   // Path 1: native BarcodeDetector (Chrome/Android, some others)
@@ -263,7 +287,7 @@ async function startScanner() {
         if (!videoStream) return;
         try {
           const codes = await detector.detect(video);
-          if (codes && codes.length) onScan(codes[0].rawValue);
+          if (codes && codes.length) onScanCandidate(codes[0].rawValue);
         } catch (_) {}
         detectLoop = requestAnimationFrame(tick);
       };
@@ -279,7 +303,7 @@ async function startScanner() {
     try {
       zxingReader = new ZXingBrowser.BrowserMultiFormatReader();
       zxingReader.decodeFromVideoElement(video, (result) => {
-        if (result) onScan(result.getText());
+        if (result) onScanCandidate(result.getText());
       });
       return;
     } catch (_) {}
@@ -289,21 +313,65 @@ async function startScanner() {
   scanStatus('<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> Scanner not supported here — use Type code');
 }
 
+// Torch / flashlight — helps in dim storeroom lighting. Supported on most
+// Android Chrome; quietly hidden where the device/browser can't do it.
+function torchTrack() {
+  if (!videoStream) return null;
+  const track = videoStream.getVideoTracks()[0];
+  if (!track || !track.getCapabilities) return null;
+  const caps = track.getCapabilities();
+  return caps && caps.torch ? track : null;
+}
+function updateTorchButton() {
+  const btn = $("torch-btn");
+  if (!btn) return;
+  btn.style.display = torchTrack() ? "flex" : "none";
+  btn.classList.toggle("on", torchOn);
+}
+async function toggleTorch() {
+  const track = torchTrack();
+  if (!track) return;
+  torchOn = !torchOn;
+  try { await track.applyConstraints({ advanced: [{ torch: torchOn }] }); } catch (_) {}
+  updateTorchButton();
+}
+
 async function stopScanner() {
   if (detectLoop) { cancelAnimationFrame(detectLoop); detectLoop = null; }
   if (zxingReader) { try { zxingReader.reset(); } catch (_) {} zxingReader = null; }
   if (videoStream) {
+    // Turn torch off before releasing, so it doesn't stay lit.
+    try {
+      const t = videoStream.getVideoTracks()[0];
+      if (torchOn && t) t.applyConstraints({ advanced: [{ torch: false }] }).catch(() => {});
+    } catch (_) {}
     try { videoStream.getTracks().forEach((t) => t.stop()); } catch (_) {}
     videoStream = null;
   }
+  torchOn = false;
+  pendingCode = null;
   const video = $("reader-video");
   if (video) { try { video.srcObject = null; } catch (_) {} }
+}
+
+// Double-read confirm: a code must be seen twice in a row before we accept it.
+// This kills one-frame misreads (e.g. a wrong number from a blurry frame).
+function onScanCandidate(text) {
+  if (!text) return;
+  if (scanCooldown) return;
+  if (text === pendingCode) {
+    pendingCode = null;
+    onScan(text);
+  } else {
+    pendingCode = text;
+  }
 }
 
 function onScan(decodedText) {
   if (scanCooldown) return;
   if (!decodedText) return;
   scanCooldown = true;
+  pendingCode = null;
   scanStatus(`<span class="led"></span> Scanned ${escapeHtml(decodedText)}`);
   addByCode(decodedText);
   setTimeout(() => (scanCooldown = false), 1500);
@@ -467,6 +535,7 @@ $("code-input").addEventListener("keydown", (e) => {
   }
 });
 $("scan-restart").addEventListener("click", startScanner);
+$("torch-btn").addEventListener("click", toggleTorch);
 $("ocr-capture").addEventListener("click", captureAndRead);
 $("ocr-restart").addEventListener("click", startOcrCamera);
 
