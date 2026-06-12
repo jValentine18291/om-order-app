@@ -557,16 +557,15 @@ async function captureAndRead() {
 function setMode(mode) {
   currentMode = mode;
   document.querySelectorAll("#mode-toggle button").forEach((b) =>
-    b.classList.toggle("on", b.dataset.mode === mode)
+    b.classList.toggle("active", b.dataset.mode === mode)
   );
-  $("scan-pane").style.display = mode === "scan" ? "flex" : "none";
+  document.getElementById("upload-pane").style.display = mode === "upload" ? "block" : "none";
+  $("scanner-pane") && ($("scanner-pane").style.display = mode === "scan" ? "flex" : "none");
   $("manual-pane").style.display = mode === "manual" ? "block" : "none";
-  $("ocr-pane").style.display = mode === "ocr" ? "flex" : "none";
 
-  // Start/stop the right camera for the active mode; only one runs at a time.
-  if (mode === "scan") { stopOcrCamera(); startScanner(); }
-  else if (mode === "ocr") { stopScanner(); startOcrCamera(); }
-  else { stopScanner(); stopOcrCamera(); $("code-input").focus(); }
+  if (mode === "scan") startScanner();
+  else stopScanner();
+  if (mode === "manual") $("code-input").focus();
 }
 
 // ---- Escaping helpers ------------------------------------------------------
@@ -634,10 +633,13 @@ $("back-to-entry").addEventListener("click", () => {
 });
 $("submit-btn").addEventListener("click", submitOrder);
 $("new-order-btn").addEventListener("click", resetOrder);
-
+document.getElementById("batch-input").addEventListener("change", (e) => {
+  handleBatchFiles(e.target.files);
+  e.target.value = "";
+});
 // ---- Boot ------------------------------------------------------------------
 renderCart();
-setMode("scan");
+setMode("upload");
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./sw.js").catch(() => {});
