@@ -50,4 +50,13 @@ module.exports = {
     createOrder: (...a) => repo.createOrder(...a),
     getOrder: (...a) => repo.getOrder(...a),
   },
+  slips: {
+    createSlip: (...a) => repo.slips.createSlip(...a),
+    listSlips: (...a) => repo.slips.listSlips(...a),
+    getSlip: (...a) => repo.slips.getSlip(...a),
+    addPartToMachine: (...a) => repo.slips.addPartToMachine(...a),
+    setPartQuantity: (...a) => repo.slips.setPartQuantity(...a),
+    createSlipOrder: (...a) => repo.slips.createSlipOrder(...a),
+    closeSlip: (...a) => repo.slips.closeSlip(...a),
+  },
 };
