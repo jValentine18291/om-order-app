@@ -177,6 +177,26 @@ app.post("/api/slips/:slip/close", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`OM Order App running at http://localhost:${PORT}`);
-});
+// ---- Start server ----------------------------------------------------------
+// Serve HTTPS when cert files are present (self-hosted on the office server,
+// needed for the camera/QR features). Falls back to plain HTTP otherwise — so
+// the Render deployment (which terminates HTTPS itself) is unaffected.
+const fs = require("fs");
+const https = require("https");
+
+const CERT_PATH = path.join(__dirname, "cert.pem");
+const KEY_PATH = path.join(__dirname, "key.pem");
+
+if (fs.existsSync(CERT_PATH) && fs.existsSync(KEY_PATH)) {
+  const options = {
+    cert: fs.readFileSync(CERT_PATH),
+    key: fs.readFileSync(KEY_PATH),
+  };
+  https.createServer(options, app).listen(PORT, () => {
+    console.log(`OM Service running (HTTPS) at https://localhost:${PORT}`);
+  });
+} else {
+  app.listen(PORT, () => {
+    console.log(`OM Service running (HTTP) at http://localhost:${PORT}`);
+  });
+}
