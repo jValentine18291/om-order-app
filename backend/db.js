@@ -96,7 +96,51 @@ db.exec(`
     name          TEXT    PRIMARY KEY,
     value         INTEGER NOT NULL
   );
+
+  -- ===== Service slip workflow =====
+  -- A service slip is created when a customer brings machines in. Parts are
+  -- later scanned against each machine; submitting creates a Sales Order.
+  -- Status flow: OPEN -> CALL_CUSTOMER (SO created) -> CLOSED (paid/invoiced).
+  CREATE TABLE IF NOT EXISTS service_slips (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    slip_number    TEXT    NOT NULL UNIQUE,   -- 5-digit sequential, e.g. '00001'
+    company        TEXT    NOT NULL,
+    contact_name   TEXT,
+    contact_number TEXT,
+    notes          TEXT,
+    status         TEXT    NOT NULL DEFAULT 'OPEN',  -- OPEN | CALL_CUSTOMER | CLOSED
+    closing_ref    TEXT,                       -- DO/CS/INV number entered at close
+    created_at     TEXT    DEFAULT (datetime('now')),
+    closed_at      TEXT
+  );
+
+  -- Machines tagged to a slip (free text — may be non-brand / very old units).
+  CREATE TABLE IF NOT EXISTS slip_machines (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    slip_id        INTEGER NOT NULL,
+    machine_desc   TEXT    NOT NULL,
+    FOREIGN KEY (slip_id) REFERENCES service_slips(id) ON DELETE CASCADE
+  );
+
+  -- Parts scanned against a specific machine on a slip. Records who scanned and
+  -- the price at time of scan (so later catalogue price changes don't rewrite history).
+  CREATE TABLE IF NOT EXISTS machine_parts (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    machine_id     INTEGER NOT NULL,
+    item_code      TEXT    NOT NULL,
+    description    TEXT    NOT NULL,
+    uom            TEXT    DEFAULT 'UNIT',
+    unit_price     REAL    DEFAULT 0,
+    quantity       INTEGER NOT NULL DEFAULT 1,
+    technician     TEXT,                        -- WJ / XL / KM / R
+    created_at     TEXT    DEFAULT (datetime('now')),
+    FOREIGN KEY (machine_id) REFERENCES slip_machines(id) ON DELETE CASCADE
+  );
 `);
+
+db.prepare(
+  "INSERT OR IGNORE INTO counters (name, value) VALUES ('slip_number', 0)"
+).run();
 
 db.prepare(
   "INSERT OR IGNORE INTO counters (name, value) VALUES ('so_number', 0)"

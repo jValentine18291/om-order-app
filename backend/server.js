@@ -85,6 +85,98 @@ app.get("/api/orders/:so", async (req, res) => {
   }
 });
 
+// ============================================================================
+// SERVICE SLIP ROUTES
+// ============================================================================
+
+// Create a new service slip (New Service)
+app.post("/api/slips", async (req, res) => {
+  try {
+    const { company, contact_name, contact_number, notes, machines } = req.body || {};
+    const slip = await data.slips.createSlip({ company, contact_name, contact_number, notes, machines });
+    res.status(201).json(slip);
+  } catch (err) {
+    if (err.status === 400) return res.status(400).json({ error: err.message });
+    console.error("[POST /api/slips]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to create slip" });
+  }
+});
+
+// List slips. ?status=active|open|call_customer|closed|all  (default active)
+app.get("/api/slips", async (req, res) => {
+  try {
+    const status = String(req.query.status || "active").toLowerCase();
+    const rows = await data.slips.listSlips(status);
+    res.json(rows);
+  } catch (err) {
+    console.error("[GET /api/slips]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to list slips" });
+  }
+});
+
+// Get one slip with machines + parts
+app.get("/api/slips/:slip", async (req, res) => {
+  try {
+    const slip = await data.slips.getSlip(req.params.slip);
+    if (!slip) return res.status(404).json({ error: "Service slip not found" });
+    res.json(slip);
+  } catch (err) {
+    console.error("[GET /api/slips/:slip]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to fetch slip" });
+  }
+});
+
+// Add a scanned part to a specific machine on a slip
+app.post("/api/machines/:machineId/parts", async (req, res) => {
+  try {
+    const machineId = Number(req.params.machineId);
+    const parts = await data.slips.addPartToMachine(machineId, req.body || {});
+    res.status(201).json(parts);
+  } catch (err) {
+    if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/machines/:machineId/parts]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to add part" });
+  }
+});
+
+// Update a part line's quantity (0 removes)
+app.patch("/api/parts/:partId", async (req, res) => {
+  try {
+    const partId = Number(req.params.partId);
+    const result = await data.slips.setPartQuantity(partId, (req.body || {}).quantity);
+    res.json(result);
+  } catch (err) {
+    if (err.status === 400) return res.status(400).json({ error: err.message });
+    console.error("[PATCH /api/parts/:partId]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to update part" });
+  }
+});
+
+// Create the Sales Order for a slip (-> CALL_CUSTOMER)
+app.post("/api/slips/:slip/order", async (req, res) => {
+  try {
+    const result = await data.slips.createSlipOrder(req.params.slip);
+    res.status(201).json(result);
+  } catch (err) {
+    if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/slips/:slip/order]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to create order" });
+  }
+});
+
+// Close a slip (Close Service) — requires DO/CS/INV ref
+app.post("/api/slips/:slip/close", async (req, res) => {
+  try {
+    const { closing_ref } = req.body || {};
+    const slip = await data.slips.closeSlip(req.params.slip, closing_ref);
+    res.json(slip);
+  } catch (err) {
+    if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/slips/:slip/close]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to close slip" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`OM Order App running at http://localhost:${PORT}`);
 });
