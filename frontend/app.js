@@ -40,6 +40,17 @@ function escapeHtml(s) {
 }
 function escapeAttr(s) { return escapeHtml(s).replace(/"/g, "&quot;"); }
 
+// Format a stored timestamp ("2026-06-16 08:50:25") as a plain date: "16 Jun 2026".
+function formatDate(ts) {
+  if (!ts) return "";
+  // Treat the space-separated SQLite timestamp as a date; take the date part.
+  const datePart = String(ts).split(" ")[0]; // "2026-06-16"
+  const [y, m, d] = datePart.split("-").map(Number);
+  if (!y || !m || !d) return "";
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${d} ${months[m - 1]} ${y}`;
+}
+
 // ---- Screen navigation -----------------------------------------------------
 const SCREENS = ["home", "new", "open", "close"];
 function showScreen(name) {
@@ -228,9 +239,11 @@ function maybeShowEntry() {
 
 function renderContext() {
   const m = session.slip.machines.find((x) => x.id === session.machineId);
+  const created = formatDate(session.slip.created_at);
   $("os-context").innerHTML =
     `<div><strong>${escapeHtml(session.slip.company)}</strong> · Slip ${escapeHtml(session.slipNumber)}</div>` +
-    `<div class="sub">Machine: ${escapeHtml(m ? m.machine_desc : "")} · Tech: ${escapeHtml(session.technician)}</div>`;
+    `<div class="sub">Machine: ${escapeHtml(m ? m.machine_desc : "")} · Tech: ${escapeHtml(session.technician)}</div>` +
+    (created ? `<div class="sub">Created: ${escapeHtml(created)}</div>` : "");
 }
 
 // The scanned-part entry point. Replaces the old local-cart addByCode:
@@ -395,7 +408,8 @@ async function onCloseSlipChosen(slipNumber) {
     $("cs-context").style.display = "block";
     $("cs-context").innerHTML =
       `<div><strong>${escapeHtml(slip.company)}</strong> · Slip ${escapeHtml(slip.slip_number)}</div>` +
-      `<div class="sub">Status: ${escapeHtml(slip.status)} · ${slip.machines.length} machine(s)</div>`;
+      `<div class="sub">Status: ${escapeHtml(slip.status)} · ${slip.machines.length} machine(s)</div>` +
+      (formatDate(slip.created_at) ? `<div class="sub">Created: ${escapeHtml(formatDate(slip.created_at))}</div>` : "");
   } catch (e) {
     toast(e.message, "err");
   }
