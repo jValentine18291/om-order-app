@@ -45,6 +45,24 @@
 /* ---- Required-field asterisk ---- */
 .req { color: #c61f2b; font-weight: 700; }
 
+/* Ensure all text-like inputs in a field render at the same full-width size.
+   The base stylesheet styles input[type="text"]; type="tel" was missing it,
+   so it rendered smaller. This covers tel/text/email/number consistently. */
+.field input[type="text"],
+.field input[type="tel"],
+.field input[type="email"],
+.field input[type="number"] {
+  width: 100%;
+  padding: 13px 14px;
+  font: inherit;
+  font-size: 1rem;
+  border: 1px solid var(--line, #e2e6ea);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink, #0b1f2a);
+  box-sizing: border-box;
+}
+
 /* ---- Select dropdowns ---- */
 select {
   width: 100%;
