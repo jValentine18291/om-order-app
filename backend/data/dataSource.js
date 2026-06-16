@@ -56,6 +56,7 @@ module.exports = {
     getSlip: (...a) => repo.slips.getSlip(...a),
     addPartToMachine: (...a) => repo.slips.addPartToMachine(...a),
     setPartQuantity: (...a) => repo.slips.setPartQuantity(...a),
+    setMachineComment: (...a) => repo.slips.setMachineComment(...a),
     createSlipOrder: (...a) => repo.slips.createSlipOrder(...a),
     closeSlip: (...a) => repo.slips.closeSlip(...a),
   },

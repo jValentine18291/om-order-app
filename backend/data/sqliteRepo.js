@@ -285,8 +285,17 @@ function closeSlip(slipNumber, closingRef) {
   return getSlip(slipNumber);
 }
 
+// Save a machine's repair comment (free text).
+function setMachineComment(machineId, comment) {
+  const machine = db.prepare("SELECT * FROM slip_machines WHERE id = ?").get(machineId);
+  if (!machine) { const e = new Error("Machine not found."); e.status = 404; throw e; }
+  db.prepare("UPDATE slip_machines SET repair_comment = ? WHERE id = ?")
+    .run(String(comment == null ? "" : comment), machineId);
+  return { ok: true };
+}
+
 const slips = {
-  createSlip, listSlips, getSlip, addPartToMachine, setPartQuantity, createSlipOrder, closeSlip,
+  createSlip, listSlips, getSlip, addPartToMachine, setPartQuantity, setMachineComment, createSlipOrder, closeSlip,
 };
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };
