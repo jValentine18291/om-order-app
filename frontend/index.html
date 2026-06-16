@@ -3,22 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
-  <meta name="theme-color" content="#f4f6f8" />
-  <title>OM Order Entry</title>
+  <meta name="theme-color" content="#0b1f2a" />
+  <title>OM Service</title>
   <link rel="manifest" href="./manifest.json" />
   <link rel="apple-touch-icon" href="./icon-192.png" />
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./batch-upload.css" />
-  <!-- ZXing fallback scanner (used when the device has no native BarcodeDetector, e.g. iPhone Safari) -->
+  <link rel="stylesheet" href="./service.css" />
   <script src="https://unpkg.com/@zxing/browser@0.1.5"></script>
-  <!-- Tesseract.js OCR — reads the printed SKU text on smeared/damaged labels -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <!-- html5-qrcode — decodes barcodes from uploaded photos (batch upload mode) -->
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-  <!-- Barcode Detection API polyfill (ZXing-WASM) — gives iPhone Safari a strong
-       image decoder, since iOS lacks the native BarcodeDetector. The polyfill
-       build only installs itself where the native API is missing (so Android's
-       native detector is left untouched). -->
   <script src="https://fastly.jsdelivr.net/npm/barcode-detector@3/dist/iife/polyfill.min.js"></script>
 </head>
 <body>
@@ -30,155 +24,194 @@
           <circle cx="9" cy="21" r="1"/><circle cx="16" cy="21" r="1"/>
         </svg>
       </div>
-      <h1>Order Entry <span>· OM</span></h1>
-      <span class="pill">Demo</span>
+      <h1>OM Service <span>&middot; OM</span></h1>
+      <button class="pill home-link" id="home-link" style="display:none">Home</button>
     </header>
 
-    <!-- Step indicator -->
-    <div class="steps" id="steps">
-      <div class="step active" data-step="entry"><span class="dot">1</span> Build</div>
-      <div class="bar"></div>
-      <div class="step" data-step="review"><span class="dot">2</span> Review</div>
-      <div class="bar"></div>
-      <div class="step" data-step="confirm"><span class="dot">3</span> Done</div>
-    </div>
-
-    <!-- ============ SCREEN: ENTRY ============ -->
-    <section id="screen-entry" class="screen active">
+    <!-- ============ SCREEN: HOME ============ -->
+    <section id="screen-home" class="screen active">
       <div class="section-head">
-        <p class="eyebrow">Add parts</p>
-        <h2>Which parts do you need?</h2>
-        <p class="lede">Scan a barcode or type a part number to add it to the request.</p>
+        <p class="eyebrow">Service desk</p>
+        <h2>What would you like to do?</h2>
       </div>
-
-      <div class="toggle" id="mode-toggle">
-        <button data-mode="upload">Upload photos</button>
-        <button data-mode="qr">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 21v.01M21 14v.01M14 21v.01"/></svg>
-          Scan QR Code
+      <div class="home-actions">
+        <button class="home-btn" data-go="new">
+          <span class="home-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          </span>
+          <span class="home-txt"><strong>New Service</strong><small>Register a customer's machines</small></span>
         </button>
-        <button data-mode="manual">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-          Type code
+        <button class="home-btn" data-go="open">
+          <span class="home-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 21v.01M21 14v.01M14 21v.01"/></svg>
+          </span>
+          <span class="home-txt"><strong>Open Service</strong><small>Scan parts onto a service slip</small></span>
         </button>
-      </div>
-
-      <!-- Upload mode (default) -->
-      <div id="upload-pane">
-        <p class="eyebrow">Take a photo of each barcode, then upload them all at once.</p>
-        <label class="btn-primary upload-btn" for="batch-input">📷 Upload barcode photos</label>
-        <input id="batch-input" type="file" accept="image/*" multiple hidden />
-        <p class="scanner-msg" id="upload-status"></p>
-      </div>
-      <!-- Hidden region html5-qrcode needs for file decoding (never shown) -->
-      <div id="file-decoder-region" style="display:none"></div>
-
-      <!-- Scan QR Code mode — live camera, QR codes only -->
-      <div id="qr-pane" style="display:none; flex-direction:column; gap:14px;">
-        <div class="scanner-frame">
-          <video id="qr-video" playsinline muted></video>
-          <div class="reticle"><span class="corner bl"></span><span class="corner br"></span></div>
-        </div>
-        <div class="scan-hint" id="qr-status"><span class="led"></span> Point at a QR code</div>
-        <button class="btn-secondary" id="qr-restart" style="width:100%">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
-          Restart camera
+        <button class="home-btn" data-go="close">
+          <span class="home-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </span>
+          <span class="home-txt"><strong>Close Service</strong><small>Record DO/CS/INV and close</small></span>
         </button>
       </div>
-
-      <!-- Manual mode -->
-      <div id="manual-pane" style="display:none">
-        <div class="field">
-          <label for="code-input">Part number or barcode</label>
-          <div class="input-row">
-            <input id="code-input" type="text" inputmode="text" autocomplete="off"
-                   placeholder="e.g. 525IB" />
-            <button class="btn-primary" id="lookup-btn" style="width:auto; padding:0 20px;">Add</button>
-          </div>
-        </div>
-        <div class="scan-hint" id="manual-status" style="justify-content:flex-start; min-height:20px;"></div>
-      </div>
-
-      <div class="section-head" style="margin-top:2px;">
-        <p class="eyebrow">Parts in this request</p>
-      </div>
-      <div class="cart-wrap" id="cart"></div>
     </section>
 
-    <!-- ============ SCREEN: REVIEW ============ -->
-    <section id="screen-review" class="screen">
+    <!-- ============ SCREEN: NEW SERVICE ============ -->
+    <section id="screen-new" class="screen">
       <div class="section-head">
-        <p class="eyebrow">Almost there</p>
-        <h2>Review your request</h2>
-        <p class="lede">Check the parts and quantities before you submit.</p>
-      </div>
-
-      <div class="review-card" id="review-lines"></div>
-
-      <div class="totals-card">
-        <div>
-          <div class="lbl">Order total</div>
-          <div class="sub" id="review-sub">0 parts</div>
-        </div>
-        <div class="big" id="review-total">$0.00</div>
+        <p class="eyebrow">New service</p>
+        <h2>Register a service slip</h2>
+        <p class="lede">Enter the customer's details and the machines brought in.</p>
       </div>
 
       <div class="field">
-        <label for="notes-input">Notes for the order <span style="color:var(--ink-faint); font-weight:400;">(optional)</span></label>
-        <textarea id="notes-input" placeholder="Delivery instructions, PO reference, contact…"></textarea>
+        <label for="ns-company">Company <span class="req">*</span></label>
+        <input id="ns-company" type="text" autocomplete="off" placeholder="e.g. Tan Landscaping" />
+      </div>
+      <div class="field">
+        <label for="ns-contact-name">Contact name</label>
+        <input id="ns-contact-name" type="text" autocomplete="off" placeholder="e.g. Mr Tan" />
+      </div>
+      <div class="field">
+        <label for="ns-contact-number">Contact number</label>
+        <input id="ns-contact-number" type="tel" autocomplete="off" placeholder="e.g. 9123 4567" />
+      </div>
+
+      <div class="field">
+        <label>Machines <span class="req">*</span></label>
+        <div id="ns-machines"></div>
+        <button class="btn-secondary" id="ns-add-machine" type="button" style="width:100%; margin-top:8px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          Add another machine
+        </button>
+      </div>
+
+      <div class="field">
+        <label for="ns-notes">Notes <span style="color:var(--ink-faint);font-weight:400;">(optional)</span></label>
+        <textarea id="ns-notes" placeholder="Anything the technician should know&hellip;"></textarea>
+      </div>
+
+      <button class="btn-primary" id="ns-submit" style="width:100%">Register service slip</button>
+      <div class="scan-hint" id="ns-status" style="justify-content:flex-start;min-height:20px;margin-top:8px;"></div>
+    </section>
+
+    <!-- ============ SCREEN: OPEN SERVICE ============ -->
+    <section id="screen-open" class="screen">
+      <div class="section-head">
+        <p class="eyebrow">Open service</p>
+        <h2>Scan parts onto a slip</h2>
+      </div>
+
+      <div class="field">
+        <label for="os-slip">Service slip <span class="req">*</span></label>
+        <select id="os-slip"><option value="">Loading open slips&hellip;</option></select>
+      </div>
+
+      <div class="field" id="os-machine-field" style="display:none">
+        <label for="os-machine">Machine <span class="req">*</span></label>
+        <select id="os-machine"><option value="">Select a machine&hellip;</option></select>
+      </div>
+
+      <div class="field" id="os-tech-field" style="display:none">
+        <label for="os-tech">Technician <span class="req">*</span></label>
+        <select id="os-tech">
+          <option value="">Select your name&hellip;</option>
+          <option value="WJ">WJ</option>
+          <option value="XL">XL</option>
+          <option value="KM">KM</option>
+          <option value="R">R</option>
+        </select>
+      </div>
+
+      <div id="os-entry" style="display:none">
+        <div class="slip-context" id="os-context"></div>
+
+        <div class="toggle" id="mode-toggle">
+          <button data-mode="upload">Upload photos</button>
+          <button data-mode="qr">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 21v.01M21 14v.01M14 21v.01"/></svg>
+            Scan QR Code
+          </button>
+          <button data-mode="manual">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            Type code
+          </button>
+        </div>
+
+        <div id="upload-pane">
+          <p class="eyebrow">Take a photo of each barcode, then upload them all at once.</p>
+          <label class="btn-primary upload-btn" for="batch-input">&#128247; Upload barcode photos</label>
+          <input id="batch-input" type="file" accept="image/*" multiple hidden />
+          <p class="scanner-msg" id="upload-status"></p>
+        </div>
+        <div id="file-decoder-region" style="display:none"></div>
+
+        <div id="qr-pane" style="display:none; flex-direction:column; gap:14px;">
+          <div class="scanner-frame">
+            <video id="qr-video" playsinline muted></video>
+            <div class="reticle"><span class="corner bl"></span><span class="corner br"></span></div>
+          </div>
+          <div class="scan-hint" id="qr-status"><span class="led"></span> Point at a QR code</div>
+          <button class="btn-secondary" id="qr-restart" style="width:100%">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+            Restart camera
+          </button>
+        </div>
+
+        <div id="manual-pane" style="display:none">
+          <div class="field">
+            <label for="code-input">Part number or barcode</label>
+            <div class="input-row">
+              <input id="code-input" type="text" inputmode="text" autocomplete="off" placeholder="e.g. 525IB" />
+              <button class="btn-primary" id="lookup-btn" style="width:auto; padding:0 20px;">Add</button>
+            </div>
+          </div>
+          <div class="scan-hint" id="manual-status" style="justify-content:flex-start; min-height:20px;"></div>
+        </div>
+
+        <div class="section-head" style="margin-top:2px;">
+          <p class="eyebrow">Parts on this machine</p>
+        </div>
+        <div class="cart-wrap" id="machine-parts"></div>
       </div>
     </section>
 
-    <!-- ============ SCREEN: CONFIRM ============ -->
-    <section id="screen-confirm" class="screen">
-      <div class="confirm-card">
-        <div class="check">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-        </div>
-        <p class="eyebrow">Request submitted</p>
-        <div class="so-chip" id="confirm-so">SO-0000-00000</div>
-        <p class="note">Saved successfully. Keep this number for your records.</p>
-        <div class="confirm-meta">
-          <div class="box"><div class="k">Parts</div><div class="v" id="confirm-items">0</div></div>
-          <div class="box"><div class="k">Total qty</div><div class="v" id="confirm-qty">0</div></div>
-          <div class="box"><div class="k">Amount</div><div class="v" id="confirm-amount">$0</div></div>
-        </div>
+    <!-- ============ SCREEN: CLOSE SERVICE ============ -->
+    <section id="screen-close" class="screen">
+      <div class="section-head">
+        <p class="eyebrow">Close service</p>
+        <h2>Close a service slip</h2>
+        <p class="lede">Record the DO/CS/INV reference once the customer has paid.</p>
       </div>
-      <button class="btn-primary" id="new-order-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-        Start a new request
-      </button>
+      <div class="field">
+        <label for="cs-slip">Service slip <span class="req">*</span></label>
+        <select id="cs-slip"><option value="">Loading slips&hellip;</option></select>
+      </div>
+      <div class="slip-context" id="cs-context" style="display:none"></div>
+      <div class="field">
+        <label for="cs-ref">DO / CS / INV number <span class="req">*</span></label>
+        <input id="cs-ref" type="text" autocomplete="off" placeholder="e.g. DO-2604-016" />
+      </div>
+      <button class="btn-primary" id="cs-submit" style="width:100%">Close service slip</button>
+      <div class="scan-hint" id="cs-status" style="justify-content:flex-start;min-height:20px;margin-top:8px;"></div>
     </section>
 
-    <!-- ============ STICKY FOOTERS ============ -->
-    <div class="footer-bar" id="footer-entry">
+    <!-- ============ STICKY FOOTER: Open Service ============ -->
+    <div class="footer-bar" id="footer-open" style="display:none">
       <div class="summary-card">
         <div class="left">
-          <strong><span id="line-count">0</span> parts</strong>
-          <span id="qty-count">0</span> total qty
+          <strong id="os-total-parts">0 parts</strong>
+          <span id="os-total-qty">on this slip</span>
         </div>
         <div class="total">
-          <div class="lbl">Total</div>
-          <div class="val" id="entry-total">$0.00</div>
+          <div class="lbl">Slip</div>
+          <div class="val" id="os-slip-badge">&mdash;</div>
         </div>
       </div>
-      <button class="btn-primary" id="to-review-btn" disabled>
-        Review request
+      <button class="btn-primary" id="os-create-so">
+        Create Sales Order
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </button>
-    </div>
-
-    <div class="footer-bar" id="footer-review" style="display:none">
-      <div class="btn-row">
-        <button class="btn-secondary" id="back-to-entry">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          Back
-        </button>
-        <button class="btn-primary grow-2" id="submit-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg>
-          Submit request
-        </button>
-      </div>
     </div>
   </div>
 

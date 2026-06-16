@@ -1,13 +1,20 @@
-// app.js — OM Order Entry
-// State, scanning, lookup, cart, review, submit. No login. Mock backend.
+// app.js — OM Service (service-slip workflow)
+// Home -> New / Open / Close Service. Parts scanned in Open Service are saved
+// per-machine to the backend immediately. No login.
 
-const API = ""; // same origin (server hosts both API and static files)
+const API = ""; // same origin
 
 // ---- State -----------------------------------------------------------------
-const cart = []; // { item_code, barcode, description, brand, uom, unit_price, quantity }
-// (scanner state handled in scanner section below)
 let scanCooldown = false;
-let currentMode = "scan";
+let currentMode = "upload";
+
+// Open Service session state
+const session = {
+  slipNumber: null,     // e.g. "00001"
+  slip: null,           // full slip object (with machines + parts)
+  machineId: null,      // currently selected machine id
+  technician: "",       // carries over across machines
+};
 
 // ---- Helpers ---------------------------------------------------------------
 const $ = (id) => document.getElementById(id);
@@ -27,202 +34,399 @@ function toast(msg, kind = "ok") {
   toast._t = setTimeout(() => t.classList.remove("show"), 2600);
 }
 
-function setSteps(active) {
-  const order = ["entry", "review", "confirm"];
-  const ai = order.indexOf(active);
-  document.querySelectorAll("#steps .step").forEach((el) => {
-    const i = order.indexOf(el.dataset.step);
-    el.classList.toggle("active", i === ai);
-    el.classList.toggle("done", i < ai);
-  });
-  document.querySelectorAll("#steps .bar").forEach((el, idx) => {
-    el.classList.toggle("done", idx < ai);
-  });
+function escapeHtml(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
+function escapeAttr(s) { return escapeHtml(s).replace(/"/g, "&quot;"); }
 
+// ---- Screen navigation -----------------------------------------------------
+const SCREENS = ["home", "new", "open", "close"];
 function showScreen(name) {
-  ["entry", "review", "confirm"].forEach((s) => {
-    $("screen-" + s).classList.toggle("active", s === name);
-  });
-  $("footer-entry").style.display = name === "entry" ? "flex" : "none";
-  $("footer-review").style.display = name === "review" ? "flex" : "none";
-  setSteps(name);
+  SCREENS.forEach((s) => $("screen-" + s).classList.toggle("active", s === name));
+  // Footer only on open-service when entry is active
+  $("footer-open").style.display = "none";
+  // Home link visible everywhere except home
+  $("home-link").style.display = name === "home" ? "none" : "inline-flex";
+  // Stop any camera when leaving a scanning context
+  if (name !== "open") { try { stopQrScanner(); } catch (_) {} }
   window.scrollTo(0, 0);
 }
 
-// ---- Item lookup (mock master) ---------------------------------------------
-async function lookupItem(code) {
-  const res = await fetch(`${API}/api/items/${encodeURIComponent(code)}`);
-  if (!res.ok) {
-    const { error } = await res.json().catch(() => ({}));
-    throw new Error(error || "Lookup failed");
-  }
-  return res.json();
+function goHome() {
+  // Reset open-service session + new-service form when returning home
+  try { stopQrScanner(); } catch (_) {}
+  session.slipNumber = null; session.slip = null; session.machineId = null; session.technician = "";
+  showScreen("home");
 }
 
-async function addByCode(code) {
-  code = (code || "").trim();
-  if (!code) return;
+// ---- API helpers -----------------------------------------------------------
+async function api(path, opts) {
+  const res = await fetch(`${API}${path}`, opts);
+  let body = null;
+  try { body = await res.json(); } catch (_) {}
+  if (!res.ok) {
+    const msg = (body && body.error) || `Request failed (${res.status})`;
+    throw new Error(msg);
+  }
+  return body;
+}
+
+async function lookupItem(code) {
+  return api(`/api/items/${encodeURIComponent(code)}`);
+}
+
+// ============================================================================
+// NEW SERVICE
+// ============================================================================
+function addMachineRow(value = "") {
+  const wrap = $("ns-machines");
+  const row = document.createElement("div");
+  row.className = "machine-row";
+  row.innerHTML = `
+    <input type="text" class="ns-machine-input" autocomplete="off" placeholder="e.g. Husqvarna 525LK Brushcutter" />
+    <button type="button" class="machine-del" aria-label="Remove machine">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>`;
+  row.querySelector("input").value = value;
+  row.querySelector(".machine-del").addEventListener("click", () => {
+    // Keep at least one row present
+    if ($("ns-machines").children.length > 1) row.remove();
+  });
+  wrap.appendChild(row);
+}
+
+function resetNewServiceForm() {
+  ["ns-company", "ns-contact-name", "ns-contact-number", "ns-notes"].forEach((id) => ($(id).value = ""));
+  $("ns-machines").innerHTML = "";
+  addMachineRow();
+  $("ns-status").innerHTML = "";
+}
+
+async function submitNewService() {
+  const company = $("ns-company").value.trim();
+  const machines = [...document.querySelectorAll(".ns-machine-input")]
+    .map((i) => i.value.trim()).filter(Boolean);
+
+  if (!company) { $("ns-status").innerHTML = statusErr("Company is required."); return; }
+  if (machines.length === 0) { $("ns-status").innerHTML = statusErr("Add at least one machine."); return; }
+
+  $("ns-submit").disabled = true;
+  $("ns-status").innerHTML = statusInfo("Registering…");
   try {
-    const item = await lookupItem(code);
-    addToCart(item);
-    toast(`Added ${item.description}`, "ok");
+    const slip = await api("/api/slips", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        company,
+        contact_name: $("ns-contact-name").value.trim(),
+        contact_number: $("ns-contact-number").value.trim(),
+        notes: $("ns-notes").value.trim(),
+        machines,
+      }),
+    });
+    toast(`Service slip ${slip.slip_number} created`, "ok");
+    $("ns-status").innerHTML = statusOk(`Created slip ${slip.slip_number}. Returning home…`);
+    setTimeout(goHome, 1400);
+  } catch (e) {
+    $("ns-status").innerHTML = statusErr(e.message);
+  } finally {
+    $("ns-submit").disabled = false;
+  }
+}
+
+function statusErr(m) { return `<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> ${escapeHtml(m)}`; }
+function statusInfo(m) { return `<span class="led"></span> ${escapeHtml(m)}`; }
+function statusOk(m) { return `<span class="led" style="background:#38A32A;box-shadow:0 0 0 3px rgba(56,163,42,.18)"></span> ${escapeHtml(m)}`; }
+
+// ============================================================================
+// OPEN SERVICE
+// ============================================================================
+async function enterOpenService() {
+  showScreen("open");
+  // Reset selectors
+  $("os-machine-field").style.display = "none";
+  $("os-tech-field").style.display = "none";
+  $("os-entry").style.display = "none";
+  $("footer-open").style.display = "none";
+  session.slipNumber = null; session.slip = null; session.machineId = null; session.technician = "";
+
+  const sel = $("os-slip");
+  sel.innerHTML = `<option value="">Loading open slips…</option>`;
+  try {
+    const slips = await api("/api/slips?status=active");
+    if (!slips.length) {
+      sel.innerHTML = `<option value="">No open slips — create one first</option>`;
+      return;
+    }
+    sel.innerHTML = `<option value="">Select a slip…</option>` +
+      slips.map((s) => `<option value="${escapeAttr(s.slip_number)}">${escapeHtml(s.slip_number)} — ${escapeHtml(s.company)}${s.status === "CALL_CUSTOMER" ? " (SO created)" : ""}</option>`).join("");
+  } catch (e) {
+    sel.innerHTML = `<option value="">Failed to load slips</option>`;
+    toast(e.message, "err");
+  }
+}
+
+async function onSlipChosen(slipNumber) {
+  if (!slipNumber) {
+    $("os-machine-field").style.display = "none";
+    $("os-tech-field").style.display = "none";
+    $("os-entry").style.display = "none";
+    $("footer-open").style.display = "none";
+    return;
+  }
+  try {
+    const slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
+    session.slipNumber = slipNumber;
+    session.slip = slip;
+    session.machineId = null;
+
+    // Populate machine dropdown
+    const msel = $("os-machine");
+    msel.innerHTML = `<option value="">Select a machine…</option>` +
+      slip.machines.map((m) => `<option value="${m.id}">${escapeHtml(m.machine_desc)}</option>`).join("");
+    $("os-machine-field").style.display = "block";
+    // Tech + entry hidden until machine chosen
+    $("os-tech-field").style.display = "none";
+    $("os-entry").style.display = "none";
+    updateSlipFooter();
   } catch (e) {
     toast(e.message, "err");
   }
 }
 
-function addToCart(item) {
-  const existing = cart.find((l) => l.item_code === item.item_code);
-  if (existing) existing.quantity += 1;
-  else cart.push({ ...item, quantity: 1 });
-  renderCart();
+function onMachineChosen(machineId) {
+  session.machineId = machineId ? Number(machineId) : null;
+  if (!session.machineId) {
+    $("os-tech-field").style.display = "none";
+    $("os-entry").style.display = "none";
+    return;
+  }
+  // Show technician picker (carries over if already chosen)
+  $("os-tech-field").style.display = "block";
+  if (session.technician) $("os-tech").value = session.technician;
+  maybeShowEntry();
+  renderMachineParts();
 }
 
-function removeLine(code) {
-  const i = cart.findIndex((l) => l.item_code === code);
-  if (i >= 0) cart.splice(i, 1);
-  renderCart();
+function onTechChosen(tech) {
+  session.technician = tech || "";
+  maybeShowEntry();
 }
 
-function setQty(code, qty) {
-  const line = cart.find((l) => l.item_code === code);
-  if (!line) return;
-  line.quantity = Math.max(1, parseInt(qty, 10) || 1);
-  renderCart();
+function maybeShowEntry() {
+  const ready = session.slipNumber && session.machineId && session.technician;
+  $("os-entry").style.display = ready ? "block" : "none";
+  $("footer-open").style.display = ready ? "flex" : "none";
+  if (ready) {
+    setMode(currentMode || "upload");
+    renderContext();
+    renderMachineParts();
+    updateSlipFooter();
+  }
 }
 
-// ---- Render cart -----------------------------------------------------------
+function renderContext() {
+  const m = session.slip.machines.find((x) => x.id === session.machineId);
+  $("os-context").innerHTML =
+    `<div><strong>${escapeHtml(session.slip.company)}</strong> · Slip ${escapeHtml(session.slipNumber)}</div>` +
+    `<div class="sub">Machine: ${escapeHtml(m ? m.machine_desc : "")} · Tech: ${escapeHtml(session.technician)}</div>`;
+}
+
+// The scanned-part entry point. Replaces the old local-cart addByCode:
+// looks up the item, then SAVES it to the current machine on the server.
+async function addByCode(code) {
+  code = (code || "").trim();
+  if (!code) return;
+  if (!session.machineId || !session.technician) {
+    toast("Pick a machine and your name first", "err");
+    return;
+  }
+  try {
+    const item = await lookupItem(code);
+    await api(`/api/machines/${session.machineId}/parts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        item_code: item.item_code,
+        description: item.description,
+        uom: item.uom,
+        unit_price: item.unit_price,
+        quantity: 1,
+        technician: session.technician,
+      }),
+    });
+    toast(`Added ${item.description}`, "ok");
+    await refreshSlip();
+    renderMachineParts();
+    updateSlipFooter();
+  } catch (e) {
+    toast(e.message, "err");
+  }
+}
+
+async function refreshSlip() {
+  if (!session.slipNumber) return;
+  session.slip = await api(`/api/slips/${encodeURIComponent(session.slipNumber)}`);
+}
+
 const TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/></svg>';
 
-function renderCart() {
-  const wrap = $("cart");
+function currentMachine() {
+  if (!session.slip) return null;
+  return session.slip.machines.find((m) => m.id === session.machineId) || null;
+}
+
+function renderMachineParts() {
+  const wrap = $("machine-parts");
+  const machine = currentMachine();
+  const parts = machine ? (machine.parts || []) : [];
   wrap.innerHTML = "";
 
-  if (cart.length === 0) {
+  if (parts.length === 0) {
     wrap.innerHTML = `
       <div class="cart-empty">
         <div class="ico">
           <svg viewBox="0 0 24 24" fill="none" stroke="#1f6f78" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
         </div>
         <strong>No parts yet</strong>
-        <span>Scan a barcode or type a part number to get started.</span>
+        <span>Scan or type a part to add it to this machine.</span>
       </div>`;
-  } else {
-    for (const l of cart) {
-      const el = document.createElement("div");
-      el.className = "line";
-      el.innerHTML = `
-        <div class="head">
-          <div class="info">
-            <div class="desc">${escapeHtml(l.description)}</div>
-            <div class="sku mono">${escapeHtml(l.item_code)}</div>
-          </div>
-          <div class="price-col">
-            <span class="price">${money(l.unit_price)}</span>
-            <button class="remove" data-remove="${escapeAttr(l.item_code)}" aria-label="Remove part">${TRASH}</button>
-          </div>
-        </div>
-        <div class="foot">
-          <div class="qty">
-            <button data-dec="${escapeAttr(l.item_code)}" aria-label="Decrease">−</button>
-            <input type="number" min="1" value="${l.quantity}" data-qty="${escapeAttr(l.item_code)}" inputmode="numeric" aria-label="Quantity" />
-            <button data-inc="${escapeAttr(l.item_code)}" aria-label="Increase">+</button>
-          </div>
-          <div class="amt-wrap">
-            <span class="amt-lbl">Line total</span>
-            <span class="amt">${money(l.unit_price * l.quantity)}</span>
-          </div>
-        </div>
-      `;
-      wrap.appendChild(el);
-    }
+    return;
   }
-  updateSummary();
-}
 
-function updateSummary() {
-  const lines = cart.length;
-  const qty = cart.reduce((s, l) => s + l.quantity, 0);
-  const total = cart.reduce((s, l) => s + l.unit_price * l.quantity, 0);
-  $("line-count").textContent = lines;
-  $("qty-count").textContent = qty;
-  $("entry-total").textContent = money(total);
-  $("to-review-btn").disabled = lines === 0;
-}
-
-// ---- Render review ---------------------------------------------------------
-function renderReview() {
-  const wrap = $("review-lines");
-  wrap.innerHTML = "";
-  let total = 0;
-  let qty = 0;
-  for (const l of cart) {
-    const amt = l.unit_price * l.quantity;
-    total += amt;
-    qty += l.quantity;
+  for (const p of parts) {
     const el = document.createElement("div");
-    el.className = "review-line";
+    el.className = "line";
     el.innerHTML = `
-      <div>
-        <div class="desc">${escapeHtml(l.description)}</div>
-        <div class="sub"><span class="mono">${escapeHtml(l.item_code)}</span> · ${l.quantity} × ${money(l.unit_price)}</div>
+      <div class="head">
+        <div class="info">
+          <div class="desc">${escapeHtml(p.description)}</div>
+          <div class="sku mono">${escapeHtml(p.item_code)} · ${escapeHtml(p.technician || "")}</div>
+        </div>
+        <div class="price-col">
+          <span class="price">${money(p.unit_price)}</span>
+          <button class="remove" data-del="${p.id}" aria-label="Remove part">${TRASH}</button>
+        </div>
       </div>
-      <div class="amt">${money(amt)}</div>
-    `;
+      <div class="foot">
+        <div class="qty">
+          <button data-dec="${p.id}" aria-label="Decrease">−</button>
+          <input type="number" min="1" value="${p.quantity}" data-qty="${p.id}" inputmode="numeric" aria-label="Quantity" />
+          <button data-inc="${p.id}" aria-label="Increase">+</button>
+        </div>
+        <div class="amt-wrap">
+          <span class="amt-lbl">Line total</span>
+          <span class="amt">${money(p.unit_price * p.quantity)}</span>
+        </div>
+      </div>`;
     wrap.appendChild(el);
   }
-  $("review-total").textContent = money(total);
-  $("review-sub").textContent = `${cart.length} part${cart.length === 1 ? "" : "s"} · ${qty} total qty`;
 }
 
-// ---- Submit ----------------------------------------------------------------
-async function submitOrder() {
-  $("submit-btn").disabled = true;
+async function setPartQty(partId, qty) {
   try {
-    const payload = {
-      notes: $("notes-input").value.trim(),
-      lines: cart.map((l) => ({
-        item_code: l.item_code,
-        description: l.description,
-        uom: l.uom,
-        unit_price: l.unit_price,
-        quantity: l.quantity,
-      })),
-    };
-    const res = await fetch(`${API}/api/orders`, {
-      method: "POST",
+    await api(`/api/parts/${partId}`, {
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ quantity: qty }),
     });
-    if (!res.ok) {
-      const { error } = await res.json().catch(() => ({}));
-      throw new Error(error || "Submit failed");
-    }
-    const data = await res.json();
-    $("confirm-so").textContent = data.so_number;
-    $("confirm-items").textContent = cart.length;
-    $("confirm-qty").textContent = data.total_qty;
-    $("confirm-amount").textContent = money(data.total_amount);
-    showScreen("confirm");
+    await refreshSlip();
+    renderMachineParts();
+    updateSlipFooter();
   } catch (e) {
     toast(e.message, "err");
-  } finally {
-    $("submit-btn").disabled = false;
   }
 }
 
-function resetOrder() {
-  cart.length = 0;
-  $("notes-input").value = "";
-  $("code-input").value = "";
-  renderCart();
-  showScreen("entry");
-  if (currentMode === "qr") startQrScanner();
+function updateSlipFooter() {
+  if (!session.slip) return;
+  let parts = 0, qty = 0;
+  for (const m of session.slip.machines) for (const p of (m.parts || [])) { parts++; qty += p.quantity; }
+  $("os-total-parts").textContent = `${parts} part${parts === 1 ? "" : "s"}`;
+  $("os-total-qty").textContent = `${qty} qty across slip`;
+  $("os-slip-badge").textContent = session.slipNumber || "—";
+  $("os-create-so").disabled = parts === 0;
+}
+
+async function createSalesOrder() {
+  if (!session.slipNumber) return;
+  $("os-create-so").disabled = true;
+  try {
+    const result = await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/order`, { method: "POST" });
+    toast(`Sales Order ${result.so_number} created (${result.ss_line})`, "ok");
+    setTimeout(goHome, 1600);
+  } catch (e) {
+    toast(e.message, "err");
+    $("os-create-so").disabled = false;
+  }
+}
+
+// ============================================================================
+// CLOSE SERVICE
+// ============================================================================
+async function enterCloseService() {
+  showScreen("close");
+  $("cs-context").style.display = "none";
+  $("cs-ref").value = "";
+  $("cs-status").innerHTML = "";
+  const sel = $("cs-slip");
+  sel.innerHTML = `<option value="">Loading slips…</option>`;
+  try {
+    // Closeable slips are typically those awaiting payment (CALL_CUSTOMER),
+    // but allow any active slip to be closed.
+    const slips = await api("/api/slips?status=active");
+    if (!slips.length) {
+      sel.innerHTML = `<option value="">No active slips</option>`;
+      return;
+    }
+    sel.innerHTML = `<option value="">Select a slip…</option>` +
+      slips.map((s) => `<option value="${escapeAttr(s.slip_number)}">${escapeHtml(s.slip_number)} — ${escapeHtml(s.company)}${s.status === "CALL_CUSTOMER" ? " (SO created)" : ""}</option>`).join("");
+  } catch (e) {
+    sel.innerHTML = `<option value="">Failed to load</option>`;
+    toast(e.message, "err");
+  }
+}
+
+async function onCloseSlipChosen(slipNumber) {
+  if (!slipNumber) { $("cs-context").style.display = "none"; return; }
+  try {
+    const slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
+    $("cs-context").style.display = "block";
+    $("cs-context").innerHTML =
+      `<div><strong>${escapeHtml(slip.company)}</strong> · Slip ${escapeHtml(slip.slip_number)}</div>` +
+      `<div class="sub">Status: ${escapeHtml(slip.status)} · ${slip.machines.length} machine(s)</div>`;
+  } catch (e) {
+    toast(e.message, "err");
+  }
+}
+
+async function submitClose() {
+  const slipNumber = $("cs-slip").value;
+  const ref = $("cs-ref").value.trim();
+  if (!slipNumber) { $("cs-status").innerHTML = statusErr("Pick a slip to close."); return; }
+  if (!ref) { $("cs-status").innerHTML = statusErr("Enter the DO/CS/INV number."); return; }
+
+  $("cs-submit").disabled = true;
+  $("cs-status").innerHTML = statusInfo("Closing…");
+  try {
+    await api(`/api/slips/${encodeURIComponent(slipNumber)}/close`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ closing_ref: ref }),
+    });
+    toast(`Slip ${slipNumber} closed`, "ok");
+    $("cs-status").innerHTML = statusOk(`Closed ${slipNumber}. Returning home…`);
+    setTimeout(goHome, 1400);
+  } catch (e) {
+    $("cs-status").innerHTML = statusErr(e.message);
+  } finally {
+    $("cs-submit").disabled = false;
+  }
 }
 
 // ---- Scanner ---------------------------------------------------------------
-function scanStatus(html) { $("scan-status").innerHTML = html; }
+function scanStatus(html) { const el = $("scan-status"); if (el) el.innerHTML = html; }
 
 // Scanner engine: prefer the device's native BarcodeDetector (fast, accurate on
 // Code 128 — great on Android), fall back to ZXing (covers iPhone Safari).
@@ -642,106 +846,102 @@ async function captureAndRead() {
   }
 }
 
-// ---- Mode toggle -----------------------------------------------------------
+// ---- Mode toggle (part-entry methods within Open Service) -------------------
 function setMode(mode) {
   currentMode = mode;
   document.querySelectorAll("#mode-toggle button").forEach((b) =>
     b.classList.toggle("on", b.dataset.mode === mode)
   );
 
-  // Show/hide each pane. Every lookup is guarded so a missing node can never
-  // halt the function partway (which would leave panes in a broken state).
   const uploadPane = $("upload-pane");
   if (uploadPane) uploadPane.style.display = mode === "upload" ? "block" : "none";
-
   const qrPane = $("qr-pane");
   if (qrPane) qrPane.style.display = mode === "qr" ? "flex" : "none";
-
   const manualPane = $("manual-pane");
   if (manualPane) manualPane.style.display = mode === "manual" ? "block" : "none";
 
-  // Camera lifecycle: only QR mode uses a camera now.
   if (mode === "qr") startQrScanner();
-  else stopQrScanner(); // upload + manual: camera off
-
-  if (mode === "manual") $("code-input").focus();
+  else stopQrScanner();
+  if (mode === "manual") { const ci = $("code-input"); if (ci) ci.focus(); }
 }
-
-// ---- Escaping helpers ------------------------------------------------------
-function escapeHtml(s) {
-  return String(s ?? "").replace(/[&<>"']/g, (c) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
-function escapeAttr(s) { return escapeHtml(s).replace(/"/g, "&quot;"); }
 
 // ---- Event wiring ----------------------------------------------------------
+// Home navigation
+document.querySelectorAll(".home-btn").forEach((b) =>
+  b.addEventListener("click", () => {
+    const go = b.dataset.go;
+    if (go === "new") { resetNewServiceForm(); showScreen("new"); }
+    else if (go === "open") { enterOpenService(); }
+    else if (go === "close") { enterCloseService(); }
+  })
+);
+$("home-link").addEventListener("click", goHome);
+
+// New Service
+$("ns-add-machine").addEventListener("click", () => addMachineRow());
+$("ns-submit").addEventListener("click", submitNewService);
+
+// Open Service selectors
+$("os-slip").addEventListener("change", (e) => onSlipChosen(e.target.value));
+$("os-machine").addEventListener("change", (e) => onMachineChosen(e.target.value));
+$("os-tech").addEventListener("change", (e) => onTechChosen(e.target.value));
+$("os-create-so").addEventListener("click", createSalesOrder);
+
+// Mode toggle buttons
 document.querySelectorAll("#mode-toggle button").forEach((b) =>
   b.addEventListener("click", () => setMode(b.dataset.mode))
 );
 
+// Manual entry
 $("lookup-btn").addEventListener("click", () => {
   addByCode($("code-input").value);
   $("code-input").value = "";
   $("code-input").focus();
 });
 $("code-input").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    addByCode($("code-input").value);
-    $("code-input").value = "";
-  }
+  if (e.key === "Enter") { addByCode($("code-input").value); $("code-input").value = ""; }
 });
-// Scan-mode controls removed from UI; guard in case the elements are absent.
-const _scanRestart = $("scan-restart");
-if (_scanRestart) _scanRestart.addEventListener("click", startScanner);
-const _torchBtn = $("torch-btn");
-if (_torchBtn) _torchBtn.addEventListener("click", toggleTorch);
-// Tap anywhere on the camera preview to force a refocus on the label.
-(function () {
-  const v = $("reader-video");
-  if (v) v.addEventListener("click", tapToFocus);
-})();
-const _ocrCap = $("ocr-capture"); if (_ocrCap) _ocrCap.addEventListener("click", captureAndRead);
-const _ocrRst = $("ocr-restart"); if (_ocrRst) _ocrRst.addEventListener("click", startOcrCamera);
+
+// QR restart
 const _qrRst = $("qr-restart"); if (_qrRst) _qrRst.addEventListener("click", startQrScanner);
 
-// Cart interactions (event delegation; closest() handles taps on inner SVG)
-$("cart").addEventListener("click", (e) => {
-  const rm = e.target.closest("[data-remove]");
+// Machine-parts list interactions (event delegation)
+$("machine-parts").addEventListener("click", (e) => {
+  const del = e.target.closest("[data-del]");
   const inc = e.target.closest("[data-inc]");
   const dec = e.target.closest("[data-dec]");
-  if (rm) removeLine(rm.dataset.remove);
+  if (del) setPartQty(Number(del.dataset.del), 0);
   else if (inc) {
-    const l = cart.find((x) => x.item_code === inc.dataset.inc);
-    if (l) setQty(l.item_code, l.quantity + 1);
+    const id = Number(inc.dataset.inc);
+    const m = currentMachine();
+    const p = m && m.parts.find((x) => x.id === id);
+    if (p) setPartQty(id, p.quantity + 1);
   } else if (dec) {
-    const l = cart.find((x) => x.item_code === dec.dataset.dec);
-    if (l) setQty(l.item_code, l.quantity - 1);
+    const id = Number(dec.dataset.dec);
+    const m = currentMachine();
+    const p = m && m.parts.find((x) => x.id === id);
+    if (p) setPartQty(id, Math.max(0, p.quantity - 1));
   }
 });
-$("cart").addEventListener("change", (e) => {
-  if (e.target.dataset.qty) setQty(e.target.dataset.qty, e.target.value);
+$("machine-parts").addEventListener("change", (e) => {
+  if (e.target.dataset.qty) {
+    const q = Math.max(0, parseInt(e.target.value, 10) || 0);
+    setPartQty(Number(e.target.dataset.qty), q);
+  }
 });
 
-$("to-review-btn").addEventListener("click", () => {
-  if (cart.length === 0) return;
-  stopScanner();
-  stopOcrCamera();
-  renderReview();
-  showScreen("review");
-});
-$("back-to-entry").addEventListener("click", () => {
-  showScreen("entry");
-  if (currentMode === "qr") startQrScanner();
-});
-$("submit-btn").addEventListener("click", submitOrder);
-$("new-order-btn").addEventListener("click", resetOrder);
-document.getElementById("batch-input").addEventListener("change", (e) => {
+// Close Service
+$("cs-slip").addEventListener("change", (e) => onCloseSlipChosen(e.target.value));
+$("cs-submit").addEventListener("click", submitClose);
+
+// Batch upload (defined in batch-upload.js -> handleBatchFiles)
+$("batch-input").addEventListener("change", (e) => {
   handleBatchFiles(e.target.files);
   e.target.value = "";
 });
+
 // ---- Boot ------------------------------------------------------------------
-renderCart();
-setMode("upload");
+showScreen("home");
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./sw.js").catch(() => {});
