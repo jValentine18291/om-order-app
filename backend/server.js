@@ -152,6 +152,19 @@ app.patch("/api/parts/:partId", async (req, res) => {
   }
 });
 
+// Save a machine's repair comment
+app.patch("/api/machines/:machineId/comment", async (req, res) => {
+  try {
+    const machineId = Number(req.params.machineId);
+    const result = await data.slips.setMachineComment(machineId, (req.body || {}).comment);
+    res.json(result);
+  } catch (err) {
+    if (err.status === 404) return res.status(404).json({ error: err.message });
+    console.error("[PATCH /api/machines/:machineId/comment]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to save comment" });
+  }
+});
+
 // Create the Sales Order for a slip (-> CALL_CUSTOMER)
 app.post("/api/slips/:slip/order", async (req, res) => {
   try {

@@ -119,6 +119,7 @@ db.exec(`
     id             INTEGER PRIMARY KEY AUTOINCREMENT,
     slip_id        INTEGER NOT NULL,
     machine_desc   TEXT    NOT NULL,
+    repair_comment TEXT    DEFAULT '',
     FOREIGN KEY (slip_id) REFERENCES service_slips(id) ON DELETE CASCADE
   );
 
@@ -141,6 +142,19 @@ db.exec(`
 db.prepare(
   "INSERT OR IGNORE INTO counters (name, value) VALUES ('slip_number', 0)"
 ).run();
+
+// Migration: add repair_comment to slip_machines if an older DB lacks it.
+// (CREATE TABLE IF NOT EXISTS won't alter an existing table, so do it explicitly.)
+try {
+  const cols = db.prepare("PRAGMA table_info(slip_machines)").all();
+  const hasComment = cols.some((c) => c.name === "repair_comment");
+  if (!hasComment) {
+    db.exec("ALTER TABLE slip_machines ADD COLUMN repair_comment TEXT DEFAULT ''");
+    console.log("[db] migrated: added repair_comment to slip_machines");
+  }
+} catch (e) {
+  console.error("[db] repair_comment migration check failed:", e.message);
+}
 
 db.prepare(
   "INSERT OR IGNORE INTO counters (name, value) VALUES ('so_number', 0)"
