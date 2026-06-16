@@ -52,7 +52,7 @@ function formatDate(ts) {
 }
 
 // ---- Screen navigation -----------------------------------------------------
-const SCREENS = ["home", "new", "open", "close"];
+const SCREENS = ["home", "new", "open", "close", "view"];
 function showScreen(name) {
   SCREENS.forEach((s) => $("screen-" + s).classList.toggle("active", s === name));
   // Footer only on open-service when entry is active
@@ -437,6 +437,115 @@ async function submitClose() {
   } finally {
     $("cs-submit").disabled = false;
   }
+}
+
+// ============================================================================
+// VIEW SLIPS (read-only)
+// ============================================================================
+const STATUS_LABEL = {
+  OPEN: "Open",
+  CALL_CUSTOMER: "Call customer (SO created)",
+  CLOSED: "Closed",
+};
+
+async function enterViewSlips() {
+  showScreen("view");
+  $("vs-detail").innerHTML = "";
+  const sel = $("vs-slip");
+  sel.innerHTML = `<option value="">Loading slips…</option>`;
+  try {
+    const slips = await api("/api/slips?status=all"); // newest first (slip_number DESC)
+    if (!slips.length) {
+      sel.innerHTML = `<option value="">No slips created yet</option>`;
+      return;
+    }
+    sel.innerHTML = `<option value="">Select a slip…</option>` +
+      slips.map((s) =>
+        `<option value="${escapeAttr(s.slip_number)}">${escapeHtml(s.slip_number)} — ${escapeHtml(s.company)} (${escapeHtml(STATUS_LABEL[s.status] || s.status)})</option>`
+      ).join("");
+  } catch (e) {
+    sel.innerHTML = `<option value="">Failed to load slips</option>`;
+    toast(e.message, "err");
+  }
+}
+
+async function onViewSlipChosen(slipNumber) {
+  const wrap = $("vs-detail");
+  if (!slipNumber) { wrap.innerHTML = ""; return; }
+  wrap.innerHTML = `<div class="slip-context"><span class="led"></span> Loading…</div>`;
+  try {
+    const slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
+    wrap.innerHTML = renderSlipDetail(slip);
+  } catch (e) {
+    wrap.innerHTML = "";
+    toast(e.message, "err");
+  }
+}
+
+function renderSlipDetail(slip) {
+  // Header block: customer + meta
+  let slipQty = 0, slipAmount = 0, slipParts = 0;
+  for (const m of slip.machines) {
+    for (const p of (m.parts || [])) { slipQty += p.quantity; slipAmount += p.unit_price * p.quantity; slipParts++; }
+  }
+
+  const meta = [];
+  if (slip.contact_name) meta.push(`Contact: ${escapeHtml(slip.contact_name)}`);
+  if (slip.contact_number) meta.push(escapeHtml(slip.contact_number));
+
+  let html = `
+    <div class="vs-card">
+      <div class="vs-head">
+        <div>
+          <div class="vs-company">${escapeHtml(slip.company)}</div>
+          <div class="vs-sub">Slip ${escapeHtml(slip.slip_number)} · Created ${escapeHtml(formatDate(slip.created_at))}</div>
+        </div>
+        <span class="vs-status vs-${escapeAttr(slip.status)}">${escapeHtml(STATUS_LABEL[slip.status] || slip.status)}</span>
+      </div>
+      ${meta.length ? `<div class="vs-sub">${meta.join(" · ")}</div>` : ""}
+      ${slip.notes ? `<div class="vs-notes">${escapeHtml(slip.notes)}</div>` : ""}
+      ${slip.status === "CLOSED" && slip.closing_ref ? `<div class="vs-sub">Closed with: <strong>${escapeHtml(slip.closing_ref)}</strong>${slip.closed_at ? " on " + escapeHtml(formatDate(slip.closed_at)) : ""}</div>` : ""}
+    </div>`;
+
+  // Each machine + its parts
+  for (const m of slip.machines) {
+    const parts = m.parts || [];
+    let mQty = 0, mAmount = 0;
+    for (const p of parts) { mQty += p.quantity; mAmount += p.unit_price * p.quantity; }
+
+    html += `
+      <div class="vs-machine">
+        <div class="vs-machine-name">${escapeHtml(m.machine_desc)}</div>`;
+
+    if (parts.length === 0) {
+      html += `<div class="vs-sub" style="padding:6px 0;">No parts recorded.</div>`;
+    } else {
+      for (const p of parts) {
+        html += `
+          <div class="vs-part">
+            <div class="vs-part-info">
+              <div class="vs-part-desc">${escapeHtml(p.description)}</div>
+              <div class="vs-part-sku mono">${escapeHtml(p.item_code)}${p.technician ? " · " + escapeHtml(p.technician) : ""}</div>
+            </div>
+            <div class="vs-part-amt">
+              <div>${escapeHtml(String(p.quantity))} × ${money(p.unit_price)}</div>
+              <div class="vs-part-line">${money(p.unit_price * p.quantity)}</div>
+            </div>
+          </div>`;
+      }
+      html += `<div class="vs-machine-total">Machine total: <strong>${money(mAmount)}</strong> (${mQty} qty)</div>`;
+    }
+    html += `</div>`;
+  }
+
+  // Slip total
+  html += `
+    <div class="vs-grand">
+      <span>${slipParts} part${slipParts === 1 ? "" : "s"} · ${slipQty} qty across ${slip.machines.length} machine${slip.machines.length === 1 ? "" : "s"}</span>
+      <strong>${money(slipAmount)}</strong>
+    </div>`;
+
+  return html;
 }
 
 // ---- Scanner ---------------------------------------------------------------
@@ -887,6 +996,7 @@ document.querySelectorAll(".home-btn").forEach((b) =>
     if (go === "new") { resetNewServiceForm(); showScreen("new"); }
     else if (go === "open") { enterOpenService(); }
     else if (go === "close") { enterCloseService(); }
+    else if (go === "view") { enterViewSlips(); }
   })
 );
 $("home-link").addEventListener("click", goHome);
@@ -947,6 +1057,9 @@ $("machine-parts").addEventListener("change", (e) => {
 // Close Service
 $("cs-slip").addEventListener("change", (e) => onCloseSlipChosen(e.target.value));
 $("cs-submit").addEventListener("click", submitClose);
+
+// View Slips
+$("vs-slip").addEventListener("change", (e) => onViewSlipChosen(e.target.value));
 
 // Batch upload (defined in batch-upload.js -> handleBatchFiles)
 $("batch-input").addEventListener("change", (e) => {

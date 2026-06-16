@@ -53,6 +53,12 @@
           </span>
           <span class="home-txt"><strong>Close Service</strong><small>Record DO/CS/INV and close</small></span>
         </button>
+        <button class="home-btn" data-go="view">
+          <span class="home-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </span>
+          <span class="home-txt"><strong>View Slips</strong><small>Look up any service slip</small></span>
+        </button>
       </div>
     </section>
 
@@ -194,6 +200,20 @@
       </div>
       <button class="btn-primary" id="cs-submit" style="width:100%">Close service slip</button>
       <div class="scan-hint" id="cs-status" style="justify-content:flex-start;min-height:20px;margin-top:8px;"></div>
+    </section>
+
+    <!-- ============ SCREEN: VIEW SLIPS ============ -->
+    <section id="screen-view" class="screen">
+      <div class="section-head">
+        <p class="eyebrow">View slips</p>
+        <h2>Look up a service slip</h2>
+        <p class="lede">Select any slip to see its full details.</p>
+      </div>
+      <div class="field">
+        <label for="vs-slip">Service slip</label>
+        <select id="vs-slip"><option value="">Loading slips…</option></select>
+      </div>
+      <div id="vs-detail"></div>
     </section>
 
     <!-- ============ STICKY FOOTER: Open Service ============ -->

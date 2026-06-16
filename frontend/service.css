@@ -121,3 +121,87 @@ select {
   font-size: .84rem;
   margin-top: 3px;
 }
+
+/* ---- View Slips: read-only detail ---- */
+.vs-card {
+  background: #fff;
+  border: 1px solid var(--line, #e2e6ea);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.vs-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.vs-company { font-size: 1.1rem; font-weight: 700; color: var(--ink, #0b1f2a); }
+.vs-sub { color: var(--ink-faint, #6b7a82); font-size: .85rem; margin-top: 3px; }
+.vs-notes {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--brand-tint, #e6f2f1);
+  border-radius: 10px;
+  font-size: .9rem;
+  color: var(--ink, #0b1f2a);
+}
+.vs-status {
+  flex: 0 0 auto;
+  font-size: .72rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.vs-OPEN { background: #e6f2f1; color: #1f6f78; }
+.vs-CALL_CUSTOMER { background: #fff3e0; color: #b26a00; }
+.vs-CLOSED { background: #eceff1; color: #5a6b73; }
+
+.vs-machine {
+  background: #fff;
+  border: 1px solid var(--line, #e2e6ea);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.vs-machine-name {
+  font-weight: 700;
+  color: var(--ink, #0b1f2a);
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line, #e2e6ea);
+}
+.vs-part {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f2f4f6;
+}
+.vs-part:last-of-type { border-bottom: none; }
+.vs-part-desc { color: var(--ink, #0b1f2a); font-size: .95rem; }
+.vs-part-sku { color: var(--ink-faint, #6b7a82); font-size: .78rem; margin-top: 2px; }
+.vs-part-amt { text-align: right; white-space: nowrap; }
+.vs-part-amt > div:first-child { color: var(--ink-faint, #6b7a82); font-size: .82rem; }
+.vs-part-line { font-weight: 700; color: var(--ink, #0b1f2a); margin-top: 2px; }
+.vs-machine-total {
+  text-align: right;
+  font-size: .88rem;
+  color: var(--ink-faint, #6b7a82);
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line, #e2e6ea);
+}
+.vs-grand {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--ink, #0b1f2a);
+  color: #fff;
+  border-radius: 14px;
+  font-size: .9rem;
+}
+.vs-grand strong { font-size: 1.15rem; }
