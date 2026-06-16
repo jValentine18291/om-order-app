@@ -64,8 +64,9 @@ function showScreen(name) {
   window.scrollTo(0, 0);
 }
 
-function goHome() {
-  // Reset open-service session + new-service form when returning home
+async function goHome() {
+  // Save any in-progress repair comment before clearing the session.
+  try { await saveCurrentComment(); } catch (_) {}
   try { stopQrScanner(); } catch (_) {}
   session.slipNumber = null; session.slip = null; session.machineId = null; session.technician = "";
   showScreen("home");
@@ -206,7 +207,10 @@ async function onSlipChosen(slipNumber) {
   }
 }
 
-function onMachineChosen(machineId) {
+async function onMachineChosen(machineId) {
+  // Save the comment for the machine we're leaving (if any) before switching.
+  await saveCurrentComment();
+
   session.machineId = machineId ? Number(machineId) : null;
   if (!session.machineId) {
     $("os-tech-field").style.display = "none";
@@ -216,8 +220,39 @@ function onMachineChosen(machineId) {
   // Show technician picker (carries over if already chosen)
   $("os-tech-field").style.display = "block";
   if (session.technician) $("os-tech").value = session.technician;
+  // Load this machine's existing comment into the textbox.
+  loadCommentForCurrentMachine();
   maybeShowEntry();
   renderMachineParts();
+}
+
+// Load the saved comment for the currently selected machine into the textbox.
+function loadCommentForCurrentMachine() {
+  const box = $("os-comment");
+  if (!box) return;
+  const m = currentMachine();
+  box.value = (m && m.repair_comment) ? m.repair_comment : "";
+}
+
+// Save the textbox comment to whichever machine is currently selected.
+// Used when switching machines, creating the SO, or leaving the screen.
+async function saveCurrentComment() {
+  const box = $("os-comment");
+  if (!box || !session.machineId) return;
+  const m = currentMachine();
+  const current = box.value;
+  // Skip the network call if nothing changed.
+  if (m && (m.repair_comment || "") === current) return;
+  try {
+    await api(`/api/machines/${session.machineId}/comment`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ comment: current }),
+    });
+    if (m) m.repair_comment = current; // keep local copy in sync
+  } catch (e) {
+    toast("Couldn't save comment: " + e.message, "err");
+  }
 }
 
 function onTechChosen(tech) {
@@ -280,7 +315,17 @@ async function addByCode(code) {
 
 async function refreshSlip() {
   if (!session.slipNumber) return;
+  // Preserve whatever the technician has typed in the comment box for the
+  // current machine, so a part-scan refresh doesn't wipe an unsaved comment.
+  const box = $("os-comment");
+  const unsaved = (box && session.machineId) ? box.value : null;
+
   session.slip = await api(`/api/slips/${encodeURIComponent(session.slipNumber)}`);
+
+  if (unsaved !== null) {
+    const m = currentMachine();
+    if (m) m.repair_comment = unsaved; // keep local copy aligned with the box
+  }
 }
 
 const TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/></svg>';
@@ -365,6 +410,8 @@ function updateSlipFooter() {
 async function createSalesOrder() {
   if (!session.slipNumber) return;
   $("os-create-so").disabled = true;
+  // Persist the current machine's comment first (per the agreed save-on-SO behaviour).
+  await saveCurrentComment();
   try {
     const result = await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/order`, { method: "POST" });
     toast(`Sales Order ${result.so_number} created (${result.ss_line})`, "ok");
@@ -516,6 +563,10 @@ function renderSlipDetail(slip) {
     html += `
       <div class="vs-machine">
         <div class="vs-machine-name">${escapeHtml(m.machine_desc)}</div>`;
+
+    if (m.repair_comment) {
+      html += `<div class="vs-comment">${escapeHtml(m.repair_comment)}</div>`;
+    }
 
     if (parts.length === 0) {
       html += `<div class="vs-sub" style="padding:6px 0;">No parts recorded.</div>`;

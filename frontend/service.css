@@ -205,3 +205,14 @@ select {
   font-size: .9rem;
 }
 .vs-grand strong { font-size: 1.15rem; }
+
+.vs-comment {
+  background: #fffbe9;
+  border-left: 3px solid #e0b400;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  font-size: .88rem;
+  color: var(--ink, #0b1f2a);
+  white-space: pre-wrap;
+}
