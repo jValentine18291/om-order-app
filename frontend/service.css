@@ -1,0 +1,105 @@
+/* service.css — styles for the service-slip screens (home, new, open, close) */
+
+/* Home link button in the top bar */
+.home-link {
+  cursor: pointer;
+  border: none;
+  font: inherit;
+}
+
+/* ---- Home screen action buttons ---- */
+.home-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 8px;
+}
+.home-btn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 20px 18px;
+  background: #fff;
+  border: 1px solid var(--line, #e2e6ea);
+  border-radius: 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: transform .08s ease, box-shadow .15s ease;
+  box-shadow: 0 1px 3px rgba(11,31,42,.06);
+}
+.home-btn:active { transform: scale(.99); }
+.home-btn .home-ic {
+  flex: 0 0 auto;
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--brand-tint, #e6f2f1);
+  color: var(--brand, #1f6f78);
+  border-radius: 12px;
+}
+.home-btn .home-ic svg { width: 26px; height: 26px; }
+.home-btn .home-txt { display: flex; flex-direction: column; gap: 2px; }
+.home-btn .home-txt strong { font-size: 1.05rem; color: var(--ink, #0b1f2a); }
+.home-btn .home-txt small { color: var(--ink-faint, #6b7a82); font-size: .85rem; }
+
+/* ---- Required-field asterisk ---- */
+.req { color: #c61f2b; font-weight: 700; }
+
+/* ---- Select dropdowns ---- */
+select {
+  width: 100%;
+  padding: 13px 14px;
+  font: inherit;
+  font-size: 1rem;
+  border: 1px solid var(--line, #e2e6ea);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink, #0b1f2a);
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236b7a82' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 40px;
+}
+
+/* ---- New Service machine rows ---- */
+.machine-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+.machine-row input {
+  flex: 1;
+  padding: 13px 14px;
+  font: inherit;
+  border: 1px solid var(--line, #e2e6ea);
+  border-radius: 12px;
+}
+.machine-del {
+  flex: 0 0 auto;
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  background: #fff;
+  border: 1px solid var(--line, #e2e6ea);
+  border-radius: 12px;
+  color: #c61f2b;
+  cursor: pointer;
+}
+.machine-del svg { width: 18px; height: 18px; }
+
+/* ---- Slip context banner (Open / Close) ---- */
+.slip-context {
+  background: var(--brand-tint, #e6f2f1);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  font-size: .92rem;
+  color: var(--ink, #0b1f2a);
+}
+.slip-context .sub {
+  color: var(--ink-faint, #6b7a82);
+  font-size: .84rem;
+  margin-top: 3px;
+}
