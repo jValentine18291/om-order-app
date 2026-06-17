@@ -256,3 +256,12 @@ select {
   font-size: .88rem;
   text-align: center;
 }
+
+/* Footer: keep a long machine model from breaking the summary layout */
+#os-machine-name {
+  display: block;
+  max-width: 60vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -462,12 +462,29 @@ async function setPartQty(partId, qty) {
 
 function updateSlipFooter() {
   if (!session.slip) return;
-  let parts = 0, qty = 0;
-  for (const m of session.slip.machines) for (const p of (m.parts || [])) { parts++; qty += p.quantity; }
-  $("os-total-parts").textContent = `${parts} part${parts === 1 ? "" : "s"}`;
-  $("os-total-qty").textContent = `${qty} qty across slip`;
+
+  // Slip number
   $("os-slip-badge").textContent = session.slipNumber || "—";
-  $("os-create-so").disabled = parts === 0;
+
+  // Current machine model + its total cost
+  const machine = currentMachine();
+  const machineName = machine ? machine.machine_desc : "—";
+  let machineTotal = 0;
+  let machineParts = 0;
+  if (machine) {
+    for (const p of (machine.parts || [])) {
+      machineTotal += p.unit_price * p.quantity;
+      machineParts++;
+    }
+  }
+  $("os-machine-name").textContent = machineName;
+  $("os-machine-total").textContent = money(machineTotal);
+
+  // The Create Sales Order button covers the whole slip, so enable it whenever
+  // any machine on the slip has parts (not just the current one).
+  let slipParts = 0;
+  for (const m of session.slip.machines) for (const p of (m.parts || [])) slipParts++;
+  $("os-create-so").disabled = slipParts === 0;
 }
 
 async function createSalesOrder() {
