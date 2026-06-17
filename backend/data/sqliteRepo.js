@@ -294,8 +294,39 @@ function setMachineComment(machineId, comment) {
   return { ok: true };
 }
 
+// Search slips by slip number (partial match on the digits). Scope mirrors
+// listSlips: 'active' (not closed) or 'all'. Returns lightweight rows (with
+// machines) capped to `limit`, newest first.
+function searchSlips(query = "", scope = "all", limit = 20) {
+  const q = String(query).replace(/\s+/g, "");
+  const cap = Math.max(1, Math.min(50, Number(limit) || 20));
+
+  let sql, params;
+  const scopeClause = scope === "active" ? "status != 'CLOSED'" : "1=1";
+
+  if (!q) {
+    // Empty query: most recent slips in scope.
+    sql = `SELECT * FROM service_slips WHERE ${scopeClause} ORDER BY slip_number DESC LIMIT ?`;
+    params = [cap + 1]; // +1 to detect "more results exist"
+  } else {
+    sql = `SELECT * FROM service_slips
+             WHERE ${scopeClause} AND slip_number LIKE ?
+             ORDER BY slip_number DESC LIMIT ?`;
+    params = [`%${q}%`, cap + 1];
+  }
+
+  const rows = db.prepare(sql).all(...params);
+  const hasMore = rows.length > cap;
+  const trimmed = hasMore ? rows.slice(0, cap) : rows;
+
+  const getMachines = db.prepare("SELECT id, machine_desc FROM slip_machines WHERE slip_id = ?");
+  for (const r of trimmed) r.machines = getMachines.all(r.id);
+
+  return { results: trimmed, hasMore };
+}
+
 const slips = {
-  createSlip, listSlips, getSlip, addPartToMachine, setPartQuantity, setMachineComment, createSlipOrder, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setMachineComment, createSlipOrder, closeSlip,
 };
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };

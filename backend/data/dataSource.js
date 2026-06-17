@@ -53,6 +53,7 @@ module.exports = {
   slips: {
     createSlip: (...a) => repo.slips.createSlip(...a),
     listSlips: (...a) => repo.slips.listSlips(...a),
+    searchSlips: (...a) => repo.slips.searchSlips(...a),
     getSlip: (...a) => repo.slips.getSlip(...a),
     addPartToMachine: (...a) => repo.slips.addPartToMachine(...a),
     setPartQuantity: (...a) => repo.slips.setPartQuantity(...a),
