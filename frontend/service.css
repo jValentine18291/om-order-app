@@ -216,3 +216,43 @@ select {
   color: var(--ink, #0b1f2a);
   white-space: pre-wrap;
 }
+
+/* ---- Slip search results ---- */
+.slip-results {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+.slip-result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid var(--line, #e2e6ea);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+.slip-result:active { transform: scale(.99); }
+.slip-result.picked { border-color: var(--brand, #1f6f78); background: var(--brand-tint, #e6f2f1); }
+.slip-result .sr-num { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink, #0b1f2a); }
+.slip-result .sr-co { flex: 1; color: var(--ink-faint, #6b7a82); font-size: .9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.slip-result .sr-status {
+  flex: 0 0 auto; font-size: .68rem; font-weight: 700;
+  padding: 3px 8px; border-radius: 999px; white-space: nowrap;
+}
+.sr-OPEN { background: #e6f2f1; color: #1f6f78; }
+.sr-CALL_CUSTOMER { background: #fff3e0; color: #b26a00; }
+.sr-CLOSED { background: #eceff1; color: #5a6b73; }
+.slip-result-empty, .slip-result-more {
+  padding: 12px 14px;
+  color: var(--ink-faint, #6b7a82);
+  font-size: .88rem;
+  text-align: center;
+}

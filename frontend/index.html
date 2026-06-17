@@ -109,8 +109,9 @@
       </div>
 
       <div class="field">
-        <label for="os-slip">Service slip <span class="req">*</span></label>
-        <select id="os-slip"><option value="">Loading open slips&hellip;</option></select>
+        <label for="os-search">Service slip <span class="req">*</span></label>
+        <input id="os-search" type="text" inputmode="numeric" autocomplete="off" placeholder="Type slip number, e.g. 638" />
+        <div class="slip-results" id="os-results"></div>
       </div>
 
       <div class="field" id="os-machine-field" style="display:none">
@@ -195,8 +196,9 @@
         <p class="lede">Record the DO/CS/INV reference once the customer has paid.</p>
       </div>
       <div class="field">
-        <label for="cs-slip">Service slip <span class="req">*</span></label>
-        <select id="cs-slip"><option value="">Loading slips&hellip;</option></select>
+        <label for="cs-search">Service slip <span class="req">*</span></label>
+        <input id="cs-search" type="text" inputmode="numeric" autocomplete="off" placeholder="Type slip number, e.g. 638" />
+        <div class="slip-results" id="cs-results"></div>
       </div>
       <div class="slip-context" id="cs-context" style="display:none"></div>
       <div class="field">
@@ -215,8 +217,9 @@
         <p class="lede">Select any slip to see its full details.</p>
       </div>
       <div class="field">
-        <label for="vs-slip">Service slip</label>
-        <select id="vs-slip"><option value="">Loading slips…</option></select>
+        <label for="vs-search">Service slip</label>
+        <input id="vs-search" type="text" inputmode="numeric" autocomplete="off" placeholder="Type slip number, e.g. 638" />
+        <div class="slip-results" id="vs-results"></div>
       </div>
       <div id="vs-detail"></div>
     </section>

@@ -89,6 +89,76 @@ async function lookupItem(code) {
 }
 
 // ============================================================================
+// REUSABLE SLIP SEARCH (used by Open, Close, View)
+// Wires a text input + results container to the search endpoint, debounced.
+// onPick(slipNumber) is called when the user taps a result.
+// ============================================================================
+function setupSlipSearch({ inputId, resultsId, scope, onPick }) {
+  const input = $(inputId);
+  const results = $(resultsId);
+  let debounce = null;
+
+  async function runSearch() {
+    const q = input.value.trim();
+    try {
+      const data = await api(`/api/slips-search?q=${encodeURIComponent(q)}&scope=${scope}`);
+      renderResults(data);
+    } catch (e) {
+      results.innerHTML = `<div class="slip-result-empty">Search failed</div>`;
+    }
+  }
+
+  function renderResults(data) {
+    const list = data.results || [];
+    if (list.length === 0) {
+      results.innerHTML = `<div class="slip-result-empty">${input.value.trim() ? "No matching slips" : "No slips yet"}</div>`;
+      return;
+    }
+    results.innerHTML =
+      list.map((s) =>
+        `<button type="button" class="slip-result" data-slip="${escapeAttr(s.slip_number)}">
+           <span class="sr-num">${escapeHtml(s.slip_number)}</span>
+           <span class="sr-co">${escapeHtml(s.company)}</span>
+           <span class="sr-status sr-${escapeAttr(s.status)}">${escapeHtml(STATUS_LABEL[s.status] || s.status)}</span>
+         </button>`
+      ).join("") +
+      (data.hasMore ? `<div class="slip-result-more">Keep typing to narrow results…</div>` : "");
+
+    results.querySelectorAll(".slip-result").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        const num = btn.dataset.slip;
+        // Mark selection visually
+        results.querySelectorAll(".slip-result").forEach((b) => b.classList.remove("picked"));
+        btn.classList.add("picked");
+        onPick(num);
+      })
+    );
+  }
+
+  // Debounced typing
+  input.addEventListener("input", () => {
+    clearTimeout(debounce);
+    debounce = setTimeout(runSearch, 250);
+  });
+
+  // Expose a reset that clears + shows recent slips
+  return {
+    reset() {
+      input.value = "";
+      results.innerHTML = `<div class="slip-result-empty">Loading…</div>`;
+      runSearch();
+    },
+  };
+}
+
+// STATUS_LABEL is defined later (used by both search and View Slips); declare here.
+const STATUS_LABEL = {
+  OPEN: "Open",
+  CALL_CUSTOMER: "Call customer (SO created)",
+  CLOSED: "Closed",
+};
+
+// ============================================================================
 // NEW SERVICE
 // ============================================================================
 function addMachineRow(value = "") {
@@ -154,29 +224,22 @@ function statusOk(m) { return `<span class="led" style="background:#38A32A;box-s
 // ============================================================================
 // OPEN SERVICE
 // ============================================================================
+let openSearch = null;
 async function enterOpenService() {
   showScreen("open");
-  // Reset selectors
   $("os-machine-field").style.display = "none";
   $("os-tech-field").style.display = "none";
   $("os-entry").style.display = "none";
   $("footer-open").style.display = "none";
   session.slipNumber = null; session.slip = null; session.machineId = null; session.technician = "";
 
-  const sel = $("os-slip");
-  sel.innerHTML = `<option value="">Loading open slips…</option>`;
-  try {
-    const slips = await api("/api/slips?status=active");
-    if (!slips.length) {
-      sel.innerHTML = `<option value="">No open slips — create one first</option>`;
-      return;
-    }
-    sel.innerHTML = `<option value="">Select a slip…</option>` +
-      slips.map((s) => `<option value="${escapeAttr(s.slip_number)}">${escapeHtml(s.slip_number)} — ${escapeHtml(s.company)}${s.status === "CALL_CUSTOMER" ? " (SO created)" : ""}</option>`).join("");
-  } catch (e) {
-    sel.innerHTML = `<option value="">Failed to load slips</option>`;
-    toast(e.message, "err");
+  if (!openSearch) {
+    openSearch = setupSlipSearch({
+      inputId: "os-search", resultsId: "os-results", scope: "active",
+      onPick: (slipNumber) => onSlipChosen(slipNumber),
+    });
   }
+  openSearch.reset();
 }
 
 async function onSlipChosen(slipNumber) {
@@ -425,30 +488,26 @@ async function createSalesOrder() {
 // ============================================================================
 // CLOSE SERVICE
 // ============================================================================
+let closeSearch = null;
+let csPickedSlip = null; // currently selected slip number in Close Service
 async function enterCloseService() {
   showScreen("close");
   $("cs-context").style.display = "none";
   $("cs-ref").value = "";
   $("cs-status").innerHTML = "";
-  const sel = $("cs-slip");
-  sel.innerHTML = `<option value="">Loading slips…</option>`;
-  try {
-    // Closeable slips are typically those awaiting payment (CALL_CUSTOMER),
-    // but allow any active slip to be closed.
-    const slips = await api("/api/slips?status=active");
-    if (!slips.length) {
-      sel.innerHTML = `<option value="">No active slips</option>`;
-      return;
-    }
-    sel.innerHTML = `<option value="">Select a slip…</option>` +
-      slips.map((s) => `<option value="${escapeAttr(s.slip_number)}">${escapeHtml(s.slip_number)} — ${escapeHtml(s.company)}${s.status === "CALL_CUSTOMER" ? " (SO created)" : ""}</option>`).join("");
-  } catch (e) {
-    sel.innerHTML = `<option value="">Failed to load</option>`;
-    toast(e.message, "err");
+  csPickedSlip = null;
+
+  if (!closeSearch) {
+    closeSearch = setupSlipSearch({
+      inputId: "cs-search", resultsId: "cs-results", scope: "active",
+      onPick: (slipNumber) => onCloseSlipChosen(slipNumber),
+    });
   }
+  closeSearch.reset();
 }
 
 async function onCloseSlipChosen(slipNumber) {
+  csPickedSlip = slipNumber || null;
   if (!slipNumber) { $("cs-context").style.display = "none"; return; }
   try {
     const slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
@@ -463,7 +522,7 @@ async function onCloseSlipChosen(slipNumber) {
 }
 
 async function submitClose() {
-  const slipNumber = $("cs-slip").value;
+  const slipNumber = csPickedSlip;
   const ref = $("cs-ref").value.trim();
   if (!slipNumber) { $("cs-status").innerHTML = statusErr("Pick a slip to close."); return; }
   if (!ref) { $("cs-status").innerHTML = statusErr("Enter the DO/CS/INV number."); return; }
@@ -489,31 +548,17 @@ async function submitClose() {
 // ============================================================================
 // VIEW SLIPS (read-only)
 // ============================================================================
-const STATUS_LABEL = {
-  OPEN: "Open",
-  CALL_CUSTOMER: "Call customer (SO created)",
-  CLOSED: "Closed",
-};
-
+let viewSearch = null;
 async function enterViewSlips() {
   showScreen("view");
   $("vs-detail").innerHTML = "";
-  const sel = $("vs-slip");
-  sel.innerHTML = `<option value="">Loading slips…</option>`;
-  try {
-    const slips = await api("/api/slips?status=all"); // newest first (slip_number DESC)
-    if (!slips.length) {
-      sel.innerHTML = `<option value="">No slips created yet</option>`;
-      return;
-    }
-    sel.innerHTML = `<option value="">Select a slip…</option>` +
-      slips.map((s) =>
-        `<option value="${escapeAttr(s.slip_number)}">${escapeHtml(s.slip_number)} — ${escapeHtml(s.company)} (${escapeHtml(STATUS_LABEL[s.status] || s.status)})</option>`
-      ).join("");
-  } catch (e) {
-    sel.innerHTML = `<option value="">Failed to load slips</option>`;
-    toast(e.message, "err");
+  if (!viewSearch) {
+    viewSearch = setupSlipSearch({
+      inputId: "vs-search", resultsId: "vs-results", scope: "all",
+      onPick: (slipNumber) => onViewSlipChosen(slipNumber),
+    });
   }
+  viewSearch.reset();
 }
 
 async function onViewSlipChosen(slipNumber) {
@@ -1056,8 +1101,7 @@ $("home-link").addEventListener("click", goHome);
 $("ns-add-machine").addEventListener("click", () => addMachineRow());
 $("ns-submit").addEventListener("click", submitNewService);
 
-// Open Service selectors
-$("os-slip").addEventListener("change", (e) => onSlipChosen(e.target.value));
+// Open Service: slip selection via search component; machine/tech selects + SO button
 $("os-machine").addEventListener("change", (e) => onMachineChosen(e.target.value));
 $("os-tech").addEventListener("change", (e) => onTechChosen(e.target.value));
 $("os-create-so").addEventListener("click", createSalesOrder);
@@ -1105,12 +1149,10 @@ $("machine-parts").addEventListener("change", (e) => {
   }
 });
 
-// Close Service
-$("cs-slip").addEventListener("change", (e) => onCloseSlipChosen(e.target.value));
+// Close Service: slip selection via search component
 $("cs-submit").addEventListener("click", submitClose);
 
-// View Slips
-$("vs-slip").addEventListener("change", (e) => onViewSlipChosen(e.target.value));
+// View Slips: slip selection via search component
 
 // Batch upload (defined in batch-upload.js -> handleBatchFiles)
 $("batch-input").addEventListener("change", (e) => {
