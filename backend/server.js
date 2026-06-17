@@ -102,6 +102,19 @@ app.post("/api/slips", async (req, res) => {
   }
 });
 
+// Search slips by number. ?q=638&scope=active|all
+app.get("/api/slips-search", async (req, res) => {
+  try {
+    const q = String(req.query.q || "");
+    const scope = String(req.query.scope || "all").toLowerCase();
+    const result = await data.slips.searchSlips(q, scope, 20);
+    res.json(result);
+  } catch (err) {
+    console.error("[GET /api/slips-search]", err);
+    res.status(err.status || 500).json({ error: err.message || "Search failed" });
+  }
+});
+
 // List slips. ?status=active|open|call_customer|closed|all  (default active)
 app.get("/api/slips", async (req, res) => {
   try {
