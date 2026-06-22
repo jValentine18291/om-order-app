@@ -122,8 +122,8 @@ select {
 .ns-qty button:active { background: #e6eaec; }
 .ns-machine-qty {
   flex: 0 0 auto;
-  width: 36px !important;
-  min-width: 36px;
+  width: 46px !important;
+  min-width: 46px;
   height: 44px;
   border: none;
   border-left: 1px solid var(--line, #e2e6ea);
