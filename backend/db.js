@@ -107,6 +107,7 @@ db.exec(`
     company        TEXT    NOT NULL,
     contact_name   TEXT,
     contact_number TEXT,
+    whatsapp_number TEXT DEFAULT '',
     notes          TEXT,
     status         TEXT    NOT NULL DEFAULT 'OPEN',  -- OPEN | CALL_CUSTOMER | CLOSED
     closing_ref    TEXT,                       -- DO/CS/INV number entered at close
@@ -154,6 +155,18 @@ try {
   }
 } catch (e) {
   console.error("[db] repair_comment migration check failed:", e.message);
+}
+
+// Migration: add whatsapp_number to service_slips if an older DB lacks it.
+try {
+  const cols = db.prepare("PRAGMA table_info(service_slips)").all();
+  const hasWa = cols.some((c) => c.name === "whatsapp_number");
+  if (!hasWa) {
+    db.exec("ALTER TABLE service_slips ADD COLUMN whatsapp_number TEXT DEFAULT ''");
+    console.log("[db] migrated: added whatsapp_number to service_slips");
+  }
+} catch (e) {
+  console.error("[db] whatsapp_number migration check failed:", e.message);
 }
 
 db.prepare(
