@@ -207,6 +207,8 @@ function resetNewServiceForm() {
   const same = $("ns-whatsapp-same"); if (same) same.checked = true;
   const wa = $("ns-whatsapp"); if (wa) wa.setAttribute("disabled", "true");
   const created = $("ns-created"); if (created) { created.style.display = "none"; created.innerHTML = ""; }
+  const cs = $("ns-check-service"); if (cs) cs.checked = false;
+  const qf = $("ns-quote-first"); if (qf) qf.checked = false;
   $("ns-machines").innerHTML = "";
   addMachineRow();
   $("ns-status").innerHTML = "";
@@ -245,6 +247,8 @@ async function submitNewService() {
         contact_name: $("ns-contact-name").value.trim(),
         contact_number: $("ns-contact-number").value.trim(),
         whatsapp_number: $("ns-whatsapp").value.trim(),
+        check_service: $("ns-check-service").checked,
+        quote_first: $("ns-quote-first").checked,
         notes: $("ns-notes").value.trim(),
         machines,
       }),
@@ -331,6 +335,16 @@ function buildSlipPdf(slip) {
     doc.text(`${i + 1}.  ${m.machine_desc}`, left + 10, y);
     y += 18;
   });
+
+  const requests = [];
+  if (slip.check_service) requests.push("Check & Service for all");
+  if (slip.quote_first) requests.push("Quote first");
+  if (requests.length) {
+    y += 8;
+    doc.setFont("helvetica", "bold"); doc.text("Requests:", left, y); y += 18;
+    doc.setFont("helvetica", "normal");
+    requests.forEach((r) => { doc.text(`•  ${r}`, left + 10, y); y += 18; });
+  }
 
   if (slip.notes) {
     y += 8;
@@ -772,6 +786,7 @@ function renderSlipDetail(slip) {
         <span class="vs-status vs-${escapeAttr(slip.status)}">${escapeHtml(STATUS_LABEL[slip.status] || slip.status)}</span>
       </div>
       ${meta.length ? `<div class="vs-sub">${meta.join(" · ")}</div>` : ""}
+      ${(slip.check_service || slip.quote_first) ? `<div class="vs-requests">${slip.check_service ? `<span class="vs-req-badge">Check &amp; Service for all</span>` : ""}${slip.quote_first ? `<span class="vs-req-badge">Quote first</span>` : ""}</div>` : ""}
       ${slip.notes ? `<div class="vs-notes">${escapeHtml(slip.notes)}</div>` : ""}
       ${slip.status === "CLOSED" && slip.closing_ref ? `<div class="vs-sub">Closed with: <strong>${escapeHtml(slip.closing_ref)}</strong>${slip.closed_at ? " on " + escapeHtml(formatDate(slip.closed_at)) : ""}</div>` : ""}
     </div>`;

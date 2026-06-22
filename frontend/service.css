@@ -335,3 +335,20 @@ select {
 .created-check svg { width: 30px; height: 30px; }
 .created-title { font-size: 1.15rem; font-weight: 700; color: var(--ink, #0b1f2a); }
 .created-sub { color: var(--ink-faint, #6b7a82); font-size: .9rem; margin-top: 4px; }
+
+/* ---- New Service: common-request checkboxes ---- */
+.ns-check-line {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0;
+  font-size: .95rem; color: var(--ink, #0b1f2a);
+  cursor: pointer;
+}
+.ns-check-line input { width: auto; flex: 0 0 auto; }
+
+/* ---- View Slips: request badges ---- */
+.vs-requests { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+.vs-req-badge {
+  font-size: .78rem; font-weight: 600;
+  padding: 4px 10px; border-radius: 999px;
+  background: #eaf3ff; color: #1c5fb0;
+}
