@@ -171,10 +171,30 @@ function addMachineRow(value = "") {
   row.className = "machine-row";
   row.innerHTML = `
     <input type="text" class="ns-machine-input" autocomplete="off" placeholder="e.g. Husqvarna 525LK Brushcutter" />
+    <div class="ns-qty">
+      <button type="button" class="ns-qty-dec" aria-label="Decrease quantity">−</button>
+      <input type="number" class="ns-machine-qty" value="1" min="1" inputmode="numeric" aria-label="Quantity" />
+      <button type="button" class="ns-qty-inc" aria-label="Increase quantity">+</button>
+    </div>
     <button type="button" class="machine-del" aria-label="Remove machine">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
     </button>`;
-  row.querySelector("input").value = value;
+  row.querySelector(".ns-machine-input").value = value;
+
+  const qtyInput = row.querySelector(".ns-machine-qty");
+  const clampQty = () => {
+    let n = parseInt(qtyInput.value, 10);
+    if (!Number.isFinite(n) || n < 1) n = 1;
+    qtyInput.value = n;
+  };
+  row.querySelector(".ns-qty-dec").addEventListener("click", () => {
+    qtyInput.value = Math.max(1, (parseInt(qtyInput.value, 10) || 1) - 1);
+  });
+  row.querySelector(".ns-qty-inc").addEventListener("click", () => {
+    qtyInput.value = (parseInt(qtyInput.value, 10) || 1) + 1;
+  });
+  qtyInput.addEventListener("change", clampQty);
+
   row.querySelector(".machine-del").addEventListener("click", () => {
     // Keep at least one row present
     if ($("ns-machines").children.length > 1) row.remove();
@@ -194,8 +214,22 @@ function resetNewServiceForm() {
 
 async function submitNewService() {
   const company = $("ns-company").value.trim();
-  const machines = [...document.querySelectorAll(".ns-machine-input")]
-    .map((i) => i.value.trim()).filter(Boolean);
+
+  // Expand each machine row by its quantity. A row with qty >= 2 becomes
+  // separate entries suffixed " - n/total" (e.g. "BK3410 - 1/2", "BK3410 - 2/2").
+  // A row with qty 1 stays as-is ("BK3410"). Each entry becomes its own machine.
+  const machines = [];
+  for (const row of document.querySelectorAll("#ns-machines .machine-row")) {
+    const desc = row.querySelector(".ns-machine-input").value.trim();
+    if (!desc) continue;
+    let qty = parseInt(row.querySelector(".ns-machine-qty").value, 10);
+    if (!Number.isFinite(qty) || qty < 1) qty = 1;
+    if (qty === 1) {
+      machines.push(desc);
+    } else {
+      for (let n = 1; n <= qty; n++) machines.push(`${desc} - ${n}/${qty}`);
+    }
+  }
 
   if (!company) { $("ns-status").innerHTML = statusErr("Company is required."); return; }
   if (machines.length === 0) { $("ns-status").innerHTML = statusErr("Add at least one machine."); return; }

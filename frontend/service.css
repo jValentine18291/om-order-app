@@ -88,12 +88,50 @@ select {
   margin-bottom: 8px;
   align-items: center;
 }
-.machine-row input {
+.machine-row .ns-machine-input {
   flex: 1;
+  min-width: 0;
   padding: 13px 14px;
   font: inherit;
   border: 1px solid var(--line, #e2e6ea);
   border-radius: 12px;
+}
+/* Quantity stepper */
+.ns-qty {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--line, #e2e6ea);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.ns-qty button {
+  width: 36px; height: 44px;
+  border: none;
+  background: #f5f7f8;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--ink, #0b1f2a);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.ns-qty button:active { background: #e6eaec; }
+.ns-machine-qty {
+  width: 40px;
+  height: 44px;
+  border: none;
+  border-left: 1px solid var(--line, #e2e6ea);
+  border-right: 1px solid var(--line, #e2e6ea);
+  text-align: center;
+  font: inherit;
+  font-size: 1rem;
+  -moz-appearance: textfield;
+  padding: 0;
+}
+.ns-machine-qty::-webkit-outer-spin-button,
+.ns-machine-qty::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 .machine-del {
   flex: 0 0 auto;
