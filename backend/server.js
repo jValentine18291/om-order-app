@@ -92,8 +92,8 @@ app.get("/api/orders/:so", async (req, res) => {
 // Create a new service slip (New Service)
 app.post("/api/slips", async (req, res) => {
   try {
-    const { company, contact_name, contact_number, whatsapp_number, notes, machines } = req.body || {};
-    const slip = await data.slips.createSlip({ company, contact_name, contact_number, whatsapp_number, notes, machines });
+    const { company, contact_name, contact_number, whatsapp_number, check_service, quote_first, notes, machines } = req.body || {};
+    const slip = await data.slips.createSlip({ company, contact_name, contact_number, whatsapp_number, check_service, quote_first, notes, machines });
     res.status(201).json(slip);
   } catch (err) {
     if (err.status === 400) return res.status(400).json({ error: err.message });

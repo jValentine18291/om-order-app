@@ -108,6 +108,8 @@ db.exec(`
     contact_name   TEXT,
     contact_number TEXT,
     whatsapp_number TEXT DEFAULT '',
+    check_service   INTEGER DEFAULT 0,
+    quote_first     INTEGER DEFAULT 0,
     notes          TEXT,
     status         TEXT    NOT NULL DEFAULT 'OPEN',  -- OPEN | CALL_CUSTOMER | CLOSED
     closing_ref    TEXT,                       -- DO/CS/INV number entered at close
@@ -167,6 +169,21 @@ try {
   }
 } catch (e) {
   console.error("[db] whatsapp_number migration check failed:", e.message);
+}
+
+// Migration: add check_service / quote_first request flags if an older DB lacks them.
+try {
+  const cols = db.prepare("PRAGMA table_info(service_slips)").all();
+  if (!cols.some((c) => c.name === "check_service")) {
+    db.exec("ALTER TABLE service_slips ADD COLUMN check_service INTEGER DEFAULT 0");
+    console.log("[db] migrated: added check_service to service_slips");
+  }
+  if (!cols.some((c) => c.name === "quote_first")) {
+    db.exec("ALTER TABLE service_slips ADD COLUMN quote_first INTEGER DEFAULT 0");
+    console.log("[db] migrated: added quote_first to service_slips");
+  }
+} catch (e) {
+  console.error("[db] request-flags migration check failed:", e.message);
 }
 
 db.prepare(
