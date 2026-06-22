@@ -179,7 +179,10 @@ function addMachineRow(value = "") {
 }
 
 function resetNewServiceForm() {
-  ["ns-company", "ns-contact-name", "ns-contact-number", "ns-notes"].forEach((id) => ($(id).value = ""));
+  ["ns-company", "ns-contact-name", "ns-contact-number", "ns-whatsapp", "ns-notes"].forEach((id) => ($(id).value = ""));
+  const same = $("ns-whatsapp-same"); if (same) same.checked = false;
+  const wa = $("ns-whatsapp"); if (wa) wa.removeAttribute("disabled");
+  const created = $("ns-created"); if (created) { created.style.display = "none"; created.innerHTML = ""; }
   $("ns-machines").innerHTML = "";
   addMachineRow();
   $("ns-status").innerHTML = "";
@@ -203,18 +206,127 @@ async function submitNewService() {
         company,
         contact_name: $("ns-contact-name").value.trim(),
         contact_number: $("ns-contact-number").value.trim(),
+        whatsapp_number: $("ns-whatsapp").value.trim(),
         notes: $("ns-notes").value.trim(),
         machines,
       }),
     });
     toast(`Service slip ${slip.slip_number} created`, "ok");
-    $("ns-status").innerHTML = statusOk(`Created slip ${slip.slip_number}. Returning home…`);
-    setTimeout(goHome, 1400);
+    showSlipCreated(slip);
   } catch (e) {
     $("ns-status").innerHTML = statusErr(e.message);
   } finally {
     $("ns-submit").disabled = false;
   }
+}
+
+// After a slip is registered: show its number with Share (PDF) + Done actions.
+function showSlipCreated(slip) {
+  const panel = $("ns-created");
+  if (!panel) { setTimeout(goHome, 1200); return; }
+  panel.style.display = "block";
+  panel.innerHTML = `
+    <div class="created-card">
+      <div class="created-check">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      </div>
+      <div class="created-title">Service slip ${escapeHtml(slip.slip_number)} created</div>
+      <div class="created-sub">${escapeHtml(slip.company)} · ${slip.machines.length} machine(s)</div>
+      <button class="btn-primary" id="ns-share" style="width:100%;margin-top:14px;">Share slip (PDF)</button>
+      <button class="btn-secondary" id="ns-done" style="width:100%;margin-top:8px;">Done</button>
+    </div>`;
+  // Hide the form bits while the success card is up
+  $("ns-status").innerHTML = "";
+  $("ns-share").addEventListener("click", () => shareSlipPdf(slip));
+  $("ns-done").addEventListener("click", goHome);
+  window.scrollTo(0, 0);
+}
+
+// Build the service-slip PDF (jsPDF) and return a Blob.
+function buildSlipPdf(slip) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const left = 48;
+  let y = 56;
+
+  doc.setFontSize(20); doc.setFont("helvetica", "bold");
+  doc.text("Outboard & Marine (Pte) Ltd", left, y);
+  y += 22;
+  doc.setFontSize(13); doc.setFont("helvetica", "normal");
+  doc.text("Service Slip", left, y);
+
+  // Slip number, top-right
+  doc.setFontSize(16); doc.setFont("helvetica", "bold");
+  doc.text(`S/S: ${slip.slip_number}`, 547, 56, { align: "right" });
+
+  y += 26;
+  doc.setDrawColor(200); doc.line(left, y, 547, y); y += 24;
+
+  doc.setFontSize(11); doc.setFont("helvetica", "normal");
+  const created = formatDate(slip.created_at) || "";
+  const rows = [
+    ["Date", created],
+    ["Company", slip.company || ""],
+    ["Contact", slip.contact_name || ""],
+    ["Contact No.", slip.contact_number || ""],
+  ];
+  for (const [label, val] of rows) {
+    doc.setFont("helvetica", "bold"); doc.text(`${label}:`, left, y);
+    doc.setFont("helvetica", "normal"); doc.text(String(val), left + 90, y);
+    y += 20;
+  }
+
+  y += 8;
+  doc.setFont("helvetica", "bold"); doc.text("Machines received:", left, y); y += 20;
+  doc.setFont("helvetica", "normal");
+  (slip.machines || []).forEach((m, i) => {
+    doc.text(`${i + 1}.  ${m.machine_desc}`, left + 10, y);
+    y += 18;
+  });
+
+  if (slip.notes) {
+    y += 8;
+    doc.setFont("helvetica", "bold"); doc.text("Notes:", left, y); y += 18;
+    doc.setFont("helvetica", "normal");
+    const wrapped = doc.splitTextToSize(slip.notes, 499);
+    doc.text(wrapped, left, y); y += wrapped.length * 16;
+  }
+
+  y += 16;
+  doc.setDrawColor(200); doc.line(left, y, 547, y); y += 18;
+  doc.setFontSize(9); doc.setTextColor(120);
+  doc.text("Please quote your service slip number when enquiring about your machines.", left, y);
+
+  return doc.output("blob");
+}
+
+// Share the PDF via the device's native share sheet (WhatsApp/email/AirDrop),
+// falling back to a plain download where sharing files isn't supported.
+async function shareSlipPdf(slip) {
+  let blob;
+  try {
+    blob = buildSlipPdf(slip);
+  } catch (e) {
+    toast("Couldn't build PDF: " + e.message, "err");
+    return;
+  }
+  const filename = `ServiceSlip_${slip.slip_number}.pdf`;
+  const file = new File([blob], filename, { type: "application/pdf" });
+
+  // Native file share (mobile): includes WhatsApp, Mail, AirDrop, etc.
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: `Service Slip ${slip.slip_number}` });
+      return;
+    } catch (_) { /* user cancelled or share failed — fall through to download */ }
+  }
+
+  // Fallback: trigger a download (desktop, or browsers without file share).
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
 function statusErr(m) { return `<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> ${escapeHtml(m)}`; }
@@ -1117,6 +1229,16 @@ $("home-link").addEventListener("click", goHome);
 // New Service
 $("ns-add-machine").addEventListener("click", () => addMachineRow());
 $("ns-submit").addEventListener("click", submitNewService);
+// "Same as contact number" convenience for the WhatsApp field
+$("ns-whatsapp-same").addEventListener("change", (e) => {
+  const wa = $("ns-whatsapp");
+  if (e.target.checked) {
+    wa.value = $("ns-contact-number").value.trim();
+    wa.setAttribute("disabled", "true");
+  } else {
+    wa.removeAttribute("disabled");
+  }
+});
 
 // Open Service: slip selection via search component; machine/tech selects + SO button
 $("os-machine").addEventListener("change", (e) => onMachineChosen(e.target.value));

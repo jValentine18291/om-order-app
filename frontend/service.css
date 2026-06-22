@@ -265,3 +265,28 @@ select {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ---- New Service: WhatsApp "same as" line ---- */
+.ns-same-line {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 8px; font-size: .85rem; color: var(--ink-faint, #6b7a82);
+}
+.ns-same-line input { width: auto; }
+
+/* ---- Slip created success card ---- */
+.created-card {
+  text-align: center;
+  background: #fff;
+  border: 1px solid var(--line, #e2e6ea);
+  border-radius: 16px;
+  padding: 24px 18px;
+  margin-top: 16px;
+}
+.created-check {
+  width: 56px; height: 56px; margin: 0 auto 12px;
+  display: flex; align-items: center; justify-content: center;
+  background: #e7f7e3; color: #2f9e22; border-radius: 50%;
+}
+.created-check svg { width: 30px; height: 30px; }
+.created-title { font-size: 1.15rem; font-weight: 700; color: var(--ink, #0b1f2a); }
+.created-sub { color: var(--ink-faint, #6b7a82); font-size: .9rem; margin-top: 4px; }
