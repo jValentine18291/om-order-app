@@ -184,8 +184,8 @@ function addMachineRow(value = "") {
 
 function resetNewServiceForm() {
   ["ns-company", "ns-contact-name", "ns-contact-number", "ns-whatsapp", "ns-notes"].forEach((id) => ($(id).value = ""));
-  const same = $("ns-whatsapp-same"); if (same) same.checked = false;
-  const wa = $("ns-whatsapp"); if (wa) wa.removeAttribute("disabled");
+  const same = $("ns-whatsapp-same"); if (same) same.checked = true;
+  const wa = $("ns-whatsapp"); if (wa) wa.setAttribute("disabled", "true");
   const created = $("ns-created"); if (created) { created.style.display = "none"; created.innerHTML = ""; }
   $("ns-machines").innerHTML = "";
   addMachineRow();
@@ -1244,6 +1244,13 @@ $("home-link").addEventListener("click", goHome);
 $("ns-add-machine").addEventListener("click", () => addMachineRow());
 $("ns-submit").addEventListener("click", submitNewService);
 // "Same as contact number" convenience for the WhatsApp field
+// WhatsApp number defaults to the contact number while "same as" is ticked.
+function syncWhatsappFromContact() {
+  if ($("ns-whatsapp-same").checked) {
+    $("ns-whatsapp").value = $("ns-contact-number").value.trim();
+  }
+}
+$("ns-contact-number").addEventListener("input", syncWhatsappFromContact);
 $("ns-whatsapp-same").addEventListener("change", (e) => {
   const wa = $("ns-whatsapp");
   if (e.target.checked) {
@@ -1251,6 +1258,7 @@ $("ns-whatsapp-same").addEventListener("change", (e) => {
     wa.setAttribute("disabled", "true");
   } else {
     wa.removeAttribute("disabled");
+    wa.focus();
   }
 });
 
