@@ -139,7 +139,7 @@ function nextSlipNumber() {
 }
 
 // Create a new service slip with its machines. Returns the created slip (with machines).
-function createSlip({ company, contact_name = "", contact_number = "", whatsapp_number = "", notes = "", machines = [] } = {}) {
+function createSlip({ company, contact_name = "", contact_number = "", whatsapp_number = "", check_service = false, quote_first = false, notes = "", machines = [] } = {}) {
   if (!company || !String(company).trim()) {
     const e = new Error("Company is required to register a service slip.");
     e.status = 400; throw e;
@@ -153,8 +153,8 @@ function createSlip({ company, contact_name = "", contact_number = "", whatsapp_
   }
 
   const insertSlip = db.prepare(
-    `INSERT INTO service_slips (slip_number, company, contact_name, contact_number, whatsapp_number, notes, status)
-     VALUES (?, ?, ?, ?, ?, ?, 'OPEN')`
+    `INSERT INTO service_slips (slip_number, company, contact_name, contact_number, whatsapp_number, check_service, quote_first, notes, status)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'OPEN')`
   );
   const insertMachine = db.prepare(
     "INSERT INTO slip_machines (slip_id, machine_desc) VALUES (?, ?)"
@@ -166,7 +166,7 @@ function createSlip({ company, contact_name = "", contact_number = "", whatsapp_
     db.prepare("UPDATE counters SET value = value + 1 WHERE name = 'slip_number'").run();
     const { value } = db.prepare("SELECT value FROM counters WHERE name = 'slip_number'").get();
     const slipNumber = String(value).padStart(5, "0");
-    const info = insertSlip.run(slipNumber, String(company).trim(), contact_name, contact_number, whatsapp_number, notes);
+    const info = insertSlip.run(slipNumber, String(company).trim(), contact_name, contact_number, whatsapp_number, check_service ? 1 : 0, quote_first ? 1 : 0, notes);
     const slipId = info.lastInsertRowid;
     for (const m of machineList) insertMachine.run(slipId, m);
     return slipNumber;
