@@ -10,7 +10,7 @@ const API = ""; // same origin
 
 // ---- State -----------------------------------------------------------------
 let scanCooldown = false;
-let currentMode = "upload";
+let currentMode = "qr";
 
 // Open Service session state
 const session = {
@@ -504,7 +504,7 @@ function maybeShowEntry() {
   $("os-entry").style.display = ready ? "block" : "none";
   $("footer-open").style.display = ready ? "flex" : "none";
   if (ready) {
-    setMode(currentMode || "upload");
+    setMode(currentMode || "qr");
     renderContext();
     renderMachineParts();
     updateSlipFooter();
