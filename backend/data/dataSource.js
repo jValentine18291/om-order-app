@@ -2,63 +2,60 @@
 // ============================================================================
 // DATA SOURCE SELECTOR — the single place that decides where data comes from.
 //
-// Today: everything uses the SQLite repository.
-// Phase 3: create data/autocountRepo.js (same four functions as the contract),
-//          then set the DATA_SOURCE env var to "autocount" to switch — OR mix
-//          sources (e.g. items from AutoCount, order logging still local) by
-//          adjusting the picks below. No changes needed in server.js.
+// Two independent switches via environment variables:
 //
-// Switch via environment variable (set in Render's dashboard or a local .env):
-//   DATA_SOURCE=sqlite     (default)
-//   DATA_SOURCE=autocount  (once autocountRepo.js exists)
+//   ITEMS_SOURCE   = "sqlite" (default) | "autocount"   <- item lookups
+//   DATA_SOURCE    = "sqlite" (default)                 <- orders + service slips
+//
+// Why separate? Items can safely be READ from AutoCount, while service slips
+// and order writes stay on SQLite (writing into AutoCount needs the official
+// AutoCount API/SDK). The typical production config on the office server is:
+//   ITEMS_SOURCE=autocount   (read real items/prices)
+//   DATA_SOURCE=sqlite       (slips + orders stay local)
+//
+// AutoCount also needs its AUTOCOUNT_DB_* connection vars — see
+// data/autocountConnection.js.
 // ============================================================================
 
 const sqliteRepo = require("./sqliteRepo");
 
-const SOURCE = (process.env.DATA_SOURCE || "sqlite").toLowerCase();
-
-// Map of available repositories. Add autocount here when it's built:
-//   const autocountRepo = require("./autocountRepo");
-//   repos.autocount = autocountRepo;
-const repos = {
-  sqlite: sqliteRepo,
-};
-
-const repo = repos[SOURCE];
-
-if (!repo) {
-  // Fail loudly and early rather than serving wrong/empty data silently.
-  const available = Object.keys(repos).join(", ");
-  throw new Error(
-    `[dataSource] Unknown DATA_SOURCE "${SOURCE}". Available: ${available}. ` +
-      `Defaulting requires DATA_SOURCE unset or "sqlite".`
-  );
+// AutoCount repo is loaded lazily, only if selected — so a missing mssql driver
+// or config never breaks the default SQLite path.
+function loadRepo(name) {
+  if (name === "sqlite") return sqliteRepo;
+  if (name === "autocount") return require("./autocountRepo");
+  throw new Error(`[dataSource] Unknown source "${name}". Use "sqlite" or "autocount".`);
 }
 
-console.log(`[dataSource] using "${SOURCE}" repository`);
+const ITEMS_SOURCE = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+const DATA_SOURCE = (process.env.DATA_SOURCE || "sqlite").toLowerCase();
+
+const itemsRepo = loadRepo(ITEMS_SOURCE);
+const dataRepo = loadRepo(DATA_SOURCE);
+
+console.log(`[dataSource] items from "${ITEMS_SOURCE}", orders+slips from "${DATA_SOURCE}"`);
 
 // ----------------------------------------------------------------------------
-// Items and orders are exposed separately so they can later point at DIFFERENT
-// sources if needed (e.g. items from AutoCount, orders still logged locally).
-// For now both come from the same selected repo.
+// Items come from itemsRepo; orders and service slips from dataRepo. This lets
+// items be read from AutoCount while all writes stay safely on SQLite.
 module.exports = {
   items: {
-    findItem: (...a) => repo.findItem(...a),
-    listItems: (...a) => repo.listItems(...a),
+    findItem: (...a) => itemsRepo.findItem(...a),
+    listItems: (...a) => itemsRepo.listItems(...a),
   },
   orders: {
-    createOrder: (...a) => repo.createOrder(...a),
-    getOrder: (...a) => repo.getOrder(...a),
+    createOrder: (...a) => dataRepo.createOrder(...a),
+    getOrder: (...a) => dataRepo.getOrder(...a),
   },
   slips: {
-    createSlip: (...a) => repo.slips.createSlip(...a),
-    listSlips: (...a) => repo.slips.listSlips(...a),
-    searchSlips: (...a) => repo.slips.searchSlips(...a),
-    getSlip: (...a) => repo.slips.getSlip(...a),
-    addPartToMachine: (...a) => repo.slips.addPartToMachine(...a),
-    setPartQuantity: (...a) => repo.slips.setPartQuantity(...a),
-    setMachineComment: (...a) => repo.slips.setMachineComment(...a),
-    createSlipOrder: (...a) => repo.slips.createSlipOrder(...a),
-    closeSlip: (...a) => repo.slips.closeSlip(...a),
+    createSlip: (...a) => dataRepo.slips.createSlip(...a),
+    listSlips: (...a) => dataRepo.slips.listSlips(...a),
+    searchSlips: (...a) => dataRepo.slips.searchSlips(...a),
+    getSlip: (...a) => dataRepo.slips.getSlip(...a),
+    addPartToMachine: (...a) => dataRepo.slips.addPartToMachine(...a),
+    setPartQuantity: (...a) => dataRepo.slips.setPartQuantity(...a),
+    setMachineComment: (...a) => dataRepo.slips.setMachineComment(...a),
+    createSlipOrder: (...a) => dataRepo.slips.createSlipOrder(...a),
+    closeSlip: (...a) => dataRepo.slips.closeSlip(...a),
   },
 };
