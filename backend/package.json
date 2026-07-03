@@ -1,17 +1,19 @@
 {
   "name": "om-order-app-backend",
   "version": "1.0.0",
-  "description": "Phase 1 backend (mock data, no AutoCount)",
+  "description": "OM Service backend (SQLite slips; optional read-only AutoCount items)",
   "main": "server.js",
   "type": "commonjs",
   "engines": {
-    "node": ">=22.13.0"  },
+    "node": ">=22.13.0"
+  },
   "scripts": {
     "start": "node server.js",
     "seed": "node seed.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "mssql": "^11.0.1"
   }
 }
