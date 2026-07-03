@@ -186,10 +186,61 @@ app.patch("/api/machines/:machineId/comment", async (req, res) => {
 });
 
 // Create the Sales Order for a slip (-> CALL_CUSTOMER)
+// If AutoCount price write-back is enabled, prices keyed in by staff for parts
+// that had NO price in AutoCount are saved to AutoCount's ItemUOM at this
+// moment. Failures never block the Sales Order — they are logged and reported.
 app.post("/api/slips/:slip/order", async (req, res) => {
   try {
     const result = await data.slips.createSlipOrder(req.params.slip);
-    res.status(201).json(result);
+
+    // ---- Price write-back (guarded, best-effort) ----
+    const priceSync = { updated: [], skipped: 0, failed: [] };
+    try {
+      const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+      const acRepo = itemsSource === "autocount" ? require("./data/autocountRepo") : null;
+      if (acRepo && acRepo.writebackEnabled && acRepo.writebackEnabled()) {
+        const { logPriceEvent } = require("./priceLog");
+        const slip = await data.slips.getSlip(req.params.slip);
+        for (const machine of slip.machines || []) {
+          for (const part of machine.parts || []) {
+            if (!(Number(part.unit_price) > 0)) continue; // nothing keyed in
+            try {
+              const r = await acRepo.updateItemPriceIfMissing(part.item_code, part.unit_price);
+              if (r.status === "updated") {
+                priceSync.updated.push(r.item_code);
+                logPriceEvent({
+                  slip: slip.slip_number, itemCode: r.item_code,
+                  oldPrice: r.old_price, newPrice: r.new_price,
+                  technician: part.technician, outcome: "updated in AutoCount",
+                });
+              } else {
+                priceSync.skipped++;
+                // Only log not-found skips; has-price skips are the normal case
+                // for every ordinarily-priced part and would flood the log.
+                if (r.status === "skipped_not_found") {
+                  logPriceEvent({
+                    slip: slip.slip_number, itemCode: part.item_code,
+                    oldPrice: null, newPrice: part.unit_price,
+                    technician: part.technician, outcome: "SKIPPED - item not found in AutoCount",
+                  });
+                }
+              }
+            } catch (e) {
+              priceSync.failed.push(part.item_code);
+              logPriceEvent({
+                slip: slip.slip_number, itemCode: part.item_code,
+                oldPrice: null, newPrice: part.unit_price,
+                technician: part.technician, outcome: `FAILED - ${e.message}`,
+              });
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error("[price-writeback] sync step error:", e.message);
+    }
+
+    res.status(201).json({ ...result, price_sync: priceSync });
   } catch (err) {
     if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
     console.error("[POST /api/slips/:slip/order]", err);
