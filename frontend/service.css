@@ -391,3 +391,79 @@ select {
   font-weight: 600;
   margin-top: 3px;
 }
+
+/* ---- Role selection (Sales Staff / Technician) ---- */
+.role-btn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 20px 18px;
+  border-radius: 16px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: transform .08s ease;
+}
+.role-btn:active { transform: scale(.99); }
+.role-btn .role-ic {
+  flex: 0 0 auto;
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 12px;
+}
+.role-btn .role-ic svg { width: 26px; height: 26px; }
+.role-btn .home-txt { display: flex; flex-direction: column; gap: 2px; }
+.role-btn .home-txt strong { font-size: 1.08rem; }
+.role-btn .home-txt small { font-size: .85rem; }
+
+.role-sales {
+  background: #FAEEDA;
+  border: 2px solid #EF9F27;
+}
+.role-sales .role-ic { background: #FAC775; color: #633806; }
+.role-sales .home-txt strong { color: #633806; }
+.role-sales .home-txt small { color: #854F0B; }
+
+.role-tech {
+  background: #E6F1FB;
+  border: 2px solid #378ADD;
+}
+.role-tech .role-ic { background: #B5D4F4; color: #0C447C; }
+.role-tech .home-txt strong { color: #0C447C; }
+.role-tech .home-txt small { color: #185FA5; }
+
+/* Role badge on the home screen */
+.home-head-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.role-badge {
+  flex: 0 0 auto;
+  font-size: .72rem;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+  margin-top: 4px;
+}
+.role-badge-sales { background: #FAEEDA; color: #633806; }
+.role-badge-tech { background: #E6F1FB; color: #0C447C; }
+
+/* Switch role link */
+.switch-role {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px;
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: .88rem;
+  color: var(--ink-faint, #6b7a82);
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: center;
+}

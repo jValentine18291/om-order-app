@@ -30,11 +30,38 @@
       <button class="pill home-link" id="home-link" style="display:none">Home</button>
     </header>
 
-    <!-- ============ SCREEN: HOME ============ -->
-    <section id="screen-home" class="screen active">
+    <!-- ============ SCREEN: ROLE (who is using the app) ============ -->
+    <section id="screen-role" class="screen">
       <div class="section-head">
         <p class="eyebrow">Service desk</p>
-        <h2>What would you like to do?</h2>
+        <h2>Who is using the app?</h2>
+      </div>
+      <div class="home-actions">
+        <button class="role-btn role-sales" data-role="sales">
+          <span class="role-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.5a4 4 0 0 1 0 7"/></svg>
+          </span>
+          <span class="home-txt"><strong>Sales Staff</strong><small>Register, scan, close and view slips</small></span>
+        </button>
+        <button class="role-btn role-tech" data-role="tech">
+          <span class="role-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          </span>
+          <span class="home-txt"><strong>Technician 技术员</strong><small>Scan parts onto a service slip</small></span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ============ SCREEN: HOME ============ -->
+    <section id="screen-home" class="screen">
+      <div class="section-head">
+        <div class="home-head-row">
+          <div>
+            <p class="eyebrow">Service desk</p>
+            <h2>What would you like to do?</h2>
+          </div>
+          <span class="role-badge" id="role-badge"></span>
+        </div>
       </div>
       <div class="home-actions">
         <button class="home-btn" data-go="new">
@@ -62,6 +89,7 @@
           <span class="home-txt"><strong>View Slips</strong><small>Look up any service slip</small></span>
         </button>
       </div>
+      <button class="switch-role" id="switch-role">Switch role</button>
     </section>
 
     <!-- ============ SCREEN: NEW SERVICE ============ -->

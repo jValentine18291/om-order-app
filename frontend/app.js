@@ -56,13 +56,39 @@ function formatDate(ts) {
 }
 
 // ---- Screen navigation -----------------------------------------------------
-const SCREENS = ["home", "new", "open", "close", "view"];
+const SCREENS = ["role", "home", "new", "open", "close", "view"];
+
+// ---- Role (Sales Staff vs Technician) ---------------------------------------
+// Remembered per phone in localStorage. Technicians see only Open Service;
+// Sales Staff see everything. "Switch role" on the home screen resets it.
+const ROLE_KEY = "om_role";
+function getRole() {
+  try { return localStorage.getItem(ROLE_KEY) || ""; } catch (_) { return ""; }
+}
+function setRole(role) {
+  try {
+    if (role) localStorage.setItem(ROLE_KEY, role);
+    else localStorage.removeItem(ROLE_KEY);
+  } catch (_) {}
+}
+function applyRoleToHome() {
+  const role = getRole();
+  const tech = role === "tech";
+  document.querySelectorAll("#screen-home .home-btn").forEach((b) => {
+    b.style.display = tech && b.dataset.go !== "open" ? "none" : "flex";
+  });
+  const badge = $("role-badge");
+  if (badge) {
+    badge.textContent = tech ? "Technician 技术员" : "Sales Staff";
+    badge.className = "role-badge " + (tech ? "role-badge-tech" : "role-badge-sales");
+  }
+}
 function showScreen(name) {
   SCREENS.forEach((s) => $("screen-" + s).classList.toggle("active", s === name));
   // Footer only on open-service when entry is active
   $("footer-open").style.display = "none";
   // Home link visible everywhere except home
-  $("home-link").style.display = name === "home" ? "none" : "inline-flex";
+  $("home-link").style.display = (name === "home" || name === "role") ? "none" : "inline-flex";
   // Stop any camera when leaving a scanning context
   if (name !== "open") { try { stopQrScanner(); } catch (_) {} }
   window.scrollTo(0, 0);
@@ -73,6 +99,8 @@ async function goHome() {
   try { await saveCurrentComment(); } catch (_) {}
   try { stopQrScanner(); } catch (_) {}
   session.slipNumber = null; session.slip = null; session.machineId = null; session.technician = "";
+  if (!getRole()) { showScreen("role"); return; }
+  applyRoleToHome();
   showScreen("home");
 }
 
@@ -1307,6 +1335,19 @@ function setMode(mode) {
 }
 
 // ---- Event wiring ----------------------------------------------------------
+// Role selection
+document.querySelectorAll(".role-btn").forEach((b) =>
+  b.addEventListener("click", () => {
+    setRole(b.dataset.role);
+    applyRoleToHome();
+    showScreen("home");
+  })
+);
+$("switch-role").addEventListener("click", () => {
+  setRole("");
+  showScreen("role");
+});
+
 // Home navigation
 document.querySelectorAll(".home-btn").forEach((b) =>
   b.addEventListener("click", () => {
@@ -1404,7 +1445,8 @@ $("batch-input").addEventListener("change", (e) => {
 });
 
 // ---- Boot ------------------------------------------------------------------
-showScreen("home");
+if (getRole()) { applyRoleToHome(); showScreen("home"); }
+else { showScreen("role"); }
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./sw.js").catch(() => {});
