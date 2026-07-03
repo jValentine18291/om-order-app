@@ -352,3 +352,42 @@ select {
   padding: 4px 10px; border-radius: 999px;
   background: #eaf3ff; color: #1c5fb0;
 }
+
+/* ---- Editable part price ---- */
+.price-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-weight: 700;
+  color: var(--ink, #0b1f2a);
+}
+.price-edit input {
+  width: 74px;
+  padding: 8px 6px;
+  font: inherit;
+  font-weight: 700;
+  text-align: right;
+  border: 1px solid var(--line, #e2e6ea);
+  border-radius: 8px;
+  background: #fff;
+  -moz-appearance: textfield;
+}
+.price-edit input::-webkit-outer-spin-button,
+.price-edit input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* Parts with no price ($0): flag red until a price is keyed in */
+.line.no-price {
+  border: 1px solid #e05252;
+  background: #fdf3f3;
+  border-radius: 12px;
+}
+.line.no-price .price-edit input {
+  border-color: #e05252;
+  background: #fff;
+}
+.no-price-tag {
+  color: #c62828;
+  font-size: .78rem;
+  font-weight: 600;
+  margin-top: 3px;
+}

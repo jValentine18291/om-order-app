@@ -454,9 +454,11 @@ async function onMachineChosen(machineId) {
     $("os-entry").style.display = "none";
     return;
   }
-  // Show technician picker (carries over if already chosen)
+  // Show technician picker, reset to blank so the tech is chosen fresh for
+  // each machine (parts get tagged to whoever actually works on this one).
+  session.technician = "";
+  $("os-tech").value = "";
   $("os-tech-field").style.display = "block";
-  if (session.technician) $("os-tech").value = session.technician;
   // Load this machine's existing comment into the textbox.
   loadCommentForCurrentMachine();
   maybeShowEntry();
@@ -591,16 +593,18 @@ function renderMachineParts() {
   }
 
   for (const p of parts) {
+    const noPrice = !(Number(p.unit_price) > 0);
     const el = document.createElement("div");
-    el.className = "line";
+    el.className = "line" + (noPrice ? " no-price" : "");
     el.innerHTML = `
       <div class="head">
         <div class="info">
           <div class="desc">${escapeHtml(p.description)}</div>
           <div class="sku mono">${escapeHtml(p.item_code)} · ${escapeHtml(p.technician || "")}</div>
+          ${noPrice ? `<div class="no-price-tag">No price — enter one</div>` : ""}
         </div>
         <div class="price-col">
-          <span class="price">${money(p.unit_price)}</span>
+          <span class="price-edit">$<input type="number" step="0.01" min="0" value="${Number(p.unit_price).toFixed(2)}" data-price="${p.id}" inputmode="decimal" aria-label="Unit price" /></span>
           <button class="remove" data-del="${p.id}" aria-label="Remove part">${TRASH}</button>
         </div>
       </div>
@@ -616,6 +620,21 @@ function renderMachineParts() {
         </div>
       </div>`;
     wrap.appendChild(el);
+  }
+}
+
+async function setPartPrice(partId, price) {
+  try {
+    await api(`/api/parts/${partId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ unit_price: price }),
+    });
+    await refreshSlip();
+    renderMachineParts();
+    updateSlipFooter();
+  } catch (e) {
+    toast(e.message, "err");
   }
 }
 
@@ -1356,6 +1375,9 @@ $("machine-parts").addEventListener("change", (e) => {
   if (e.target.dataset.qty) {
     const q = Math.max(0, parseInt(e.target.value, 10) || 0);
     setPartQty(Number(e.target.dataset.qty), q);
+  } else if (e.target.dataset.price) {
+    const p = Math.max(0, parseFloat(e.target.value) || 0);
+    setPartPrice(Number(e.target.dataset.price), p);
   }
 });
 
