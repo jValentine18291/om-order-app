@@ -688,7 +688,18 @@ async function createSalesOrder() {
   try {
     const result = await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/order`, { method: "POST" });
     toast(`Sales Order ${result.so_number} created (${result.ss_line})`, "ok");
-    setTimeout(goHome, 1600);
+    // Report price write-back outcome (prices saved into AutoCount for parts
+    // that previously had none). Failures are non-blocking but flagged.
+    const ps = result.price_sync;
+    if (ps && ps.failed && ps.failed.length) {
+      setTimeout(() => toast(`Price save to AutoCount failed for: ${ps.failed.join(", ")}`, "err"), 1800);
+      setTimeout(goHome, 4200);
+    } else if (ps && ps.updated && ps.updated.length) {
+      setTimeout(() => toast(`${ps.updated.length} price${ps.updated.length === 1 ? "" : "s"} saved to AutoCount`, "ok"), 1800);
+      setTimeout(goHome, 3600);
+    } else {
+      setTimeout(goHome, 1600);
+    }
   } catch (e) {
     toast(e.message, "err");
     $("os-create-so").disabled = false;
