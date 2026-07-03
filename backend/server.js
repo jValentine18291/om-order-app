@@ -152,14 +152,21 @@ app.post("/api/machines/:machineId/parts", async (req, res) => {
   }
 });
 
-// Update a part line's quantity (0 removes)
+// Update a part line: quantity (0 removes) and/or unit_price
 app.patch("/api/parts/:partId", async (req, res) => {
   try {
     const partId = Number(req.params.partId);
-    const result = await data.slips.setPartQuantity(partId, (req.body || {}).quantity);
+    const body = req.body || {};
+    let result = {};
+    if (body.unit_price !== undefined) {
+      result = await data.slips.setPartPrice(partId, body.unit_price);
+    }
+    if (body.quantity !== undefined) {
+      result = await data.slips.setPartQuantity(partId, body.quantity);
+    }
     res.json(result);
   } catch (err) {
-    if (err.status === 400) return res.status(400).json({ error: err.message });
+    if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
     console.error("[PATCH /api/parts/:partId]", err);
     res.status(err.status || 500).json({ error: err.message || "Failed to update part" });
   }
