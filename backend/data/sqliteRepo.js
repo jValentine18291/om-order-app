@@ -243,6 +243,17 @@ function setPartQuantity(partId, quantity) {
   return { removed: false, quantity: q };
 }
 
+// Update a part line's unit price (used when AutoCount has no price for a part
+// and staff key it in manually on the slip).
+function setPartPrice(partId, price) {
+  const p = Number(price);
+  if (!Number.isFinite(p) || p < 0) { const e = new Error("Invalid price."); e.status = 400; throw e; }
+  const row = db.prepare("SELECT id FROM machine_parts WHERE id = ?").get(partId);
+  if (!row) { const e = new Error("Part not found."); e.status = 404; throw e; }
+  db.prepare("UPDATE machine_parts SET unit_price = ? WHERE id = ?").run(p, partId);
+  return { ok: true, unit_price: p };
+}
+
 // Create the Sales Order for a slip (all machines' parts), flip status to CALL_CUSTOMER.
 // Mock SO for now — same shape as createOrder — but tagged with the slip number.
 function createSlipOrder(slipNumber) {
@@ -326,7 +337,7 @@ function searchSlips(query = "", scope = "all", limit = 20) {
 }
 
 const slips = {
-  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setMachineComment, createSlipOrder, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setMachineComment, createSlipOrder, closeSlip,
 };
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };
