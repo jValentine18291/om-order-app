@@ -240,6 +240,7 @@ function resetNewServiceForm() {
   $("ns-machines").innerHTML = "";
   addMachineRow();
   $("ns-status").innerHTML = "";
+  const sug = $("ns-company-suggest"); if (sug) sug.innerHTML = "";
 }
 
 async function submitNewService() {
@@ -1363,6 +1364,36 @@ $("home-link").addEventListener("click", goHome);
 // New Service
 $("ns-add-machine").addEventListener("click", () => addMachineRow());
 $("ns-submit").addEventListener("click", submitNewService);
+
+// Company-name suggestions from the AutoCount debtor list (optional helper —
+// staff can still type any company freely; suggestions just speed it up).
+let companyDebounce = null;
+let companySuppress = false; // true right after a suggestion is picked
+$("ns-company").addEventListener("input", () => {
+  if (companySuppress) { companySuppress = false; return; }
+  clearTimeout(companyDebounce);
+  const box = $("ns-company-suggest");
+  const q = $("ns-company").value.trim();
+  if (q.length < 2) { box.innerHTML = ""; return; }
+  companyDebounce = setTimeout(async () => {
+    try {
+      const data = await api(`/api/debtors-search?q=${encodeURIComponent(q)}`);
+      const list = data.results || [];
+      // Don't show a lone suggestion identical to what's already typed.
+      if (!list.length || (list.length === 1 && list[0].company === q)) { box.innerHTML = ""; return; }
+      box.innerHTML = list.map((d) =>
+        `<button type="button" class="company-option" data-company="${escapeAttr(d.company)}">${escapeHtml(d.company)}</button>`
+      ).join("");
+      box.querySelectorAll(".company-option").forEach((btn) =>
+        btn.addEventListener("click", () => {
+          companySuppress = true;
+          $("ns-company").value = btn.dataset.company;
+          box.innerHTML = "";
+        })
+      );
+    } catch (_) { box.innerHTML = ""; }
+  }, 250);
+});
 // "Same as contact number" convenience for the WhatsApp field
 // WhatsApp number defaults to the contact number while "same as" is ticked.
 function syncWhatsappFromContact() {

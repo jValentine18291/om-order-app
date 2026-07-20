@@ -467,3 +467,26 @@ select {
   cursor: pointer;
   text-align: center;
 }
+
+/* ---- Company name suggestions (AutoCount debtors) ---- */
+.company-suggest {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.company-option {
+  width: 100%;
+  padding: 11px 14px;
+  background: #fff;
+  border: 1px solid var(--line, #e2e6ea);
+  border-radius: 10px;
+  font: inherit;
+  font-size: .93rem;
+  color: var(--ink, #0b1f2a);
+  text-align: left;
+  cursor: pointer;
+}
+.company-option:active { background: var(--brand-tint, #e6f2f1); }
