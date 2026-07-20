@@ -154,3 +154,23 @@ async function updateItemPriceIfMissing(itemCode, newPrice) {
 
 module.exports.writebackEnabled = writebackEnabled;
 module.exports.updateItemPriceIfMissing = updateItemPriceIfMissing;
+
+// ============================================================================
+// DEBTOR (customer) search — read-only, for Company Name suggestions in the
+// New Service form. Standard AutoCount layout: Debtor(AccNo, CompanyName).
+// CONFIRM on first live test; adjust column names if the test errors.
+// ============================================================================
+async function searchDebtors(q, limit = 12) {
+  const term = String(q || "").trim();
+  if (!term) return [];
+  const cap = Math.max(1, Math.min(20, Number(limit) || 12));
+  const rows = await query(
+    `SELECT TOP ${cap} AccNo, CompanyName
+       FROM Debtor
+      WHERE CompanyName LIKE '%' + @term + '%'
+      ORDER BY CompanyName`,
+    { term }
+  );
+  return rows.map((r) => ({ acc_no: r.AccNo, company: r.CompanyName }));
+}
+module.exports.searchDebtors = searchDebtors;
