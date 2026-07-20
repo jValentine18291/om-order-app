@@ -102,6 +102,23 @@ app.post("/api/slips", async (req, res) => {
   }
 });
 
+// Search AutoCount debtors (customers) by company name, for the New Service
+// company-name suggestions. Returns empty results when AutoCount items are off,
+// so the app degrades gracefully.
+app.get("/api/debtors-search", async (req, res) => {
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") return res.json({ results: [] });
+    const acRepo = require("./data/autocountRepo");
+    const results = await acRepo.searchDebtors(String(req.query.q || ""), 12);
+    res.json({ results });
+  } catch (err) {
+    console.error("[GET /api/debtors-search]", err.message);
+    // Suggestions are a convenience — never surface a hard error to the form.
+    res.json({ results: [] });
+  }
+});
+
 // Search slips by number. ?q=638&scope=active|all
 app.get("/api/slips-search", async (req, res) => {
   try {
