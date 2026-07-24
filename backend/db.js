@@ -194,6 +194,27 @@ try {
   console.error("[db] status migration failed:", e.message);
 }
 
+// Reconciliation: ALL_REPAIRED must mean every machine has work recorded.
+// Any slip marked ALL_REPAIRED that still has an untouched machine (no parts
+// and no repair comment) is knocked back to IN_PROGRESS. Runs at every start,
+// so historical inconsistencies self-correct.
+try {
+  const n = db.prepare(`
+    UPDATE service_slips SET status = 'IN_PROGRESS'
+    WHERE status = 'ALL_REPAIRED'
+      AND id IN (
+        SELECT sm.slip_id
+        FROM slip_machines sm
+        LEFT JOIN machine_parts mp ON mp.machine_id = sm.id
+        GROUP BY sm.id
+        HAVING COUNT(mp.id) = 0
+           AND (sm.repair_comment IS NULL OR TRIM(sm.repair_comment) = '')
+      )`).run();
+  if (n.changes > 0) console.log("[db] reconciled: " + n.changes + " slip(s) ALL_REPAIRED -> IN_PROGRESS (untouched machines)");
+} catch (e) {
+  console.error("[db] all-repaired reconciliation failed:", e.message);
+}
+
 db.prepare(
   "INSERT OR IGNORE INTO counters (name, value) VALUES ('so_number', 0)"
 ).run();

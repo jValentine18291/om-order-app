@@ -77,7 +77,7 @@ function applyRoleToHome() {
   const role = getRole();
   const tech = role === "tech";
   document.querySelectorAll("#screen-home .home-btn").forEach((b) => {
-    b.style.display = tech && b.dataset.go !== "open" && b.dataset.go !== "find" ? "none" : "flex";
+    b.style.display = tech && b.dataset.go !== "open" ? "none" : "flex";
   });
   const badge = $("role-badge");
   if (badge) {
@@ -448,7 +448,7 @@ async function enterOpenService() {
   session.technician = ""; session.pendingParts = [];
   $("os-slip-list").innerHTML = `<div class="fp-loading">Loading slips…</div>`;
   try {
-    session.allSlips = await api(`/api/slips?status=active`);
+    session.allSlips = await api(`/api/slips?status=working`);
     renderSlipList();
   } catch (e) {
     $("os-slip-list").innerHTML = "";
@@ -518,9 +518,13 @@ function renderSlipScreen() {
         <span class="vs-status vs-${escapeAttr(slip.status)}" id="os-status-badge">${escapeHtml(STATUS_LABEL[slip.status] || slip.status)}</span>
       </div>
       ${meta.length ? `<div class="vs-sub">${meta.join(" · ")}</div>` : ""}
-      ${(slip.check_service || slip.quote_first) ? `<div class="vs-requests">${slip.check_service ? `<span class="vs-req-badge">Check &amp; Service for all</span>` : ""}${slip.quote_first ? `<span class="vs-req-badge">Quote first</span>` : ""}</div>` : ""}
       ${slip.notes ? `<div class="vs-notes">${escapeHtml(slip.notes)}</div>` : ""}
-    </div>`;
+    </div>
+    ${(slip.check_service || slip.quote_first) ? `
+    <div class="sd-requests">
+      ${slip.check_service ? `<div class="sd-req sd-req-service">✓ Check &amp; Service for all</div>` : ""}
+      ${slip.quote_first ? `<div class="sd-req sd-req-quote">💬 Quote first</div>` : ""}
+    </div>` : ""}`;
 
   // Machines as tappable buttons with per-machine progress.
   $("sd-machines").innerHTML = slip.machines.map((m) => {
@@ -532,7 +536,7 @@ function renderSlipScreen() {
       <button type="button" class="machine-btn ${worked ? "machine-btn-worked" : ""}" data-machine="${m.id}">
         <div class="machine-btn-top">
           <strong>${escapeHtml(m.machine_desc)}</strong>
-          ${worked ? `<span class="machine-tick">✓</span>` : `<span class="machine-untouched">No work yet</span>`}
+          ${worked ? `<span class="machine-tick">✓</span>` : `<span class="machine-untouched">Need Repair</span>`}
         </div>
         <div class="machine-btn-sub">${parts.length} part${parts.length === 1 ? "" : "s"}${hasComment ? " · has comment" : ""}${total > 0 ? " · " + money(total) : ""}</div>
       </button>`;
@@ -953,7 +957,7 @@ async function enterCloseService() {
 
   if (!closeSearch) {
     closeSearch = setupSlipSearch({
-      inputId: "cs-search", resultsId: "cs-results", scope: "active",
+      inputId: "cs-search", resultsId: "cs-results", scope: "repaired",
       onPick: (slipNumber) => onCloseSlipChosen(slipNumber),
     });
   }
@@ -1612,7 +1616,6 @@ document.querySelectorAll(".home-btn").forEach((b) =>
     else if (go === "open") { enterOpenService(); }
     else if (go === "close") { enterCloseService(); }
     else if (go === "view") { enterViewSlips(); }
-    else if (go === "find") { enterFindPart(); }
   })
 );
 $("home-link").addEventListener("click", goHome);

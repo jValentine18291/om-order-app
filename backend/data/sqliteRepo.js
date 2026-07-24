@@ -181,7 +181,10 @@ function listSlips(statusFilter = "active") {
   let rows;
   if (statusFilter === "open") {
     rows = db.prepare("SELECT * FROM service_slips WHERE status = 'OPEN' ORDER BY slip_number").all();
-  } else if (statusFilter === "call_customer") {
+  } else if (statusFilter === "working") {
+    // Open Service scope: still being worked on (not repaired, not closed)
+    rows = db.prepare("SELECT * FROM service_slips WHERE status NOT IN ('ALL_REPAIRED', 'CLOSED') ORDER BY slip_number").all();
+  } else if (statusFilter === "repaired" || statusFilter === "call_customer") {
     rows = db.prepare("SELECT * FROM service_slips WHERE status = 'ALL_REPAIRED' ORDER BY slip_number").all();
   } else if (statusFilter === "closed") {
     rows = db.prepare("SELECT * FROM service_slips WHERE status = 'CLOSED' ORDER BY slip_number DESC").all();
@@ -351,7 +354,11 @@ function searchSlips(query = "", scope = "all", limit = 20) {
   const cap = Math.max(1, Math.min(50, Number(limit) || 20));
 
   let sql, params;
-  const scopeClause = scope === "active" ? "status != 'CLOSED'" : "1=1";
+  const scopeClause =
+    scope === "active" ? "status != 'CLOSED'" :
+    scope === "working" ? "status NOT IN ('ALL_REPAIRED', 'CLOSED')" :
+    scope === "repaired" ? "status = 'ALL_REPAIRED'" :
+    "1=1";
 
   if (!q) {
     // Empty query: most recent slips in scope.
