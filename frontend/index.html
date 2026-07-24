@@ -298,12 +298,18 @@
       <div class="summary-card">
         <div class="left">
           <strong id="os-slip-badge">—</strong>
+          <span class="vs-status" id="os-status-badge"></span>
           <span id="os-machine-name">—</span>
         </div>
         <div class="total">
           <div class="lbl">Machine total</div>
           <div class="val" id="os-machine-total">$0.00</div>
         </div>
+      </div>
+      <div class="status-actions" id="os-status-actions" style="display:none;">
+        <button class="status-btn status-btn-quote" id="os-need-quote">Need to Quote</button>
+        <button class="status-btn status-btn-quoted" id="os-mark-quoted">Mark as Quoted</button>
+        <button class="status-btn status-btn-noquote" id="os-no-quote">Close w/o Quote</button>
       </div>
       <button class="btn-primary" id="os-create-so">
         Create Sales Order

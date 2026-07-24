@@ -231,7 +231,19 @@ app.patch("/api/machines/:machineId/comment", async (req, res) => {
   }
 });
 
-// Create the Sales Order for a slip (-> CALL_CUSTOMER)
+// Manually set a slip's quoting status: NEED_QUOTE, QUOTED, or back to IN_PROGRESS.
+app.patch("/api/slips/:slip/status", async (req, res) => {
+  try {
+    const slip = await data.slips.setSlipStatus(req.params.slip, (req.body || {}).status);
+    res.json(slip);
+  } catch (err) {
+    if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
+    console.error("[PATCH /api/slips/:slip/status]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to update status" });
+  }
+});
+
+// Create the Sales Order for a slip (-> ALL_REPAIRED)
 // If AutoCount price write-back is enabled, prices keyed in by staff for parts
 // that had NO price in AutoCount are saved to AutoCount's ItemUOM at this
 // moment. Failures never block the Sales Order — they are logged and reported.

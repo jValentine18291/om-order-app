@@ -186,6 +186,14 @@ try {
   console.error("[db] request-flags migration check failed:", e.message);
 }
 
+// Migration: rename legacy CALL_CUSTOMER status to ALL_REPAIRED (status model v2).
+try {
+  const n = db.prepare("UPDATE service_slips SET status = 'ALL_REPAIRED' WHERE status = 'CALL_CUSTOMER'").run();
+  if (n.changes > 0) console.log("[db] migrated: " + n.changes + " slip(s) CALL_CUSTOMER -> ALL_REPAIRED");
+} catch (e) {
+  console.error("[db] status migration failed:", e.message);
+}
+
 db.prepare(
   "INSERT OR IGNORE INTO counters (name, value) VALUES ('so_number', 0)"
 ).run();

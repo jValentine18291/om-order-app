@@ -186,7 +186,11 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick }) {
 // STATUS_LABEL is defined later (used by both search and View Slips); declare here.
 const STATUS_LABEL = {
   OPEN: "Open",
-  CALL_CUSTOMER: "Call customer (SO created)",
+  IN_PROGRESS: "In Progress",
+  NEED_QUOTE: "Need to Quote",
+  QUOTED: "Quoted",
+  ALL_REPAIRED: "All Repaired",
+  CALL_CUSTOMER: "All Repaired", // legacy name, shown as the new label
   CLOSED: "Closed",
 };
 
@@ -688,6 +692,9 @@ function updateSlipFooter() {
   // Slip number
   $("os-slip-badge").textContent = session.slipNumber || "—";
 
+  // Status badge + which status action buttons apply right now
+  renderSlipStatusUI();
+
   // Current machine model + its total cost
   const machine = currentMachine();
   const machineName = machine ? machine.machine_desc : "—";
@@ -708,6 +715,58 @@ function updateSlipFooter() {
   for (const m of session.slip.machines) for (const p of (m.parts || [])) slipParts++;
   $("os-create-so").disabled = slipParts === 0;
 }
+
+// ---- Slip status UI (Open Service) ------------------------------------------
+// Shows the current status as a badge next to the slip number, and decides
+// which manual status buttons apply:
+//   OPEN / IN_PROGRESS  -> [Need to Quote] [Close w/o Quote]
+//   NEED_QUOTE          -> [Mark as Quoted] [Close w/o Quote]
+//   QUOTED              -> [Close w/o Quote]  (returns to In Progress)
+//   ALL_REPAIRED/CLOSED -> no buttons
+function renderSlipStatusUI() {
+  const status = session.slip ? session.slip.status : "";
+  const badge = $("os-status-badge");
+  if (badge) {
+    badge.textContent = STATUS_LABEL[status] || status || "—";
+    badge.className = "vs-status vs-" + status;
+  }
+  const wrap = $("os-status-actions");
+  if (!wrap) return;
+  const showQuote = status === "OPEN" || status === "IN_PROGRESS";
+  const showQuoted = status === "NEED_QUOTE";
+  const showNoQuote = status === "OPEN" || status === "IN_PROGRESS" || status === "NEED_QUOTE" || status === "QUOTED";
+  $("os-need-quote").style.display = showQuote ? "inline-flex" : "none";
+  $("os-mark-quoted").style.display = showQuoted ? "inline-flex" : "none";
+  $("os-no-quote").style.display = showNoQuote ? "inline-flex" : "none";
+  wrap.style.display = (showQuote || showQuoted || showNoQuote) ? "flex" : "none";
+}
+
+async function changeSlipStatus(newStatus, confirmMsg) {
+  if (!session.slipNumber) return;
+  try {
+    await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    await refreshSlip();
+    updateSlipFooter();
+    toast(confirmMsg, "ok");
+  } catch (e) {
+    toast(e.message, "err");
+  }
+}
+
+$("os-need-quote").addEventListener("click", () => changeSlipStatus("NEED_QUOTE", "Marked: Need to Quote"));
+$("os-mark-quoted").addEventListener("click", () => changeSlipStatus("QUOTED", "Marked: Quoted"));
+$("os-no-quote").addEventListener("click", () => {
+  const s = session.slip ? session.slip.status : "";
+  if (s === "NEED_QUOTE" || s === "QUOTED") {
+    changeSlipStatus("IN_PROGRESS", "Continuing without quote");
+  } else {
+    toast("No quote needed — carry on", "ok");
+  }
+});
 
 async function createSalesOrder() {
   if (!session.slipNumber) return;
@@ -818,10 +877,60 @@ async function onViewSlipChosen(slipNumber) {
   try {
     const slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
     wrap.innerHTML = renderSlipDetail(slip);
+    wireVsStatusActions(slipNumber);
   } catch (e) {
     wrap.innerHTML = "";
     toast(e.message, "err");
   }
+}
+
+// The same manual status buttons as Open Service, rendered in the View Slips
+// detail so sales can manage quoting from here too.
+function renderVsStatusActions(slip) {
+  const s = slip.status;
+  const showQuote = s === "OPEN" || s === "IN_PROGRESS";
+  const showQuoted = s === "NEED_QUOTE";
+  const showNoQuote = showQuote || showQuoted || s === "QUOTED";
+  if (!showQuote && !showQuoted && !showNoQuote) return "";
+  return `<div class="status-actions">
+    ${showQuote ? `<button class="status-btn status-btn-quote" data-vs-status="NEED_QUOTE">Need to Quote</button>` : ""}
+    ${showQuoted ? `<button class="status-btn status-btn-quoted" data-vs-status="QUOTED">Mark as Quoted</button>` : ""}
+    ${showNoQuote ? `<button class="status-btn status-btn-noquote" data-vs-status="NO_QUOTE">Close w/o Quote</button>` : ""}
+  </div>`;
+}
+
+function wireVsStatusActions(slipNumber) {
+  document.querySelectorAll("#vs-detail [data-vs-status]").forEach((btn) =>
+    btn.addEventListener("click", async () => {
+      const action = btn.dataset.vsStatus;
+      try {
+        if (action === "NO_QUOTE") {
+          // Only meaningful when currently in a quoting state; otherwise confirm.
+          const slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
+          if (slip.status === "NEED_QUOTE" || slip.status === "QUOTED") {
+            await api(`/api/slips/${encodeURIComponent(slipNumber)}/status`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ status: "IN_PROGRESS" }),
+            });
+            toast("Continuing without quote", "ok");
+          } else {
+            toast("No quote needed — carry on", "ok");
+          }
+        } else {
+          await api(`/api/slips/${encodeURIComponent(slipNumber)}/status`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: action }),
+          });
+          toast(action === "NEED_QUOTE" ? "Marked: Need to Quote" : "Marked: Quoted", "ok");
+        }
+        onViewSlipChosen(slipNumber); // re-render with the new status
+      } catch (e) {
+        toast(e.message, "err");
+      }
+    })
+  );
 }
 
 function renderSlipDetail(slip) {
@@ -848,6 +957,7 @@ function renderSlipDetail(slip) {
       ${(slip.check_service || slip.quote_first) ? `<div class="vs-requests">${slip.check_service ? `<span class="vs-req-badge">Check &amp; Service for all</span>` : ""}${slip.quote_first ? `<span class="vs-req-badge">Quote first</span>` : ""}</div>` : ""}
       ${slip.notes ? `<div class="vs-notes">${escapeHtml(slip.notes)}</div>` : ""}
       ${slip.status === "CLOSED" && slip.closing_ref ? `<div class="vs-sub">Closed with: <strong>${escapeHtml(slip.closing_ref)}</strong>${slip.closed_at ? " on " + escapeHtml(formatDate(slip.closed_at)) : ""}</div>` : ""}
+      ${renderVsStatusActions(slip)}
     </div>`;
 
   // Each machine + its parts

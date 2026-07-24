@@ -548,3 +548,38 @@ select {
 /* Find Part: model line (Desc2) styling */
 .fp-opt-model { color: var(--ink-faint, #6b7a82); font-weight: 400; }
 .fp-val-model { font-weight: 500; color: var(--ink-faint, #6b7a82); font-size: .88rem; }
+
+/* ---- Six-status badges (vs- for detail/list, sr- for search results) ---- */
+.vs-OPEN, .sr-OPEN { background: #eef1f3; color: #45525a; }
+.vs-IN_PROGRESS, .sr-IN_PROGRESS { background: #E6F1FB; color: #185FA5; }
+.vs-NEED_QUOTE, .sr-NEED_QUOTE { background: #FDF0E0; color: #A85B00; }
+.vs-QUOTED, .sr-QUOTED { background: #F0EAFB; color: #5B3FA8; }
+.vs-ALL_REPAIRED, .sr-ALL_REPAIRED, .vs-CALL_CUSTOMER, .sr-CALL_CUSTOMER { background: #E7F5EC; color: #1B7A42; }
+/* .vs-CLOSED / .sr-CLOSED keep their existing styling */
+
+/* Status badge in the Open Service footer */
+#os-status-badge { display: inline-block; margin-left: 8px; }
+#os-status-badge:empty { display: none; }
+
+/* ---- Manual status action buttons ---- */
+.status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+.status-btn {
+  flex: 1 1 auto;
+  min-width: 130px;
+  padding: 11px 12px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: .9rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+}
+.status-btn-quote { background: #FDF0E0; color: #A85B00; border: 1.5px solid #EF9F27; }
+.status-btn-quoted { background: #F0EAFB; color: #5B3FA8; border: 1.5px solid #8B6FD8; }
+.status-btn-noquote { background: #fff; color: var(--ink-faint, #6b7a82); border: 1.5px solid var(--line, #e2e6ea); }
+.status-btn:active { transform: scale(.98); }

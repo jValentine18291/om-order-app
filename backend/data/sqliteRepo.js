@@ -176,13 +176,13 @@ function createSlip({ company, contact_name = "", contact_number = "", whatsapp_
   return getSlip(slipNumber);
 }
 
-// List slips filtered by status group. 'active' = OPEN + CALL_CUSTOMER.
+// List slips filtered by status group. 'active' = everything not CLOSED.
 function listSlips(statusFilter = "active") {
   let rows;
   if (statusFilter === "open") {
     rows = db.prepare("SELECT * FROM service_slips WHERE status = 'OPEN' ORDER BY slip_number").all();
   } else if (statusFilter === "call_customer") {
-    rows = db.prepare("SELECT * FROM service_slips WHERE status = 'CALL_CUSTOMER' ORDER BY slip_number").all();
+    rows = db.prepare("SELECT * FROM service_slips WHERE status = 'ALL_REPAIRED' ORDER BY slip_number").all();
   } else if (statusFilter === "closed") {
     rows = db.prepare("SELECT * FROM service_slips WHERE status = 'CLOSED' ORDER BY slip_number DESC").all();
   } else if (statusFilter === "all") {
@@ -228,6 +228,9 @@ function addPartToMachine(machineId, { item_code, description, uom = "UNIT", uni
        VALUES (?, ?, ?, ?, ?, ?, ?)`
     ).run(machineId, item_code, description || item_code, uom, Number(unit_price) || 0, Number(quantity) || 1, technician);
   }
+  // Work has started on this slip: auto-bump OPEN -> IN_PROGRESS.
+  db.prepare("UPDATE service_slips SET status = 'IN_PROGRESS' WHERE id = ? AND status = 'OPEN'")
+    .run(machine.slip_id);
   return db.prepare("SELECT * FROM machine_parts WHERE machine_id = ? ORDER BY id").all(machineId);
 }
 
@@ -254,7 +257,7 @@ function setPartPrice(partId, price) {
   return { ok: true, unit_price: p };
 }
 
-// Create the Sales Order for a slip (all machines' parts), flip status to CALL_CUSTOMER.
+// Create the Sales Order for a slip (all machines' parts), flip status to ALL_REPAIRED.
 // Mock SO for now — same shape as createOrder — but tagged with the slip number.
 function createSlipOrder(slipNumber) {
   const slip = getSlip(slipNumber);
@@ -277,7 +280,7 @@ function createSlipOrder(slipNumber) {
   const so = createOrder({ notes: `S/S: ${slip.slip_number}`, lines });
 
   // Mark slip as awaiting customer call.
-  db.prepare("UPDATE service_slips SET status = 'CALL_CUSTOMER' WHERE id = ?").run(slip.id);
+  db.prepare("UPDATE service_slips SET status = 'ALL_REPAIRED' WHERE id = ?").run(slip.id);
 
   return { ...so, slip_number: slip.slip_number, ss_line: `S/S: ${slip.slip_number}` };
 }
@@ -302,7 +305,28 @@ function setMachineComment(machineId, comment) {
   if (!machine) { const e = new Error("Machine not found."); e.status = 404; throw e; }
   db.prepare("UPDATE slip_machines SET repair_comment = ? WHERE id = ?")
     .run(String(comment == null ? "" : comment), machineId);
+  // Work has started on this slip: auto-bump OPEN -> IN_PROGRESS (comment must
+  // be non-empty; clearing a comment doesn't count as work).
+  if (String(comment || "").trim()) {
+    db.prepare("UPDATE service_slips SET status = 'IN_PROGRESS' WHERE id = ? AND status = 'OPEN'")
+      .run(machine.slip_id);
+  }
   return { ok: true };
+}
+
+// Manually set a slip's status. Used by the "Need to Quote" / "Mark Quoted" /
+// "Close w/o Quote" buttons. Only the quoting-related statuses (plus the
+// return to IN_PROGRESS) can be set this way; the rest are automatic.
+const MANUAL_STATUSES = new Set(["NEED_QUOTE", "QUOTED", "IN_PROGRESS"]);
+function setSlipStatus(slipNumber, status) {
+  const s = String(status || "").toUpperCase();
+  if (!MANUAL_STATUSES.has(s)) { const e = new Error("Invalid status."); e.status = 400; throw e; }
+  const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
+  if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
+  if (slip.status === "CLOSED") { const e = new Error("Slip is already closed."); e.status = 400; throw e; }
+  if (slip.status === "ALL_REPAIRED") { const e = new Error("Slip is already fully repaired."); e.status = 400; throw e; }
+  db.prepare("UPDATE service_slips SET status = ? WHERE id = ?").run(s, slip.id);
+  return getSlip(slipNumber);
 }
 
 // Search slips by slip number (partial match on the digits). Scope mirrors
@@ -337,7 +361,7 @@ function searchSlips(query = "", scope = "all", limit = 20) {
 }
 
 const slips = {
-  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setMachineComment, createSlipOrder, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setMachineComment, setSlipStatus, createSlipOrder, closeSlip,
 };
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };
