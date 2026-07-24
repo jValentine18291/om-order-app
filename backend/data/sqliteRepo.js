@@ -264,6 +264,16 @@ function createSlipOrder(slipNumber) {
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
   if (slip.status === "CLOSED") { const e = new Error("Slip is already closed."); e.status = 400; throw e; }
 
+  // "All Repaired" must be true for ALL machines: refuse the SO if any machine
+  // has no work recorded at all (no parts AND no repair comment), naming them.
+  const untouched = slip.machines
+    .filter((m) => (m.parts || []).length === 0 && !String(m.repair_comment || "").trim())
+    .map((m) => m.machine_desc);
+  if (untouched.length) {
+    const e = new Error(`No work recorded on: ${untouched.join(", ")}. Add parts or a repair comment (or remove the machine) before creating the Sales Order.`);
+    e.status = 400; throw e;
+  }
+
   // Flatten every machine's parts into order lines.
   const lines = [];
   for (const m of slip.machines) {
@@ -324,7 +334,11 @@ function setSlipStatus(slipNumber, status) {
   const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
   if (slip.status === "CLOSED") { const e = new Error("Slip is already closed."); e.status = 400; throw e; }
-  if (slip.status === "ALL_REPAIRED") { const e = new Error("Slip is already fully repaired."); e.status = 400; throw e; }
+  // From ALL_REPAIRED, only the escape hatch back to IN_PROGRESS is allowed
+  // (to correct a premature "Create Sales Order"); quoting states are not.
+  if (slip.status === "ALL_REPAIRED" && s !== "IN_PROGRESS") {
+    const e = new Error("Slip is already fully repaired."); e.status = 400; throw e;
+  }
   db.prepare("UPDATE service_slips SET status = ? WHERE id = ?").run(s, slip.id);
   return getSlip(slipNumber);
 }

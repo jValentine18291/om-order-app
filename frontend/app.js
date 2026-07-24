@@ -16,8 +16,10 @@ let currentMode = "qr";
 const session = {
   slipNumber: null,     // e.g. "00001"
   slip: null,           // full slip object (with machines + parts)
-  machineId: null,      // currently selected machine id
-  technician: "",       // carries over across machines
+  machineId: null,      // machine being worked on in the modal
+  technician: "",       // chosen fresh per machine
+  pendingParts: [],     // parts scanned in the modal but not yet saved
+  allSlips: [],         // active-slip list for the Open Service screen
 };
 
 // ---- Helpers ---------------------------------------------------------------
@@ -56,7 +58,7 @@ function formatDate(ts) {
 }
 
 // ---- Screen navigation -----------------------------------------------------
-const SCREENS = ["role", "home", "new", "open", "close", "view", "find"];
+const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip"];
 
 // ---- Role (Sales Staff vs Technician) ---------------------------------------
 // Remembered per phone in localStorage. Technicians see only Open Service;
@@ -85,16 +87,24 @@ function applyRoleToHome() {
 }
 function showScreen(name) {
   SCREENS.forEach((s) => $("screen-" + s).classList.toggle("active", s === name));
-  // Footer only on open-service when entry is active
-  $("footer-open").style.display = "none";
-  // Home link visible everywhere except home
+  // Home link visible everywhere except home/role
   $("home-link").style.display = (name === "home" || name === "role") ? "none" : "inline-flex";
-  // Stop any camera when leaving a scanning context
-  if (name !== "open") { try { stopQrScanner(); } catch (_) {} }
+  // Leaving the working context: hide the machine modal and stop any camera.
+  if (name !== "slip") {
+    const mm = $("machine-modal");
+    if (mm) { mm.style.display = "none"; document.body.style.overflow = ""; }
+    try { stopQrScanner(); } catch (_) {}
+  }
   window.scrollTo(0, 0);
 }
 
 async function goHome() {
+  // Do not silently lose scanned-but-unsaved parts in the machine popup.
+  if (session.pendingParts && session.pendingParts.length) {
+    const ok = confirm(session.pendingParts.length + " scanned part(s) have not been saved. Discard them?");
+    if (!ok) return;
+    session.pendingParts = [];
+  }
   // Save any in-progress repair comment before clearing the session.
   try { await saveCurrentComment(); } catch (_) {}
   try { stopQrScanner(); } catch (_) {}
@@ -431,71 +441,173 @@ function statusOk(m) { return `<span class="led" style="background:#38A32A;box-s
 // ============================================================================
 // OPEN SERVICE
 // ============================================================================
-let openSearch = null;
+// ---- Open Service: slip list -> slip detail -> machine modal ---------------
 async function enterOpenService() {
   showScreen("open");
-  $("os-machine-field").style.display = "none";
-  $("os-tech-field").style.display = "none";
-  $("os-entry").style.display = "none";
-  $("footer-open").style.display = "none";
-  session.slipNumber = null; session.slip = null; session.machineId = null; session.technician = "";
-
-  if (!openSearch) {
-    openSearch = setupSlipSearch({
-      inputId: "os-search", resultsId: "os-results", scope: "active",
-      onPick: (slipNumber) => onSlipChosen(slipNumber),
-    });
+  session.slipNumber = null; session.slip = null; session.machineId = null;
+  session.technician = ""; session.pendingParts = [];
+  $("os-slip-list").innerHTML = `<div class="fp-loading">Loading slips…</div>`;
+  try {
+    session.allSlips = await api(`/api/slips?status=active`);
+    renderSlipList();
+  } catch (e) {
+    $("os-slip-list").innerHTML = "";
+    toast(e.message, "err");
   }
-  openSearch.reset();
 }
 
-async function onSlipChosen(slipNumber) {
-  if (!slipNumber) {
-    $("os-machine-field").style.display = "none";
-    $("os-tech-field").style.display = "none";
-    $("os-entry").style.display = "none";
-    $("footer-open").style.display = "none";
+// Render the active-slip list, filtered by the search box (number or company).
+function renderSlipList() {
+  const q = ($("os-search").value || "").trim().toLowerCase();
+  const list = (session.allSlips || []).filter((s) =>
+    !q || s.slip_number.includes(q) || (s.company || "").toLowerCase().includes(q)
+  );
+  const wrap = $("os-slip-list");
+  if (!list.length) {
+    wrap.innerHTML = `<div class="fp-empty">${q ? "No slips match" : "No open slips"}</div>`;
     return;
   }
-  try {
-    const slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
-    session.slipNumber = slipNumber;
-    session.slip = slip;
-    session.machineId = null;
+  // Newest first
+  const sorted = [...list].sort((a, b) => b.slip_number.localeCompare(a.slip_number));
+  wrap.innerHTML = sorted.map((s) => `
+    <button type="button" class="slip-card" data-slip="${escapeAttr(s.slip_number)}">
+      <div class="slip-card-top">
+        <strong>${escapeHtml(s.slip_number)}</strong>
+        <span class="vs-status vs-${escapeAttr(s.status)}">${escapeHtml(STATUS_LABEL[s.status] || s.status)}</span>
+      </div>
+      <div class="slip-card-co">${escapeHtml(s.company)}</div>
+      <div class="slip-card-sub">${(s.machines || []).length} machine${(s.machines || []).length === 1 ? "" : "s"}${s.created_at ? " · " + escapeHtml(formatDate(s.created_at)) : ""}</div>
+    </button>`).join("");
+  wrap.querySelectorAll(".slip-card").forEach((btn) =>
+    btn.addEventListener("click", () => onSlipChosen(btn.dataset.slip))
+  );
+}
+$("os-search").addEventListener("input", renderSlipList);
+$("sd-back").addEventListener("click", enterOpenService);
 
-    // Populate machine dropdown
-    const msel = $("os-machine");
-    msel.innerHTML = `<option value="">Select a machine…</option>` +
-      slip.machines.map((m) => `<option value="${m.id}">${escapeHtml(m.machine_desc)}</option>`).join("");
-    $("os-machine-field").style.display = "block";
-    // Tech + entry hidden until machine chosen
-    $("os-tech-field").style.display = "none";
-    $("os-entry").style.display = "none";
-    updateSlipFooter();
+async function onSlipChosen(slipNumber) {
+  if (!slipNumber) return;
+  try {
+    session.slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
+    session.slipNumber = slipNumber;
+    session.machineId = null;
+    showScreen("slip");
+    renderSlipScreen();
   } catch (e) {
     toast(e.message, "err");
   }
 }
 
-async function onMachineChosen(machineId) {
-  // Save the comment for the machine we're leaving (if any) before switching.
-  await saveCurrentComment();
+// The slip-detail screen: header card, machines as buttons, status actions.
+function renderSlipScreen() {
+  const slip = session.slip;
+  if (!slip) return;
 
-  session.machineId = machineId ? Number(machineId) : null;
-  if (!session.machineId) {
-    $("os-tech-field").style.display = "none";
-    $("os-entry").style.display = "none";
-    return;
-  }
-  // Show technician picker, reset to blank so the tech is chosen fresh for
-  // each machine (parts get tagged to whoever actually works on this one).
+  const meta = [];
+  if (slip.contact_name) meta.push(`Contact: ${escapeHtml(slip.contact_name)}`);
+  if (slip.contact_number) meta.push(escapeHtml(slip.contact_number));
+  const created = formatDate(slip.created_at);
+
+  $("sd-head").innerHTML = `
+    <div class="vs-card">
+      <div class="vs-head">
+        <div>
+          <div class="vs-company">${escapeHtml(slip.company)}</div>
+          <div class="vs-sub">Slip ${escapeHtml(slip.slip_number)}${created ? " · Created " + escapeHtml(created) : ""}</div>
+        </div>
+        <span class="vs-status vs-${escapeAttr(slip.status)}" id="os-status-badge">${escapeHtml(STATUS_LABEL[slip.status] || slip.status)}</span>
+      </div>
+      ${meta.length ? `<div class="vs-sub">${meta.join(" · ")}</div>` : ""}
+      ${(slip.check_service || slip.quote_first) ? `<div class="vs-requests">${slip.check_service ? `<span class="vs-req-badge">Check &amp; Service for all</span>` : ""}${slip.quote_first ? `<span class="vs-req-badge">Quote first</span>` : ""}</div>` : ""}
+      ${slip.notes ? `<div class="vs-notes">${escapeHtml(slip.notes)}</div>` : ""}
+    </div>`;
+
+  // Machines as tappable buttons with per-machine progress.
+  $("sd-machines").innerHTML = slip.machines.map((m) => {
+    const parts = m.parts || [];
+    let total = 0; for (const p of parts) total += p.unit_price * p.quantity;
+    const hasComment = !!String(m.repair_comment || "").trim();
+    const worked = parts.length > 0 || hasComment;
+    return `
+      <button type="button" class="machine-btn ${worked ? "machine-btn-worked" : ""}" data-machine="${m.id}">
+        <div class="machine-btn-top">
+          <strong>${escapeHtml(m.machine_desc)}</strong>
+          ${worked ? `<span class="machine-tick">✓</span>` : `<span class="machine-untouched">No work yet</span>`}
+        </div>
+        <div class="machine-btn-sub">${parts.length} part${parts.length === 1 ? "" : "s"}${hasComment ? " · has comment" : ""}${total > 0 ? " · " + money(total) : ""}</div>
+      </button>`;
+  }).join("");
+  $("sd-machines").querySelectorAll(".machine-btn").forEach((btn) =>
+    btn.addEventListener("click", () => openMachineModal(Number(btn.dataset.machine)))
+  );
+
+  renderSlipStatusUI();
+  updateSlipFooter();
+}
+
+// ---- Machine modal ----------------------------------------------------------
+function openMachineModal(machineId) {
+  session.machineId = machineId;
   session.technician = "";
+  session.pendingParts = [];
   $("os-tech").value = "";
   $("os-tech-field").style.display = "block";
-  // Load this machine's existing comment into the textbox.
+  $("os-entry").style.display = "none";
+  const m = currentMachine();
+  $("mm-title").textContent = m ? m.machine_desc : "Machine";
+  $("mm-sub").textContent = `Slip ${session.slipNumber} · ${session.slip.company}`;
   loadCommentForCurrentMachine();
-  maybeShowEntry();
   renderMachineParts();
+  updateSlipFooter();
+  $("machine-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+async function closeMachineModal(save) {
+  if (!save && session.pendingParts.length) {
+    const ok = confirm(`${session.pendingParts.length} scanned part(s) haven't been saved. Discard them?`);
+    if (!ok) return;
+  }
+  try { stopQrScanner(); } catch (_) {}
+  if (save) {
+    $("mm-save").disabled = true;
+    try {
+      await commitPendingParts();
+      await saveCurrentComment();
+      toast("Saved", "ok");
+    } catch (e) {
+      toast(e.message, "err");
+      $("mm-save").disabled = false;
+      return; // keep the modal open so nothing scanned is lost
+    }
+    $("mm-save").disabled = false;
+  }
+  $("machine-modal").style.display = "none";
+  document.body.style.overflow = "";
+  session.machineId = null;
+  session.pendingParts = [];
+  // Refresh the slip so the machine buttons reflect the latest state.
+  try { await refreshSlip(); } catch (_) {}
+  renderSlipScreen();
+}
+$("mm-save").addEventListener("click", () => closeMachineModal(true));
+$("mm-close").addEventListener("click", () => closeMachineModal(false));
+
+// POST every pending part to the server, in order. Stops on first failure
+// (already-saved ones are removed from the pending list as they succeed).
+async function commitPendingParts() {
+  while (session.pendingParts.length) {
+    const p = session.pendingParts[0];
+    await api(`/api/machines/${session.machineId}/parts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        item_code: p.item_code, description: p.description, uom: p.uom,
+        unit_price: p.unit_price, quantity: p.quantity, technician: p.technician,
+      }),
+    });
+    session.pendingParts.shift();
+  }
 }
 
 // Load the saved comment for the currently selected machine into the textbox.
@@ -507,7 +619,6 @@ function loadCommentForCurrentMachine() {
 }
 
 // Save the textbox comment to whichever machine is currently selected.
-// Used when switching machines, creating the SO, or leaving the screen.
 async function saveCurrentComment() {
   const box = $("os-comment");
   if (!box || !session.machineId) return;
@@ -535,7 +646,6 @@ function onTechChosen(tech) {
 function maybeShowEntry() {
   const ready = session.slipNumber && session.machineId && session.technician;
   $("os-entry").style.display = ready ? "block" : "none";
-  $("footer-open").style.display = ready ? "flex" : "none";
   if (ready) {
     setMode(currentMode || "qr");
     renderContext();
@@ -553,31 +663,34 @@ function renderContext() {
     (created ? `<div class="sub">Created: ${escapeHtml(created)}</div>` : "");
 }
 
-// The scanned-part entry point. Replaces the old local-cart addByCode:
-// looks up the item, then SAVES it to the current machine on the server.
+// The scanned-part entry point. Parts are held as PENDING (not yet saved) and
+// committed to the server when the technician taps Save in the machine popup.
 async function addByCode(code) {
   code = (code || "").trim();
   if (!code) return;
   if (!session.machineId || !session.technician) {
-    toast("Pick a machine and your name first", "err");
+    toast("Pick your name first", "err");
     return;
   }
   try {
     const item = await lookupItem(code);
-    await api(`/api/machines/${session.machineId}/parts`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    // Same part already pending for this tech? Just bump its quantity.
+    const existing = session.pendingParts.find(
+      (p) => p.item_code === item.item_code && p.technician === session.technician
+    );
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      session.pendingParts.push({
         item_code: item.item_code,
         description: item.description,
         uom: item.uom,
         unit_price: item.unit_price,
         quantity: 1,
         technician: session.technician,
-      }),
-    });
-    toast(`Added ${item.description}`, "ok");
-    await refreshSlip();
+      });
+    }
+    toast(`Added ${item.description} — tap Save when done`, "ok");
     renderMachineParts();
     updateSlipFooter();
   } catch (e) {
@@ -613,7 +726,39 @@ function renderMachineParts() {
   const parts = machine ? (machine.parts || []) : [];
   wrap.innerHTML = "";
 
-  if (parts.length === 0) {
+  // Pending (scanned but not yet saved) parts first, visually distinct.
+  if (session.pendingParts.length) {
+    const pendWrap = document.createElement("div");
+    pendWrap.className = "pending-wrap";
+    pendWrap.innerHTML = `<div class="pending-head">Not saved yet — tap Save below</div>` +
+      session.pendingParts.map((p, i) => `
+        <div class="line line-pending">
+          <div class="head">
+            <div class="info">
+              <div class="desc">${escapeHtml(p.description)}</div>
+              <div class="sku mono">${escapeHtml(p.item_code)} · ${escapeHtml(p.technician)}</div>
+            </div>
+            <div class="price-col">
+              <span class="price-edit">$<input type="number" step="0.01" min="0" value="${Number(p.unit_price).toFixed(2)}" data-pprice="${i}" inputmode="decimal" aria-label="Unit price" /></span>
+              <button class="remove" data-pdel="${i}" aria-label="Remove part">${TRASH}</button>
+            </div>
+          </div>
+          <div class="foot">
+            <div class="qty">
+              <button data-pdec="${i}" aria-label="Decrease">−</button>
+              <input type="number" min="1" value="${p.quantity}" data-pqty="${i}" inputmode="numeric" aria-label="Quantity" />
+              <button data-pinc="${i}" aria-label="Increase">+</button>
+            </div>
+            <div class="amt-wrap">
+              <span class="amt-lbl">Line total</span>
+              <span class="amt">${money(p.unit_price * p.quantity)}</span>
+            </div>
+          </div>
+        </div>`).join("");
+    wrap.appendChild(pendWrap);
+  }
+
+  if (parts.length === 0 && session.pendingParts.length === 0) {
     wrap.innerHTML = `
       <div class="cart-empty">
         <div class="ico">
@@ -689,31 +834,31 @@ async function setPartQty(partId, qty) {
 function updateSlipFooter() {
   if (!session.slip) return;
 
-  // Slip number
+  // Slip summary (on the slip-detail screen): number, machine count, slip total
   $("os-slip-badge").textContent = session.slipNumber || "—";
+  const machines = session.slip.machines || [];
+  let slipTotal = 0, slipParts = 0;
+  for (const m of machines) for (const p of (m.parts || [])) { slipTotal += p.unit_price * p.quantity; slipParts++; }
+  $("os-machine-name").textContent = `${machines.length} machine${machines.length === 1 ? "" : "s"}`;
+  $("os-machine-total").textContent = money(slipTotal);
 
   // Status badge + which status action buttons apply right now
   renderSlipStatusUI();
 
-  // Current machine model + its total cost
+  // Machine total inside the modal: saved parts + pending (unsaved) parts
   const machine = currentMachine();
-  const machineName = machine ? machine.machine_desc : "—";
-  let machineTotal = 0;
-  let machineParts = 0;
   if (machine) {
-    for (const p of (machine.parts || [])) {
-      machineTotal += p.unit_price * p.quantity;
-      machineParts++;
-    }
+    let mt = 0;
+    for (const p of (machine.parts || [])) mt += p.unit_price * p.quantity;
+    for (const p of session.pendingParts) mt += p.unit_price * p.quantity;
+    const mmTotal = $("mm-total");
+    if (mmTotal) mmTotal.textContent = money(mt);
   }
-  $("os-machine-name").textContent = machineName;
-  $("os-machine-total").textContent = money(machineTotal);
 
-  // The Create Sales Order button covers the whole slip, so enable it whenever
-  // any machine on the slip has parts (not just the current one).
-  let slipParts = 0;
-  for (const m of session.slip.machines) for (const p of (m.parts || [])) slipParts++;
-  $("os-create-so").disabled = slipParts === 0;
+  // Create Sales Order covers the whole slip; enable when parts exist and the
+  // slip hasn't already been repaired/closed.
+  const st = session.slip.status;
+  $("os-create-so").disabled = slipParts === 0 || st === "ALL_REPAIRED" || st === "CLOSED";
 }
 
 // ---- Slip status UI (Open Service) ------------------------------------------
@@ -781,12 +926,12 @@ async function createSalesOrder() {
     const ps = result.price_sync;
     if (ps && ps.failed && ps.failed.length) {
       setTimeout(() => toast(`Price save to AutoCount failed for: ${ps.failed.join(", ")}`, "err"), 1800);
-      setTimeout(goHome, 4200);
+      setTimeout(async () => { await refreshSlip(); renderSlipScreen(); }, 4200);
     } else if (ps && ps.updated && ps.updated.length) {
       setTimeout(() => toast(`${ps.updated.length} price${ps.updated.length === 1 ? "" : "s"} saved to AutoCount`, "ok"), 1800);
-      setTimeout(goHome, 3600);
+      setTimeout(async () => { await refreshSlip(); renderSlipScreen(); }, 3600);
     } else {
-      setTimeout(goHome, 1600);
+      setTimeout(async () => { await refreshSlip(); renderSlipScreen(); }, 1600);
     }
   } catch (e) {
     toast(e.message, "err");
@@ -1585,8 +1730,7 @@ $("ns-whatsapp-same").addEventListener("change", (e) => {
   }
 });
 
-// Open Service: slip selection via search component; machine/tech selects + SO button
-$("os-machine").addEventListener("change", (e) => onMachineChosen(e.target.value));
+// Open Service: technician select (inside the machine popup) + SO button
 $("os-tech").addEventListener("change", (e) => onTechChosen(e.target.value));
 $("os-create-so").addEventListener("click", createSalesOrder);
 
@@ -1610,6 +1754,22 @@ const _qrRst = $("qr-restart"); if (_qrRst) _qrRst.addEventListener("click", sta
 
 // Machine-parts list interactions (event delegation)
 $("machine-parts").addEventListener("click", (e) => {
+  // Pending (unsaved) part controls first
+  const pdel = e.target.closest("[data-pdel]");
+  const pinc = e.target.closest("[data-pinc]");
+  const pdec = e.target.closest("[data-pdec]");
+  if (pdel || pinc || pdec) {
+    const el = pdel || pinc || pdec;
+    const i = Number(el.dataset.pdel ?? el.dataset.pinc ?? el.dataset.pdec);
+    const p = session.pendingParts[i];
+    if (!p) return;
+    if (pdel) session.pendingParts.splice(i, 1);
+    else if (pinc) p.quantity += 1;
+    else if (pdec) p.quantity = Math.max(1, p.quantity - 1);
+    renderMachineParts();
+    updateSlipFooter();
+    return;
+  }
   const del = e.target.closest("[data-del]");
   const inc = e.target.closest("[data-inc]");
   const dec = e.target.closest("[data-dec]");
@@ -1627,7 +1787,13 @@ $("machine-parts").addEventListener("click", (e) => {
   }
 });
 $("machine-parts").addEventListener("change", (e) => {
-  if (e.target.dataset.qty) {
+  if (e.target.dataset.pqty !== undefined) {
+    const p = session.pendingParts[Number(e.target.dataset.pqty)];
+    if (p) { p.quantity = Math.max(1, parseInt(e.target.value, 10) || 1); renderMachineParts(); updateSlipFooter(); }
+  } else if (e.target.dataset.pprice !== undefined) {
+    const p = session.pendingParts[Number(e.target.dataset.pprice)];
+    if (p) { p.unit_price = Math.max(0, parseFloat(e.target.value) || 0); renderMachineParts(); updateSlipFooter(); }
+  } else if (e.target.dataset.qty) {
     const q = Math.max(0, parseInt(e.target.value, 10) || 0);
     setPartQty(Number(e.target.dataset.qty), q);
   } else if (e.target.dataset.price) {

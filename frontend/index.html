@@ -170,24 +170,95 @@
       <div id="ns-created" style="display:none"></div>
     </section>
 
-    <!-- ============ SCREEN: OPEN SERVICE ============ -->
+    <!-- ============ SCREEN: OPEN SERVICE (slip list) ============ -->
     <section id="screen-open" class="screen">
       <div class="section-head">
         <p class="eyebrow">Open service</p>
-        <h2>Scan parts onto a slip</h2>
+        <h2>Pick a service slip</h2>
       </div>
-
       <div class="field">
-        <label for="os-search">Service slip <span class="req">*</span></label>
-        <input id="os-search" type="text" inputmode="numeric" autocomplete="off" placeholder="Type slip number, e.g. 638" />
-        <div class="slip-results" id="os-results"></div>
+        <label for="os-search">Search</label>
+        <input id="os-search" type="text" autocomplete="off" placeholder="Slip number or company&hellip;" />
       </div>
+      <div id="os-slip-list"></div>
+    </section>
 
-      <div class="field" id="os-machine-field" style="display:none">
-        <label for="os-machine">Machine <span class="req">*</span></label>
-        <select id="os-machine"><option value="">Select a machine&hellip;</option></select>
+    <!-- ============ SCREEN: SLIP DETAIL (machines as buttons) ============ -->
+    <section id="screen-slip" class="screen">
+      <button class="back-link" id="sd-back">&larr; All slips</button>
+      <div id="sd-head"></div>
+      <div class="section-head" style="margin-top:14px;">
+        <p class="eyebrow">Machines — tap one to work on it</p>
       </div>
+      <div id="sd-machines"></div>
+      <div class="status-actions" id="os-status-actions" style="display:none;">
+        <button class="status-btn status-btn-quote" id="os-need-quote">Need to Quote</button>
+        <button class="status-btn status-btn-quoted" id="os-mark-quoted">Mark as Quoted</button>
+        <button class="status-btn status-btn-noquote" id="os-no-quote">Close w/o Quote</button>
+      </div>
+      <div class="summary-card" style="margin-top:8px;">
+        <div class="left">
+          <strong id="os-slip-badge">&mdash;</strong>
+          <span id="os-machine-name">&mdash;</span>
+        </div>
+        <div class="total">
+          <div class="lbl">Slip total</div>
+          <div class="val" id="os-machine-total">$0.00</div>
+        </div>
+      </div>
+      <button class="btn-primary" id="os-create-so" style="margin-top:10px;">
+        Create Sales Order
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </section>
 
+    <!-- ============ SCREEN: CLOSE SERVICE ============ -->
+    <section id="screen-close" class="screen">
+      <div class="section-head">
+        <p class="eyebrow">Close service</p>
+        <h2>Close a service slip</h2>
+        <p class="lede">Record the DO/CS/INV reference once the customer has paid.</p>
+      </div>
+      <div class="field">
+        <label for="cs-search">Service slip <span class="req">*</span></label>
+        <input id="cs-search" type="text" inputmode="numeric" autocomplete="off" placeholder="Type slip number, e.g. 638" />
+        <div class="slip-results" id="cs-results"></div>
+      </div>
+      <div class="slip-context" id="cs-context" style="display:none"></div>
+      <div class="field">
+        <label for="cs-ref">DO / CS / INV number <span class="req">*</span></label>
+        <input id="cs-ref" type="text" autocomplete="off" placeholder="e.g. DO-2604-016" />
+      </div>
+      <button class="btn-primary" id="cs-submit" style="width:100%">Close service slip</button>
+      <div class="scan-hint" id="cs-status" style="justify-content:flex-start;min-height:20px;margin-top:8px;"></div>
+    </section>
+
+    <!-- ============ SCREEN: VIEW SLIPS ============ -->
+    <section id="screen-view" class="screen">
+      <div class="section-head">
+        <p class="eyebrow">View slips</p>
+        <h2>Look up a service slip</h2>
+        <p class="lede">Select any slip to see its full details.</p>
+      </div>
+      <div class="field">
+        <label for="vs-search">Service slip</label>
+        <input id="vs-search" type="text" inputmode="numeric" autocomplete="off" placeholder="Type slip number, e.g. 638" />
+        <div class="slip-results" id="vs-results"></div>
+      </div>
+      <div id="vs-detail"></div>
+    </section>
+
+  </div>
+
+  <div class="modal-overlay" id="machine-modal" style="display:none">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div>
+          <strong id="mm-title">Machine</strong>
+          <div class="mm-sub" id="mm-sub"></div>
+        </div>
+        <button class="modal-x" id="mm-close" aria-label="Close">&#10005;</button>
+      </div>
       <div class="field" id="os-tech-field" style="display:none">
         <label for="os-tech">Technician <span class="req">*</span></label>
         <select id="os-tech">
@@ -255,66 +326,11 @@
           <textarea id="os-comment" placeholder="e.g. Carburettor clogged — cleaned and replaced fuel line."></textarea>
         </div>
       </div>
-    </section>
-
-    <!-- ============ SCREEN: CLOSE SERVICE ============ -->
-    <section id="screen-close" class="screen">
-      <div class="section-head">
-        <p class="eyebrow">Close service</p>
-        <h2>Close a service slip</h2>
-        <p class="lede">Record the DO/CS/INV reference once the customer has paid.</p>
+      <div class="summary-card" style="margin:12px 0 0;">
+        <div class="left"><span>Machine total</span></div>
+        <div class="total"><div class="val" id="mm-total">$0.00</div></div>
       </div>
-      <div class="field">
-        <label for="cs-search">Service slip <span class="req">*</span></label>
-        <input id="cs-search" type="text" inputmode="numeric" autocomplete="off" placeholder="Type slip number, e.g. 638" />
-        <div class="slip-results" id="cs-results"></div>
-      </div>
-      <div class="slip-context" id="cs-context" style="display:none"></div>
-      <div class="field">
-        <label for="cs-ref">DO / CS / INV number <span class="req">*</span></label>
-        <input id="cs-ref" type="text" autocomplete="off" placeholder="e.g. DO-2604-016" />
-      </div>
-      <button class="btn-primary" id="cs-submit" style="width:100%">Close service slip</button>
-      <div class="scan-hint" id="cs-status" style="justify-content:flex-start;min-height:20px;margin-top:8px;"></div>
-    </section>
-
-    <!-- ============ SCREEN: VIEW SLIPS ============ -->
-    <section id="screen-view" class="screen">
-      <div class="section-head">
-        <p class="eyebrow">View slips</p>
-        <h2>Look up a service slip</h2>
-        <p class="lede">Select any slip to see its full details.</p>
-      </div>
-      <div class="field">
-        <label for="vs-search">Service slip</label>
-        <input id="vs-search" type="text" inputmode="numeric" autocomplete="off" placeholder="Type slip number, e.g. 638" />
-        <div class="slip-results" id="vs-results"></div>
-      </div>
-      <div id="vs-detail"></div>
-    </section>
-
-    <!-- ============ STICKY FOOTER: Open Service ============ -->
-    <div class="footer-bar" id="footer-open" style="display:none">
-      <div class="summary-card">
-        <div class="left">
-          <strong id="os-slip-badge">—</strong>
-          <span class="vs-status" id="os-status-badge"></span>
-          <span id="os-machine-name">—</span>
-        </div>
-        <div class="total">
-          <div class="lbl">Machine total</div>
-          <div class="val" id="os-machine-total">$0.00</div>
-        </div>
-      </div>
-      <div class="status-actions" id="os-status-actions" style="display:none;">
-        <button class="status-btn status-btn-quote" id="os-need-quote">Need to Quote</button>
-        <button class="status-btn status-btn-quoted" id="os-mark-quoted">Mark as Quoted</button>
-        <button class="status-btn status-btn-noquote" id="os-no-quote">Close w/o Quote</button>
-      </div>
-      <button class="btn-primary" id="os-create-so">
-        Create Sales Order
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </button>
+      <button class="btn-primary" id="mm-save" style="margin-top:12px;">Save</button>
     </div>
   </div>
 
