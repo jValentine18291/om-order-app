@@ -49,6 +49,12 @@
           </span>
           <span class="home-txt"><strong>Technician 技术员</strong><small>Scan parts onto a service slip</small></span>
         </button>
+        <button class="role-btn role-find" id="role-find-btn">
+          <span class="role-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </span>
+          <span class="home-txt"><strong>Find Part 查找零件</strong><small>Check part location and stock</small></span>
+        </button>
       </div>
     </section>
 
@@ -88,8 +94,28 @@
           </span>
           <span class="home-txt"><strong>View Slips</strong><small>Look up any service slip</small></span>
         </button>
+        <button class="home-btn" data-go="find">
+          <span class="home-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </span>
+          <span class="home-txt"><strong>Find Part</strong><small>Check part location and stock</small></span>
+        </button>
       </div>
       <button class="switch-role" id="switch-role">Switch role</button>
+    </section>
+
+    <!-- ============ SCREEN: FIND PART ============ -->
+    <section id="screen-find" class="screen">
+      <div class="section-head">
+        <p class="eyebrow">Parts</p>
+        <h2>Find Part</h2>
+      </div>
+      <div class="field">
+        <label for="fp-q">Search by description or part no.</label>
+        <input id="fp-q" type="text" autocomplete="off" placeholder="e.g. clutch, carburetor, SZEN 140…" />
+        <div class="company-suggest" id="fp-results"></div>
+      </div>
+      <div class="fp-card" id="fp-detail" style="display:none;"></div>
     </section>
 
     <!-- ============ SCREEN: NEW SERVICE ============ -->

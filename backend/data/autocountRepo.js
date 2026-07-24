@@ -174,3 +174,82 @@ async function searchDebtors(q, limit = 12) {
   return rows.map((r) => ({ acc_no: r.AccNo, company: r.CompanyName }));
 }
 module.exports.searchDebtors = searchDebtors;
+
+// ============================================================================
+// FIND PART — read-only part search + stock info for the Find Part screen.
+// Balance = SUM(StockDTL.Qty) per item (confirmed against live data: opening
+// balance + transaction rows; this is how AutoCount derives stock balance).
+// Shelf comes from ItemUOM (base-UOM row).
+// ============================================================================
+
+// Search by description (or code) for the suggestion list.
+// The search is split into words and EVERY word must match somewhere in
+// Description, Desc2 (AutoCount's 2nd description line, typically the machine
+// model e.g. "BK3410"), or the item code. So "BK3410 Recoil" finds an item
+// with Description "Recoil Assy 2-58" and Desc2 "BK3410".
+async function searchParts(q, limit = 15) {
+  const term = String(q || "").trim();
+  if (!term) return [];
+  const cap = Math.max(1, Math.min(20, Number(limit) || 15));
+
+  const words = term.split(/\s+/).slice(0, 6); // sane cap on word count
+  const params = {};
+  const conditions = words.map((w, idx) => {
+    params[`w${idx}`] = w;
+    params[`n${idx}`] = w.replace(/\s+/g, "").toUpperCase();
+    return `( i.Description LIKE '%' + @w${idx} + '%'
+           OR i.Desc2 LIKE '%' + @w${idx} + '%'
+           OR REPLACE(UPPER(i.ItemCode), ' ', '') LIKE '%' + @n${idx} + '%' )`;
+  });
+
+  const rows = await query(
+    `SELECT TOP ${cap}
+            i.ItemCode,
+            COALESCE(NULLIF(i.Description, ''), NULLIF(i.Desc2, ''), i.ItemCode) AS Descr,
+            NULLIF(i.Desc2, '') AS Desc2
+       FROM Item i
+      WHERE i.IsActive = 'T'
+        AND ${conditions.join("\n        AND ")}
+      ORDER BY Descr`,
+    params
+  );
+  return rows.map((r) => ({
+    item_code: r.ItemCode,
+    description: r.Descr,
+    desc2: r.Desc2 && r.Desc2 !== r.Descr ? r.Desc2 : "",
+  }));
+}
+
+// Full stock card for one part: code, description, shelf, balance qty.
+async function getPartStock(code) {
+  const norm = String(code || "").replace(/\s+/g, "").toUpperCase();
+  if (!norm) return null;
+  const rows = await query(
+    `SELECT TOP 1
+            i.ItemCode,
+            COALESCE(NULLIF(i.Description, ''), NULLIF(i.Desc2, ''), i.ItemCode) AS Descr,
+            NULLIF(i.Desc2, '') AS Desc2,
+            i.BaseUOM,
+            u.Shelf,
+            (SELECT SUM(s.Qty) FROM StockDTL s
+              WHERE REPLACE(UPPER(s.ItemCode), ' ', '') = REPLACE(UPPER(i.ItemCode), ' ', '')
+            ) AS BalQty
+       FROM Item i
+       LEFT JOIN ItemUOM u ON u.ItemCode = i.ItemCode AND u.UOM = i.BaseUOM
+      WHERE REPLACE(UPPER(i.ItemCode), ' ', '') = @norm`,
+    { norm }
+  );
+  if (!rows.length) return null;
+  const r = rows[0];
+  return {
+    item_code: r.ItemCode,
+    description: r.Descr,
+    desc2: r.Desc2 && r.Desc2 !== r.Descr ? r.Desc2 : "",
+    shelf: r.Shelf || "",
+    uom: r.BaseUOM || "",
+    bal_qty: r.BalQty === null || r.BalQty === undefined ? 0 : Number(r.BalQty),
+  };
+}
+
+module.exports.searchParts = searchParts;
+module.exports.getPartStock = getPartStock;

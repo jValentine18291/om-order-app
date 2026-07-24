@@ -102,6 +102,35 @@ app.post("/api/slips", async (req, res) => {
   }
 });
 
+// Find Part: search parts by description/code (suggestion list).
+app.get("/api/parts-search", async (req, res) => {
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") return res.json({ results: [] });
+    const acRepo = require("./data/autocountRepo");
+    const results = await acRepo.searchParts(String(req.query.q || ""), 15);
+    res.json({ results });
+  } catch (err) {
+    console.error("[GET /api/parts-search]", err.message);
+    res.json({ results: [] });
+  }
+});
+
+// Find Part: stock card for one part (code, description, shelf, balance qty).
+app.get("/api/part-stock/:code", async (req, res) => {
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") return res.status(503).json({ error: "AutoCount is not enabled." });
+    const acRepo = require("./data/autocountRepo");
+    const info = await acRepo.getPartStock(req.params.code);
+    if (!info) return res.status(404).json({ error: "Part not found." });
+    res.json(info);
+  } catch (err) {
+    console.error("[GET /api/part-stock/:code]", err.message);
+    res.status(500).json({ error: "Stock lookup failed." });
+  }
+});
+
 // Search AutoCount debtors (customers) by company name, for the New Service
 // company-name suggestions. Returns empty results when AutoCount items are off,
 // so the app degrades gracefully.

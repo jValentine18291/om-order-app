@@ -1,0 +1,29 @@
+# --- Never commit these ---
+
+# HTTPS certificates & private keys
+backend/cert.pem
+backend/key.pem
+*.pem
+
+# Live databases (service slips) and SQLite side-files
+backend/om_orders.db
+backend/om_orders.db-shm
+backend/om_orders.db-wal
+*.db
+*.db-shm
+*.db-wal
+
+# Logs (service output, price audit log)
+backend/service-out.log
+backend/service-err.log
+backend/price-updates.log
+*.log
+
+# Dependencies (restored by npm install)
+node_modules/
+backend/node_modules/
+
+# OS junk
+Thumbs.db
+Desktop.ini
+.DS_Store

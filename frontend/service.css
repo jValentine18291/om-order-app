@@ -490,3 +490,61 @@ select {
   cursor: pointer;
 }
 .company-option:active { background: var(--brand-tint, #e6f2f1); }
+
+/* ---- Find Part ---- */
+.role-find {
+  background: #E7F5EC;
+  border: 2px solid #2FA45C;
+}
+.role-find .role-ic { background: #B9E2C8; color: #135A31; }
+.role-find .home-txt strong { color: #135A31; }
+.role-find .home-txt small { color: #1B7A42; }
+
+.company-option .fp-opt-desc { display: block; }
+.company-option .fp-opt-code {
+  display: block;
+  font-size: .78rem;
+  color: var(--ink-faint, #6b7a82);
+  margin-top: 2px;
+}
+.fp-empty, .fp-loading {
+  padding: 12px 14px;
+  font-size: .9rem;
+  color: var(--ink-faint, #6b7a82);
+}
+.fp-card {
+  margin-top: 14px;
+  background: #fff;
+  border: 1px solid var(--line, #e2e6ea);
+  border-radius: 14px;
+  padding: 6px 16px;
+}
+.fp-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line, #eef1f3);
+}
+.fp-row:last-child { border-bottom: none; }
+.fp-lbl {
+  flex: 0 0 auto;
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--ink-faint, #6b7a82);
+}
+.fp-val {
+  text-align: right;
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--ink, #0b1f2a);
+  word-break: break-word;
+}
+.fp-qty { font-size: 1.15rem; font-weight: 800; }
+.fp-qty-ok { color: #1B7A42; }
+.fp-qty-zero { color: #c62828; }
+
+/* Find Part: model line (Desc2) styling */
+.fp-opt-model { color: var(--ink-faint, #6b7a82); font-weight: 400; }
+.fp-val-model { font-weight: 500; color: var(--ink-faint, #6b7a82); font-size: .88rem; }

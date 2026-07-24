@@ -56,7 +56,7 @@ function formatDate(ts) {
 }
 
 // ---- Screen navigation -----------------------------------------------------
-const SCREENS = ["role", "home", "new", "open", "close", "view"];
+const SCREENS = ["role", "home", "new", "open", "close", "view", "find"];
 
 // ---- Role (Sales Staff vs Technician) ---------------------------------------
 // Remembered per phone in localStorage. Technicians see only Open Service;
@@ -75,7 +75,7 @@ function applyRoleToHome() {
   const role = getRole();
   const tech = role === "tech";
   document.querySelectorAll("#screen-home .home-btn").forEach((b) => {
-    b.style.display = tech && b.dataset.go !== "open" ? "none" : "flex";
+    b.style.display = tech && b.dataset.go !== "open" && b.dataset.go !== "find" ? "none" : "flex";
   });
   const badge = $("role-badge");
   if (badge) {
@@ -1357,9 +1357,71 @@ document.querySelectorAll(".home-btn").forEach((b) =>
     else if (go === "open") { enterOpenService(); }
     else if (go === "close") { enterCloseService(); }
     else if (go === "view") { enterViewSlips(); }
+    else if (go === "find") { enterFindPart(); }
   })
 );
 $("home-link").addEventListener("click", goHome);
+
+// ---- Find Part --------------------------------------------------------------
+// Search AutoCount by description or code; tap a result to see the stock card
+// (part no., description, shelf location, balance qty). Read-only.
+function enterFindPart() {
+  $("fp-q").value = "";
+  $("fp-results").innerHTML = "";
+  $("fp-detail").style.display = "none";
+  $("fp-detail").innerHTML = "";
+  showScreen("find");
+  setTimeout(() => $("fp-q").focus(), 50);
+}
+// The role-screen card opens Find Part directly without choosing a role.
+$("role-find-btn").addEventListener("click", enterFindPart);
+
+let fpDebounce = null;
+$("fp-q").addEventListener("input", () => {
+  clearTimeout(fpDebounce);
+  const q = $("fp-q").value.trim();
+  const box = $("fp-results");
+  $("fp-detail").style.display = "none";
+  if (q.length < 2) { box.innerHTML = ""; return; }
+  fpDebounce = setTimeout(async () => {
+    try {
+      const data = await api(`/api/parts-search?q=${encodeURIComponent(q)}`);
+      const list = data.results || [];
+      if (!list.length) {
+        box.innerHTML = `<div class="fp-empty">No matching parts</div>`;
+        return;
+      }
+      box.innerHTML = list.map((p) =>
+        `<button type="button" class="company-option" data-code="${escapeAttr(p.item_code)}">
+           <span class="fp-opt-desc">${escapeHtml(p.description)}${p.desc2 ? ` <span class="fp-opt-model">· ${escapeHtml(p.desc2)}</span>` : ""}</span>
+           <span class="fp-opt-code mono">${escapeHtml(p.item_code)}</span>
+         </button>`
+      ).join("");
+      box.querySelectorAll(".company-option").forEach((btn) =>
+        btn.addEventListener("click", () => showPartStock(btn.dataset.code))
+      );
+    } catch (_) { box.innerHTML = ""; }
+  }, 250);
+});
+
+async function showPartStock(code) {
+  const detail = $("fp-detail");
+  $("fp-results").innerHTML = "";
+  detail.style.display = "block";
+  detail.innerHTML = `<div class="fp-loading">Looking up stock…</div>`;
+  try {
+    const p = await api(`/api/part-stock/${encodeURIComponent(code)}`);
+    const qty = Number(p.bal_qty);
+    const qtyStr = Number.isInteger(qty) ? String(qty) : qty.toFixed(2);
+    detail.innerHTML = `
+      <div class="fp-row"><span class="fp-lbl">Part No.</span><span class="fp-val mono">${escapeHtml(p.item_code)}</span></div>
+      <div class="fp-row"><span class="fp-lbl">Description</span><span class="fp-val">${escapeHtml(p.description)}${p.desc2 ? `<br><span class="fp-val-model">${escapeHtml(p.desc2)}</span>` : ""}</span></div>
+      <div class="fp-row"><span class="fp-lbl">Location / Shelf</span><span class="fp-val">${p.shelf ? escapeHtml(p.shelf) : "—"}</span></div>
+      <div class="fp-row"><span class="fp-lbl">Bal. Qty</span><span class="fp-val fp-qty ${qty > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${qtyStr}${p.uom ? " " + escapeHtml(p.uom) : ""}</span></div>`;
+  } catch (e) {
+    detail.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Lookup failed")}</div>`;
+  }
+}
 
 // New Service
 $("ns-add-machine").addEventListener("click", () => addMachineRow());
