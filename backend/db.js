@@ -236,4 +236,19 @@ if (partCount === 0) {
   console.log(`[db] auto-seeded ${parts.length} parts`);
 }
 
+// Reorder requests raised from the Find Part screen ("Order more"), consumed
+// by the Purchaser screen.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS part_requests (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_code     TEXT NOT NULL,
+    description   TEXT DEFAULT '',
+    qty_requested INTEGER NOT NULL,
+    requester     TEXT DEFAULT '',
+    status        TEXT DEFAULT 'PENDING',
+    created_at    TEXT DEFAULT (datetime('now', 'localtime')),
+    ordered_at    TEXT
+  )
+`);
+
 module.exports = db;

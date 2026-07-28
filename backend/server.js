@@ -102,6 +102,54 @@ app.post("/api/slips", async (req, res) => {
   }
 });
 
+// ---- Part reorder requests (Find Part "Order more" -> Purchaser screen) ----
+app.post("/api/part-requests", async (req, res) => {
+  try {
+    const row = await data.requests.createPartRequest(req.body || {});
+    res.status(201).json(row);
+  } catch (err) {
+    if (err.status === 400 || err.status === 409) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/part-requests]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to save request" });
+  }
+});
+
+// Pending requests, each enriched with the current AutoCount balance (when
+// AutoCount is enabled) so the purchaser sees live stock next to the ask.
+app.get("/api/part-requests", async (req, res) => {
+  try {
+    const rows = await data.requests.listPartRequests(String(req.query.status || "PENDING"));
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource === "autocount" && rows.length) {
+      const acRepo = require("./data/autocountRepo");
+      for (const r of rows) {
+        try {
+          const info = await acRepo.getPartStock(r.item_code);
+          r.current_qty = info ? info.bal_qty : null;
+          if (info && !r.description) r.description = info.description;
+        } catch (_) { r.current_qty = null; }
+      }
+    } else {
+      for (const r of rows) r.current_qty = null;
+    }
+    res.json(rows);
+  } catch (err) {
+    console.error("[GET /api/part-requests]", err);
+    res.status(500).json({ error: "Failed to load requests" });
+  }
+});
+
+app.patch("/api/part-requests/:id/ordered", async (req, res) => {
+  try {
+    const result = await data.requests.markPartRequestOrdered(Number(req.params.id));
+    res.json(result);
+  } catch (err) {
+    if (err.status === 404) return res.status(404).json({ error: err.message });
+    console.error("[PATCH /api/part-requests/:id/ordered]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to update request" });
+  }
+});
+
 // Find Part: search parts by description/code (suggestion list).
 app.get("/api/parts-search", async (req, res) => {
   try {

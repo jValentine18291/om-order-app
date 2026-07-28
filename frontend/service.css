@@ -685,3 +685,45 @@ select {
 }
 .sd-req-service { background: #E7F5EC; color: #135A31; border: 1.5px solid #2FA45C; }
 .sd-req-quote { background: #FDF0E0; color: #7A4200; border: 1.5px solid #EF9F27; }
+
+/* ---- Purchaser role card ---- */
+.role-purchase {
+  background: #F0EAFB;
+  border: 2px solid #8B6FD8;
+}
+.role-purchase .role-ic { background: #D8CCF2; color: #4A2F91; }
+.role-purchase .home-txt strong { color: #4A2F91; }
+.role-purchase .home-txt small { color: #5B3FA8; }
+
+/* ---- Purchaser: requested parts list ---- */
+#pu-list { display: flex; flex-direction: column; gap: 10px; }
+.pu-card {
+  background: #fff;
+  border: 1px solid var(--line, #e2e6ea);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+.pu-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.pu-desc { font-weight: 700; color: var(--ink, #0b1f2a); }
+.pu-code { font-size: .8rem; color: var(--ink-faint, #6b7a82); margin-top: 2px; }
+.pu-done {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1.5px solid #2FA45C;
+  background: #E7F5EC;
+  color: #135A31;
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.pu-grid {
+  display: flex;
+  gap: 18px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.pu-cell { display: flex; flex-direction: column; gap: 2px; }
+.pu-lbl { font-size: .72rem; font-weight: 600; color: var(--ink-faint, #6b7a82); }
+.pu-val { font-size: 1.05rem; font-weight: 800; color: var(--ink, #0b1f2a); }

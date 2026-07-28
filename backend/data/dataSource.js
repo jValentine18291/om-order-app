@@ -60,4 +60,9 @@ module.exports = {
     createSlipOrder: (...a) => dataRepo.slips.createSlipOrder(...a),
     closeSlip: (...a) => dataRepo.slips.closeSlip(...a),
   },
+  requests: {
+    createPartRequest: (...a) => sqliteRepo.partRequests.createPartRequest(...a),
+    listPartRequests: (...a) => sqliteRepo.partRequests.listPartRequests(...a),
+    markPartRequestOrdered: (...a) => sqliteRepo.partRequests.markPartRequestOrdered(...a),
+  },
 };

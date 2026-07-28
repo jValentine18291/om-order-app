@@ -350,7 +350,8 @@ function setSlipStatus(slipNumber, status) {
 // listSlips: 'active' (not closed) or 'all'. Returns lightweight rows (with
 // machines) capped to `limit`, newest first.
 function searchSlips(query = "", scope = "all", limit = 20) {
-  const q = String(query).replace(/\s+/g, "");
+  const raw = String(query).trim();
+  const q = raw.replace(/\s+/g, ""); // digits-style matching for slip numbers
   const cap = Math.max(1, Math.min(50, Number(limit) || 20));
 
   let sql, params;
@@ -365,10 +366,12 @@ function searchSlips(query = "", scope = "all", limit = 20) {
     sql = `SELECT * FROM service_slips WHERE ${scopeClause} ORDER BY slip_number DESC LIMIT ?`;
     params = [cap + 1]; // +1 to detect "more results exist"
   } else {
+    // Match the slip number (spaces stripped) OR the company name (as typed,
+    // case-insensitive) so "Tan Land" finds Tan Landscaping's slips.
     sql = `SELECT * FROM service_slips
-             WHERE ${scopeClause} AND slip_number LIKE ?
+             WHERE ${scopeClause} AND (slip_number LIKE ? OR company LIKE ?)
              ORDER BY slip_number DESC LIMIT ?`;
-    params = [`%${q}%`, cap + 1];
+    params = [`%${q}%`, `%${raw}%`, cap + 1];
   }
 
   const rows = db.prepare(sql).all(...params);
@@ -386,3 +389,53 @@ const slips = {
 };
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };
+
+// ---- Part reorder requests ("Order more" -> Purchaser list) -----------------
+function createPartRequest({ item_code, description = "", qty_requested, requester = "" } = {}) {
+  const code = String(item_code || "").trim();
+  const qty = Number(qty_requested);
+  if (!code) { const e = new Error("Part code is required."); e.status = 400; throw e; }
+  if (!Number.isFinite(qty) || qty < 1) { const e = new Error("Order quantity must be at least 1."); e.status = 400; throw e; }
+
+  // Failsafe: one open request per part. If a PENDING request already exists
+  // for this part (codes compared space-stripped, case-insensitive), refuse
+  // and tell the requester who already asked and for how many.
+  const norm = code.replace(/\s+/g, "").toUpperCase();
+  const existing = db.prepare(
+    `SELECT * FROM part_requests
+      WHERE status = 'PENDING'
+        AND REPLACE(UPPER(item_code), ' ', '') = ?`
+  ).get(norm);
+  if (existing) {
+    const who = existing.requester || "someone";
+    const when = String(existing.created_at || "").split(" ")[0];
+    const e = new Error(
+      `This part already has an open request: ${existing.qty_requested} requested by ${who}${when ? " on " + when : ""}.`
+    );
+    e.status = 409; throw e;
+  }
+
+  const info = db.prepare(
+    `INSERT INTO part_requests (item_code, description, qty_requested, requester)
+     VALUES (?, ?, ?, ?)`
+  ).run(code, String(description || ""), Math.floor(qty), String(requester || "").trim());
+  return db.prepare("SELECT * FROM part_requests WHERE id = ?").get(info.lastInsertRowid);
+}
+
+function listPartRequests(status = "PENDING") {
+  const s = String(status || "PENDING").toUpperCase();
+  if (s === "ALL") {
+    return db.prepare("SELECT * FROM part_requests ORDER BY id DESC").all();
+  }
+  return db.prepare("SELECT * FROM part_requests WHERE status = ? ORDER BY id DESC").all(s);
+}
+
+function markPartRequestOrdered(id) {
+  const row = db.prepare("SELECT * FROM part_requests WHERE id = ?").get(id);
+  if (!row) { const e = new Error("Request not found."); e.status = 404; throw e; }
+  db.prepare("UPDATE part_requests SET status = 'ORDERED', ordered_at = datetime('now','localtime') WHERE id = ?").run(id);
+  return { ok: true };
+}
+
+const partRequests = { createPartRequest, listPartRequests, markPartRequestOrdered };
+module.exports.partRequests = partRequests;

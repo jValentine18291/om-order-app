@@ -58,7 +58,7 @@ function formatDate(ts) {
 }
 
 // ---- Screen navigation -----------------------------------------------------
-const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip"];
+const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip", "purchase"];
 
 // ---- Role (Sales Staff vs Technician) ---------------------------------------
 // Remembered per phone in localStorage. Technicians see only Open Service;
@@ -93,6 +93,8 @@ function showScreen(name) {
   if (name !== "slip") {
     const mm = $("machine-modal");
     if (mm) { mm.style.display = "none"; document.body.style.overflow = ""; }
+    const om = $("order-modal");
+    if (om) om.style.display = "none";
     try { stopQrScanner(); } catch (_) {}
   }
   window.scrollTo(0, 0);
@@ -1628,6 +1630,8 @@ function enterFindPart() {
   $("fp-results").innerHTML = "";
   $("fp-detail").style.display = "none";
   $("fp-detail").innerHTML = "";
+  $("fp-order-more").style.display = "none";
+  fpCurrentPart = null;
   showScreen("find");
   setTimeout(() => $("fp-q").focus(), 50);
 }
@@ -1640,6 +1644,7 @@ $("fp-q").addEventListener("input", () => {
   const q = $("fp-q").value.trim();
   const box = $("fp-results");
   $("fp-detail").style.display = "none";
+  $("fp-order-more").style.display = "none";
   if (q.length < 2) { box.innerHTML = ""; return; }
   fpDebounce = setTimeout(async () => {
     try {
@@ -1662,13 +1667,18 @@ $("fp-q").addEventListener("input", () => {
   }, 250);
 });
 
+let fpCurrentPart = null; // the part shown in the Find Part detail card
+
 async function showPartStock(code) {
   const detail = $("fp-detail");
   $("fp-results").innerHTML = "";
   detail.style.display = "block";
+  $("fp-order-more").style.display = "none";
+  fpCurrentPart = null;
   detail.innerHTML = `<div class="fp-loading">Looking up stock…</div>`;
   try {
     const p = await api(`/api/part-stock/${encodeURIComponent(code)}`);
+    fpCurrentPart = p;
     const qty = Number(p.bal_qty);
     const qtyStr = Number.isInteger(qty) ? String(qty) : qty.toFixed(2);
     detail.innerHTML = `
@@ -1676,8 +1686,106 @@ async function showPartStock(code) {
       <div class="fp-row"><span class="fp-lbl">Description</span><span class="fp-val">${escapeHtml(p.description)}${p.desc2 ? `<br><span class="fp-val-model">${escapeHtml(p.desc2)}</span>` : ""}</span></div>
       <div class="fp-row"><span class="fp-lbl">Location / Shelf</span><span class="fp-val">${p.shelf ? escapeHtml(p.shelf) : "—"}</span></div>
       <div class="fp-row"><span class="fp-lbl">Bal. Qty</span><span class="fp-val fp-qty ${qty > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${qtyStr}${p.uom ? " " + escapeHtml(p.uom) : ""}</span></div>`;
+    $("fp-order-more").style.display = "block";
   } catch (e) {
     detail.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Lookup failed")}</div>`;
+  }
+}
+
+// ---- Order More popup -------------------------------------------------------
+$("fp-order-more").addEventListener("click", () => {
+  if (!fpCurrentPart) return;
+  $("om-part-name").textContent = `${fpCurrentPart.description} · ${fpCurrentPart.item_code}`;
+  $("om-qty").value = "";
+  $("om-requester").value = "";
+  $("order-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+  setTimeout(() => $("om-qty").focus(), 50);
+});
+function closeOrderModal() {
+  $("order-modal").style.display = "none";
+  document.body.style.overflow = "";
+}
+$("om-close").addEventListener("click", closeOrderModal);
+$("om-submit").addEventListener("click", async () => {
+  if (!fpCurrentPart) return;
+  const qty = parseInt($("om-qty").value, 10);
+  const requester = $("om-requester").value.trim();
+  if (!Number.isFinite(qty) || qty < 1) { toast("Enter an order quantity", "err"); return; }
+  if (!requester) { toast("Enter the requester's name", "err"); return; }
+  $("om-submit").disabled = true;
+  try {
+    await api(`/api/part-requests`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        item_code: fpCurrentPart.item_code,
+        description: fpCurrentPart.description,
+        qty_requested: qty,
+        requester,
+      }),
+    });
+    toast("Request submitted", "ok");
+    closeOrderModal();
+  } catch (e) {
+    toast(e.message, "err");
+  }
+  $("om-submit").disabled = false;
+});
+
+// ---- Purchaser screen: pending reorder requests -----------------------------
+function enterPurchaser() {
+  showScreen("purchase");
+  loadPartRequests();
+}
+$("role-purchase-btn").addEventListener("click", enterPurchaser);
+
+async function loadPartRequests() {
+  const wrap = $("pu-list");
+  wrap.innerHTML = `<div class="fp-loading">Loading requests…</div>`;
+  try {
+    const rows = await api(`/api/part-requests`);
+    if (!rows.length) {
+      wrap.innerHTML = `<div class="fp-empty">No parts have been requested</div>`;
+      return;
+    }
+    wrap.innerHTML = rows.map((r) => {
+      const cur = r.current_qty === null || r.current_qty === undefined
+        ? "—"
+        : (Number.isInteger(Number(r.current_qty)) ? String(r.current_qty) : Number(r.current_qty).toFixed(2));
+      const low = r.current_qty !== null && Number(r.current_qty) <= 0;
+      return `
+      <div class="pu-card">
+        <div class="pu-top">
+          <div>
+            <div class="pu-desc">${escapeHtml(r.description || r.item_code)}</div>
+            <div class="pu-code mono">${escapeHtml(r.item_code)}</div>
+          </div>
+          <button class="pu-done" data-req="${r.id}">Mark ordered</button>
+        </div>
+        <div class="pu-grid">
+          <div class="pu-cell"><span class="pu-lbl">Current Qty</span><span class="pu-val ${low ? "fp-qty-zero" : ""}">${cur}</span></div>
+          <div class="pu-cell"><span class="pu-lbl">Qty Requested</span><span class="pu-val">${r.qty_requested}</span></div>
+          <div class="pu-cell"><span class="pu-lbl">Requester</span><span class="pu-val">${escapeHtml(r.requester || "—")}</span></div>
+        </div>
+      </div>`;
+    }).join("");
+    wrap.querySelectorAll(".pu-done").forEach((btn) =>
+      btn.addEventListener("click", async () => {
+        btn.disabled = true;
+        try {
+          await api(`/api/part-requests/${btn.dataset.req}/ordered`, { method: "PATCH" });
+          toast("Marked as ordered", "ok");
+          loadPartRequests();
+        } catch (e) {
+          toast(e.message, "err");
+          btn.disabled = false;
+        }
+      })
+    );
+  } catch (e) {
+    wrap.innerHTML = "";
+    toast(e.message, "err");
   }
 }
 
