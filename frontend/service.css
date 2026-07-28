@@ -756,3 +756,6 @@ select {
   font-weight: 600;
   cursor: pointer;
 }
+
+/* Toasts must always be visible — above modal overlays (which sit at 60). */
+.toast { z-index: 100; }
