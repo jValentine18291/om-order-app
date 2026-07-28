@@ -1378,11 +1378,18 @@ let qrZxingReader = null;
 let qrCooldown = false;
 let qrPending = null;
 
-function qrStatus(html) { const el = $("qr-status"); if (el) el.innerHTML = html; }
+// The scanner can serve two places: the machine popup (default — feeds
+// addByCode) and the Find Part screen (feeds the stock lookup). qrTarget
+// says which video/status elements to use and what to do with a scanned code.
+const QR_DEFAULT_TARGET = { videoId: "qr-video", statusId: "qr-status", onCode: (text) => addByCode(text) };
+let qrTarget = QR_DEFAULT_TARGET;
 
-async function startQrScanner() {
+function qrStatus(html) { const el = $(qrTarget.statusId); if (el) el.innerHTML = html; }
+
+async function startQrScanner(target) {
   await stopQrScanner();
-  const video = $("qr-video");
+  qrTarget = target || QR_DEFAULT_TARGET;
+  const video = $(qrTarget.videoId);
   if (!video) return;
 
   try {
@@ -1440,7 +1447,7 @@ async function stopQrScanner() {
     qrStream = null;
   }
   qrPending = null;
-  const video = $("qr-video");
+  const video = $(qrTarget.videoId);
   if (video) { try { video.srcObject = null; } catch (_) {} }
 }
 
@@ -1455,7 +1462,7 @@ function onQrScan(text) {
   qrCooldown = true;
   qrPending = null;
   qrStatus(`<span class="led"></span> Scanned ${escapeHtml(text)}`);
-  addByCode(text);
+  qrTarget.onCode(text);
   setTimeout(() => (qrCooldown = false), 1500);
 }
 
@@ -1632,11 +1639,37 @@ function enterFindPart() {
   $("fp-detail").innerHTML = "";
   $("fp-order-more").style.display = "none";
   fpCurrentPart = null;
+  $("fp-scan-area").style.display = "none";
+  $("fp-scan").style.display = "flex";
   showScreen("find");
   setTimeout(() => $("fp-q").focus(), 50);
 }
 // The role-screen card opens Find Part directly without choosing a role.
 $("role-find-btn").addEventListener("click", enterFindPart);
+
+// QR scanning inside Find Part: scan a part's code to jump straight to its
+// stock card. Uses the shared scanner pointed at Find Part's own elements.
+function stopFindScan() {
+  $("fp-scan-area").style.display = "none";
+  $("fp-scan").style.display = "flex";
+  try { stopQrScanner(); } catch (_) {}
+}
+$("fp-scan").addEventListener("click", () => {
+  $("fp-results").innerHTML = "";
+  $("fp-detail").style.display = "none";
+  $("fp-order-more").style.display = "none";
+  $("fp-scan").style.display = "none";
+  $("fp-scan-area").style.display = "flex";
+  startQrScanner({
+    videoId: "fp-video",
+    statusId: "fp-scan-status",
+    onCode: (code) => {
+      stopFindScan();
+      showPartStock(code);
+    },
+  });
+});
+$("fp-scan-stop").addEventListener("click", stopFindScan);
 
 let fpDebounce = null;
 $("fp-q").addEventListener("input", () => {
