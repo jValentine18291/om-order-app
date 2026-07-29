@@ -759,3 +759,5 @@ select {
 
 /* Toasts must always be visible — above modal overlays (which sit at 60). */
 .toast { z-index: 100; }
+
+.role-badge-purchase { background: #F0EAFB; color: #4A2F91; }

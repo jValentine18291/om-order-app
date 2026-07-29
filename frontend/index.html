@@ -41,7 +41,7 @@
           <span class="role-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.5a4 4 0 0 1 0 7"/></svg>
           </span>
-          <span class="home-txt"><strong>Sales Staff</strong><small>Register, scan, close and view slips</small></span>
+          <span class="home-txt"><strong>Sales Staff</strong><small>Register, close and view slips</small></span>
         </button>
         <button class="role-btn role-tech" data-role="tech">
           <span class="role-ic">
@@ -49,17 +49,11 @@
           </span>
           <span class="home-txt"><strong>Technician 技术员</strong><small>Scan parts onto a service slip</small></span>
         </button>
-        <button class="role-btn role-find" id="role-find-btn">
-          <span class="role-ic">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-          </span>
-          <span class="home-txt"><strong>Find Part 查找零件</strong><small>Check part location and stock</small></span>
-        </button>
-        <button class="role-btn role-purchase" id="role-purchase-btn">
+        <button class="role-btn role-purchase" data-role="purchaser">
           <span class="role-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
           </span>
-          <span class="home-txt"><strong>Purchaser</strong><small>Parts requested for reordering</small></span>
+          <span class="home-txt"><strong>Purchaser</strong><small>Slips, parts and purchasing</small></span>
         </button>
       </div>
     </section>
@@ -99,6 +93,18 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
           </span>
           <span class="home-txt"><strong>View Slips</strong><small>Look up any service slip</small></span>
+        </button>
+        <button class="home-btn" data-go="find">
+          <span class="home-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </span>
+          <span class="home-txt"><strong>Find Part</strong><small>Check part location and stock</small></span>
+        </button>
+        <button class="home-btn" data-go="requests">
+          <span class="home-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+          </span>
+          <span class="home-txt"><strong>Requested Parts</strong><small>Parts requested for reordering</small></span>
         </button>
       </div>
       <button class="switch-role" id="switch-role">Switch role</button>

@@ -75,14 +75,22 @@ function setRole(role) {
 }
 function applyRoleToHome() {
   const role = getRole();
-  const tech = role === "tech";
+  // Which home functions each account sees (per John's mapping, 28 Jul 2026):
+  const ROLE_FUNCTIONS = {
+    sales: ["new", "close", "view", "find"],
+    tech: ["open", "view", "find"],
+    purchaser: ["new", "close", "view", "find", "requests"],
+  };
+  const allowed = ROLE_FUNCTIONS[role] || ROLE_FUNCTIONS.sales;
   document.querySelectorAll("#screen-home .home-btn").forEach((b) => {
-    b.style.display = tech && b.dataset.go !== "open" ? "none" : "flex";
+    b.style.display = allowed.includes(b.dataset.go) ? "flex" : "none";
   });
   const badge = $("role-badge");
   if (badge) {
-    badge.textContent = tech ? "Technician 技术员" : "Sales Staff";
-    badge.className = "role-badge " + (tech ? "role-badge-tech" : "role-badge-sales");
+    const label = role === "tech" ? "Technician 技术员" : role === "purchaser" ? "Purchaser" : "Sales";
+    const cls = role === "tech" ? "role-badge-tech" : role === "purchaser" ? "role-badge-purchase" : "role-badge-sales";
+    badge.textContent = label;
+    badge.className = "role-badge " + cls;
   }
 }
 function showScreen(name) {
@@ -1625,6 +1633,8 @@ document.querySelectorAll(".home-btn").forEach((b) =>
     else if (go === "open") { enterOpenService(); }
     else if (go === "close") { enterCloseService(); }
     else if (go === "view") { enterViewSlips(); }
+    else if (go === "find") { enterFindPart(); }
+    else if (go === "requests") { enterPurchaser(); }
   })
 );
 $("home-link").addEventListener("click", goHome);
@@ -1644,9 +1654,6 @@ function enterFindPart() {
   showScreen("find");
   setTimeout(() => $("fp-q").focus(), 50);
 }
-// The role-screen card opens Find Part directly without choosing a role.
-$("role-find-btn").addEventListener("click", enterFindPart);
-
 // QR scanning inside Find Part: scan a part's code to jump straight to its
 // stock card. Uses the shared scanner pointed at Find Part's own elements.
 function stopFindScan() {
@@ -1771,7 +1778,6 @@ function enterPurchaser() {
   showScreen("purchase");
   loadPartRequests();
 }
-$("role-purchase-btn").addEventListener("click", enterPurchaser);
 
 async function loadPartRequests() {
   const wrap = $("pu-list");
