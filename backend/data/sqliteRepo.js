@@ -439,3 +439,10 @@ function markPartRequestOrdered(id) {
 
 const partRequests = { createPartRequest, listPartRequests, markPartRequestOrdered };
 module.exports.partRequests = partRequests;
+
+// Fast count of pending reorder requests (for the Purchaser notification).
+function countPendingPartRequests() {
+  const row = db.prepare("SELECT COUNT(*) AS n FROM part_requests WHERE status = 'PENDING'").get();
+  return row ? Number(row.n) : 0;
+}
+module.exports.partRequests.countPendingPartRequests = countPendingPartRequests;

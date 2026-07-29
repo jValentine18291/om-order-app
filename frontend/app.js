@@ -92,7 +92,30 @@ function applyRoleToHome() {
     badge.textContent = label;
     badge.className = "role-badge " + cls;
   }
+  updatePurchaserNotify(role);
 }
+
+// Purchaser-only: a banner at the top of home when parts are waiting to be
+// ordered. Tapping it opens the Requested Parts list. Fails silently — a
+// broken badge must never disturb the home screen.
+async function updatePurchaserNotify(role) {
+  const bar = $("pu-notify");
+  if (!bar) return;
+  if (role !== "purchaser") { bar.style.display = "none"; return; }
+  try {
+    const data = await api(`/api/part-requests/count`);
+    const n = Number(data.count) || 0;
+    if (n > 0) {
+      bar.innerHTML = `🛒 <strong>${n} part${n === 1 ? "" : "s"}</strong> requested for ordering — tap to view`;
+      bar.style.display = "block";
+    } else {
+      bar.style.display = "none";
+    }
+  } catch (_) {
+    bar.style.display = "none";
+  }
+}
+$("pu-notify").addEventListener("click", () => enterPurchaser());
 function showScreen(name) {
   SCREENS.forEach((s) => $("screen-" + s).classList.toggle("active", s === name));
   // Home link visible everywhere except home/role

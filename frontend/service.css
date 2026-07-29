@@ -761,3 +761,20 @@ select {
 .toast { z-index: 100; }
 
 .role-badge-purchase { background: #F0EAFB; color: #4A2F91; }
+
+/* ---- Purchaser notification bar (home screen) ---- */
+.pu-notify {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: #FDF0E0;
+  border: 1.5px solid #EF9F27;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  font: inherit;
+  font-size: .92rem;
+  color: #7A4200;
+  cursor: pointer;
+}
+.pu-notify:active { background: #FAE6C8; }

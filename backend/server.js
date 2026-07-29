@@ -114,6 +114,17 @@ app.post("/api/part-requests", async (req, res) => {
   }
 });
 
+// Lightweight pending-request count for the Purchaser home notification.
+app.get("/api/part-requests/count", async (req, res) => {
+  try {
+    const count = await data.requests.countPendingPartRequests();
+    res.json({ count });
+  } catch (err) {
+    console.error("[GET /api/part-requests/count]", err);
+    res.json({ count: 0 }); // a broken badge should never break the home screen
+  }
+});
+
 // Pending requests, each enriched with the current AutoCount balance (when
 // AutoCount is enabled) so the purchaser sees live stock next to the ask.
 app.get("/api/part-requests", async (req, res) => {
