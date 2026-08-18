@@ -19,28 +19,28 @@
   align-items: center;
   gap: 16px;
   width: 100%;
-  padding: 20px 18px;
+  padding: 22px 18px;
   background: #fff;
-  border: 1px solid var(--line, #e2e6ea);
+  border: 1px solid var(--border);
   border-radius: 16px;
   cursor: pointer;
   text-align: left;
   transition: transform .08s ease, box-shadow .15s ease;
-  box-shadow: 0 1px 3px rgba(11,31,42,.06);
+  box-shadow: 0 1px 3px rgba(22,36,31,.06);
 }
 .home-btn:active { transform: scale(.99); }
 .home-btn .home-ic {
   flex: 0 0 auto;
   width: 48px; height: 48px;
   display: flex; align-items: center; justify-content: center;
-  background: var(--brand-tint, #e6f2f1);
-  color: var(--brand, #1f6f78);
-  border-radius: 12px;
+  background: var(--primary-grad);
+  color: #fff;
+  border-radius: 13px;
 }
 .home-btn .home-ic svg { width: 26px; height: 26px; }
 .home-btn .home-txt { display: flex; flex-direction: column; gap: 2px; }
-.home-btn .home-txt strong { font-size: 1.05rem; color: var(--ink, #0b1f2a); }
-.home-btn .home-txt small { color: var(--ink-faint, #6b7a82); font-size: .85rem; }
+.home-btn .home-txt strong { font-size: 1.15rem; font-weight: 700; color: var(--ink); }
+.home-btn .home-txt small { color: var(--ink-soft); font-size: .95rem; }
 
 /* ---- Required-field asterisk ---- */
 .req { color: #c61f2b; font-weight: 700; }
@@ -56,10 +56,10 @@
   padding: 13px 14px;
   font: inherit;
   font-size: 1rem;
-  border: 1px solid var(--line, #e2e6ea);
+  border: 1px solid var(--border);
   border-radius: 12px;
   background: #fff;
-  color: var(--ink, #0b1f2a);
+  color: var(--ink);
   box-sizing: border-box;
 }
 
@@ -69,10 +69,10 @@ select {
   padding: 13px 14px;
   font: inherit;
   font-size: 1rem;
-  border: 1px solid var(--line, #e2e6ea);
+  border: 1px solid var(--border);
   border-radius: 12px;
   background: #fff;
-  color: var(--ink, #0b1f2a);
+  color: var(--ink);
   -webkit-appearance: none;
   appearance: none;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236b7a82' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
@@ -94,7 +94,7 @@ select {
   min-width: 0;
   padding: 13px 14px;
   font: inherit;
-  border: 1px solid var(--line, #e2e6ea);
+  border: 1px solid var(--border);
   border-radius: 12px;
   box-sizing: border-box;
 }
@@ -103,7 +103,7 @@ select {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  border: 1px solid var(--line, #e2e6ea);
+  border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -114,7 +114,7 @@ select {
   background: #f5f7f8;
   font-size: 1.2rem;
   font-weight: 600;
-  color: var(--ink, #0b1f2a);
+  color: var(--ink);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   padding: 0;
@@ -126,8 +126,8 @@ select {
   min-width: 46px;
   height: 44px;
   border: none;
-  border-left: 1px solid var(--line, #e2e6ea);
-  border-right: 1px solid var(--line, #e2e6ea);
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
   text-align: center;
   font: inherit;
   font-size: 1rem;
@@ -145,7 +145,7 @@ select {
   width: 44px; height: 44px;
   display: flex; align-items: center; justify-content: center;
   background: #fff;
-  border: 1px solid var(--line, #e2e6ea);
+  border: 1px solid var(--border);
   border-radius: 12px;
   color: #c61f2b;
   cursor: pointer;
@@ -154,15 +154,15 @@ select {
 
 /* ---- Slip context banner (Open / Close) ---- */
 .slip-context {
-  background: var(--brand-tint, #e6f2f1);
+  background: var(--primary-tint);
   border-radius: 12px;
   padding: 12px 14px;
   margin-bottom: 14px;
   font-size: .92rem;
-  color: var(--ink, #0b1f2a);
+  color: var(--ink);
 }
 .slip-context .sub {
-  color: var(--ink-faint, #6b7a82);
+  color: var(--ink-faint);
   font-size: .84rem;
   margin-top: 3px;
 }
@@ -170,7 +170,7 @@ select {
 /* ---- View Slips: read-only detail ---- */
 .vs-card {
   background: #fff;
-  border: 1px solid var(--line, #e2e6ea);
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 16px;
   margin-bottom: 14px;
@@ -182,15 +182,15 @@ select {
   gap: 12px;
   margin-bottom: 6px;
 }
-.vs-company { font-size: 1.1rem; font-weight: 700; color: var(--ink, #0b1f2a); }
-.vs-sub { color: var(--ink-faint, #6b7a82); font-size: .85rem; margin-top: 3px; }
+.vs-company { font-size: 1.1rem; font-weight: 700; color: var(--ink); }
+.vs-sub { color: var(--ink-faint); font-size: .85rem; margin-top: 3px; }
 .vs-notes {
   margin-top: 10px;
   padding: 10px 12px;
-  background: var(--brand-tint, #e6f2f1);
+  background: var(--primary-tint);
   border-radius: 10px;
   font-size: .9rem;
-  color: var(--ink, #0b1f2a);
+  color: var(--ink);
 }
 .vs-status {
   flex: 0 0 auto;
@@ -200,23 +200,23 @@ select {
   border-radius: 999px;
   white-space: nowrap;
 }
-.vs-OPEN { background: #e6f2f1; color: #1f6f78; }
+.vs-OPEN { background: var(--primary-tint); color: var(--primary); }
 .vs-CALL_CUSTOMER { background: #fff3e0; color: #b26a00; }
 .vs-CLOSED { background: #eceff1; color: #5a6b73; }
 
 .vs-machine {
   background: #fff;
-  border: 1px solid var(--line, #e2e6ea);
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 14px 16px;
   margin-bottom: 12px;
 }
 .vs-machine-name {
   font-weight: 700;
-  color: var(--ink, #0b1f2a);
+  color: var(--ink);
   margin-bottom: 8px;
   padding-bottom: 8px;
-  border-bottom: 1px solid var(--line, #e2e6ea);
+  border-bottom: 1px solid var(--border);
 }
 .vs-part {
   display: flex;
@@ -226,25 +226,25 @@ select {
   border-bottom: 1px solid #f2f4f6;
 }
 .vs-part:last-of-type { border-bottom: none; }
-.vs-part-desc { color: var(--ink, #0b1f2a); font-size: .95rem; }
-.vs-part-sku { color: var(--ink-faint, #6b7a82); font-size: .78rem; margin-top: 2px; }
+.vs-part-desc { color: var(--ink); font-size: .95rem; }
+.vs-part-sku { color: var(--ink-faint); font-size: .78rem; margin-top: 2px; }
 .vs-part-amt { text-align: right; white-space: nowrap; }
-.vs-part-amt > div:first-child { color: var(--ink-faint, #6b7a82); font-size: .82rem; }
-.vs-part-line { font-weight: 700; color: var(--ink, #0b1f2a); margin-top: 2px; }
+.vs-part-amt > div:first-child { color: var(--ink-faint); font-size: .82rem; }
+.vs-part-line { font-weight: 700; color: var(--ink); margin-top: 2px; }
 .vs-machine-total {
   text-align: right;
   font-size: .88rem;
-  color: var(--ink-faint, #6b7a82);
+  color: var(--ink-faint);
   margin-top: 10px;
   padding-top: 8px;
-  border-top: 1px solid var(--line, #e2e6ea);
+  border-top: 1px solid var(--border);
 }
 .vs-grand {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 14px 16px;
-  background: var(--ink, #0b1f2a);
+  background: var(--ink);
   color: #fff;
   border-radius: 14px;
   font-size: .9rem;
@@ -258,7 +258,7 @@ select {
   padding: 8px 10px;
   margin-bottom: 10px;
   font-size: .88rem;
-  color: var(--ink, #0b1f2a);
+  color: var(--ink);
   white-space: pre-wrap;
 }
 
@@ -278,26 +278,26 @@ select {
   width: 100%;
   padding: 12px 14px;
   background: #fff;
-  border: 1px solid var(--line, #e2e6ea);
+  border: 1px solid var(--border);
   border-radius: 12px;
   cursor: pointer;
   text-align: left;
   font: inherit;
 }
 .slip-result:active { transform: scale(.99); }
-.slip-result.picked { border-color: var(--brand, #1f6f78); background: var(--brand-tint, #e6f2f1); }
-.slip-result .sr-num { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink, #0b1f2a); }
-.slip-result .sr-co { flex: 1; color: var(--ink-faint, #6b7a82); font-size: .9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.slip-result.picked { border-color: var(--primary); background: var(--primary-tint); }
+.slip-result .sr-num { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); }
+.slip-result .sr-co { flex: 1; color: var(--ink-faint); font-size: .9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .slip-result .sr-status {
   flex: 0 0 auto; font-size: .68rem; font-weight: 700;
   padding: 3px 8px; border-radius: 999px; white-space: nowrap;
 }
-.sr-OPEN { background: #e6f2f1; color: #1f6f78; }
+.sr-OPEN { background: var(--primary-tint); color: var(--primary); }
 .sr-CALL_CUSTOMER { background: #fff3e0; color: #b26a00; }
 .sr-CLOSED { background: #eceff1; color: #5a6b73; }
 .slip-result-empty, .slip-result-more {
   padding: 12px 14px;
-  color: var(--ink-faint, #6b7a82);
+  color: var(--ink-faint);
   font-size: .88rem;
   text-align: center;
 }
@@ -314,7 +314,7 @@ select {
 /* ---- New Service: WhatsApp "same as" line ---- */
 .ns-same-line {
   display: flex; align-items: center; gap: 8px;
-  margin-top: 8px; font-size: .85rem; color: var(--ink-faint, #6b7a82);
+  margin-top: 8px; font-size: .85rem; color: var(--ink-faint);
 }
 .ns-same-line input { width: auto; }
 
@@ -322,7 +322,7 @@ select {
 .created-card {
   text-align: center;
   background: #fff;
-  border: 1px solid var(--line, #e2e6ea);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 24px 18px;
   margin-top: 16px;
@@ -333,14 +333,14 @@ select {
   background: #e7f7e3; color: #2f9e22; border-radius: 50%;
 }
 .created-check svg { width: 30px; height: 30px; }
-.created-title { font-size: 1.15rem; font-weight: 700; color: var(--ink, #0b1f2a); }
-.created-sub { color: var(--ink-faint, #6b7a82); font-size: .9rem; margin-top: 4px; }
+.created-title { font-size: 1.15rem; font-weight: 700; color: var(--ink); }
+.created-sub { color: var(--ink-faint); font-size: .9rem; margin-top: 4px; }
 
 /* ---- New Service: common-request checkboxes ---- */
 .ns-check-line {
   display: flex; align-items: center; gap: 10px;
   padding: 10px 0;
-  font-size: .95rem; color: var(--ink, #0b1f2a);
+  font-size: .95rem; color: var(--ink);
   cursor: pointer;
 }
 .ns-check-line input { width: auto; flex: 0 0 auto; }
@@ -359,7 +359,7 @@ select {
   align-items: center;
   gap: 2px;
   font-weight: 700;
-  color: var(--ink, #0b1f2a);
+  color: var(--ink);
 }
 .price-edit input {
   width: 74px;
@@ -367,7 +367,7 @@ select {
   font: inherit;
   font-weight: 700;
   text-align: right;
-  border: 1px solid var(--line, #e2e6ea);
+  border: 1px solid var(--border);
   border-radius: 8px;
   background: #fff;
   -moz-appearance: textfield;
@@ -414,8 +414,8 @@ select {
 }
 .role-btn .role-ic svg { width: 26px; height: 26px; }
 .role-btn .home-txt { display: flex; flex-direction: column; gap: 2px; }
-.role-btn .home-txt strong { font-size: 1.08rem; }
-.role-btn .home-txt small { font-size: .85rem; }
+.role-btn .home-txt strong { font-size: 1.18rem; font-weight: 700; }
+.role-btn .home-txt small { font-size: .95rem; }
 
 .role-sales {
   background: #FAEEDA;
@@ -462,7 +462,7 @@ select {
   border: none;
   font: inherit;
   font-size: .88rem;
-  color: var(--ink-faint, #6b7a82);
+  color: var(--ink-faint);
   text-decoration: underline;
   cursor: pointer;
   text-align: center;
@@ -481,15 +481,15 @@ select {
   width: 100%;
   padding: 11px 14px;
   background: #fff;
-  border: 1px solid var(--line, #e2e6ea);
+  border: 1px solid var(--border);
   border-radius: 10px;
   font: inherit;
   font-size: .93rem;
-  color: var(--ink, #0b1f2a);
+  color: var(--ink);
   text-align: left;
   cursor: pointer;
 }
-.company-option:active { background: var(--brand-tint, #e6f2f1); }
+.company-option:active { background: var(--primary-tint); }
 
 /* ---- Find Part ---- */
 .role-find {
@@ -504,18 +504,18 @@ select {
 .company-option .fp-opt-code {
   display: block;
   font-size: .78rem;
-  color: var(--ink-faint, #6b7a82);
+  color: var(--ink-faint);
   margin-top: 2px;
 }
 .fp-empty, .fp-loading {
   padding: 12px 14px;
   font-size: .9rem;
-  color: var(--ink-faint, #6b7a82);
+  color: var(--ink-faint);
 }
 .fp-card {
   margin-top: 14px;
   background: #fff;
-  border: 1px solid var(--line, #e2e6ea);
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 6px 16px;
 }
@@ -532,13 +532,13 @@ select {
   flex: 0 0 auto;
   font-size: .8rem;
   font-weight: 600;
-  color: var(--ink-faint, #6b7a82);
+  color: var(--ink-faint);
 }
 .fp-val {
   text-align: right;
   font-size: .95rem;
   font-weight: 600;
-  color: var(--ink, #0b1f2a);
+  color: var(--ink);
   word-break: break-word;
 }
 .fp-qty { font-size: 1.15rem; font-weight: 800; }
@@ -546,8 +546,8 @@ select {
 .fp-qty-zero { color: #c62828; }
 
 /* Find Part: model line (Desc2) styling */
-.fp-opt-model { color: var(--ink-faint, #6b7a82); font-weight: 400; }
-.fp-val-model { font-weight: 500; color: var(--ink-faint, #6b7a82); font-size: .88rem; }
+.fp-opt-model { color: var(--ink-faint); font-weight: 400; }
+.fp-val-model { font-weight: 500; color: var(--ink-faint); font-size: .88rem; }
 
 /* ---- Six-status badges (vs- for detail/list, sr- for search results) ---- */
 .vs-OPEN, .sr-OPEN { background: #eef1f3; color: #45525a; }
@@ -581,7 +581,7 @@ select {
 }
 .status-btn-quote { background: #FDF0E0; color: #A85B00; border: 1.5px solid #EF9F27; }
 .status-btn-quoted { background: #F0EAFB; color: #5B3FA8; border: 1.5px solid #8B6FD8; }
-.status-btn-noquote { background: #fff; color: var(--ink-faint, #6b7a82); border: 1.5px solid var(--line, #e2e6ea); }
+.status-btn-noquote { background: #fff; color: var(--ink-faint); border: 1.5px solid var(--border); }
 .status-btn:active { transform: scale(.98); }
 
 /* ---- Open Service: slip list ---- */
@@ -590,7 +590,7 @@ select {
   width: 100%;
   text-align: left;
   background: #fff;
-  border: 1px solid var(--line, #e2e6ea);
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 14px 16px;
   font: inherit;
@@ -599,13 +599,13 @@ select {
 .slip-card:active { background: #f6f9fa; }
 .slip-card-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .slip-card-top strong { font-size: 1.05rem; }
-.slip-card-co { margin-top: 4px; font-weight: 600; color: var(--ink, #0b1f2a); }
-.slip-card-sub { margin-top: 2px; font-size: .82rem; color: var(--ink-faint, #6b7a82); }
+.slip-card-co { margin-top: 4px; font-weight: 600; color: var(--ink); }
+.slip-card-sub { margin-top: 2px; font-size: .82rem; color: var(--ink-faint); }
 
 /* ---- Slip detail: back link + machine buttons ---- */
 .back-link {
   background: none; border: none; font: inherit;
-  color: var(--brand, #1f6f78); font-weight: 600;
+  color: var(--primary); font-weight: 600;
   padding: 0 0 10px; cursor: pointer;
 }
 #sd-machines { display: flex; flex-direction: column; gap: 10px; }
@@ -613,7 +613,7 @@ select {
   width: 100%;
   text-align: left;
   background: #fff;
-  border: 1.5px solid var(--line, #e2e6ea);
+  border: 1.5px solid var(--border);
   border-radius: 14px;
   padding: 14px 16px;
   font: inherit;
@@ -630,7 +630,7 @@ select {
   display: inline-flex; align-items: center; justify-content: center;
 }
 .machine-untouched { font-size: .75rem; font-weight: 600; color: #A85B00; background: #FDF0E0; padding: 4px 10px; border-radius: 999px; }
-.machine-btn-sub { margin-top: 4px; font-size: .82rem; color: var(--ink-faint, #6b7a82); }
+.machine-btn-sub { margin-top: 4px; font-size: .82rem; color: var(--ink-faint); }
 
 /* ---- Machine modal ---- */
 .modal-overlay {
@@ -654,11 +654,11 @@ select {
   gap: 12px; margin-bottom: 12px;
 }
 .modal-head strong { font-size: 1.1rem; }
-.mm-sub { font-size: .82rem; color: var(--ink-faint, #6b7a82); margin-top: 2px; }
+.mm-sub { font-size: .82rem; color: var(--ink-faint); margin-top: 2px; }
 .modal-x {
   flex: 0 0 auto;
   width: 38px; height: 38px;
-  border: 1px solid var(--line, #e2e6ea);
+  border: 1px solid var(--border);
   border-radius: 10px;
   background: #fff;
   font-size: 1rem;
@@ -699,13 +699,13 @@ select {
 #pu-list { display: flex; flex-direction: column; gap: 10px; }
 .pu-card {
   background: #fff;
-  border: 1px solid var(--line, #e2e6ea);
+  border: 1px solid var(--border);
   border-radius: 14px;
   padding: 14px 16px;
 }
 .pu-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.pu-desc { font-weight: 700; color: var(--ink, #0b1f2a); }
-.pu-code { font-size: .8rem; color: var(--ink-faint, #6b7a82); margin-top: 2px; }
+.pu-desc { font-weight: 700; color: var(--ink); }
+.pu-code { font-size: .8rem; color: var(--ink-faint); margin-top: 2px; }
 .pu-done {
   flex: 0 0 auto;
   padding: 8px 12px;
@@ -725,8 +725,8 @@ select {
   flex-wrap: wrap;
 }
 .pu-cell { display: flex; flex-direction: column; gap: 2px; }
-.pu-lbl { font-size: .72rem; font-weight: 600; color: var(--ink-faint, #6b7a82); }
-.pu-val { font-size: 1.05rem; font-weight: 800; color: var(--ink, #0b1f2a); }
+.pu-lbl { font-size: .72rem; font-weight: 600; color: var(--ink-faint); }
+.pu-val { font-size: 1.05rem; font-weight: 800; color: var(--ink); }
 
 /* ---- Find Part: QR scan ---- */
 .fp-scan-btn {
@@ -737,9 +737,9 @@ select {
   width: 100%;
   padding: 13px;
   border-radius: 12px;
-  border: 1.5px solid var(--brand, #1f6f78);
-  background: var(--brand-tint, #e6f2f1);
-  color: var(--brand, #1f6f78);
+  border: 1.5px solid var(--primary);
+  background: var(--primary-tint);
+  color: var(--primary);
   font: inherit;
   font-weight: 700;
   cursor: pointer;
@@ -749,9 +749,9 @@ select {
   width: 100%;
   padding: 11px;
   border-radius: 12px;
-  border: 1px solid var(--line, #e2e6ea);
+  border: 1px solid var(--border);
   background: #fff;
-  color: var(--ink-faint, #6b7a82);
+  color: var(--ink-faint);
   font: inherit;
   font-weight: 600;
   cursor: pointer;
@@ -778,3 +778,73 @@ select {
   cursor: pointer;
 }
 .pu-notify:active { background: #FAE6C8; }
+
+/* ===== Status legibility ================================================
+   Status was carried by hue alone: two pills of identical shape differing
+   only in colour. On a workshop floor, under glare and through a scratched
+   protector, they read as the same grey lozenge — and roughly one man in
+   twelve has some red-green colour deficiency.
+
+   Two cues are added, neither of them colour:
+     1. a small square marker inside the chip
+     2. a coloured left edge on the card, so status is legible before any
+        text is read
+   The edge uses :has(), which older phones simply ignore — they fall back
+   to the neutral edge below rather than showing anything broken.
+   ======================================================================== */
+
+.vs-status::before,
+.sr-status::before {
+  content: "";
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 2px;
+  background: currentColor;
+  margin-right: 6px;
+  vertical-align: 1px;
+}
+
+/* Chips get a touch more room now that they carry a marker, and Chinese
+   sits a step larger than the Latin it replaced. */
+.vs-status { font-size: .8rem; padding: 4px 11px; border-radius: 7px; }
+.slip-result .sr-status { font-size: .76rem; padding: 4px 9px; border-radius: 6px; }
+
+/* Status edge on slip cards.
+   Colours are taken from the chips the app already uses (the vs- and sr-
+   rules above), so the edge and the chip always read as the same status.
+   Two prefixes are in play: .slip-card renders its chip with a vs- class,
+   while .slip-result uses sr-. Both are matched below. */
+.slip-card, .slip-result { border-left-width: 5px; border-left-style: solid; }
+.slip-card:has(.vs-OPEN),         .slip-result:has(.sr-OPEN)         { border-left-color: #8f9ba2; }
+.slip-card:has(.vs-IN_PROGRESS),  .slip-result:has(.sr-IN_PROGRESS)  { border-left-color: #185FA5; }
+.slip-card:has(.vs-NEED_QUOTE),   .slip-result:has(.sr-NEED_QUOTE)   { border-left-color: #A85B00; }
+.slip-card:has(.vs-QUOTED),       .slip-result:has(.sr-QUOTED)       { border-left-color: #5B3FA8; }
+.slip-card:has(.vs-ALL_REPAIRED), .slip-result:has(.sr-ALL_REPAIRED) { border-left-color: #1B7A42; }
+.slip-card:has(.vs-CALL_CUSTOMER),.slip-result:has(.sr-CALL_CUSTOMER){ border-left-color: #1B7A42; }
+.slip-card:has(.vs-CLOSED),       .slip-result:has(.sr-CLOSED)       { border-left-color: var(--ink-faint); }
+
+/* Slip numbers and dates line up column-wise */
+.slip-card-sub, .vs-sub { font-variant-numeric: tabular-nums; }
+.slip-card-sub { font-size: .92rem; color: var(--ink-soft); }
+
+/* ---- Role badge -------------------------------------------------------
+   Previously amber / blue / purple — the same three hues that carry slip
+   status. Roles are already named in the badge text, so the colour was
+   doing no work while quietly weakening "colour means status". All three
+   roles now share one neutral pill, which hands amber, blue and purple
+   back to status alone. */
+.role-badge {
+  font-size: .82rem;
+  padding: 6px 13px;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  color: var(--ink-soft);
+}
+.role-badge-sales, .role-badge-tech, .role-badge-purchase {
+  background: var(--surface);
+  color: var(--ink-soft);
+}
+
+/* ---- Machine cards: the "worked on" tick reads as a state, not a tint -- */
+.machine-btn { border-left: 5px solid var(--border-2); }
+.machine-btn-worked { border-color: var(--border); border-left-color: var(--green); }

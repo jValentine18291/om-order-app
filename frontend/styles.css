@@ -4,38 +4,63 @@
    palette (green / amber / blue) used ONLY to communicate status, never as
    decoration. Comfortable tap targets for one-handed use; reads as polished. */
 
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+/* Noto Sans SC carries the Chinese. Sora and Inter contain no CJK glyphs at
+   all, so without it every Chinese label falls back to whatever the phone
+   picks and stops matching the English beside it.
+   The stack below still names the platform CJK faces after Noto, so if the
+   workshop Wi-Fi is slow the text renders in PingFang / YaHei rather than
+   flashing blank — the same thing the phones do today. */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&display=swap');
 
 :root {
-  /* Neutrals — warm-cool grey, soft on the eye */
-  --bg:        #f4f6f8;
+  --cjk: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+         "Noto Sans CJK SC", sans-serif;
+  --ui:  "Inter", var(--cjk), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --display: "Sora", var(--cjk), sans-serif;
+}
+
+:root {
+  /* Neutrals — grey biased slightly green, so the canvas sits with the mark
+     instead of against it */
+  --bg:        #f1f4f2;
   --surface:   #ffffff;
-  --surface-2: #f8fafb;
-  --border:    #e3e8ec;
-  --border-2:  #d3dade;
+  --surface-2: #f7faf8;
+  --border:    #e0e8e3;
+  --border-2:  #cbd8d1;
 
   /* Ink */
-  --ink:       #1c2b33;
-  --ink-soft:  #51626c;
-  --ink-faint: #8295a0;
+  --ink:       #16241f;
+  --ink-soft:  #55665f;
+  --ink-faint: #85958d;
 
-  /* Primary — calm deep slate-teal */
-  --primary:        #1f6f78;
-  --primary-press:  #185a62;
-  --primary-tint:   #e7f2f3;
+  /* Brand — sampled from om-logo.png.
+     The raw pair is DECORATIVE ONLY. White text fails on both ends of it
+     (2.3:1 on the teal, 1.4:1 on the green), so anything carrying text uses
+     the darkened pair below, which clears 4.5:1. */
+  --leaf-teal:   #06bec6;
+  --leaf-green:  #20fe20;
+  --leaf-grad:   linear-gradient(105deg, #06bec6, #20fe20);
+
+  /* Primary — deep teal drawn from the mark's cool end */
+  --primary:        #0a7f86;
+  --primary-press:  #06666c;
+  --primary-tint:   #e4f4f5;
   --primary-ink:    #ffffff;
+  --primary-grad:   linear-gradient(105deg, #048389, #118911);
 
-  /* Functional status colours — used for meaning only */
-  --green:  #1f9d6b;  --green-tint:  #e6f6ef;
-  --amber:  #c9871f;  --amber-tint:  #fbf1dd;
+  /* Functional status colours — meaning only, never decoration.
+     Green is the brand now, so "complete" uses a deeper green that still
+     reads as a state rather than as more branding. */
+  --green:  #17914f;  --green-tint:  #e3f5ea;
+  --amber:  #b8791a;  --amber-tint:  #fbf1dd;
   --blue:   #2b6cb0;  --blue-tint:   #e8f0f9;
   --red:    #c5402f;  --red-tint:    #fae8e5;
 
-  --radius:    16px;
-  --radius-sm: 11px;
-  --tap:       54px;
-  --shadow:    0 1px 2px rgba(28,43,51,0.04), 0 4px 16px rgba(28,43,51,0.06);
-  --shadow-lg: 0 6px 28px rgba(28,43,51,0.12);
+  --radius:    18px;
+  --radius-sm: 12px;
+  --tap:       60px;
+  --shadow:    0 1px 2px rgba(22,36,31,0.05), 0 4px 16px rgba(22,36,31,0.06);
+  --shadow-lg: 0 6px 28px rgba(22,36,31,0.13);
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -44,7 +69,7 @@ html, body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--ui);
   font-size: 16px;
   line-height: 1.45;
   overscroll-behavior-y: none;
@@ -69,22 +94,22 @@ html, body {
 
 .topbar {
   position: sticky; top: 0; z-index: 10;
-  background: rgba(244,246,248,0.86);
+  background: rgba(241,244,242,0.88);
   backdrop-filter: saturate(180%) blur(12px);
   -webkit-backdrop-filter: saturate(180%) blur(12px);
   border-bottom: 1px solid var(--border);
   padding: 14px 20px;
   display: flex; align-items: center; gap: 11px;
 }
+/* The mark is the logo artwork itself — it already carries its own circular
+   form and white ground, so it needs no tinted container behind it. */
 .topbar .mark {
-  width: 30px; height: 30px; border-radius: 9px;
-  background: var(--primary);
-  display: grid; place-items: center; flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(31,111,120,0.28);
+  width: 34px; height: 34px; flex-shrink: 0;
+  display: grid; place-items: center;
 }
-.topbar .mark svg { width: 17px; height: 17px; }
+.topbar .mark img { width: 34px; height: 34px; display: block; }
 .topbar h1 {
-  font-family: "Sora", sans-serif;
+  font-family: var(--display);
   font-size: 16px; font-weight: 700; letter-spacing: -0.01em; margin: 0;
 }
 .topbar h1 span { color: var(--ink-faint); font-weight: 500; }
@@ -129,14 +154,14 @@ html, body {
 @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 .section-head .eyebrow {
-  font-size: 11.5px; font-weight: 600; letter-spacing: 0.08em;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.1em;
   text-transform: uppercase; color: var(--primary); margin: 0 0 3px;
 }
 .section-head h2 {
-  font-family: "Sora", sans-serif;
-  font-size: 21px; font-weight: 700; letter-spacing: -0.02em; margin: 0;
+  font-family: var(--display);
+  font-size: 23px; font-weight: 700; letter-spacing: -0.01em; margin: 0;
 }
-.section-head p.lede { margin: 5px 0 0; color: var(--ink-soft); font-size: 14px; }
+.section-head p.lede { margin: 5px 0 0; color: var(--ink-soft); font-size: 15px; }
 
 /* ---- Mode toggle ------------------------------------------------------- */
 .toggle {
@@ -144,8 +169,8 @@ html, body {
   border-radius: 13px; padding: 4px; gap: 3px; box-shadow: var(--shadow);
 }
 .toggle button {
-  flex: 1; min-height: 46px; background: transparent; border: none;
-  color: var(--ink-soft); border-radius: 9px; font-size: 13px; font-weight: 600;
+  flex: 1; min-height: 50px; background: transparent; border: none;
+  color: var(--ink-soft); border-radius: 9px; font-size: 14px; font-weight: 600;
   font-family: inherit; cursor: pointer; white-space: nowrap; padding: 0 4px;
   display: flex; align-items: center; justify-content: center; gap: 5px;
   transition: all 0.18s ease;
@@ -153,7 +178,7 @@ html, body {
 .toggle button svg { width: 16px; height: 16px; flex-shrink: 0; }
 .toggle button.on {
   background: var(--primary); color: #fff;
-  box-shadow: 0 2px 8px rgba(31,111,120,0.26);
+  box-shadow: 0 2px 8px rgba(10,127,134,0.24);
 }
 @media (max-width: 360px) {
   .toggle button { font-size: 12px; gap: 3px; }
@@ -246,15 +271,17 @@ input:focus, textarea:focus {
 /* ---- Buttons ----------------------------------------------------------- */
 button { font-family: inherit; cursor: pointer; border: none; }
 .btn-primary {
-  background: var(--primary); color: var(--primary-ink);
-  border-radius: var(--radius-sm); font-size: 16px; font-weight: 600;
+  /* The darkened brand pair, not the raw logo gradient — white text needs
+     4.5:1 and the raw green gives 1.4:1. */
+  background: var(--primary-grad); color: var(--primary-ink);
+  border-radius: var(--radius-sm); font-size: 17px; font-weight: 600;
   min-height: var(--tap); width: 100%;
   display: flex; align-items: center; justify-content: center; gap: 9px;
-  box-shadow: 0 2px 10px rgba(31,111,120,0.24);
-  transition: background 0.14s, transform 0.05s, box-shadow 0.14s;
+  box-shadow: 0 2px 10px rgba(13,135,110,0.26);
+  transition: filter 0.14s, transform 0.05s, box-shadow 0.14s;
 }
 .btn-primary svg { width: 18px; height: 18px; }
-.btn-primary:active { background: var(--primary-press); transform: translateY(1px); }
+.btn-primary:active { filter: brightness(0.88); transform: translateY(1px); }
 .btn-primary:disabled {
   background: var(--border-2); color: var(--ink-faint);
   box-shadow: none; cursor: default;
@@ -301,7 +328,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .line .desc { font-weight: 600; font-size: 15px; line-height: 1.3; color: var(--ink); }
 .line .sku { margin-top: 4px; font-size: 12.5px; font-weight: 500; color: var(--ink-soft); letter-spacing: 0.02em; }
 .line .price-col { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
-.line .price { font-family: "Sora", sans-serif; font-weight: 600; font-size: 15px; color: var(--ink); white-space: nowrap; }
+.line .price { font-family: var(--display); font-weight: 600; font-size: 15px; color: var(--ink); white-space: nowrap; }
 .line .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
 .tag {
   font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 7px;
@@ -334,12 +361,12 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .qty input:focus { box-shadow: none; }
 .line .amt-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
 .line .amt-lbl { font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-faint); }
-.line .amt { font-family: "Sora", sans-serif; font-weight: 600; font-size: 16px; color: var(--ink); }
+.line .amt { font-family: var(--display); font-weight: 600; font-size: 16px; color: var(--ink); }
 
 /* ---- Sticky footer ----------------------------------------------------- */
 .footer-bar {
   position: sticky; bottom: 0;
-  background: linear-gradient(180deg, rgba(244,246,248,0) 0%, var(--bg) 30%);
+  background: linear-gradient(180deg, rgba(241,244,242,0) 0%, var(--bg) 30%);
   padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
   display: flex; flex-direction: column; gap: 11px;
 }
@@ -352,7 +379,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .summary-card .left strong { display: block; color: var(--ink); font-size: 14px; font-weight: 600; }
 .summary-card .total { text-align: right; }
 .summary-card .total .lbl { font-size: 11px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.05em; }
-.summary-card .total .val { font-family: "Sora", sans-serif; font-weight: 700; font-size: 20px; color: var(--ink); }
+.summary-card .total .val { font-family: var(--display); font-weight: 700; font-size: 20px; color: var(--ink); }
 
 /* ---- Review ------------------------------------------------------------ */
 .review-card {
@@ -363,14 +390,14 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .review-line:last-child { border-bottom: none; }
 .review-line .desc { font-weight: 600; font-size: 14.5px; }
 .review-line .sub { font-size: 12.5px; color: var(--ink-soft); margin-top: 3px; }
-.review-line .amt { font-family: "Sora", sans-serif; font-weight: 600; white-space: nowrap; }
+.review-line .amt { font-family: var(--display); font-weight: 600; white-space: nowrap; }
 .totals-card {
   background: var(--primary-tint); border-radius: var(--radius);
   padding: 16px 18px; display: flex; align-items: center; justify-content: space-between;
 }
 .totals-card .lbl { font-weight: 600; color: var(--primary); }
 .totals-card .sub { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
-.totals-card .big { font-family: "Sora", sans-serif; font-size: 25px; font-weight: 700; color: var(--ink); }
+.totals-card .big { font-family: var(--display); font-size: 25px; font-weight: 700; color: var(--ink); }
 
 /* ---- Confirmation ------------------------------------------------------ */
 .confirm-card {
@@ -388,7 +415,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
 .confirm-card .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); margin: 0; }
 .so-chip {
   display: inline-block; margin: 12px 0 4px;
-  font-family: "Sora", sans-serif; font-size: 27px; font-weight: 700;
+  font-family: var(--display); font-size: 27px; font-weight: 700;
   color: var(--primary); letter-spacing: 0.01em;
 }
 .confirm-card .note { color: var(--ink-soft); font-size: 13.5px; margin: 6px 0 0; }
@@ -400,7 +427,7 @@ button { font-family: inherit; cursor: pointer; border: none; }
   border-radius: 12px; padding: 12px;
 }
 .confirm-meta .box .k { font-size: 11px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.04em; }
-.confirm-meta .box .v { font-family: "Sora", sans-serif; font-weight: 700; font-size: 18px; margin-top: 3px; }
+.confirm-meta .box .v { font-family: var(--display); font-weight: 700; font-size: 18px; margin-top: 3px; }
 
 /* ---- Toast ------------------------------------------------------------- */
 .toast {
