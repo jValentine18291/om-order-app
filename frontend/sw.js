@@ -3,13 +3,14 @@
 // Bump CACHE on every deploy (v7 -> v8 -> ...). The new worker deletes old
 // caches in activate, and core files are fetched network-first so a normal
 // reopen always gets the latest code. Cache is only used as an offline fallback.
-const CACHE = "om-order-v39";
+const CACHE = "om-order-v40";
 const SHELL = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
   "./batch-upload.js",
+  "./i18n.js",
   "./batch-upload.css",
   "./service.css",
   "./manifest.json",

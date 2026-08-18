@@ -1636,15 +1636,25 @@ function setMode(mode) {
 
 // ---- Event wiring ----------------------------------------------------------
 // Role selection
+// Technician is the only role with a Chinese interface (i18n.js), and that
+// layer is installed at page load. So when someone crosses into or out of
+// Technician we reload; every other role change stays instant as before.
+function languageChanges(nextRole) {
+  return (getRole() === "tech") !== (nextRole === "tech");
+}
 document.querySelectorAll(".role-btn").forEach((b) =>
   b.addEventListener("click", () => {
+    const reload = languageChanges(b.dataset.role);
     setRole(b.dataset.role);
+    if (reload) { location.reload(); return; } // reopens straight on Home
     applyRoleToHome();
     showScreen("home");
   })
 );
 $("switch-role").addEventListener("click", () => {
+  const reload = languageChanges("");
   setRole("");
+  if (reload) { location.reload(); return; } // reopens on the role screen
   showScreen("role");
 });
 
