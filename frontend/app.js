@@ -1907,8 +1907,6 @@ function setMode(mode) {
     b.classList.toggle("on", b.dataset.mode === mode)
   );
 
-  const uploadPane = $("upload-pane");
-  if (uploadPane) uploadPane.style.display = mode === "upload" ? "block" : "none";
   const qrPane = $("qr-pane");
   if (qrPane) qrPane.style.display = mode === "qr" ? "flex" : "none";
   const manualPane = $("manual-pane");
@@ -1916,7 +1914,10 @@ function setMode(mode) {
 
   if (mode === "qr") startQrScanner();
   else stopQrScanner();
-  if (mode === "manual") { const ci = $("code-input"); if (ci) ci.focus(); }
+  if (mode === "manual") {
+    const ci = $("code-input"); if (ci) { ci.value = ""; ci.focus(); }
+    const cr = $("code-results"); if (cr) cr.innerHTML = "";
+  }
 }
 
 // ---- Event wiring ----------------------------------------------------------
@@ -2208,13 +2209,47 @@ document.querySelectorAll("#mode-toggle button").forEach((b) =>
 );
 
 // Manual entry
-$("lookup-btn").addEventListener("click", () => {
-  addByCode($("code-input").value);
-  $("code-input").value = "";
-  $("code-input").focus();
+// Manual entry is a live AutoCount search, the same engine as Find Part:
+// type a code or a description word, tap a suggestion to add it to the
+// machine. Enter still adds an exact code directly, so a technician who
+// knows the number (or uses a scanner gun) is not forced through the list.
+let codeDebounce = null;
+$("code-input").addEventListener("input", () => {
+  clearTimeout(codeDebounce);
+  const q = $("code-input").value.trim();
+  const box = $("code-results");
+  if (q.length < 2) { box.innerHTML = ""; return; }
+  codeDebounce = setTimeout(async () => {
+    try {
+      const data = await api(`/api/parts-search?q=${encodeURIComponent(q)}`);
+      const list = data.results || [];
+      if (!list.length) {
+        box.innerHTML = `<div class="fp-empty">No matching parts</div>`;
+        return;
+      }
+      box.innerHTML = list.map((p) =>
+        `<button type="button" class="company-option" data-code="${escapeAttr(p.item_code)}">
+           <span class="fp-opt-desc">${escapeHtml(p.description)}${p.desc2 ? ` <span class="fp-opt-model">· ${escapeHtml(p.desc2)}</span>` : ""}</span>
+           <span class="fp-opt-code mono">${escapeHtml(p.item_code)}</span>
+         </button>`
+      ).join("");
+      box.querySelectorAll(".company-option").forEach((btn) =>
+        btn.addEventListener("click", () => {
+          addByCode(btn.dataset.code);
+          $("code-input").value = "";
+          box.innerHTML = "";
+          $("code-input").focus();
+        })
+      );
+    } catch (_) { box.innerHTML = ""; }
+  }, 250);
 });
 $("code-input").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") { addByCode($("code-input").value); $("code-input").value = ""; }
+  if (e.key === "Enter") {
+    addByCode($("code-input").value);
+    $("code-input").value = "";
+    $("code-results").innerHTML = "";
+  }
 });
 
 // QR restart
@@ -2274,12 +2309,6 @@ $("machine-parts").addEventListener("change", (e) => {
 $("cs-submit").addEventListener("click", submitClose);
 
 // View Slips: slip selection via search component
-
-// Batch upload (defined in batch-upload.js -> handleBatchFiles)
-$("batch-input").addEventListener("change", (e) => {
-  handleBatchFiles(e.target.files);
-  e.target.value = "";
-});
 
 // ---- Boot ------------------------------------------------------------------
 if (getRole()) { applyRoleToHome(); showScreen("home"); }

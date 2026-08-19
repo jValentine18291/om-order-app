@@ -8,7 +8,6 @@
   <link rel="manifest" href="./manifest.json" />
   <link rel="apple-touch-icon" href="./icon-192.png" />
   <link rel="stylesheet" href="./styles.css" />
-  <link rel="stylesheet" href="./batch-upload.css" />
   <link rel="stylesheet" href="./service.css" />
   <script src="https://unpkg.com/@zxing/browser@0.1.5"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -343,20 +342,11 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 21v.01M21 14v.01M14 21v.01"/></svg>
             Scan QR Code
           </button>
-          <button data-mode="upload">Upload photos</button>
           <button data-mode="manual">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
             Type code
           </button>
         </div>
-
-        <div id="upload-pane">
-          <p class="eyebrow">Take a photo of each barcode, then upload them all at once.</p>
-          <label class="btn-primary upload-btn" for="batch-input">&#128247; Upload barcode photos</label>
-          <input id="batch-input" type="file" accept="image/*" multiple hidden />
-          <p class="scanner-msg" id="upload-status"></p>
-        </div>
-        <div id="file-decoder-region" style="display:none"></div>
 
         <div id="qr-pane" style="display:none; flex-direction:column; gap:14px;">
           <div class="scanner-frame">
@@ -372,11 +362,9 @@
 
         <div id="manual-pane" style="display:none">
           <div class="field">
-            <label for="code-input">Part number or barcode</label>
-            <div class="input-row">
-              <input id="code-input" type="text" inputmode="text" autocomplete="off" placeholder="e.g. 525IB" />
-              <button class="btn-primary" id="lookup-btn" style="width:auto; padding:0 20px;">Add</button>
-            </div>
+            <label for="code-input">Search by description or part no.</label>
+            <input id="code-input" type="text" inputmode="text" autocomplete="off" placeholder="e.g. clutch, carburetor, SZEN 140…" />
+            <div class="company-suggest" id="code-results"></div>
           </div>
           <div class="scan-hint" id="manual-status" style="justify-content:flex-start; min-height:20px;"></div>
         </div>
@@ -401,7 +389,6 @@
 
   <div class="toast" id="toast"><span class="ic" id="toast-ic"></span><span id="toast-msg"></span></div>
   <script src="./app.js"></script>
-  <script src="./batch-upload.js"></script>
   <!-- Chinese interface for the Technician role. Loads last so it can translate
        whatever app.js has already put on screen, then watches for the rest. -->
   <script src="./i18n.js"></script>
