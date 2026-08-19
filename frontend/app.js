@@ -120,6 +120,10 @@ function showScreen(name) {
   SCREENS.forEach((s) => $("screen-" + s).classList.toggle("active", s === name));
   // Home link visible everywhere except home/role
   $("home-link").style.display = (name === "home" || name === "role") ? "none" : "inline-flex";
+  // The signature canvas measures zero while its screen is hidden, so size it
+  // the moment the screen becomes visible — otherwise it keeps the 300x150
+  // default bitmap and the signature comes out stretched and blurry.
+  if (name === "new") sigPadResize();
   // Leaving the working context: hide the machine modal and stop any camera.
   if (name !== "slip") {
     const mm = $("machine-modal");
@@ -288,6 +292,7 @@ function resetNewServiceForm() {
   addMachineRow();
   $("ns-status").innerHTML = "";
   const sug = $("ns-company-suggest"); if (sug) sug.innerHTML = "";
+  sigPadClear();
 }
 
 async function submitNewService() {
@@ -312,6 +317,21 @@ async function submitNewService() {
   if (!company) { $("ns-status").innerHTML = statusErr("Company is required."); return; }
   if (machines.length === 0) { $("ns-status").innerHTML = statusErr("Add at least one machine."); return; }
 
+  // The signature is the customer accepting the printed terms, so a slip
+  // cannot be registered without it. Scroll it into view rather than just
+  // complaining — it sits below the fold on most phones.
+  const signature = sigPadData();
+  if (!signature) {
+    $("ns-status").innerHTML = statusErr("Ask the customer to sign before registering.");
+    const pad = $("ns-sig-pad");
+    if (pad) {
+      pad.scrollIntoView({ behavior: "smooth", block: "center" });
+      pad.classList.add("sigpad-missing");
+      setTimeout(() => pad.classList.remove("sigpad-missing"), 1600);
+    }
+    return;
+  }
+
   $("ns-submit").disabled = true;
   $("ns-status").innerHTML = statusInfo("Registering…");
   try {
@@ -327,6 +347,7 @@ async function submitNewService() {
         quote_first: $("ns-quote-first").checked,
         notes: $("ns-notes").value.trim(),
         machines,
+        signature,
       }),
     });
     toast(`Service slip ${slip.slip_number} created`, "ok");
@@ -360,80 +381,270 @@ function showSlipCreated(slip) {
   window.scrollTo(0, 0);
 }
 
+// ---- Service slip PDF ------------------------------------------------------
+// The only part of OM Service a customer ever sees, so it is also where the
+// terms live. Laid out at A4 in Helvetica (the only face jsPDF has built in).
+
+// Terms & Conditions, as supplied by John (19 Aug 2026). Split into segments so
+// the phrases he marked can be set bold mid-sentence. Wording is verbatim —
+// do not reword these without asking; they are the terms customers sign against.
+const SLIP_TERMS = [
+  [
+    { t: "Repaired equipment remaining unclaimed for a period exceeding " },
+    { t: "Two Months (60 days)", b: true },
+    { t: " may be disposed of at the sole discretion of Outboard & Marine Pte Ltd." },
+  ],
+  [
+    { t: "Repair Assessment will be conducted free-of-charge. However, Outboard & Marine Pte Ltd will not be responsible for re-assembly of the assessed equipment should the client decide not to proceed with the repair. " },
+    { t: "(Re-assembly surcharge of S$20.00 will be levied upon such request)", b: true },
+  ],
+  [
+    { t: "Our standard Service & Repair package may include diagnosis & replacement of minor / peripheral components, etc. Repair duration would be less than 2 days." },
+  ],
+  [
+    { t: "Our extended Services & Repair package may include cleaning, repair, and overhaul of key engine / product components and functional testing." },
+  ],
+  [
+    { t: "Repair charges range from S$15.00 ~ S$80.00 (EXCLUDING Cost of spare parts & prevailing GST) " },
+    { t: "NOT APPLICABLE", b: true },
+    { t: " for Chipper Shredders. Vehicle mounted application equipment are subject to individualised quotation." },
+  ],
+  [
+    { t: "The client agrees to proceed for repair without quotation if price does not exceed S$120.00 for all other equipment brands." },
+  ],
+];
+
+// Lay out mixed normal/bold runs with word wrapping. jsPDF has no rich text, so
+// each word is measured and placed individually. Returns the final baseline y.
+function pdfFlowRich(doc, segments, x, y, maxW, size, leading) {
+  doc.setFontSize(size);
+  let cx = x;
+  let cy = y;
+  for (const seg of segments) {
+    doc.setFont("helvetica", seg.b ? "bold" : "normal");
+    for (const word of seg.t.split(/(\s+)/)) {
+      if (!word) continue;
+      const isSpace = !/\S/.test(word);
+      const w = doc.getTextWidth(word);
+      if (!isSpace && cx + w > x + maxW) {
+        cy += leading;
+        cx = x;
+      }
+      if (isSpace && cx === x) continue;   // never start a line with a space
+      doc.text(word, cx, cy);
+      cx += w;
+    }
+  }
+  return cy;
+}
+
 // Build the service-slip PDF (jsPDF) and return a Blob.
 function buildSlipPdf(slip) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: "pt", format: "a4" });
-  const left = 48;
-  const right = 547;
+
+  const LEFT = 48;
+  const RIGHT = 547;
+  const W = RIGHT - LEFT;
+  const BOTTOM = 792;          // last usable baseline before the page footer
   let y = 48;
 
-  // Company letterhead across the top (logo + name + address/contact details).
-  // Sized full content-width, preserving the image's aspect ratio.
-  const lhWidth = right - left;            // content width in pt
-  const lhHeight = lhWidth / OM_LETTERHEAD_RATIO;
+  // Start a new page when the next block would not fit.
+  const need = (h) => {
+    if (y + h <= BOTTOM) return;
+    doc.addPage();
+    y = 56;
+  };
+
+  const hline = (col = 200, weight = 0.7) => {
+    doc.setDrawColor(col); doc.setLineWidth(weight);
+    doc.line(LEFT, y, RIGHT, y);
+  };
+
+  // ---- Letterhead ----
+  const lhHeight = W / OM_LETTERHEAD_RATIO;
   try {
-    doc.addImage(OM_LETTERHEAD, "JPEG", left, y, lhWidth, lhHeight);
+    doc.addImage(OM_LETTERHEAD, "JPEG", LEFT, y, W, lhHeight);
+    y += lhHeight;
   } catch (_) {
-    // Fallback to a text header if the image fails for any reason.
     doc.setFontSize(20); doc.setFont("helvetica", "bold");
-    doc.text("Outboard & Marine Pte Ltd", left, y + 16);
+    doc.text("Outboard & Marine Pte Ltd", LEFT, y + 16);
+    y += 34;
   }
-  y += lhHeight + 24;
+  y += 30;
 
-  // Title + slip number row
-  doc.setFontSize(15); doc.setFont("helvetica", "bold");
-  doc.text("Service Slip", left, y);
-  doc.setFontSize(15);
-  doc.text(`S/S: ${slip.slip_number}`, right, y, { align: "right" });
+  // ---- Title + slip number ----
+  // The slip number is what a customer reads back over the phone, so it is the
+  // loudest thing on the sheet.
+  const boxW = 132, boxH = 46;
+  const boxX = RIGHT - boxW, boxY = y - 30;
+  doc.setDrawColor(17); doc.setLineWidth(1.4);
+  doc.rect(boxX, boxY, boxW, boxH);
+  doc.setFontSize(7.5); doc.setFont("helvetica", "bold"); doc.setTextColor(85);
+  doc.text("SLIP NO.", boxX + boxW / 2, boxY + 13, { align: "center" });
+  doc.setFontSize(22); doc.setTextColor(17);
+  doc.text(String(slip.slip_number || ""), boxX + boxW / 2, boxY + 36, { align: "center" });
 
-  y += 14;
-  doc.setDrawColor(200); doc.line(left, y, right, y); y += 24;
+  doc.setFontSize(18); doc.setFont("helvetica", "bold"); doc.setTextColor(17);
+  doc.text("SERVICE SLIP", LEFT, y);
+  doc.setFontSize(8); doc.setFont("helvetica", "normal"); doc.setTextColor(100);
+  doc.text("CUSTOMER ACKNOWLEDGEMENT COPY", LEFT, y + 12);
 
-  doc.setFontSize(11); doc.setFont("helvetica", "normal");
-  const created = formatDate(slip.created_at) || "";
-  const rows = [
-    ["Date", created],
+  y += 28;
+  doc.setTextColor(17);
+  hline(17, 1.2);
+  y += 20;
+
+  // ---- Customer details, two columns ----
+  const colW = W / 2 - 12;
+  const details = [
+    ["Date Received", formatDate(slip.created_at) || ""],
+    ["Contact", slip.contact_name || "—"],
     ["Company", slip.company || ""],
-    ["Contact", slip.contact_name || ""],
-    ["Contact No.", slip.contact_number || ""],
+    ["Contact No.", slip.contact_number || "—"],
   ];
-  for (const [label, val] of rows) {
-    doc.setFont("helvetica", "bold"); doc.text(`${label}:`, left, y);
-    doc.setFont("helvetica", "normal"); doc.text(String(val), left + 90, y);
+  doc.setFontSize(9.5);
+  for (let i = 0; i < details.length; i += 2) {
+    for (let c = 0; c < 2; c++) {
+      const d = details[i + c];
+      if (!d) continue;
+      const x = LEFT + c * (colW + 24);
+      doc.setFont("helvetica", "normal"); doc.setTextColor(90);
+      doc.text(d[0], x, y);
+      doc.setFont("helvetica", "bold"); doc.setTextColor(17);
+      doc.text(doc.splitTextToSize(String(d[1]), colW - 82)[0] || "", x + 82, y);
+    }
+    y += 9;
+    doc.setDrawColor(236); doc.setLineWidth(0.6);
+    doc.line(LEFT, y, RIGHT, y);
+    y += 15;
+  }
+
+  // ---- Equipment table ----
+  y += 8;
+  doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(17);
+  doc.text("EQUIPMENT RECEIVED", LEFT, y);
+  y += 10;
+  doc.setDrawColor(17); doc.setLineWidth(1);
+  doc.line(LEFT, y, RIGHT, y);
+  y += 15;
+
+  const machines = slip.machines || [];
+  doc.setFontSize(9.5);
+  machines.forEach((m, i) => {
+    const lines = doc.splitTextToSize(String(m.machine_desc || ""), W - 40 - 90);
+    need(lines.length * 12 + 12);
+    doc.setFont("helvetica", "normal"); doc.setTextColor(90);
+    doc.text(String(i + 1) + ".", LEFT + 2, y);
+    doc.setTextColor(17);
+    doc.text(lines, LEFT + 22, y);
+    // Empty box ticked when the machine goes back to the customer.
+    doc.setDrawColor(120); doc.setLineWidth(0.8);
+    doc.rect(RIGHT - 62, y - 8, 11, 11);
+    doc.setFontSize(7.5); doc.setTextColor(120);
+    doc.text("Returned", RIGHT - 46, y);
+    doc.setFontSize(9.5);
+    y += lines.length * 12 + 5;
+    doc.setDrawColor(230); doc.setLineWidth(0.5);
+    doc.line(LEFT, y, RIGHT, y);
+    y += 13;
+  });
+
+  // ---- Requests ----
+  const requests = [];
+  if (slip.check_service) requests.push("CHECK & SERVICE FOR ALL");
+  if (slip.quote_first) requests.push("QUOTE FIRST");
+  if (requests.length) {
+    need(40);
+    y += 4;
+    doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(17);
+    doc.text("REQUESTED", LEFT, y);
+    y += 14;
+    let cx = LEFT;
+    doc.setFontSize(8.5);
+    requests.forEach((r) => {
+      const w = doc.getTextWidth(r) + 16;
+      doc.setDrawColor(17); doc.setLineWidth(0.8);
+      doc.rect(cx, y - 9, w, 15);
+      doc.text(r, cx + 8, y);
+      cx += w + 7;
+    });
     y += 20;
   }
 
-  y += 8;
-  doc.setFont("helvetica", "bold"); doc.text("Machines received:", left, y); y += 20;
-  doc.setFont("helvetica", "normal");
-  (slip.machines || []).forEach((m, i) => {
-    doc.text(`${i + 1}.  ${m.machine_desc}`, left + 10, y);
-    y += 18;
-  });
-
-  const requests = [];
-  if (slip.check_service) requests.push("Check & Service for all");
-  if (slip.quote_first) requests.push("Quote first");
-  if (requests.length) {
-    y += 8;
-    doc.setFont("helvetica", "bold"); doc.text("Requests:", left, y); y += 18;
-    doc.setFont("helvetica", "normal");
-    requests.forEach((r) => { doc.text(`•  ${r}`, left + 10, y); y += 18; });
-  }
-
+  // ---- Notes ----
   if (slip.notes) {
-    y += 8;
-    doc.setFont("helvetica", "bold"); doc.text("Notes:", left, y); y += 18;
-    doc.setFont("helvetica", "normal");
-    const wrapped = doc.splitTextToSize(slip.notes, 499);
-    doc.text(wrapped, left, y); y += wrapped.length * 16;
+    const lines = doc.splitTextToSize(String(slip.notes), W - 14);
+    need(lines.length * 12 + 32);
+    y += 4;
+    doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(17);
+    doc.text("NOTES", LEFT, y);
+    y += 14;
+    doc.setDrawColor(17); doc.setLineWidth(2);
+    doc.line(LEFT, y - 9, LEFT, y + lines.length * 12 - 8);
+    doc.setFontSize(9.5); doc.setFont("helvetica", "normal");
+    doc.text(lines, LEFT + 10, y);
+    y += lines.length * 12 + 12;
   }
 
-  y += 16;
-  doc.setDrawColor(200); doc.line(left, y, right, y); y += 18;
-  doc.setFontSize(9); doc.setTextColor(120);
-  doc.text("Please quote your service slip number when enquiring about your machines.", left, y);
+  // ---- Terms & Conditions ----
+  // Roughly 150pt of box; start a fresh page rather than split it, so the terms
+  // a customer signs against are never broken across a page fold.
+  need(190);
+  y += 12;
+  const termsTop = y;
+  doc.setFontSize(8); doc.setFont("helvetica", "bold"); doc.setTextColor(17);
+  doc.text("TERMS & CONDITIONS", LEFT + 12, y + 16);
+  let ty = y + 32;
+  SLIP_TERMS.forEach((segs, i) => {
+    doc.setFontSize(7.6); doc.setFont("helvetica", "normal"); doc.setTextColor(26);
+    doc.text(String(i + 1) + ".", LEFT + 12, ty);
+    ty = pdfFlowRich(doc, segs, LEFT + 26, ty, W - 42, 7.6, 9.4);
+    ty += 9;
+  });
+  doc.setDrawColor(17); doc.setLineWidth(0.8);
+  doc.rect(LEFT, termsTop, W, ty - termsTop);
+  y = ty + 26;
+
+  // ---- Signatures ----
+  need(90);
+  const sigW = (W - 40) / 2;
+  const sigBase = y + 34;
+
+  // The customer's signature, drawn on the phone at registration, sits on the
+  // line rather than replacing it.
+  if (slip.signature) {
+    try {
+      const props = doc.getImageProperties(slip.signature);
+      const maxH = 30, maxW = sigW - 16;
+      let sw = props.width, sh = props.height;
+      const scale = Math.min(maxW / sw, maxH / sh);
+      sw *= scale; sh *= scale;
+      doc.addImage(slip.signature, "PNG", LEFT + 4, sigBase - sh - 2, sw, sh);
+    } catch (_) { /* a bad image must never stop the slip printing */ }
+  }
+
+  doc.setDrawColor(17); doc.setLineWidth(0.8);
+  doc.line(LEFT, sigBase, LEFT + sigW, sigBase);
+  doc.line(RIGHT - sigW, sigBase, RIGHT, sigBase);
+  doc.setFontSize(7.5); doc.setFont("helvetica", "normal"); doc.setTextColor(90);
+  doc.text("Customer signature  ·  I accept the terms above", LEFT, sigBase + 11);
+  doc.text("Received by (Outboard & Marine)", RIGHT - sigW, sigBase + 11);
+  y = sigBase + 26;
+
+  // ---- Page footers ----
+  const pages = doc.getNumberOfPages();
+  for (let p = 1; p <= pages; p++) {
+    doc.setPage(p);
+    doc.setDrawColor(205); doc.setLineWidth(0.6);
+    doc.line(LEFT, 806, RIGHT, 806);
+    doc.setFontSize(7.5); doc.setFont("helvetica", "normal"); doc.setTextColor(110);
+    doc.text(
+      "Please quote Slip No. " + String(slip.slip_number || "") + " when enquiring about your equipment.",
+      LEFT, 818
+    );
+    doc.text("Page " + p + " of " + pages, RIGHT, 818, { align: "right" });
+  }
 
   return doc.output("blob");
 }
@@ -2003,3 +2214,134 @@ else { showScreen("role"); }
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./sw.js").catch(() => {});
 }
+
+// ---- Customer signature pad (New Service) ----------------------------------
+// The customer signs with a finger at the counter; the drawing is printed onto
+// the slip PDF above the signature line, beside the terms they are accepting.
+//
+// Drawn on a device-pixel-ratio-scaled canvas so strokes stay sharp on phones,
+// and exported trimmed to the ink so the PDF gets a tight image rather than a
+// mostly-empty rectangle.
+const sigPad = { ctx: null, canvas: null, drawing: false, dirty: false, last: null, bounds: null };
+
+function sigPadSetup() {
+  const canvas = $("ns-sig-canvas");
+  if (!canvas || sigPad.canvas) return;
+  sigPad.canvas = canvas;
+  sigPad.ctx = canvas.getContext("2d");
+  sigPadResize();
+
+  const pos = (e) => {
+    const r = canvas.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  };
+
+  canvas.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    canvas.setPointerCapture(e.pointerId);
+    sigPad.drawing = true;
+    sigPad.last = pos(e);
+    sigPadMark(sigPad.last);
+    // A tap with no drag should still leave a dot.
+    const c = sigPad.ctx;
+    c.beginPath();
+    c.arc(sigPad.last.x, sigPad.last.y, c.lineWidth / 2, 0, Math.PI * 2);
+    c.fill();
+  });
+
+  canvas.addEventListener("pointermove", (e) => {
+    if (!sigPad.drawing) return;
+    e.preventDefault();
+    const p = pos(e);
+    const c = sigPad.ctx;
+    c.beginPath();
+    c.moveTo(sigPad.last.x, sigPad.last.y);
+    c.lineTo(p.x, p.y);
+    c.stroke();
+    sigPad.last = p;
+    sigPadMark(p);
+  });
+
+  const end = (e) => {
+    if (!sigPad.drawing) return;
+    sigPad.drawing = false;
+    try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+  };
+  canvas.addEventListener("pointerup", end);
+  canvas.addEventListener("pointercancel", end);
+  canvas.addEventListener("pointerleave", end);
+
+  $("ns-sig-clear").addEventListener("click", sigPadClear);
+  window.addEventListener("resize", sigPadResize);
+}
+
+// Track the inked area so the export can be trimmed to it.
+function sigPadMark(p) {
+  if (!sigPad.dirty) {
+    sigPad.dirty = true;
+    $("ns-sig-pad").classList.add("signed");
+  }
+  const b = sigPad.bounds;
+  if (!b) sigPad.bounds = { x1: p.x, y1: p.y, x2: p.x, y2: p.y };
+  else {
+    if (p.x < b.x1) b.x1 = p.x;
+    if (p.y < b.y1) b.y1 = p.y;
+    if (p.x > b.x2) b.x2 = p.x;
+    if (p.y > b.y2) b.y2 = p.y;
+  }
+}
+
+function sigPadResize() {
+  const canvas = sigPad.canvas;
+  if (!canvas) return;
+  // Resizing clears the bitmap, so only do it while the pad is still empty.
+  if (sigPad.dirty) return;
+  const r = canvas.getBoundingClientRect();
+  if (!r.width || !r.height) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  canvas.width = Math.round(r.width * dpr);
+  canvas.height = Math.round(r.height * dpr);
+  const c = sigPad.ctx;
+  c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  c.lineWidth = 2.4;
+  c.lineCap = "round";
+  c.lineJoin = "round";
+  c.strokeStyle = "#16241f";
+  c.fillStyle = "#16241f";
+}
+
+function sigPadClear() {
+  const canvas = sigPad.canvas;
+  sigPad.dirty = false;
+  sigPad.bounds = null;
+  sigPad.drawing = false;
+  const pad = $("ns-sig-pad");
+  if (pad) pad.classList.remove("signed");
+  if (!canvas || !sigPad.ctx) return;
+  sigPad.ctx.clearRect(0, 0, canvas.width, canvas.height);
+  sigPadResize();
+}
+
+// Export the signature as a trimmed PNG data URL, or "" if nothing was drawn.
+function sigPadData() {
+  if (!sigPad.dirty || !sigPad.canvas || !sigPad.bounds) return "";
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  const b = sigPad.bounds;
+  const pad = 8;
+  const x = Math.max(0, (b.x1 - pad)) * dpr;
+  const y = Math.max(0, (b.y1 - pad)) * dpr;
+  const w = Math.min(sigPad.canvas.width - x, (b.x2 - b.x1 + pad * 2) * dpr);
+  const h = Math.min(sigPad.canvas.height - y, (b.y2 - b.y1 + pad * 2) * dpr);
+  if (w <= 0 || h <= 0) return "";
+  try {
+    const out = document.createElement("canvas");
+    out.width = Math.round(w);
+    out.height = Math.round(h);
+    out.getContext("2d").drawImage(sigPad.canvas, x, y, w, h, 0, 0, out.width, out.height);
+    return out.toDataURL("image/png");
+  } catch (_) {
+    return "";
+  }
+}
+
+sigPadSetup();

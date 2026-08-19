@@ -191,6 +191,21 @@
         <textarea id="ns-notes" placeholder="Anything the technician should know&hellip;"></textarea>
       </div>
 
+      <!-- Customer signature: drawn on the phone, printed onto the slip PDF
+           above the signature line, next to the terms they are accepting. -->
+      <div class="field">
+        <label>Customer signature <span class="req">*</span> <span style="color:var(--ink-faint);font-weight:400;">(hand the phone to the customer)</span></label>
+        <div class="sigpad" id="ns-sig-pad">
+          <canvas id="ns-sig-canvas"></canvas>
+          <span class="sigpad-hint" id="ns-sig-hint">Sign here</span>
+          <span class="sigpad-baseline"></span>
+        </div>
+        <div class="sigpad-actions">
+          <span class="sigpad-note" id="ns-sig-note">By signing, the customer accepts the terms printed on the slip.</span>
+          <button type="button" class="sigpad-clear" id="ns-sig-clear">Clear</button>
+        </div>
+      </div>
+
       <button class="btn-primary" id="ns-submit" style="width:100%">Register service slip</button>
       <div class="scan-hint" id="ns-status" style="justify-content:flex-start;min-height:20px;margin-top:8px;"></div>
       <div id="ns-created" style="display:none"></div>

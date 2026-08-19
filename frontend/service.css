@@ -848,3 +848,73 @@ select {
 /* ---- Machine cards: the "worked on" tick reads as a state, not a tint -- */
 .machine-btn { border-left: 5px solid var(--border-2); }
 .machine-btn-worked { border-color: var(--border); border-left-color: var(--green); }
+
+/* ===== Customer signature pad (New Service) =============================
+   Drawn with a finger on the phone at the counter, then printed onto the
+   slip PDF above the signature line. touch-action:none is what stops the
+   page scrolling out from under the customer while they sign.
+   ======================================================================== */
+.sigpad {
+  position: relative;
+  width: 100%;
+  height: 190px;
+  background: #fff;
+  border: 1.5px dashed var(--border-2);
+  border-radius: 14px;
+  overflow: hidden;
+  touch-action: none;
+}
+.sigpad.signed { border-style: solid; border-color: var(--primary); }
+.sigpad canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  touch-action: none;
+  cursor: crosshair;
+  display: block;
+}
+/* Baseline the customer signs along, like a paper form. */
+.sigpad-baseline {
+  position: absolute;
+  left: 24px; right: 24px; bottom: 46px; height: 1px;
+  background: var(--border-2);
+  pointer-events: none;
+}
+.sigpad-hint {
+  position: absolute;
+  left: 50%; bottom: 54px; transform: translateX(-50%);
+  font-size: .95rem; color: var(--ink-faint);
+  pointer-events: none;
+  transition: opacity .15s ease;
+}
+.sigpad.signed .sigpad-hint { opacity: 0; }
+
+.sigpad-actions {
+  display: flex; align-items: center; gap: 12px; margin-top: 8px;
+}
+.sigpad-note { flex: 1; font-size: .82rem; color: var(--ink-faint); line-height: 1.35; }
+.sigpad-clear {
+  flex: 0 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  padding: 9px 16px;
+  font: inherit; font-size: .9rem; font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.sigpad-clear:active { background: var(--surface-2); }
+
+/* Flash the pad when someone tries to register without a signature. */
+.sigpad.sigpad-missing {
+  border-color: #c61f2b;
+  border-style: solid;
+  animation: sigShake .4s ease;
+}
+@keyframes sigShake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-5px); }
+  75%      { transform: translateX(5px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sigpad.sigpad-missing { animation: none; }
+}

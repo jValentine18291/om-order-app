@@ -140,6 +140,20 @@ db.exec(`
     created_at     TEXT    DEFAULT (datetime('now')),
     FOREIGN KEY (machine_id) REFERENCES slip_machines(id) ON DELETE CASCADE
   );
+
+  -- Customer signature captured on the phone at registration, stored as a PNG
+  -- data URL and drawn onto the service-slip PDF.
+  --
+  -- Deliberately a separate table rather than a column on service_slips: the
+  -- slip list and search queries all use SELECT *, so a column here would ship
+  -- every signature image in every list response. Kept apart, only getSlip
+  -- pays for it.
+  CREATE TABLE IF NOT EXISTS slip_signatures (
+    slip_id    INTEGER PRIMARY KEY,
+    image      TEXT    NOT NULL,
+    signed_at  TEXT    DEFAULT (datetime('now')),
+    FOREIGN KEY (slip_id) REFERENCES service_slips(id) ON DELETE CASCADE
+  );
 `);
 
 db.prepare(

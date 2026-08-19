@@ -22,7 +22,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
+// 1mb, not the 100kb default: registration posts the customer's signature as a
+// PNG data URL. A trimmed signature is a few KB, but a large tablet screen can
+// produce more, and hitting the default limit fails with an opaque parse error.
+app.use(express.json({ limit: "1mb" }));
 
 // Serve the PWA frontend from ../frontend
 app.use(express.static(path.join(__dirname, "..", "frontend")));
@@ -92,8 +95,8 @@ app.get("/api/orders/:so", async (req, res) => {
 // Create a new service slip (New Service)
 app.post("/api/slips", async (req, res) => {
   try {
-    const { company, contact_name, contact_number, whatsapp_number, check_service, quote_first, notes, machines } = req.body || {};
-    const slip = await data.slips.createSlip({ company, contact_name, contact_number, whatsapp_number, check_service, quote_first, notes, machines });
+    const { company, contact_name, contact_number, whatsapp_number, check_service, quote_first, notes, machines, signature } = req.body || {};
+    const slip = await data.slips.createSlip({ company, contact_name, contact_number, whatsapp_number, check_service, quote_first, notes, machines, signature });
     res.status(201).json(slip);
   } catch (err) {
     if (err.status === 400) return res.status(400).json({ error: err.message });

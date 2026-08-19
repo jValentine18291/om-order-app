@@ -139,7 +139,19 @@ function nextSlipNumber() {
 }
 
 // Create a new service slip with its machines. Returns the created slip (with machines).
-function createSlip({ company, contact_name = "", contact_number = "", whatsapp_number = "", check_service = false, quote_first = false, notes = "", machines = [] } = {}) {
+// A signature is a PNG data URL drawn on the phone. Cap it so a malformed or
+// oversized payload can't bloat the database — a trimmed signature is a few KB,
+// so this is generous while still being a limit.
+const MAX_SIGNATURE_CHARS = 400_000;
+
+function cleanSignature(sig) {
+  if (!sig || typeof sig !== "string") return "";
+  if (!sig.startsWith("data:image/png;base64,")) return "";
+  if (sig.length > MAX_SIGNATURE_CHARS) return "";
+  return sig;
+}
+
+function createSlip({ company, contact_name = "", contact_number = "", whatsapp_number = "", check_service = false, quote_first = false, notes = "", machines = [], signature = "" } = {}) {
   if (!company || !String(company).trim()) {
     const e = new Error("Company is required to register a service slip.");
     e.status = 400; throw e;
@@ -159,6 +171,21 @@ function createSlip({ company, contact_name = "", contact_number = "", whatsapp_
   const insertMachine = db.prepare(
     "INSERT INTO slip_machines (slip_id, machine_desc) VALUES (?, ?)"
   );
+  const insertSignature = db.prepare(
+    "INSERT INTO slip_signatures (slip_id, image) VALUES (?, ?)"
+  );
+
+  // The signature is the customer accepting the printed terms, so it is
+  // required. The message names the fix for the one case that isn't a missing
+  // signature: a phone still running a cached copy of the app from before this
+  // field existed, which would otherwise post without one and get a bare 400.
+  const sig = cleanSignature(signature);
+  if (!sig) {
+    const e = new Error(
+      "Customer signature is required. If you don't see a signature box, close and reopen the app to update it."
+    );
+    e.status = 400; throw e;
+  }
 
   const tx = db.transaction(() => {
     // Inline the counter bump here (calling nextSlipNumber() would open a
@@ -169,6 +196,7 @@ function createSlip({ company, contact_name = "", contact_number = "", whatsapp_
     const info = insertSlip.run(slipNumber, String(company).trim(), contact_name, contact_number, whatsapp_number, check_service ? 1 : 0, quote_first ? 1 : 0, notes);
     const slipId = info.lastInsertRowid;
     for (const m of machineList) insertMachine.run(slipId, m);
+    if (sig) insertSignature.run(slipId, sig);
     return slipNumber;
   });
 
@@ -208,6 +236,9 @@ function getSlip(slipNumber) {
   const getParts = db.prepare("SELECT * FROM machine_parts WHERE machine_id = ? ORDER BY id");
   for (const m of machines) m.parts = getParts.all(m.id);
   slip.machines = machines;
+  // Signature lives in its own table so it never rides along on list queries.
+  const sig = db.prepare("SELECT image FROM slip_signatures WHERE slip_id = ?").get(slip.id);
+  slip.signature = sig ? sig.image : "";
   return slip;
 }
 
