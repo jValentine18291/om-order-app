@@ -56,8 +56,10 @@ module.exports = {
     setPartQuantity: (...a) => dataRepo.slips.setPartQuantity(...a),
     setPartPrice: (...a) => dataRepo.slips.setPartPrice(...a),
     setMachineComment: (...a) => dataRepo.slips.setMachineComment(...a),
+    setMachineLabour: (...a) => dataRepo.slips.setMachineLabour(...a),
     setSlipStatus: (...a) => dataRepo.slips.setSlipStatus(...a),
     createSlipOrder: (...a) => dataRepo.slips.createSlipOrder(...a),
+    getSlipOrder: (...a) => dataRepo.slips.getSlipOrder(...a),
     closeSlip: (...a) => dataRepo.slips.closeSlip(...a),
   },
   requests: {

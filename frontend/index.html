@@ -314,6 +314,25 @@
     </div>
   </div>
 
+  <!-- Sales Order block: the rows exactly as they are keyed into AutoCount. -->
+  <div class="modal-overlay" id="so-modal" style="display:none">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div>
+          <strong>Sales Order</strong>
+          <div class="mm-sub" id="so-sub"></div>
+        </div>
+        <button class="modal-x" id="so-close" aria-label="Close">&#10005;</button>
+      </div>
+      <p class="eyebrow" data-no-i18n style="margin:0 0 8px;">Key these rows into AutoCount in this order</p>
+      <div class="so-scroll"><div id="so-lines"></div></div>
+      <div class="summary-card" style="margin:12px 0 0;">
+        <div class="left"><span>Order total</span></div>
+        <div class="total"><div class="val" id="so-total">$0.00</div></div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="machine-modal" style="display:none">
     <div class="modal-sheet">
       <div class="modal-head">
@@ -373,6 +392,14 @@
           <p class="eyebrow">Parts on this machine</p>
         </div>
         <div class="cart-wrap" id="machine-parts"></div>
+
+        <div class="field" style="margin-top:14px;">
+          <label for="os-labour">Labour Charge <span style="color:var(--ink-faint);font-weight:400;">(technician time, on top of parts)</span></label>
+          <div class="labour-row">
+            <span class="labour-cur">$</span>
+            <input id="os-labour" type="number" min="0" step="0.01" inputmode="decimal" autocomplete="off" placeholder="0.00" />
+          </div>
+        </div>
 
         <div class="field" style="margin-top:14px;">
           <label for="os-comment">Repair comment <span style="color:var(--ink-faint);font-weight:400;">(what was wrong, what was done)</span></label>

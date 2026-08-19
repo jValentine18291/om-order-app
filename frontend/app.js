@@ -840,9 +840,10 @@ function renderSlipScreen() {
   // Machines as tappable buttons with per-machine progress.
   $("sd-machines").innerHTML = slip.machines.map((m) => {
     const parts = m.parts || [];
-    let total = 0; for (const p of parts) total += p.unit_price * p.quantity;
+    const labour = Number(m.labour_charge) || 0;
+    let total = labour; for (const p of parts) total += p.unit_price * p.quantity;
     const hasComment = !!String(m.repair_comment || "").trim();
-    const worked = parts.length > 0 || hasComment;
+    const worked = parts.length > 0 || hasComment || labour > 0;
     return `
       <button type="button" class="machine-btn ${worked ? "machine-btn-worked" : ""}" data-machine="${m.id}">
         <div class="machine-btn-top">
@@ -872,6 +873,7 @@ function openMachineModal(machineId) {
   $("mm-title").textContent = m ? m.machine_desc : "Machine";
   $("mm-sub").textContent = `Slip ${session.slipNumber} · ${session.slip.company}`;
   loadCommentForCurrentMachine();
+  loadLabourForCurrentMachine();
   renderMachineParts();
   updateSlipFooter();
   $("machine-modal").style.display = "flex";
@@ -888,6 +890,7 @@ async function closeMachineModal(save) {
     $("mm-save").disabled = true;
     try {
       await commitPendingParts();
+      await saveCurrentLabour();
       await saveCurrentComment();
       toast("Saved", "ok");
     } catch (e) {
@@ -905,6 +908,9 @@ async function closeMachineModal(save) {
   try { await refreshSlip(); } catch (_) {}
   renderSlipScreen();
 }
+// Labour feeds the machine total, so recompute as it is typed.
+$("os-labour").addEventListener("input", () => updateSlipFooter());
+
 $("mm-save").addEventListener("click", () => closeMachineModal(true));
 $("mm-close").addEventListener("click", () => closeMachineModal(false));
 
@@ -931,6 +937,37 @@ function loadCommentForCurrentMachine() {
   if (!box) return;
   const m = currentMachine();
   box.value = (m && m.repair_comment) ? m.repair_comment : "";
+}
+
+function loadLabourForCurrentMachine() {
+  const box = $("os-labour");
+  if (!box) return;
+  const m = currentMachine();
+  const v = m ? Number(m.labour_charge) || 0 : 0;
+  box.value = v ? v.toFixed(2) : "";
+}
+
+// Labour typed into the box, as a number. Blank means zero.
+function currentLabourValue() {
+  const box = $("os-labour");
+  if (!box) return 0;
+  const v = parseFloat(box.value);
+  return Number.isFinite(v) && v > 0 ? Math.round(v * 100) / 100 : 0;
+}
+
+// Save the labour charge for the currently selected machine.
+async function saveCurrentLabour() {
+  const box = $("os-labour");
+  if (!box || !session.machineId) return;
+  const m = currentMachine();
+  const value = currentLabourValue();
+  if (m && (Number(m.labour_charge) || 0) === value) return;   // unchanged
+  await api(`/api/machines/${session.machineId}/labour`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ labour_charge: value }),
+  });
+  if (m) m.labour_charge = value;
 }
 
 // Save the textbox comment to whichever machine is currently selected.
@@ -1153,7 +1190,10 @@ function updateSlipFooter() {
   $("os-slip-badge").textContent = session.slipNumber || "—";
   const machines = session.slip.machines || [];
   let slipTotal = 0, slipParts = 0;
-  for (const m of machines) for (const p of (m.parts || [])) { slipTotal += p.unit_price * p.quantity; slipParts++; }
+  for (const m of machines) {
+    for (const p of (m.parts || [])) { slipTotal += p.unit_price * p.quantity; slipParts++; }
+    slipTotal += Number(m.labour_charge) || 0;
+  }
   $("os-machine-name").textContent = `${machines.length} machine${machines.length === 1 ? "" : "s"}`;
   $("os-machine-total").textContent = money(slipTotal);
 
@@ -1166,14 +1206,19 @@ function updateSlipFooter() {
     let mt = 0;
     for (const p of (machine.parts || [])) mt += p.unit_price * p.quantity;
     for (const p of session.pendingParts) mt += p.unit_price * p.quantity;
+    // Reads the box, not the saved value, so the total moves as it is typed.
+    mt += currentLabourValue();
     const mmTotal = $("mm-total");
     if (mmTotal) mmTotal.textContent = money(mt);
   }
 
   // Create Sales Order covers the whole slip; enable when parts exist and the
   // slip hasn't already been repaired/closed.
+  // Billable when there is anything to charge for — parts OR labour. A slip
+  // that is pure labour ("cleaned the carburettor, no parts") is legitimate.
   const st = session.slip.status;
-  $("os-create-so").disabled = slipParts === 0 || st === "ALL_REPAIRED" || st === "CLOSED";
+  const billable = slipParts > 0 || slipTotal > 0;
+  $("os-create-so").disabled = !billable || st === "ALL_REPAIRED" || st === "CLOSED";
 }
 
 // ---- Slip status UI (Open Service) ------------------------------------------
@@ -1236,6 +1281,9 @@ async function createSalesOrder() {
   try {
     const result = await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/order`, { method: "POST" });
     toast(`Sales Order ${result.so_number} created (${result.ss_line})`, "ok");
+    // Straight into the keyable block — this is the moment it gets typed into
+    // AutoCount, so don't make anyone go looking for it.
+    showSlipOrder(session.slipNumber);
     // Report price write-back outcome (prices saved into AutoCount for parts
     // that previously had none). Failures are non-blocking but flagged.
     const ps = result.price_sync;
@@ -1341,6 +1389,8 @@ async function onViewSlipChosen(slipNumber) {
     // Rebuilt from the stored slip, so a re-issued copy matches the original.
     const share = document.getElementById("vs-share");
     if (share) share.addEventListener("click", () => shareSlipPdf(slip));
+    const soBtn = document.getElementById("vs-so");
+    if (soBtn) soBtn.addEventListener("click", () => showSlipOrder(slip.slip_number));
   } catch (e) {
     wrap.innerHTML = "";
     toast(e.message, "err");
@@ -1398,10 +1448,12 @@ function wireVsStatusActions(slipNumber) {
 
 function renderSlipDetail(slip) {
   // Header block: customer + meta
-  let slipQty = 0, slipAmount = 0, slipParts = 0;
+  let slipQty = 0, slipAmount = 0, slipParts = 0, slipLabour = 0;
   for (const m of slip.machines) {
     for (const p of (m.parts || [])) { slipQty += p.quantity; slipAmount += p.unit_price * p.quantity; slipParts++; }
+    slipLabour += Number(m.labour_charge) || 0;
   }
+  slipAmount += slipLabour;
 
   const meta = [];
   if (slip.contact_name) meta.push(`Contact: ${escapeHtml(slip.contact_name)}`);
@@ -1426,8 +1478,10 @@ function renderSlipDetail(slip) {
   // Each machine + its parts
   for (const m of slip.machines) {
     const parts = m.parts || [];
+    const mLabour = Number(m.labour_charge) || 0;
     let mQty = 0, mAmount = 0;
     for (const p of parts) { mQty += p.quantity; mAmount += p.unit_price * p.quantity; }
+    mAmount += mLabour;
 
     html += `
       <div class="vs-machine">
@@ -1437,9 +1491,12 @@ function renderSlipDetail(slip) {
       html += `<div class="vs-comment">${escapeHtml(m.repair_comment)}</div>`;
     }
 
-    if (parts.length === 0) {
+    if (parts.length === 0 && !mLabour) {
       html += `<div class="vs-sub" style="padding:6px 0;">No parts recorded.</div>`;
     } else {
+      if (parts.length === 0) {
+        html += `<div class="vs-sub" style="padding:6px 0;">No parts recorded.</div>`;
+      }
       for (const p of parts) {
         html += `
           <div class="vs-part">
@@ -1453,6 +1510,17 @@ function renderSlipDetail(slip) {
             </div>
           </div>`;
       }
+      if (mLabour) {
+        html += `
+          <div class="vs-part">
+            <div class="vs-part-info">
+              <div class="vs-part-desc">Labour Charge</div>
+            </div>
+            <div class="vs-part-amt">
+              <div class="vs-part-line">${money(mLabour)}</div>
+            </div>
+          </div>`;
+      }
       html += `<div class="vs-machine-total">Machine total: <strong>${money(mAmount)}</strong> (${mQty} qty)</div>`;
     }
     html += `</div>`;
@@ -1461,7 +1529,7 @@ function renderSlipDetail(slip) {
   // Slip total
   html += `
     <div class="vs-grand">
-      <span>${slipParts} part${slipParts === 1 ? "" : "s"} · ${slipQty} qty across ${slip.machines.length} machine${slip.machines.length === 1 ? "" : "s"}</span>
+      <span>${slipParts} part${slipParts === 1 ? "" : "s"} · ${slipQty} qty across ${slip.machines.length} machine${slip.machines.length === 1 ? "" : "s"}${slipLabour ? ` · incl. ${money(slipLabour)} labour` : ""}</span>
       <strong>${money(slipAmount)}</strong>
     </div>`;
 
@@ -1469,7 +1537,72 @@ function renderSlipDetail(slip) {
   html += `
     <button class="btn-primary" id="vs-share" style="margin-top:14px;">Share slip (PDF)</button>`;
 
+  // Once an order exists, the keyable AutoCount block stays reachable — sales
+  // may key it in later, or need it again.
+  if (slip.status === "ALL_REPAIRED" || slip.status === "CLOSED") {
+    html += `
+      <button class="btn-secondary" id="vs-so" style="margin-top:10px;width:100%;">View Sales Order</button>`;
+  }
+
   return html;
+}
+
+// ---- Sales Order block ------------------------------------------------------
+// Shows the order exactly as it is keyed into AutoCount: one block per machine,
+// opened by the labour line, then the machine heading, its parts, the repair
+// comment and a sub-total. Un-coded rows are notes and carry no price.
+function renderSalesOrder(order) {
+  const lines = order.lines || [];
+  let html = `
+    <div class="so-row so-head">
+      <span>Item Code</span><span>Description</span>
+      <span class="so-qty">Qty</span><span class="so-price">Price</span><span class="so-amt">Amount</span>
+    </div>`;
+
+  for (const l of lines) {
+    const isNote = !l.item_code;
+    let kind = "";
+    if (isNote) {
+      const d = String(l.description || "");
+      if (d === "SubTotal") kind = " so-row-sub";
+      else if (d.startsWith("*")) kind = " so-row-comment";
+      else if (d.includes("S/S:")) kind = " so-row-machine";
+      else kind = " so-row-note";
+    }
+    html += `
+      <div class="so-row${isNote ? " so-row-note" : ""}${kind}">
+        <span class="so-code mono">${escapeHtml(l.item_code || "")}</span>
+        <span class="so-desc">${escapeHtml(l.description || "")}</span>
+        <span class="so-qty">${l.quantity ? escapeHtml(String(l.quantity)) : ""}</span>
+        <span class="so-price">${l.quantity ? money(l.unit_price) : ""}</span>
+        <span class="so-amt">${l.line_amount ? money(l.line_amount) : ""}</span>
+      </div>`;
+  }
+
+  $("so-lines").innerHTML = html;
+  $("so-sub").textContent = `${order.so_number} · ${order.notes || ""}`;
+  $("so-total").textContent = money(order.total_amount);
+  $("so-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function closeSalesOrder() {
+  $("so-modal").style.display = "none";
+  document.body.style.overflow = "";
+}
+$("so-close").addEventListener("click", closeSalesOrder);
+$("so-modal").addEventListener("click", (e) => {
+  if (e.target === $("so-modal")) closeSalesOrder();
+});
+
+// Fetch and show the order raised for a slip.
+async function showSlipOrder(slipNumber) {
+  try {
+    const order = await api(`/api/slips/${encodeURIComponent(slipNumber)}/order`);
+    renderSalesOrder(order);
+  } catch (e) {
+    toast(e.message, "err");
+  }
 }
 
 // ---- Scanner ---------------------------------------------------------------

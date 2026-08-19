@@ -930,3 +930,72 @@ select {
   background: var(--surface);
 }
 .lang-toggle:active { background: var(--surface-2); }
+
+/* ---- Labour charge input (machine modal) ---- */
+.labour-row {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+.labour-cur {
+  flex: 0 0 auto;
+  padding: 0 4px 0 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink-faint);
+}
+.labour-row input {
+  flex: 1 1 auto;
+  width: 100%;
+  border: none !important;
+  background: transparent;
+  padding: 13px 14px 13px 4px;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--ink);
+  -moz-appearance: textfield;
+}
+.labour-row input::-webkit-outer-spin-button,
+.labour-row input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* ===== Sales Order block (keyable AutoCount mirror) =====================
+   Laid out as the AutoCount grid columns so the rows can be typed straight
+   across. Scrolls inside itself rather than widening the modal.
+   ======================================================================== */
+.so-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.so-row {
+  display: grid;
+  grid-template-columns: 132px minmax(190px, 1fr) 34px 62px 68px;
+  gap: 8px;
+  align-items: baseline;
+  min-width: 500px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: .85rem;
+}
+.so-row:last-child { border-bottom: none; }
+.so-head {
+  font-size: .66rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  border-bottom: 1.5px solid var(--ink);
+}
+.so-code { font-weight: 700; color: var(--primary); word-break: break-all; }
+.so-desc { color: var(--ink); }
+.so-qty, .so-price, .so-amt { text-align: right; font-variant-numeric: tabular-nums; }
+.so-amt { font-weight: 700; }
+
+/* Note rows: machine heading, repair comment, sub-total, contact. */
+.so-row-note .so-desc { color: var(--ink-soft); }
+.so-row-machine .so-desc { font-weight: 700; color: var(--ink); }
+.so-row-comment .so-desc { color: #9c6712; font-style: italic; }
+.so-row-sub {
+  border-bottom: 1.5px solid var(--border-2);
+  background: var(--surface-2);
+}
+.so-row-sub .so-desc { font-weight: 700; letter-spacing: .04em; }

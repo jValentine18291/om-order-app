@@ -293,6 +293,19 @@ app.patch("/api/machines/:machineId/comment", async (req, res) => {
   }
 });
 
+// Labour charge for one machine (technician time, billed on top of parts).
+app.patch("/api/machines/:machineId/labour", async (req, res) => {
+  try {
+    const machineId = Number(req.params.machineId);
+    const result = await data.slips.setMachineLabour(machineId, (req.body || {}).labour_charge);
+    res.json(result);
+  } catch (err) {
+    if (err.status === 404) return res.status(404).json({ error: err.message });
+    console.error("[PATCH /api/machines/:machineId/labour]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to save labour charge" });
+  }
+});
+
 // Manually set a slip's quoting status: NEED_QUOTE, QUOTED, or back to IN_PROGRESS.
 app.patch("/api/slips/:slip/status", async (req, res) => {
   try {
@@ -369,6 +382,18 @@ app.post("/api/slips/:slip/order", async (req, res) => {
 });
 
 // Close a slip (Close Service) — requires DO/CS/INV ref
+// The Sales Order raised for a slip (for the keyable AutoCount block view).
+app.get("/api/slips/:slip/order", async (req, res) => {
+  try {
+    const order = await data.slips.getSlipOrder(req.params.slip);
+    if (!order) return res.status(404).json({ error: "No sales order for this slip yet." });
+    res.json(order);
+  } catch (err) {
+    console.error("[GET /api/slips/:slip/order]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to load sales order" });
+  }
+});
+
 app.post("/api/slips/:slip/close", async (req, res) => {
   try {
     const { closing_ref } = req.body || {};

@@ -59,7 +59,11 @@ function createOrder({ notes = "", lines } = {}) {
     e.status = 400;
     throw e;
   }
+  // Note lines carry no item code or quantity: they are the machine heading,
+  // the repair comment and the sub-total rows that make a Sales Order readable
+  // as the AutoCount block it will be keyed into. Priced lines still validate.
   for (const l of lines) {
+    if (l.note) continue;
     if (!l.item_code || !Number.isFinite(Number(l.quantity)) || Number(l.quantity) <= 0) {
       const e = new Error("Each line needs an item_code and quantity > 0.");
       e.status = 400;
@@ -89,6 +93,13 @@ function createOrder({ notes = "", lines } = {}) {
     const orderId = info.lastInsertRowid;
 
     for (const l of lines) {
+      if (l.note) {
+        // Stored so the order reads back as a block; contributes nothing to the
+        // totals. A sub-total row carries its amount for display only — adding
+        // it to totalAmount would count that machine twice.
+        insertLine.run(orderId, "", l.description || "", "", 0, 0, Number(l.line_amount) || 0);
+        continue;
+      }
       const qty = Number(l.quantity);
       const price = Number(l.unit_price) || 0;
       const amount = qty * price;
@@ -293,6 +304,12 @@ function setPartPrice(partId, price) {
 
 // Create the Sales Order for a slip (all machines' parts), flip status to ALL_REPAIRED.
 // Mock SO for now — same shape as createOrder — but tagged with the slip number.
+// Labour is billed through AutoCount's service item. This code also marks the
+// start of a machine's block on the Sales Order, so each machine with labour
+// contributes one of these lines ahead of its parts.
+const LABOUR_ITEM_CODE = "A1 SVR LANDSCAPE";
+const LABOUR_DESCRIPTION = "Being repair & replacement of part :-";
+
 function createSlipOrder(slipNumber) {
   const slip = getSlip(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
@@ -308,17 +325,70 @@ function createSlipOrder(slipNumber) {
     e.status = 400; throw e;
   }
 
-  // Flatten every machine's parts into order lines.
+  // Build the Sales Order as the block a person will key into AutoCount, one
+  // block per machine, in the order the screenshot shows:
+  //
+  //   A1 SVR LANDSCAPE  "Being repair & replacement of part :-"   qty 1 NOS, labour
+  //   (no code)         "EBZ5100 Backpack Blower, S/S: 00042 (R) - 1/2"
+  //   <parts>
+  //   (no code)         "*Too much 2T Oil"          <- repair comment
+  //   (no code)         "SubTotal"                  <- machine total
+  //
+  // and the customer's contact on the last line. The un-coded rows are note
+  // lines: no price, no quantity, no effect on the order total.
   const lines = [];
-  for (const m of slip.machines) {
-    for (const p of (m.parts || [])) {
+  const total = slip.machines.length;
+  let priced = 0;
+
+  slip.machines.forEach((m, i) => {
+    const labour = Number(m.labour_charge) || 0;
+    const parts = m.parts || [];
+
+    // Labour opens the block — in AutoCount this line also marks where the
+    // parts for this machine begin, so it must come first.
+    if (labour > 0) {
+      lines.push({
+        item_code: LABOUR_ITEM_CODE,
+        description: LABOUR_DESCRIPTION,
+        uom: "NOS",
+        unit_price: labour,
+        quantity: 1,
+      });
+      priced++;
+    }
+
+    // Machine heading: model, slip number, technician(s), position on the slip.
+    const techs = [...new Set(parts.map((p) => p.technician).filter(Boolean))];
+    const who = techs.length ? ` (${techs.join("/")})` : "";
+    lines.push({
+      note: true,
+      description: `${m.machine_desc}, S/S: ${slip.slip_number}${who} - ${i + 1}/${total}`,
+    });
+
+    let machineTotal = labour;
+    for (const p of parts) {
       lines.push({
         item_code: p.item_code, description: p.description, uom: p.uom,
         unit_price: p.unit_price, quantity: p.quantity,
       });
+      machineTotal += p.unit_price * p.quantity;
+      priced++;
     }
+
+    const comment = String(m.repair_comment || "").trim();
+    if (comment) lines.push({ note: true, description: `*${comment}` });
+
+    lines.push({ note: true, description: "SubTotal", line_amount: machineTotal });
+  });
+
+  if (priced === 0) {
+    const e = new Error("Nothing to bill on this slip yet — no parts and no labour charge.");
+    e.status = 400; throw e;
   }
-  if (lines.length === 0) { const e = new Error("No parts scanned on this slip yet."); e.status = 400; throw e; }
+
+  // Customer contact, as the last line of the block.
+  const contact = [slip.contact_name, slip.contact_number].filter(Boolean).join(" ").trim();
+  if (contact) lines.push({ note: true, description: contact });
 
   // Reuse the existing order creation (mock SO + persistence).
   const so = createOrder({ notes: `S/S: ${slip.slip_number}`, lines });
@@ -327,6 +397,34 @@ function createSlipOrder(slipNumber) {
   db.prepare("UPDATE service_slips SET status = 'ALL_REPAIRED' WHERE id = ?").run(slip.id);
 
   return { ...so, slip_number: slip.slip_number, ss_line: `S/S: ${slip.slip_number}` };
+}
+
+// Labour billed for one machine, on top of its parts. Stored per machine so
+// each unit on a multi-machine slip carries its own charge.
+function setMachineLabour(machineId, amount) {
+  const machine = db.prepare("SELECT * FROM slip_machines WHERE id = ?").get(machineId);
+  if (!machine) { const e = new Error("Machine not found."); e.status = 404; throw e; }
+  let value = Number(amount);
+  if (!Number.isFinite(value) || value < 0) value = 0;
+  value = Math.round(value * 100) / 100;
+  db.prepare("UPDATE slip_machines SET labour_charge = ? WHERE id = ?").run(value, machineId);
+  // Charging labour is work recorded, so bump OPEN -> IN_PROGRESS the same way
+  // a repair comment does. Clearing it back to zero doesn't count.
+  if (value > 0) {
+    db.prepare("UPDATE service_slips SET status = 'IN_PROGRESS' WHERE id = ? AND status = 'OPEN'")
+      .run(machine.slip_id);
+  }
+  return { ok: true, labour_charge: value };
+}
+
+// The Sales Order raised for a slip, or null. There is no so_number column on
+// service_slips; the link is the "S/S: <slip>" note stamped on the order when
+// it was created, so it is matched on that.
+function getSlipOrder(slipNumber) {
+  const row = db.prepare(
+    "SELECT so_number FROM orders WHERE notes = ? ORDER BY id DESC LIMIT 1"
+  ).get(`S/S: ${slipNumber}`);
+  return row ? getOrder(row.so_number) : null;
 }
 
 // Close a slip: record the DO/CS/INV reference, set status CLOSED.
@@ -416,7 +514,7 @@ function searchSlips(query = "", scope = "all", limit = 20) {
 }
 
 const slips = {
-  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setMachineComment, setSlipStatus, createSlipOrder, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setMachineComment, setMachineLabour, setSlipStatus, createSlipOrder, getSlipOrder, closeSlip,
 };
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };

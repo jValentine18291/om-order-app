@@ -123,6 +123,7 @@ db.exec(`
     slip_id        INTEGER NOT NULL,
     machine_desc   TEXT    NOT NULL,
     repair_comment TEXT    DEFAULT '',
+    labour_charge  REAL    DEFAULT 0,     -- technician labour billed for this machine
     FOREIGN KEY (slip_id) REFERENCES service_slips(id) ON DELETE CASCADE
   );
 
@@ -171,6 +172,17 @@ try {
   }
 } catch (e) {
   console.error("[db] repair_comment migration check failed:", e.message);
+}
+
+// Migration: add labour_charge to slip_machines if an older DB lacks it.
+try {
+  const cols = db.prepare("PRAGMA table_info(slip_machines)").all();
+  if (!cols.some((c) => c.name === "labour_charge")) {
+    db.exec("ALTER TABLE slip_machines ADD COLUMN labour_charge REAL DEFAULT 0");
+    console.log("[db] migrated: added labour_charge to slip_machines");
+  }
+} catch (e) {
+  console.error("[db] labour_charge migration check failed:", e.message);
 }
 
 // Migration: add whatsapp_number to service_slips if an older DB lacks it.
