@@ -76,6 +76,28 @@ function setRole(role) {
     else localStorage.removeItem(ROLE_KEY);
   } catch (_) {}
 }
+// Technician-only language toggle in the topbar. The preference lives in
+// localStorage ("om_lang"); i18n.js reads it at page load, so flipping it
+// reloads — the same pattern as switching roles. The label always shows the
+// language you would switch TO, in that language.
+function updateLangToggle() {
+  const btn = $("lang-toggle");
+  if (!btn) return;
+  const isTech = getRole() === "tech";
+  btn.style.display = isTech ? "inline-flex" : "none";
+  if (!isTech) return;
+  const inEnglish = localStorage.getItem("om_lang") === "en";
+  btn.textContent = inEnglish ? "中文" : "English";
+  // Both topbar pills carry margin-left:auto; with two visible, flexbox would
+  // split them apart. The toggle takes the auto margin, Home sits beside it.
+  $("home-link").style.marginLeft = "10px";
+}
+$("lang-toggle").addEventListener("click", () => {
+  const inEnglish = localStorage.getItem("om_lang") === "en";
+  localStorage.setItem("om_lang", inEnglish ? "zh" : "en");
+  location.reload();
+});
+
 function applyRoleToHome() {
   const role = getRole();
   // Which home functions each account sees (per John's mapping, 28 Jul 2026):
@@ -88,6 +110,7 @@ function applyRoleToHome() {
   document.querySelectorAll("#screen-home .home-btn").forEach((b) => {
     b.style.display = allowed.includes(b.dataset.go) ? "flex" : "none";
   });
+  updateLangToggle();
   const badge = $("role-badge");
   if (badge) {
     const label = role === "tech" ? "Technician 技术员" : role === "purchaser" ? "Purchaser" : "Sales";

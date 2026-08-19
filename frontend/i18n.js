@@ -377,8 +377,15 @@
     try { return localStorage.getItem(ROLE_KEY) === "tech"; } catch (e) { return false; }
   }
 
+  // Technicians default to Chinese, but the topbar toggle can switch a phone
+  // to English ("om_lang" = "en"). The layer installs at page load, so the
+  // toggle in app.js flips this key and reloads — same pattern as role changes.
+  function wantsEnglish() {
+    try { return localStorage.getItem("om_lang") === "en"; } catch (e) { return false; }
+  }
+
   function boot() {
-    if (!isTech()) return;
+    if (!isTech() || wantsEnglish()) return;
     enabled = true;
     document.documentElement.lang = "zh-Hans-SG";
     apply(document.body);

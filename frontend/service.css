@@ -918,3 +918,15 @@ select {
 @media (prefers-reduced-motion: reduce) {
   .sigpad.sigpad-missing { animation: none; }
 }
+
+/* ---- Technician language toggle (topbar) ---- */
+.lang-toggle {
+  cursor: pointer;
+  border: 1px solid var(--border-2);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--surface);
+}
+.lang-toggle:active { background: var(--surface-2); }
