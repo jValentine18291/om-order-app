@@ -2618,25 +2618,27 @@ async function loadIplModel(id) {
     toast("Couldn't load that diagram", "err");
     return;
   }
+  // Selected by id, not by the printed figure number — a figure can span
+  // several sheets and they would otherwise collide.
   $("ipl-figs").innerHTML = ipl.model.figures.map((f, i) =>
-    `<button type="button" class="ipl-fig-btn${i === 0 ? " on" : ""}" data-fig="${f.number}">
-       Fig.${f.number} ${escapeHtml(f.title)}
+    `<button type="button" class="ipl-fig-btn${i === 0 ? " on" : ""}" data-fig="${escapeAttr(f.id)}">
+       ${escapeHtml(f.label || `Fig.${f.number} ${f.title}`)}
      </button>`
   ).join("");
   $("ipl-figs").querySelectorAll(".ipl-fig-btn").forEach((b) =>
-    b.addEventListener("click", () => showIplFigure(Number(b.dataset.fig)))
+    b.addEventListener("click", () => showIplFigure(b.dataset.fig))
   );
-  showIplFigure(ipl.model.figures[0].number);
+  showIplFigure(ipl.model.figures[0].id);
 }
 
-function showIplFigure(number) {
-  const fig = ipl.model.figures.find((f) => f.number === number);
+function showIplFigure(id) {
+  const fig = ipl.model.figures.find((f) => f.id === id);
   if (!fig) return;
   ipl.figure = fig;
   ipl.selectedKey = null;
 
   $("ipl-figs").querySelectorAll(".ipl-fig-btn").forEach((b) =>
-    b.classList.toggle("on", Number(b.dataset.fig) === number)
+    b.classList.toggle("on", b.dataset.fig === id)
   );
 
   const canvas = $("ipl-canvas");
@@ -2720,7 +2722,7 @@ async function openIplPart(key) {
 
   $("ipl-part-title").textContent = part.description || part.part_number;
   $("ipl-part-sub").textContent =
-    `Fig.${ipl.figure.number} ${ipl.figure.title} · Key ${part.key}`;
+    `${ipl.figure.label || `Fig.${ipl.figure.number} ${ipl.figure.title}`} · Key ${part.key}`;
   $("ipl-part-stock").innerHTML = `<div class="fp-loading">Looking up stock…</div>`;
   $("ipl-modal").style.display = "flex";
   document.body.style.overflow = "hidden";

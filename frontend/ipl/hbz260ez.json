@@ -4,6 +4,7 @@
  "source": "IPL,ZENOAH,HBZ260EZ,2021-02.pdf",
  "figures": [
   {
+   "id": "1",
    "number": 1,
    "title": "ENGINE UNIT",
    "image": "hbz260ez-fig1.png",
@@ -599,9 +600,13 @@
      "remarks": "M5x0.8 2021.02",
      "search": "482012350"
     }
-   ]
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 ENGINE UNIT"
   },
   {
+   "id": "2",
    "number": 2,
    "title": "AIR UNIT",
    "image": "hbz260ez-fig2.png",
@@ -1077,9 +1082,13 @@
      "remarks": "2021.02",
      "search": "577955601"
     }
-   ]
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 AIR UNIT"
   },
   {
+   "id": "3",
    "number": 3,
    "title": "INTAKE, RECOIL, ACCESSARY",
    "image": "hbz260ez-fig3.png",
@@ -1506,9 +1515,13 @@
      "remarks": "2021.02",
      "search": "588841401"
     }
-   ]
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 INTAKE, RECOIL, ACCESSARY"
   },
   {
+   "id": "4",
    "number": 4,
    "title": "CARBURETOR",
    "image": "hbz260ez-fig4.png",
@@ -2094,7 +2107,10 @@
      "remarks": "2021.02",
      "search": "587713801"
     }
-   ]
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.4 CARBURETOR"
   }
  ]
 }

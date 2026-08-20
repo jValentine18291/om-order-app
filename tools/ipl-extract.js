@@ -171,11 +171,16 @@ for (let p = 1; p <= pageCount; p++) {
     const keys = new Set(rows.map((r) => r.key));
     const hotspots = parseFigure(pending.page, keys);
 
-    const png = `${MODEL_ID}-fig${pending.number}.png`;
+    const png = `${MODEL_ID}-fig${figures.length + 1}.png`;
     run("pdftoppm", ["-png", "-r", "150", "-f", String(pending.page), "-l", String(pending.page),
                      "-singlefile", PDF, path.join(OUT_DIR, png.replace(/\.png$/, ""))]);
 
     figures.push({
+      // id is what the viewer selects on: a figure can run to more than one
+      // sheet (the BK3410's Fig.1 DRIVE UNIT does), and keying on the printed
+      // figure number alone would make every sheet after the first
+      // unreachable.
+      id: String(figures.length + 1),
       number: pending.number,
       title: pending.title,
       image: png,
@@ -183,6 +188,7 @@ for (let p = 1; p <= pageCount; p++) {
       parts: rows.map((r) => ({ ...r, search: searchCode(r.part_number) })),
     });
     console.log(`  Fig.${pending.number} ${pending.title}: ${rows.length} parts, ${hotspots.length} hotspots`);
+
     pending = null;
   } else if (fig && !isTable) {
     // The title sits on the same line as "Fig.N". Taking the whole page here
@@ -197,6 +203,17 @@ for (let p = 1; p <= pageCount; p++) {
       : "";
     pending = { page: p, number: parseInt(fig[1], 10), title: title || `Figure ${fig[1]}` };
   }
+}
+
+// Where a figure runs to several sheets, number them for the tab label.
+const sheetCounts = {};
+for (const f of figures) sheetCounts[f.number] = (sheetCounts[f.number] || 0) + 1;
+const seen = {};
+for (const f of figures) {
+  f.sheets = sheetCounts[f.number];
+  seen[f.number] = (seen[f.number] || 0) + 1;
+  f.sheet = seen[f.number];
+  f.label = `Fig.${f.number} ${f.title}` + (f.sheets > 1 ? ` (${f.sheet}/${f.sheets})` : "");
 }
 
 const model = {
