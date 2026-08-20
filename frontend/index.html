@@ -112,6 +112,12 @@
           </span>
           <span class="home-txt"><strong>Find Part</strong><small>Check part location and stock</small></span>
         </button>
+        <button class="home-btn" data-go="ipl">
+          <span class="home-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3z"/><circle cx="17.5" cy="17.5" r="3.5"/></svg>
+          </span>
+          <span class="home-txt"><strong>Parts Diagram</strong><small>Exploded views with live stock</small></span>
+        </button>
         <button class="home-btn" data-go="requests">
           <span class="home-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
@@ -147,6 +153,37 @@
       </div>
       <div class="fp-card" id="fp-detail" style="display:none;"></div>
       <button class="btn-primary" id="fp-order-more" style="display:none; margin-top:12px;">Order more</button>
+    </section>
+
+    <!-- ============ SCREEN: IPL (interactive parts diagram) ============ -->
+    <section id="screen-ipl" class="screen">
+      <div class="section-head">
+        <p class="eyebrow">Parts catalogue</p>
+        <h2>Parts Diagram</h2>
+      </div>
+      <div class="field">
+        <label for="ipl-model">Model</label>
+        <select id="ipl-model"></select>
+      </div>
+      <div class="ipl-figs" id="ipl-figs"></div>
+      <div class="ipl-bar">
+        <div class="ipl-zoom" id="ipl-zoom">
+          <button type="button" data-zoom="1" class="on">Fit</button>
+          <button type="button" data-zoom="2">2&times;</button>
+          <button type="button" data-zoom="3">3&times;</button>
+        </div>
+        <span class="ipl-hint" id="ipl-hint">Tap a number on the diagram</span>
+      </div>
+      <div class="ipl-stage" id="ipl-stage">
+        <div class="ipl-canvas" id="ipl-canvas">
+          <img id="ipl-img" alt="Parts diagram" />
+        </div>
+      </div>
+      <div class="field" style="margin-top:14px;">
+        <label for="ipl-filter">Find in this figure</label>
+        <input id="ipl-filter" type="text" autocomplete="off" placeholder="Part number or description&hellip;" />
+      </div>
+      <div id="ipl-list"></div>
     </section>
 
     <!-- ============ SCREEN: PURCHASER (requested parts) ============ -->
@@ -327,6 +364,22 @@
   </div>
 
   <!-- Sales Order block: the rows exactly as they are keyed into AutoCount. -->
+  <!-- One part from the diagram: what the IPL says, plus live AutoCount stock. -->
+  <div class="modal-overlay" id="ipl-modal" style="display:none">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div>
+          <strong id="ipl-part-title">Part</strong>
+          <div class="mm-sub" id="ipl-part-sub"></div>
+        </div>
+        <button class="modal-x" id="ipl-part-close" aria-label="Close">&#10005;</button>
+      </div>
+      <div id="ipl-part-ipl"></div>
+      <p class="eyebrow" style="margin:14px 0 6px;">Stock</p>
+      <div id="ipl-part-stock"></div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="so-modal" style="display:none">
     <div class="modal-sheet">
       <div class="modal-head">

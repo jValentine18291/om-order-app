@@ -999,3 +999,91 @@ select {
   background: var(--surface-2);
 }
 .so-row-sub .so-desc { font-weight: 700; letter-spacing: .04em; }
+
+/* ===== IPL / parts diagram viewer =======================================
+   The diagram is a fixed-aspect drawing with callout numbers whose positions
+   come from the PDF itself, so hotspots are placed in percentages and scale
+   with whatever zoom the user picks.
+   ======================================================================== */
+.ipl-figs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.ipl-fig-btn {
+  flex: 0 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font: inherit; font-size: .88rem; font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer; white-space: nowrap;
+}
+.ipl-fig-btn.on {
+  background: var(--primary-grad);
+  border-color: transparent;
+  color: #fff;
+}
+
+.ipl-bar { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.ipl-zoom { display: flex; border: 1px solid var(--border-2); border-radius: 10px; overflow: hidden; }
+.ipl-zoom button {
+  background: var(--surface); border: none; padding: 8px 13px;
+  font: inherit; font-size: .82rem; font-weight: 700; color: var(--ink-soft); cursor: pointer;
+}
+.ipl-zoom button + button { border-left: 1px solid var(--border-2); }
+.ipl-zoom button.on { background: var(--primary); color: #fff; }
+.ipl-hint { font-size: .8rem; color: var(--ink-faint); }
+
+.ipl-stage {
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fff;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  max-height: 62vh;
+}
+.ipl-canvas { position: relative; width: 100%; transition: width .18s ease; }
+.ipl-canvas img { width: 100%; display: block; }
+
+/* Callout hotspot. Sits over the printed number, so it is deliberately
+   translucent until tapped — the drawing has to stay readable. */
+.ipl-spot {
+  position: absolute;
+  width: 26px; height: 26px;
+  margin: -13px 0 0 -13px;
+  border-radius: 50%;
+  border: 2px solid var(--primary);
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  cursor: pointer;
+  padding: 0;
+}
+.ipl-spot:active,
+.ipl-spot.on {
+  background: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-tint);
+}
+
+/* Parts list */
+.ipl-row {
+  display: flex; align-items: baseline; gap: 10px;
+  width: 100%; text-align: left; font: inherit;
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 12px; padding: 11px 13px; margin-bottom: 6px;
+  cursor: pointer;
+}
+.ipl-row.on { border-color: var(--primary); background: var(--primary-tint); }
+.ipl-row .k {
+  flex: 0 0 34px; font-weight: 700; color: var(--primary);
+  font-variant-numeric: tabular-nums;
+}
+.ipl-row .d { flex: 1; min-width: 0; }
+.ipl-row .d .n { font-size: .95rem; color: var(--ink); }
+.ipl-row .d .c { font-size: .8rem; color: var(--ink-faint); margin-top: 2px; }
+.ipl-row .q { flex: 0 0 auto; font-size: .82rem; color: var(--ink-faint); }
+.ipl-row .d .n .sub { color: var(--ink-faint); }
+.ipl-empty { padding: 14px; text-align: center; color: var(--ink-faint); font-size: .9rem; }
+
+/* Part modal */
+.ipl-kv { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: .92rem; }
+.ipl-kv:last-child { border-bottom: none; }
+.ipl-kv .k { color: var(--ink-faint); }
+.ipl-kv .v { font-weight: 600; text-align: right; }

@@ -61,7 +61,7 @@ function formatDate(ts) {
 }
 
 // ---- Screen navigation -----------------------------------------------------
-const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip", "purchase"];
+const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip", "purchase", "ipl"];
 
 // ---- Role (Sales Staff vs Technician) ---------------------------------------
 // Remembered per phone in localStorage. Technicians see only Open Service;
@@ -102,7 +102,9 @@ function applyRoleToHome() {
   const role = getRole();
   // Which home functions each account sees (per John's mapping, 28 Jul 2026):
   const ROLE_FUNCTIONS = {
-    sales: ["new", "close", "view", "find"],
+    // Parts Diagram is with Sales first, as a trial. Add "ipl" to the other
+    // roles here when it is ready to go wider.
+    sales: ["new", "close", "view", "find", "ipl"],
     tech: ["open", "view", "find"],
     purchaser: ["new", "close", "view", "find", "requests"],
   };
@@ -2087,6 +2089,7 @@ document.querySelectorAll(".home-btn").forEach((b) =>
     else if (go === "view") { enterViewSlips(); }
     else if (go === "find") { enterFindPart(); }
     else if (go === "requests") { enterPurchaser(); }
+    else if (go === "ipl") { enterIpl(); }
   })
 );
 $("home-link").addEventListener("click", goHome);
@@ -2581,3 +2584,206 @@ function sigPadData() {
 }
 
 sigPadSetup();
+
+// ---- IPL: interactive parts diagram -----------------------------------------
+// Data comes from tools/ipl-extract.js, which reads the manufacturer's IPL PDF.
+// Callout coordinates are lifted from the PDF's own text layer, so the hotspots
+// sit exactly on the printed numbers rather than being placed by hand.
+const ipl = { models: null, model: null, figure: null, selectedKey: null };
+
+async function enterIpl() {
+  showScreen("ipl");
+  if (ipl.models) return;
+  try {
+    ipl.models = await api("./ipl/index.json");
+  } catch (_) {
+    ipl.models = [];
+  }
+  const sel = $("ipl-model");
+  if (!ipl.models.length) {
+    sel.innerHTML = `<option value="">No diagrams installed yet</option>`;
+    $("ipl-list").innerHTML = `<div class="ipl-empty">No parts diagrams have been added yet.</div>`;
+    return;
+  }
+  sel.innerHTML = ipl.models.map((m) =>
+    `<option value="${escapeAttr(m.id)}">${escapeHtml(m.name)}</option>`
+  ).join("");
+  await loadIplModel(ipl.models[0].id);
+}
+
+async function loadIplModel(id) {
+  try {
+    ipl.model = await api(`./ipl/${encodeURIComponent(id)}.json`);
+  } catch (e) {
+    toast("Couldn't load that diagram", "err");
+    return;
+  }
+  $("ipl-figs").innerHTML = ipl.model.figures.map((f, i) =>
+    `<button type="button" class="ipl-fig-btn${i === 0 ? " on" : ""}" data-fig="${f.number}">
+       Fig.${f.number} ${escapeHtml(f.title)}
+     </button>`
+  ).join("");
+  $("ipl-figs").querySelectorAll(".ipl-fig-btn").forEach((b) =>
+    b.addEventListener("click", () => showIplFigure(Number(b.dataset.fig)))
+  );
+  showIplFigure(ipl.model.figures[0].number);
+}
+
+function showIplFigure(number) {
+  const fig = ipl.model.figures.find((f) => f.number === number);
+  if (!fig) return;
+  ipl.figure = fig;
+  ipl.selectedKey = null;
+
+  $("ipl-figs").querySelectorAll(".ipl-fig-btn").forEach((b) =>
+    b.classList.toggle("on", Number(b.dataset.fig) === number)
+  );
+
+  const canvas = $("ipl-canvas");
+  canvas.querySelectorAll(".ipl-spot").forEach((s) => s.remove());
+  $("ipl-img").src = `./ipl/${fig.image}`;
+
+  // One hotspot per printed callout — a part shown twice on the drawing gets
+  // two, both selecting the same row.
+  fig.hotspots.forEach((h) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "ipl-spot";
+    b.dataset.key = h.key;
+    b.style.left = h.x + "%";
+    b.style.top = h.y + "%";
+    b.setAttribute("aria-label", "Part " + h.key);
+    b.addEventListener("click", () => selectIplKey(h.key, true));
+    canvas.appendChild(b);
+  });
+
+  $("ipl-filter").value = "";
+  renderIplList();
+}
+
+function renderIplList() {
+  const fig = ipl.figure;
+  if (!fig) return;
+  const q = $("ipl-filter").value.trim().toLowerCase();
+  const rows = fig.parts.filter((p) =>
+    !q || p.description.toLowerCase().includes(q) ||
+    p.part_number.toLowerCase().includes(q) ||
+    p.search.toLowerCase().includes(q.replace(/[^a-z0-9]/g, "")) ||
+    p.key.toLowerCase() === q
+  );
+
+  $("ipl-list").innerHTML = rows.length
+    ? rows.map((p) => `
+        <button type="button" class="ipl-row${p.key === ipl.selectedKey ? " on" : ""}" data-key="${escapeAttr(p.key)}">
+          <span class="k">${escapeHtml(p.key)}</span>
+          <span class="d">
+            <span class="n">${p.sub ? `<span class="sub">&middot; </span>` : ""}${escapeHtml(p.description)}</span>
+            <span class="c mono">${escapeHtml(p.part_number)}${p.remarks ? " &middot; " + escapeHtml(p.remarks) : ""}</span>
+          </span>
+          <span class="q">${p.qty ? "&times;" + escapeHtml(p.qty) : ""}</span>
+        </button>`).join("")
+    : `<div class="ipl-empty">No parts match that.</div>`;
+
+  $("ipl-list").querySelectorAll(".ipl-row").forEach((b) =>
+    b.addEventListener("click", () => {
+      selectIplKey(b.dataset.key, false);
+      openIplPart(b.dataset.key);
+    })
+  );
+}
+
+// Highlight a key on both the drawing and the list. fromDiagram scrolls the
+// list to the row; tapping the row instead opens the part straight away.
+function selectIplKey(key, fromDiagram) {
+  ipl.selectedKey = key;
+  document.querySelectorAll(".ipl-spot").forEach((s) =>
+    s.classList.toggle("on", s.dataset.key === key)
+  );
+  document.querySelectorAll(".ipl-row").forEach((r) =>
+    r.classList.toggle("on", r.dataset.key === key)
+  );
+  if (fromDiagram) {
+    const row = document.querySelector('.ipl-row[data-key="' + CSS.escape(key) + '"]');
+    if (row) row.scrollIntoView({ behavior: "smooth", block: "center" });
+    openIplPart(key);
+  }
+}
+
+// The IPL gives the manufacturer's part number; AutoCount stores it with the
+// brand prefix and no separators (IPL "585 60 19-01" is "SZEN 585601901").
+// So resolve the real item code by search first, then ask for its stock —
+// getPartStock matches the code exactly and would miss otherwise.
+async function openIplPart(key) {
+  const part = ipl.figure.parts.find((p) => p.key === key);
+  if (!part) return;
+
+  $("ipl-part-title").textContent = part.description || part.part_number;
+  $("ipl-part-sub").textContent =
+    `Fig.${ipl.figure.number} ${ipl.figure.title} · Key ${part.key}`;
+  $("ipl-part-ipl").innerHTML = `
+    <div class="ipl-kv"><span class="k">Part number</span><span class="v mono">${escapeHtml(part.part_number)}</span></div>
+    ${part.qty ? `<div class="ipl-kv"><span class="k">Qty on machine</span><span class="v">${escapeHtml(part.qty)}</span></div>` : ""}
+    ${part.remarks ? `<div class="ipl-kv"><span class="k">Remarks</span><span class="v">${escapeHtml(part.remarks)}</span></div>` : ""}`;
+  $("ipl-part-stock").innerHTML = `<div class="fp-loading">Looking up stock…</div>`;
+  $("ipl-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+
+  try {
+    const data = await api(`/api/parts-search?q=${encodeURIComponent(part.search)}`);
+    const list = data.results || [];
+    if (!list.length) {
+      $("ipl-part-stock").innerHTML =
+        `<div class="fp-empty">Not found in AutoCount under this number.</div>`;
+      return;
+    }
+    if (list.length > 1) {
+      // More than one match — usually the plain code and an "R" variant. Let
+      // the user pick rather than guessing which one they meant.
+      $("ipl-part-stock").innerHTML = list.map((r) =>
+        `<button type="button" class="company-option" data-code="${escapeAttr(r.item_code)}">
+           <span class="fp-opt-desc">${escapeHtml(r.description)}</span>
+           <span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>
+         </button>`).join("");
+      $("ipl-part-stock").querySelectorAll(".company-option").forEach((b) =>
+        b.addEventListener("click", () => renderIplStock(b.dataset.code))
+      );
+      return;
+    }
+    renderIplStock(list[0].item_code);
+  } catch (e) {
+    $("ipl-part-stock").innerHTML =
+      `<div class="fp-empty">${escapeHtml(e.message || "Lookup failed")}</div>`;
+  }
+}
+
+async function renderIplStock(itemCode) {
+  const box = $("ipl-part-stock");
+  box.innerHTML = `<div class="fp-loading">Looking up stock…</div>`;
+  try {
+    const p = await api(`/api/part-stock/${encodeURIComponent(itemCode)}`);
+    const qty = Number(p.bal_qty);
+    const qtyStr = Number.isInteger(qty) ? String(qty) : qty.toFixed(2);
+    box.innerHTML = `
+      <div class="fp-row"><span class="fp-lbl">Part No.</span><span class="fp-val mono">${escapeHtml(p.item_code)}</span></div>
+      <div class="fp-row"><span class="fp-lbl">Description</span><span class="fp-val">${escapeHtml(p.description)}${p.desc2 ? `<br><span class="fp-val-model">${escapeHtml(p.desc2)}</span>` : ""}</span></div>
+      <div class="fp-row"><span class="fp-lbl">Location / Shelf</span><span class="fp-val">${p.shelf ? escapeHtml(p.shelf) : "—"}</span></div>
+      <div class="fp-row"><span class="fp-lbl">Bal. Qty</span><span class="fp-val fp-qty ${qty > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${qtyStr}${p.uom ? " " + escapeHtml(p.uom) : ""}</span></div>`;
+  } catch (e) {
+    box.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Stock lookup failed")}</div>`;
+  }
+}
+
+function closeIplPart() {
+  $("ipl-modal").style.display = "none";
+  document.body.style.overflow = "";
+}
+$("ipl-part-close").addEventListener("click", closeIplPart);
+$("ipl-modal").addEventListener("click", (e) => { if (e.target === $("ipl-modal")) closeIplPart(); });
+$("ipl-model").addEventListener("change", (e) => loadIplModel(e.target.value));
+$("ipl-filter").addEventListener("input", renderIplList);
+$("ipl-zoom").querySelectorAll("button").forEach((b) =>
+  b.addEventListener("click", () => {
+    $("ipl-zoom").querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
+    $("ipl-canvas").style.width = (Number(b.dataset.zoom) * 100) + "%";
+  })
+);
