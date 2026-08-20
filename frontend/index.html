@@ -6,7 +6,19 @@
   <meta name="theme-color" content="#f1f4f2" />
   <title>OM Service</title>
   <link rel="manifest" href="./manifest.json" />
-  <link rel="apple-touch-icon" href="./icon-192.png" />
+  <!-- iOS home screen. Safari snapshots these when "Add to Home Screen" is
+       used and never re-fetches, so a phone added before the icons existed
+       keeps the plain letter tile until it is removed and re-added.
+       180x180 is the size iOS actually wants; the unsized link is the
+       fallback for older devices. apple-mobile-web-app-title sets the label
+       under the icon — without it iOS falls back to the page title. -->
+  <link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png" />
+  <link rel="apple-touch-icon" href="./icon-180.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="OM Service" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./service.css" />
   <script src="https://unpkg.com/@zxing/browser@0.1.5"></script>
