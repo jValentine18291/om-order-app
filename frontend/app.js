@@ -2658,6 +2658,7 @@ function showIplFigure(number) {
   });
 
   $("ipl-filter").value = "";
+  if (typeof iplReset === "function") iplReset();
   renderIplList();
 }
 
@@ -2720,10 +2721,6 @@ async function openIplPart(key) {
   $("ipl-part-title").textContent = part.description || part.part_number;
   $("ipl-part-sub").textContent =
     `Fig.${ipl.figure.number} ${ipl.figure.title} · Key ${part.key}`;
-  $("ipl-part-ipl").innerHTML = `
-    <div class="ipl-kv"><span class="k">Part number</span><span class="v mono">${escapeHtml(part.part_number)}</span></div>
-    ${part.qty ? `<div class="ipl-kv"><span class="k">Qty on machine</span><span class="v">${escapeHtml(part.qty)}</span></div>` : ""}
-    ${part.remarks ? `<div class="ipl-kv"><span class="k">Remarks</span><span class="v">${escapeHtml(part.remarks)}</span></div>` : ""}`;
   $("ipl-part-stock").innerHTML = `<div class="fp-loading">Looking up stock…</div>`;
   $("ipl-modal").style.display = "flex";
   document.body.style.overflow = "hidden";
@@ -2781,9 +2778,145 @@ $("ipl-part-close").addEventListener("click", closeIplPart);
 $("ipl-modal").addEventListener("click", (e) => { if (e.target === $("ipl-modal")) closeIplPart(); });
 $("ipl-model").addEventListener("change", (e) => loadIplModel(e.target.value));
 $("ipl-filter").addEventListener("input", renderIplList);
-$("ipl-zoom").querySelectorAll("button").forEach((b) =>
-  b.addEventListener("click", () => {
-    $("ipl-zoom").querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
-    $("ipl-canvas").style.width = (Number(b.dataset.zoom) * 100) + "%";
-  })
-);
+
+// ---- Diagram pinch / pan ----------------------------------------------------
+// The stage clips, and the drawing is moved with a transform rather than by
+// scrolling, so pinch and drag can share one gesture model.
+//
+// Two details worth keeping:
+//  * The hotspots live inside the transformed canvas, so they would grow with
+//    the zoom. They are counter-scaled through the --k variable, staying a
+//    constant tap size at any magnification.
+//  * A drag that ends on a hotspot must not also select it, so any gesture
+//    that travels beyond a few pixels suppresses the click that follows.
+const iplView = { k: 1, tx: 0, ty: 0, moved: false };
+const IPL_MAX = 6;
+
+function iplApply() {
+  const c = $("ipl-canvas");
+  if (!c) return;
+  // Keep the drawing anchored: never let it be dragged clear of the stage.
+  const stage = $("ipl-stage");
+  const w = stage.clientWidth, h = stage.clientHeight;
+  const maxX = 0, maxY = 0;
+  const minX = Math.min(0, w - w * iplView.k);
+  const minY = Math.min(0, h - c.offsetHeight * iplView.k);
+  iplView.tx = Math.max(minX, Math.min(maxX, iplView.tx));
+  iplView.ty = Math.max(minY, Math.min(maxY, iplView.ty));
+
+  c.style.setProperty("--k", iplView.k);
+  c.style.transform = `translate(${iplView.tx}px, ${iplView.ty}px) scale(${iplView.k})`;
+  stage.style.touchAction = iplView.k > 1.01 ? "none" : "pan-y";
+  const reset = $("ipl-reset");
+  if (reset) reset.style.display = iplView.k > 1.01 ? "inline-flex" : "none";
+}
+
+function iplReset() {
+  iplView.k = 1; iplView.tx = 0; iplView.ty = 0;
+  iplApply();
+}
+
+// Zoom about a point so the spot under the fingers stays put.
+function iplZoomAt(x, y, factor) {
+  const next = Math.max(1, Math.min(IPL_MAX, iplView.k * factor));
+  const ratio = next / iplView.k;
+  iplView.tx = x - (x - iplView.tx) * ratio;
+  iplView.ty = y - (y - iplView.ty) * ratio;
+  iplView.k = next;
+  iplApply();
+}
+
+(function wireIplGestures() {
+  const stage = $("ipl-stage");
+  if (!stage) return;
+  const pts = new Map();
+  let startDist = 0, startK = 1, lastMid = null, lastOne = null;
+
+  const mid = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+  const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  const local = (e) => {
+    const r = stage.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  };
+
+  stage.addEventListener("pointerdown", (e) => {
+    pts.set(e.pointerId, local(e));
+    iplView.moved = false;
+    if (pts.size === 2) {
+      const [a, b] = [...pts.values()];
+      startDist = dist(a, b);
+      startK = iplView.k;
+      lastMid = mid(a, b);
+    } else if (pts.size === 1) {
+      lastOne = local(e);
+    }
+    // Capture can throw if the pointer has already gone (a finger lifted
+    // mid-gesture, or a synthetic event); losing capture is survivable, an
+    // exception here would abort the gesture entirely.
+    try { stage.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+
+  stage.addEventListener("pointermove", (e) => {
+    if (!pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, local(e));
+
+    if (pts.size >= 2) {
+      const [a, b] = [...pts.values()];
+      const d = dist(a, b);
+      if (startDist > 0) {
+        const m = mid(a, b);
+        const next = Math.max(1, Math.min(IPL_MAX, startK * (d / startDist)));
+        const ratio = next / iplView.k;
+        // Scale about the pinch centre, then follow it as the fingers travel.
+        iplView.tx = m.x - (m.x - iplView.tx) * ratio + (lastMid ? m.x - lastMid.x : 0);
+        iplView.ty = m.y - (m.y - iplView.ty) * ratio + (lastMid ? m.y - lastMid.y : 0);
+        iplView.k = next;
+        lastMid = m;
+        iplView.moved = true;
+        iplApply();
+      }
+      e.preventDefault();
+    } else if (pts.size === 1 && iplView.k > 1.01) {
+      const p = local(e);
+      if (lastOne) {
+        iplView.tx += p.x - lastOne.x;
+        iplView.ty += p.y - lastOne.y;
+        if (Math.abs(p.x - lastOne.x) > 2 || Math.abs(p.y - lastOne.y) > 2) iplView.moved = true;
+        iplApply();
+      }
+      lastOne = p;
+      e.preventDefault();
+    }
+  });
+
+  const release = (e) => {
+    pts.delete(e.pointerId);
+    if (pts.size < 2) { startDist = 0; lastMid = null; }
+    if (pts.size === 1) lastOne = [...pts.values()][0];
+    if (pts.size === 0) lastOne = null;
+  };
+  stage.addEventListener("pointerup", release);
+  stage.addEventListener("pointercancel", release);
+
+  // A pan or pinch must not select whatever it finished on top of.
+  stage.addEventListener("click", (e) => {
+    if (iplView.moved) { e.stopPropagation(); e.preventDefault(); iplView.moved = false; }
+  }, true);
+
+  // Desktop: wheel to zoom, double-click to toggle.
+  stage.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const p = local(e);
+    iplZoomAt(p.x, p.y, e.deltaY < 0 ? 1.12 : 1 / 1.12);
+  }, { passive: false });
+
+  stage.addEventListener("dblclick", (e) => {
+    const p = local(e);
+    if (iplView.k > 1.01) iplReset();
+    else iplZoomAt(p.x, p.y, 2.5);
+  });
+
+  const reset = $("ipl-reset");
+  if (reset) reset.addEventListener("click", iplReset);
+  window.addEventListener("resize", iplApply);
+})();

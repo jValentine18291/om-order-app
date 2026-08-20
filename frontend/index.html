@@ -167,12 +167,8 @@
       </div>
       <div class="ipl-figs" id="ipl-figs"></div>
       <div class="ipl-bar">
-        <div class="ipl-zoom" id="ipl-zoom">
-          <button type="button" data-zoom="1" class="on">Fit</button>
-          <button type="button" data-zoom="2">2&times;</button>
-          <button type="button" data-zoom="3">3&times;</button>
-        </div>
-        <span class="ipl-hint" id="ipl-hint">Tap a number on the diagram</span>
+        <span class="ipl-hint" id="ipl-hint">Pinch to zoom &middot; drag to move &middot; tap a number</span>
+        <button type="button" class="ipl-reset" id="ipl-reset" style="display:none;">Reset</button>
       </div>
       <div class="ipl-stage" id="ipl-stage">
         <div class="ipl-canvas" id="ipl-canvas">
@@ -374,8 +370,6 @@
         </div>
         <button class="modal-x" id="ipl-part-close" aria-label="Close">&#10005;</button>
       </div>
-      <div id="ipl-part-ipl"></div>
-      <p class="eyebrow" style="margin:14px 0 6px;">Stock</p>
       <div id="ipl-part-stock"></div>
     </div>
   </div>

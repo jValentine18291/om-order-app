@@ -1023,26 +1023,39 @@ select {
 }
 
 .ipl-bar { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
-.ipl-zoom { display: flex; border: 1px solid var(--border-2); border-radius: 10px; overflow: hidden; }
-.ipl-zoom button {
-  background: var(--surface); border: none; padding: 8px 13px;
-  font: inherit; font-size: .82rem; font-weight: 700; color: var(--ink-soft); cursor: pointer;
+.ipl-hint { flex: 1; font-size: .8rem; color: var(--ink-faint); }
+.ipl-reset {
+  flex: 0 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: 10px;
+  padding: 7px 14px;
+  font: inherit; font-size: .82rem; font-weight: 700;
+  color: var(--primary);
+  cursor: pointer;
 }
-.ipl-zoom button + button { border-left: 1px solid var(--border-2); }
-.ipl-zoom button.on { background: var(--primary); color: #fff; }
-.ipl-hint { font-size: .8rem; color: var(--ink-faint); }
 
 .ipl-stage {
   margin-top: 10px;
   border: 1px solid var(--border);
   border-radius: 14px;
   background: #fff;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
+  /* Clips rather than scrolls: pan and pinch are driven by a transform on the
+     canvas, so native scrolling would fight the gesture. touch-action is set
+     from script — pan-y while the drawing fits, none once it is zoomed. */
+  overflow: hidden;
   max-height: 62vh;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
 }
-.ipl-canvas { position: relative; width: 100%; transition: width .18s ease; }
-.ipl-canvas img { width: 100%; display: block; }
+.ipl-canvas {
+  position: relative;
+  width: 100%;
+  transform-origin: 0 0;
+  --k: 1;
+}
+.ipl-canvas img { width: 100%; display: block; -webkit-user-drag: none; user-select: none; }
 
 /* Callout hotspot. Sits over the printed number, so it is deliberately
    translucent until tapped — the drawing has to stay readable. */
@@ -1050,6 +1063,9 @@ select {
   position: absolute;
   width: 26px; height: 26px;
   margin: -13px 0 0 -13px;
+  /* Counter the canvas zoom so the tap target stays the same size on screen
+     however far the drawing is magnified. */
+  transform: scale(calc(1 / var(--k, 1)));
   border-radius: 50%;
   border: 2px solid var(--primary);
   background: color-mix(in srgb, var(--primary) 14%, transparent);
