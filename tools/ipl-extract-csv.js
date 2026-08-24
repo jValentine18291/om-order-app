@@ -118,14 +118,20 @@ async function main() {
   for (const r of data) {
     const name = r[iName].trim();
     if (!byName.has(name)) {
-      const s = { name, image: r[iImg], rows: [] };
+      const s = { name, image: "", rows: [] };
       byName.set(name, s); sections.push(s);
     }
-    byName.get(name).rows.push(r);
+    const sec = byName.get(name);
+    // Superseded parts ("up to serial number ...") come through with Link,
+    // Image and Coordinates all blank. Take the section's image from the first
+    // row that actually has one, rather than assuming the first row does.
+    if (!sec.image && r[iImg] && r[iImg].trim()) sec.image = r[iImg].trim();
+    sec.rows.push(r);
   }
 
   const figures = [];
   for (const [i, s] of sections.entries()) {
+    if (!s.image) { console.log(`  ${s.name}: no diagram image in the export — skipping`); continue; }
     const file = `${MODEL_ID}-fig${i + 1}.png`;
     const dest = path.join(OUT_DIR, file);
     try {

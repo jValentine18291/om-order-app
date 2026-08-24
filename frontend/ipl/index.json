@@ -1,5 +1,10 @@
 [
  {
+  "id": "hus365",
+  "name": "Husqvarna 365 Chainsaw",
+  "figures": 15
+ },
+ {
   "id": "hus525bx",
   "name": "Husqvarna 525BX Blower",
   "figures": 11
