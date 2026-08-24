@@ -101,4 +101,21 @@ async function query(sqlText, params = {}) {
   return result.recordset;
 }
 
-module.exports = { getPool, query, sql };
+// Same as query(), but returns how many rows the statement actually changed.
+// Writes need this: an UPDATE guarded by "...AND Price IS NULL" reports zero
+// rows when someone set the price a moment earlier, and that has to be told
+// apart from a successful write rather than reported as one.
+async function execute(sqlText, params = {}) {
+  const pool = await getPool();
+  const request = pool.request();
+  for (const [name, value] of Object.entries(params)) {
+    request.input(name, value);
+  }
+  const result = await request.query(sqlText);
+  const affected = Array.isArray(result.rowsAffected)
+    ? result.rowsAffected.reduce((a, b) => a + b, 0)
+    : 0;
+  return { rowsAffected: affected, recordset: result.recordset };
+}
+
+module.exports = { getPool, query, sql, execute };

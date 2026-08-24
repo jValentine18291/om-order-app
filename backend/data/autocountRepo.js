@@ -14,7 +14,7 @@
 // AutoCount API and stay on SQLite.
 // ============================================================================
 
-const { query } = require("./autocountConnection");
+const { query, execute } = require("./autocountConnection");
 
 function mapItem(row) {
   if (!row) return null;
@@ -152,6 +152,98 @@ async function updateItemPriceIfMissing(itemCode, newPrice) {
   );
   return { status: "updated", item_code: row.ItemCode, old_price: current, new_price: p };
 }
+
+// ============================================================================
+// SET A MISSING PRICE (Parts Diagram -> Check Price -> Set price)
+//
+// This is a WRITE into the live accounting database, so it is deliberately
+// narrow:
+//
+//   - Only fills a price that is currently blank or zero. It can never change
+//     a price that already exists; the UPDATE re-checks that in its own WHERE
+//     clause, so even a race with someone pricing the item in AutoCount at the
+//     same moment loses safely rather than overwriting them.
+//   - Takes the EXACT ItemCode that the price lookup already resolved, and
+//     matches it exactly. getPartPrices has to search loosely (the IPL prints
+//     "612912230" where AutoCount holds "SZEN 612912230C"), and a loose match
+//     is fine for reading but completely unacceptable for writing - it could
+//     price the wrong item. So the caller passes back the resolved code and
+//     this never guesses.
+//   - Updates exactly one column on exactly one row: the item's base-UOM row.
+//   - Refuses to create an ItemUOM row that does not exist. That is a bigger
+//     change than filling in a price and belongs in AutoCount.
+//   - Reports rows-changed honestly instead of assuming success.
+// ============================================================================
+
+// The tier name arrives from the browser, so it must never reach the SQL text.
+// It is looked up in this fixed table instead, and an unknown tier is rejected.
+const PRICE_TIERS = {
+  contractor: { column: "Price", label: "Contractor Price" },
+  list: { column: "Price6", label: "List Price" },
+};
+
+// A fat-finger ceiling. A price is keyed by hand into an accounting system, so
+// an extra digit is the realistic mistake; this stops the daft ones without
+// getting in the way of a genuinely expensive part.
+const MAX_PRICE = 100000;
+
+async function setMissingPrice(exactItemCode, tier, newPrice) {
+  const spec = PRICE_TIERS[String(tier || "").toLowerCase()];
+  if (!spec) {
+    const e = new Error("Unknown price type."); e.status = 400; throw e;
+  }
+  const code = String(exactItemCode || "").trim();
+  if (!code) {
+    const e = new Error("Missing item code."); e.status = 400; throw e;
+  }
+  const p = Number(newPrice);
+  if (!Number.isFinite(p) || p <= 0) {
+    const e = new Error("Enter a price greater than zero."); e.status = 400; throw e;
+  }
+  if (p > MAX_PRICE) {
+    const e = new Error(`That price looks wrong (over ${MAX_PRICE}). Set it in AutoCount if it is correct.`);
+    e.status = 400; throw e;
+  }
+  // Round to cents rather than trusting whatever the browser sent.
+  const price = Math.round(p * 100) / 100;
+
+  const rows = await query(
+    `SELECT TOP 1 i.ItemCode, i.BaseUOM, u.UOM AS UomRow, u.${spec.column} AS CurrentPrice
+       FROM Item i
+       LEFT JOIN ItemUOM u ON u.ItemCode = i.ItemCode AND u.UOM = i.BaseUOM
+      WHERE i.ItemCode = @code`,
+    { code }
+  );
+  if (!rows.length) {
+    return { status: "not_found", tier: spec.label, item_code: code, old_price: null, new_price: price };
+  }
+  const row = rows[0];
+  const base = { tier: spec.label, item_code: row.ItemCode, new_price: price };
+
+  if (row.UomRow === null || row.UomRow === undefined) {
+    return { ...base, status: "no_uom_row", old_price: null };
+  }
+  const current = row.CurrentPrice === null || row.CurrentPrice === undefined ? 0 : Number(row.CurrentPrice);
+  if (current > 0) {
+    return { ...base, status: "already_priced", old_price: current };
+  }
+
+  const res = await execute(
+    `UPDATE ItemUOM
+        SET ${spec.column} = @price
+      WHERE ItemCode = @code AND UOM = @uom
+        AND (${spec.column} IS NULL OR ${spec.column} = 0)`,
+    { price, code: row.ItemCode, uom: row.BaseUOM }
+  );
+  if (!res.rowsAffected) {
+    // The guard in the WHERE clause held: someone priced it in between.
+    return { ...base, status: "already_priced", old_price: null };
+  }
+  return { ...base, status: "updated", old_price: 0 };
+}
+
+module.exports.PRICE_TIERS = PRICE_TIERS;
+module.exports.setMissingPrice = setMissingPrice;
 
 module.exports.writebackEnabled = writebackEnabled;
 module.exports.updateItemPriceIfMissing = updateItemPriceIfMissing;

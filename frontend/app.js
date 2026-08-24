@@ -2954,15 +2954,22 @@ function iplZoomAt(x, y, factor) {
 // Price1 is the Contractor Price and Price6 the List Price. Prices stay hidden
 // until "Check Price" is tapped.
 //
-// There is no editing here. Prices are AutoCount's to own, and changing them
-// from the app would mean writing to AutoCount fields — the app makes exactly
-// one guarded write there and this is not it.
+// A price that AutoCount does not have yet can be filled in from here, because
+// a blank price is the one case where there is nothing to overwrite. A price
+// that already exists is never editable from the app — that stays AutoCount's
+// to own. Sales and Purchaser only, initials required, and the write is
+// confirmed before it happens because it lands in the accounting system.
 const IPL_TIERS = [
-  { field: "list_price",       code: "LP", name: "List Price" },
-  { field: "contractor_price", code: "CP", name: "Contractor Price" },
+  { field: "list_price",       code: "LP", name: "List Price",       tier: "list" },
+  { field: "contractor_price", code: "CP", name: "Contractor Price", tier: "contractor" },
 ];
 
 let iplPriceState = { code: "" };
+
+// Who may fill in a missing price. Technicians deliberately cannot: they see
+// prices on the slip screens, but these values feed customer quotes.
+const CAN_SET_PRICE = ["sales", "purchaser"];
+const INITIALS_KEY = "om_initials";
 
 function renderIplPriceButton() {
   $("ipl-part-price").innerHTML =
@@ -2978,16 +2985,99 @@ async function loadIplPrices() {
     let html = `<div class="ipl-prices">`;
     for (const t of IPL_TIERS) {
       const v = p[t.field];
-      const missing = v === null || v === undefined;
+      // AutoCount leaves an unset price as NULL or as a plain zero, and both
+      // mean the same thing to a person looking at the screen.
+      const missing = v === null || v === undefined || Number(v) === 0;
+      const canSet = missing && CAN_SET_PRICE.includes(getRole());
       html += `
-        <div class="ipl-price-row">
+        <div class="ipl-price-row" data-tier="${t.tier}">
           <span class="lbl"><b>${t.code}</b>${t.name}</span>
           <span class="val${missing ? " none" : ""}">${missing ? "Not set" : money(v)}</span>
+          ${canSet ? `<button type="button" class="ipl-setprice" data-tier="${t.tier}" data-name="${escapeHtml(t.name)}">Set price</button>` : ""}
         </div>`;
     }
     html += `</div>`;
+    // The resolved AutoCount code, not the number printed on the diagram. Any
+    // write must target the exact item whose price was just shown.
+    iplPriceState.itemCode = p.item_code;
     box.innerHTML = html;
+    box.querySelectorAll(".ipl-setprice").forEach((b) =>
+      b.addEventListener("click", () => openSetPrice(b.dataset.tier, b.dataset.name))
+    );
   } catch (e) {
     box.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Couldn't load prices")}</div>`;
   }
+}
+
+// Fill in a price AutoCount does not have. Two deliberate steps: the value is
+// typed into a small form, and then confirmed against the item code and tier
+// spelled out in full, because this writes to the accounting database and the
+// app cannot undo it afterwards.
+function openSetPrice(tier, tierName) {
+  const row = document.querySelector(`.ipl-price-row[data-tier="${tier}"]`);
+  if (!row || row.querySelector(".ipl-setform")) return;
+  row.querySelector(".ipl-setprice").style.display = "none";
+
+  const saved = (() => { try { return localStorage.getItem(INITIALS_KEY) || ""; } catch (_) { return ""; } })();
+  const form = document.createElement("div");
+  form.className = "ipl-setform";
+  form.innerHTML = `
+    <div class="ipl-setform-item">${escapeHtml(iplPriceState.itemCode || iplPriceState.code)}</div>
+    <div class="ipl-setform-fields">
+      <label>${escapeHtml(tierName)}
+        <input type="number" class="sp-price" inputmode="decimal" step="0.01" min="0.01" placeholder="0.00">
+      </label>
+      <label>Your initials
+        <input type="text" class="sp-who" maxlength="6" placeholder="e.g. JT" value="${escapeHtml(saved)}">
+      </label>
+    </div>
+    <div class="ipl-setform-actions">
+      <button type="button" class="sp-cancel">Cancel</button>
+      <button type="button" class="sp-save">Save to AutoCount</button>
+    </div>
+    <div class="ipl-setform-note">Writes into AutoCount. It cannot be changed back from this app.</div>`;
+  row.appendChild(form);
+  const price = form.querySelector(".sp-price");
+  const who = form.querySelector(".sp-who");
+  price.focus();
+
+  form.querySelector(".sp-cancel").addEventListener("click", () => {
+    form.remove();
+    const b = row.querySelector(".ipl-setprice");
+    if (b) b.style.display = "";
+  });
+
+  form.querySelector(".sp-save").addEventListener("click", async () => {
+    const value = Number(price.value);
+    if (!Number.isFinite(value) || value <= 0) { toast("Enter a price greater than zero.", "err"); price.focus(); return; }
+    const initials = who.value.trim();
+    if (!initials) { toast("Enter your initials so the change can be traced.", "err"); who.focus(); return; }
+
+    const item = iplPriceState.itemCode || iplPriceState.code;
+    const ok = confirm(
+      `Set the ${tierName} for ${item} to ${money(value)} in AutoCount?
+
+` +
+      `This writes to AutoCount and cannot be undone from this app.`
+    );
+    if (!ok) return;
+
+    const btn = form.querySelector(".sp-save");
+    btn.disabled = true; btn.textContent = "Saving…";
+    try {
+      try { localStorage.setItem(INITIALS_KEY, initials); } catch (_) {}
+      const r = await api("/api/part-prices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          item_code: item, tier, price: value, who: initials, role: getRole(),
+        }),
+      });
+      toast(r.message || "Price saved.", "ok");
+      loadIplPrices();
+    } catch (e) {
+      toast(e.message || "Could not save the price.", "err");
+      btn.disabled = false; btn.textContent = "Save to AutoCount";
+    }
+  });
 }

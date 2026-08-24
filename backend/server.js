@@ -190,6 +190,70 @@ app.get("/api/part-prices/:code", async (req, res) => {
   }
 });
 
+// Set a price that AutoCount does not have yet (Parts Diagram -> Check Price).
+// This WRITES to the accounting database, so it is fenced in on every side:
+// the switch must be on, the item code must be the exact one the price lookup
+// resolved, the price must already be blank, and every attempt is logged.
+//
+// The role check is an accident guard, not security: this app has no logins,
+// so the role comes from the browser and could be anything. It stops a
+// technician tapping something they should not, which is what it is for.
+app.post("/api/part-prices", async (req, res) => {
+  const { item_code, tier, price, who, role } = req.body || {};
+  const { logPriceEvent } = require("./priceLog");
+  const stamp = (outcome, extra = {}) =>
+    logPriceEvent({
+      source: "Parts Diagram",
+      itemCode: extra.item_code || item_code,
+      tier: extra.tier || tier,
+      oldPrice: extra.old_price ?? null,
+      newPrice: price,
+      who: `${who || "?"} (${role || "?"})`,
+      outcome,
+    });
+
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") {
+      return res.status(503).json({ error: "AutoCount is not enabled." });
+    }
+    const acRepo = require("./data/autocountRepo");
+    if (!acRepo.writebackEnabled()) {
+      return res.status(403).json({
+        error: "Setting prices is switched off. Ask IT to enable AUTOCOUNT_PRICE_WRITEBACK.",
+      });
+    }
+    if (!["sales", "purchaser"].includes(String(role || "").toLowerCase())) {
+      stamp("REFUSED - role not allowed");
+      return res.status(403).json({ error: "Only Sales and Purchaser can set a price." });
+    }
+    if (!String(who || "").trim()) {
+      return res.status(400).json({ error: "Enter your initials so the change can be traced." });
+    }
+
+    const r = await acRepo.setMissingPrice(item_code, tier, price);
+    const messages = {
+      updated: `${r.tier} set to ${Number(r.new_price).toFixed(2)} in AutoCount.`,
+      already_priced: `${r.tier} is already set in AutoCount — nothing was changed.`,
+      not_found: `"${item_code}" is no longer in AutoCount.`,
+      no_uom_row: `This item has no unit-of-measure row in AutoCount, so the price must be set there.`,
+    };
+    stamp(
+      r.status === "updated" ? "updated in AutoCount" : `no change - ${r.status}`,
+      r
+    );
+    if (r.status !== "updated") {
+      return res.status(409).json({ error: messages[r.status] || "Nothing was changed.", status: r.status });
+    }
+    res.json({ ...r, message: messages.updated });
+  } catch (err) {
+    stamp(`FAILED - ${err.message}`);
+    if (err.status === 400) return res.status(400).json({ error: err.message });
+    console.error("[POST /api/part-prices]", err.message);
+    res.status(500).json({ error: "Could not save the price to AutoCount." });
+  }
+});
+
 // Find Part: search parts by description/code (suggestion list).
 app.get("/api/parts-search", async (req, res) => {
   try {
@@ -357,7 +421,13 @@ app.post("/api/slips/:slip/order", async (req, res) => {
     try {
       const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
       const acRepo = itemsSource === "autocount" ? require("./data/autocountRepo") : null;
-      if (acRepo && acRepo.writebackEnabled && acRepo.writebackEnabled()) {
+      // Deliberately a SEPARATE switch from the Parts Diagram one. Turning on
+      // price-setting there must not silently start writing prices from every
+      // Sales Order as well — that is a different decision, so it needs its
+      // own explicit opt-in.
+      const ordersWriteback =
+        String(process.env.AUTOCOUNT_PRICE_WRITEBACK_ORDERS || "false").toLowerCase() === "true";
+      if (acRepo && ordersWriteback) {
         const { logPriceEvent } = require("./priceLog");
         const slip = await data.slips.getSlip(req.params.slip);
         for (const machine of slip.machines || []) {
@@ -368,9 +438,10 @@ app.post("/api/slips/:slip/order", async (req, res) => {
               if (r.status === "updated") {
                 priceSync.updated.push(r.item_code);
                 logPriceEvent({
-                  slip: slip.slip_number, itemCode: r.item_code,
+                  source: `Slip ${slip.slip_number}`, itemCode: r.item_code,
+                  tier: "Contractor Price",
                   oldPrice: r.old_price, newPrice: r.new_price,
-                  technician: part.technician, outcome: "updated in AutoCount",
+                  who: part.technician, outcome: "updated in AutoCount",
                 });
               } else {
                 priceSync.skipped++;
@@ -378,18 +449,20 @@ app.post("/api/slips/:slip/order", async (req, res) => {
                 // for every ordinarily-priced part and would flood the log.
                 if (r.status === "skipped_not_found") {
                   logPriceEvent({
-                    slip: slip.slip_number, itemCode: part.item_code,
+                    source: `Slip ${slip.slip_number}`, itemCode: part.item_code,
+                    tier: "Contractor Price",
                     oldPrice: null, newPrice: part.unit_price,
-                    technician: part.technician, outcome: "SKIPPED - item not found in AutoCount",
+                    who: part.technician, outcome: "SKIPPED - item not found in AutoCount",
                   });
                 }
               }
             } catch (e) {
               priceSync.failed.push(part.item_code);
               logPriceEvent({
-                slip: slip.slip_number, itemCode: part.item_code,
+                source: `Slip ${slip.slip_number}`, itemCode: part.item_code,
+                tier: "Contractor Price",
                 oldPrice: null, newPrice: part.unit_price,
-                technician: part.technician, outcome: `FAILED - ${e.message}`,
+                who: part.technician, outcome: `FAILED - ${e.message}`,
               });
             }
           }
