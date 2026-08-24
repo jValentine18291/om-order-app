@@ -1118,6 +1118,17 @@ select {
 }
 .ipl-price-btn:active { background: var(--primary-tint); }
 
+.ipl-price-wait {
+  margin-top: 14px; padding: 12px; border: 1px dashed var(--border);
+  border-radius: 10px; font-size: .85rem; color: var(--ink-faint); text-align: center;
+}
+/* Which AutoCount item these prices belong to. Shown because the number on the
+   diagram can match more than one item, and the two can be priced differently. */
+.ipl-price-for {
+  margin-top: 14px; font-size: .78rem; font-weight: 700; color: var(--ink-soft);
+  letter-spacing: .02em;
+}
+.ipl-price-for + .ipl-prices { margin-top: 4px; }
 .ipl-prices { margin-top: 14px; }
 .ipl-price-row {
   display: flex; align-items: center; justify-content: space-between;

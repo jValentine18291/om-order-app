@@ -2748,8 +2748,13 @@ async function openIplPart(index) {
   $("ipl-part-stock").innerHTML = `<div class="fp-loading">Looking up stock…</div>`;
   // Prices are per part and hidden until asked for, so reset the panel rather
   // than leaving the previous part's figures showing.
-  iplPriceState = { code: part.search || part.part_number };
-  renderIplPriceButton();
+  //
+  // The price stays UNBOUND until the exact AutoCount item is known. The number
+  // printed on the diagram is not enough to identify one: "848BE058B2" matches
+  // both SZEN 848BE058B2 and SZEN 848BE058B2R, which are different parts at
+  // different prices. Binding happens below, once the item is resolved.
+  iplPriceState = { code: null, itemCode: null };
+  renderIplPriceButton(null);
   $("ipl-modal").style.display = "flex";
   document.body.style.overflow = "hidden";
 
@@ -2784,6 +2789,10 @@ async function openIplPart(index) {
 async function renderIplStock(itemCode) {
   const box = $("ipl-part-stock");
   box.innerHTML = `<div class="fp-loading">Looking up stock…</div>`;
+  // Stock and price must describe the same item. This is the single point where
+  // the diagram number becomes a real AutoCount item, so bind the price here.
+  iplPriceState = { code: itemCode, itemCode };
+  renderIplPriceButton(itemCode);
   try {
     const p = await api(`/api/part-stock/${encodeURIComponent(itemCode)}`);
     const qty = Number(p.bal_qty);
@@ -2971,8 +2980,15 @@ let iplPriceState = { code: "" };
 const CAN_SET_PRICE = ["sales", "purchaser"];
 const INITIALS_KEY = "om_initials";
 
-function renderIplPriceButton() {
-  $("ipl-part-price").innerHTML =
+function renderIplPriceButton(itemCode) {
+  const box = $("ipl-part-price");
+  if (!itemCode) {
+    // More than one AutoCount item can carry the same diagram number, so there
+    // is nothing honest to show a price for until one has been picked above.
+    box.innerHTML = `<div class="ipl-price-wait">Choose the part above to see its price.</div>`;
+    return;
+  }
+  box.innerHTML =
     `<button type="button" class="ipl-price-btn" id="ipl-check-price">Check Price</button>`;
   $("ipl-check-price").addEventListener("click", loadIplPrices);
 }
@@ -2982,7 +2998,8 @@ async function loadIplPrices() {
   box.innerHTML = `<div class="fp-loading">Checking price…</div>`;
   try {
     const p = await api(`/api/part-prices/${encodeURIComponent(iplPriceState.code)}`);
-    let html = `<div class="ipl-prices">`;
+    let html = `<div class="ipl-price-for mono">${escapeHtml(p.item_code)}</div>`;
+    html += `<div class="ipl-prices">`;
     for (const t of IPL_TIERS) {
       const v = p[t.field];
       // AutoCount leaves an unset price as NULL or as a plain zero, and both

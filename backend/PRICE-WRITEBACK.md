@@ -17,7 +17,7 @@ confirm, and the price is written into AutoCount.
 | Only fills a price that is blank or zero | There is nothing to overwrite, so nothing can be lost |
 | Never changes a price that already exists | Existing prices stay AutoCount's to own |
 | Re-checks "still blank?" inside the write itself | If someone prices it in AutoCount at the same moment, they win, not us |
-| Writes to the exact item the lookup resolved | The diagram prints `612912230`, AutoCount holds `SZEN 612912230C`. Searching loosely is fine for reading a price and unacceptable for writing one |
+| Writes to the exact item the user picked | A diagram number can match more than one item — `848BE058B2` matches both `SZEN 848BE058B2` and `SZEN 848BE058B2R`, which are priced differently. The user chooses which one, and stock, price and any write all follow that choice |
 | One column, one row (the item's base-UOM row) | Smallest possible change |
 | Refuses if the item has no unit-of-measure row | Creating one is a bigger change and belongs in AutoCount |
 | Rejects zero, negatives, and anything over 100,000 | Catches the realistic mistake: an extra digit |
