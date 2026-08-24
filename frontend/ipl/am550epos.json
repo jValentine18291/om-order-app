@@ -1,0 +1,1952 @@
+{
+ "id": "am550epos",
+ "name": "Husqvarna Automower 550 EPOS",
+ "source": "550 EPOS_IPL SG_HK.pdf",
+ "diagramOnly": true,
+ "figures": [
+  {
+   "id": "1",
+   "number": 1,
+   "letter": "D",
+   "title": "CHASSIS LOWER",
+   "image": "am550epos-fig1.png",
+   "hotspots": [],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "593247401",
+     "sub": false,
+     "description": "BATTERY Type 14 5S2P Basic 18V 5,2Ah, 593118401 Packed - Sparepart",
+     "qty": "2",
+     "remarks": "Battery",
+     "search": "593247401"
+    },
+    {
+     "key": "2",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "3",
+     "part_number": "579529401",
+     "sub": false,
+     "description": "Clamp",
+     "qty": "2",
+     "remarks": "Clamp",
+     "search": "579529401"
+    },
+    {
+     "key": "4",
+     "part_number": "580614402",
+     "sub": false,
+     "description": "WIRING ASSY Ultra sonic extension Shielded cable",
+     "qty": "1",
+     "remarks": "US-Extension Wiring",
+     "search": "580614402"
+    },
+    {
+     "key": "5",
+     "part_number": "579708601",
+     "sub": false,
+     "description": "Loom",
+     "qty": "1",
+     "remarks": "AUX Cable",
+     "search": "579708601"
+    },
+    {
+     "key": "6",
+     "part_number": "578285703",
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY Ultrasonic board type 3 With 512k Flash",
+     "qty": "1",
+     "remarks": "Printed Circuit Ultrasonic",
+     "search": "578285703"
+    },
+    {
+     "key": "7",
+     "part_number": "579708701",
+     "sub": false,
+     "description": "LOOM",
+     "qty": "1",
+     "remarks": "Switch On-Off",
+     "search": "579708701"
+    },
+    {
+     "key": "8",
+     "part_number": "596494701",
+     "sub": false,
+     "description": "HOLDER KIT Spare Part Battery",
+     "qty": "1",
+     "remarks": "Holder Kit",
+     "search": "596494701"
+    },
+    {
+     "key": "9",
+     "part_number": "574450101",
+     "sub": false,
+     "description": "Screw black",
+     "qty": "5",
+     "remarks": "Screw",
+     "search": "574450101"
+    },
+    {
+     "key": "10",
+     "part_number": "580682901",
+     "sub": false,
+     "description": "Holder",
+     "qty": "3",
+     "remarks": "Holder Twist Lock",
+     "search": "580682901"
+    },
+    {
+     "key": "11",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "12",
+     "part_number": "579529401",
+     "sub": false,
+     "description": "Clamp",
+     "qty": "2",
+     "remarks": "Clamp",
+     "search": "579529401"
+    },
+    {
+     "key": "13",
+     "part_number": "593830601",
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY PCBA Main board Type 14",
+     "qty": "1",
+     "remarks": "Main board",
+     "search": "593830601"
+    },
+    {
+     "key": "14",
+     "part_number": "588818402",
+     "sub": false,
+     "description": "WIRING ASSY LED LIGHT extension 540mm",
+     "qty": "1",
+     "remarks": "LED-Extension Wiring",
+     "search": "588818402"
+    },
+    {
+     "key": "15",
+     "part_number": "579708201",
+     "sub": false,
+     "description": "HARNESS",
+     "qty": "1",
+     "remarks": "Sensor Cable",
+     "search": "579708201"
+    },
+    {
+     "key": "16",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "17",
+     "part_number": "579529401",
+     "sub": false,
+     "description": "Clamp",
+     "qty": "2",
+     "remarks": "Clamp",
+     "search": "579529401"
+    },
+    {
+     "key": "18",
+     "part_number": "592852701",
+     "sub": false,
+     "description": "Printed circuit assy",
+     "qty": "1",
+     "remarks": "Printed Circuit Loop Sensor",
+     "search": "592852701"
+    },
+    {
+     "key": "19",
+     "part_number": "534156602",
+     "sub": false,
+     "description": "AWG16 L=700mm Medi Kabel sparepart",
+     "qty": "1",
+     "remarks": "Charging cable",
+     "search": "534156602"
+    },
+    {
+     "key": "20",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "21",
+     "part_number": "581556101",
+     "sub": false,
+     "description": "SPRING Guide height adjustment",
+     "qty": "2",
+     "remarks": "Spring",
+     "search": "581556101"
+    },
+    {
+     "key": "22",
+     "part_number": "579708001",
+     "sub": false,
+     "description": "WIRING ASSY Height adjustment",
+     "qty": "1",
+     "remarks": "Height Adjustment Wiring",
+     "search": "579708001"
+    },
+    {
+     "key": "23",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "1",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "24",
+     "part_number": "579529401",
+     "sub": false,
+     "description": "Clamp",
+     "qty": "1",
+     "remarks": "Clamp",
+     "search": "579529401"
+    },
+    {
+     "key": "25",
+     "part_number": "579728502",
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY PCBA Cutting Height Board Type 1 Updated EMC performance",
+     "qty": "1",
+     "remarks": "Printed Circuit Height Adjustment",
+     "search": "579728502"
+    },
+    {
+     "key": "26",
+     "part_number": "574874705",
+     "sub": false,
+     "description": "SEALING STRIP P2 Chassis Lower",
+     "qty": "1",
+     "remarks": "Sealing Strip (1 pcs, Ø5 mm)",
+     "search": "574874705"
+    },
+    {
+     "key": "27",
+     "part_number": "583944503",
+     "sub": false,
+     "description": "CHASSIS KIT Lower",
+     "qty": "1",
+     "remarks": "",
+     "search": "583944503"
+    },
+    {
+     "key": "28",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "4",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "29",
+     "part_number": "501068301",
+     "sub": false,
+     "description": "MOTOR ASSY Height motor",
+     "qty": "1",
+     "remarks": "Cutting height adjustment motor",
+     "search": "501068301"
+    },
+    {
+     "key": "30",
+     "part_number": "581621202",
+     "sub": false,
+     "description": "Plug kit",
+     "qty": "1",
+     "remarks": "Plug KIT",
+     "search": "581621202"
+    },
+    {
+     "key": "31",
+     "part_number": "734113741",
+     "sub": false,
+     "description": "Washer",
+     "qty": "1",
+     "remarks": "Washer",
+     "search": "734113741"
+    },
+    {
+     "key": "32",
+     "part_number": "574450101",
+     "sub": false,
+     "description": "Screw black",
+     "qty": "1",
+     "remarks": "Screw",
+     "search": "574450101"
+    },
+    {
+     "key": "33",
+     "part_number": "581621601",
+     "sub": false,
+     "description": "SCREW KIT",
+     "qty": "1",
+     "remarks": "Gear KIT",
+     "search": "581621601"
+    },
+    {
+     "key": "34",
+     "part_number": "535018401",
+     "sub": false,
+     "description": "WIRING ASSY Battery Cable Basic 4P/4P L=160mm +/-5mm",
+     "qty": "1",
+     "remarks": "Battery cable",
+     "search": "535018401"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "D CHASSIS LOWER"
+  },
+  {
+   "id": "2",
+   "number": 2,
+   "letter": "A",
+   "title": "COVER",
+   "image": "am550epos-fig2.png",
+   "hotspots": [],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "501065202",
+     "sub": false,
+     "description": "WIRING ASSY Ultrasonic with shielded",
+     "qty": "1",
+     "remarks": "Ultra Sonic Sensor",
+     "search": "501065202"
+    },
+    {
+     "key": "2",
+     "part_number": "598905201",
+     "sub": false,
+     "description": "FRONT COVER Top Orange",
+     "qty": "1",
+     "remarks": "Cover Top Orange",
+     "search": "598905201"
+    },
+    {
+     "key": "3",
+     "part_number": "598905301",
+     "sub": false,
+     "description": "REAR COVER Top Grey, 550 EPOS logo",
+     "qty": "1",
+     "remarks": "Cover Top Grey, 550 EPOS",
+     "search": "598905301"
+    },
+    {
+     "key": "4",
+     "part_number": "587423501",
+     "sub": false,
+     "description": "DECAL Husqvarna Crown Height 55 mm",
+     "qty": "1",
+     "remarks": "Decal Crown",
+     "search": "587423501"
+    },
+    {
+     "key": "5",
+     "part_number": "595312202",
+     "sub": false,
+     "description": "WIRING ASSY LED Light Wiring Orange color",
+     "qty": "1",
+     "remarks": "Led Lights Orange",
+     "search": "595312202"
+    },
+    {
+     "key": "6",
+     "part_number": "531144701",
+     "sub": false,
+     "description": "Charging plates cable",
+     "qty": "1",
+     "remarks": "Charging Plate Wiring",
+     "search": "531144701"
+    },
+    {
+     "key": "7",
+     "part_number": "501065602",
+     "sub": false,
+     "description": "HOLDER ASSY AM420,430X,440,450X,520,55 0 Magnet",
+     "qty": "1",
+     "remarks": "Holder ASSY",
+     "search": "501065602"
+    },
+    {
+     "key": "8",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "1",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "9",
+     "part_number": "588225202",
+     "sub": false,
+     "description": "BUMPER Rear",
+     "qty": "1",
+     "remarks": "Bumper ASSY",
+     "search": "588225202"
+    },
+    {
+     "key": "11",
+     "part_number": "574450101",
+     "sub": false,
+     "description": "Screw black",
+     "qty": "12",
+     "remarks": "Screw",
+     "search": "574450101"
+    },
+    {
+     "key": "12",
+     "part_number": "581903102",
+     "sub": false,
+     "description": "Wheel brush start kit; brushes x6, holders x2 (400 & 500 series)",
+     "qty": "1",
+     "remarks": "Brush KIT (brackets and brushes, 6 pcs)",
+     "search": "581903102"
+    },
+    {
+     "key": "13",
+     "part_number": "581982002",
+     "sub": false,
+     "description": "420, 440, 430X (-2022), 450X (-2022)",
+     "qty": "1",
+     "remarks": "Brush, 6 pcs",
+     "search": "581982002"
+    },
+    {
+     "key": "14",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "15",
+     "part_number": "501061102",
+     "sub": false,
+     "description": "BODY ASSY",
+     "qty": "1",
+     "remarks": "Body Kit",
+     "search": "501061102"
+    },
+    {
+     "key": "16",
+     "part_number": "580526801",
+     "sub": false,
+     "description": "Cap",
+     "qty": "1",
+     "remarks": "Snaploc",
+     "search": "580526801"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "A COVER"
+  },
+  {
+   "id": "3",
+   "number": 3,
+   "letter": "E",
+   "title": "WHEELS & TIRES",
+   "image": "am550epos-fig3.png",
+   "hotspots": [],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "576019302",
+     "sub": false,
+     "description": "LOCKWASHER PUSH-ON TYPE P 8 BV, thickness: 0,4mm Geomet 500A",
+     "qty": "2",
+     "remarks": "Lock Washer",
+     "search": "576019302"
+    },
+    {
+     "key": "2",
+     "part_number": "514916400",
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "Washer",
+     "search": "514916400"
+    },
+    {
+     "key": "3",
+     "part_number": "580605101",
+     "sub": false,
+     "description": "Ball bearing, front wheel",
+     "qty": "2",
+     "remarks": "Ball Bearing",
+     "search": "580605101"
+    },
+    {
+     "key": "3",
+     "part_number": "597795601",
+     "sub": false,
+     "description": "BALL BEARING 580605101 Packed 50pcs Front Wheel P2 Robotic Mowers",
+     "qty": "1",
+     "remarks": "Tube 50 pcs",
+     "search": "597795601"
+    },
+    {
+     "key": "4",
+     "part_number": "580605101",
+     "sub": false,
+     "description": "Ball bearing, front wheel",
+     "qty": "2",
+     "remarks": "Ball Bearing",
+     "search": "580605101"
+    },
+    {
+     "key": "4",
+     "part_number": "597795601",
+     "sub": false,
+     "description": "BALL BEARING 580605101 Packed 50pcs Front Wheel P2 Robotic Mowers",
+     "qty": "1",
+     "remarks": "Tube 50 pcs",
+     "search": "597795601"
+    },
+    {
+     "key": "5",
+     "part_number": "535087803",
+     "sub": false,
+     "description": "WASHER Front wheel Center hole dia 8",
+     "qty": "2",
+     "remarks": "Washer",
+     "search": "535087803"
+    },
+    {
+     "key": "6",
+     "part_number": "580764601",
+     "sub": false,
+     "description": "Washer Robotic Part",
+     "qty": "2",
+     "remarks": "Washer",
+     "search": "580764601"
+    },
+    {
+     "key": "7",
+     "part_number": "581621501",
+     "sub": false,
+     "description": "SHIELD KIT Front Wheel Robotic Mower",
+     "qty": "2",
+     "remarks": "Shield KIT",
+     "search": "581621501"
+    },
+    {
+     "key": "8",
+     "part_number": "580487101",
+     "sub": false,
+     "description": "Sealing",
+     "qty": "2",
+     "remarks": "Sealing",
+     "search": "580487101"
+    },
+    {
+     "key": "9",
+     "part_number": "580605101",
+     "sub": false,
+     "description": "Ball bearing, front wheel",
+     "qty": "2",
+     "remarks": "Ball Bearing",
+     "search": "580605101"
+    },
+    {
+     "key": "9",
+     "part_number": "597795601",
+     "sub": false,
+     "description": "BALL BEARING 580605101 Packed 50pcs Front Wheel P2 Robotic Mowers",
+     "qty": "1",
+     "remarks": "Tube 50 pcs",
+     "search": "597795601"
+    },
+    {
+     "key": "10",
+     "part_number": "579457101",
+     "sub": false,
+     "description": "WHEEL Robotic Part Front Wheel Inside",
+     "qty": "2",
+     "remarks": "Wheel Inside",
+     "search": "579457101"
+    },
+    {
+     "key": "11",
+     "part_number": "574449801",
+     "sub": false,
+     "description": "Wheel, front",
+     "qty": "2",
+     "remarks": "Tire",
+     "search": "574449801"
+    },
+    {
+     "key": "12",
+     "part_number": "580445101",
+     "sub": false,
+     "description": "O-Ring",
+     "qty": "2",
+     "remarks": "O-Ring",
+     "search": "580445101"
+    },
+    {
+     "key": "13",
+     "part_number": "580605101",
+     "sub": false,
+     "description": "Ball bearing, front wheel",
+     "qty": "2",
+     "remarks": "Ball Bearing",
+     "search": "580605101"
+    },
+    {
+     "key": "13",
+     "part_number": "597795601",
+     "sub": false,
+     "description": "BALL BEARING 580605101 Packed 50pcs Front Wheel P2 Robotic Mowers",
+     "qty": "1",
+     "remarks": "Tube 50 pcs",
+     "search": "597795601"
+    },
+    {
+     "key": "15",
+     "part_number": "576019302",
+     "sub": false,
+     "description": "LOCKWASHER PUSH-ON TYPE P 8 BV, thickness: 0,4mm Geomet 500A",
+     "qty": "2",
+     "remarks": "Lock Washer",
+     "search": "576019302"
+    },
+    {
+     "key": "16",
+     "part_number": "579457201",
+     "sub": false,
+     "description": "WHEEL Front wheel outside Robotic Mower",
+     "qty": "2",
+     "remarks": "Wheel Outside",
+     "search": "579457201"
+    },
+    {
+     "key": "17",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "6",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "18",
+     "part_number": "580336102",
+     "sub": false,
+     "description": "SPINDLE Spindle front wheel",
+     "qty": "2",
+     "remarks": "Spindle",
+     "search": "580336102"
+    },
+    {
+     "key": "19",
+     "part_number": "581621402",
+     "sub": false,
+     "description": "Wheel, front",
+     "qty": "2",
+     "remarks": "Front Wheel KIT",
+     "search": "581621402"
+    },
+    {
+     "key": "20",
+     "part_number": "580443902",
+     "sub": false,
+     "description": "O-RING Wheel Motor Robotic Mower Light grey",
+     "qty": "2",
+     "remarks": "O-Ring",
+     "search": "580443902"
+    },
+    {
+     "key": "21",
+     "part_number": "581621307",
+     "sub": false,
+     "description": "MOTOR KIT Drive Wheel",
+     "qty": "2",
+     "remarks": "Wheel Motor Up to S/N 2308XXXXX",
+     "search": "581621307"
+    },
+    {
+     "key": "21",
+     "part_number": "599659302",
+     "sub": false,
+     "description": "WHEEL MOTOR ASSY",
+     "qty": "1",
+     "remarks": "Wheel Motor From S/N 230909784",
+     "search": "599659302"
+    },
+    {
+     "key": "22",
+     "part_number": "574450101",
+     "sub": false,
+     "description": "Screw black",
+     "qty": "8",
+     "remarks": "Screw",
+     "search": "574450101"
+    },
+    {
+     "key": "25",
+     "part_number": "582280201",
+     "sub": false,
+     "description": "WHEEL ASSY Complete grey",
+     "qty": "2",
+     "remarks": "Rear Wheel",
+     "search": "582280201"
+    },
+    {
+     "key": "26",
+     "part_number": "586210601",
+     "sub": false,
+     "description": "Washer",
+     "qty": "2",
+     "remarks": "Washer",
+     "search": "586210601"
+    },
+    {
+     "key": "27",
+     "part_number": "731432401",
+     "sub": false,
+     "description": "HEXAGON THIN NUT ISO 4035 M16 04 ZPB",
+     "qty": "2",
+     "remarks": "Thin Nut",
+     "search": "731432401"
+    },
+    {
+     "key": "28",
+     "part_number": "579505502",
+     "sub": false,
+     "description": "HUB CAP Rear wheel No center pin",
+     "qty": "2",
+     "remarks": "Hub Cap",
+     "search": "579505502"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "E WHEELS & TIRES"
+  },
+  {
+   "id": "4",
+   "number": 4,
+   "letter": "J",
+   "title": "ACCESSORIES",
+   "image": "am550epos-fig4.png",
+   "hotspots": [],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "585019702",
+     "sub": false,
+     "description": "420, 430X (-2022), 440, 450X (-2022), 520, 550, 550 EPOS",
+     "qty": "1",
+     "remarks": "Wall Hanger",
+     "search": "585019702"
+    },
+    {
+     "key": "2",
+     "part_number": "590855101",
+     "sub": false,
+     "description": "Automower® Cleaning & Maintenance Kit",
+     "qty": "1",
+     "remarks": "Maintenance and Cleaning KIT",
+     "search": "590855101"
+    },
+    {
+     "key": "3",
+     "part_number": "581982002",
+     "sub": false,
+     "description": "420, 440, 430X (-2022), 450X (-2022)",
+     "qty": "1",
+     "remarks": "Brush, 6pcs",
+     "search": "581982002"
+    },
+    {
+     "key": "4",
+     "part_number": "597496302",
+     "sub": false,
+     "description": "Kit to convert Automower 420/430X/440/450X/520/550 to a lower cutting height, ideal for golf fairways. For models manuf from 2020",
+     "qty": "1",
+     "remarks": "Fairway KIT",
+     "search": "597496302"
+    },
+    {
+     "key": "5",
+     "part_number": "581889702",
+     "sub": false,
+     "description": "320 (-2015), 330X, 420, 440, 430X (-2022), 430XH, 450X (-2022), 450XH, 520, 520H, 550, 550H",
+     "qty": "1",
+     "remarks": "Rear Wheel Kit incl Brush Kit",
+     "search": "581889702"
+    },
+    {
+     "key": "13",
+     "part_number": "585019401",
+     "sub": false,
+     "description": "420, 440, 430X (-2022), 450X (-2022), 520, 550",
+     "qty": "1",
+     "remarks": "House KIT",
+     "search": "585019401"
+    },
+    {
+     "key": "13",
+     "part_number": "585019410",
+     "sub": false,
+     "description": "420, 440, 430X, 450X, 520, 550",
+     "qty": "1",
+     "remarks": "House KIT US",
+     "search": "585019410"
+    },
+    {
+     "key": "14",
+     "part_number": "577469001",
+     "sub": false,
+     "description": "DECAL HUSQVARNA 210mm",
+     "qty": "1",
+     "remarks": "Decal",
+     "search": "577469001"
+    },
+    {
+     "key": "15",
+     "part_number": "586885801",
+     "sub": false,
+     "description": "KIT Lid - Automower House",
+     "qty": "1",
+     "remarks": "Cover Lid",
+     "search": "586885801"
+    },
+    {
+     "key": "16",
+     "part_number": "585324002",
+     "sub": false,
+     "description": "HANDLE Release Left",
+     "qty": "1",
+     "remarks": "Handle Left",
+     "search": "585324002"
+    },
+    {
+     "key": "17",
+     "part_number": "585324101",
+     "sub": false,
+     "description": "Connecting rod",
+     "qty": "1",
+     "remarks": "Rod",
+     "search": "585324101"
+    },
+    {
+     "key": "18",
+     "part_number": "580511401",
+     "sub": false,
+     "description": "Spring",
+     "qty": "2",
+     "remarks": "Spring",
+     "search": "580511401"
+    },
+    {
+     "key": "19",
+     "part_number": "585341501",
+     "sub": false,
+     "description": "Hinge pin",
+     "qty": "2",
+     "remarks": "Hinge Pin",
+     "search": "585341501"
+    },
+    {
+     "key": "20",
+     "part_number": "585341601",
+     "sub": false,
+     "description": "Hinge",
+     "qty": "1",
+     "remarks": "Beam",
+     "search": "585341601"
+    },
+    {
+     "key": "21",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "9",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "22",
+     "part_number": "585324001",
+     "sub": false,
+     "description": "HANDLE Release Right",
+     "qty": "1",
+     "remarks": "Handle Right",
+     "search": "585324001"
+    },
+    {
+     "key": "23",
+     "part_number": "585323602",
+     "sub": false,
+     "description": "HATCH Grey",
+     "qty": "1",
+     "remarks": "Hatch",
+     "search": "585323602"
+    },
+    {
+     "key": "24",
+     "part_number": "585323401",
+     "sub": false,
+     "description": "COVER Base",
+     "qty": "1",
+     "remarks": "Cover Base",
+     "search": "585323401"
+    },
+    {
+     "key": "26",
+     "part_number": "585323802",
+     "sub": false,
+     "description": "Support base left",
+     "qty": "1",
+     "remarks": "Support Base Left",
+     "search": "585323802"
+    },
+    {
+     "key": "27",
+     "part_number": "503226601",
+     "sub": false,
+     "description": "SQUARE NUT M6 5 ZPB",
+     "qty": "4",
+     "remarks": "Square Nut",
+     "search": "503226601"
+    },
+    {
+     "key": "28",
+     "part_number": "585323801",
+     "sub": false,
+     "description": "Support base right",
+     "qty": "1",
+     "remarks": "Support Base Right",
+     "search": "585323801"
+    },
+    {
+     "key": "29",
+     "part_number": "535129303",
+     "sub": false,
+     "description": "Screw M6",
+     "qty": "4",
+     "remarks": "Screw",
+     "search": "535129303"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "J ACCESSORIES"
+  },
+  {
+   "id": "5",
+   "number": 5,
+   "letter": "H",
+   "title": "CHARGING STATION",
+   "image": "am550epos-fig5.png",
+   "hotspots": [],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "598914002",
+     "sub": false,
+     "description": "CHARGING STATION 550 EPOS No boundry or guide wire",
+     "qty": "1",
+     "remarks": "Charging Station",
+     "search": "598914002"
+    },
+    {
+     "key": "2",
+     "part_number": "579448203",
+     "sub": false,
+     "description": "CAP Charging station",
+     "qty": "1",
+     "remarks": "Cap",
+     "search": "579448203"
+    },
+    {
+     "key": "4",
+     "part_number": "580511401",
+     "sub": false,
+     "description": "Spring",
+     "qty": "2",
+     "remarks": "Spring",
+     "search": "580511401"
+    },
+    {
+     "key": "5",
+     "part_number": "579462402",
+     "sub": false,
+     "description": "Button",
+     "qty": "1",
+     "remarks": "Button - Release",
+     "search": "579462402"
+    },
+    {
+     "key": "6",
+     "part_number": "574487001",
+     "sub": false,
+     "description": "Spring",
+     "qty": "1",
+     "remarks": "Spring",
+     "search": "574487001"
+    },
+    {
+     "key": "7",
+     "part_number": "579458004",
+     "sub": false,
+     "description": "Frame Charging Station",
+     "qty": "1",
+     "remarks": "Frame",
+     "search": "579458004"
+    },
+    {
+     "key": "8",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "4",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "10",
+     "part_number": "579460502",
+     "sub": false,
+     "description": "Distance",
+     "qty": "2",
+     "remarks": "Distance",
+     "search": "579460502"
+    },
+    {
+     "key": "11",
+     "part_number": "580511401",
+     "sub": false,
+     "description": "Spring",
+     "qty": "2",
+     "remarks": "Spring",
+     "search": "580511401"
+    },
+    {
+     "key": "12",
+     "part_number": "734113741",
+     "sub": false,
+     "description": "Washer",
+     "qty": "2",
+     "remarks": "Washer",
+     "search": "734113741"
+    },
+    {
+     "key": "13",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "14",
+     "part_number": "531242201",
+     "sub": false,
+     "description": "Wiring assy Charging Contacts",
+     "qty": "1",
+     "remarks": "Loom Charging Contact",
+     "search": "531242201"
+    },
+    {
+     "key": "15",
+     "part_number": "590217201",
+     "sub": false,
+     "description": "Lens Diode",
+     "qty": "1",
+     "remarks": "Lens",
+     "search": "590217201"
+    },
+    {
+     "key": "16",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "17",
+     "part_number": "579459704",
+     "sub": false,
+     "description": "LID Charging station 320, one grommet",
+     "qty": "1",
+     "remarks": "Lid",
+     "search": "579459704"
+    },
+    {
+     "key": "19",
+     "part_number": "579459805",
+     "sub": false,
+     "description": "PANEL Charging station No terminals",
+     "qty": "1",
+     "remarks": "Panel",
+     "search": "579459805"
+    },
+    {
+     "key": "20",
+     "part_number": "579459901",
+     "sub": false,
+     "description": "Holder",
+     "qty": "1",
+     "remarks": "Holder",
+     "search": "579459901"
+    },
+    {
+     "key": "21",
+     "part_number": "531032001",
+     "sub": false,
+     "description": "HOUSING KIT 550 EPOS",
+     "qty": "1",
+     "remarks": "Housing KIT",
+     "search": "531032001"
+    },
+    {
+     "key": "22",
+     "part_number": "599947504",
+     "sub": false,
+     "description": "Charging Station Board",
+     "qty": "1",
+     "remarks": "PCBA Charging station",
+     "search": "599947504"
+    },
+    {
+     "key": "23",
+     "part_number": "588478902",
+     "sub": false,
+     "description": "CABLE KIT GENERATOR BOARD Spares",
+     "qty": "1",
+     "remarks": "Cable KIT",
+     "search": "588478902"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "H CHARGING STATION"
+  },
+  {
+   "id": "6",
+   "number": 6,
+   "letter": "C",
+   "title": "CENTER CONSOL",
+   "image": "am550epos-fig6.png",
+   "hotspots": [],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "599477201",
+     "sub": false,
+     "description": "BUTTON Start / Stop",
+     "qty": "1",
+     "remarks": "Button Start/Stop",
+     "search": "599477201"
+    },
+    {
+     "key": "2",
+     "part_number": "599477001",
+     "sub": false,
+     "description": "CONSOLE Rear",
+     "qty": "1",
+     "remarks": "Console Rear",
+     "search": "599477001"
+    },
+    {
+     "key": "3",
+     "part_number": "599477401",
+     "sub": false,
+     "description": "LID Start/stop button Transparent",
+     "qty": "1",
+     "remarks": "Lid Stop/Start button",
+     "search": "599477401"
+    },
+    {
+     "key": "4",
+     "part_number": "589336201",
+     "sub": false,
+     "description": "SUPPORT Button",
+     "qty": "1",
+     "remarks": "Support",
+     "search": "589336201"
+    },
+    {
+     "key": "5",
+     "part_number": "599212701",
+     "sub": false,
+     "description": "HOUSING ASSY RGB LED Light",
+     "qty": "1",
+     "remarks": "Stop Button LED Assy",
+     "search": "599212701"
+    },
+    {
+     "key": "7",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "8",
+     "part_number": "599628801",
+     "sub": false,
+     "description": "SPRING Lid",
+     "qty": "1",
+     "remarks": "Spring Lid",
+     "search": "599628801"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "C CENTER CONSOL"
+  },
+  {
+   "id": "7",
+   "number": 7,
+   "letter": "B",
+   "title": "CHASSIS UPPER",
+   "image": "am550epos-fig7.png",
+   "hotspots": [],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "574450101",
+     "sub": false,
+     "description": "Screw black",
+     "qty": "8",
+     "remarks": "Screw",
+     "search": "574450101"
+    },
+    {
+     "key": "2",
+     "part_number": "501061301",
+     "sub": false,
+     "description": "Joystick, rear",
+     "qty": "2",
+     "remarks": "Joystick KIT Rear",
+     "search": "501061301"
+    },
+    {
+     "key": "3",
+     "part_number": "501122602",
+     "sub": false,
+     "description": "Joystick, rear",
+     "qty": "2",
+     "remarks": "Joystick Column KIT",
+     "search": "501122602"
+    },
+    {
+     "key": "4",
+     "part_number": "503226601",
+     "sub": false,
+     "description": "SQUARE NUT M6 5 ZPB",
+     "qty": "2",
+     "remarks": "Square Nut",
+     "search": "503226601"
+    },
+    {
+     "key": "5",
+     "part_number": "535143201",
+     "sub": false,
+     "description": "DEFLECTION LIMITER",
+     "qty": "2",
+     "remarks": "Deflection Limiter",
+     "search": "535143201"
+    },
+    {
+     "key": "6",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "7",
+     "part_number": "579706302",
+     "sub": false,
+     "description": "BUZZER Assy",
+     "qty": "1",
+     "remarks": "Buzzer",
+     "search": "579706302"
+    },
+    {
+     "key": "8",
+     "part_number": "581620903",
+     "sub": false,
+     "description": "Joystick kit",
+     "qty": "2",
+     "remarks": "Joystick KIT Front",
+     "search": "581620903"
+    },
+    {
+     "key": "9",
+     "part_number": "580526701",
+     "sub": false,
+     "description": "Stud",
+     "qty": "2",
+     "remarks": "Stud",
+     "search": "580526701"
+    },
+    {
+     "key": "10",
+     "part_number": "579525701",
+     "sub": false,
+     "description": "Washer",
+     "qty": "2",
+     "remarks": "Washer",
+     "search": "579525701"
+    },
+    {
+     "key": "11",
+     "part_number": "579474601",
+     "sub": false,
+     "description": "Bellows",
+     "qty": "2",
+     "remarks": "Bellows",
+     "search": "579474601"
+    },
+    {
+     "key": "12",
+     "part_number": "587448802",
+     "sub": false,
+     "description": "Joystick",
+     "qty": "2",
+     "remarks": "Joystick KIT",
+     "search": "587448802"
+    },
+    {
+     "key": "13",
+     "part_number": "503226601",
+     "sub": false,
+     "description": "SQUARE NUT M6 5 ZPB",
+     "qty": "2",
+     "remarks": "Square Nut",
+     "search": "503226601"
+    },
+    {
+     "key": "14",
+     "part_number": "592852301",
+     "sub": false,
+     "description": "Printed circuit assy",
+     "qty": "2",
+     "remarks": "PCBA Lift sensor",
+     "search": "592852301"
+    },
+    {
+     "key": "15",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "6",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "16",
+     "part_number": "574450101",
+     "sub": false,
+     "description": "Screw black",
+     "qty": "14",
+     "remarks": "Screw",
+     "search": "574450101"
+    },
+    {
+     "key": "17",
+     "part_number": "577753701",
+     "sub": false,
+     "description": "Air filter (10pcs)",
+     "qty": "1",
+     "remarks": "Air Filter 10 pcs",
+     "search": "577753701"
+    },
+    {
+     "key": "18",
+     "part_number": "529564201",
+     "sub": false,
+     "description": "CHASSIS KIT Upper 550 EPOS / 550H EPOS",
+     "qty": "1",
+     "remarks": "Chassis KIT",
+     "search": "529564201"
+    },
+    {
+     "key": "19",
+     "part_number": "574874705",
+     "sub": false,
+     "description": "SEALING STRIP P2 Chassis Lower",
+     "qty": "1",
+     "remarks": "Sealing Strip (1 pcs, Ø5 mm)",
+     "search": "574874705"
+    },
+    {
+     "key": "20",
+     "part_number": "592852401",
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY Collision sensor board type 4 579669101 Packed",
+     "qty": "1",
+     "remarks": "PCBA Collision Sensor",
+     "search": "592852401"
+    },
+    {
+     "key": "21",
+     "part_number": "587834901",
+     "sub": false,
+     "description": "CLIP Collision board",
+     "qty": "1",
+     "remarks": "Clip",
+     "search": "587834901"
+    },
+    {
+     "key": "22",
+     "part_number": "579705902",
+     "sub": false,
+     "description": "L1=670mm, L2 520mm",
+     "qty": "1",
+     "remarks": "Wiring Assy Lift Sensor",
+     "search": "579705902"
+    },
+    {
+     "key": "23",
+     "part_number": "574450101",
+     "sub": false,
+     "description": "Screw black",
+     "qty": "6",
+     "remarks": "Screw",
+     "search": "574450101"
+    },
+    {
+     "key": "24",
+     "part_number": "580682901",
+     "sub": false,
+     "description": "Holder",
+     "qty": "2",
+     "remarks": "Holder Twist Lock",
+     "search": "580682901"
+    },
+    {
+     "key": "25",
+     "part_number": "592852401",
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY Collision sensor board type 4 579669101 Packed",
+     "qty": "1",
+     "remarks": "PCBA Collision Sensor",
+     "search": "592852401"
+    },
+    {
+     "key": "26",
+     "part_number": "574450101",
+     "sub": false,
+     "description": "Screw black",
+     "qty": "4",
+     "remarks": "Screw",
+     "search": "574450101"
+    },
+    {
+     "key": "27",
+     "part_number": "581660902",
+     "sub": false,
+     "description": "WIRING ASSY Collision Sensor",
+     "qty": "1",
+     "remarks": "Wiring ASSY Collision Sensor",
+     "search": "581660902"
+    },
+    {
+     "key": "29",
+     "part_number": "597977401",
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY PCBA Application Board Type 3",
+     "qty": "1",
+     "remarks": "PCB Application Board",
+     "search": "597977401"
+    },
+    {
+     "key": "30",
+     "part_number": "579706201",
+     "sub": false,
+     "description": "CABLE ASSY HMI Cable L=380mm",
+     "qty": "1",
+     "remarks": "Wiring",
+     "search": "579706201"
+    },
+    {
+     "key": "31",
+     "part_number": "599308601",
+     "sub": false,
+     "description": "HOLDER ASSY ANTENNA MODULE 868Mhz",
+     "qty": "1",
+     "remarks": "Holder Assy Antenna Module 868Mhz Europe",
+     "search": "599308601"
+    },
+    {
+     "key": "31",
+     "part_number": "599308602",
+     "sub": false,
+     "description": "HOLDER ASSY ANTENNA MODULE 915Mhz",
+     "qty": "1",
+     "remarks": "Holder Assy Antenna Module 915Mhz North America",
+     "search": "599308602"
+    },
+    {
+     "key": "31",
+     "part_number": "599308603",
+     "sub": false,
+     "description": "HOLDER ASSY ANTENNA MODULE type 9 915MHz NZ",
+     "qty": "1",
+     "remarks": "Holder Assy Antenna Module 915Mhz New Zealand",
+     "search": "599308603"
+    },
+    {
+     "key": "31",
+     "part_number": "599308604",
+     "sub": false,
+     "description": "HOLDER ASSY ANTENNA MODULE type 7 915MHz AU",
+     "qty": "1",
+     "remarks": "Holder Assy Antenna Module 915Mhz Australia",
+     "search": "599308604"
+    },
+    {
+     "key": "31",
+     "part_number": "599308605",
+     "sub": false,
+     "description": "HOLDER ASSY MOWER RTK No Radio",
+     "qty": "1",
+     "remarks": "Holder Assy Antenna Module Japan",
+     "search": "599308605"
+    },
+    {
+     "key": "32",
+     "part_number": "591203102",
+     "sub": false,
+     "description": "Wiring HMI 4P L=330mm",
+     "qty": "1",
+     "remarks": "HMI Cable 4P",
+     "search": "591203102"
+    },
+    {
+     "key": "33",
+     "part_number": "589350805",
+     "sub": false,
+     "description": "WIRING ASSY Modular Jack 6/6 RJ12 L=480mm/ Yellow Label",
+     "qty": "2",
+     "remarks": "Modular Cable",
+     "search": "589350805"
+    },
+    {
+     "key": "34",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "9",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "35",
+     "part_number": "536253903",
+     "sub": false,
+     "description": "Wiring Modular Jack 6/6 RJ12 L=200",
+     "qty": "1",
+     "remarks": "Modular Jack",
+     "search": "536253903"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "B CHASSIS UPPER"
+  },
+  {
+   "id": "8",
+   "number": 8,
+   "letter": "",
+   "title": "INSTALLATION ACCESSORIES",
+   "image": "am550epos-fig8.png",
+   "hotspots": [],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "590442501",
+     "sub": false,
+     "description": "POWER UNIT 7.0A EU",
+     "qty": "1",
+     "remarks": "Power Supply Unit EU",
+     "search": "590442501"
+    },
+    {
+     "key": "1",
+     "part_number": "590442502",
+     "sub": false,
+     "description": "Power Supply Unit 7.0A type L UK/Ireland ( DD)",
+     "qty": "1",
+     "remarks": "Power Supply Unit UK",
+     "search": "590442502"
+    },
+    {
+     "key": "1",
+     "part_number": "590442503",
+     "sub": false,
+     "description": "Power Supply Unit 7.0A type L CH",
+     "qty": "1",
+     "remarks": "Power Supply Unit CH",
+     "search": "590442503"
+    },
+    {
+     "key": "1",
+     "part_number": "590442504",
+     "sub": false,
+     "description": "Power Supply unit 7.0A type L USA/CANADA (DD)",
+     "qty": "1",
+     "remarks": "Power Supply Unit US",
+     "search": "590442504"
+    },
+    {
+     "key": "1",
+     "part_number": "590442505",
+     "sub": false,
+     "description": "Power Supply Unit 7.0A type L Australia/New Zealand (DD)",
+     "qty": "1",
+     "remarks": "Power Supply Unit AU/NZ",
+     "search": "590442505"
+    },
+    {
+     "key": "1",
+     "part_number": "599662706",
+     "sub": false,
+     "description": "POWER UNIT Power supply 7.0A JAPAN (DD)",
+     "qty": "1",
+     "remarks": "Power Supply Unit JP",
+     "search": "599662706"
+    },
+    {
+     "key": "2",
+     "part_number": "595084401",
+     "sub": false,
+     "description": "6 pcs",
+     "qty": "1",
+     "remarks": "Endurance Blades, Blister pack 6 pcs incl. Screws",
+     "search": "595084401"
+    },
+    {
+     "key": "2",
+     "part_number": "595084402",
+     "sub": false,
+     "description": "45 pcs",
+     "qty": "1",
+     "remarks": "Endurance Blades, 45 pcs incl. Screws",
+     "search": "595084402"
+    },
+    {
+     "key": "2",
+     "part_number": "595084403",
+     "sub": false,
+     "description": "300 pcs",
+     "qty": "1",
+     "remarks": "Endurance Blades, 300 pcs incl. Screws",
+     "search": "595084403"
+    },
+    {
+     "key": "2",
+     "part_number": "599805201",
+     "sub": false,
+     "description": "6 pcs",
+     "qty": "1",
+     "remarks": "Endurance HSS Blades 6 pcs incl. Screws",
+     "search": "599805201"
+    },
+    {
+     "key": "2",
+     "part_number": "599805202",
+     "sub": false,
+     "description": "45 pcs",
+     "qty": "1",
+     "remarks": "Endurance HSS Blades 45 pcs incl. Screws",
+     "search": "599805202"
+    },
+    {
+     "key": "2",
+     "part_number": "599805203",
+     "sub": false,
+     "description": "300 pcs",
+     "qty": "1",
+     "remarks": "Endurance HSS Blades 300 pcs incl. Screws",
+     "search": "599805203"
+    },
+    {
+     "key": "3",
+     "part_number": "577606604",
+     "sub": false,
+     "description": "300 pcs",
+     "qty": "1",
+     "remarks": "Blades 300 pcs incl. Screws",
+     "search": "577606604"
+    },
+    {
+     "key": "3",
+     "part_number": "577864603",
+     "sub": false,
+     "description": "9 pcs",
+     "qty": "1",
+     "remarks": "Blades 9 pcs incl. Screws",
+     "search": "577864603"
+    },
+    {
+     "key": "3",
+     "part_number": "577606505",
+     "sub": false,
+     "description": "45 pcs",
+     "qty": "1",
+     "remarks": "Blades 45 pcs incl. Screws",
+     "search": "577606505"
+    },
+    {
+     "key": "4",
+     "part_number": "588765004",
+     "sub": false,
+     "description": "Low voltage cable 20m",
+     "qty": "1",
+     "remarks": "Low Voltage Cable, 20 m",
+     "search": "588765004"
+    },
+    {
+     "key": "4",
+     "part_number": "588765005",
+     "sub": false,
+     "description": "Low voltage cable 10m",
+     "qty": "1",
+     "remarks": "Low Voltage Cable, 10 m",
+     "search": "588765005"
+    },
+    {
+     "key": "5",
+     "part_number": "588765006",
+     "sub": false,
+     "description": "Low voltage cable 3m",
+     "qty": "1",
+     "remarks": "Low Voltage Cable, 3 m",
+     "search": "588765006"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "INSTALLATION ACCESSORIES"
+  },
+  {
+   "id": "9",
+   "number": 9,
+   "letter": "",
+   "title": "BLADE MOTOR AND CUTTING EQUIPMENT",
+   "image": "am550epos-fig9.png",
+   "hotspots": [],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "580624401",
+     "sub": false,
+     "description": "SPRING Link",
+     "qty": "1",
+     "remarks": "Spring",
+     "search": "580624401"
+    },
+    {
+     "key": "2",
+     "part_number": "579564601",
+     "sub": false,
+     "description": "LINK Motor Housing",
+     "qty": "1",
+     "remarks": "Link",
+     "search": "579564601"
+    },
+    {
+     "key": "3",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "3",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "4",
+     "part_number": "581621801",
+     "sub": false,
+     "description": "BEARING KIT",
+     "qty": "1",
+     "remarks": "Bearing KIT",
+     "search": "581621801"
+    },
+    {
+     "key": "5",
+     "part_number": "579564501",
+     "sub": false,
+     "description": "HOUSING Cutting Motor",
+     "qty": "1",
+     "remarks": "Housing",
+     "search": "579564501"
+    },
+    {
+     "key": "6",
+     "part_number": "579666403",
+     "sub": false,
+     "description": "BELLOWS Cutting System",
+     "qty": "1",
+     "remarks": "Bellows",
+     "search": "579666403"
+    },
+    {
+     "key": "7",
+     "part_number": "587381401",
+     "sub": false,
+     "description": "MOTOR ASSY CUTTER Type: 152.3",
+     "qty": "1",
+     "remarks": "Cutting Motor ASSY",
+     "search": "587381401"
+    },
+    {
+     "key": "8",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "4",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "9",
+     "part_number": "598814401",
+     "sub": false,
+     "description": "Cutting disc",
+     "qty": "1",
+     "remarks": "Cutting Disc, Up to S/N 2308XXXXX",
+     "search": "598814401"
+    },
+    {
+     "key": "9",
+     "part_number": "536645001",
+     "sub": false,
+     "description": "CUTTING DISC Cutting width 240mm Disc dia 222mm, 5 blades",
+     "qty": "1",
+     "remarks": "Cutting DIsc, From S/N 230909784",
+     "search": "536645001"
+    },
+    {
+     "key": "10",
+     "part_number": "590508701",
+     "sub": false,
+     "description": "Screw",
+     "qty": "3",
+     "remarks": "Screw",
+     "search": "590508701"
+    },
+    {
+     "key": "11",
+     "part_number": "588421702",
+     "sub": false,
+     "description": "Bearing housing, cutting system",
+     "qty": "1",
+     "remarks": "Bearing Housing KIT",
+     "search": "588421702"
+    },
+    {
+     "key": "12",
+     "part_number": "535076001",
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "Screw",
+     "search": "535076001"
+    },
+    {
+     "key": "13",
+     "part_number": "598794901",
+     "sub": false,
+     "description": "SKID PLATE Robotic Mower Ø211mm",
+     "qty": "1",
+     "remarks": "",
+     "search": "598794901"
+    },
+    {
+     "key": "14",
+     "part_number": "587449601",
+     "sub": false,
+     "description": "COVER KIT Bearing",
+     "qty": "1",
+     "remarks": "Bearing Cover KIT",
+     "search": "587449601"
+    },
+    {
+     "key": "15",
+     "part_number": "585297501",
+     "sub": false,
+     "description": "O-RING 20x2,5 mm",
+     "qty": "1",
+     "remarks": "O-Ring",
+     "search": "585297501"
+    },
+    {
+     "key": "16",
+     "part_number": "575543314",
+     "sub": false,
+     "description": "Screw (14 mm) grey",
+     "qty": "3",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "17",
+     "part_number": "535075703",
+     "sub": false,
+     "description": "Ball bearing, cutting system",
+     "qty": "1",
+     "remarks": "Ball Bearing",
+     "search": "535075703"
+    },
+    {
+     "key": "17",
+     "part_number": "593080801",
+     "sub": false,
+     "description": "Ball bearing 535075703 Packed 50pcs Cutting System Robotic Mower",
+     "qty": "1",
+     "remarks": "Ball Bearing Tube 50 pcs",
+     "search": "593080801"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "BLADE MOTOR AND CUTTING EQUIPMENT"
+  }
+ ]
+}

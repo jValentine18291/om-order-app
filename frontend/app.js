@@ -2659,6 +2659,16 @@ function showIplFigure(id) {
     canvas.appendChild(b);
   });
 
+  // Husqvarna Portal diagrams are flat images with the callout numbers baked
+  // in, so those figures have no hotspots. Say so rather than inviting a tap
+  // that cannot work.
+  const hint = $("ipl-hint");
+  if (hint) {
+    hint.textContent = fig.hotspots.length
+      ? "Pinch to zoom · drag to move · tap a number"
+      : "Pinch to zoom · drag to move · pick a part from the list below";
+  }
+
   $("ipl-filter").value = "";
   if (typeof iplReset === "function") iplReset();
   renderIplList();
