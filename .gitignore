@@ -13,6 +13,10 @@ backend/om_orders.db-wal
 *.db-shm
 *.db-wal
 
+# Database backups (belong on the server, not in the repo)
+backend/backups/
+backend/backup.log
+
 # Logs (service output, price audit log)
 backend/service-out.log
 backend/service-err.log
