@@ -256,53 +256,33 @@ module.exports.searchParts = searchParts;
 module.exports.getPartStock = getPartStock;
 
 // ---- Part prices -----------------------------------------------------------
-// AutoCount carries the tiers on the item's base-UOM row:
-//   Price1 = Contractor Price
-//   Price6 = List Price
+// Confirmed against the live schema on 24 Aug 2026:
 //
-// The exact column names are confirmed at runtime rather than assumed, because
-// getting a price column wrong means quoting a customer the wrong figure. If
-// the columns are not there, this returns null and the app says prices are
-// unavailable — it never falls back to a different column.
-let priceColumns = null;
-
-async function detectPriceColumns() {
-  if (priceColumns) return priceColumns;
-  const rows = await query(
-    `SELECT COLUMN_NAME
-       FROM INFORMATION_SCHEMA.COLUMNS
-      WHERE TABLE_NAME = 'ItemUOM' AND COLUMN_NAME IN ('Price1', 'Price6')`
-  );
-  const names = rows.map((r) => r.COLUMN_NAME);
-  priceColumns = {
-    contractor: names.includes("Price1") ? "Price1" : null,
-    list: names.includes("Price6") ? "Price6" : null,
-  };
-  if (!priceColumns.contractor || !priceColumns.list) {
-    console.warn(
-      "[autocount] ItemUOM is missing Price1/Price6 — part prices will read as unavailable. Run inspect-prices.js to find where the tiers live."
-    );
-  }
-  return priceColumns;
-}
-
+//   ItemUOM has Price, Price2 ... Price6 — there is NO Price1 column.
+//   AutoCount's interface labels the base Price column as "Price 1", which is
+//   why looking for a literal Price1 found nothing.
+//
+//   Contractor Price = ItemUOM.Price    (shown as "Price 1" in AutoCount)
+//   List Price       = ItemUOM.Price6
+//
+// Corroborated by SZEN 612912230C: Price 12.80, Price6 17.00 — list above
+// contractor, as it should be. The category-based ItemPrice table is empty for
+// that item, so multi-pricing by customer category is not in use here.
+//
+// Note ItemUOM.Price is the same figure the app already bills parts at on a
+// service slip, so a technician's parts and the Contractor Price agree.
 async function getPartPrices(code) {
   const norm = String(code || "").replace(/\s+/g, "").toUpperCase();
   if (!norm) return { error: "no-code" };
 
-  const cols = await detectPriceColumns();
-  if (!cols.contractor || !cols.list) return { error: "no-price-columns" };
-
   // The IPL gives the manufacturer's number ("612912230C"); AutoCount stores it
-  // with a brand prefix ("SZEN 612912230C"). An exact match therefore finds
-  // nothing, which is what made every price read as missing. Match the way
-  // findItem does: exact first, then a suffix match, preferring the exact one
-  // and the shortest code so a longer unrelated item cannot win.
+  // with a brand prefix ("SZEN 612912230C"). Exact first, then suffix, ordered
+  // so an exact hit wins and the shortest code wins after that.
   const rows = await query(
     `SELECT TOP 1
             i.ItemCode,
-            u.[${cols.contractor}] AS ContractorPrice,
-            u.[${cols.list}]       AS ListPrice
+            u.Price  AS ContractorPrice,
+            u.Price6 AS ListPrice
        FROM Item i
        LEFT JOIN ItemUOM u ON u.ItemCode = i.ItemCode AND u.UOM = i.BaseUOM
       WHERE REPLACE(UPPER(i.ItemCode), ' ', '') = @norm
