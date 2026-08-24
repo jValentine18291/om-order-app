@@ -445,14 +445,19 @@ app.post("/api/slips/:slip/order", async (req, res) => {
                 });
               } else {
                 priceSync.skipped++;
-                // Only log not-found skips; has-price skips are the normal case
-                // for every ordinarily-priced part and would flood the log.
-                if (r.status === "skipped_not_found") {
+                // has-price skips are the normal case for every ordinarily
+                // priced part and would flood the log. The other two are rare
+                // and each means a price the staff expected to save did not,
+                // so they are worth a line.
+                if (r.status === "skipped_not_found" || r.status === "skipped_no_uom_row") {
                   logPriceEvent({
                     source: `Slip ${slip.slip_number}`, itemCode: part.item_code,
                     tier: "Contractor Price",
                     oldPrice: null, newPrice: part.unit_price,
-                    who: part.technician, outcome: "SKIPPED - item not found in AutoCount",
+                    who: part.technician,
+                    outcome: r.status === "skipped_no_uom_row"
+                      ? "SKIPPED - item has no unit-of-measure row in AutoCount"
+                      : "SKIPPED - item not found in AutoCount",
                   });
                 }
               }

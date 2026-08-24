@@ -118,39 +118,39 @@ function writebackEnabled() {
 // Returns { status: "updated" | "skipped_has_price" | "skipped_not_found",
 //           item_code, old_price, new_price }
 async function updateItemPriceIfMissing(itemCode, newPrice) {
-  const p = Number(newPrice);
-  if (!Number.isFinite(p) || p <= 0) {
-    const e = new Error("Invalid price for write-back."); e.status = 400; throw e;
-  }
+  // Used by the Sales Order path: fills the Contractor price from what a
+  // technician keyed on the slip, when AutoCount has no price for that part.
+  //
+  // The slip carries AutoCount's OWN item code, so resolving it is an exact
+  // match on the full code and cannot land on the wrong variant the way a bare
+  // diagram number can. Once resolved, the write is the same hardened one the
+  // Parts Diagram uses, so this path also checks that a row actually changed
+  // rather than assuming it did - it used to report "updated in AutoCount"
+  // even when its own blank-price guard had blocked the write, and that log is
+  // the only record there is.
   const norm = String(itemCode || "").replace(/\s+/g, "").toUpperCase();
-
-  // Resolve the exact item + base UOM + current price.
   const rows = await query(
-    `SELECT TOP 1 i.ItemCode, i.BaseUOM, u.Price
-       FROM Item i
-       LEFT JOIN ItemUOM u ON u.ItemCode = i.ItemCode AND u.UOM = i.BaseUOM
+    `SELECT TOP 1 i.ItemCode FROM Item i
       WHERE REPLACE(UPPER(i.ItemCode), ' ', '') = @norm`,
     { norm }
   );
   if (!rows.length) {
-    return { status: "skipped_not_found", item_code: itemCode, old_price: null, new_price: p };
-  }
-  const row = rows[0];
-  const current = Number(row.Price ?? 0);
-  if (current > 0) {
-    return { status: "skipped_has_price", item_code: row.ItemCode, old_price: current, new_price: p };
+    return { status: "skipped_not_found", item_code: itemCode, old_price: null, new_price: Number(newPrice) };
   }
 
-  // Belt-and-braces: the WHERE clause re-checks the price is still 0/NULL, so
-  // even a race with someone setting the price in AutoCount cannot overwrite.
-  await query(
-    `UPDATE ItemUOM
-        SET Price = @p
-      WHERE ItemCode = @code AND UOM = @uom
-        AND (Price IS NULL OR Price = 0)`,
-    { p, code: row.ItemCode, uom: row.BaseUOM }
-  );
-  return { status: "updated", item_code: row.ItemCode, old_price: current, new_price: p };
+  const r = await setMissingPrice(rows[0].ItemCode, "contractor", newPrice);
+  const asSkip = {
+    updated: "updated",
+    already_priced: "skipped_has_price",
+    no_uom_row: "skipped_no_uom_row",
+    not_found: "skipped_not_found",
+  };
+  return {
+    status: asSkip[r.status] || "skipped",
+    item_code: r.item_code,
+    old_price: r.old_price,
+    new_price: r.new_price,
+  };
 }
 
 // ============================================================================

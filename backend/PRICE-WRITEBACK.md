@@ -46,9 +46,16 @@ initials.
 Two separate switches, both **off** unless set to `true`:
 
 - `AUTOCOUNT_PRICE_WRITEBACK` — the Parts Diagram feature described above.
-- `AUTOCOUNT_PRICE_WRITEBACK_ORDERS` — a separate, older path that writes
-  prices keyed on a slip when a Sales Order is created. Deliberately its own
-  switch, so turning the first one on does not quietly start this one too.
+- `AUTOCOUNT_PRICE_WRITEBACK_ORDERS` — a separate, older path that writes the
+  Contractor price keyed on a slip when a Sales Order is created. Deliberately
+  its own switch, so turning the first one on does not quietly start this one
+  too.
+
+**At OM both are set to `true`.** The Sales Order path had in fact been running
+since at least 3 July 2026 under the single old switch — the log entry for
+`SZEN 596813307` is from that path — so splitting the switches briefly turned
+it off until `..._ORDERS` was added. If prices stop flowing from slips, check
+that variable first.
 
 With the switch off, the app still shows prices; the Set price button does not
 appear, and the server refuses the request even if one is sent.
