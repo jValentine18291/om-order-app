@@ -2734,6 +2734,10 @@ async function openIplPart(key) {
   $("ipl-part-sub").textContent =
     `${ipl.figure.label || `Fig.${ipl.figure.number} ${ipl.figure.title}`} · Key ${part.key}`;
   $("ipl-part-stock").innerHTML = `<div class="fp-loading">Looking up stock…</div>`;
+  // Prices are per part and hidden until asked for, so reset the panel rather
+  // than leaving the previous part's figures showing.
+  iplPriceState = { code: part.search || part.part_number, prices: null, editing: false };
+  renderIplPriceButton();
   $("ipl-modal").style.display = "flex";
   document.body.style.overflow = "hidden";
 
@@ -2932,3 +2936,124 @@ function iplZoomAt(x, y, factor) {
   if (reset) reset.addEventListener("click", iplReset);
   window.addEventListener("resize", iplApply);
 })();
+
+// ---- Part prices (IPL viewer) -----------------------------------------------
+// List / Contractor / Reseller. These are not in AutoCount — they only existed
+// on the printed IPL copies, so the app stores and owns them.
+//
+// Prices stay hidden until "Check Price" is tapped, and the fields are never
+// directly editable: editing takes a deliberate confirmation first, so a stray
+// tap on a phone in a workshop cannot change what a customer is charged.
+const IPL_TIERS = [
+  { field: "list_price",       code: "LP", name: "List Price" },
+  { field: "contractor_price", code: "CP", name: "Contractor Price" },
+  { field: "reseller_price",   code: "RP", name: "Reseller Price" },
+];
+
+let iplPriceState = { code: "", prices: null, editing: false };
+
+function renderIplPriceButton() {
+  $("ipl-part-price").innerHTML =
+    `<button type="button" class="ipl-price-btn" id="ipl-check-price">Check Price</button>`;
+  $("ipl-check-price").addEventListener("click", () => loadIplPrices());
+}
+
+async function loadIplPrices() {
+  const box = $("ipl-part-price");
+  box.innerHTML = `<div class="fp-loading">Checking price…</div>`;
+  try {
+    const row = await api(`/api/part-prices/${encodeURIComponent(iplPriceState.code)}`);
+    iplPriceState.prices = row;
+    iplPriceState.editing = false;
+    renderIplPrices();
+  } catch (e) {
+    box.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Couldn't load prices")}</div>`;
+  }
+}
+
+function renderIplPrices() {
+  const p = iplPriceState.prices || {};
+  const editing = iplPriceState.editing;
+  const has = IPL_TIERS.some((t) => p[t.field] !== null && p[t.field] !== undefined);
+
+  let html = `<div class="ipl-prices">`;
+  for (const t of IPL_TIERS) {
+    const v = p[t.field];
+    html += `
+      <div class="ipl-price-row">
+        <span class="lbl"><b>${t.code}</b>${t.name}</span>
+        ${editing
+          ? `<input type="number" min="0" step="0.01" inputmode="decimal"
+                    id="ipl-price-${t.field}" value="${v === null || v === undefined ? "" : v}"
+                    placeholder="—" />`
+          : `<span class="val${v === null || v === undefined ? " none" : ""}">${
+              v === null || v === undefined ? "Not set" : money(v)
+            }</span>`}
+      </div>`;
+  }
+  html += `</div>`;
+
+  if (!editing && !has) {
+    html += `<div class="ipl-price-meta">No prices recorded for this part yet.</div>`;
+  } else if (!editing && p.updated_at) {
+    html += `<div class="ipl-price-meta">Last updated ${escapeHtml(formatDate(p.updated_at))}${
+      p.updated_by ? " by " + escapeHtml(p.updated_by) : ""
+    }</div>`;
+  }
+
+  html += editing
+    ? `<div class="ipl-price-actions">
+         <button type="button" class="ipl-cancel-btn" id="ipl-price-cancel">Cancel</button>
+         <button type="button" class="ipl-save-btn" id="ipl-price-save">Save prices</button>
+       </div>`
+    : `<div class="ipl-price-actions">
+         <button type="button" class="ipl-edit-btn" id="ipl-price-edit">${
+           has ? "Edit prices" : "Add prices"
+         }</button>
+       </div>`;
+
+  $("ipl-part-price").innerHTML = html;
+
+  if (editing) {
+    $("ipl-price-cancel").addEventListener("click", () => {
+      iplPriceState.editing = false;
+      renderIplPrices();
+    });
+    $("ipl-price-save").addEventListener("click", saveIplPrices);
+  } else {
+    $("ipl-price-edit").addEventListener("click", () => {
+      // The confirmation is the point: fields are never live until someone
+      // deliberately says yes.
+      const ok = confirm(
+        `Edit prices for ${iplPriceState.code}?\n\nThese are the prices quoted to customers.`
+      );
+      if (!ok) return;
+      iplPriceState.editing = true;
+      renderIplPrices();
+    });
+  }
+}
+
+async function saveIplPrices() {
+  const body = { updated_by: getRole() || "" };
+  for (const t of IPL_TIERS) {
+    const el = $("ipl-price-" + t.field);
+    body[t.field] = el && el.value.trim() !== "" ? el.value.trim() : null;
+  }
+  const btn = $("ipl-price-save");
+  if (btn) btn.disabled = true;
+  try {
+    const row = await api(`/api/part-prices/${encodeURIComponent(iplPriceState.code)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    iplPriceState.prices = row;
+    iplPriceState.editing = false;
+    renderIplPrices();
+    toast("Prices saved", "ok");
+  } catch (e) {
+    if (btn) btn.disabled = false;
+    toast(e.message || "Couldn't save prices", "err");
+  }
+}

@@ -164,6 +164,29 @@ app.patch("/api/part-requests/:id/ordered", async (req, res) => {
   }
 });
 
+// ---- Part prices (IPL viewer) ----------------------------------------------
+// List / Contractor / Reseller. Not held in AutoCount — the app owns these.
+app.get("/api/part-prices/:code", async (req, res) => {
+  try {
+    const row = await data.partPrices.getPartPrices(req.params.code);
+    res.json(row || { item_code: "", list_price: null, contractor_price: null, reseller_price: null });
+  } catch (err) {
+    console.error("[GET /api/part-prices/:code]", err);
+    res.status(500).json({ error: "Failed to load prices" });
+  }
+});
+
+app.put("/api/part-prices/:code", async (req, res) => {
+  try {
+    const row = await data.partPrices.setPartPrices(req.params.code, req.body || {});
+    res.json(row);
+  } catch (err) {
+    if (err.status === 400) return res.status(400).json({ error: err.message });
+    console.error("[PUT /api/part-prices/:code]", err);
+    res.status(500).json({ error: "Failed to save prices" });
+  }
+});
+
 // Find Part: search parts by description/code (suggestion list).
 app.get("/api/parts-search", async (req, res) => {
   try {

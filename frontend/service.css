@@ -1103,3 +1103,47 @@ select {
 .ipl-kv:last-child { border-bottom: none; }
 .ipl-kv .k { color: var(--ink-faint); }
 .ipl-kv .v { font-weight: 600; text-align: right; }
+
+/* ---- Part prices (IPL viewer) ---- */
+.ipl-price-btn {
+  width: 100%;
+  margin-top: 14px;
+  min-height: 48px;
+  background: var(--surface);
+  border: 1.5px solid var(--primary);
+  border-radius: 12px;
+  font: inherit; font-size: 1rem; font-weight: 700;
+  color: var(--primary);
+  cursor: pointer;
+}
+.ipl-price-btn:active { background: var(--primary-tint); }
+
+.ipl-prices { margin-top: 14px; }
+.ipl-price-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border);
+}
+.ipl-price-row:last-of-type { border-bottom: none; }
+.ipl-price-row .lbl { font-size: .95rem; color: var(--ink-soft); }
+.ipl-price-row .lbl b { display: block; font-size: .74rem; color: var(--ink-faint); font-weight: 700; letter-spacing: .06em; }
+.ipl-price-row .val {
+  font-size: 1.15rem; font-weight: 700; color: var(--ink);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.ipl-price-row .val.none { color: var(--ink-faint); font-weight: 400; font-size: 1rem; }
+.ipl-price-row input {
+  width: 110px; text-align: right;
+  padding: 9px 11px; font: inherit; font-size: 1rem;
+  border: 1px solid var(--border-2); border-radius: 10px;
+  background: #fff; color: var(--ink);
+  -moz-appearance: textfield;
+}
+.ipl-price-row input::-webkit-outer-spin-button,
+.ipl-price-row input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.ipl-price-meta { font-size: .78rem; color: var(--ink-faint); margin-top: 10px; }
+.ipl-price-actions { display: flex; gap: 8px; margin-top: 12px; }
+.ipl-price-actions button { flex: 1; min-height: 46px; border-radius: 11px; font: inherit; font-size: .95rem; font-weight: 700; cursor: pointer; }
+.ipl-edit-btn { background: var(--surface); border: 1px solid var(--border-2); color: var(--ink-soft); }
+.ipl-save-btn { background: var(--primary-grad); border: none; color: #fff; }
+.ipl-cancel-btn { background: var(--surface); border: 1px solid var(--border-2); color: var(--ink-soft); }

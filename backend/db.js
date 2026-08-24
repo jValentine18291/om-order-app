@@ -142,6 +142,22 @@ db.exec(`
     FOREIGN KEY (machine_id) REFERENCES slip_machines(id) ON DELETE CASCADE
   );
 
+  -- Spare-part prices for the IPL viewer.
+  --
+  -- These are NOT in AutoCount: the three tiers live only on the printed IPL
+  -- copies the technicians keep, so the app is the system of record for them.
+  -- Keyed on the part number with separators stripped and upper-cased (the
+  -- same normalised form the IPL viewer searches AutoCount with), so IPL
+  -- "585 60 19-01" and AutoCount "SZEN 585601901" both resolve to 585601901.
+  CREATE TABLE IF NOT EXISTS part_prices (
+    item_code        TEXT    PRIMARY KEY,   -- normalised: A-Z0-9 only
+    list_price       REAL,
+    contractor_price REAL,
+    reseller_price   REAL,
+    updated_at       TEXT    DEFAULT (datetime('now')),
+    updated_by       TEXT    DEFAULT ''
+  );
+
   -- Customer signature captured on the phone at registration, stored as a PNG
   -- data URL and drawn onto the service-slip PDF.
   --
