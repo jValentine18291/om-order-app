@@ -118,7 +118,8 @@ async function main() {
       try {
         const rows = await query(
           `SELECT TOP 10 * FROM [${t.TABLE_NAME}]
-            WHERE REPLACE(UPPER(ItemCode), ' ', '') = @code`,
+            WHERE REPLACE(UPPER(ItemCode), ' ', '') = @code
+               OR REPLACE(UPPER(ItemCode), ' ', '') LIKE '%' + @code`,
           { code: SAMPLE_ITEM.replace(/\s+/g, "").toUpperCase() }
         );
         console.log(`  ${t.TABLE_NAME}: ${rows.length ? JSON.stringify(rows) : "(no rows)"}`);
@@ -127,10 +128,22 @@ async function main() {
       }
     }
     const uom = await query(
-      `SELECT * FROM ItemUOM WHERE REPLACE(UPPER(ItemCode), ' ', '') = @code`,
+      `SELECT * FROM ItemUOM
+        WHERE REPLACE(UPPER(ItemCode), ' ', '') = @code
+           OR REPLACE(UPPER(ItemCode), ' ', '') LIKE '%' + @code`,
       { code: SAMPLE_ITEM.replace(/\s+/g, "").toUpperCase() }
     );
     console.log(`  ItemUOM: ${JSON.stringify(uom)}`);
+
+    // The Item row too — every column, so a price held on the item itself
+    // rather than per UOM shows up.
+    const item = await query(
+      `SELECT TOP 3 * FROM Item
+        WHERE REPLACE(UPPER(ItemCode), ' ', '') = @code
+           OR REPLACE(UPPER(ItemCode), ' ', '') LIKE '%' + @code`,
+      { code: SAMPLE_ITEM.replace(/\s+/g, "").toUpperCase() }
+    );
+    console.log(`  Item: ${JSON.stringify(item)}`);
     console.log("");
   }
 
