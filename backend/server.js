@@ -165,25 +165,23 @@ app.patch("/api/part-requests/:id/ordered", async (req, res) => {
 });
 
 // ---- Part prices (IPL viewer) ----------------------------------------------
-// List / Contractor / Reseller. Not held in AutoCount — the app owns these.
+// Read-only from AutoCount: Price1 is the Contractor Price, Price6 the List
+// Price. Editing lives in AutoCount, not here — writing prices back would mean
+// updating AutoCount fields, which is restricted to the one guarded
+// write-back the app already has.
 app.get("/api/part-prices/:code", async (req, res) => {
   try {
-    const row = await data.partPrices.getPartPrices(req.params.code);
-    res.json(row || { item_code: "", list_price: null, contractor_price: null, reseller_price: null });
-  } catch (err) {
-    console.error("[GET /api/part-prices/:code]", err);
-    res.status(500).json({ error: "Failed to load prices" });
-  }
-});
-
-app.put("/api/part-prices/:code", async (req, res) => {
-  try {
-    const row = await data.partPrices.setPartPrices(req.params.code, req.body || {});
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") {
+      return res.status(503).json({ error: "AutoCount is not enabled." });
+    }
+    const acRepo = require("./data/autocountRepo");
+    const row = await acRepo.getPartPrices(req.params.code);
+    if (!row) return res.status(404).json({ error: "No prices found for this part." });
     res.json(row);
   } catch (err) {
-    if (err.status === 400) return res.status(400).json({ error: err.message });
-    console.error("[PUT /api/part-prices/:code]", err);
-    res.status(500).json({ error: "Failed to save prices" });
+    console.error("[GET /api/part-prices/:code]", err.message);
+    res.status(500).json({ error: "Price lookup failed." });
   }
 });
 

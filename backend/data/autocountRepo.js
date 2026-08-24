@@ -4,6 +4,7 @@
 // (confirmed by inspect-autocount.js on 3 Jul 2026):
 //   - Item     : ItemCode, Description, Desc2, ItemBrand, BaseUOM, IsActive
 //   - ItemUOM  : ItemCode, UOM, Price, BarCode   (price lives here, per UOM)
+//               Price1 = Contractor Price, Price6 = List Price
 //
 // Lookup matches the scanned/typed code against BOTH Item.ItemCode and
 // ItemUOM.BarCode (spaces stripped, case-insensitive), preferring the base
@@ -253,3 +254,64 @@ async function getPartStock(code) {
 
 module.exports.searchParts = searchParts;
 module.exports.getPartStock = getPartStock;
+
+// ---- Part prices -----------------------------------------------------------
+// AutoCount carries the tiers on the item's base-UOM row:
+//   Price1 = Contractor Price
+//   Price6 = List Price
+//
+// The exact column names are confirmed at runtime rather than assumed, because
+// getting a price column wrong means quoting a customer the wrong figure. If
+// the columns are not there, this returns null and the app says prices are
+// unavailable — it never falls back to a different column.
+let priceColumns = null;
+
+async function detectPriceColumns() {
+  if (priceColumns) return priceColumns;
+  const rows = await query(
+    `SELECT COLUMN_NAME
+       FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_NAME = 'ItemUOM' AND COLUMN_NAME IN ('Price1', 'Price6')`
+  );
+  const names = rows.map((r) => r.COLUMN_NAME);
+  priceColumns = {
+    contractor: names.includes("Price1") ? "Price1" : null,
+    list: names.includes("Price6") ? "Price6" : null,
+  };
+  if (!priceColumns.contractor || !priceColumns.list) {
+    console.warn(
+      "[autocount] ItemUOM is missing Price1/Price6 — part prices will read as unavailable. Run inspect-prices.js to find where the tiers live."
+    );
+  }
+  return priceColumns;
+}
+
+async function getPartPrices(code) {
+  const norm = String(code || "").replace(/\s+/g, "").toUpperCase();
+  if (!norm) return null;
+
+  const cols = await detectPriceColumns();
+  if (!cols.contractor || !cols.list) return null;
+
+  const rows = await query(
+    `SELECT TOP 1
+            i.ItemCode,
+            u.[${cols.contractor}] AS ContractorPrice,
+            u.[${cols.list}]       AS ListPrice
+       FROM Item i
+       LEFT JOIN ItemUOM u ON u.ItemCode = i.ItemCode AND u.UOM = i.BaseUOM
+      WHERE REPLACE(UPPER(i.ItemCode), ' ', '') = @norm`,
+    { norm }
+  );
+  if (!rows.length) return null;
+
+  const r = rows[0];
+  const num = (v) => (v === null || v === undefined ? null : Number(v));
+  return {
+    item_code: r.ItemCode,
+    contractor_price: num(r.ContractorPrice),
+    list_price: num(r.ListPrice),
+  };
+}
+
+module.exports.getPartPrices = getPartPrices;

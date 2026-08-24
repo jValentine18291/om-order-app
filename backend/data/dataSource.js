@@ -47,11 +47,6 @@ module.exports = {
     createOrder: (...a) => dataRepo.createOrder(...a),
     getOrder: (...a) => dataRepo.getOrder(...a),
   },
-  partPrices: {
-    getPartPrices: (...a) => dataRepo.partPrices.getPartPrices(...a),
-    setPartPrices: (...a) => dataRepo.partPrices.setPartPrices(...a),
-  },
-
   slips: {
     createSlip: (...a) => dataRepo.slips.createSlip(...a),
     listSlips: (...a) => dataRepo.slips.listSlips(...a),

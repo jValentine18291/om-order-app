@@ -142,15 +142,13 @@ db.exec(`
     FOREIGN KEY (machine_id) REFERENCES slip_machines(id) ON DELETE CASCADE
   );
 
-  -- Spare-part prices for the IPL viewer.
-  --
-  -- These are NOT in AutoCount: the three tiers live only on the printed IPL
-  -- copies the technicians keep, so the app is the system of record for them.
-  -- Keyed on the part number with separators stripped and upper-cased (the
-  -- same normalised form the IPL viewer searches AutoCount with), so IPL
-  -- "585 60 19-01" and AutoCount "SZEN 585601901" both resolve to 585601901.
+  -- NOTE: part_prices is retired. The three tiers turned out to be in
+  -- AutoCount after all (ItemUOM.Price1 = Contractor, Price6 = List), so the
+  -- app reads them from there and no longer stores or edits prices. The table
+  -- is left in place so no existing database loses rows on upgrade; nothing
+  -- reads it, and it can be dropped once you are happy.
   CREATE TABLE IF NOT EXISTS part_prices (
-    item_code        TEXT    PRIMARY KEY,   -- normalised: A-Z0-9 only
+    item_code        TEXT    PRIMARY KEY,
     list_price       REAL,
     contractor_price REAL,
     reseller_price   REAL,

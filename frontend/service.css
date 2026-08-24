@@ -1131,19 +1131,6 @@ select {
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
 .ipl-price-row .val.none { color: var(--ink-faint); font-weight: 400; font-size: 1rem; }
-.ipl-price-row input {
-  width: 110px; text-align: right;
-  padding: 9px 11px; font: inherit; font-size: 1rem;
-  border: 1px solid var(--border-2); border-radius: 10px;
-  background: #fff; color: var(--ink);
-  -moz-appearance: textfield;
-}
 .ipl-price-row input::-webkit-outer-spin-button,
 .ipl-price-row input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-.ipl-price-meta { font-size: .78rem; color: var(--ink-faint); margin-top: 10px; }
-.ipl-price-actions { display: flex; gap: 8px; margin-top: 12px; }
-.ipl-price-actions button { flex: 1; min-height: 46px; border-radius: 11px; font: inherit; font-size: .95rem; font-weight: 700; cursor: pointer; }
-.ipl-edit-btn { background: var(--surface); border: 1px solid var(--border-2); color: var(--ink-soft); }
-.ipl-save-btn { background: var(--primary-grad); border: none; color: #fff; }
-.ipl-cancel-btn { background: var(--surface); border: 1px solid var(--border-2); color: var(--ink-soft); }
