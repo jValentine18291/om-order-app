@@ -2687,7 +2687,7 @@ function renderIplList() {
 
   $("ipl-list").innerHTML = rows.length
     ? rows.map((p) => `
-        <button type="button" class="ipl-row${p.key === ipl.selectedKey ? " on" : ""}" data-key="${escapeAttr(p.key)}">
+        <button type="button" class="ipl-row${p.key === ipl.selectedKey ? " on" : ""}" data-key="${escapeAttr(p.key)}" data-index="${fig.parts.indexOf(p)}">
           <span class="k">${escapeHtml(p.key)}</span>
           <span class="d">
             <span class="n">${p.sub ? `<span class="sub">&middot; </span>` : ""}${escapeHtml(p.description)}</span>
@@ -2700,7 +2700,7 @@ function renderIplList() {
   $("ipl-list").querySelectorAll(".ipl-row").forEach((b) =>
     b.addEventListener("click", () => {
       selectIplKey(b.dataset.key, false);
-      openIplPart(b.dataset.key);
+      openIplPart(Number(b.dataset.index));
     })
   );
 }
@@ -2718,7 +2718,17 @@ function selectIplKey(key, fromDiagram) {
   if (fromDiagram) {
     const row = document.querySelector('.ipl-row[data-key="' + CSS.escape(key) + '"]');
     if (row) row.scrollIntoView({ behavior: "smooth", block: "center" });
-    openIplPart(key);
+    // Husqvarna IPLs list variants under one callout — the same number with a
+    // different article number per machine SKU or serial range. Only the list
+    // shows what distinguishes them, so offer the choice rather than silently
+    // opening the first and showing the wrong part number and price.
+    const matches = ipl.figure.parts
+      .map((p, i) => ({ p, i }))
+      .filter((x) => x.p.key === key);
+    if (matches.length === 1) openIplPart(matches[0].i);
+    else if (matches.length > 1) {
+      toast(`${matches.length} versions of ${key} — pick one from the list`, "ok");
+    }
   }
 }
 
@@ -2726,8 +2736,10 @@ function selectIplKey(key, fromDiagram) {
 // brand prefix and no separators (IPL "585 60 19-01" is "SZEN 585601901").
 // So resolve the real item code by search first, then ask for its stock —
 // getPartStock matches the code exactly and would miss otherwise.
-async function openIplPart(key) {
-  const part = ipl.figure.parts.find((p) => p.key === key);
+// Takes the part's index within the figure, not its callout number: several
+// parts can share a number and differ only by article number.
+async function openIplPart(index) {
+  const part = ipl.figure.parts[index];
   if (!part) return;
 
   $("ipl-part-title").textContent = part.description || part.part_number;
