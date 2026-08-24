@@ -164,6 +164,71 @@ app.patch("/api/part-requests/:id/ordered", async (req, res) => {
   }
 });
 
+// ---- TEMPORARY diagnostic --------------------------------------------------
+// Finding where AutoCount keeps the price tiers has been blocked by the
+// credentials living in the service configuration rather than a shell. The
+// service already has them, so it can answer the question itself.
+//
+// READ-ONLY: system catalogues and a few sample rows, no writes. REMOVE THIS
+// ROUTE once the price columns are known.
+app.get("/api/_diag/prices", async (req, res) => {
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") return res.status(503).json({ error: "AutoCount is not enabled." });
+    const { query } = require("./data/autocountConnection");
+    const code = String(req.query.code || "").replace(/\s+/g, "").toUpperCase();
+
+    const out = {};
+    out.priceColumnsAnywhere = await query(
+      `SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE
+         FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE COLUMN_NAME LIKE '%Price%'
+        ORDER BY TABLE_NAME, ORDINAL_POSITION`
+    );
+    out.itemUomColumns = await query(
+      `SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME = 'ItemUOM' ORDER BY ORDINAL_POSITION`
+    );
+    out.priceTables = await query(
+      `SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES
+        WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_NAME LIKE '%Price%' ORDER BY TABLE_NAME`
+    );
+
+    if (code) {
+      out.sampleFor = code;
+      out.itemUomRows = await query(
+        `SELECT TOP 5 * FROM ItemUOM
+          WHERE REPLACE(UPPER(ItemCode), ' ', '') = @code
+             OR REPLACE(UPPER(ItemCode), ' ', '') LIKE '%' + @code`, { code }
+      );
+      out.itemRows = await query(
+        `SELECT TOP 3 * FROM Item
+          WHERE REPLACE(UPPER(ItemCode), ' ', '') = @code
+             OR REPLACE(UPPER(ItemCode), ' ', '') LIKE '%' + @code`, { code }
+      );
+      out.fromPriceTables = {};
+      for (const t of out.priceTables) {
+        const hasItem = await query(
+          `SELECT COUNT(*) AS n FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_NAME = @t AND COLUMN_NAME = 'ItemCode'`, { t: t.TABLE_NAME }
+        );
+        if (!hasItem[0].n) continue;
+        try {
+          out.fromPriceTables[t.TABLE_NAME] = await query(
+            `SELECT TOP 5 * FROM [${t.TABLE_NAME}]
+              WHERE REPLACE(UPPER(ItemCode), ' ', '') = @code
+                 OR REPLACE(UPPER(ItemCode), ' ', '') LIKE '%' + @code`, { code }
+          );
+        } catch (e) { out.fromPriceTables[t.TABLE_NAME] = "query failed: " + e.message; }
+      }
+    }
+    res.json(out);
+  } catch (err) {
+    console.error("[GET /api/_diag/prices]", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ---- Part prices (IPL viewer) ----------------------------------------------
 // Read-only from AutoCount: Price1 is the Contractor Price, Price6 the List
 // Price. Editing lives in AutoCount, not here — writing prices back would mean

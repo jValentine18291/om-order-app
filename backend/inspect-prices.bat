@@ -23,7 +23,11 @@ if not exist "%NSSM%" (
 )
 
 echo Reading AutoCount settings from the OMService service...
-for /f "usebackq tokens=1,* delims==" %%A in (`"%NSSM%" get OMService AppEnvironmentExtra 2^>nul`) do (
+REM NSSM prints wide (UTF-16) text, which for /f cannot parse — it comes back
+REM as nulls and nothing matches. PowerShell decodes it and re-emits plain
+REM text. Both key names are tried: NSSM stores service environment under
+REM AppEnvironment or AppEnvironmentExtra depending on how it was set.
+for /f "usebackq tokens=1,* delims==" %%A in (`powershell -NoProfile -Command "& { $ErrorActionPreference='SilentlyContinue'; foreach ($k in 'AppEnvironmentExtra','AppEnvironment') { & '%NSSM%' get OMService $k } }" 2^>nul`) do (
   if not "%%~A"=="" set "%%~A=%%~B"
 )
 
