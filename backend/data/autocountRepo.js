@@ -275,9 +275,16 @@ async function getPartPrices(code) {
   const norm = String(code || "").replace(/\s+/g, "").toUpperCase();
   if (!norm) return { error: "no-code" };
 
-  // The IPL gives the manufacturer's number ("612912230C"); AutoCount stores it
-  // with a brand prefix ("SZEN 612912230C"). Exact first, then suffix, ordered
-  // so an exact hit wins and the shortest code wins after that.
+  // AutoCount codes carry a brand prefix AND sometimes a trailing variant
+  // letter: the IPL prints "612912230" where the item is "SZEN 612912230C".
+  // So the fallback has to be "contains", not "ends with" — an ends-with match
+  // missed every part whose AutoCount code has a suffix, which is what made
+  // this read "not found". searchParts, which the stock lookup uses, has always
+  // matched this way, which is why stock worked and prices did not.
+  //
+  // Ordered so the best candidate wins: an exact code first, then one that ends
+  // with the number (no variant letter), then any containing it, and the
+  // shortest among equals so a longer unrelated code cannot take precedence.
   const rows = await query(
     `SELECT TOP 1
             i.ItemCode,
@@ -286,8 +293,12 @@ async function getPartPrices(code) {
        FROM Item i
        LEFT JOIN ItemUOM u ON u.ItemCode = i.ItemCode AND u.UOM = i.BaseUOM
       WHERE REPLACE(UPPER(i.ItemCode), ' ', '') = @norm
-         OR REPLACE(UPPER(i.ItemCode), ' ', '') LIKE '%' + @norm
-      ORDER BY CASE WHEN REPLACE(UPPER(i.ItemCode), ' ', '') = @norm THEN 0 ELSE 1 END,
+         OR REPLACE(UPPER(i.ItemCode), ' ', '') LIKE '%' + @norm + '%'
+      ORDER BY CASE
+                 WHEN REPLACE(UPPER(i.ItemCode), ' ', '') = @norm THEN 0
+                 WHEN REPLACE(UPPER(i.ItemCode), ' ', '') LIKE '%' + @norm THEN 1
+                 ELSE 2
+               END,
                LEN(i.ItemCode)`,
     { norm }
   );
