@@ -177,7 +177,17 @@ app.get("/api/part-prices/:code", async (req, res) => {
     }
     const acRepo = require("./data/autocountRepo");
     const row = await acRepo.getPartPrices(req.params.code);
-    if (!row) return res.status(404).json({ error: "No prices found for this part." });
+    // Say which of the two things went wrong: the part was not found, or the
+    // price columns are not where we expect. "No prices found" covered both
+    // and made the real cause impossible to tell apart.
+    if (row && row.error === "no-price-columns") {
+      return res.status(503).json({
+        error: "Price fields not found in AutoCount (expected ItemUOM.Price1 and Price6).",
+      });
+    }
+    if (!row || row.error) {
+      return res.status(404).json({ error: `"${req.params.code}" not found in AutoCount.` });
+    }
     res.json(row);
   } catch (err) {
     console.error("[GET /api/part-prices/:code]", err.message);

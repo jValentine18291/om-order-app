@@ -288,11 +288,16 @@ async function detectPriceColumns() {
 
 async function getPartPrices(code) {
   const norm = String(code || "").replace(/\s+/g, "").toUpperCase();
-  if (!norm) return null;
+  if (!norm) return { error: "no-code" };
 
   const cols = await detectPriceColumns();
-  if (!cols.contractor || !cols.list) return null;
+  if (!cols.contractor || !cols.list) return { error: "no-price-columns" };
 
+  // The IPL gives the manufacturer's number ("612912230C"); AutoCount stores it
+  // with a brand prefix ("SZEN 612912230C"). An exact match therefore finds
+  // nothing, which is what made every price read as missing. Match the way
+  // findItem does: exact first, then a suffix match, preferring the exact one
+  // and the shortest code so a longer unrelated item cannot win.
   const rows = await query(
     `SELECT TOP 1
             i.ItemCode,
@@ -300,10 +305,13 @@ async function getPartPrices(code) {
             u.[${cols.list}]       AS ListPrice
        FROM Item i
        LEFT JOIN ItemUOM u ON u.ItemCode = i.ItemCode AND u.UOM = i.BaseUOM
-      WHERE REPLACE(UPPER(i.ItemCode), ' ', '') = @norm`,
+      WHERE REPLACE(UPPER(i.ItemCode), ' ', '') = @norm
+         OR REPLACE(UPPER(i.ItemCode), ' ', '') LIKE '%' + @norm
+      ORDER BY CASE WHEN REPLACE(UPPER(i.ItemCode), ' ', '') = @norm THEN 0 ELSE 1 END,
+               LEN(i.ItemCode)`,
     { norm }
   );
-  if (!rows.length) return null;
+  if (!rows.length) return { error: "not-found" };
 
   const r = rows[0];
   const num = (v) => (v === null || v === undefined ? null : Number(v));
