@@ -178,19 +178,26 @@ app.get("/api/_diag/so-schema", async (req, res) => {
       if (!rts.length) out.push("  (none)");
       for (const r of rts.slice(0, 60)) out.push(`  ${r.type}  ${r.name}`);
 
-      const mk = await sch.maxKeys();
-      out.push("", "== Highest keys currently in use ==");
-      out.push(`  SO.DocKey max = ${mk[0].maxSoDocKey}   SODTL.DtlKey max = ${mk[0].maxSoDtlKey}`);
+      out.push("", "== Highest DocKey across the document system ==");
+      const gmax = await sch.globalMaxDocKey();
+      for (const g of gmax.slice(0, 8)) out.push(`  ${g.table}: ${g.maxKey}`);
+      const highest = Number(gmax.length ? gmax[0].maxKey : 0);
+      out.push(`  -> the counter must sit just above ${highest}`);
 
-      // ---- the decisive test: find the counter by its VALUE ----
+      out.push("", "== What each document type was last used ==");
+      for (const u of (await sch.lastUsed()).filter((u) => u.docs > 0)
+             .sort((a, b) => new Date(b.lastDate) - new Date(a.lastDate))) {
+        out.push(`  ${String(u.table).padEnd(12)} ${String(u.lastDate).slice(0, 10)}   ${u.docs} documents`);
+      }
+
+      // ---- the decisive test, this time in the right range ----
       out.push("", "== Hunting the global DocKey counter by value ==");
-      const highest = Math.max(Number(mk[0].maxSoDocKey) || 0, Number(mk[0].maxSoDtlKey) || 0);
-      const cands = await sch.smallTableNumericColumns(200);
-      out.push(`  scanning ${cands.length} numeric columns in tables of 200 rows or fewer`);
-      out.push(`  looking for a value between ${highest} and ${highest + 5000}`);
-      const hits = await sch.findValueNear(cands, highest, highest + 5000);
+      const cands = await sch.smallTableNumericColumns(500);
+      out.push(`  scanning ${cands.length} numeric columns in tables of 500 rows or fewer`);
+      out.push(`  looking for a value between ${highest} and ${highest + 20000}`);
+      const hits = await sch.findValueNear(cands, highest, highest + 20000);
       if (!hits.length) {
-        out.push("  NOTHING FOUND - the counter is not a small table, or it is stored as text.");
+        out.push("  NOTHING FOUND - not a small numeric column.");
       } else {
         for (const h of hits) out.push(`  HIT  ${h.spot} = ${h.val}`);
       }

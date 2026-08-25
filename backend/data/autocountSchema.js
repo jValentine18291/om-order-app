@@ -120,12 +120,34 @@ async function keyRoutines() {
   );
 }
 
-// The highest key in use, to see how far ahead any "next number" sits.
-async function maxKeys() {
-  return query(
-    `SELECT (SELECT MAX(DocKey) FROM SO) AS maxSoDocKey,
-            (SELECT MAX(DtlKey) FROM SODTL) AS maxSoDtlKey`
+// The highest key in use ACROSS the document system, not just in SO. DocKey is
+// one sequence for every document type, and SO has not been written to since
+// March 2024 - so its own maximum says nothing about where the counter sits.
+const DOC_TABLES = [
+  "SO", "DO", "IV", "CS", "DN", "CN", "PO", "GR", "PI", "QT", "ADJ", "XS", "XP",
+  "ARInvoice", "ARPayment", "ARCN", "ARDN", "APInvoice", "APPayment", "JE",
+  "StockTake", "XFER", "ISS", "RCV",
+];
+
+async function globalMaxDocKey() {
+  const parts = DOC_TABLES.map(
+    (t) => `SELECT '${t}' AS [table], MAX(DocKey) AS maxKey FROM [${t}]`
   );
+  const rows = await query(parts.join(" UNION ALL "));
+  return rows.filter((r) => r.maxKey !== null).sort((a, b) => Number(b.maxKey) - Number(a.maxKey));
+}
+
+// What each document type was last used, so we can see what is actually in use
+// today rather than assuming.
+async function lastUsed() {
+  const parts = DOC_TABLES.map(
+    (t) => `SELECT '${t}' AS [table], MAX(DocDate) AS lastDate, COUNT(*) AS docs FROM [${t}]`
+  );
+  try {
+    return await query(parts.join(" UNION ALL "));
+  } catch (_) {
+    return [];
+  }
 }
 
 // Which other tables carry a DocKey - i.e. what else might a Sales Order touch.
@@ -191,5 +213,5 @@ async function findValueNear(candidates, low, high) {
 
 module.exports = { findTables, columns, sampleOrder, usedColumns,
                    identityColumns, docKeyTables, allLines,
-                   serverVersion, numberingColumns, keyRoutines, maxKeys,
+                   serverVersion, numberingColumns, keyRoutines, globalMaxDocKey, lastUsed,
                    smallTableNumericColumns, findValueNear };
