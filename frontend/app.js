@@ -474,6 +474,7 @@ function resetNewServiceForm() {
   renderNsMachines();
   $("ns-status").innerHTML = "";
   const sug = $("ns-company-suggest"); if (sug) sug.innerHTML = "";
+  nsDebtorCode = "";
   sigPadClear();
   renderSigPreview();
 }
@@ -520,6 +521,9 @@ async function submitNewService() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         company,
+        // No debtor picked from AutoCount means a walk-in, which bills to
+        // Cash Sales rather than being guessed at from the typed name.
+        debtor_code: nsDebtorCode || CASH_SALES_DEBTOR,
         contact_name: $("ns-contact-name").value.trim(),
         contact_number: $("ns-contact-number").value.trim(),
         whatsapp_number: $("ns-whatsapp").value.trim(),
@@ -2777,9 +2781,17 @@ $("ns-submit").addEventListener("click", submitNewService);
 // Company-name suggestions from the AutoCount debtor list (optional helper —
 // staff can still type any company freely; suggestions just speed it up).
 let companyDebounce = null;
+// The AutoCount debtor code behind the chosen company. A Sales Order header
+// cannot be written without one, and the name alone will not do - so it is
+// captured when a suggestion is picked, and cleared the moment the field is
+// edited by hand, because at that point we no longer know who they meant.
+let nsDebtorCode = "";
+const CASH_SALES_DEBTOR = "C0112"; // walk-ins and individuals, per John
+
 let companySuppress = false; // true right after a suggestion is picked
 $("ns-company").addEventListener("input", () => {
   if (companySuppress) { companySuppress = false; return; }
+  nsDebtorCode = "";   // typing again means this is no longer the picked customer
   clearTimeout(companyDebounce);
   const box = $("ns-company-suggest");
   const q = $("ns-company").value.trim();
@@ -2791,12 +2803,13 @@ $("ns-company").addEventListener("input", () => {
       // Don't show a lone suggestion identical to what's already typed.
       if (!list.length || (list.length === 1 && list[0].company === q)) { box.innerHTML = ""; return; }
       box.innerHTML = list.map((d) =>
-        `<button type="button" class="company-option" data-company="${escapeAttr(d.company)}">${escapeHtml(d.company)}</button>`
+        `<button type="button" class="company-option" data-company="${escapeAttr(d.company)}" data-acc="${escapeAttr(d.acc_no || "")}">${escapeHtml(d.company)}</button>`
       ).join("");
       box.querySelectorAll(".company-option").forEach((btn) =>
         btn.addEventListener("click", () => {
           companySuppress = true;
           $("ns-company").value = btn.dataset.company;
+          nsDebtorCode = btn.dataset.acc || "";
           box.innerHTML = "";
         })
       );

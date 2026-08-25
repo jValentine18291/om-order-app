@@ -105,6 +105,7 @@ db.exec(`
     id             INTEGER PRIMARY KEY AUTOINCREMENT,
     slip_number    TEXT    NOT NULL UNIQUE,   -- 5-digit sequential, e.g. '00001'
     company        TEXT    NOT NULL,
+    debtor_code    TEXT    DEFAULT '',      -- AutoCount DebtorCode; '' means walk-in
     contact_name   TEXT,
     contact_number TEXT,
     whatsapp_number TEXT DEFAULT '',
@@ -189,6 +190,19 @@ try {
   }
 } catch (e) {
   console.error("[db] repair_comment migration check failed:", e.message);
+}
+
+// Migration: the AutoCount debtor code behind the company name. A Sales Order
+// header cannot be written without it, and the name alone is not enough - two
+// customers can share a trading name, and staff can type anything.
+try {
+  const cols = db.prepare("PRAGMA table_info(service_slips)").all();
+  if (!cols.some((c) => c.name === "debtor_code")) {
+    db.exec("ALTER TABLE service_slips ADD COLUMN debtor_code TEXT DEFAULT ''");
+    console.log("[db] migrated: added debtor_code to service_slips");
+  }
+} catch (e) {
+  console.error("[db] debtor_code migration check failed:", e.message);
 }
 
 // Migration: per-machine Sales Order tracking. A slip is converted one machine
