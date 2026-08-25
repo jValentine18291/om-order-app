@@ -211,6 +211,35 @@ async function findValueNear(candidates, low, high) {
   return hits;
 }
 
+// No counter table moved when AutoCount allocated a key, so it works the next
+// one out at run time. The obvious candidate is "highest key anywhere, plus
+// one". This tests exactly that: if the order just created sits one above the
+// next-highest key in the whole document system, that is the rule.
+const KEY_TABLES = [
+  ["SO", "DocKey"], ["SODTL", "DtlKey"], ["DO", "DocKey"], ["DODTL", "DtlKey"],
+  ["IV", "DocKey"], ["IVDTL", "DtlKey"], ["CS", "DocKey"], ["CSDTL", "DtlKey"],
+  ["DN", "DocKey"], ["DNDTL", "DtlKey"], ["CN", "DocKey"], ["CNDTL", "DtlKey"],
+  ["PO", "DocKey"], ["PODTL", "DtlKey"], ["GR", "DocKey"], ["GRDTL", "DtlKey"],
+  ["PI", "DocKey"], ["PIDTL", "DtlKey"], ["QT", "DocKey"], ["QTDTL", "DtlKey"],
+  ["ARInvoice", "DocKey"], ["ARPayment", "DocKey"], ["ARCN", "DocKey"], ["ARDN", "DocKey"],
+  ["APInvoice", "DocKey"], ["APPayment", "DocKey"], ["JE", "DocKey"], ["JEDTL", "DtlKey"],
+  ["ADJ", "DocKey"], ["ADJDTL", "DtlKey"], ["XFER", "DocKey"], ["XFERDTL", "DtlKey"],
+  ["ISS", "DocKey"], ["ISSDTL", "DtlKey"], ["RCV", "DocKey"], ["RCVDTL", "DtlKey"],
+  ["StockDTL", "DocKey"], ["StockTake", "DocKey"], ["XS", "DocKey"], ["XP", "DocKey"],
+];
+
+// The highest few keys anywhere, so we can see whether they run consecutively
+// and where the newest document sits among them.
+async function topKeys() {
+  const parts = KEY_TABLES.map(
+    ([t, c]) => `SELECT '${t}.${c}' AS spot, MAX([${c}]) AS maxKey FROM [${t}]`
+  );
+  const rows = await query(parts.join(" UNION ALL "));
+  return rows
+    .filter((r) => r.maxKey !== null)
+    .sort((a, b) => Number(b.maxKey) - Number(a.maxKey));
+}
+
 // ---- Watching the counter move --------------------------------------------
 // Far better than guessing at a value: take a reading of every small table
 // before a Sales Order is created in AutoCount, and another afterwards.
@@ -259,4 +288,4 @@ async function snapshot(maxRows = 2000) {
 module.exports = { findTables, columns, sampleOrder, usedColumns,
                    identityColumns, docKeyTables, allLines,
                    serverVersion, numberingColumns, keyRoutines, globalMaxDocKey, lastUsed,
-                   smallTableNumericColumns, findValueNear, snapshot };
+                   smallTableNumericColumns, findValueNear, snapshot, topKeys };

@@ -105,6 +105,38 @@ app.post("/api/slips", async (req, res) => {
   }
 });
 
+// ---- TEMPORARY: is the next key simply "highest anywhere, plus one"? -------
+app.get("/api/_diag/keyrule", async (req, res) => {
+  res.type("text/plain");
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") return res.send("AutoCount is not enabled on this server.");
+    const sch = require("./data/autocountSchema");
+    const rows = await sch.topKeys();
+    const out = ["== Highest key in each document table, biggest first =="];
+    for (const r of rows.slice(0, 14)) out.push("  " + String(r.spot).padEnd(22) + " " + r.maxKey);
+
+    const top = Number(rows[0].maxKey);
+    const second = Number(rows[1] ? rows[1].maxKey : 0);
+    out.push("");
+    out.push("== Reading ==");
+    out.push("  highest anywhere      : " + top + "  (" + rows[0].spot + ")");
+    out.push("  next highest          : " + second + "  (" + (rows[1] ? rows[1].spot : "-") + ")");
+    out.push("  gap between them      : " + (top - second));
+    out.push("");
+    if (top - second <= 2) {
+      out.push("  The newest keys run consecutively across tables, which fits");
+      out.push("  'next key = highest anywhere + 1'.");
+    } else {
+      out.push("  There is a gap, so the next key is NOT simply the highest plus one -");
+      out.push("  AutoCount is getting it from somewhere we have not found.");
+    }
+    res.send(out.join(String.fromCharCode(10)));
+  } catch (err) {
+    res.send("FAILED: " + err.message);
+  }
+});
+
 // ---- TEMPORARY: watch AutoCount allocate a key -----------------------------
 // Take a reading before creating a Sales Order in AutoCount, and another
 // afterwards. Whatever moved is the counter. Reading only; the snapshot is
