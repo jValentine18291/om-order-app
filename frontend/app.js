@@ -739,7 +739,11 @@ function buildSlipPdf(slip) {
       doc.line(ix + 3.4 * m, iy + 6 * m, ix + 8.6 * m, iy + 6 * m);
       doc.line(ix + 3.4 * m, iy + 8.6 * m, ix + 7 * m, iy + 8.6 * m);
     } else if (name === "shield") {
-      doc.lines([[5 * m, -1.9 * m], [5 * m, 1.9 * m], [0, 4.8 * m], [-5 * m, 4.9 * m], [-5 * m, -4.9 * m]],
+      // The last segment closes the path back up the left edge. Without it the
+      // shield ends at the bottom-left corner and its left side is simply
+      // missing, which reads as the icon being clipped.
+      doc.lines([[5 * m, -1.9 * m], [5 * m, 1.9 * m], [0, 4.8 * m], [-5 * m, 4.9 * m],
+                 [-5 * m, -4.9 * m], [0, -4.8 * m]],
         ix + 1 * m, iy + 2.3 * m);
       doc.line(ix + 3.7 * m, iy + 6 * m, ix + 5.3 * m, iy + 7.7 * m);
       doc.line(ix + 5.3 * m, iy + 7.7 * m, ix + 8.5 * m, iy + 4.4 * m);
