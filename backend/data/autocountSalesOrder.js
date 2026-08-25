@@ -45,6 +45,16 @@ function userId() {
 
 const money = (n) => Math.round((Number(n) || 0) * 100) / 100;
 
+// GST computed in whole cents, not floating point. 79.50 x 9% is exactly 7.155
+// and should round to 7.16, but in binary floating point it comes out as
+// 7.154999999999999 and rounds DOWN to 7.15. That is a cent adrift on a tax
+// figure, and worse, it depends on the number - so the same calculation is
+// right on one line and wrong on the next. Integer cents make it exact.
+function gstOn(amount, ratePercent) {
+  const cents = Math.round((Number(amount) || 0) * 100);
+  return Math.round((cents * ratePercent) / 100) / 100;
+}
+
 // AutoCount fields are plain nvarchar and its reports are not forgiving: the
 // Cash Sales debtor's Phone1 came back with line breaks embedded in it, and
 // those would have gone straight into the order.
@@ -192,7 +202,7 @@ async function buildRows({ slipNumber, debtorCode, contactName, contactNumber, s
     const qty = Number(l.quantity) || 0;
     const price = money(l.unit_price);
     const sub = money(qty * price);
-    const tax = money(sub * (SR9.rate / 100));
+    const tax = gstOn(sub, SR9.rate);
     totalExTax = money(totalExTax + sub);
     totalTax = money(totalTax + tax);
 
