@@ -123,6 +123,8 @@ db.exec(`
     slip_id        INTEGER NOT NULL,
     machine_desc   TEXT    NOT NULL,
     serial_no      TEXT    DEFAULT '',     -- as given by the customer; often blank
+    converted_at   TEXT,                    -- when this machine went onto a Sales Order
+    so_number      TEXT    DEFAULT '',      -- which Sales Order it went onto
     repair_comment TEXT    DEFAULT '',
     labour_charge  REAL    DEFAULT 0,     -- technician labour billed for this machine
     FOREIGN KEY (slip_id) REFERENCES service_slips(id) ON DELETE CASCADE
@@ -187,6 +189,22 @@ try {
   }
 } catch (e) {
   console.error("[db] repair_comment migration check failed:", e.message);
+}
+
+// Migration: per-machine Sales Order tracking. A slip is converted one machine
+// at a time, so each row records when it went onto an order and which order.
+try {
+  const cols = db.prepare("PRAGMA table_info(slip_machines)").all();
+  if (!cols.some((c) => c.name === "converted_at")) {
+    db.exec("ALTER TABLE slip_machines ADD COLUMN converted_at TEXT");
+    console.log("[db] migrated: added converted_at to slip_machines");
+  }
+  if (!cols.some((c) => c.name === "so_number")) {
+    db.exec("ALTER TABLE slip_machines ADD COLUMN so_number TEXT DEFAULT ''");
+    console.log("[db] migrated: added so_number to slip_machines");
+  }
+} catch (e) {
+  console.error("[db] machine conversion migration check failed:", e.message);
 }
 
 // Migration: add serial_no to slip_machines if an older DB lacks it. Existing

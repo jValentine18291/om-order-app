@@ -499,7 +499,9 @@ app.patch("/api/slips/:slip/status", async (req, res) => {
 // moment. Failures never block the Sales Order — they are logged and reported.
 app.post("/api/slips/:slip/order", async (req, res) => {
   try {
-    const result = await data.slips.createSlipOrder(req.params.slip);
+    // machine_ids lets the sales desk convert part of a slip; with none given
+    // it takes everything not already on an order.
+    const result = await data.slips.createSlipOrder(req.params.slip, (req.body || {}).machine_ids);
 
     // ---- Price write-back (guarded, best-effort) ----
     const priceSync = { updated: [], skipped: 0, failed: [] };
@@ -572,6 +574,15 @@ app.post("/api/slips/:slip/order", async (req, res) => {
 
 // Close a slip (Close Service) — requires DO/CS/INV ref
 // The Sales Order raised for a slip (for the keyable AutoCount block view).
+app.get("/api/slips/:slip/orders", async (req, res) => {
+  try {
+    res.json({ orders: await data.slips.getSlipOrders(req.params.slip) });
+  } catch (err) {
+    console.error("[GET /api/slips/:slip/orders]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to load sales orders" });
+  }
+});
+
 app.get("/api/slips/:slip/order", async (req, res) => {
   try {
     const order = await data.slips.getSlipOrder(req.params.slip);

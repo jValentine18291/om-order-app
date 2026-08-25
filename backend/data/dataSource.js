@@ -60,6 +60,7 @@ module.exports = {
     setSlipStatus: (...a) => dataRepo.slips.setSlipStatus(...a),
     createSlipOrder: (...a) => dataRepo.slips.createSlipOrder(...a),
     getSlipOrder: (...a) => dataRepo.slips.getSlipOrder(...a),
+    getSlipOrders: (...a) => dataRepo.slips.getSlipOrders(...a),
     closeSlip: (...a) => dataRepo.slips.closeSlip(...a),
   },
   requests: {

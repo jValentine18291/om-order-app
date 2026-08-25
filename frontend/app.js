@@ -1612,7 +1612,11 @@ function updateSlipFooter() {
   // that is pure labour ("cleaned the carburettor, no parts") is legitimate.
   const st = session.slip.status;
   const billable = slipParts > 0 || slipTotal > 0;
-  $("os-create-so").disabled = !billable || st === "ALL_REPAIRED" || st === "CLOSED";
+  // A slip converted machine by machine sits at ALL_REPAIRED between orders, so
+  // that status must not disable the button any more - only a slip whose every
+  // machine is already on an order, or one that is closed.
+  const machinesLeft = (session.slip && (session.slip.machines || []).some((m) => !m.converted_at));
+  $("os-create-so").disabled = !billable || !machinesLeft || st === "CLOSED" || st === "CONVERTED";
 }
 
 // ---- Slip status UI (Open Service) ------------------------------------------
@@ -1667,14 +1671,76 @@ $("os-no-quote").addEventListener("click", () => {
   }
 });
 
+// Ask which machines go on this order. A slip is converted a machine at a
+// time, so this is the normal case rather than a special one.
+function openConvertPicker() {
+  if (!session.slip) return;
+  const machines = session.slip.machines || [];
+  const left = machines.filter((m) => !m.converted_at);
+  if (!left.length) {
+    toast("Every machine on this slip is already on a Sales Order.", "ok");
+    return;
+  }
+  $("conv-sub").textContent = `Slip ${session.slip.slip_number} · ${session.slip.company}`;
+  $("conv-status").innerHTML = "";
+  // Reset here rather than on each exit path: a slip is converted several
+  // times over, and a button left disabled by the previous run is silent -
+  // the click simply does nothing and nobody can tell why.
+  $("conv-go").disabled = false;
+  $("conv-list").innerHTML = machines.map((m) => {
+    const done = !!m.converted_at;
+    const parts = (m.parts || []).length;
+    const labour = Number(m.labour_charge) || 0;
+    const billable = parts > 0 || labour > 0 || String(m.repair_comment || "").trim();
+    const sub = done
+      ? `On ${escapeHtml(m.so_number || "a Sales Order")}`
+      : billable
+        ? `${parts} part${parts === 1 ? "" : "s"}${labour > 0 ? " · labour " + money(labour) : ""}`
+        : "No work recorded yet";
+    return `
+      <label class="conv-row${done ? " conv-done" : ""}${!done && !billable ? " conv-blocked" : ""}">
+        <input type="checkbox" value="${m.id}" ${done || !billable ? "disabled" : "checked"}>
+        <span class="conv-main">
+          <span class="conv-name">${escapeHtml(m.machine_desc)}</span>
+          ${m.serial_no ? `<span class="conv-serial">S/N ${escapeHtml(m.serial_no)}</span>` : ""}
+          <span class="conv-sub">${sub}</span>
+        </span>
+      </label>`;
+  }).join("");
+  $("conv-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function closeConvertPicker() {
+  $("conv-modal").style.display = "none";
+  document.body.style.overflow = "";
+}
+
 async function createSalesOrder() {
   if (!session.slipNumber) return;
+  const chosen = [...document.querySelectorAll("#conv-list input:checked")].map((c) => Number(c.value));
+  if (!chosen.length) {
+    $("conv-status").innerHTML = statusErr("Pick at least one machine.");
+    return;
+  }
+  $("conv-go").disabled = true;
   $("os-create-so").disabled = true;
   // Persist the current machine's comment first (per the agreed save-on-SO behaviour).
   await saveCurrentComment();
   try {
-    const result = await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/order`, { method: "POST" });
-    toast(`Sales Order ${result.so_number} created (${result.ss_line})`, "ok");
+    const result = await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/order`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ machine_ids: chosen }),
+    });
+    closeConvertPicker();
+    const left = result.machines_remaining;
+    toast(
+      left === 0
+        ? `Sales Order ${result.so_number} created — slip is now Converted`
+        : `Sales Order ${result.so_number} created — ${left} machine${left === 1 ? "" : "s"} still to convert`,
+      "ok"
+    );
     // Straight into the keyable block — this is the moment it gets typed into
     // AutoCount, so don't make anyone go looking for it.
     showSlipOrder(session.slipNumber);
@@ -1693,6 +1759,7 @@ async function createSalesOrder() {
   } catch (e) {
     toast(e.message, "err");
     $("os-create-so").disabled = false;
+    $("conv-go").disabled = false;
   }
 }
 
@@ -2757,7 +2824,10 @@ $("ns-whatsapp-same").addEventListener("change", (e) => {
 
 // Open Service: technician select (inside the machine popup) + SO button
 $("os-tech").addEventListener("change", (e) => onTechChosen(e.target.value));
-$("os-create-so").addEventListener("click", createSalesOrder);
+$("os-create-so").addEventListener("click", openConvertPicker);
+$("conv-go").addEventListener("click", createSalesOrder);
+$("conv-close").addEventListener("click", closeConvertPicker);
+$("conv-modal").addEventListener("click", (e) => { if (e.target === $("conv-modal")) closeConvertPicker(); });
 
 // Mode toggle buttons
 document.querySelectorAll("#mode-toggle button").forEach((b) =>

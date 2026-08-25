@@ -228,9 +228,9 @@ function listSlips(statusFilter = "active") {
     rows = db.prepare("SELECT * FROM service_slips WHERE status = 'OPEN' ORDER BY slip_number").all();
   } else if (statusFilter === "working") {
     // Open Service scope: still being worked on (not repaired, not closed)
-    rows = db.prepare("SELECT * FROM service_slips WHERE status NOT IN ('ALL_REPAIRED', 'CLOSED') ORDER BY slip_number").all();
+    rows = db.prepare("SELECT * FROM service_slips WHERE status NOT IN ('ALL_REPAIRED', 'CONVERTED', 'CLOSED') ORDER BY slip_number").all();
   } else if (statusFilter === "repaired" || statusFilter === "call_customer") {
-    rows = db.prepare("SELECT * FROM service_slips WHERE status = 'ALL_REPAIRED' ORDER BY slip_number").all();
+    rows = db.prepare("SELECT * FROM service_slips WHERE status IN ('ALL_REPAIRED', 'CONVERTED') ORDER BY slip_number").all();
   } else if (statusFilter === "closed") {
     rows = db.prepare("SELECT * FROM service_slips WHERE status = 'CLOSED' ORDER BY slip_number DESC").all();
   } else if (statusFilter === "all") {
@@ -308,7 +308,8 @@ function setPartPrice(partId, price) {
   return { ok: true, unit_price: p };
 }
 
-// Create the Sales Order for a slip (all machines' parts), flip status to ALL_REPAIRED.
+// Create the Sales Order for chosen machines on a slip. The slip only reaches
+// CONVERTED once every one of its machines has been put on an order.
 // Mock SO for now — same shape as createOrder — but tagged with the slip number.
 // Labour is billed through AutoCount's service item. This code also marks the
 // start of a machine's block on the Sales Order, so each machine with labour
@@ -316,59 +317,82 @@ function setPartPrice(partId, price) {
 const LABOUR_ITEM_CODE = "A1 SVR LANDSCAPE";
 const LABOUR_DESCRIPTION = "Being repair & replacement of part :-";
 
-function createSlipOrder(slipNumber) {
+function createSlipOrder(slipNumber, machineIds) {
   const slip = getSlip(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
   if (slip.status === "CLOSED") { const e = new Error("Slip is already closed."); e.status = 400; throw e; }
 
-  // "All Repaired" must be true for ALL machines: refuse the SO if any machine
-  // has no work recorded at all (no parts AND no repair comment), naming them.
-  const untouched = slip.machines
-    .filter((m) => (m.parts || []).length === 0 && !String(m.repair_comment || "").trim())
-    .map((m) => m.machine_desc);
-  if (untouched.length) {
-    const e = new Error(`No work recorded on: ${untouched.join(", ")}. Add parts or a repair comment (or remove the machine) before creating the Sales Order.`);
+  // A slip is converted a machine at a time. With no selection, take every
+  // machine that has not already gone onto an order.
+  const all = slip.machines || [];
+  const wanted = Array.isArray(machineIds) && machineIds.length
+    ? all.filter((m) => machineIds.map(Number).includes(Number(m.id)))
+    : all.filter((m) => !m.converted_at);
+
+  if (!wanted.length) {
+    const e = new Error("No machines selected for the Sales Order.");
+    e.status = 400; throw e;
+  }
+  const already = wanted.filter((m) => m.converted_at);
+  if (already.length) {
+    const e = new Error(
+      `Already on a Sales Order: ${already.map((m) => m.machine_desc).join(", ")}. Each machine can only be converted once.`
+    );
     e.status = 400; throw e;
   }
 
-  // Build the Sales Order as the block a person will key into AutoCount, one
-  // block per machine, in the order the screenshot shows:
+  // Refuse a machine with no work recorded at all, naming it - an empty block
+  // in AutoCount is worse than a clear refusal here.
+  const untouched = wanted
+    .filter((m) => (m.parts || []).length === 0 && !String(m.repair_comment || "").trim() && !(Number(m.labour_charge) > 0))
+    .map((m) => m.machine_desc);
+  if (untouched.length) {
+    const e = new Error(`No work recorded on: ${untouched.join(", ")}. Add parts, a labour charge or a repair comment before converting.`);
+    e.status = 400; throw e;
+  }
+
+  // Build the block exactly as it is keyed into AutoCount, one block per
+  // machine:
   //
-  //   A1 SVR LANDSCAPE  "Being repair & replacement of part :-"   qty 1 NOS, labour
-  //   (no code)         "EBZ5100 Backpack Blower, S/S: 00042 (R) - 1/2"
+  //   A1 SVR LANDSCAPE  "Being repair & replacement of part :-"   qty 1, labour
+  //   (no code)         "525BX Handheld Blower, S/N: 2025280, S/S: 00042 (R) - 1/6"
   //   <parts>
   //   (no code)         "*Too much 2T Oil"          <- repair comment
   //   (no code)         "SubTotal"                  <- machine total
+  //   (blank)
   //
   // and the customer's contact on the last line. The un-coded rows are note
   // lines: no price, no quantity, no effect on the order total.
+  //
+  // The A1 line opens EVERY block, including at 0.00. In AutoCount it marks
+  // where a machine's parts begin, so a block without it cannot be read.
   const lines = [];
-  const total = slip.machines.length;
-  let priced = 0;
+  const total = all.length;
 
-  slip.machines.forEach((m, i) => {
+  wanted.forEach((m, n) => {
     const labour = Number(m.labour_charge) || 0;
     const parts = m.parts || [];
 
-    // Labour opens the block — in AutoCount this line also marks where the
-    // parts for this machine begin, so it must come first.
-    if (labour > 0) {
-      lines.push({
-        item_code: LABOUR_ITEM_CODE,
-        description: LABOUR_DESCRIPTION,
-        uom: "NOS",
-        unit_price: labour,
-        quantity: 1,
-      });
-      priced++;
-    }
+    lines.push({
+      item_code: LABOUR_ITEM_CODE,
+      description: LABOUR_DESCRIPTION,
+      uom: "NOS",
+      unit_price: labour,
+      quantity: 1,
+    });
 
-    // Machine heading: model, slip number, technician(s), position on the slip.
+    // Position is the machine's place on the SLIP, not in this order - so a
+    // slip of six converted in two goes still reads 1/6 ... 6/6.
+    const pos = all.findIndex((x) => Number(x.id) === Number(m.id)) + 1;
     const techs = [...new Set(parts.map((p) => p.technician).filter(Boolean))];
     const who = techs.length ? ` (${techs.join("/")})` : "";
+    const serial = String(m.serial_no || "").trim();
     lines.push({
       note: true,
-      description: `${m.machine_desc}, S/S: ${slip.slip_number}${who} - ${i + 1}/${total}`,
+      description:
+        `${m.machine_desc}` +
+        (serial ? `, S/N: ${serial}` : "") +
+        `, S/S: ${slip.slip_number}${who} - ${pos}/${total}`,
     });
 
     let machineTotal = labour;
@@ -378,31 +402,50 @@ function createSlipOrder(slipNumber) {
         unit_price: p.unit_price, quantity: p.quantity,
       });
       machineTotal += p.unit_price * p.quantity;
-      priced++;
     }
 
     const comment = String(m.repair_comment || "").trim();
     if (comment) lines.push({ note: true, description: `*${comment}` });
 
     lines.push({ note: true, description: "SubTotal", line_amount: machineTotal });
+    // Blank row between machines, as the keyed block has.
+    if (n < wanted.length - 1) lines.push({ note: true, description: "" });
   });
-
-  if (priced === 0) {
-    const e = new Error("Nothing to bill on this slip yet — no parts and no labour charge.");
-    e.status = 400; throw e;
-  }
 
   // Customer contact, as the last line of the block.
   const contact = [slip.contact_name, slip.contact_number].filter(Boolean).join(" ").trim();
   if (contact) lines.push({ note: true, description: contact });
 
-  // Reuse the existing order creation (mock SO + persistence).
   const so = createOrder({ notes: `S/S: ${slip.slip_number}`, lines });
 
-  // Mark slip as awaiting customer call.
-  db.prepare("UPDATE service_slips SET status = 'ALL_REPAIRED' WHERE id = ?").run(slip.id);
+  // Record which machines this order covered, then move the slip on only when
+  // every machine has been converted - a partly converted slip is still work
+  // in progress as far as the sales desk is concerned.
+  const stamp = db.prepare(
+    "UPDATE slip_machines SET converted_at = datetime('now'), so_number = ? WHERE id = ?"
+  );
+  const finish = db.transaction(() => {
+    for (const m of wanted) stamp.run(so.so_number, m.id);
+    const left = db.prepare(
+      "SELECT COUNT(*) AS n FROM slip_machines WHERE slip_id = ? AND (converted_at IS NULL OR converted_at = '')"
+    ).get(slip.id).n;
+    if (left === 0) {
+      db.prepare("UPDATE service_slips SET status = 'CONVERTED' WHERE id = ?").run(slip.id);
+    } else if (slip.status !== "ALL_REPAIRED") {
+      db.prepare("UPDATE service_slips SET status = 'ALL_REPAIRED' WHERE id = ?").run(slip.id);
+    }
+    return left;
+  });
+  const remaining = finish();
 
-  return { ...so, slip_number: slip.slip_number, ss_line: `S/S: ${slip.slip_number}` };
+  return {
+    ...so,
+    slip_number: slip.slip_number,
+    ss_line: `S/S: ${slip.slip_number}`,
+    machines_converted: wanted.map((m) => ({ id: m.id, machine_desc: m.machine_desc })),
+    machines_remaining: remaining,
+    slip_status: remaining === 0 ? "CONVERTED" : "ALL_REPAIRED",
+  };
 }
 
 // Labour billed for one machine, on top of its parts. Stored per machine so
@@ -431,6 +474,15 @@ function getSlipOrder(slipNumber) {
     "SELECT so_number FROM orders WHERE notes = ? ORDER BY id DESC LIMIT 1"
   ).get(`S/S: ${slipNumber}`);
   return row ? getOrder(row.so_number) : null;
+}
+
+// Every Sales Order raised for a slip, oldest first. A slip converted a machine
+// at a time has several, and without this the earlier ones become unreachable.
+function getSlipOrders(slipNumber) {
+  const rows = db.prepare(
+    "SELECT so_number FROM orders WHERE notes = ? ORDER BY id"
+  ).all(`S/S: ${slipNumber}`);
+  return rows.map((r) => getOrder(r.so_number)).filter(Boolean);
 }
 
 // Close a slip: record the DO/CS/INV reference, set status CLOSED.
@@ -474,7 +526,7 @@ function setSlipStatus(slipNumber, status) {
   if (slip.status === "CLOSED") { const e = new Error("Slip is already closed."); e.status = 400; throw e; }
   // From ALL_REPAIRED, only the escape hatch back to IN_PROGRESS is allowed
   // (to correct a premature "Create Sales Order"); quoting states are not.
-  if (slip.status === "ALL_REPAIRED" && s !== "IN_PROGRESS") {
+  if ((slip.status === "ALL_REPAIRED" || slip.status === "CONVERTED") && s !== "IN_PROGRESS") {
     const e = new Error("Slip is already fully repaired."); e.status = 400; throw e;
   }
   db.prepare("UPDATE service_slips SET status = ? WHERE id = ?").run(s, slip.id);
@@ -492,8 +544,8 @@ function searchSlips(query = "", scope = "all", limit = 20) {
   let sql, params;
   const scopeClause =
     scope === "active" ? "status != 'CLOSED'" :
-    scope === "working" ? "status NOT IN ('ALL_REPAIRED', 'CLOSED')" :
-    scope === "repaired" ? "status = 'ALL_REPAIRED'" :
+    scope === "working" ? "status NOT IN ('ALL_REPAIRED', 'CONVERTED', 'CLOSED')" :
+    scope === "repaired" ? "status IN ('ALL_REPAIRED', 'CONVERTED')" :
     "1=1";
 
   if (!q) {
@@ -520,7 +572,7 @@ function searchSlips(query = "", scope = "all", limit = 20) {
 }
 
 const slips = {
-  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setMachineComment, setMachineLabour, setSlipStatus, createSlipOrder, getSlipOrder, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setMachineComment, setMachineLabour, setSlipStatus, createSlipOrder, getSlipOrder, getSlipOrders, closeSlip,
 };
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };

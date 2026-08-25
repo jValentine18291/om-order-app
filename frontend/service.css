@@ -1120,6 +1120,24 @@ select {
 
 /* The WhatsApp send button, once it has succeeded. Deliberately looks spent
    rather than clickable, so nobody sends the same slip twice. */
+/* Choosing which machines go onto a Sales Order. */
+.conv-row {
+  display: flex; align-items: flex-start; gap: 11px; padding: 11px 12px;
+  border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px;
+  background: var(--surface, #fff); cursor: pointer;
+}
+.conv-row input { margin-top: 2px; flex: none; width: 18px; height: 18px; }
+.conv-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.conv-name { font-size: .94rem; font-weight: 600; line-height: 1.25; }
+.conv-serial { font-size: .74rem; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.conv-row .conv-sub { font-size: .78rem; color: var(--ink-soft); }
+/* Already on an order, or nothing recorded yet: visible but not selectable, so
+   the list still shows the whole slip rather than hiding half of it. */
+.conv-done { opacity: .62; cursor: default; }
+.conv-done .conv-sub { color: var(--primary); font-weight: 600; }
+.conv-blocked { opacity: .62; cursor: default; }
+.conv-blocked .conv-sub { color: var(--amber, #B26B12); }
+
 /* Machines added to a new slip: a read-only card each, entered on a popup. */
 .ns-machines-empty {
   margin: 0; padding: 14px; border: 1px dashed var(--border); border-radius: 10px;

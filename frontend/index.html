@@ -324,6 +324,25 @@
 
   </div>
 
+  <!-- Choose which machines go onto this Sales Order -->
+  <div class="modal-overlay" id="conv-modal" style="display:none">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div>
+          <strong>Convert to Sales Order</strong>
+          <div class="mm-sub" id="conv-sub"></div>
+        </div>
+        <button class="modal-x" id="conv-close" type="button" aria-label="Close">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <p class="nsm-hint" data-no-i18n>Pick the machines to put on this order. The slip only becomes Converted once every machine has been on one.</p>
+        <div id="conv-list"></div>
+        <div class="scan-hint" id="conv-status" style="justify-content:flex-start;min-height:20px"></div>
+        <button class="btn-primary" id="conv-go" type="button" style="width:100%">Create Sales Order</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="order-modal" style="display:none">
     <div class="modal-sheet">
       <div class="modal-head">
