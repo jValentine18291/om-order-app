@@ -70,4 +70,49 @@ function usedColumns(row) {
     .map(([k, v]) => `${k} = ${v instanceof Date ? v.toISOString().slice(0, 19) : String(v).slice(0, 60)}`);
 }
 
-module.exports = { findTables, columns, sampleOrder, usedColumns };
+// Are the keys auto-generated, or must we allocate them? This decides the
+// whole shape of the insert, and INFORMATION_SCHEMA does not say.
+async function identityColumns(tables) {
+  return query(
+    `SELECT OBJECT_NAME(object_id) AS [table], name AS [column],
+            seed_value AS seed, increment_value AS increment, last_value AS [last]
+       FROM sys.identity_columns
+      WHERE OBJECT_NAME(object_id) IN (${tables.map((_, i) => "@t" + i).join(",")})`,
+    Object.fromEntries(tables.map((t, i) => ["t" + i, t]))
+  );
+}
+
+// If the keys are not identities, AutoCount allocates them somewhere. Look for
+// any table that could hold a running number, by shape rather than by name.
+async function numberingCandidates() {
+  return query(
+    `SELECT TOP 40 t.TABLE_NAME AS [table],
+            STRING_AGG(CONVERT(nvarchar(max), c.COLUMN_NAME), ', ') AS cols
+       FROM INFORMATION_SCHEMA.TABLES t
+       JOIN INFORMATION_SCHEMA.COLUMNS c ON c.TABLE_NAME = t.TABLE_NAME
+      WHERE t.TABLE_TYPE = 'BASE TABLE'
+        AND t.TABLE_NAME IN (
+              SELECT TABLE_NAME FROM INFORMATION_SCHEMA.COLUMNS
+               WHERE COLUMN_NAME IN ('NextNumber','RunningNumber','LastNumber','NextDocNo','DocNoFormat','NextKey','LastKey')
+            )
+      GROUP BY t.TABLE_NAME`
+  );
+}
+
+// Which other tables carry a DocKey - i.e. what else might a Sales Order touch.
+async function docKeyTables() {
+  return query(
+    `SELECT DISTINCT TABLE_NAME AS [table]
+       FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE COLUMN_NAME = 'DocKey'
+      ORDER BY TABLE_NAME`
+  );
+}
+
+// Every line of one order, so the SubTotal row and a parts row are both seen.
+async function allLines(detailTable, keyColumn, key) {
+  return query(`SELECT * FROM [${detailTable}] WHERE ${keyColumn} = @key ORDER BY Seq`, { key });
+}
+
+module.exports = { findTables, columns, sampleOrder, usedColumns,
+                   identityColumns, numberingCandidates, docKeyTables, allLines };
