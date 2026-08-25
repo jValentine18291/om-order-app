@@ -122,6 +122,7 @@ db.exec(`
     id             INTEGER PRIMARY KEY AUTOINCREMENT,
     slip_id        INTEGER NOT NULL,
     machine_desc   TEXT    NOT NULL,
+    serial_no      TEXT    DEFAULT '',     -- as given by the customer; often blank
     repair_comment TEXT    DEFAULT '',
     labour_charge  REAL    DEFAULT 0,     -- technician labour billed for this machine
     FOREIGN KEY (slip_id) REFERENCES service_slips(id) ON DELETE CASCADE
@@ -186,6 +187,19 @@ try {
   }
 } catch (e) {
   console.error("[db] repair_comment migration check failed:", e.message);
+}
+
+// Migration: add serial_no to slip_machines if an older DB lacks it. Existing
+// machines simply have no serial, which is also the everyday case for the ones
+// that never had one stamped.
+try {
+  const cols = db.prepare("PRAGMA table_info(slip_machines)").all();
+  if (!cols.some((c) => c.name === "serial_no")) {
+    db.exec("ALTER TABLE slip_machines ADD COLUMN serial_no TEXT DEFAULT ''");
+    console.log("[db] migrated: added serial_no to slip_machines");
+  }
+} catch (e) {
+  console.error("[db] serial_no migration check failed:", e.message);
 }
 
 // Migration: add labour_charge to slip_machines if an older DB lacks it.

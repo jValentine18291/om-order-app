@@ -1120,6 +1120,50 @@ select {
 
 /* The WhatsApp send button, once it has succeeded. Deliberately looks spent
    rather than clickable, so nobody sends the same slip twice. */
+/* Machines added to a new slip: a read-only card each, entered on a popup. */
+.ns-machines-empty {
+  margin: 0; padding: 14px; border: 1px dashed var(--border); border-radius: 10px;
+  font-size: .85rem; color: var(--ink-faint); text-align: center;
+}
+.ns-machine-card {
+  display: flex; align-items: center; gap: 10px; padding: 10px 8px 10px 12px;
+  border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px;
+  background: var(--surface, #fff);
+}
+.ns-machine-main { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
+.ns-machine-model { font-size: .95rem; font-weight: 600; }
+.ns-machine-qty-tag {
+  font-size: .78rem; font-weight: 700; color: var(--primary);
+  background: var(--primary-tint); border-radius: 999px; padding: 1px 8px;
+}
+.ns-machine-serial {
+  flex-basis: 100%; font-size: .76rem; color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+.ns-machine-acts { display: flex; gap: 2px; flex: none; }
+.ns-machine-edit, .ns-machine-del {
+  border: none; background: transparent; padding: 8px; cursor: pointer;
+  color: var(--ink-faint); line-height: 0; border-radius: 8px;
+}
+.ns-machine-edit svg, .ns-machine-del svg { width: 17px; height: 17px; }
+.ns-machine-edit:active, .ns-machine-del:active { background: var(--border); }
+.nsm-hint { margin: 6px 0 0; font-size: .76rem; line-height: 1.45; color: var(--ink-faint); }
+.vs-machine-serial {
+  font-size: .76rem; color: var(--ink-faint); margin-top: 1px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Signature popup: the pad needs real height on a phone, and the buttons sit
+   below it rather than beside the note as they did inline. */
+#sig-modal .sigpad { height: 190px; }
+.sig-modal-actions { display: flex; gap: 8px; margin-top: 14px; }
+.sig-modal-actions button { flex: 1; }
+#ns-sig-preview {
+  margin-top: 8px; border: 1px solid var(--border); border-radius: 10px;
+  padding: 6px; background: var(--surface, #fff);
+}
+#ns-sig-preview img { display: block; width: 100%; height: 64px; object-fit: contain; }
+
 /* Staff picker: grouped so thirteen names stay scannable, and a grid so a
    thumb has a real target on a phone. */
 .staff-group { margin-bottom: 18px; }

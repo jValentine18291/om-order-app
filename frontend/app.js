@@ -253,10 +253,8 @@ function showScreen(name) {
   SCREENS.forEach((s) => $("screen-" + s).classList.toggle("active", s === name));
   // Home link visible everywhere except home/role
   $("home-link").style.display = (name === "home" || name === "role") ? "none" : "inline-flex";
-  // The signature canvas measures zero while its screen is hidden, so size it
-  // the moment the screen becomes visible — otherwise it keeps the 300x150
-  // default bitmap and the signature comes out stretched and blurry.
-  if (name === "new") sigPadResize();
+  // The pad is sized when its popup opens, not here — it measures zero while
+  // the popup is closed, whatever screen is showing.
   // Leaving the working context: hide the machine modal and stop any camera.
   if (name !== "slip") {
     const mm = $("machine-modal");
@@ -377,41 +375,92 @@ const STATUS_LABEL = {
 // ============================================================================
 // NEW SERVICE
 // ============================================================================
-function addMachineRow(value = "") {
+// ---- Machines on a new slip -------------------------------------------------
+// Held here rather than read back off the form. Details are entered on a popup
+// and only land in this list once "Add" is pressed, so a half-typed machine
+// cannot be left sitting on the page and registered by accident.
+let nsMachines = [];      // [{ model, qty, serial }]
+let nsEditIndex = -1;     // -1 = adding, otherwise the entry being edited
+
+function renderNsMachines() {
   const wrap = $("ns-machines");
-  const row = document.createElement("div");
-  row.className = "machine-row";
-  row.innerHTML = `
-    <input type="text" class="ns-machine-input" autocomplete="off" placeholder="e.g. Husqvarna 525LK Brushcutter" />
-    <div class="ns-qty">
-      <button type="button" class="ns-qty-dec" aria-label="Decrease quantity">−</button>
-      <input type="number" class="ns-machine-qty" value="1" min="1" inputmode="numeric" aria-label="Quantity" />
-      <button type="button" class="ns-qty-inc" aria-label="Increase quantity">+</button>
-    </div>
-    <button type="button" class="machine-del" aria-label="Remove machine">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-    </button>`;
-  row.querySelector(".ns-machine-input").value = value;
+  if (!nsMachines.length) {
+    wrap.innerHTML = `<p class="ns-machines-empty">No machines added yet.</p>`;
+    return;
+  }
+  wrap.innerHTML = nsMachines.map((m, i) => `
+    <div class="ns-machine-card" data-i="${i}">
+      <div class="ns-machine-main">
+        <span class="ns-machine-model">${escapeHtml(m.model)}</span>
+        ${m.qty > 1 ? `<span class="ns-machine-qty-tag">&times;${m.qty}</span>` : ""}
+        ${m.serial ? `<span class="ns-machine-serial">S/N ${escapeHtml(m.serial)}</span>` : ""}
+      </div>
+      <div class="ns-machine-acts">
+        <button type="button" class="ns-machine-edit" data-i="${i}" aria-label="Edit machine">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17.5 17.5 3a2.1 2.1 0 0 1 3 3L6 20.5 2 21z"/></svg>
+        </button>
+        <button type="button" class="ns-machine-del" data-i="${i}" aria-label="Remove machine">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>`).join("");
+  wrap.querySelectorAll(".ns-machine-edit").forEach((b) =>
+    b.addEventListener("click", () => openMachineForm(Number(b.dataset.i))));
+  wrap.querySelectorAll(".ns-machine-del").forEach((b) =>
+    b.addEventListener("click", () => {
+      nsMachines.splice(Number(b.dataset.i), 1);
+      renderNsMachines();
+    }));
+}
 
-  const qtyInput = row.querySelector(".ns-machine-qty");
-  const clampQty = () => {
-    let n = parseInt(qtyInput.value, 10);
-    if (!Number.isFinite(n) || n < 1) n = 1;
-    qtyInput.value = n;
-  };
-  row.querySelector(".ns-qty-dec").addEventListener("click", () => {
-    qtyInput.value = Math.max(1, (parseInt(qtyInput.value, 10) || 1) - 1);
-  });
-  row.querySelector(".ns-qty-inc").addEventListener("click", () => {
-    qtyInput.value = (parseInt(qtyInput.value, 10) || 1) + 1;
-  });
-  qtyInput.addEventListener("change", clampQty);
+function openMachineForm(index = -1) {
+  nsEditIndex = index;
+  const m = index >= 0 ? nsMachines[index] : { model: "", qty: 1, serial: "" };
+  $("nsm-title").textContent = index >= 0 ? "Edit machine" : "Add machine";
+  $("nsm-add").textContent = index >= 0 ? "Save" : "Add";
+  $("nsm-model").value = m.model;
+  $("nsm-qty").value = m.qty;
+  $("nsm-serial").value = m.serial;
+  $("nsm-status").innerHTML = "";
+  nsmSerialHint();
+  $("nsm-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+  setTimeout(() => $("nsm-model").focus(), 50);
+}
 
-  row.querySelector(".machine-del").addEventListener("click", () => {
-    // Keep at least one row present
-    if ($("ns-machines").children.length > 1) row.remove();
-  });
-  wrap.appendChild(row);
+function closeMachineForm() {
+  $("nsm-modal").style.display = "none";
+  document.body.style.overflow = "";
+  nsEditIndex = -1;
+}
+
+// Above one unit the serial box covers all of them, so say so rather than
+// leaving someone to wonder which machine the number belongs to.
+function nsmSerialHint() {
+  const qty = Math.max(1, parseInt($("nsm-qty").value, 10) || 1);
+  const hint = $("nsm-serial-hint");
+  if (qty > 1) {
+    hint.textContent = `This slip will list ${qty} separate machines. Anything typed here is recorded against all ${qty}.`;
+    hint.style.display = "block";
+  } else {
+    hint.style.display = "none";
+  }
+}
+
+function commitMachineForm() {
+  const model = $("nsm-model").value.trim();
+  if (!model) {
+    $("nsm-status").innerHTML = statusErr("Model No. is required.");
+    $("nsm-model").focus();
+    return;
+  }
+  let qty = parseInt($("nsm-qty").value, 10);
+  if (!Number.isFinite(qty) || qty < 1) qty = 1;
+  const entry = { model, qty, serial: $("nsm-serial").value.trim() };
+  if (nsEditIndex >= 0) nsMachines[nsEditIndex] = entry;
+  else nsMachines.push(entry);
+  closeMachineForm();
+  renderNsMachines();
 }
 
 function resetNewServiceForm() {
@@ -421,11 +470,12 @@ function resetNewServiceForm() {
   const created = $("ns-created"); if (created) { created.style.display = "none"; created.innerHTML = ""; }
   const cs = $("ns-check-service"); if (cs) cs.checked = false;
   const qf = $("ns-quote-first"); if (qf) qf.checked = false;
-  $("ns-machines").innerHTML = "";
-  addMachineRow();
+  nsMachines = [];
+  renderNsMachines();
   $("ns-status").innerHTML = "";
   const sug = $("ns-company-suggest"); if (sug) sug.innerHTML = "";
   sigPadClear();
+  renderSigPreview();
 }
 
 async function submitNewService() {
@@ -434,16 +484,18 @@ async function submitNewService() {
   // Expand each machine row by its quantity. A row with qty >= 2 becomes
   // separate entries suffixed " - n/total" (e.g. "BK3410 - 1/2", "BK3410 - 2/2").
   // A row with qty 1 stays as-is ("BK3410"). Each entry becomes its own machine.
+  // A quantity above one becomes that many separate machines on the slip, so
+  // each can be repaired, commented on and priced independently. The serial
+  // typed once is carried onto all of them - John's call: staff can list
+  // several numbers in the one box when it matters.
   const machines = [];
-  for (const row of document.querySelectorAll("#ns-machines .machine-row")) {
-    const desc = row.querySelector(".ns-machine-input").value.trim();
-    if (!desc) continue;
-    let qty = parseInt(row.querySelector(".ns-machine-qty").value, 10);
-    if (!Number.isFinite(qty) || qty < 1) qty = 1;
-    if (qty === 1) {
-      machines.push(desc);
+  for (const m of nsMachines) {
+    if (m.qty === 1) {
+      machines.push({ desc: m.model, serial: m.serial });
     } else {
-      for (let n = 1; n <= qty; n++) machines.push(`${desc} - ${n}/${qty}`);
+      for (let n = 1; n <= m.qty; n++) {
+        machines.push({ desc: `${m.model} - ${n}/${m.qty}`, serial: m.serial });
+      }
     }
   }
 
@@ -456,12 +508,7 @@ async function submitNewService() {
   const signature = sigPadData();
   if (!signature) {
     $("ns-status").innerHTML = statusErr("Ask the customer to sign before registering.");
-    const pad = $("ns-sig-pad");
-    if (pad) {
-      pad.scrollIntoView({ behavior: "smooth", block: "center" });
-      pad.classList.add("sigpad-missing");
-      setTimeout(() => pad.classList.remove("sigpad-missing"), 1600);
-    }
+    openSigModal();
     return;
   }
 
@@ -708,16 +755,27 @@ function buildSlipPdf(slip) {
   y += 15;
   (slip.machines || []).forEach((m, i) => {
     const lines = doc.splitTextToSize(String(m.machine_desc || ""), W - 24 - 96);
-    need(lines.length * 12 + 14);
+    // The serial is the customer's proof of which unit they handed over, so it
+    // belongs on their copy - indented under the machine, quieter than the name.
+    const serial = String(m.serial_no || "").trim();
+    const serialLines = serial
+      ? doc.splitTextToSize("S/N " + serial, W - 24 - 96)
+      : [];
+    need((lines.length + serialLines.length) * 12 + 14);
     doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.setTextColor(160);
     doc.text(String(i + 1), LEFT, y);
     doc.setTextColor(17);
     doc.text(lines, LEFT + 20, y);
+    if (serialLines.length) {
+      doc.setFontSize(8.4); doc.setTextColor(110);
+      doc.text(serialLines, LEFT + 20, y + lines.length * 12 + 1);
+      doc.setFontSize(10); doc.setTextColor(17);
+    }
     // Ticked when the equipment goes back to the customer.
     pdfLabel(doc, "RETURNED", RIGHT - 17, y, { size: 6.4, space: 0.9, grey: 165, bold: false, align: "right" });
     doc.setDrawColor(175); doc.setLineWidth(0.7);
     doc.rect(RIGHT - 10, y - 7, 9.5, 9.5);
-    y += lines.length * 12 + 6;
+    y += (lines.length + serialLines.length) * 12 + 6;
     rule(y, 236, 0.5);
     y += 14;
   });
@@ -1035,7 +1093,7 @@ function renderSlipScreen() {
           <strong>${escapeHtml(m.machine_desc)}</strong>
           ${worked ? `<span class="machine-tick">✓</span>` : `<span class="machine-untouched">Need Repair</span>`}
         </div>
-        <div class="machine-btn-sub">${parts.length} part${parts.length === 1 ? "" : "s"}${hasComment ? " · has comment" : ""}${total > 0 ? " · " + money(total) : ""}</div>
+        <div class="machine-btn-sub">${m.serial_no ? "S/N " + escapeHtml(m.serial_no) + " · " : ""}${parts.length} part${parts.length === 1 ? "" : "s"}${hasComment ? " · has comment" : ""}${total > 0 ? " · " + money(total) : ""}</div>
       </button>`;
   }).join("");
   $("sd-machines").querySelectorAll(".machine-btn").forEach((btn) =>
@@ -1709,7 +1767,8 @@ function renderSlipDetail(slip) {
 
     html += `
       <div class="vs-machine">
-        <div class="vs-machine-name">${escapeHtml(m.machine_desc)}</div>`;
+        <div class="vs-machine-name">${escapeHtml(m.machine_desc)}</div>
+        ${m.serial_no ? `<div class="vs-machine-serial">S/N ${escapeHtml(m.serial_no)}</div>` : ""}`;
 
     if (m.repair_comment) {
       html += `<div class="vs-comment">${escapeHtml(m.repair_comment)}</div>`;
@@ -2498,7 +2557,28 @@ async function loadPartRequests() {
 }
 
 // New Service
-$("ns-add-machine").addEventListener("click", () => addMachineRow());
+$("ns-add-machine").addEventListener("click", () => openMachineForm(-1));
+$("nsm-close").addEventListener("click", closeMachineForm);
+$("nsm-add").addEventListener("click", commitMachineForm);
+$("nsm-qty-dec").addEventListener("click", () => {
+  $("nsm-qty").value = Math.max(1, (parseInt($("nsm-qty").value, 10) || 1) - 1);
+  nsmSerialHint();
+});
+$("nsm-qty-inc").addEventListener("click", () => {
+  $("nsm-qty").value = (parseInt($("nsm-qty").value, 10) || 1) + 1;
+  nsmSerialHint();
+});
+$("nsm-qty").addEventListener("change", () => {
+  let n = parseInt($("nsm-qty").value, 10);
+  if (!Number.isFinite(n) || n < 1) n = 1;
+  $("nsm-qty").value = n;
+  nsmSerialHint();
+});
+// Enter in the model box is the obvious way to move on, and on a phone
+// keyboard it is the only key that is not a character.
+$("nsm-model").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); $("nsm-serial").focus(); } });
+$("nsm-serial").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); commitMachineForm(); } });
+$("nsm-modal").addEventListener("click", (e) => { if (e.target === $("nsm-modal")) closeMachineForm(); });
 $("ns-submit").addEventListener("click", submitNewService);
 
 // Company-name suggestions from the AutoCount debtor list (optional helper —
@@ -2726,8 +2806,14 @@ function sigPadSetup() {
   canvas.addEventListener("pointercancel", end);
   canvas.addEventListener("pointerleave", end);
 
-  $("ns-sig-clear").addEventListener("click", sigPadClear);
+  $("ns-sig-clear").addEventListener("click", () => { sigPadClear(); renderSigPreview(); });
   window.addEventListener("resize", sigPadResize);
+  $("ns-sig-open").addEventListener("click", openSigModal);
+  $("sig-close").addEventListener("click", closeSigModal);
+  $("sig-done").addEventListener("click", closeSigModal);
+  // Tapping the backdrop closes it, but only the backdrop - a stray touch that
+  // lands on the pad is a signature, not a dismissal.
+  $("sig-modal").addEventListener("click", (e) => { if (e.target === $("sig-modal")) closeSigModal(); });
 }
 
 // Track the inked area so the export can be trimmed to it.
@@ -2763,6 +2849,61 @@ function sigPadResize() {
   c.lineJoin = "round";
   c.strokeStyle = "#16241f";
   c.fillStyle = "#16241f";
+}
+
+// The pad now lives on a popup, so it measures zero until that popup is
+// actually on screen. This is the same trap that produced a stretched 300x150
+// signature before, one layer deeper: size it when the modal opens, never on a
+// screen change.
+function openSigModal() {
+  $("sig-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+  // Measure straight away. Reading the pad's size forces layout, so the
+  // popup's real dimensions are already available on this line.
+  //
+  // Do NOT reach for requestAnimationFrame here: it does not fire at all while
+  // the document is hidden, and the canvas would silently keep its 300x150
+  // default - a stretched, blurry signature on the customer's slip. The timer
+  // below is only a safety net for a pad that genuinely has no size yet.
+  sigPadResize();
+  sizeSigPadWhenVisible();
+}
+
+// Third time this canvas has been caught measuring nothing, so it keeps
+// checking rather than assuming. Stops as soon as the bitmap matches the pad,
+// and sigPadResize refuses to touch a pad that has been drawn on.
+function sizeSigPadWhenVisible(tries = 20) {
+  const c = sigPad.canvas;
+  if (!c || sigPad.dirty) return;
+  const r = c.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  if (r.width && r.height && Math.abs(c.width - r.width * dpr) < 2) return;
+  if (r.width && r.height) sigPadResize();
+  if (tries > 0) setTimeout(() => sizeSigPadWhenVisible(tries - 1), 30);
+}
+
+function closeSigModal() {
+  $("sig-modal").style.display = "none";
+  document.body.style.overflow = "";
+  renderSigPreview();
+}
+
+// Show what was signed on the form itself, so nobody has to reopen the pad to
+// check whether a customer actually signed.
+function renderSigPreview() {
+  const box = $("ns-sig-preview");
+  const label = $("ns-sig-open-label");
+  if (!box) return;
+  const data = sigPadData();
+  if (!data) {
+    box.style.display = "none";
+    box.innerHTML = "";
+    if (label) label.textContent = "Sign here";
+    return;
+  }
+  box.innerHTML = `<img src="${data}" alt="Customer signature">`;
+  box.style.display = "block";
+  if (label) label.textContent = "Signed — tap to sign again";
 }
 
 function sigPadClear() {

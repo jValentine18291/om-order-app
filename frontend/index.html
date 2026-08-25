@@ -203,10 +203,12 @@
 
       <div class="field">
         <label>Machines <span class="req">*</span></label>
+        <!-- Added machines are listed here; the details are filled in on a
+             popup so a half-typed row cannot be left behind on the form. -->
         <div id="ns-machines"></div>
         <button class="btn-secondary" id="ns-add-machine" type="button" style="width:100%; margin-top:8px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-          Add another machine
+          Add machine
         </button>
       </div>
 
@@ -223,16 +225,17 @@
 
       <!-- Customer signature: drawn on the phone, printed onto the slip PDF
            above the signature line, next to the terms they are accepting. -->
+      <!-- The pad opens as a popup. Inline, a thumb scrolling the form drew on
+           it by accident, and the stray mark counted as the customer's signature. -->
       <div class="field">
         <label>Customer signature <span class="req">*</span> <span style="color:var(--ink-faint);font-weight:400;">(hand the phone to the customer)</span></label>
-        <div class="sigpad" id="ns-sig-pad">
-          <canvas id="ns-sig-canvas"></canvas>
-          <span class="sigpad-hint" id="ns-sig-hint">Sign here</span>
-          <span class="sigpad-baseline"></span>
-        </div>
+        <button type="button" class="btn-secondary" id="ns-sig-open" style="width:100%">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17.5 17.5 3a2.1 2.1 0 0 1 3 3L6 20.5 2 21z"/></svg>
+          <span id="ns-sig-open-label">Sign here</span>
+        </button>
+        <div id="ns-sig-preview" style="display:none"></div>
         <div class="sigpad-actions">
           <span class="sigpad-note" id="ns-sig-note">By signing, the customer accepts the terms printed on the slip.</span>
-          <button type="button" class="sigpad-clear" id="ns-sig-clear">Clear</button>
         </div>
       </div>
 
@@ -372,6 +375,63 @@
       <div class="summary-card" style="margin:12px 0 0;">
         <div class="left"><span>Order total</span></div>
         <div class="total"><div class="val" id="so-total">$0.00</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / edit one machine on a new slip -->
+  <div class="modal-overlay" id="nsm-modal" style="display:none">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div><strong id="nsm-title">Add machine</strong></div>
+        <button class="modal-x" id="nsm-close" type="button" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label for="nsm-model">Model No. <span class="req">*</span></label>
+          <input id="nsm-model" type="text" autocomplete="off" placeholder="e.g. Husqvarna 525LK Brushcutter" />
+        </div>
+        <div class="field">
+          <label for="nsm-qty">Qty <span class="req">*</span></label>
+          <div class="ns-qty">
+            <button type="button" class="ns-qty-dec" id="nsm-qty-dec" aria-label="Decrease quantity">&minus;</button>
+            <input id="nsm-qty" type="number" value="1" min="1" inputmode="numeric" aria-label="Quantity" />
+            <button type="button" class="ns-qty-inc" id="nsm-qty-inc" aria-label="Increase quantity">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="nsm-serial">Serial No. <span style="color:var(--ink-faint);font-weight:400;">(if applicable)</span></label>
+          <input id="nsm-serial" type="text" autocomplete="off" placeholder="e.g. 20231100123" />
+          <p class="nsm-hint" id="nsm-serial-hint" style="display:none"></p>
+        </div>
+        <div class="scan-hint" id="nsm-status" style="justify-content:flex-start;min-height:20px"></div>
+        <button class="btn-primary" id="nsm-add" type="button" style="width:100%">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer signature pad -->
+  <div class="modal-overlay" id="sig-modal" style="display:none">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div><strong>Customer signature</strong></div>
+        <button class="modal-x" id="sig-close" type="button" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="sigpad" id="ns-sig-pad">
+          <canvas id="ns-sig-canvas"></canvas>
+          <span class="sigpad-hint" id="ns-sig-hint">Sign here</span>
+          <span class="sigpad-baseline"></span>
+        </div>
+        <p class="nsm-hint">By signing, the customer accepts the terms printed on the slip.</p>
+        <div class="sig-modal-actions">
+          <button type="button" class="btn-secondary" id="ns-sig-clear">Clear</button>
+          <button type="button" class="btn-primary" id="sig-done">Done</button>
+        </div>
       </div>
     </div>
   </div>

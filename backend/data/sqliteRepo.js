@@ -167,9 +167,15 @@ function createSlip({ company, contact_name = "", contact_number = "", whatsapp_
     const e = new Error("Company is required to register a service slip.");
     e.status = 400; throw e;
   }
+  // Machines arrive either as plain strings (what the app sent before serial
+  // numbers existed, and what any phone running a cached copy still sends) or
+  // as { desc, serial }. Both are accepted so an old app cannot fail to
+  // register a slip just because it predates the field.
   const machineList = (Array.isArray(machines) ? machines : [])
-    .map((m) => String(m || "").trim())
-    .filter(Boolean);
+    .map((m) => (typeof m === "string"
+      ? { desc: m.trim(), serial: "" }
+      : { desc: String((m && m.desc) || "").trim(), serial: String((m && m.serial) || "").trim() }))
+    .filter((m) => m.desc);
   if (machineList.length === 0) {
     const e = new Error("At least one machine is required.");
     e.status = 400; throw e;
@@ -180,7 +186,7 @@ function createSlip({ company, contact_name = "", contact_number = "", whatsapp_
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'OPEN')`
   );
   const insertMachine = db.prepare(
-    "INSERT INTO slip_machines (slip_id, machine_desc) VALUES (?, ?)"
+    "INSERT INTO slip_machines (slip_id, machine_desc, serial_no) VALUES (?, ?, ?)"
   );
   const insertSignature = db.prepare(
     "INSERT INTO slip_signatures (slip_id, image) VALUES (?, ?)"
@@ -206,7 +212,7 @@ function createSlip({ company, contact_name = "", contact_number = "", whatsapp_
     const slipNumber = String(value).padStart(5, "0");
     const info = insertSlip.run(slipNumber, String(company).trim(), contact_name, contact_number, whatsapp_number, check_service ? 1 : 0, quote_first ? 1 : 0, notes);
     const slipId = info.lastInsertRowid;
-    for (const m of machineList) insertMachine.run(slipId, m);
+    for (const m of machineList) insertMachine.run(slipId, m.desc, m.serial);
     if (sig) insertSignature.run(slipId, sig);
     return slipNumber;
   });
