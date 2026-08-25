@@ -44,6 +44,17 @@ function userId() {
 }
 
 const money = (n) => Math.round((Number(n) || 0) * 100) / 100;
+
+// AutoCount fields are plain nvarchar and its reports are not forgiving: the
+// Cash Sales debtor's Phone1 came back with line breaks embedded in it, and
+// those would have gone straight into the order.
+function clean(v, max = 200) {
+  return String(v == null ? "" : v)
+    .replace(/[\r\n\t]+/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim()
+    .slice(0, max);
+}
 const guid = () =>
   "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
@@ -133,6 +144,23 @@ async function buildRows({ slipNumber, debtorCode, contactName, contactNumber, s
     e.status = 400; throw e;
   }
 
+  // An order from before the block format existed is just a list of parts: no
+  // A1 opener, no machine heading, no SubTotal. Writing that into AutoCount
+  // would produce a document nobody could read back to a machine, so refuse it
+  // rather than quietly write a worse version of the right thing.
+  const hasOpener = lines.some((l) => String(l.item_code || "").toUpperCase().startsWith("A1 SVR"));
+  const hasHeading = lines.some((l) => !l.item_code && /S\/S:/.test(String(l.description || "")));
+  if (!hasOpener || !hasHeading) {
+    const e = new Error(
+      "This order predates the AutoCount block format - it has no " +
+      (hasOpener ? "" : "A1 SVR LANDSCAPE opening line") +
+      (!hasOpener && !hasHeading ? " and no " : "") +
+      (hasHeading ? "" : "machine heading") +
+      ". Convert the slip again to produce a current order."
+    );
+    e.status = 400; throw e;
+  }
+
   const codes = [...new Set(lines.filter((l) => l.item_code).map((l) => l.item_code))];
   const desc2 = await desc2For(codes);
 
@@ -152,7 +180,7 @@ async function buildRows({ slipNumber, debtorCode, contactName, contactNumber, s
       // Note rows carry no item, quantity or price, but AutoCount still fills
       // in the tax code and the flags - an existing order shows exactly this.
       details.push({
-        Seq: seq, MainItem: "T", Description: String(l.description || ""),
+        Seq: seq, MainItem: "T", Description: clean(l.description, 200),
         Rate: 1, TaxType: SR9.code, TaxRate: SR9.rate,
         Transferable: "T", PrintOut: "T", DtlType: "N", AddToSubTotal: "T",
         StockReceived: "F", TransferedQty: 0,
@@ -171,7 +199,7 @@ async function buildRows({ slipNumber, debtorCode, contactName, contactNumber, s
     details.push({
       Seq: seq, MainItem: "T",
       ItemCode: l.item_code, Location: LOCATION,
-      Description: String(l.description || ""),
+      Description: clean(l.description, 200),
       Desc2: desc2[l.item_code] || "",
       UOM: l.uom || "UNIT", UserUOM: l.uom || "UNIT",
       Qty: qty, Rate: 1, SmallestQty: qty,
@@ -191,13 +219,18 @@ async function buildRows({ slipNumber, debtorCode, contactName, contactNumber, s
     DocNo: docNo,
     DocDate: date,
     DebtorCode: debtorCode,
-    DebtorName: cust.name || "",
+    DebtorName: clean(cust.name, 100),
     Description: "SALES ORDER",
-    DisplayTerm: cust.term || "C.O.D",
-    SalesAgent: salesAgent || cust.agent || "",
-    InvAddr1: cust.addr1, InvAddr2: cust.addr2, InvAddr3: cust.addr3, InvAddr4: cust.addr4,
-    Phone1: cust.phone || "",
-    Attention: [contactName, contactNumber].filter(Boolean).join(" ").trim(),
+    DisplayTerm: clean(cust.term, 30) || "C.O.D",
+    // Left to the customer's own default, or blank. "KM/WJ" is not an
+    // AutoCount sales agent - it is two technician initials joined together,
+    // and writing it would put an invalid value on the document. Sales set the
+    // agent when they review the draft.
+    SalesAgent: clean(cust.agent, 12),
+    InvAddr1: clean(cust.addr1, 100), InvAddr2: clean(cust.addr2, 100),
+    InvAddr3: clean(cust.addr3, 100), InvAddr4: clean(cust.addr4, 100),
+    Phone1: clean(cust.phone, 40),
+    Attention: clean([contactName, contactNumber].filter(Boolean).join(" "), 100),
     CurrencyCode: CURRENCY, CurrencyRate: 1, ToTaxCurrencyRate: 1,
     Total: totalExTax, TotalExTax: totalExTax,
     TaxableAmt: totalExTax, LocalTaxableAmt: totalExTax, TaxCurrencyTaxableAmt: totalExTax,
