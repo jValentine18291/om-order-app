@@ -105,6 +105,43 @@ app.post("/api/slips", async (req, res) => {
   }
 });
 
+// TEMPORARY: every constraint the Sales Order tables impose, and who counts as
+// a valid AutoCount user. Read-only.
+app.get("/api/_diag/so-constraints", async (req, res) => {
+  res.type("text/plain");
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") return res.send("AutoCount is not enabled on this server.");
+    const sch = require("./data/autocountSchema");
+    const out = [];
+
+    out.push("== Foreign keys on SO and SODTL ==");
+    const fks = await sch.foreignKeys(["SO", "SODTL"]);
+    if (!fks.length) out.push("  (none)");
+    for (const f of fks) {
+      out.push(`  ${f.table}.${f.column}  ->  ${f.refTable}.${f.refColumn}   [${f.constraintName}]`);
+    }
+
+    out.push("");
+    out.push("== Valid AutoCount users ==");
+    try {
+      const users = await sch.autocountUsers();
+      if (!users.length) out.push("  (none)");
+      for (const u of users) {
+        const id = u.UserID || u.UserId || u.LoginID || "?";
+        const name = u.UserName || u.Description || u.FullName || "";
+        const active = u.IsActive !== undefined ? ` active=${u.IsActive}` : "";
+        out.push(`  ${String(id).padEnd(12)} ${String(name).slice(0, 40)}${active}`);
+      }
+    } catch (e) {
+      out.push("  could not read Users: " + e.message);
+    }
+    res.send(out.join(String.fromCharCode(10)));
+  } catch (err) {
+    res.send("FAILED: " + err.message);
+  }
+});
+
 // Preview exactly what would be written into AutoCount for an order the app
 // has already produced. Writes nothing, whatever the switch says.
 app.get("/api/orders/:so/autocount-preview", async (req, res) => {

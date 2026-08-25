@@ -285,7 +285,32 @@ async function snapshot(maxRows = 2000) {
   return readings;
 }
 
+// Every foreign key on the Sales Order tables, and the valid AutoCount users.
+// Discovering these one failed insert at a time is slow and leaves half-built
+// documents behind; better to see the whole set before writing again.
+async function foreignKeys(tables) {
+  return query(
+    `SELECT fk.name AS constraintName,
+            OBJECT_NAME(fk.parent_object_id) AS [table],
+            cp.name AS [column],
+            OBJECT_NAME(fk.referenced_object_id) AS refTable,
+            cr.name AS refColumn
+       FROM sys.foreign_keys fk
+       JOIN sys.foreign_key_columns fkc ON fkc.constraint_object_id = fk.object_id
+       JOIN sys.columns cp ON cp.object_id = fkc.parent_object_id AND cp.column_id = fkc.parent_column_id
+       JOIN sys.columns cr ON cr.object_id = fkc.referenced_object_id AND cr.column_id = fkc.referenced_column_id
+      WHERE OBJECT_NAME(fk.parent_object_id) IN (${tables.map((_, i) => "@t" + i).join(",")})
+      ORDER BY [table], constraintName`,
+    Object.fromEntries(tables.map((t, i) => ["t" + i, t]))
+  );
+}
+
+async function autocountUsers() {
+  return query("SELECT TOP 25 * FROM Users");
+}
+
 module.exports = { findTables, columns, sampleOrder, usedColumns,
                    identityColumns, docKeyTables, allLines,
                    serverVersion, numberingColumns, keyRoutines, globalMaxDocKey, lastUsed,
-                   smallTableNumericColumns, findValueNear, snapshot, topKeys };
+                   smallTableNumericColumns, findValueNear, snapshot, topKeys,
+                   foreignKeys, autocountUsers };

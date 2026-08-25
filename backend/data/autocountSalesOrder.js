@@ -38,9 +38,27 @@ function writebackEnabled() {
   return on(process.env.AUTOCOUNT_SO_WRITEBACK);
 }
 function userId() {
-  // nvarchar(10). Deliberately identifiable: an order written by the app
-  // should be obvious in AutoCount's own audit columns.
-  return (process.env.AUTOCOUNT_SO_USER || "OMAPP").slice(0, 10);
+  // nvarchar(10), and a foreign key onto AutoCount's Users table - so it must
+  // be a user that really exists. "OMAPP" was invented and AutoCount rejected
+  // the insert, correctly.
+  return (process.env.AUTOCOUNT_SO_USER || "").slice(0, 10);
+}
+
+// Check the user before writing anything. Failing here costs nothing; failing
+// half way through leaves a header with no lines behind it.
+async function resolveUser() {
+  const want = userId();
+  const rows = await query("SELECT UserID FROM Users");
+  const valid = rows.map((r) => String(r.UserID));
+  if (want && valid.includes(want)) return want;
+
+  const e = new Error(
+    want
+      ? `AUTOCOUNT_SO_USER is "${want}", which is not an AutoCount user. Valid users: ${valid.join(", ")}`
+      : `AUTOCOUNT_SO_USER is not set. It must be an AutoCount user ID. Valid users: ${valid.join(", ")}`
+  );
+  e.status = 400;
+  throw e;
 }
 
 const money = (n) => Math.round((Number(n) || 0) * 100) / 100;
@@ -261,12 +279,17 @@ async function buildRows({ slipNumber, debtorCode, contactName, contactNumber, s
 // ---------------------------------------------------------------------------
 // Write it. One transaction: the header, its lines, and nothing half-written.
 // ---------------------------------------------------------------------------
+// Columns that hold a code rather than free text. AutoCount checks these
+// against other tables, and an empty string is not a valid code - leaving the
+// column out entirely lets the default or NULL apply instead.
+const CODED = new Set(["SalesAgent", "BranchCode", "ShipVia", "ProjNo", "DeptNo", "Area", "SalesExemptionNo"]);
+
 function insertSql(table, row) {
-  const cols = Object.keys(row);
+  const cols = Object.keys(row).filter((c) => !(CODED.has(c) && String(row[c] || "") === ""));
   return {
     sql: `INSERT INTO [${table}] (${cols.map((c) => `[${c}]`).join(", ")}) ` +
          `VALUES (${cols.map((c) => "@" + c).join(", ")})`,
-    params: row,
+    params: Object.fromEntries(cols.map((c) => [c, row[c]])),
   };
 }
 
@@ -292,12 +315,14 @@ async function createSalesOrder(payload, { dryRun = false } = {}) {
   // Optimistic allocation: take the next key, and if another document claimed
   // it in the meantime the primary key rejects the insert and we try again.
   // A clash costs a retry; it can never write a duplicate.
+  const who = await resolveUser();
+
   let lastError = null;
   for (let attempt = 1; attempt <= 4; attempt++) {
     const docKey = await nextKey();
     const header = { DocKey: docKey, ...built.header,
       LastModified: new Date(), CreatedTimeStamp: new Date(),
-      LastModifiedUserID: userId(), CreatedUserID: userId() };
+      LastModifiedUserID: who, CreatedUserID: who };
     try {
       const h = insertSql("SO", header);
       await execute(h.sql, h.params);
