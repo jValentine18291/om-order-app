@@ -105,6 +105,58 @@ app.post("/api/slips", async (req, res) => {
   }
 });
 
+// Preview exactly what would be written into AutoCount for an order the app
+// has already produced. Writes nothing, whatever the switch says.
+app.get("/api/orders/:so/autocount-preview", async (req, res) => {
+  res.type("text/plain");
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") return res.send("AutoCount is not enabled on this server.");
+
+    const order = await data.orders.getOrder(req.params.so);
+    if (!order) return res.send("No such order in the app.");
+    const slipNumber = String(order.notes || "").replace(/^S\/S:\s*/, "").trim();
+    const slip = slipNumber ? await data.slips.getSlip(slipNumber) : null;
+    if (!slip) return res.send(`Could not find the service slip behind ${req.params.so}.`);
+
+    const techs = [...new Set((slip.machines || [])
+      .flatMap((m) => (m.parts || []).map((p) => p.technician)).filter(Boolean))];
+
+    const so = require("./data/autocountSalesOrder");
+    const out = await so.createSalesOrder({
+      slipNumber: slip.slip_number,
+      debtorCode: slip.debtor_code || "C0112",
+      contactName: slip.contact_name,
+      contactNumber: slip.contact_number,
+      salesAgent: techs.join("/"),
+      lines: order.lines || [],
+    }, { dryRun: true });
+
+    const t = [];
+    t.push("DRY RUN - nothing was written.");
+    t.push("");
+    t.push(`Would create Sales Order ${out.doc_no} with DocKey ${out.would_use_doc_key}`);
+    t.push(`  debtor ${out.header.DebtorCode}  ${out.header.DebtorName}`);
+    t.push(`  term ${out.header.DisplayTerm}   agent ${out.header.SalesAgent || "(none)"}`);
+    t.push(`  ex-tax ${out.totals.ex_tax}   GST ${out.totals.tax}   total ${out.totals.net}`);
+    t.push("");
+    t.push(`== ${out.details.length} lines ==`);
+    for (const d of out.details) {
+      t.push(`  Seq ${String(d.Seq).padStart(4)} | ${(d.ItemCode || "(no code)").padEnd(20)}` +
+             ` | ${String(d.Description || "").slice(0, 44).padEnd(44)}` +
+             ` | qty ${d.Qty === undefined ? "-" : d.Qty}` +
+             ` | price ${d.UnitPrice === undefined ? "-" : d.UnitPrice}` +
+             ` | sub ${d.SubTotal === undefined ? "-" : d.SubTotal}`);
+    }
+    t.push("");
+    t.push("== Header columns that would be set ==");
+    for (const [k, v] of Object.entries(out.header)) t.push(`  ${k} = ${v instanceof Date ? v.toISOString().slice(0,10) : v}`);
+    res.send(t.join(String.fromCharCode(10)));
+  } catch (err) {
+    res.send("FAILED: " + err.message);
+  }
+});
+
 // ---- TEMPORARY: is the next key simply "highest anywhere, plus one"? -------
 app.get("/api/_diag/keyrule", async (req, res) => {
   res.type("text/plain");
