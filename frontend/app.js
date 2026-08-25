@@ -63,10 +63,71 @@ function formatDate(ts) {
 // ---- Screen navigation -----------------------------------------------------
 const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip", "purchase", "ipl"];
 
-// ---- Role (Sales Staff vs Technician) ---------------------------------------
-// Remembered per phone in localStorage. Technicians see only Open Service;
-// Sales Staff see everything. "Switch role" on the home screen resets it.
+// ---- Who is using this phone ------------------------------------------------
+// Staff pick their name once per phone; the choice is remembered and decides
+// which functions they see. There is no password - this is about showing the
+// right buttons and recording who did what, not about keeping anyone out.
+//
+// THE ONE PLACE TO EDIT when somebody joins or leaves. Groups:
+//   sales      register, close and view slips, find parts, parts diagrams
+//   purchaser  everything Sales has, plus requested parts
+//   tech       open service, view slips, find parts - and a Chinese interface
+//   admin      everything
+//
+// A technician's "tech" code is the initials already stored against every part
+// they have ever recorded (WJ, XL, KM, R). Keeping them means old and new
+// records still agree about who did the work; the full name is only shown on
+// screen. Do not change a code once it is in use.
+const STAFF = [
+  { id: "carmen",    name: "Carmen",      group: "sales" },
+  { id: "chiuyan",   name: "Chiu Yan",    group: "sales" },
+
+  { id: "iris",      name: "Iris",        group: "purchaser" },
+
+  { id: "wenjian",   name: "文建",         group: "tech", tech: "WJ" },
+  { id: "xiaoliu",   name: "小刘",         group: "tech", tech: "XL" },
+  { id: "kangmin",   name: "康民",         group: "tech", tech: "KM" },
+  { id: "ray",       name: "Ray",         group: "tech", tech: "R"  },
+
+  { id: "keeseng",   name: "Kee Seng",    group: "admin" },
+  { id: "chansing",  name: "Chan Sing",   group: "admin" },
+  { id: "khoon",     name: "Uncle Khoon", group: "admin" },
+  { id: "shirley",   name: "Shirley",     group: "admin" },
+  { id: "john",      name: "John",        group: "admin" },
+  { id: "alvin",     name: "Alvin",       group: "admin" },
+];
+
+const GROUP_LABEL = {
+  sales: "Sales",
+  purchaser: "Purchaser",
+  tech: "Technician 技术员",
+  admin: "Admin",
+};
+
+const USER_KEY = "om_user";
+// The group is still stored under the old key. Everything that already keyed
+// off a role - the Chinese layer, the home buttons, the price permissions -
+// keeps working, and a phone that had only a role set simply picks a name once.
 const ROLE_KEY = "om_role";
+
+function getUser() {
+  try {
+    const id = localStorage.getItem(USER_KEY) || "";
+    return STAFF.find((u) => u.id === id) || null;
+  } catch (_) { return null; }
+}
+function setUser(id) {
+  const u = STAFF.find((s) => s.id === id) || null;
+  try {
+    if (u) { localStorage.setItem(USER_KEY, u.id); localStorage.setItem(ROLE_KEY, u.group); }
+    else { localStorage.removeItem(USER_KEY); localStorage.removeItem(ROLE_KEY); }
+  } catch (_) {}
+}
+// The person's name, for anything that records who did something.
+function userName() {
+  const u = getUser();
+  return u ? u.name : "";
+}
 function getRole() {
   try { return localStorage.getItem(ROLE_KEY) || ""; } catch (_) { return ""; }
 }
@@ -75,6 +136,43 @@ function setRole(role) {
     if (role) localStorage.setItem(ROLE_KEY, role);
     else localStorage.removeItem(ROLE_KEY);
   } catch (_) {}
+}
+
+// Draw the picker, grouped, so a long list stays scannable.
+function renderStaffPicker() {
+  const box = $("staff-list");
+  if (!box) return;
+  const order = ["sales", "purchaser", "tech", "admin"];
+  box.innerHTML = order.map((g) => {
+    const people = STAFF.filter((u) => u.group === g);
+    if (!people.length) return "";
+    return `
+      <div class="staff-group">
+        <p class="staff-group-title">${escapeHtml(GROUP_LABEL[g])}</p>
+        <div class="staff-grid">
+          ${people.map((u) => `
+            <button type="button" class="staff-btn staff-${g}" data-user="${escapeAttr(u.id)}">
+              <span class="staff-initial">${escapeHtml([...u.name][0] || "?")}</span>
+              <span class="staff-name">${escapeHtml(u.name)}</span>
+            </button>`).join("")}
+        </div>
+      </div>`;
+  }).join("");
+  box.querySelectorAll(".staff-btn").forEach((b) =>
+    b.addEventListener("click", () => chooseUser(b.dataset.user))
+  );
+}
+
+function chooseUser(id) {
+  const next = STAFF.find((u) => u.id === id);
+  if (!next) return;
+  // The Chinese layer installs at page load, so moving into or out of the
+  // technician group has to reload rather than re-translate a live page.
+  const reload = (getRole() === "tech") !== (next.group === "tech");
+  setUser(id);
+  if (reload) { location.reload(); return; }
+  applyRoleToHome();
+  showScreen("home");
 }
 // Technician-only language toggle in the topbar. The preference lives in
 // localStorage ("om_lang"); i18n.js reads it at page load, so flipping it
@@ -102,22 +200,29 @@ function applyRoleToHome() {
   const role = getRole();
   // Which home functions each account sees (per John's mapping, 28 Jul 2026):
   const ROLE_FUNCTIONS = {
-    // Parts Diagram is with Sales first, as a trial. Add "ipl" to the other
-    // roles here when it is ready to go wider.
     sales: ["new", "close", "view", "find", "ipl"],
     tech: ["open", "view", "find"],
-    purchaser: ["new", "close", "view", "find", "requests"],
+    // Purchaser is Sales plus requested parts, so it inherits the parts
+    // diagrams too rather than being a separate shorter list.
+    purchaser: ["new", "close", "view", "find", "ipl", "requests"],
+    admin: ["new", "open", "close", "view", "find", "ipl", "requests"],
   };
-  const allowed = ROLE_FUNCTIONS[role] || ROLE_FUNCTIONS.sales;
+  // An unknown group shows nothing rather than defaulting to Sales - silently
+  // handing out someone else's functions is worse than an empty screen.
+  const allowed = ROLE_FUNCTIONS[role] || [];
   document.querySelectorAll("#screen-home .home-btn").forEach((b) => {
     b.style.display = allowed.includes(b.dataset.go) ? "flex" : "none";
   });
   updateLangToggle();
   const badge = $("role-badge");
   if (badge) {
-    const label = role === "tech" ? "Technician 技术员" : role === "purchaser" ? "Purchaser" : "Sales";
-    const cls = role === "tech" ? "role-badge-tech" : role === "purchaser" ? "role-badge-purchase" : "role-badge-sales";
-    badge.textContent = label;
+    // The name, not the group: on a personal phone "文建" answers "am I logged
+    // in as me?" at a glance, which the group label never did.
+    const u = getUser();
+    const cls = role === "tech" ? "role-badge-tech"
+      : role === "purchaser" ? "role-badge-purchase"
+      : role === "admin" ? "role-badge-admin" : "role-badge-sales";
+    badge.textContent = u ? u.name : (GROUP_LABEL[role] || "");
     badge.className = "role-badge " + cls;
   }
   updatePurchaserNotify(role);
@@ -174,7 +279,7 @@ async function goHome() {
   try { await saveCurrentComment(); } catch (_) {}
   try { stopQrScanner(); } catch (_) {}
   session.slipNumber = null; session.slip = null; session.machineId = null; session.technician = "";
-  if (!getRole()) { showScreen("role"); return; }
+  if (!getUser()) { renderStaffPicker(); showScreen("role"); return; }
   applyRoleToHome();
   showScreen("home");
 }
@@ -756,8 +861,8 @@ async function sendSlipWhatsApp(slip, { auto = false } = {}) {
     return { ok: false, error: "Couldn't build the PDF: " + e.message };
   }
   const params = new URLSearchParams();
-  const initials = (() => { try { return localStorage.getItem(INITIALS_KEY) || ""; } catch (_) { return ""; } })();
-  if (initials) params.set("who", initials);
+  const me = userName();
+  if (me) params.set("who", me);
   params.set("role", getRole());
   if (auto) params.set("auto", "1");
 
@@ -944,10 +1049,23 @@ function renderSlipScreen() {
 // ---- Machine modal ----------------------------------------------------------
 function openMachineModal(machineId) {
   session.machineId = machineId;
-  session.technician = "";
   session.pendingParts = [];
-  $("os-tech").value = "";
-  $("os-tech-field").style.display = "block";
+
+  // Phones are personal, so a technician does not need to say who they are on
+  // every machine - the app already knows. Anyone else with access to this
+  // screen (an Admin) has no technician code, so they still pick one, and the
+  // part is recorded against the technician who did the work rather than
+  // whoever happened to key it in.
+  const me = getUser();
+  if (me && me.tech) {
+    session.technician = me.tech;
+    $("os-tech").value = me.tech;
+    $("os-tech-field").style.display = "none";
+  } else {
+    session.technician = "";
+    $("os-tech").value = "";
+    $("os-tech-field").style.display = "block";
+  }
   $("os-entry").style.display = "none";
   const m = currentMachine();
   $("mm-title").textContent = m ? m.machine_desc : "Machine";
@@ -958,6 +1076,9 @@ function openMachineModal(machineId) {
   updateSlipFooter();
   $("machine-modal").style.display = "flex";
   document.body.style.overflow = "hidden";
+  // With the technician already known there is nothing left to wait for, so
+  // open straight onto the part entry instead of a panel nobody has to fill in.
+  maybeShowEntry();
 }
 
 async function closeMachineModal(save) {
@@ -1070,6 +1191,15 @@ async function saveCurrentComment() {
   }
 }
 
+// Parts are stored against the initials (WJ, XL, KM, R) so old and new records
+// agree, but there is no reason to show someone a code for their own name.
+function technicianLabel() {
+  const me = getUser();
+  if (me && me.tech && me.tech === session.technician) return me.name;
+  const other = STAFF.find((u) => u.tech && u.tech === session.technician);
+  return other ? other.name : session.technician;
+}
+
 function onTechChosen(tech) {
   session.technician = tech || "";
   maybeShowEntry();
@@ -1091,7 +1221,7 @@ function renderContext() {
   const created = formatDate(session.slip.created_at);
   $("os-context").innerHTML =
     `<div><strong>${escapeHtml(session.slip.company)}</strong> · Slip ${escapeHtml(session.slipNumber)}</div>` +
-    `<div class="sub">Machine: ${escapeHtml(m ? m.machine_desc : "")} · Tech: ${escapeHtml(session.technician)}</div>` +
+    `<div class="sub">Machine: ${escapeHtml(m ? m.machine_desc : "")} · Tech: ${escapeHtml(technicianLabel())}</div>` +
     (created ? `<div class="sub">Created: ${escapeHtml(created)}</div>` : "");
 }
 
@@ -2155,19 +2285,11 @@ function setMode(mode) {
 function languageChanges(nextRole) {
   return (getRole() === "tech") !== (nextRole === "tech");
 }
-document.querySelectorAll(".role-btn").forEach((b) =>
-  b.addEventListener("click", () => {
-    const reload = languageChanges(b.dataset.role);
-    setRole(b.dataset.role);
-    if (reload) { location.reload(); return; } // reopens straight on Home
-    applyRoleToHome();
-    showScreen("home");
-  })
-);
 $("switch-role").addEventListener("click", () => {
   const reload = languageChanges("");
-  setRole("");
-  if (reload) { location.reload(); return; } // reopens on the role screen
+  setUser("");
+  if (reload) { location.reload(); return; } // reopens on the picker
+  renderStaffPicker();
   showScreen("role");
 });
 
@@ -2539,8 +2661,10 @@ $("cs-submit").addEventListener("click", submitClose);
 // View Slips: slip selection via search component
 
 // ---- Boot ------------------------------------------------------------------
-if (getRole()) { applyRoleToHome(); showScreen("home"); }
-else { showScreen("role"); }
+// A phone that only ever had a role set (before names existed) has no user, so
+// it lands on the picker and chooses one - once.
+if (getUser()) { applyRoleToHome(); showScreen("home"); }
+else { renderStaffPicker(); showScreen("role"); }
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./sw.js").catch(() => {});
@@ -3069,8 +3193,7 @@ let iplPriceState = { code: "" };
 
 // Who may fill in a missing price. Technicians deliberately cannot: they see
 // prices on the slip screens, but these values feed customer quotes.
-const CAN_SET_PRICE = ["sales", "purchaser"];
-const INITIALS_KEY = "om_initials";
+const CAN_SET_PRICE = ["sales", "purchaser", "admin"];
 
 function renderIplPriceButton(itemCode) {
   const box = $("ipl-part-price");
@@ -3127,7 +3250,8 @@ function openSetPrice(tier, tierName) {
   if (!row || row.querySelector(".ipl-setform")) return;
   row.querySelector(".ipl-setprice").style.display = "none";
 
-  const saved = (() => { try { return localStorage.getItem(INITIALS_KEY) || ""; } catch (_) { return ""; } })();
+  // No "your initials" box any more - the app knows who is signed in, and a
+  // typed-in name on an audit trail is only as good as whoever typed it.
   const form = document.createElement("div");
   form.className = "ipl-setform";
   form.innerHTML = `
@@ -3136,10 +3260,8 @@ function openSetPrice(tier, tierName) {
       <label>${escapeHtml(tierName)}
         <input type="number" class="sp-price" inputmode="decimal" step="0.01" min="0.01" placeholder="0.00">
       </label>
-      <label>Your initials
-        <input type="text" class="sp-who" maxlength="6" placeholder="e.g. JT" value="${escapeHtml(saved)}">
-      </label>
     </div>
+    <div class="ipl-setform-by">Recorded against ${escapeHtml(userName() || "an unknown user")}</div>
     <div class="ipl-setform-actions">
       <button type="button" class="sp-cancel">Cancel</button>
       <button type="button" class="sp-save">Save to AutoCount</button>
@@ -3147,7 +3269,6 @@ function openSetPrice(tier, tierName) {
     <div class="ipl-setform-note">Writes into AutoCount. It cannot be changed back from this app.</div>`;
   row.appendChild(form);
   const price = form.querySelector(".sp-price");
-  const who = form.querySelector(".sp-who");
   price.focus();
 
   form.querySelector(".sp-cancel").addEventListener("click", () => {
@@ -3159,8 +3280,8 @@ function openSetPrice(tier, tierName) {
   form.querySelector(".sp-save").addEventListener("click", async () => {
     const value = Number(price.value);
     if (!Number.isFinite(value) || value <= 0) { toast("Enter a price greater than zero.", "err"); price.focus(); return; }
-    const initials = who.value.trim();
-    if (!initials) { toast("Enter your initials so the change can be traced.", "err"); who.focus(); return; }
+    const initials = userName();
+    if (!initials) { toast("Pick your name on the first screen before setting a price.", "err"); return; }
 
     const item = iplPriceState.itemCode || iplPriceState.code;
     const ok = confirm(
@@ -3174,7 +3295,6 @@ function openSetPrice(tier, tierName) {
     const btn = form.querySelector(".sp-save");
     btn.disabled = true; btn.textContent = "Saving…";
     try {
-      try { localStorage.setItem(INITIALS_KEY, initials); } catch (_) {}
       const r = await api("/api/part-prices", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

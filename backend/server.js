@@ -308,9 +308,9 @@ app.post("/api/part-prices", async (req, res) => {
         error: "Setting prices is switched off. Ask IT to enable AUTOCOUNT_PRICE_WRITEBACK.",
       });
     }
-    if (!["sales", "purchaser"].includes(String(role || "").toLowerCase())) {
+    if (!["sales", "purchaser", "admin"].includes(String(role || "").toLowerCase())) {
       stamp("REFUSED - role not allowed");
-      return res.status(403).json({ error: "Only Sales and Purchaser can set a price." });
+      return res.status(403).json({ error: "Only Sales, Purchaser and Admin can set a price." });
     }
     if (!String(who || "").trim()) {
       return res.status(400).json({ error: "Enter your initials so the change can be traced." });

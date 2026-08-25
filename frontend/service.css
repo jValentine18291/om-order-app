@@ -1120,6 +1120,36 @@ select {
 
 /* The WhatsApp send button, once it has succeeded. Deliberately looks spent
    rather than clickable, so nobody sends the same slip twice. */
+/* Staff picker: grouped so thirteen names stay scannable, and a grid so a
+   thumb has a real target on a phone. */
+.staff-group { margin-bottom: 18px; }
+.staff-group:last-child { margin-bottom: 0; }
+.staff-group-title {
+  margin: 0 0 8px; font-size: .74rem; font-weight: 700; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--ink-faint);
+}
+.staff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.staff-btn {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 12px 12px; border: 1px solid var(--border); border-radius: 12px;
+  background: var(--surface, #fff); cursor: pointer; text-align: left;
+  font: inherit; color: var(--ink); min-height: 56px;
+}
+.staff-btn:active { background: var(--primary-tint); border-color: var(--primary); }
+.staff-initial {
+  flex: none; width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .95rem; font-weight: 700; color: #fff; background: var(--primary);
+}
+.staff-tech .staff-initial { background: #6B4FA8; }
+.staff-purchaser .staff-initial { background: #B26B12; }
+.staff-admin .staff-initial { background: #2B4C6F; }
+.staff-name { font-size: .95rem; font-weight: 600; line-height: 1.25; }
+.role-badge-admin { background: #E8EEF5; color: #2B4C6F; }
+.ipl-setform-by {
+  margin-top: 10px; font-size: .76rem; color: var(--ink-faint);
+}
+
 .wa-send.wa-sent {
   background: #E8F5E9; border-color: #38A32A; color: #2A7A20;
   font-variant-numeric: tabular-nums;
