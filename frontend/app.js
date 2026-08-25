@@ -675,21 +675,92 @@ function buildSlipPdf(slip) {
   const LEFT = 48;
   const RIGHT = 547;
   const W = RIGHT - LEFT;
-  const BOTTOM = 780;
-  const TEAL = [11, 122, 130];
-  let y = 48;
+  const BOTTOM = 772;
+  const TEAL = [13, 116, 122];
+  const TEAL_TINT = [237, 246, 246];
+  const BORDER = [219, 225, 227];
+  const INK = 26;
+  let y = 46;
+
+  const setDraw = (c) => Array.isArray(c) ? doc.setDrawColor(c[0], c[1], c[2]) : doc.setDrawColor(c);
+  const setFill = (c) => Array.isArray(c) ? doc.setFillColor(c[0], c[1], c[2]) : doc.setFillColor(c);
+  const setText = (c) => Array.isArray(c) ? doc.setTextColor(c[0], c[1], c[2]) : doc.setTextColor(c);
 
   const need = (h) => {
-    if (y + h <= BOTTOM) return;
+    if (y + h <= BOTTOM) return false;
     doc.addPage();
-    y = 56;
+    y = 54;
+    return true;
   };
-  const rule = (yy, col, weight) => {
-    if (Array.isArray(col)) doc.setDrawColor(col[0], col[1], col[2]);
-    else doc.setDrawColor(col);
-    doc.setLineWidth(weight);
-    doc.line(LEFT, yy, RIGHT, yy);
-  };
+
+  // ---- Small outline icons -------------------------------------------------
+  // jsPDF has no icon font, so these are drawn from primitives. Deliberately
+  // simple: at 11pt anything more detailed turns to mush on a printed slip.
+  function icon(name, ix, iy, s) {
+    setDraw(TEAL); doc.setLineWidth(0.9);
+    const m = s / 12;
+    if (name === "calendar") {
+      doc.roundedRect(ix, iy + 1.5 * m, 12 * m, 10 * m, 1.2 * m, 1.2 * m);
+      doc.line(ix, iy + 4.5 * m, ix + 12 * m, iy + 4.5 * m);
+      doc.line(ix + 3.5 * m, iy, ix + 3.5 * m, iy + 3 * m);
+      doc.line(ix + 8.5 * m, iy, ix + 8.5 * m, iy + 3 * m);
+    } else if (name === "building") {
+      doc.rect(ix + 1 * m, iy, 10 * m, 11.5 * m);
+      doc.line(ix + 3.6 * m, iy + 3 * m, ix + 5 * m, iy + 3 * m);
+      doc.line(ix + 7 * m, iy + 3 * m, ix + 8.4 * m, iy + 3 * m);
+      doc.line(ix + 3.6 * m, iy + 6 * m, ix + 5 * m, iy + 6 * m);
+      doc.line(ix + 7 * m, iy + 6 * m, ix + 8.4 * m, iy + 6 * m);
+      doc.line(ix + 5.2 * m, iy + 11.5 * m, ix + 5.2 * m, iy + 8.8 * m);
+      doc.line(ix + 6.8 * m, iy + 11.5 * m, ix + 6.8 * m, iy + 8.8 * m);
+      doc.line(ix + 5.2 * m, iy + 8.8 * m, ix + 6.8 * m, iy + 8.8 * m);
+    } else if (name === "person") {
+      doc.circle(ix + 6 * m, iy + 3.6 * m, 2.7 * m);
+      doc.lines([[0, -3.2 * m], [1.7 * m, -1.9 * m], [4.6 * m, 0], [1.7 * m, 1.9 * m], [0, 3.2 * m]],
+        ix + 1 * m, iy + 11.6 * m);
+    } else if (name === "phone") {
+      doc.roundedRect(ix + 2.6 * m, iy, 6.8 * m, 12 * m, 1.4 * m, 1.4 * m);
+      doc.line(ix + 4.8 * m, iy + 1.8 * m, ix + 7.2 * m, iy + 1.8 * m);
+      setFill(TEAL);
+      doc.circle(ix + 6 * m, iy + 9.9 * m, 0.7 * m, "F");
+    } else if (name === "gear") {
+      // Six short, stubby teeth. Four long ones read as a snowflake.
+      doc.circle(ix + 6 * m, iy + 6 * m, 3.6 * m);
+      doc.circle(ix + 6 * m, iy + 6 * m, 1.5 * m);
+      doc.setLineWidth(1.5);
+      for (let i = 0; i < 6; i++) {
+        const a = (Math.PI / 3) * i;
+        doc.line(ix + 6 * m + Math.cos(a) * 3.6 * m, iy + 6 * m + Math.sin(a) * 3.6 * m,
+                 ix + 6 * m + Math.cos(a) * 5.5 * m, iy + 6 * m + Math.sin(a) * 5.5 * m);
+      }
+      doc.setLineWidth(0.9);
+    } else if (name === "clipboard") {
+      doc.roundedRect(ix + 1 * m, iy + 1.6 * m, 10 * m, 10.4 * m, 1.2 * m, 1.2 * m);
+      doc.roundedRect(ix + 4 * m, iy, 4 * m, 3 * m, 0.8 * m, 0.8 * m);
+      doc.line(ix + 3.4 * m, iy + 6 * m, ix + 8.6 * m, iy + 6 * m);
+      doc.line(ix + 3.4 * m, iy + 8.6 * m, ix + 7 * m, iy + 8.6 * m);
+    } else if (name === "shield") {
+      doc.lines([[5 * m, -1.9 * m], [5 * m, 1.9 * m], [0, 4.8 * m], [-5 * m, 4.9 * m], [-5 * m, -4.9 * m]],
+        ix + 1 * m, iy + 2.3 * m);
+      doc.line(ix + 3.7 * m, iy + 6 * m, ix + 5.3 * m, iy + 7.7 * m);
+      doc.line(ix + 5.3 * m, iy + 7.7 * m, ix + 8.5 * m, iy + 4.4 * m);
+    } else if (name === "info") {
+      doc.circle(ix + 6 * m, iy + 6 * m, 5.2 * m);
+      setFill(TEAL);
+      doc.circle(ix + 6 * m, iy + 3.5 * m, 0.75 * m, "F");
+      doc.setLineWidth(1.1);
+      doc.line(ix + 6 * m, iy + 5.5 * m, ix + 6 * m, iy + 8.8 * m);
+    }
+  }
+
+  // A teal section heading with its icon, as on the printed copy.
+  function sectionHead(label, ic) {
+    icon(ic, LEFT, y - 8.5, 11);
+    doc.setFontSize(9); doc.setFont("helvetica", "bold");
+    setText(TEAL); doc.setCharSpace(0.9);
+    doc.text(label, LEFT + 17, y);
+    doc.setCharSpace(0);
+    y += 12;
+  }
 
   // ---- Header: mark + wordmark, address set as text ----
   const MARK = 46;
@@ -702,11 +773,11 @@ function buildSlipPdf(slip) {
     const nameH = nameW / OM_NAMEBLOCK_RATIO;
     doc.addImage(OM_NAMEBLOCK, "PNG", LEFT + MARK + 13, y + (MARK - nameH) / 2, nameW, nameH);
   } catch (_) {
-    doc.setFontSize(15); doc.setFont("helvetica", "bold"); doc.setTextColor(17);
+    doc.setFontSize(15); doc.setFont("helvetica", "bold"); setText(INK);
     doc.text("Outboard & Marine Pte Ltd", LEFT + MARK + 13, y + 28);
   }
 
-  doc.setFontSize(6.9); doc.setFont("helvetica", "normal"); doc.setTextColor(105);
+  doc.setFontSize(6.9); doc.setFont("helvetica", "normal"); setText(105);
   const addr = [
     "9 Kaki Bukit Rd 1, #01-03, Eunos Technolink, Singapore 415938",
     "Tel (65) 6743 4039   ·   Fax (65) 6748 2031",
@@ -717,248 +788,234 @@ function buildSlipPdf(slip) {
   addr.forEach((line) => { doc.text(line, RIGHT, ay, { align: "right" }); ay += 9.2; });
   headBottom = Math.max(headBottom, ay - 5);
 
-  y = headBottom + 11;
-  rule(y, TEAL, 1.6);
-  y += 26;
+  y = headBottom + 10;
+  setDraw(TEAL); doc.setLineWidth(1.8);
+  doc.line(LEFT, y, RIGHT, y);
+  y += 30;
 
-  // ---- Document type + slip number ----
-  pdfLabel(doc, "SERVICE SLIP", LEFT, y, { size: 10, space: 2.6, grey: 17 });
-  pdfLabel(doc, "CUSTOMER ACKNOWLEDGEMENT COPY", LEFT, y + 11, { size: 6.6, space: 1.1, grey: 140, bold: false });
+  // ---- Title + slip number panel ----
+  const BOX_W = 158, BOX_H = 58, BAND_H = 19;
+  doc.setFontSize(25); doc.setFont("helvetica", "bold"); setText(TEAL);
+  doc.text("Service Slip", LEFT, y + 6);
+  doc.setFontSize(9.2); doc.setFont("helvetica", "normal"); setText(120);
+  doc.text("Customer Acknowledgement Copy", LEFT, y + 21);
 
-  pdfLabel(doc, "SLIP NO.", RIGHT, y - 14, { size: 6.6, space: 1.5, grey: 140, align: "right" });
-  doc.setFontSize(28); doc.setFont("helvetica", "bold"); doc.setTextColor(17);
-  doc.text(String(slip.slip_number || ""), RIGHT, y + 9, { align: "right" });
+  const boxX = RIGHT - BOX_W, boxY = y - 15;
+  setFill(TEAL);
+  doc.roundedRect(boxX, boxY, BOX_W, BAND_H + 6, 4, 4, "F");
+  setFill(255); setDraw(TEAL); doc.setLineWidth(1.1);
+  doc.rect(boxX, boxY + BAND_H, BOX_W, BOX_H - BAND_H, "FD");
+  doc.setFontSize(7.4); doc.setFont("helvetica", "bold"); setText(255);
+  doc.setCharSpace(1.6);
+  doc.text("SLIP NO.", boxX + BOX_W / 2, boxY + 13.5, { align: "center" });
+  doc.setCharSpace(0);
+  doc.setFontSize(23); setText(INK);
+  doc.text(String(slip.slip_number || ""), boxX + BOX_W / 2, boxY + BOX_H - 11, { align: "center" });
 
-  y += 26;
+  y = boxY + BOX_H + 24;
 
-  // ---- Customer details: four columns between two rules ----
-  rule(y, 17, 0.9);
-  const cols = [
-    ["DATE RECEIVED", formatDate(slip.created_at) || "—"],
-    ["COMPANY", slip.company || "—"],
-    ["CONTACT", slip.contact_name || "—"],
-    ["CONTACT NO.", slip.contact_number || "—"],
+  // ---- Meta card: four fields, each with an icon ----
+  const META_H = 56;
+  setDraw(BORDER); setFill(252); doc.setLineWidth(0.8);
+  doc.roundedRect(LEFT, y, W, META_H, 5, 5, "FD");
+  const meta = [
+    ["calendar", "DATE RECEIVED", formatDate(slip.created_at) || "—"],
+    ["building", "COMPANY", slip.company || "—"],
+    ["person", "CONTACT", slip.contact_name || "—"],
+    ["phone", "CONTACT NO.", slip.contact_number || "—"],
   ];
-  const colW = W / 4;
-  cols.forEach(([k, v], i) => {
-    const x = LEFT + i * colW;
-    pdfLabel(doc, k, x, y + 14, { size: 6.1, space: 0.9, grey: 150 });
-    doc.setFontSize(9.2); doc.setFont("helvetica", "bold"); doc.setTextColor(17);
-    doc.text(doc.splitTextToSize(String(v), colW - 10)[0] || "", x, y + 26);
-  });
-  y += 34;
-  rule(y, 218, 0.6);
-  y += 24;
-
-  // ---- Equipment ----
-  pdfLabel(doc, "EQUIPMENT RECEIVED", LEFT, y, { size: 6.6, space: 1.8, grey: 150 });
-  y += 15;
-  (slip.machines || []).forEach((m, i) => {
-    const lines = doc.splitTextToSize(String(m.machine_desc || ""), W - 24 - 96);
-    // The serial is the customer's proof of which unit they handed over, so it
-    // belongs on their copy - indented under the machine, quieter than the name.
-    const serial = String(m.serial_no || "").trim();
-    const serialLines = serial
-      ? doc.splitTextToSize("S/N " + serial, W - 24 - 96)
-      : [];
-    need((lines.length + serialLines.length) * 12 + 14);
-    doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.setTextColor(160);
-    doc.text(String(i + 1), LEFT, y);
-    doc.setTextColor(17);
-    doc.text(lines, LEFT + 20, y);
-    if (serialLines.length) {
-      doc.setFontSize(8.4); doc.setTextColor(110);
-      doc.text(serialLines, LEFT + 20, y + lines.length * 12 + 1);
-      doc.setFontSize(10); doc.setTextColor(17);
+  const cellW = W / 4;
+  meta.forEach(([ic, label, value], i) => {
+    const cx = LEFT + i * cellW;
+    if (i) {
+      setDraw(BORDER); doc.setLineWidth(0.7);
+      doc.line(cx, y + 10, cx, y + META_H - 10);
     }
-    // Ticked when the equipment goes back to the customer.
-    pdfLabel(doc, "RETURNED", RIGHT - 17, y, { size: 6.4, space: 0.9, grey: 165, bold: false, align: "right" });
-    doc.setDrawColor(175); doc.setLineWidth(0.7);
-    doc.rect(RIGHT - 10, y - 7, 9.5, 9.5);
-    y += (lines.length + serialLines.length) * 12 + 6;
-    rule(y, 236, 0.5);
-    y += 14;
+    icon(ic, cx + 14, y + 14, 11);
+    doc.setFontSize(6.6); doc.setFont("helvetica", "bold"); setText(140);
+    doc.setCharSpace(1.1);
+    doc.text(label, cx + 31, y + 22);
+    doc.setCharSpace(0);
+    doc.setFontSize(11); doc.setFont("helvetica", "bold"); setText(INK);
+    doc.text(doc.splitTextToSize(String(value), cellW - 28)[0] || "", cx + 14, y + 43);
   });
+  y += META_H + 26;
+
+  // ---- Equipment table ----
+  sectionHead("EQUIPMENT RECEIVED", "gear");
+  y += 4;
+
+  const NO_W = 46, RET_W = 96, DESC_W = W - NO_W - RET_W;
+  const drawTableHead = () => {
+    setFill(TEAL);
+    doc.rect(LEFT, y, W, 21, "F");
+    doc.setFontSize(7); doc.setFont("helvetica", "bold"); setText(255);
+    doc.setCharSpace(1.2);
+    doc.text("NO.", LEFT + NO_W / 2, y + 13.5, { align: "center" });
+    doc.text("EQUIPMENT DESCRIPTION", LEFT + NO_W + 14, y + 13.5);
+    doc.text("RETURNED", LEFT + NO_W + DESC_W + RET_W / 2, y + 13.5, { align: "center" });
+    doc.setCharSpace(0);
+    y += 21;
+  };
+  drawTableHead();
+
+  (slip.machines || []).forEach((m, i) => {
+    // Set the font BEFORE measuring. splitTextToSize measures at whatever size
+    // was last set, so leaving the serial's 8pt in place made the next row
+    // measure narrow, skip its wrap, and then print at 9.6pt straight through
+    // the RETURNED column.
+    doc.setFontSize(9.6); doc.setFont("helvetica", "normal");
+    const lines = doc.splitTextToSize(String(m.machine_desc || ""), DESC_W - 26);
+    const serial = String(m.serial_no || "").trim();
+    doc.setFontSize(8);
+    const serialLines = serial ? doc.splitTextToSize("S/N " + serial, DESC_W - 26) : [];
+    const rowH = Math.max(30, 16 + lines.length * 12 + serialLines.length * 10);
+    if (need(rowH + 30)) drawTableHead();
+
+    setDraw(BORDER); setFill(255); doc.setLineWidth(0.7);
+    doc.rect(LEFT, y, W, rowH, "FD");
+    doc.line(LEFT + NO_W, y, LEFT + NO_W, y + rowH);
+    doc.line(LEFT + NO_W + DESC_W, y, LEFT + NO_W + DESC_W, y + rowH);
+
+    doc.setFontSize(9.6); doc.setFont("helvetica", "normal"); setText(120);
+    doc.text(String(i + 1), LEFT + NO_W / 2, y + 19, { align: "center" });
+    setText(INK);
+    doc.text(lines, LEFT + NO_W + 14, y + 19);
+    if (serialLines.length) {
+      doc.setFontSize(8); setText(125);
+      doc.text(serialLines, LEFT + NO_W + 14, y + 19 + lines.length * 12);
+    }
+    // Ticked by hand when the equipment goes back to the customer.
+    setDraw(150); doc.setLineWidth(0.8); setFill(255);
+    doc.rect(LEFT + NO_W + DESC_W + RET_W / 2 - 6, y + rowH / 2 - 6, 12, 12, "FD");
+    y += rowH;
+  });
+  y += 26;
 
   // ---- Requested ----
   const requests = [];
   if (slip.check_service) requests.push("CHECK & SERVICE FOR ALL");
   if (slip.quote_first) requests.push("QUOTE FIRST");
   if (requests.length) {
-    need(38);
-    y += 6;
-    pdfLabel(doc, "REQUESTED", LEFT, y, { size: 6.6, space: 1.8, grey: 150 });
-    y += 14;
-    let cx = LEFT;
-    doc.setFont("helvetica", "bold"); doc.setTextColor(70);
-    doc.setFontSize(6.6); doc.setCharSpace(0.9);
-    requests.forEach((r) => {
-      // Box the spaced width, not the measured one, or the chips overlap.
-      const w = pdfSpacedWidth(doc, r, 0.9) + 15;
-      doc.setDrawColor(160); doc.setLineWidth(0.6);
-      doc.rect(cx, y - 8, w, 14);
-      doc.text(r, cx + 7.5, y);
-      cx += w + 6;
-    });
-    doc.setCharSpace(0);
-    y += 20;
+    need(58);
+    sectionHead("REQUESTED", "clipboard");
+    y += 4;
+    const boxH = 16 + requests.length * 15;
+    setDraw(BORDER); setFill(TEAL_TINT); doc.setLineWidth(0.8);
+    doc.roundedRect(LEFT, y, W, boxH, 5, 5, "FD");
+    doc.setFontSize(10); doc.setFont("helvetica", "bold"); setText(INK);
+    requests.forEach((r, i) => doc.text(r, LEFT + 16, y + 20 + i * 15));
+    y += boxH + 24;
   }
 
   // ---- Notes ----
   if (slip.notes) {
-    const lines = doc.splitTextToSize(String(slip.notes), W - 14);
-    need(lines.length * 12 + 30);
-    y += 6;
-    pdfLabel(doc, "NOTES", LEFT, y, { size: 6.6, space: 1.8, grey: 150 });
-    y += 14;
-    doc.setDrawColor(TEAL[0], TEAL[1], TEAL[2]); doc.setLineWidth(1.8);
-    doc.line(LEFT + 0.9, y - 8, LEFT + 0.9, y + lines.length * 12 - 9);
-    doc.setFontSize(9.6); doc.setFont("helvetica", "normal"); doc.setTextColor(45);
-    doc.text(lines, LEFT + 10, y);
-    y += lines.length * 12 + 10;
+    const lines = doc.splitTextToSize(String(slip.notes), W - 32);
+    need(lines.length * 12 + 46);
+    sectionHead("NOTES", "clipboard");
+    y += 4;
+    const boxH = 16 + lines.length * 12;
+    setDraw(BORDER); setFill(252); doc.setLineWidth(0.8);
+    doc.roundedRect(LEFT, y, W, boxH, 5, 5, "FD");
+    doc.setFontSize(9.4); doc.setFont("helvetica", "normal"); setText(60);
+    doc.text(lines, LEFT + 16, y + 18);
+    y += boxH + 24;
   }
 
   // ---- Terms, balanced across two columns ----
-  const T_SIZE = 6.3, T_LEAD = 8.2, T_GAP = 26;
-  const tColW = (W - T_GAP) / 2 - 12;
-  // Measure first so the split lands near the middle rather than at item 3.
+  const T_SIZE = 7.2, T_LEAD = 9.6, T_GAP = 34;
+  const tColW = (W - T_GAP) / 2 - 22;
+  // Measure exactly what drawColumn advances, or the estimate drifts. It used
+  // to add a separator for every item including the last, overshooting by 9pt
+  // per column - enough to push the signature onto a page of its own.
+  const SEP_H = 9;
   const heights = SLIP_TERMS.map((segs) => {
     const end = pdfFlowRich(doc, segs, 0, 0, tColW, T_SIZE, T_LEAD, false);
     return end + T_LEAD + 4;
   });
-  const total = heights.reduce((a, b) => a + b, 0);
+  const colHeightOf = (items) =>
+    items.reduce((a, b) => a + b, 0) + Math.max(0, items.length - 1) * SEP_H;
+  const totalH = colHeightOf(heights);
   let split = SLIP_TERMS.length, run = 0;
   for (let i = 0; i < heights.length; i++) {
-    run += heights[i];
-    if (run >= total / 2) { split = i + 1; break; }
+    run += heights[i] + SEP_H;
+    if (run >= totalH / 2) { split = i + 1; break; }
   }
   const colHeight = Math.max(
-    heights.slice(0, split).reduce((a, b) => a + b, 0),
-    heights.slice(split).reduce((a, b) => a + b, 0)
+    colHeightOf(heights.slice(0, split)),
+    colHeightOf(heights.slice(split))
   );
 
-  need(colHeight + 54);
-  y += 16;
-  rule(y, 17, 0.9);
-  y += 13;
-  pdfLabel(doc, "TERMS & CONDITIONS", LEFT, y, { size: 6.6, space: 1.8, grey: 150 });
-  y += 13;
+  need(colHeight + 46);
+  sectionHead("TERMS & CONDITIONS", "shield");
+  y += 8;
 
   const drawColumn = (items, startIndex, x, startY) => {
     let cy = startY;
     items.forEach((segs, n) => {
-      doc.setFontSize(T_SIZE); doc.setFont("helvetica", "normal"); doc.setTextColor(120);
-      doc.text(String(startIndex + n + 1) + ".", x, cy);
-      doc.setTextColor(60);
-      cy = pdfFlowRich(doc, segs, x + 11, cy, tColW, T_SIZE, T_LEAD) + T_LEAD + 4;
+      // Numbered in a teal ring, the way the printed copy reads.
+      setDraw(TEAL); setFill(255); doc.setLineWidth(0.8);
+      doc.circle(x + 7, cy - 2.6, 7, "FD");
+      doc.setFontSize(6.8); doc.setFont("helvetica", "bold"); setText(TEAL);
+      doc.text(String(startIndex + n + 1), x + 7, cy - 0.4, { align: "center" });
+      setText(62);
+      const end = pdfFlowRich(doc, segs, x + 20, cy, tColW, T_SIZE, T_LEAD);
+      cy = end + T_LEAD + 4;
+      if (n < items.length - 1) {
+        setDraw(232); doc.setLineWidth(0.6);
+        doc.setLineDashPattern([1.4, 1.8], 0);
+        doc.line(x, cy, x + tColW + 20, cy);
+        doc.setLineDashPattern([], 0);
+        cy += 9;
+      }
     });
     return cy;
   };
   drawColumn(SLIP_TERMS.slice(0, split), 0, LEFT, y);
   drawColumn(SLIP_TERMS.slice(split), split, LEFT + W / 2 + T_GAP / 2, y);
-  y += colHeight + 20;
+  y += colHeight + 22;
 
   // ---- Signature ----
   // Customer only: the counter staff are already identified by the letterhead.
-  need(74);
-  const sigW = 212;
-  const sigBase = y + 34;
+  const SIG_H = 66;
+  need(SIG_H + 4);
+  setDraw(BORDER); setFill(255); doc.setLineWidth(0.8);
+  doc.roundedRect(LEFT, y, W, SIG_H, 5, 5, "FD");
+  const sigLineY = y + SIG_H - 22;
+  const sigW = 250;
   if (slip.signature) {
     try {
       const props = doc.getImageProperties(slip.signature);
-      const maxH = 30, maxW = sigW - 16;
+      const maxH = 32, maxW = sigW - 24;
       const scale = Math.min(maxW / props.width, maxH / props.height);
-      doc.addImage(slip.signature, "PNG", LEFT + 4,
-        sigBase - props.height * scale - 2, props.width * scale, props.height * scale);
+      doc.addImage(slip.signature, "PNG", LEFT + 22,
+        sigLineY - props.height * scale - 3, props.width * scale, props.height * scale);
     } catch (_) { /* a bad image must never stop the slip printing */ }
   }
-  doc.setDrawColor(17); doc.setLineWidth(0.8);
-  doc.line(LEFT, sigBase, LEFT + sigW, sigBase);
-  pdfLabel(doc, "CUSTOMER SIGNATURE   ·   I ACCEPT THE TERMS ABOVE", LEFT, sigBase + 10,
-    { size: 6.2, space: 0.7, grey: 150, bold: false });
+  setDraw(90); doc.setLineWidth(0.8);
+  doc.line(LEFT + 18, sigLineY, LEFT + 18 + sigW, sigLineY);
+  doc.setFontSize(6.8); doc.setFont("helvetica", "bold"); setText(TEAL);
+  doc.setCharSpace(1.1);
+  doc.text("CUSTOMER SIGNATURE   ·   I ACCEPT THE TERMS ABOVE", LEFT + 18, sigLineY + 14);
+  doc.setCharSpace(0);
 
   // ---- Page footers ----
   const pages = doc.getNumberOfPages();
   for (let p = 1; p <= pages; p++) {
     doc.setPage(p);
-    doc.setDrawColor(228); doc.setLineWidth(0.6);
+    setDraw(228); doc.setLineWidth(0.7);
     doc.line(LEFT, 800, RIGHT, 800);
-    doc.setFontSize(6.6); doc.setFont("helvetica", "normal"); doc.setTextColor(160);
+    icon("info", LEFT, 807, 10);
+    doc.setFontSize(7.4); doc.setFont("helvetica", "normal"); setText(120);
     doc.text(
       "Please quote Slip No. " + String(slip.slip_number || "") + " when enquiring about your equipment.",
-      LEFT, 812
+      LEFT + 16, 816
     );
-    doc.text("Page " + p + " of " + pages, RIGHT, 812, { align: "right" });
+    doc.text("Page " + p + " of " + pages, RIGHT, 816, { align: "right" });
   }
 
   return doc.output("blob");
 }
-
-// ---- Sending the slip to the customer on WhatsApp --------------------------
-// Asked once and remembered: whether the server is set up to send at all, and
-// whether it should send without being asked. Both live on the server so
-// switching to automatic is a setting there, not an app deploy.
-let waStatusPromise = null;
-function whatsappStatus() {
-  if (!waStatusPromise) {
-    waStatusPromise = api("/api/whatsapp/status")
-      .catch(() => ({ enabled: false, configured: false, auto_send: false }));
-  }
-  return waStatusPromise;
-}
-
-// The PDF is built here, in the browser, by the same code that produces the
-// copy staff look at - then posted up as raw bytes. Sending the finished file
-// rather than asking the server to rebuild it means the customer cannot
-// receive a subtly different document from the one that was signed.
-async function sendSlipWhatsApp(slip, { auto = false } = {}) {
-  let blob;
-  try {
-    blob = buildSlipPdf(slip);
-  } catch (e) {
-    return { ok: false, error: "Couldn't build the PDF: " + e.message };
-  }
-  const params = new URLSearchParams();
-  const me = userName();
-  if (me) params.set("who", me);
-  params.set("role", getRole());
-  if (auto) params.set("auto", "1");
-
-  try {
-    const r = await api(
-      `/api/slips/${encodeURIComponent(slip.slip_number)}/whatsapp?${params.toString()}`,
-      { method: "POST", headers: { "Content-Type": "application/pdf" }, body: blob }
-    );
-    return { ok: true, to: r.to };
-  } catch (e) {
-    return { ok: false, error: e.message || "Could not send on WhatsApp." };
-  }
-}
-
-// One button, used on the success card and again in View Slips - the second
-// one matters, because a send that fails needs somewhere to be retried from.
-function wireWhatsappButton(btn, slip, { auto = false } = {}) {
-  const idle = btn.textContent;
-  const run = async (isAuto) => {
-    btn.disabled = true;
-    btn.textContent = isAuto ? "Sending to customer…" : "Sending…";
-    const r = await sendSlipWhatsApp(slip, { auto: isAuto });
-    if (r.ok) {
-      btn.textContent = "Sent to " + r.to;
-      btn.classList.add("wa-sent");
-      toast("Slip sent on WhatsApp", "ok");
-    } else {
-      btn.disabled = false;
-      btn.textContent = idle;
-      // Left on screen rather than a toast that vanishes: a failed send is
-      // something someone has to act on.
-      toast(r.error, "err");
-    }
-  };
-  btn.addEventListener("click", () => run(false));
-  if (auto) run(true);
-}
-
 // Share the PDF via the device's native share sheet (WhatsApp/email/AirDrop),
 // falling back to a plain download where sharing files isn't supported.
 async function shareSlipPdf(slip) {
