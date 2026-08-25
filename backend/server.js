@@ -105,6 +105,61 @@ app.post("/api/slips", async (req, res) => {
   }
 });
 
+// ---- TEMPORARY: read-only look at AutoCount's Sales Order schema -----------
+// Here so the Sales Order insert can be built from the real tables rather than
+// a guess. Every query behind it is a SELECT. REMOVE once the insert is built.
+// Returns plain text because the output is meant to be read and pasted.
+app.get("/api/_diag/so-schema", async (req, res) => {
+  res.type("text/plain");
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") return res.send("AutoCount is not enabled on this server.");
+    const sch = require("./data/autocountSchema");
+
+    const header = String(req.query.header || "SO");
+    const detail = String(req.query.detail || "SODTL");
+    const key = String(req.query.key || "DocKey");
+    const out = [];
+
+    out.push("== Tables that look like sales orders or numbering ==");
+    for (const t of await sch.findTables()) out.push("  " + t.name);
+
+    for (const [label, table] of [["HEADER", header], ["DETAIL", detail]]) {
+      const cols = await sch.columns(table);
+      out.push("", `== ${label}: ${table} - ${cols.length} columns ==`);
+      if (!cols.length) { out.push("  (no such table - tell me the right name)"); continue; }
+      out.push("  -- required (NOT NULL, no default) --");
+      for (const c of cols.filter((c) => c.nullable === "NO" && c.default === null)) {
+        out.push(`    ${c.name}  ${c.type}${c.len ? "(" + c.len + ")" : ""}`);
+      }
+      out.push("  -- all columns --");
+      out.push("    " + cols.map((c) => c.name).join(", "));
+    }
+
+    try {
+      const s = await sch.sampleOrder(header, detail, key);
+      out.push("", "== Most recent Sales Order: columns that are actually filled in ==");
+      if (!s.header) {
+        out.push("  (no sales orders found)");
+      } else {
+        out.push("  -- header --");
+        for (const line of sch.usedColumns(s.header)) out.push("    " + line);
+        out.push(`  -- ${s.lines.length} line(s), first three --`);
+        s.lines.slice(0, 3).forEach((l, i) => {
+          out.push(`    [line ${i + 1}]`);
+          for (const line of sch.usedColumns(l)) out.push("      " + line);
+        });
+      }
+    } catch (e) {
+      out.push("", "Sample order failed: " + e.message + "  (wrong key column? try ?key=DocKey or ?key=DocNo)");
+    }
+
+    res.send(out.join("\n"));
+  } catch (err) {
+    res.send("FAILED: " + err.message);
+  }
+});
+
 // ---- Send a slip to the customer on WhatsApp -------------------------------
 // The PDF arrives as raw bytes, NOT JSON. Base64 would inflate it by a third
 // and force the global 1mb JSON limit up for every route in the app; this way
