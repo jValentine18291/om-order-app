@@ -1016,6 +1016,71 @@ function buildSlipPdf(slip) {
 
   return doc.output("blob");
 }
+// ---- Sending the slip to the customer on WhatsApp --------------------------
+// Asked once and remembered: whether the server is set up to send at all, and
+// whether it should send without being asked. Both live on the server so
+// switching to automatic is a setting there, not an app deploy.
+let waStatusPromise = null;
+function whatsappStatus() {
+  if (!waStatusPromise) {
+    waStatusPromise = api("/api/whatsapp/status")
+      .catch(() => ({ enabled: false, configured: false, auto_send: false }));
+  }
+  return waStatusPromise;
+}
+
+// The PDF is built here, in the browser, by the same code that produces the
+// copy staff look at - then posted up as raw bytes. Sending the finished file
+// rather than asking the server to rebuild it means the customer cannot
+// receive a subtly different document from the one that was signed.
+async function sendSlipWhatsApp(slip, { auto = false } = {}) {
+  let blob;
+  try {
+    blob = buildSlipPdf(slip);
+  } catch (e) {
+    return { ok: false, error: "Couldn't build the PDF: " + e.message };
+  }
+  const params = new URLSearchParams();
+  const me = userName();
+  if (me) params.set("who", me);
+  params.set("role", getRole());
+  if (auto) params.set("auto", "1");
+
+  try {
+    const r = await api(
+      `/api/slips/${encodeURIComponent(slip.slip_number)}/whatsapp?${params.toString()}`,
+      { method: "POST", headers: { "Content-Type": "application/pdf" }, body: blob }
+    );
+    return { ok: true, to: r.to };
+  } catch (e) {
+    return { ok: false, error: e.message || "Could not send on WhatsApp." };
+  }
+}
+
+// One button, used on the success card and again in View Slips - the second
+// one matters, because a send that fails needs somewhere to be retried from.
+function wireWhatsappButton(btn, slip, { auto = false } = {}) {
+  const idle = btn.textContent;
+  const run = async (isAuto) => {
+    btn.disabled = true;
+    btn.textContent = isAuto ? "Sending to customerâ€¦" : "Sendingâ€¦";
+    const r = await sendSlipWhatsApp(slip, { auto: isAuto });
+    if (r.ok) {
+      btn.textContent = "Sent to " + r.to;
+      btn.classList.add("wa-sent");
+      toast("Slip sent on WhatsApp", "ok");
+    } else {
+      btn.disabled = false;
+      btn.textContent = idle;
+      // Left on screen rather than a toast that vanishes: a failed send is
+      // something someone has to act on.
+      toast(r.error, "err");
+    }
+  };
+  btn.addEventListener("click", () => run(false));
+  if (auto) run(true);
+}
+
 // Share the PDF via the device's native share sheet (WhatsApp/email/AirDrop),
 // falling back to a plain download where sharing files isn't supported.
 async function shareSlipPdf(slip) {
