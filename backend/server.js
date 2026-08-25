@@ -166,8 +166,7 @@ app.get("/api/_diag/so-schema", async (req, res) => {
 
       const ver = await sch.serverVersion();
       out.push("", "== SQL Server ==");
-      out.push("  " + String(ver[0].version).split("
-")[0] + "  (product " + ver[0].product + ")");
+      out.push("  " + String(ver[0].version).split(String.fromCharCode(10))[0] + "  (product " + ver[0].product + ")");
 
       out.push("", "== Columns that look like a next-number holder ==");
       const ncols = await sch.numberingColumns();
