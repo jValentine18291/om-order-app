@@ -105,6 +105,55 @@ app.post("/api/slips", async (req, res) => {
   }
 });
 
+// ---- TEMPORARY: watch AutoCount allocate a key -----------------------------
+// Take a reading before creating a Sales Order in AutoCount, and another
+// afterwards. Whatever moved is the counter. Reading only; the snapshot is
+// kept in a file beside the app so the two visits can be compared.
+app.get("/api/_diag/keyprobe", async (req, res) => {
+  res.type("text/plain");
+  const fs = require("fs");
+  const path = require("path");
+  const SNAP = path.join(__dirname, "_keyprobe.json");
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") return res.send("AutoCount is not enabled on this server.");
+    const sch = require("./data/autocountSchema");
+
+    const now = await sch.snapshot(2000);
+    const count = Object.keys(now).length;
+
+    if (!req.query.compare) {
+      fs.writeFileSync(SNAP, JSON.stringify(now));
+      return res.send(
+        ["BEFORE reading taken: " + count + " columns.", "",
+         "Now create a Sales Order in AutoCount, then open this page again with",
+         "?compare=1 on the end."].join(String.fromCharCode(10))
+      );
+    }
+
+    if (!fs.existsSync(SNAP)) return res.send("No BEFORE reading. Open this page without ?compare=1 first.");
+    const before = JSON.parse(fs.readFileSync(SNAP, "utf8"));
+
+    const moved = [];
+    for (const [spot, val] of Object.entries(now)) {
+      if (before[spot] === undefined) moved.push(`${spot}: (new) -> ${val}`);
+      else if (before[spot] !== val) moved.push(`${spot}: ${before[spot]} -> ${val}`);
+    }
+
+    const out = [`AFTER reading: ${count} columns, ${moved.length} moved.`, ""];
+    if (!moved.length) {
+      out.push("Nothing moved. Either no order was created, or the counter lives");
+      out.push("in a table larger than 2000 rows, or it is not a number.");
+    } else {
+      out.push("== What changed while the Sales Order was created ==");
+      for (const m of moved.sort()) out.push("  " + m);
+    }
+    res.send(out.join(String.fromCharCode(10)));
+  } catch (err) {
+    res.send("FAILED: " + err.message);
+  }
+});
+
 // ---- TEMPORARY: read-only look at AutoCount's Sales Order schema -----------
 // Here so the Sales Order insert can be built from the real tables rather than
 // a guess. Every query behind it is a SELECT. REMOVE once the insert is built.

@@ -211,7 +211,52 @@ async function findValueNear(candidates, low, high) {
   return hits;
 }
 
+// ---- Watching the counter move --------------------------------------------
+// Far better than guessing at a value: take a reading of every small table
+// before a Sales Order is created in AutoCount, and another afterwards.
+// Whatever moved IS the counter. Nothing is inferred.
+async function snapshot(maxRows = 2000) {
+  const cols = await query(
+    `SELECT t.name AS [table], c.name AS [column]
+       FROM sys.tables t
+       JOIN sys.columns c ON c.object_id = t.object_id
+       JOIN sys.types ty ON ty.user_type_id = c.user_type_id
+       JOIN sys.partitions p ON p.object_id = t.object_id AND p.index_id IN (0, 1)
+      WHERE ty.name IN ('bigint', 'int', 'numeric', 'decimal', 'smallint')
+      GROUP BY t.name, c.name
+     HAVING SUM(p.rows) BETWEEN 1 AND @maxRows`,
+    { maxRows }
+  );
+
+  const readings = {};
+  const chunkSize = 50;
+  for (let i = 0; i < cols.length; i += chunkSize) {
+    const chunk = cols.slice(i, i + chunkSize);
+    const parts = chunk.map((c) => {
+      const t = String(c.table).replace(/[^A-Za-z0-9_]/g, "");
+      const col = String(c.column).replace(/[^A-Za-z0-9_]/g, "");
+      return `SELECT '${t}.${col}' AS spot, CAST(MAX([${col}]) AS bigint) AS val FROM [${t}]`;
+    });
+    try {
+      for (const r of await query(parts.join(" UNION ALL "))) {
+        if (r.val !== null) readings[r.spot] = String(r.val);
+      }
+    } catch (_) {
+      // One unreadable column must not lose the other forty-nine.
+      for (const c of chunk) {
+        const t = String(c.table).replace(/[^A-Za-z0-9_]/g, "");
+        const col = String(c.column).replace(/[^A-Za-z0-9_]/g, "");
+        try {
+          const one = await query(`SELECT CAST(MAX([${col}]) AS bigint) AS val FROM [${t}]`);
+          if (one[0] && one[0].val !== null) readings[`${t}.${col}`] = String(one[0].val);
+        } catch (_) { /* skip */ }
+      }
+    }
+  }
+  return readings;
+}
+
 module.exports = { findTables, columns, sampleOrder, usedColumns,
                    identityColumns, docKeyTables, allLines,
                    serverVersion, numberingColumns, keyRoutines, globalMaxDocKey, lastUsed,
-                   smallTableNumericColumns, findValueNear };
+                   smallTableNumericColumns, findValueNear, snapshot };
