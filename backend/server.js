@@ -171,6 +171,13 @@ app.get("/api/orders/:so/autocount-preview", async (req, res) => {
 
     const t = [];
     t.push("DRY RUN - nothing was written.");
+    if (out.problems && out.problems.length) {
+      t.push("");
+      t.push("*** AutoCount would REJECT this order ***");
+      for (const p of out.problems) t.push("  - " + p);
+    } else {
+      t.push("All AutoCount constraints check out.");
+    }
     t.push("");
     t.push(`Would create Sales Order ${out.doc_no} with DocKey ${out.would_use_doc_key}`);
     t.push(`  debtor ${out.header.DebtorCode}  ${out.header.DebtorName}`);

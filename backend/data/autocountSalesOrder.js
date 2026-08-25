@@ -44,6 +44,59 @@ function userId() {
   return (process.env.AUTOCOUNT_SO_USER || "").slice(0, 10);
 }
 
+// ---- Pre-flight ------------------------------------------------------------
+// SO and SODTL carry two dozen foreign keys. Meeting them one failed insert at
+// a time is slow and leaves half-built documents behind, so everything is
+// checked first and every problem reported together.
+//
+// The one that matters most is SODTL(ItemCode, UOM) -> ItemUOM: a COMPOSITE
+// key, so a part whose unit of measure in the app does not match the unit
+// AutoCount holds for it is rejected even though the item code is perfectly
+// valid. Rather than fail, the real unit is looked up and used.
+async function preflight(details, header) {
+  const problems = [];
+
+  const one = async (sql, params, what) => {
+    try {
+      const rows = await query(sql, params);
+      if (!rows.length) problems.push(what);
+    } catch (e) {
+      problems.push(`${what} (could not check: ${e.message})`);
+    }
+  };
+
+  await one("SELECT TOP 1 CurrencyCode FROM CURRENCY WHERE CurrencyCode = @v",
+            { v: header.CurrencyCode }, `currency "${header.CurrencyCode}" is not in AutoCount`);
+  await one("SELECT TOP 1 DisplayTerm FROM Terms WHERE DisplayTerm = @v",
+            { v: header.DisplayTerm }, `credit term "${header.DisplayTerm}" is not in AutoCount's Terms`);
+  await one("SELECT TOP 1 Location FROM Location WHERE Location = @v",
+            { v: header.SalesLocation }, `location "${header.SalesLocation}" is not in AutoCount`);
+  await one("SELECT TOP 1 AccNo FROM GLMast WHERE AccNo = @v",
+            { v: header.DebtorCode }, `debtor "${header.DebtorCode}" is not a GL account`);
+  await one("SELECT TOP 1 TaxType FROM TaxType WHERE TaxType = @v",
+            { v: SR9.code }, `tax type "${SR9.code}" is not in AutoCount`);
+
+  // Every priced line: the item and unit must exist together in ItemUOM.
+  for (const d of details) {
+    if (!d.ItemCode) continue;
+    const rows = await query(
+      "SELECT UOM FROM ItemUOM WHERE ItemCode = @code",
+      { code: d.ItemCode }
+    );
+    if (!rows.length) { problems.push(`part "${d.ItemCode}" is not in AutoCount`); continue; }
+    const units = rows.map((r) => String(r.UOM));
+    if (!units.includes(String(d.UOM))) {
+      // The app stored a unit AutoCount does not use for this part. Take
+      // AutoCount's own, rather than refusing over a difference we can settle.
+      const chosen = units[0];
+      d.UOM = chosen;
+      d.UserUOM = chosen;
+    }
+  }
+
+  return problems;
+}
+
 // Check the user before writing anything. Failing here costs nothing; failing
 // half way through leaves a header with no lines behind it.
 async function resolveUser() {
@@ -302,8 +355,10 @@ async function createSalesOrder(payload, { dryRun = false } = {}) {
 
   if (dryRun) {
     const docKey = await nextKey();
+    const dryProblems = await preflight(built.details, built.header).catch((e) => [e.message]);
     return {
       dry_run: true,
+      problems: dryProblems,
       doc_no: built.docNo,
       would_use_doc_key: docKey,
       header: built.header,
@@ -316,6 +371,12 @@ async function createSalesOrder(payload, { dryRun = false } = {}) {
   // it in the meantime the primary key rejects the insert and we try again.
   // A clash costs a retry; it can never write a duplicate.
   const who = await resolveUser();
+
+  const problems = await preflight(built.details, built.header);
+  if (problems.length) {
+    const e = new Error("AutoCount would reject this order: " + problems.join("; "));
+    e.status = 400; throw e;
+  }
 
   let lastError = null;
   for (let attempt = 1; attempt <= 4; attempt++) {
