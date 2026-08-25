@@ -72,8 +72,21 @@ numbers. It is copied by `backup-db.bat` along with the database.
 
 1. **Business verification** — still Unverified. Needs ACRA documents, takes days.
 2. **An approved template** — Utility category, with a **Document** header.
-   Suggested name `service_slip_confirmation`, two body variables: customer
-   name and slip number, in that order.
+   Name `service_slip_confirmation`, language **English** (`en`), and **four**
+   body variables in this exact order:
+
+       {{1}} customer name        e.g. Mr Tan
+       {{2}} slip number          e.g. 00123
+       {{3}} date received        e.g. 25 Aug 2026
+       {{4}} equipment            e.g. Husqvarna 365 Chainsaw
+
+   The order is fixed by the approved template - changing it in Meta without
+   changing `whatsapp.js` would put the slip number where the name goes.
+
+   The date is the date the slip was REGISTERED, not today, so re-sending an
+   older slip from View Slips still reads correctly. Equipment names the first
+   machine and counts the rest ("Automower 550 EPOS and 2 more") rather than
+   listing them all, which would wrap into a wall of text on a phone.
 3. **A payment method on the WhatsApp account** — business-initiated messages
    (this is one) will not send without one.
 4. **A phone number** — see the note below.

@@ -145,10 +145,30 @@ app.post(
       const to = slip.whatsapp_number || slip.contact_number || "";
       const filename = `Service Slip ${slip.slip_number}.pdf`;
 
+      // The date the slip was REGISTERED, not today - re-sending an older slip
+      // from View Slips must still describe when the equipment came in.
+      const received = (() => {
+        const d = new Date(slip.created_at || Date.now());
+        if (isNaN(d)) return "";
+        const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+      })();
+
+      // One line on a phone screen. Listing five machines in full would wrap
+      // into a wall of text, so name the first and count the rest.
+      const names = (slip.machines || []).map((m) => String(m.machine_desc || "").trim()).filter(Boolean);
+      const equipment = !names.length
+        ? ""
+        : names.length === 1
+          ? names[0]
+          : `${names[0]} and ${names.length - 1} more`;
+
       const out = await wa.sendSlip({
         to,
         customerName: slip.contact_name || slip.company,
         slipNumber: slip.slip_number,
+        receivedOn: received,
+        equipment,
         pdf: req.body,
         filename,
       });

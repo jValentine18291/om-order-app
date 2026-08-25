@@ -88,6 +88,18 @@ function normalisePhone(raw, defaultCountry = "65") {
   return { ok: true, number: s };
 }
 
+// WhatsApp rejects a template parameter containing a newline, a tab, or four
+// consecutive spaces, and silently truncates very long ones. Machine
+// descriptions are typed by hand, so they get cleaned rather than trusted.
+function waParam(value, fallback, max) {
+  const clean = String(value == null ? "" : value)
+    .replace(/[\r\n\t]+/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  if (!clean) return fallback;
+  return clean.length > max ? clean.slice(0, max - 1).trimEnd() + "…" : clean;
+}
+
 // ---- Graph calls ----------------------------------------------------------
 // Meta returns its real complaint in body.error.message; surface that rather
 // than a bare status code, because the useful cases (template not approved,
@@ -139,7 +151,7 @@ async function uploadPdf(buffer, filename) {
 }
 
 // Send the approved template, with the PDF as its document header.
-async function sendSlip({ to, customerName, slipNumber, pdf, filename }) {
+async function sendSlip({ to, customerName, slipNumber, receivedOn, equipment, pdf, filename }) {
   const c = config();
   if (!c.enabled) { const e = new Error("WhatsApp sending is switched off."); e.status = 403; throw e; }
   if (!c.phoneNumberId || !c.token) {
@@ -167,8 +179,14 @@ async function sendSlip({ to, customerName, slipNumber, pdf, filename }) {
           {
             type: "body",
             parameters: [
-              { type: "text", text: String(customerName || "there").slice(0, 60) },
-              { type: "text", text: String(slipNumber || "") },
+              // Order matters and is fixed by the approved template:
+              // 1 customer name, 2 slip number, 3 date received, 4 equipment.
+              // A template variable cannot contain a newline or a tab, so each
+              // of these is flattened and trimmed before it goes anywhere.
+              { type: "text", text: waParam(customerName, "there", 60) },
+              { type: "text", text: waParam(slipNumber, "", 20) },
+              { type: "text", text: waParam(receivedOn, "-", 20) },
+              { type: "text", text: waParam(equipment, "-", 90) },
             ],
           },
         ],
@@ -180,4 +198,4 @@ async function sendSlip({ to, customerName, slipNumber, pdf, filename }) {
   return { to: phone.number, mediaId, messageId: messageId || null };
 }
 
-module.exports = { config, readiness, normalisePhone, sendSlip, uploadPdf };
+module.exports = { config, readiness, normalisePhone, sendSlip, uploadPdf, waParam };
