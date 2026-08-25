@@ -182,6 +182,19 @@ app.get("/api/_diag/so-schema", async (req, res) => {
       out.push("", "== Highest keys currently in use ==");
       out.push(`  SO.DocKey max = ${mk[0].maxSoDocKey}   SODTL.DtlKey max = ${mk[0].maxSoDtlKey}`);
 
+      // ---- the decisive test: find the counter by its VALUE ----
+      out.push("", "== Hunting the global DocKey counter by value ==");
+      const highest = Math.max(Number(mk[0].maxSoDocKey) || 0, Number(mk[0].maxSoDtlKey) || 0);
+      const cands = await sch.smallTableNumericColumns(200);
+      out.push(`  scanning ${cands.length} numeric columns in tables of 200 rows or fewer`);
+      out.push(`  looking for a value between ${highest} and ${highest + 5000}`);
+      const hits = await sch.findValueNear(cands, highest, highest + 5000);
+      if (!hits.length) {
+        out.push("  NOTHING FOUND - the counter is not a small table, or it is stored as text.");
+      } else {
+        for (const h of hits) out.push(`  HIT  ${h.spot} = ${h.val}`);
+      }
+
       out.push("", "== Other tables carrying a DocKey ==");
       out.push("  " + (await sch.docKeyTables()).map((t) => t.table).join(", "));
 

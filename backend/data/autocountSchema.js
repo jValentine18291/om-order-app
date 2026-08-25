@@ -143,6 +143,53 @@ async function allLines(detailTable, keyColumn, key) {
   return query(`SELECT * FROM [${detailTable}] WHERE ${keyColumn} = @key ORDER BY Seq`, { key });
 }
 
+// ---- Finding the global DocKey counter ------------------------------------
+// DocKey is one sequence across every document table (a Sales Order and the
+// Delivery Order it became sit either side of the same run), so it cannot be
+// allocated by looking at SO alone. AutoCount keeps the next value somewhere.
+//
+// Rather than guess at table names, look for the NUMBER. Whatever holds the
+// next key must contain a value just above the highest key in use, so scan
+// every numeric column of every small table for one in that range. A counter
+// lives in a table with a handful of rows, never a document table.
+
+async function smallTableNumericColumns(maxRows = 200) {
+  return query(
+    `SELECT t.name AS [table], c.name AS [column], SUM(p.rows) AS [rows]
+       FROM sys.tables t
+       JOIN sys.columns c ON c.object_id = t.object_id
+       JOIN sys.types ty ON ty.user_type_id = c.user_type_id
+       JOIN sys.partitions p ON p.object_id = t.object_id AND p.index_id IN (0, 1)
+      WHERE ty.name IN ('bigint', 'int', 'numeric', 'decimal')
+      GROUP BY t.name, c.name
+     HAVING SUM(p.rows) BETWEEN 1 AND @maxRows
+      ORDER BY t.name, c.name`,
+    { maxRows }
+  );
+}
+
+// Look for the counter by its value. Table and column names come from the
+// catalogue, never from user input, and are bracket-quoted regardless.
+async function findValueNear(candidates, low, high) {
+  const hits = [];
+  const chunkSize = 60;
+  for (let i = 0; i < candidates.length; i += chunkSize) {
+    const chunk = candidates.slice(i, i + chunkSize);
+    const parts = chunk.map((c) => {
+      const t = String(c.table).replace(/[^A-Za-z0-9_]/g, "");
+      const col = String(c.column).replace(/[^A-Za-z0-9_]/g, "");
+      return `SELECT '${t}.${col}' AS spot, CAST(MAX([${col}]) AS bigint) AS val ` +
+             `FROM [${t}] WHERE [${col}] BETWEEN ${low} AND ${high}`;
+    });
+    try {
+      const rows = await query(parts.join(" UNION ALL "));
+      for (const r of rows) if (r.val !== null) hits.push(r);
+    } catch (_) { /* a column that will not cast is not the counter */ }
+  }
+  return hits;
+}
+
 module.exports = { findTables, columns, sampleOrder, usedColumns,
                    identityColumns, docKeyTables, allLines,
-                   serverVersion, numberingColumns, keyRoutines, maxKeys };
+                   serverVersion, numberingColumns, keyRoutines, maxKeys,
+                   smallTableNumericColumns, findValueNear };
