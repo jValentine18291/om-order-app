@@ -154,7 +154,40 @@ app.get("/api/_diag/so-schema", async (req, res) => {
       out.push("", "Sample order failed: " + e.message + "  (wrong key column? try ?key=DocKey or ?key=DocNo)");
     }
 
-    res.send(out.join("\n"));
+        // ---- round two: the things that decide how the insert is written ----
+    try {
+      out.push("", "== Are the keys auto-generated? ==");
+      const ids = await sch.identityColumns([header, detail]);
+      if (!ids.length) {
+        out.push("  NO identity columns - DocKey and DtlKey must be allocated by us.");
+      } else {
+        for (const i of ids) out.push(`  ${i.table}.${i.column} IS an identity (last = ${i.last})`);
+      }
+
+      out.push("", "== Tables that look like they hold a running number ==");
+      const nums = await sch.numberingCandidates();
+      if (!nums.length) out.push("  (none found by column shape)");
+      for (const n of nums) out.push(`  ${n.table}: ${String(n.cols).slice(0, 160)}`);
+
+      out.push("", "== Other tables carrying a DocKey ==");
+      out.push("  " + (await sch.docKeyTables()).map((t) => t.table).join(", "));
+
+      const s2 = await sch.sampleOrder(header, detail, key);
+      if (s2.header) {
+        const lines = await sch.allLines(detail, key, s2.header[key]);
+        out.push("", `== All ${lines.length} lines of ${s2.header.DocNo}, compactly ==`);
+        for (const l of lines) {
+          out.push(`  Seq ${l.Seq} | ${l.ItemCode || "(no code)"} | ${String(l.Description || "").slice(0, 46)}`
+            + ` | qty ${l.Qty === null ? "-" : l.Qty} | price ${l.UnitPrice === null ? "-" : l.UnitPrice}`
+            + ` | sub ${l.SubTotal === null ? "-" : l.SubTotal} | DtlType ${l.DtlType} | AddToSubTotal ${l.AddToSubTotal}`
+            + ` | MainItem ${l.MainItem} | Numbering ${l.Numbering === null ? "-" : l.Numbering}`);
+        }
+      }
+    } catch (e) {
+      out.push("", "Round two failed: " + e.message);
+    }
+
+res.send(out.join("\n"));
   } catch (err) {
     res.send("FAILED: " + err.message);
   }
