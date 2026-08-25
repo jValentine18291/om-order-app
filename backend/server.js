@@ -747,6 +747,47 @@ app.patch("/api/slips/:slip/status", async (req, res) => {
   }
 });
 
+// Push an app order into AutoCount as a Sales Order. Kept separate from the
+// conversion itself so a failure here never undoes work the workshop has
+// already done - the slip stays converted and the push can be retried.
+async function pushOrderToAutoCount(soNumber) {
+  const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+  if (itemsSource !== "autocount") return { pushed: false, reason: "AutoCount is not enabled." };
+
+  const so = require("./data/autocountSalesOrder");
+  if (!so.writebackEnabled()) return { pushed: false, reason: "Writing Sales Orders to AutoCount is switched off." };
+
+  const order = await data.orders.getOrder(soNumber);
+  if (!order) return { pushed: false, reason: `Order ${soNumber} not found.` };
+  if (order.autocount_doc_no) {
+    return { pushed: false, already: order.autocount_doc_no, reason: `Already in AutoCount as ${order.autocount_doc_no}.` };
+  }
+
+  const slipNumber = String(order.notes || "").replace(/^S\/S:\s*/, "").trim();
+  const slip = slipNumber ? await data.slips.getSlip(slipNumber) : null;
+  if (!slip) return { pushed: false, reason: `Could not find the service slip behind ${soNumber}.` };
+
+  const out = await so.createSalesOrder({
+    slipNumber: slip.slip_number,
+    debtorCode: slip.debtor_code || "C0112",
+    contactName: slip.contact_name,
+    contactNumber: slip.contact_number,
+    lines: order.lines || [],
+  });
+  await data.slips.setOrderAutocountDocNo(soNumber, out.doc_no);
+  return { pushed: true, doc_no: out.doc_no, doc_key: out.doc_key, lines: out.lines, totals: out.totals };
+}
+
+// Retry pushing an order that did not reach AutoCount the first time.
+app.post("/api/orders/:so/push-to-autocount", async (req, res) => {
+  try {
+    res.json(await pushOrderToAutoCount(req.params.so));
+  } catch (err) {
+    console.error("[push-to-autocount]", err.message);
+    res.status(err.status || 502).json({ error: err.message || "Could not write to AutoCount." });
+  }
+});
+
 // Create the Sales Order for a slip (-> ALL_REPAIRED)
 // If AutoCount price write-back is enabled, prices keyed in by staff for parts
 // that had NO price in AutoCount are saved to AutoCount's ItemUOM at this
@@ -818,7 +859,19 @@ app.post("/api/slips/:slip/order", async (req, res) => {
       console.error("[price-writeback] sync step error:", e.message);
     }
 
-    res.status(201).json({ ...result, price_sync: priceSync });
+    // ---- Write it into AutoCount (guarded, best-effort) ----
+    // Deliberately after the slip has been committed: the machines are already
+    // marked converted, and a failure here must not undo that. It is reported
+    // instead, and can be retried.
+    let autocount = { pushed: false, reason: "not attempted" };
+    try {
+      autocount = await pushOrderToAutoCount(result.so_number);
+    } catch (e) {
+      autocount = { pushed: false, error: e.message };
+      console.error("[autocount SO]", e.message);
+    }
+
+    res.status(201).json({ ...result, price_sync: priceSync, autocount });
   } catch (err) {
     if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
     console.error("[POST /api/slips/:slip/order]", err);

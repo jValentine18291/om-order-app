@@ -77,6 +77,7 @@ db.exec(`
     notes         TEXT,
     total_qty     INTEGER NOT NULL DEFAULT 0,
     total_amount  REAL    NOT NULL DEFAULT 0,
+    autocount_doc_no TEXT DEFAULT '',   -- the Sales Order written into AutoCount
     created_at    TEXT    DEFAULT (datetime('now'))
   );
 
@@ -190,6 +191,18 @@ try {
   }
 } catch (e) {
   console.error("[db] repair_comment migration check failed:", e.message);
+}
+
+// Migration: which AutoCount Sales Order an app order was written to. Blank
+// means it has not reached AutoCount yet, which is what a retry looks for.
+try {
+  const cols = db.prepare("PRAGMA table_info(orders)").all();
+  if (!cols.some((c) => c.name === "autocount_doc_no")) {
+    db.exec("ALTER TABLE orders ADD COLUMN autocount_doc_no TEXT DEFAULT ''");
+    console.log("[db] migrated: added autocount_doc_no to orders");
+  }
+} catch (e) {
+  console.error("[db] autocount_doc_no migration check failed:", e.message);
 }
 
 // Migration: the AutoCount debtor code behind the company name. A Sales Order

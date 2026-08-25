@@ -485,6 +485,11 @@ function getSlipOrders(slipNumber) {
   return rows.map((r) => getOrder(r.so_number)).filter(Boolean);
 }
 
+// Record which AutoCount Sales Order an app order became.
+function setOrderAutocountDocNo(soNumber, docNo) {
+  db.prepare("UPDATE orders SET autocount_doc_no = ? WHERE so_number = ?").run(String(docNo || ""), soNumber);
+}
+
 // Close a slip: record the DO/CS/INV reference, set status CLOSED.
 function closeSlip(slipNumber, closingRef) {
   const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
@@ -572,7 +577,7 @@ function searchSlips(query = "", scope = "all", limit = 20) {
 }
 
 const slips = {
-  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setMachineComment, setMachineLabour, setSlipStatus, createSlipOrder, getSlipOrder, getSlipOrders, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setMachineComment, setMachineLabour, setSlipStatus, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, closeSlip,
 };
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };

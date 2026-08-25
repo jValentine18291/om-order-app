@@ -1738,6 +1738,19 @@ async function createSalesOrder() {
       body: JSON.stringify({ machine_ids: chosen }),
     });
     closeConvertPicker();
+
+    // Say plainly whether it reached AutoCount. A silent failure here is the
+    // worst outcome: staff would believe the order exists and only find out
+    // when they went looking for it.
+    const ac = result.autocount || {};
+    if (ac.pushed) {
+      setTimeout(() => toast(`Written into AutoCount as Sales Order ${ac.doc_no}`, "ok"), 1600);
+    } else if (ac.error) {
+      setTimeout(() => toast(`NOT written to AutoCount: ${ac.error}`, "err"), 1600);
+    } else if (ac.reason && !/switched off|not enabled/i.test(ac.reason)) {
+      setTimeout(() => toast(`Not written to AutoCount: ${ac.reason}`, "err"), 1600);
+    }
+
     const left = result.machines_remaining;
     toast(
       left === 0
