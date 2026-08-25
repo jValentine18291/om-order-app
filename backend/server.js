@@ -105,6 +105,75 @@ app.post("/api/slips", async (req, res) => {
   }
 });
 
+// ---- Send a slip to the customer on WhatsApp -------------------------------
+// The PDF arrives as raw bytes, NOT JSON. Base64 would inflate it by a third
+// and force the global 1mb JSON limit up for every route in the app; this way
+// the parser above ignores the request entirely and only this route sees it.
+//
+// The PDF is built in the browser, by the same code that produces the copy
+// staff look at. Deliberately not regenerated here: two generators would drift
+// apart, and the customer would eventually receive something subtly different
+// from what was on screen when it was signed.
+app.post(
+  "/api/slips/:slip/whatsapp",
+  express.raw({ type: "application/pdf", limit: "10mb" }),
+  async (req, res) => {
+    const wa = require("./whatsapp");
+    const { logSend } = require("./whatsappLog");
+    const who = String(req.query.who || "").trim() || (req.query.auto === "1" ? "auto" : "?");
+    const role = String(req.query.role || "").trim();
+    const stamp = (outcome, detail, to) =>
+      logSend({ slip: req.params.slip, to, outcome, detail, who: role ? `${who} (${role})` : who });
+
+    try {
+      const ready = wa.readiness();
+      if (!ready.enabled) {
+        return res.status(403).json({ error: "WhatsApp sending is switched off on this server." });
+      }
+      if (!ready.configured) {
+        return res.status(503).json({ error: `WhatsApp is not configured (missing ${ready.missing.join(", ")}).` });
+      }
+      if (!req.body || !req.body.length) {
+        return res.status(400).json({ error: "No PDF was received." });
+      }
+
+      const slip = await data.slips.getSlip(req.params.slip);
+      if (!slip) return res.status(404).json({ error: "Slip not found." });
+
+      // Fall back to the contact number only if no WhatsApp number was given -
+      // the form defaults one to the other, so they are usually the same.
+      const to = slip.whatsapp_number || slip.contact_number || "";
+      const filename = `Service Slip ${slip.slip_number}.pdf`;
+
+      const out = await wa.sendSlip({
+        to,
+        customerName: slip.contact_name || slip.company,
+        slipNumber: slip.slip_number,
+        pdf: req.body,
+        filename,
+      });
+
+      stamp("SENT", out.messageId || "-", out.to);
+      res.json({ sent: true, to: out.to, message_id: out.messageId });
+    } catch (err) {
+      // A failed send must never look like a success, and must never take the
+      // slip down with it - the slip already exists and is the important part.
+      stamp("FAILED", err.message, null);
+      const code = err.status && err.status >= 400 && err.status < 500 ? err.status : 502;
+      res.status(code).json({ error: err.message || "Could not send on WhatsApp." });
+    }
+  }
+);
+
+// Tells the browser whether to offer the button, and whether to send without
+// being asked. Kept on the server so switching to automatic is a server
+// setting, not an app deploy.
+app.get("/api/whatsapp/status", (req, res) => {
+  const wa = require("./whatsapp");
+  const r = wa.readiness();
+  res.json({ enabled: r.enabled, configured: r.configured, auto_send: r.autoSend });
+});
+
 // ---- Part reorder requests (Find Part "Order more" -> Purchaser screen) ----
 app.post("/api/part-requests", async (req, res) => {
   try {

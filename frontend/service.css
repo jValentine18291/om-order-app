@@ -1118,6 +1118,14 @@ select {
 }
 .ipl-price-btn:active { background: var(--primary-tint); }
 
+/* The WhatsApp send button, once it has succeeded. Deliberately looks spent
+   rather than clickable, so nobody sends the same slip twice. */
+.wa-send.wa-sent {
+  background: #E8F5E9; border-color: #38A32A; color: #2A7A20;
+  font-variant-numeric: tabular-nums;
+}
+.wa-send:disabled { opacity: .75; }
+
 .ipl-price-wait {
   margin-top: 14px; padding: 12px; border: 1px dashed var(--border);
   border-radius: 10px; font-size: .85rem; color: var(--ink-faint); text-align: center;

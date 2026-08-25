@@ -407,6 +407,19 @@ function showSlipCreated(slip) {
   $("ns-share").addEventListener("click", () => shareSlipPdf(slip));
   $("ns-done").addEventListener("click", goHome);
   window.scrollTo(0, 0);
+
+  // Offered only when the server can actually send, so staff are never shown a
+  // button that cannot work.
+  whatsappStatus().then((wa) => {
+    if (!wa.enabled || !wa.configured) return;
+    const btn = document.createElement("button");
+    btn.className = "btn-primary wa-send";
+    btn.type = "button";
+    btn.style.cssText = "width:100%;margin-top:8px;";
+    btn.textContent = "Send to customer on WhatsApp";
+    $("ns-share").insertAdjacentElement("beforebegin", btn);
+    wireWhatsappButton(btn, slip, { auto: wa.auto_send });
+  });
 }
 
 // ---- Service slip PDF ------------------------------------------------------
@@ -716,6 +729,71 @@ function buildSlipPdf(slip) {
   }
 
   return doc.output("blob");
+}
+
+// ---- Sending the slip to the customer on WhatsApp --------------------------
+// Asked once and remembered: whether the server is set up to send at all, and
+// whether it should send without being asked. Both live on the server so
+// switching to automatic is a setting there, not an app deploy.
+let waStatusPromise = null;
+function whatsappStatus() {
+  if (!waStatusPromise) {
+    waStatusPromise = api("/api/whatsapp/status")
+      .catch(() => ({ enabled: false, configured: false, auto_send: false }));
+  }
+  return waStatusPromise;
+}
+
+// The PDF is built here, in the browser, by the same code that produces the
+// copy staff look at - then posted up as raw bytes. Sending the finished file
+// rather than asking the server to rebuild it means the customer cannot
+// receive a subtly different document from the one that was signed.
+async function sendSlipWhatsApp(slip, { auto = false } = {}) {
+  let blob;
+  try {
+    blob = buildSlipPdf(slip);
+  } catch (e) {
+    return { ok: false, error: "Couldn't build the PDF: " + e.message };
+  }
+  const params = new URLSearchParams();
+  const initials = (() => { try { return localStorage.getItem(INITIALS_KEY) || ""; } catch (_) { return ""; } })();
+  if (initials) params.set("who", initials);
+  params.set("role", getRole());
+  if (auto) params.set("auto", "1");
+
+  try {
+    const r = await api(
+      `/api/slips/${encodeURIComponent(slip.slip_number)}/whatsapp?${params.toString()}`,
+      { method: "POST", headers: { "Content-Type": "application/pdf" }, body: blob }
+    );
+    return { ok: true, to: r.to };
+  } catch (e) {
+    return { ok: false, error: e.message || "Could not send on WhatsApp." };
+  }
+}
+
+// One button, used on the success card and again in View Slips - the second
+// one matters, because a send that fails needs somewhere to be retried from.
+function wireWhatsappButton(btn, slip, { auto = false } = {}) {
+  const idle = btn.textContent;
+  const run = async (isAuto) => {
+    btn.disabled = true;
+    btn.textContent = isAuto ? "Sending to customer…" : "Sending…";
+    const r = await sendSlipWhatsApp(slip, { auto: isAuto });
+    if (r.ok) {
+      btn.textContent = "Sent to " + r.to;
+      btn.classList.add("wa-sent");
+      toast("Slip sent on WhatsApp", "ok");
+    } else {
+      btn.disabled = false;
+      btn.textContent = idle;
+      // Left on screen rather than a toast that vanishes: a failed send is
+      // something someone has to act on.
+      toast(r.error, "err");
+    }
+  };
+  btn.addEventListener("click", () => run(false));
+  if (auto) run(true);
 }
 
 // Share the PDF via the device's native share sheet (WhatsApp/email/AirDrop),
@@ -1391,6 +1469,20 @@ async function onViewSlipChosen(slipNumber) {
     // Rebuilt from the stored slip, so a re-issued copy matches the original.
     const share = document.getElementById("vs-share");
     if (share) share.addEventListener("click", () => shareSlipPdf(slip));
+    if (share) {
+      whatsappStatus().then((wa) => {
+        if (!wa.enabled || !wa.configured) return;
+        const btn = document.createElement("button");
+        btn.className = "btn-secondary wa-send";
+        btn.type = "button";
+        btn.style.cssText = "width:100%;margin-top:8px;";
+        btn.textContent = "Send to customer on WhatsApp";
+        share.insertAdjacentElement("afterend", btn);
+        // Never automatic here - this screen is opened to look at old slips,
+        // and re-sending one just because it was viewed would be alarming.
+        wireWhatsappButton(btn, slip, { auto: false });
+      });
+    }
     const soBtn = document.getElementById("vs-so");
     if (soBtn) soBtn.addEventListener("click", () => showSlipOrder(slip.slip_number));
   } catch (e) {
