@@ -164,10 +164,24 @@ app.get("/api/_diag/so-schema", async (req, res) => {
         for (const i of ids) out.push(`  ${i.table}.${i.column} IS an identity (last = ${i.last})`);
       }
 
-      out.push("", "== Tables that look like they hold a running number ==");
-      const nums = await sch.numberingCandidates();
-      if (!nums.length) out.push("  (none found by column shape)");
-      for (const n of nums) out.push(`  ${n.table}: ${String(n.cols).slice(0, 160)}`);
+      const ver = await sch.serverVersion();
+      out.push("", "== SQL Server ==");
+      out.push("  " + String(ver[0].version).split("
+")[0] + "  (product " + ver[0].product + ")");
+
+      out.push("", "== Columns that look like a next-number holder ==");
+      const ncols = await sch.numberingColumns();
+      if (!ncols.length) out.push("  (none)");
+      for (const c of ncols.slice(0, 60)) out.push(`  ${c.table}.${c.column}  ${c.type}`);
+
+      out.push("", "== Stored procedures / functions that may allocate keys ==");
+      const rts = await sch.keyRoutines();
+      if (!rts.length) out.push("  (none)");
+      for (const r of rts.slice(0, 60)) out.push(`  ${r.type}  ${r.name}`);
+
+      const mk = await sch.maxKeys();
+      out.push("", "== Highest keys currently in use ==");
+      out.push(`  SO.DocKey max = ${mk[0].maxSoDocKey}   SODTL.DtlKey max = ${mk[0].maxSoDtlKey}`);
 
       out.push("", "== Other tables carrying a DocKey ==");
       out.push("  " + (await sch.docKeyTables()).map((t) => t.table).join(", "));

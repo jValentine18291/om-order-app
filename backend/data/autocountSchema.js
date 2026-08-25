@@ -82,20 +82,49 @@ async function identityColumns(tables) {
   );
 }
 
-// If the keys are not identities, AutoCount allocates them somewhere. Look for
-// any table that could hold a running number, by shape rather than by name.
-async function numberingCandidates() {
+// If the keys are not identities, AutoCount allocates them somewhere, and we
+// must find where before writing a single row - picking our own key risks
+// colliding with whatever AutoCount hands out next.
+//
+// No STRING_AGG here: that needs SQL Server 2017 and this instance is older.
+async function serverVersion() {
+  return query("SELECT @@VERSION AS version, SERVERPROPERTY('ProductVersion') AS product");
+}
+
+// Any column whose name suggests it holds "the next one to use".
+async function numberingColumns() {
   return query(
-    `SELECT TOP 40 t.TABLE_NAME AS [table],
-            STRING_AGG(CONVERT(nvarchar(max), c.COLUMN_NAME), ', ') AS cols
-       FROM INFORMATION_SCHEMA.TABLES t
-       JOIN INFORMATION_SCHEMA.COLUMNS c ON c.TABLE_NAME = t.TABLE_NAME
-      WHERE t.TABLE_TYPE = 'BASE TABLE'
-        AND t.TABLE_NAME IN (
-              SELECT TABLE_NAME FROM INFORMATION_SCHEMA.COLUMNS
-               WHERE COLUMN_NAME IN ('NextNumber','RunningNumber','LastNumber','NextDocNo','DocNoFormat','NextKey','LastKey')
-            )
-      GROUP BY t.TABLE_NAME`
+    `SELECT TABLE_NAME AS [table], COLUMN_NAME AS [column], DATA_TYPE AS type
+       FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE COLUMN_NAME LIKE '%Next%'
+         OR COLUMN_NAME LIKE '%Running%'
+         OR COLUMN_NAME LIKE '%LastUsed%'
+         OR COLUMN_NAME LIKE '%CurrentNo%'
+         OR COLUMN_NAME LIKE '%LastNumber%'
+         OR COLUMN_NAME LIKE '%LastKey%'
+      ORDER BY TABLE_NAME, COLUMN_NAME`
+  );
+}
+
+// AutoCount may allocate keys through a stored procedure. If it does, calling
+// that is far safer than inventing a number ourselves.
+async function keyRoutines() {
+  return query(
+    `SELECT ROUTINE_NAME AS name, ROUTINE_TYPE AS type
+       FROM INFORMATION_SCHEMA.ROUTINES
+      WHERE ROUTINE_NAME LIKE '%Key%'
+         OR ROUTINE_NAME LIKE '%Number%'
+         OR ROUTINE_NAME LIKE '%Seq%'
+         OR ROUTINE_NAME LIKE '%DocNo%'
+      ORDER BY ROUTINE_NAME`
+  );
+}
+
+// The highest key in use, to see how far ahead any "next number" sits.
+async function maxKeys() {
+  return query(
+    `SELECT (SELECT MAX(DocKey) FROM SO) AS maxSoDocKey,
+            (SELECT MAX(DtlKey) FROM SODTL) AS maxSoDtlKey`
   );
 }
 
@@ -115,4 +144,5 @@ async function allLines(detailTable, keyColumn, key) {
 }
 
 module.exports = { findTables, columns, sampleOrder, usedColumns,
-                   identityColumns, numberingCandidates, docKeyTables, allLines };
+                   identityColumns, docKeyTables, allLines,
+                   serverVersion, numberingColumns, keyRoutines, maxKeys };
