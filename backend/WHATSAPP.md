@@ -78,15 +78,15 @@ numbers. It is copied by `backup-db.bat` along with the database.
        {{1}} customer name        e.g. Mr Tan
        {{2}} slip number          e.g. 00123
        {{3}} date received        e.g. 25 Aug 2026
-       {{4}} equipment            e.g. Husqvarna 365 Chainsaw
+       {{4}} number of machines   e.g. 3
 
    The order is fixed by the approved template - changing it in Meta without
    changing `whatsapp.js` would put the slip number where the name goes.
 
    The date is the date the slip was REGISTERED, not today, so re-sending an
-   older slip from View Slips still reads correctly. Equipment names the first
-   machine and counts the rest ("Automower 550 EPOS and 2 more") rather than
-   listing them all, which would wrap into a wall of text on a phone.
+   older slip from View Slips still reads correctly. {{4}} is a COUNT, not a
+   list - the template reads "No. of Equipment: {{4}}", and the machines are
+   itemised on the attached slip anyway.
 3. **A payment method on the WhatsApp account** — business-initiated messages
    (this is one) will not send without one.
 4. **A phone number** — see the note below.

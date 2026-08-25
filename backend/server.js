@@ -154,14 +154,10 @@ app.post(
         return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
       })();
 
-      // One line on a phone screen. Listing five machines in full would wrap
-      // into a wall of text, so name the first and count the rest.
-      const names = (slip.machines || []).map((m) => String(m.machine_desc || "").trim()).filter(Boolean);
-      const equipment = !names.length
-        ? ""
-        : names.length === 1
-          ? names[0]
-          : `${names[0]} and ${names.length - 1} more`;
+      // Just the count. The template reads "No. of Equipment: {{4}}" - the
+      // machines are itemised on the attached slip, so naming them here only
+      // repeated it and risked a long line wrapping badly on a phone.
+      const equipment = String((slip.machines || []).length);
 
       const out = await wa.sendSlip({
         to,
