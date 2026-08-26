@@ -3,9 +3,9 @@
 // Bump CACHE on every deploy (v7 -> v8 -> ...). The new worker deletes old
 // caches in activate, and core files are fetched network-first so a normal
 // reopen always gets the latest code. Cache is only used as an offline fallback.
-const CACHE = "om-order-v86";
+const CACHE = "om-order-v87";
 
-// Parts diagrams live in their own cache, deliberately NOT version-stamped.
+// IPL artwork lives in its own cache, deliberately NOT version-stamped.
 // They are large, they are already fetched only when a section is opened, and
 // they do not change when the app does — so wiping them on every deploy just
 // made phones re-download the same drawings over office Wi-Fi. This cache
@@ -59,11 +59,12 @@ self.addEventListener("fetch", (e) => {
   // Only manage GET requests; let the browser handle the rest normally.
   if (e.request.method !== "GET") return;
 
-  // Parts diagrams: serve from cache immediately, then refresh in the
-  // background. A drawing appears instantly on a second viewing and survives
-  // deploys, while a re-extracted model still corrects itself on the next
-  // open rather than needing a cache bump.
-  if (/\/ipl\/[^/]+\.png$/.test(url.pathname)) {
+  // IPL artwork - the parts diagrams and the brand logos: serve from cache
+  // immediately, then refresh in the background. A drawing appears instantly
+  // on a second viewing and survives deploys, while a re-extracted model still
+  // corrects itself on the next open rather than needing a cache bump. The
+  // brand logos sit a folder deeper, hence the optional path segment.
+  if (/\/ipl\/(?:brands\/)?[^/]+\.png$/.test(url.pathname)) {
     e.respondWith(
       caches.open(IPL_CACHE).then((cache) =>
         cache.match(e.request).then((hit) => {

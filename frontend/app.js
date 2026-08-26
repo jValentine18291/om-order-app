@@ -3347,14 +3347,22 @@ async function enterIpl() {
 //
 // Every brand in that folder is listed, not just the two with IPLs loaded, so
 // the first Ferris or Billy Goat book arrives already in its own colour.
+//
+// `logo` is the plate built by tools/build-brand-logos.py from those same
+// files: the logo on its own background, trimmed and sized, because these come
+// drawn for different grounds — Husqvarna's is white on navy, Zenoah's is white
+// text that would vanish without the black behind it, and the rest are coloured
+// artwork made for white.
+// `w` is the plate's width in CSS pixels at its 30px height, so the browser
+// reserves the right space and the heading does not jump when the logo lands.
 const IPL_BRAND_COLOUR = {
-  husqvarna:   { fill: "#183060", ink: "#183060" },  // logo navy
-  zenoah:      { fill: "#dc3030", ink: "#ce2d2d" },  // logo red
-  billygoat:   { fill: "#008050", ink: "#008050" },
-  ferris:      { fill: "#8f1020", ink: "#8f1020" },
-  grasshopper: { fill: "#e01020", ink: "#d20f1e" },
-  pulsfog:     { fill: "#e12d3c", ink: "#d32a38" },
-  rayco:       { fill: "#91691a", ink: "#886218" },
+  husqvarna:   { fill: "#183060", ink: "#183060", logo: "husqvarna",   w: 37 },  // logo navy
+  zenoah:      { fill: "#dc3030", ink: "#ce2d2d", logo: "zenoah",      w: 84 },  // logo red
+  billygoat:   { fill: "#008050", ink: "#008050", logo: "billygoat",   w: 30 },
+  ferris:      { fill: "#8f1020", ink: "#8f1020", logo: "ferris",      w: 32 },
+  grasshopper: { fill: "#e01020", ink: "#d20f1e", logo: "grasshopper", w: 63 },
+  pulsfog:     { fill: "#e12d3c", ink: "#d32a38", logo: "pulsfog",     w: 84 },
+  rayco:       { fill: "#91691a", ink: "#886218", logo: "rayco",       w: 84 },
 };
 // An unknown brand falls back to the app's own teal rather than to grey, so a
 // new brand looks deliberate on the day it lands.
@@ -3481,9 +3489,14 @@ function renderIplPicker() {
       iplShort(x).localeCompare(iplShort(y), undefined, { numeric: true })
     );
     const col = iplBrandColour(b);
+    // The logo where we hold one, the coloured initials where we do not — so a
+    // brand nobody has supplied artwork for still reads as a proper heading.
+    const badge = col.logo
+      ? `<img class="mp-glogo" src="./ipl/brands/${encodeURIComponent(col.logo)}.png" alt="" width="${col.w}" height="30">`
+      : `<span class="mp-gmark">${escapeHtml(iplBrandInitials(b))}</span>`;
     return `<div class="mp-group">
       <div class="mp-ghead" style="--brand-fill:${col.fill};--brand-ink:${col.ink};">
-        <span class="mp-gmark">${escapeHtml(iplBrandInitials(b))}</span>
+        ${badge}
         <strong>${escapeHtml(b)}</strong><span class="n">${rows.length}</span>
       </div>
       <div class="mp-rows">` +

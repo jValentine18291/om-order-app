@@ -1396,6 +1396,20 @@ select {
   border-bottom: 2px solid var(--brand-fill, var(--primary));
   margin-bottom: 11px;
 }
+/* The brand's own logo, on the ground its artwork was drawn for: navy for
+   Husqvarna, black for Zenoah, white for the rest. Height is fixed and width
+   follows, so a wordmark and a badge both sit on the same baseline. */
+.mp-glogo {
+  /* content-box, against the global border-box: the width and height attributes
+     on the tag describe the artwork, so with border-box the 1px edge ate into
+     the height and the plate came out 80px wide where 84 had been reserved -
+     a visible nudge as each logo landed. */
+  box-sizing: content-box;
+  height: 30px; width: auto; max-width: 84px; flex-shrink: 0;
+  display: block; border-radius: 6px;
+  border: 1px solid var(--border);
+}
+/* Fallback for a brand whose logo we do not hold. */
 .mp-gmark {
   width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
   display: grid; place-items: center;
