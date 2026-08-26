@@ -92,8 +92,52 @@
     "Requester": "申请人",
     "Your name": "你的名字",
     "Submit request": "提交申请",
+    "Confirm order": "确认申请",
+    "Back": "返回",
     "Enter an order quantity": "请输入申请数量",
     "Enter the requester's name": "请输入申请人姓名",
+    "Choose your name from the top bar first": "请先选择您的姓名",
+
+    // ---- IPL (parts diagrams) ----
+    // Technicians work off these more than anyone, so the whole screen is here.
+    // "IPL" itself stays as it is: it is what the printed books are called and
+    // what everyone in the workshop says.
+    "Exploded views with live stock": "零件分解图与实时库存",
+    "Parts catalogue": "零件目录",
+    "Model, brand or machine type…": "型号、品牌或机器类型…",
+    "Search models": "搜索型号",
+    "Clear search": "清除搜索",
+    "Machine type": "机器类型",
+    "All": "全部",
+    "Recently opened": "最近打开",
+    "Change": "更换",
+    "Reset": "重置",
+    "Find in this figure": "在此图中查找",
+    "Part number or description…": "零件编号或名称…",
+    "No parts match that.": "没有符合的零件。",
+    "Pinch to zoom · drag to move · tap a number": "双指缩放 · 拖动移动 · 点击数字",
+    "Pinch to zoom · drag to move · pick a part from the list below": "双指缩放 · 拖动移动 · 从下方列表选择零件",
+    "Pinch to zoom · tap a number · scanned drawing, a few numbers may not respond":
+      "双指缩放 · 点击数字 · 扫描图纸，少数数字可能无反应",
+    "No IPLs installed yet": "尚未添加 IPL",
+    "Ask John to add one.": "请联系 John 添加。",
+    "Try the model number printed on the machine.": "请查看机器上标示的型号。",
+    "Couldn't load that IPL": "无法加载该 IPL",
+    "Not found in AutoCount under this number.": "在 AutoCount 中找不到此编号。",
+
+    // Machine types. Also used by the filter chips and the chosen-model line,
+    // through the patterns further down.
+    "Chainsaw": "链锯",
+    "Blower": "吹风机",
+    "Hedge Trimmer": "绿篱机",
+    "Pole Hedge Trimmer": "高枝绿篱机",
+    "Brushcutter": "割灌机",
+    "Robotic Mower": "智能割草机",
+    "Lawn Mower": "草坪机",
+    "Power Cutter": "切割机",
+    "Outboard": "舷外机",
+    "Engine": "发动机",
+    "Other": "其他",
     "Request submitted": "申请已提交",
     "Mark ordered": "标记为已订购",
     "Marked as ordered": "已标记为已订购",
@@ -218,6 +262,12 @@
   // Anchored with ^...$ so they only fire on a complete match, and the value is
   // carried through untouched via $1 / $2. A replacement may also be a function
   // (used where a month name has to become a number).
+  // Own-property check, so a type such as "constructor" cannot find something
+  // on Object.prototype and come back as a translation.
+  function hasDict(k) {
+    return Object.prototype.hasOwnProperty.call(DICT, k);
+  }
+
   var PATTERNS = [
     // Dates, alone and inside the lines that carry them
     [new RegExp("^" + DATE + "$"), function (_, d, m, y) { return cnDate(d, m, y); }],
@@ -227,6 +277,25 @@
       function (_, s, d, m, y) { return "服务单 " + s + " · 创建于 " + cnDate(d, m, y); }],
     [new RegExp("^(\\d+) machines? · " + DATE + "$"),
       function (_, n, d, m, y) { return n + " 台机器 · " + cnDate(d, m, y); }],
+
+    // ---- IPL ----
+    // These carry a machine type inside them, so the type is looked up in DICT
+    // rather than spelled out again in a pattern per category. A type that is
+    // not in DICT comes back unchanged, which translate() then treats as no
+    // translation at all — so an unfamiliar category is left alone rather than
+    // half-rendered.
+    [/^([A-Za-z][A-Za-z ]*[A-Za-z]) (\d+)$/, function (whole, type, n) {
+      return hasDict(type) ? DICT[type] + " " + n : whole;   // filter chips
+    }],
+    [/^([A-Za-z][A-Za-z ]*[A-Za-z]) · (\d+) figures?$/, function (whole, type, n) {
+      return hasDict(type) ? DICT[type] + " · " + n + " 张图" : whole;
+    }],
+    [/^(\d+) figures? · (\d+) parts?$/, "$1 张图 · $2 个零件"],
+    [/^(\d+) figures?$/, "$1 张图"],
+    // The part description comes from AutoCount and is left exactly as it is.
+    [/^Order (\d+) × (.+)$/, "申请 $1 × $2"],
+    [/^(.+) · requested by (.+)$/, "$1 · 申请人：$2"],
+    [/^Nothing matches “(.+)”$/, "没有符合“$1”的型号"],
 
     // Counts and summaries
     [/^(\d+) machines?$/, "$1 台机器"],

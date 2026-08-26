@@ -217,7 +217,7 @@ function applyRoleToHome() {
   // Which home functions each account sees (per John's mapping, 28 Jul 2026):
   const ROLE_FUNCTIONS = {
     sales: ["new", "close", "view", "find", "ipl"],
-    tech: ["open", "view", "find"],
+    tech: ["open", "view", "find", "ipl"],
     // Purchaser is Sales plus requested parts, so it inherits the
     // IPLs too rather than being a separate shorter list.
     purchaser: ["new", "close", "view", "find", "ipl", "requests"],
@@ -2789,14 +2789,23 @@ async function showPartStock(code) {
 // the part being ordered is held here rather than read back off either screen.
 let orderPart = null;
 
+// Ordering runs in two steps: type the quantity, then confirm what is about to
+// be sent. A reorder request goes to the purchaser and gets acted on, so a
+// mistyped quantity is worth one deliberate tap to catch.
+function showOrderStep(step) {
+  const confirming = step === "confirm";
+  $("om-qty-field").style.display = confirming ? "none" : "";
+  $("om-confirm").style.display = confirming ? "" : "none";
+  $("om-back").style.display = confirming ? "" : "none";
+  $("om-submit").textContent = confirming ? "Confirm order" : "Submit request";
+}
+
 function openOrderModal(part) {
   if (!part || !part.item_code) return;
   orderPart = part;
   $("om-part-name").textContent = `${part.description} · ${part.item_code}`;
   $("om-qty").value = "";
-  // The app knows who is signed in, so there is no reason to make them type
-  // their own name; it stays editable for someone ordering on another's behalf.
-  $("om-requester").value = userName();
+  showOrderStep("qty");
   $("order-modal").style.display = "flex";
   document.body.style.overflow = "hidden";
   setTimeout(() => $("om-qty").focus(), 50);
@@ -2812,12 +2821,28 @@ function closeOrderModal() {
   if ($("ipl-modal").style.display !== "flex") document.body.style.overflow = "";
 }
 $("om-close").addEventListener("click", closeOrderModal);
+$("om-back").addEventListener("click", () => {
+  showOrderStep("qty");
+  $("om-qty").focus();
+});
+
 $("om-submit").addEventListener("click", async () => {
   if (!orderPart) return;
   const qty = parseInt($("om-qty").value, 10);
-  const requester = $("om-requester").value.trim();
+  const requester = userName();
   if (!Number.isFinite(qty) || qty < 1) { toast("Enter an order quantity", "err"); return; }
-  if (!requester) { toast("Enter the requester's name", "err"); return; }
+  // Nobody signed in means nothing to put in the requester column, and the
+  // purchaser would have no idea who asked.
+  if (!requester) { toast("Choose your name from the top bar first", "err"); return; }
+
+  // First tap shows what is about to be sent; the second sends it.
+  if ($("om-confirm").style.display === "none") {
+    $("om-check-line").textContent = `Order ${qty} × ${orderPart.description}`;
+    $("om-check-who").textContent = `${orderPart.item_code} · requested by ${requester}`;
+    showOrderStep("confirm");
+    return;
+  }
+
   $("om-submit").disabled = true;
   try {
     await api(`/api/part-requests`, {

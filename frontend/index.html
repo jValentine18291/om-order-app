@@ -375,15 +375,18 @@
         </div>
         <button class="modal-x" id="om-close" aria-label="Close">&#10005;</button>
       </div>
-      <div class="field">
+      <!-- No name field: the app knows who is signed in, and asking again only
+           invites a blank or a nickname the purchaser cannot place. -->
+      <div class="field" id="om-qty-field">
         <label for="om-qty">Order quantity</label>
         <input id="om-qty" type="number" min="1" inputmode="numeric" placeholder="e.g. 5" />
       </div>
-      <div class="field">
-        <label for="om-requester">Requester</label>
-        <input id="om-requester" type="text" autocomplete="off" placeholder="Your name" />
+      <div class="om-check" id="om-confirm" style="display:none;">
+        <div class="om-check-line" id="om-check-line"></div>
+        <div class="om-check-who" id="om-check-who"></div>
       </div>
       <button class="btn-primary" id="om-submit" style="margin-top:8px;">Submit request</button>
+      <button class="btn-secondary" id="om-back" style="display:none; margin-top:8px;">Back</button>
     </div>
   </div>
 

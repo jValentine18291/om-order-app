@@ -1495,3 +1495,18 @@ select {
   flex-shrink: 0; font-size: .82rem; font-weight: 600; color: var(--primary);
   background: var(--primary-tint); border-radius: 999px; padding: 6px 12px;
 }
+
+/* ---- Order more: the confirmation step -------------------------------- */
+/* A reorder request reaches the purchaser and gets acted on, so what is
+   about to be sent is spelled out before it goes. */
+.om-check {
+  background: var(--primary-tint); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 15px 16px;
+}
+.om-check-line {
+  font-family: var(--display); font-size: 1.05rem; font-weight: 600;
+  color: var(--ink); line-height: 1.35;
+}
+.om-check-who {
+  margin-top: 5px; font-size: .82rem; color: var(--ink-soft);
+}
