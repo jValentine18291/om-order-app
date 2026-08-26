@@ -16,6 +16,7 @@ backend/om_orders.db-wal
 # Database backups (belong on the server, not in the repo)
 backend/backups/
 backend/backup.log
+backend/backup-last-run.txt
 
 # Logs (service output, price audit log)
 backend/service-out.log
