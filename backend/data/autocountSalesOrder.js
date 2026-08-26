@@ -263,9 +263,10 @@ async function buildRows({ slipNumber, debtorCode, contactName, contactNumber, s
   const codes = [...new Set(lines.filter((l) => l.item_code).map((l) => l.item_code))];
   const desc2 = await desc2For(codes);
 
-  const docNo = await nextDocNo(date);
+  // The date has to come first: the document number is derived from it.
   const today = new Date();
   const date = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const docNo = await nextDocNo(date);
 
   let totalExTax = 0;
   let totalTax = 0;
