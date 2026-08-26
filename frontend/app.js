@@ -3484,31 +3484,56 @@ function renderIplPicker() {
     byBrand.get(b).push(m);
   });
 
+  const byName = (x, y) => iplShort(x).localeCompare(iplShort(y), undefined, { numeric: true });
+
+  const rowHtml = (m) =>
+    `<button type="button" class="mp-row" data-id="${escapeAttr(m.id)}">
+       <span class="txt">
+         <span class="nm">${iplMark(iplShort(m), q)}</span>
+         <span class="mt">${m.figures} figure${m.figures === 1 ? "" : "s"}${m.parts ? " &middot; " + m.parts + " parts" : ""}</span>
+       </span>
+       <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+     </button>`;
+
   box.innerHTML = [...byBrand.keys()].sort().map((b) => {
-    const rows = byBrand.get(b).slice().sort((x, y) =>
-      iplShort(x).localeCompare(iplShort(y), undefined, { numeric: true })
-    );
+    const models = byBrand.get(b);
     const col = iplBrandColour(b);
     // The logo where we hold one, the coloured initials where we do not — so a
     // brand nobody has supplied artwork for still reads as a proper heading.
     const badge = col.logo
       ? `<img class="mp-glogo" src="./ipl/brands/${encodeURIComponent(col.logo)}.png" alt="" width="${col.w}" height="30">`
       : `<span class="mp-gmark">${escapeHtml(iplBrandInitials(b))}</span>`;
+
+    // Within a brand, group by machine type. Alphabetical rather than by count:
+    // a category has to keep its place in the list as models are added to it,
+    // or nobody can learn where anything is.
+    const byCat = new Map();
+    models.forEach((m) => {
+      const c = iplCategory(m) || "Other";
+      if (!byCat.has(c)) byCat.set(c, []);
+      byCat.get(c).push(m);
+    });
+    const cats = [...byCat.keys()].sort((x, y) =>
+      x === "Other" ? 1 : y === "Other" ? -1 : x.localeCompare(y)
+    );
+
+    // A category label repeating the chip you just tapped says nothing, so with
+    // a type filter running the rows are listed plainly instead.
+    const showCats = !ipl.type;
+
+    const body = cats.map((c) => {
+      const rows = byCat.get(c).slice().sort(byName);
+      const label = showCats
+        ? `<div class="mp-clab">${iplMark(c, q)}<b>${rows.length}</b></div>`
+        : "";
+      return label + `<div class="mp-rows">${rows.map(rowHtml).join("")}</div>`;
+    }).join("");
+
     return `<div class="mp-group">
       <div class="mp-ghead" style="--brand-fill:${col.fill};--brand-ink:${col.ink};">
         ${badge}
-        <strong>${escapeHtml(b)}</strong><span class="n">${rows.length}</span>
-      </div>
-      <div class="mp-rows">` +
-      rows.map((m) =>
-        `<button type="button" class="mp-row" data-id="${escapeAttr(m.id)}">
-           <span class="txt">
-             <span class="nm">${iplMark(iplShort(m), q)}</span>
-             <span class="mt">${iplCategory(m) ? "<b>" + iplMark(iplCategory(m), q) + "</b> &middot; " : ""}${m.figures} figure${m.figures === 1 ? "" : "s"}${m.parts ? " &middot; " + m.parts + " parts" : ""}</span>
-           </span>
-           <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
-         </button>`).join("") +
-      `</div></div>`;
+        <strong>${escapeHtml(b)}</strong><span class="n">${models.length}</span>
+      </div>${body}</div>`;
   }).join("");
 
   wireIplPicks();

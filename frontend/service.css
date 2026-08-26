@@ -1427,7 +1427,28 @@ select {
   border: 1px solid var(--border-2); border-radius: 999px; padding: 2px 9px;
 }
 
+/* Machine type, within a brand. Deliberately quiet — it is a shelf label under
+   the brand heading, not a second heading competing with it. */
+.mp-clab {
+  display: flex; align-items: center; gap: 9px;
+  margin: 15px 2px 8px;
+  font-size: .72rem; font-weight: 600; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--ink-faint);
+}
+.mp-ghead + .mp-clab { margin-top: 4px; }
+.mp-clab b { font-weight: 600; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+/* The rule runs to the end of the row, between label and count, so the eye has
+   something to follow across to the number. */
+.mp-clab::after {
+  content: ""; order: 1; flex: 1 1 auto; height: 1px; background: var(--border);
+}
+.mp-clab b { order: 2; }
+.mp-clab mark { background: #fdf0b8; color: inherit; border-radius: 3px; padding: 0 2px; }
+
 .mp-rows { display: flex; flex-direction: column; gap: 8px; }
+/* With a type filter running there are no labels, so consecutive blocks need
+   their own gap. */
+.mp-rows + .mp-rows { margin-top: 8px; }
 .mp-row {
   display: flex; align-items: center; gap: 12px; width: 100%;
   background: var(--surface); border: 1px solid var(--border);
