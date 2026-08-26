@@ -54,10 +54,24 @@ The `auto` argument stops it waiting for a keypress. The task reports failure
 to Task Scheduler properly, so a red result in the task history means a backup
 really did not happen.
 
+## If the scheduled task reports Last Result 1
+
+Almost always Node. A scheduled task runs with nobody logged on and no user
+profile, so `node` is frequently missing from its PATH even though it works
+perfectly when you run the file yourself. The batch file looks on PATH and in
+the usual install folders, and says so in plain words if it still cannot find
+it. Set `OM_NODE` to the full path of `node.exe` if it lives somewhere unusual,
+or add Node to the SYSTEM PATH rather than only your own user PATH.
+
+Whatever the cause, **`backend\backup-last-run.txt`** holds everything the last
+run printed. An exit code on its own tells you nothing; that file tells you what
+actually happened.
+
 ## Checking it is working
 
-Two places, both quick:
+Three places, all quick:
 
+- `backend\backup-last-run.txt` — everything the last run printed
 - `backend\backup.log` — one line per run, `ok` or `FAILED`
 - `backend\backups\` — dated files, roughly the size of the database
 
