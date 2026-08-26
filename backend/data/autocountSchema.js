@@ -309,8 +309,48 @@ async function autocountUsers() {
   return query("SELECT TOP 25 * FROM Users");
 }
 
+// What makes a line a real SubTotal in AutoCount, rather than a row with the
+// word typed into it? Find genuine ones and copy their shape. DtlType is the
+// likely switch - every line we write is "N", and a subtotal is evidently
+// something else.
+async function subtotalRows() {
+  const out = {};
+  for (const t of ["SODTL", "DODTL", "IVDTL", "CSDTL"]) {
+    try {
+      out[t] = await query(
+        `SELECT TOP 6 DocKey, Seq, DtlType, AddToSubTotal, MainItem, PrintOut,
+                Numbering, Indent, ItemCode, Description, Qty, UnitPrice,
+                SubTotal, Tax, TaxType, TaxRate
+           FROM [${t}]
+          WHERE Description LIKE '%SubTotal%' OR DtlType <> 'N'
+          ORDER BY DocKey DESC, Seq`
+      );
+    } catch (e) {
+      out[t] = [{ error: e.message }];
+    }
+  }
+  return out;
+}
+
+// Every distinct DtlType in use, with how many lines carry it - the vocabulary
+// of line types this installation actually uses.
+async function detailTypes() {
+  const out = {};
+  for (const t of ["SODTL", "DODTL"]) {
+    try {
+      out[t] = await query(
+        `SELECT DtlType, COUNT(*) AS lines, MIN(Description) AS example
+           FROM [${t}] GROUP BY DtlType ORDER BY COUNT(*) DESC`
+      );
+    } catch (e) {
+      out[t] = [{ error: e.message }];
+    }
+  }
+  return out;
+}
+
 module.exports = { findTables, columns, sampleOrder, usedColumns,
                    identityColumns, docKeyTables, allLines,
                    serverVersion, numberingColumns, keyRoutines, globalMaxDocKey, lastUsed,
                    smallTableNumericColumns, findValueNear, snapshot, topKeys,
-                   foreignKeys, autocountUsers };
+                   foreignKeys, autocountUsers, subtotalRows, detailTypes };

@@ -105,6 +105,47 @@ app.post("/api/slips", async (req, res) => {
   }
 });
 
+// TEMPORARY: how AutoCount records a real SubTotal line. Read-only.
+app.get("/api/_diag/subtotals", async (req, res) => {
+  res.type("text/plain");
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") return res.send("AutoCount is not enabled on this server.");
+    const sch = require("./data/autocountSchema");
+    const out = [];
+
+    out.push("== Line types in use ==");
+    const types = await sch.detailTypes();
+    for (const [table, rows] of Object.entries(types)) {
+      out.push("  " + table + ":");
+      for (const r of rows) {
+        if (r.error) { out.push("    error: " + r.error); continue; }
+        out.push(`    DtlType ${JSON.stringify(r.DtlType)}  ${String(r.lines).padStart(7)} lines   e.g. ${String(r.example || "").slice(0, 40)}`);
+      }
+    }
+
+    out.push("");
+    out.push("== Lines that are, or mention, a SubTotal ==");
+    const rows = await sch.subtotalRows();
+    for (const [table, list] of Object.entries(rows)) {
+      out.push("  " + table + ":");
+      if (!list.length) { out.push("    (none)"); continue; }
+      for (const r of list) {
+        if (r.error) { out.push("    error: " + r.error); continue; }
+        out.push(`    Seq ${String(r.Seq).padStart(4)} | DtlType ${JSON.stringify(r.DtlType)}` +
+                 ` | AddToSubTotal ${JSON.stringify(r.AddToSubTotal)} | MainItem ${JSON.stringify(r.MainItem)}` +
+                 ` | Numbering ${r.Numbering === null ? "-" : r.Numbering} | Indent ${r.Indent === null ? "-" : r.Indent}`);
+        out.push(`             desc ${JSON.stringify(String(r.Description || "").slice(0, 40))}` +
+                 ` | item ${r.ItemCode || "-"} | qty ${r.Qty === null ? "-" : r.Qty}` +
+                 ` | sub ${r.SubTotal === null ? "-" : r.SubTotal} | tax ${r.Tax === null ? "-" : r.Tax}`);
+      }
+    }
+    res.send(out.join(String.fromCharCode(10)));
+  } catch (err) {
+    res.send("FAILED: " + err.message);
+  }
+});
+
 // TEMPORARY: every constraint the Sales Order tables impose, and who counts as
 // a valid AutoCount user. Read-only.
 app.get("/api/_diag/so-constraints", async (req, res) => {
