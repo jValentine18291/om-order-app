@@ -252,10 +252,31 @@ async function buildRows({ slipNumber, debtorCode, contactName, contactNumber, s
   let totalExTax = 0;
   let totalTax = 0;
   const details = [];
+  const subtotalAt = [];   // indexes of the subtotal rows, filled in afterwards
 
   lines.forEach((l, i) => {
     const seq = (i + 1) * SEQ_STEP;
     const isNote = !l.item_code;
+    const isSubTotal = isNote && String(l.description || "").trim().toLowerCase() === "subtotal";
+
+    if (isSubTotal) {
+      // Filled in below, once the line taxes are settled.
+      subtotalAt.push(details.length);
+      // A real AutoCount subtotal, not a row with the word typed into it:
+      // DtlType "S", and AddToSubTotal "F" so the subtotal is not itself
+      // counted into the next one. The amount is what has accumulated since
+      // the previous subtotal, computed from the lines actually written rather
+      // than taken on trust - so the document always adds up to itself.
+      details.push({
+        Seq: seq, MainItem: "T",
+        Description: "SubTotal ",
+        DtlType: "S", AddToSubTotal: "F",
+        Rate: 1, TaxType: SR9.code, TaxRate: SR9.rate,
+        Transferable: "T", PrintOut: "T", StockReceived: "F", TransferedQty: 0,
+        DeliveryDate: date, Guid: guid(),
+      });
+      return;
+    }
 
     if (isNote) {
       // Note rows carry no item, quantity or price, but AutoCount still fills
@@ -294,6 +315,48 @@ async function buildRows({ slipNumber, debtorCode, contactName, contactNumber, s
       DeliveryDate: date, Guid: guid(),
     });
   });
+
+  // AutoCount computes GST on the document TOTAL and then makes the lines add
+  // up to it, rather than rounding each line on its own. In OM's own delivery
+  // order the same part at 1.80 carries 0.16 on one machine and 0.17 on
+  // another for exactly this reason. Rounding each line independently gives
+  // 19.48 on that document where AutoCount gives 19.49 - and 19.49 is the
+  // right figure, since GST is charged on the total.
+  const documentTax = gstOn(totalExTax, SR9.rate);
+  const drift = money(documentTax - totalTax);
+  if (drift !== 0) {
+    // Put the difference on the last priced line, the way AutoCount does.
+    for (let i = details.length - 1; i >= 0; i--) {
+      const d = details[i];
+      if (d.ItemCode && d.Tax !== undefined) {
+        d.Tax = money(d.Tax + drift);
+        d.LocalTax = d.Tax;
+        d.TaxCurrencyTax = d.Tax;
+        break;
+      }
+    }
+    totalTax = documentTax;
+  }
+
+  // Now the subtotals, summed from the lines as they finally stand - so each
+  // block adds up to itself and the blocks add up to the document.
+  let blockExTax = 0, blockTax = 0;
+  for (let i = 0; i < details.length; i++) {
+    const d = details[i];
+    if (d.DtlType === "S") {
+      Object.assign(d, {
+        SubTotal: money(blockExTax), LocalSubTotal: money(blockExTax),
+        SubTotalExTax: money(blockExTax), LocalSubTotalExTax: money(blockExTax),
+        Tax: money(blockTax), LocalTax: money(blockTax), TaxCurrencyTax: money(blockTax),
+        TaxableAmt: money(blockExTax), LocalTaxableAmt: money(blockExTax),
+        TaxCurrencyTaxableAmt: money(blockExTax),
+      });
+      blockExTax = 0; blockTax = 0;
+      continue;
+    }
+    if (d.SubTotal !== undefined) blockExTax = money(blockExTax + d.SubTotal);
+    if (d.Tax !== undefined) blockTax = money(blockTax + d.Tax);
+  }
 
   const net = money(totalExTax + totalTax);
   const header = {
