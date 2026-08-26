@@ -35,7 +35,7 @@ const KEEP_AT_LEAST = 7; // never prune below this many, however old they are
 
 // om_orders-2026-08-24_1530.db — sorts chronologically as plain text
 const PREFIX = "om_orders-";
-const NAME_RE = /^om_orders-\d{4}-\d{2}-\d{2}_\d{4}\.db$/;
+const NAME_RE = /^om_orders-\d{4}-\d{2}-\d{2}_\d{4}(-\d{2})?\.db$/;
 
 const fail = (msg) => { console.error("\nBACKUP FAILED: " + msg); process.exit(1); };
 const mb = (b) => (b / 1024 / 1024).toFixed(2) + " MB";
@@ -53,9 +53,17 @@ function main() {
   if (!fs.existsSync(DB_PATH)) fail(`no database at ${DB_PATH}`);
   fs.mkdirSync(DEST, { recursive: true });
 
-  const outName = `${PREFIX}${stamp()}.db`;
+  // Names are per minute, so runs close together would collide. Keep counting
+  // until a free name is found rather than refusing: a backup job that reports
+  // failure for a benign reason teaches people to ignore its failures, which
+  // is worse than the duplicate it was avoiding.
+  const base = `${PREFIX}${stamp()}`;
+  let outName = `${base}.db`;
+  for (let n = 2; fs.existsSync(path.join(DEST, outName)) && n < 100; n++) {
+    outName = `${base}-${String(n).padStart(2, "0")}.db`;
+  }
   const outPath = path.join(DEST, outName);
-  if (fs.existsSync(outPath)) fail(`${outName} already exists — backups are per minute, so wait a moment and retry`);
+  if (fs.existsSync(outPath)) fail(`could not find a free name for ${base} in ${DEST}`);
 
   console.log(`Backing up ${path.basename(DB_PATH)} (${mb(fs.statSync(DB_PATH).size)})`);
   console.log(`  to ${outPath}`);
