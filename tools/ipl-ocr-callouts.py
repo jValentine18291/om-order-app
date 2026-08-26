@@ -61,14 +61,13 @@ def render(pdf, page):
     return out + ".png"
 
 
-def read_one(crop, scale):
-    """Read a single cropped callout. --psm 8 is 'one word', which is what a
-    callout is once it has been cut out."""
+def read_one(crop, scale, psm):
+    """Read a single cropped callout at one scale, in one segmentation mode."""
     big = crop.resize((crop.width * scale, crop.height * scale), Image.LANCZOS)
     path = os.path.join(tempfile.gettempdir(), f"ipl-crop-{os.getpid()}-{scale}.png")
     big.save(path)
     r = subprocess.run(
-        [tool("tesseract"), path, "stdout", "--psm", "8",
+        [tool("tesseract"), path, "stdout", "--psm", str(psm),
          "-c", "tessedit_char_whitelist=0123456789ABCD", "tsv"],
         capture_output=True, text=True, encoding="utf-8", errors="replace",
     )
@@ -110,7 +109,13 @@ def survey(png, keys):
         # that reads at 96% confidence — the single most confident false
         # callout on the page, which is why confidence alone cannot filter it.
         # Note where the words are so their digits can be skipped.
-        if any(c.isalpha() for c in txt) and float(f[10]) >= 50:
+        #
+        # But a key can carry a letter of its own: the G3800's accessories are
+        # 4A and 4B for the 14" and 16" bars. Treating a single letter as
+        # lettering threw away all six of those - the bars, chains and
+        # protectors, which are among the parts most often ordered.
+        letters = sum(1 for c in txt if c.isalpha())
+        if letters >= 2 and txt not in keys and float(f[10]) >= 50:
             words.append((x, y, x + w, y + h))
     return (float(np.median(hs)) if len(hs) >= 5 else None), words
 
@@ -171,14 +176,24 @@ def callouts(pdf, page, keys, max_y=100.0):
         glyphs.append([s[1].start, s[0].start, s[1].stop, s[0].stop])
 
     # Group digits into numbers: same line, touching distance apart.
-    glyphs.sort(key=lambda g: (g[1], g[0]))
+    #
+    # Sorted by row band and then by x, NOT by raw y then x. Sorting on the raw
+    # top edge put the "0" of "70" one pixel higher than its own "7", so the
+    # zero was visited first and the seven - being to its LEFT - failed a test
+    # that only ever looked rightwards. The pair never joined: the figure ended
+    # up with a "70" hotspot and a stray "7" on the same printed number, and
+    # tapping it could give either part.
+    band = max(1.0, med * 0.6)
+    glyphs.sort(key=lambda g: (int(g[1] / band), g[0]))
     groups = []
     for g in glyphs:
         placed = False
         for grp in groups:
             same_line = abs(g[1] - grp[1]) < med * 0.55
-            near = 0 <= g[0] - grp[2] < med * 0.55
-            if same_line and near:
+            # Distance between the two boxes whichever way round they sit;
+            # negative means they overlap.
+            gap = max(g[0] - grp[2], grp[0] - g[2])
+            if same_line and gap < med * 0.55:
                 grp[0] = min(grp[0], g[0]); grp[1] = min(grp[1], g[1])
                 grp[2] = max(grp[2], g[2]); grp[3] = max(grp[3], g[3])
                 placed = True
@@ -193,18 +208,34 @@ def callouts(pdf, page, keys, max_y=100.0):
             continue
         crop = im.crop((max(0, x1 - pad), max(0, y1 - pad),
                         min(W, x2 + pad), min(H, y2 + pad)))
-        # Read twice at different scales; disagreement means drop it.
-        a, ca = read_one(crop, 3)
-        if a not in keys:
+
+        # Two segmentation modes, because neither wins on its own. "one word"
+        # is the better all-rounder but returns nothing at all for "11" — two
+        # identical thin strokes it will not commit to. "one text line" reads
+        # that at 94%, and "70" at 97% against 83%, but loses seven other
+        # callouts on the same figure. Asking the second only when the first
+        # finds nothing usable gets 96% where either alone gets 87.
+        #
+        # Within a mode the crop is read at two scales and both must agree,
+        # which is what stops a doubtful glyph becoming a confident wrong part.
+        hit = None
+        for psm in (8, 7):
+            a, ca = read_one(crop, 3, psm)
+            if a not in keys:
+                continue
+            b, cb = read_one(crop, 5, psm)
+            if b == a:
+                hit = (a, min(ca, cb))
+                break
+        if not hit:
             continue
-        b, cb = read_one(crop, 5)
-        if b != a:
-            continue
+
         spots.append({
-            "key": a,
+            "key": hit[0],
             "x": round((x1 + x2) / 2 / W * 100, 3),
             "y": round((y1 + y2) / 2 / H * 100, 3),
-            "conf": round(min(ca, cb)),
+            "conf": round(hit[1]),
+            "box": (x1, y1, x2, y2),
         })
 
     try:
@@ -212,15 +243,31 @@ def callouts(pdf, page, keys, max_y=100.0):
     except OSError:
         pass
 
+    # Two hotspots on one printed number is worse than none: tapping "70" could
+    # give part 7. Grouping is fixed so it should not happen, but a scan can
+    # always break a digit apart in some new way, so refuse to emit an
+    # overlapping pair. The longer reading wins - a fragment is a piece of the
+    # whole number, never the other way round.
+    def overlaps(p, q):
+        return (p["box"][0] < q["box"][2] and q["box"][0] < p["box"][2]
+                and p["box"][1] < q["box"][3] and q["box"][1] < p["box"][3])
+
+    spots.sort(key=lambda s: (-len(s["key"]), -s["conf"]))
+    kept = []
+    for s in spots:
+        if any(overlaps(s, k) for k in kept):
+            continue
+        kept.append(s)
+
     # The same key can legitimately be called out twice; identical duplicates
-    # from one blob split two ways cannot.
+    # from one blob read two ways cannot.
     seen, out = set(), []
-    for s in sorted(spots, key=lambda s: (s["key"], s["x"])):
+    for s in sorted(kept, key=lambda s: (s["key"], s["x"])):
         tag = (s["key"], round(s["x"], 1), round(s["y"], 1))
         if tag in seen:
             continue
         seen.add(tag)
-        out.append(s)
+        out.append({k: v for k, v in s.items() if k != "box"})
     return out
 
 
