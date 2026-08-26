@@ -71,13 +71,21 @@ function columnOf(x) {
 }
 
 function parseTable(page) {
-  const { words } = wordsForPage(page);
+  const { words, height } = wordsForPage(page);
 
   // Cluster words into rows by proximity rather than by rounding to a fixed
   // grid: rows sit ~15pt apart but a "・" or a wrapped remark can sit a point
   // or two off its neighbours, and rounding put those in the wrong row —
   // which silently merged parts and crossed columns on the carburetor page.
-  const body = words.filter((w) => w.y1 >= 80).sort((a, b) => a.y1 - b.y1);
+  //
+  // The footer band has to go as well. The page number and the print date sit
+  // in the DESCRIPTION and REMARKS columns, and having no key of their own they
+  // were folded into the last part of every table — so the closing row of all
+  // 14 figures across the three Zenoah models read "JOINT 2" with a remark of
+  // "2017.08", and on one of them that displaced a real remark.
+  const body = words
+    .filter((w) => w.y1 >= 80 && w.y1 < height - 55)
+    .sort((a, b) => a.y1 - b.y1);
   const rows = [];
   for (const w of body) {
     const row = rows[rows.length - 1];
@@ -134,13 +142,48 @@ function parseTable(page) {
 // spaces, so the dash has to go before we ask.
 const searchCode = (partNumber) => String(partNumber || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
 
+// Read a "Fig. 1 CARBURETOR" / "Fig. A STARTER HT220-75" heading off a page.
+//
+// Two layouts are in circulation. Most Zenoah books print the heading on the
+// drawing and number the figures 1, 2, 3; the HT220-75 prints it on the parts
+// page opposite and letters them A, B, C ... So the number is kept as text, and
+// the caller looks on both pages.
+function readHeading(words) {
+  const anchor = words.find((w) => /^Fig/.test(w.text));
+  if (!anchor) return null;
+  const line = words
+    .filter((w) => Math.abs(w.y1 - anchor.y1) < 6 && w.x1 >= anchor.x1)
+    .sort((a, b) => a.x1 - b.x1)
+    .map((w) => w.text)
+    .join(" ");
+  const m = line.match(/^Fig\.?\s*([A-Z0-9]+)\s*([\s\S]*)$/);
+  if (!m) return null;
+  return { number: m[1], title: m[2].trim() };
+}
+
 function parseFigure(page, keys) {
   const { width, height, words } = wordsForPage(page);
+
+  // The heading must be kept out of the callouts, because books that number
+  // their figures print "Fig. 1" up there and that 1 would land as a hotspot in
+  // the corner of the drawing. Blanking the whole top band was the obvious way
+  // and the wrong one: the HANDLE and GEARBOX drawings both put callout 1 high
+  // on the right, and both went missing. So measure the heading instead — the
+  // box around the words at the top of the page that are not callout-shaped —
+  // and exclude only what falls inside it.
+  const headWords = words.filter((w) => w.y1 < 70 && !/^\d+[A-Z]?$/.test(w.text));
+  const head = headWords.length && {
+    x1: Math.min(...headWords.map((w) => w.x1)) - 10,
+    x2: Math.max(...headWords.map((w) => w.x2)) + 10,
+    y2: Math.max(...headWords.map((w) => w.y2)) + 10,
+  };
+  const inHeading = (w) => head && w.y2 <= head.y2 && w.x1 >= head.x1 && w.x2 <= head.x2;
+
   const spots = [];
   for (const w of words) {
     if (!/^\d+[A-Z]?$/.test(w.text)) continue;
-    if (w.y1 < 60 || w.y2 > height - 55) continue;   // title band / page number
-    if (!keys.has(w.text)) continue;                 // only real callouts
+    if (inHeading(w) || w.y2 > height - 55) continue;   // heading / page number
+    if (!keys.has(w.text)) continue;                    // only real callouts
     spots.push({
       key: w.text,
       // Percentages, so the viewer can scale the image freely.
@@ -164,9 +207,12 @@ for (let p = 1; p <= pageCount; p++) {
   if (!text.trim()) continue;
 
   const isTable = /Key#/.test(text);
-  const fig = text.match(/Fig\.\s*(\d+)/);
+  const heading = readHeading(words);
 
   if (isTable && pending) {
+    // Prefer the heading printed on the drawing; fall back to the one on the
+    // parts page, which is where the HT220-75 puts it.
+    const head = pending.head || heading || { number: String(figures.length + 1), title: "" };
     const rows = parseTable(p);
     const keys = new Set(rows.map((r) => r.key));
     const hotspots = parseFigure(pending.page, keys);
@@ -181,27 +227,23 @@ for (let p = 1; p <= pageCount; p++) {
       // figure number alone would make every sheet after the first
       // unreachable.
       id: String(figures.length + 1),
-      number: pending.number,
-      title: pending.title,
+      number: head.number,
+      title: head.title || `Figure ${head.number}`,
       image: png,
       hotspots,
       parts: rows.map((r) => ({ ...r, search: searchCode(r.part_number) })),
     });
-    console.log(`  Fig.${pending.number} ${pending.title}: ${rows.length} parts, ${hotspots.length} hotspots`);
+    console.log(`  Fig.${head.number} ${head.title}: ${rows.length} parts, ${hotspots.length} hotspots`);
 
     pending = null;
-  } else if (fig && !isTable) {
-    // The title sits on the same line as "Fig.N". Taking the whole page here
-    // would swallow every callout number on the drawing.
-    const anchor = words.find((w) => /^Fig\.?\s*\d*$/.test(w.text));
-    const title = anchor
-      ? words
-          .filter((w) => Math.abs(w.y1 - anchor.y1) < 6 && w.x1 > anchor.x1 && !/^\d+$/.test(w.text))
-          .map((w) => w.text)
-          .join(" ")
-          .trim()
-      : "";
-    pending = { page: p, number: parseInt(fig[1], 10), title: title || `Figure ${fig[1]}` };
+  } else if (!isTable) {
+    // The drawing is simply the page facing the table, so hold on to whatever
+    // page came last and let the table claim it. Counting callouts to decide
+    // instead looks sensible and is not: the MUFFLER, CRANKSHAFT & CLUTCH and
+    // ACCESSORIES figures have only two to four parts each, and any threshold
+    // high enough to reject the cover page threw all three away. The cover
+    // needs no rejecting — no table faces it.
+    pending = { page: p, head: heading };
   }
 }
 

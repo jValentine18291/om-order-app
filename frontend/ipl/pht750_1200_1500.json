@@ -5,7 +5,7 @@
  "figures": [
   {
    "id": "1",
-   "number": 1,
+   "number": "1",
    "title": "ENGINE / COIL / CLUTCH",
    "image": "pht750_1200_1500-fig1.png",
    "hotspots": [
@@ -693,9 +693,9 @@
      "key": "48",
      "part_number": "577 13 32-01",
      "sub": false,
-     "description": "JOINT 2",
+     "description": "JOINT",
      "qty": "1",
-     "remarks": "2017.08",
+     "remarks": "",
      "search": "577133201"
     }
    ],
@@ -705,7 +705,7 @@
   },
   {
    "id": "2",
-   "number": 2,
+   "number": "2",
    "title": "FUELING SYSTEM / STARTER",
    "image": "pht750_1200_1500-fig2.png",
    "hotspots": [
@@ -1336,9 +1336,9 @@
      "key": "43",
      "part_number": "1601-81810",
      "sub": false,
-     "description": "CAP 4",
+     "description": "CAP",
      "qty": "1",
-     "remarks": "2017.08",
+     "remarks": "",
      "search": "160181810"
     }
    ],
@@ -1348,7 +1348,7 @@
   },
   {
    "id": "3",
-   "number": 3,
+   "number": "3",
    "title": "CARBURETOR",
    "image": "pht750_1200_1500-fig3.png",
    "hotspots": [
@@ -1657,9 +1657,9 @@
      "key": "22",
      "part_number": "1850-81530",
      "sub": true,
-     "description": "SCREW 6",
+     "description": "SCREW",
      "qty": "4",
-     "remarks": "2017.08",
+     "remarks": "",
      "search": "185081530"
     }
    ],
@@ -1669,7 +1669,7 @@
   },
   {
    "id": "4",
-   "number": 4,
+   "number": "4",
    "title": "SHAFT / HANDLE / ACCESSORY",
    "image": "pht750_1200_1500-fig4.png",
    "hotspots": [
@@ -2151,9 +2151,9 @@
      "key": "28",
      "part_number": "09007-00425",
      "sub": true,
-     "description": "WRENCH 8",
+     "description": "WRENCH",
      "qty": "1",
-     "remarks": "H4 2017.08",
+     "remarks": "H4",
      "search": "0900700425"
     }
    ],

@@ -5,7 +5,7 @@
  "figures": [
   {
    "id": "1",
-   "number": 1,
+   "number": "1",
    "title": "DRIVE UNIT",
    "image": "bk3410fl-fig1.png",
    "hotspots": [
@@ -611,9 +611,9 @@
      "key": "43",
      "part_number": "6189-15111",
      "sub": false,
-     "description": "SAW 2",
+     "description": "SAW",
      "qty": "1",
-     "remarks": "2018.03",
+     "remarks": "",
      "search": "618915111"
     }
    ],
@@ -623,7 +623,7 @@
   },
   {
    "id": "2",
-   "number": 1,
+   "number": "1",
    "title": "DRIVE UNIT",
    "image": "bk3410fl-fig2.png",
    "hotspots": [
@@ -708,9 +708,9 @@
      "key": "49",
      "part_number": "0280-10504",
      "sub": true,
-     "description": "NUT 4",
+     "description": "NUT",
      "qty": "3",
-     "remarks": "2018.03",
+     "remarks": "",
      "search": "028010504"
     }
    ],
@@ -720,7 +720,7 @@
   },
   {
    "id": "3",
-   "number": 2,
+   "number": "2",
    "title": "ACCESSORIES",
    "image": "bk3410fl-fig3.png",
    "hotspots": [
@@ -1235,9 +1235,9 @@
      "key": "36",
      "part_number": "01583-11408",
      "sub": false,
-     "description": "NUT 6",
+     "description": "NUT",
      "qty": "1",
-     "remarks": "2018.03",
+     "remarks": "",
      "search": "0158311408"
     }
    ],
@@ -1247,7 +1247,7 @@
   },
   {
    "id": "4",
-   "number": 3,
+   "number": "3",
    "title": "ENGINE G34L",
    "image": "bk3410fl-fig4.png",
    "hotspots": [
@@ -1866,9 +1866,9 @@
      "key": "42",
      "part_number": "0263-90514",
      "sub": false,
-     "description": "SCREW 8",
+     "description": "SCREW",
      "qty": "1",
-     "remarks": "M5x14 2018.03",
+     "remarks": "M5x14",
      "search": "026390514"
     }
    ],
@@ -1878,7 +1878,7 @@
   },
   {
    "id": "5",
-   "number": 4,
+   "number": "4",
    "title": "HOUSING, COIL, AIR CLEANER, RECOIL",
    "image": "bk3410fl-fig5.png",
    "hotspots": [
@@ -2467,9 +2467,9 @@
      "key": "42",
      "part_number": "848G5490C1",
      "sub": false,
-     "description": "LABEL, RECOIL 10",
+     "description": "LABEL, RECOIL",
      "qty": "1",
-     "remarks": "2018.03",
+     "remarks": "",
      "search": "848G5490C1"
     }
    ],
@@ -2479,7 +2479,7 @@
   },
   {
    "id": "6",
-   "number": 5,
+   "number": "5",
    "title": "CARBURETOR",
    "image": "bk3410fl-fig6.png",
    "hotspots": [
@@ -2858,9 +2858,9 @@
      "key": "27",
      "part_number": "8488P20500",
      "sub": false,
-     "description": "CABLE COMP. 12",
+     "description": "CABLE COMP.",
      "qty": "1",
-     "remarks": "2018.03",
+     "remarks": "",
      "search": "8488P20500"
     }
    ],

@@ -5,7 +5,7 @@
  "figures": [
   {
    "id": "1",
-   "number": 1,
+   "number": "1",
    "title": "ENGINE UNIT",
    "image": "hbz260ez-fig1.png",
    "hotspots": [
@@ -595,9 +595,9 @@
      "key": "41",
      "part_number": "4820-12350",
      "sub": false,
-     "description": "SCREW 2",
+     "description": "SCREW",
      "qty": "2",
-     "remarks": "M5x0.8 2021.02",
+     "remarks": "M5x0.8",
      "search": "482012350"
     }
    ],
@@ -607,7 +607,7 @@
   },
   {
    "id": "2",
-   "number": 2,
+   "number": "2",
    "title": "AIR UNIT",
    "image": "hbz260ez-fig2.png",
    "hotspots": [
@@ -1077,9 +1077,9 @@
      "key": "32",
      "part_number": "577 95 56-01",
      "sub": false,
-     "description": "STRATOCHARGED 4",
+     "description": "STRATOCHARGED",
      "qty": "1",
-     "remarks": "2021.02",
+     "remarks": "",
      "search": "577955601"
     }
    ],
@@ -1089,7 +1089,7 @@
   },
   {
    "id": "3",
-   "number": 3,
+   "number": "3",
    "title": "INTAKE, RECOIL, ACCESSARY",
    "image": "hbz260ez-fig3.png",
    "hotspots": [
@@ -1510,9 +1510,9 @@
      "key": "28",
      "part_number": "588 84 14-01",
      "sub": false,
-     "description": "WRENCH 6",
+     "description": "WRENCH",
      "qty": "1",
-     "remarks": "2021.02",
+     "remarks": "",
      "search": "588841401"
     }
    ],
@@ -1522,7 +1522,7 @@
   },
   {
    "id": "4",
-   "number": 4,
+   "number": "4",
    "title": "CARBURETOR",
    "image": "hbz260ez-fig4.png",
    "hotspots": [
@@ -2102,9 +2102,9 @@
      "key": "36",
      "part_number": "587 71 38-01",
      "sub": true,
-     "description": "PUMP, COVER 8",
+     "description": "PUMP, COVER",
      "qty": "1",
-     "remarks": "2021.02",
+     "remarks": "",
      "search": "587713801"
     }
    ],

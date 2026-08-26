@@ -1,0 +1,2446 @@
+{
+ "id": "ht220_75",
+ "name": "Zenoah HT220-75 Hedge Trimmer",
+ "source": "IPL,ZENOAH,HT220-75,2020-07.pdf",
+ "figures": [
+  {
+   "id": "1",
+   "number": "A",
+   "title": "STARTER HT220-75",
+   "image": "ht220_75-fig1.png",
+   "hotspots": [
+    {
+     "key": "9",
+     "x": 40.492,
+     "y": 14.31
+    },
+    {
+     "key": "1",
+     "x": 36.598,
+     "y": 21.232
+    },
+    {
+     "key": "2",
+     "x": 32.716,
+     "y": 33.706
+    },
+    {
+     "key": "3",
+     "x": 32.986,
+     "y": 47.681
+    },
+    {
+     "key": "4",
+     "x": 32.986,
+     "y": 57.501
+    },
+    {
+     "key": "8",
+     "x": 20.955,
+     "y": 60.699
+    },
+    {
+     "key": "5",
+     "x": 32.986,
+     "y": 67.795
+    },
+    {
+     "key": "6",
+     "x": 32.986,
+     "y": 76.981
+    },
+    {
+     "key": "7",
+     "x": 32.986,
+     "y": 82.682
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "8488241600",
+     "sub": false,
+     "description": "SCREW",
+     "qty": "3",
+     "remarks": "",
+     "search": "8488241600"
+    },
+    {
+     "key": "2",
+     "part_number": "575 48 95-02",
+     "sub": true,
+     "description": "STARTER HANDLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "575489502"
+    },
+    {
+     "key": "3",
+     "part_number": "2841-75310",
+     "sub": true,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "284175310"
+    },
+    {
+     "key": "4",
+     "part_number": "597 17 35-01",
+     "sub": true,
+     "description": "STARTER ROPE",
+     "qty": "1",
+     "remarks": "",
+     "search": "597173501"
+    },
+    {
+     "key": "5",
+     "part_number": "597 37 24-01",
+     "sub": true,
+     "description": "STARTER PULLEY",
+     "qty": "1",
+     "remarks": "",
+     "search": "597372401"
+    },
+    {
+     "key": "6",
+     "part_number": "1140-51230",
+     "sub": true,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "114051230"
+    },
+    {
+     "key": "7",
+     "part_number": "8488251901",
+     "sub": true,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "8488251901"
+    },
+    {
+     "key": "8",
+     "part_number": "590 72 57-01",
+     "sub": false,
+     "description": "STARTER ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "590725701"
+    },
+    {
+     "key": "9",
+     "part_number": "586 07 63-45",
+     "sub": false,
+     "description": "DECAL,RECOIL",
+     "qty": "1",
+     "remarks": "HT220-75",
+     "search": "586076345"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.A STARTER HT220-75"
+  },
+  {
+   "id": "2",
+   "number": "B",
+   "title": "CYLINDER COVER HT220-75",
+   "image": "ht220_75-fig2.png",
+   "hotspots": [
+    {
+     "key": "2",
+     "x": 23.109,
+     "y": 21.679
+    },
+    {
+     "key": "1",
+     "x": 19.157,
+     "y": 36.889
+    },
+    {
+     "key": "3",
+     "x": 78.969,
+     "y": 45.427
+    },
+    {
+     "key": "4",
+     "x": 71.974,
+     "y": 72.062
+    },
+    {
+     "key": "5",
+     "x": 65.485,
+     "y": 75.933
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "590 72 55-01",
+     "sub": false,
+     "description": "CYLINDER COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "590725501"
+    },
+    {
+     "key": "2",
+     "part_number": "577 94 23-01",
+     "sub": false,
+     "description": "BOLT",
+     "qty": "4",
+     "remarks": "",
+     "search": "577942301"
+    },
+    {
+     "key": "3",
+     "part_number": "590 72 56-01",
+     "sub": false,
+     "description": "MUFFLER COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "590725601"
+    },
+    {
+     "key": "4",
+     "part_number": "8488241600",
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "8488241600"
+    },
+    {
+     "key": "5",
+     "part_number": "577 16 99-02",
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "577169902"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.B CYLINDER COVER HT220-75"
+  },
+  {
+   "id": "3",
+   "number": "C",
+   "title": "CARBURETTOR & AIRFILTER HT220-75, CHT220-60",
+   "image": "ht220_75-fig3.png",
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 24.044,
+     "y": 15.54
+    },
+    {
+     "key": "7",
+     "x": 55.649,
+     "y": 16.761
+    },
+    {
+     "key": "2",
+     "x": 32.373,
+     "y": 22.623
+    },
+    {
+     "key": "3",
+     "x": 40.127,
+     "y": 24.688
+    },
+    {
+     "key": "4",
+     "x": 42.261,
+     "y": 26.695
+    },
+    {
+     "key": "5",
+     "x": 46.043,
+     "y": 28.045
+    },
+    {
+     "key": "3",
+     "x": 57.762,
+     "y": 29.845
+    },
+    {
+     "key": "6",
+     "x": 64.429,
+     "y": 30.885
+    },
+    {
+     "key": "8",
+     "x": 45.102,
+     "y": 41.451
+    },
+    {
+     "key": "9",
+     "x": 81.055,
+     "y": 44.64
+    },
+    {
+     "key": "10",
+     "x": 86.045,
+     "y": 49.35
+    },
+    {
+     "key": "11",
+     "x": 29.822,
+     "y": 67.172
+    },
+    {
+     "key": "12",
+     "x": 28.86,
+     "y": 73.418
+    },
+    {
+     "key": "13",
+     "x": 28.786,
+     "y": 77.148
+    },
+    {
+     "key": "14",
+     "x": 20.439,
+     "y": 80.336
+    },
+    {
+     "key": "15",
+     "x": 68.599,
+     "y": 74.873
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "590 72 53-01",
+     "sub": false,
+     "description": "AIR FILTER COVER, ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "590725301"
+    },
+    {
+     "key": "2",
+     "part_number": "590 72 52-01",
+     "sub": false,
+     "description": "AIR FILTER",
+     "qty": "1",
+     "remarks": "",
+     "search": "590725201"
+    },
+    {
+     "key": "3",
+     "part_number": "503 74 01-03",
+     "sub": true,
+     "description": "SNAP LOCKING",
+     "qty": "2",
+     "remarks": "",
+     "search": "503740103"
+    },
+    {
+     "key": "4",
+     "part_number": "2630-33610",
+     "sub": true,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "263033610"
+    },
+    {
+     "key": "5",
+     "part_number": "T1650-82130",
+     "sub": true,
+     "description": "PLATE, CHOKE",
+     "qty": "1",
+     "remarks": "",
+     "search": "T165082130"
+    },
+    {
+     "key": "6",
+     "part_number": "590 72 51-01",
+     "sub": true,
+     "description": "CHOKE LEVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "590725101"
+    },
+    {
+     "key": "7",
+     "part_number": "596 62 60-01",
+     "sub": false,
+     "description": "AIR FILTER, HOUSING COMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "596626001"
+    },
+    {
+     "key": "8",
+     "part_number": "8488055000",
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "8488055000"
+    },
+    {
+     "key": "9",
+     "part_number": "848E0A8102",
+     "sub": false,
+     "description": "CARBURETOR ASSY",
+     "qty": "1",
+     "remarks": "WYL-190B",
+     "search": "848E0A8102"
+    },
+    {
+     "key": "10",
+     "part_number": "5500-13131",
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "550013131"
+    },
+    {
+     "key": "11",
+     "part_number": "4820-32120",
+     "sub": false,
+     "description": "BOLT",
+     "qty": "2",
+     "remarks": "",
+     "search": "482032120"
+    },
+    {
+     "key": "12",
+     "part_number": "0282-10604",
+     "sub": true,
+     "description": "NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "028210604"
+    },
+    {
+     "key": "13",
+     "part_number": "T1600-13170",
+     "sub": true,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "T160013170"
+    },
+    {
+     "key": "14",
+     "part_number": "593 58 78-01",
+     "sub": false,
+     "description": "INSULATOR, ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "593587801"
+    },
+    {
+     "key": "15",
+     "part_number": "848E0214B0",
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "848E0214B0"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.C CARBURETTOR & AIRFILTER HT220-75, CHT220-60"
+  },
+  {
+   "id": "4",
+   "number": "D",
+   "title": "FUEL TANK HT220-75, CHT220-60",
+   "image": "ht220_75-fig4.png",
+   "hotspots": [
+    {
+     "key": "2",
+     "x": 35.958,
+     "y": 24.927
+    },
+    {
+     "key": "11",
+     "x": 75.947,
+     "y": 37.231
+    },
+    {
+     "key": "1",
+     "x": 53.647,
+     "y": 37.415
+    },
+    {
+     "key": "13",
+     "x": 88.039,
+     "y": 42.943
+    },
+    {
+     "key": "3",
+     "x": 27.447,
+     "y": 57.014
+    },
+    {
+     "key": "3",
+     "x": 34.36,
+     "y": 58.025
+    },
+    {
+     "key": "12",
+     "x": 55.157,
+     "y": 69.626
+    },
+    {
+     "key": "5",
+     "x": 24.127,
+     "y": 77.276
+    },
+    {
+     "key": "6",
+     "x": 30.16,
+     "y": 77.07
+    },
+    {
+     "key": "6",
+     "x": 34.146,
+     "y": 76.426
+    },
+    {
+     "key": "7",
+     "x": 42.843,
+     "y": 76.301
+    },
+    {
+     "key": "6",
+     "x": 55.062,
+     "y": 78.615
+    },
+    {
+     "key": "4",
+     "x": 18.813,
+     "y": 79.732
+    },
+    {
+     "key": "8",
+     "x": 61.598,
+     "y": 82.633
+    },
+    {
+     "key": "10",
+     "x": 10.23,
+     "y": 82.944
+    },
+    {
+     "key": "9",
+     "x": 47.268,
+     "y": 88.53
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "577 04 87-01",
+     "sub": true,
+     "description": "・GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "577048701"
+    },
+    {
+     "key": "2",
+     "part_number": "576 40 37-03",
+     "sub": true,
+     "description": "TANK CAP",
+     "qty": "1",
+     "remarks": "",
+     "search": "576403703"
+    },
+    {
+     "key": "3",
+     "part_number": "597 37 21-01",
+     "sub": true,
+     "description": "GROMMET, COMP",
+     "qty": "2",
+     "remarks": "",
+     "search": "597372101"
+    },
+    {
+     "key": "4",
+     "part_number": "598 42 47-01",
+     "sub": true,
+     "description": "FUEL HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "598424701"
+    },
+    {
+     "key": "5",
+     "part_number": "577 53 32-14",
+     "sub": true,
+     "description": "FUEL HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "577533214"
+    },
+    {
+     "key": "6",
+     "part_number": "1260-85460",
+     "sub": true,
+     "description": "CLIP",
+     "qty": "3",
+     "remarks": "",
+     "search": "126085460"
+    },
+    {
+     "key": "7",
+     "part_number": "577 53 32-10",
+     "sub": true,
+     "description": "FUEL HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "577533210"
+    },
+    {
+     "key": "8",
+     "part_number": "503 44 32-01",
+     "sub": true,
+     "description": "FUEL FILTER",
+     "qty": "1",
+     "remarks": "",
+     "search": "503443201"
+    },
+    {
+     "key": "9",
+     "part_number": "590 71 52-01",
+     "sub": false,
+     "description": "FUEL TANK, ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "590715201"
+    },
+    {
+     "key": "10",
+     "part_number": "1950-86120",
+     "sub": false,
+     "description": "CLIP",
+     "qty": "1",
+     "remarks": "",
+     "search": "195086120"
+    },
+    {
+     "key": "11",
+     "part_number": "T1650-85521",
+     "sub": false,
+     "description": "ABSORBER",
+     "qty": "2",
+     "remarks": "",
+     "search": "T165085521"
+    },
+    {
+     "key": "12",
+     "part_number": "1400-86271",
+     "sub": false,
+     "description": "CUSHION",
+     "qty": "1",
+     "remarks": "",
+     "search": "140086271"
+    },
+    {
+     "key": "13",
+     "part_number": "T4950-52030",
+     "sub": false,
+     "description": "BOLT",
+     "qty": "1",
+     "remarks": "",
+     "search": "T495052030"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.D FUEL TANK HT220-75, CHT220-60"
+  },
+  {
+   "id": "5",
+   "number": "E",
+   "title": "IGNITION SYSTEM HT220-75, CHT220-60",
+   "image": "ht220_75-fig5.png",
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 66.948,
+     "y": 17.343
+    },
+    {
+     "key": "2",
+     "x": 74.944,
+     "y": 21.76
+    },
+    {
+     "key": "2",
+     "x": 74.944,
+     "y": 26.798
+    },
+    {
+     "key": "3",
+     "x": 74.944,
+     "y": 29.538
+    },
+    {
+     "key": "3",
+     "x": 74.944,
+     "y": 33.347
+    },
+    {
+     "key": "6",
+     "x": 26.482,
+     "y": 35.614
+    },
+    {
+     "key": "5",
+     "x": 88.607,
+     "y": 36.21
+    },
+    {
+     "key": "9",
+     "x": 19.759,
+     "y": 42.361
+    },
+    {
+     "key": "4",
+     "x": 74.944,
+     "y": 50.248
+    },
+    {
+     "key": "8",
+     "x": 14.554,
+     "y": 54.097
+    },
+    {
+     "key": "4",
+     "x": 74.944,
+     "y": 53.567
+    },
+    {
+     "key": "10",
+     "x": 28.277,
+     "y": 55.338
+    },
+    {
+     "key": "7",
+     "x": 14.555,
+     "y": 60.432
+    },
+    {
+     "key": "11",
+     "x": 31.355,
+     "y": 67.835
+    },
+    {
+     "key": "13",
+     "x": 30.473,
+     "y": 77.181
+    },
+    {
+     "key": "12",
+     "x": 48.815,
+     "y": 69.483
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "2750-32620",
+     "sub": false,
+     "description": "NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "275032620"
+    },
+    {
+     "key": "2",
+     "part_number": "525 63 71-01",
+     "sub": true,
+     "description": "STARTER PAWL",
+     "qty": "2",
+     "remarks": "",
+     "search": "525637101"
+    },
+    {
+     "key": "3",
+     "part_number": "573 95 15-01",
+     "sub": true,
+     "description": "SPRING, STARTER PAWL",
+     "qty": "2",
+     "remarks": "",
+     "search": "573951501"
+    },
+    {
+     "key": "4",
+     "part_number": "735 58 35-01",
+     "sub": true,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "735583501"
+    },
+    {
+     "key": "5",
+     "part_number": "590 63 64-01",
+     "sub": false,
+     "description": "FLYWHEEL, ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "590636401"
+    },
+    {
+     "key": "6",
+     "part_number": "585 69 83-01",
+     "sub": false,
+     "description": "BOLT",
+     "qty": "2",
+     "remarks": "",
+     "search": "585698301"
+    },
+    {
+     "key": "7",
+     "part_number": "T1600-72110",
+     "sub": true,
+     "description": "PLUG CAP",
+     "qty": "1",
+     "remarks": "",
+     "search": "T160072110"
+    },
+    {
+     "key": "8",
+     "part_number": "T1600-72120",
+     "sub": true,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "T160072120"
+    },
+    {
+     "key": "9",
+     "part_number": "596 62 59-01",
+     "sub": false,
+     "description": "IGNITION MODULE, ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "596625901"
+    },
+    {
+     "key": "10",
+     "part_number": "1260-71261",
+     "sub": false,
+     "description": "SPACER",
+     "qty": "2",
+     "remarks": "",
+     "search": "126071261"
+    },
+    {
+     "key": "11",
+     "part_number": "T1650-72140",
+     "sub": false,
+     "description": "HUB CAP",
+     "qty": "1",
+     "remarks": "",
+     "search": "T165072140"
+    },
+    {
+     "key": "12",
+     "part_number": "3699-90419A",
+     "sub": false,
+     "description": "SPARKPLUG, RCJ6Y",
+     "qty": "1",
+     "remarks": "",
+     "search": "369990419A"
+    },
+    {
+     "key": "13",
+     "part_number": "578 93 45-02",
+     "sub": false,
+     "description": "SHORT CIRCUIT CABLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "578934502"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.E IGNITION SYSTEM HT220-75, CHT220-60"
+  },
+  {
+   "id": "6",
+   "number": "F",
+   "title": "MUFFLER HT220-75, CHT220-60",
+   "image": "ht220_75-fig6.png",
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 25.479,
+     "y": 25.043
+    },
+    {
+     "key": "2",
+     "x": 55.444,
+     "y": 34.405
+    },
+    {
+     "key": "3",
+     "x": 82.041,
+     "y": 50.007
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "848E0215C2",
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "848E0215C2"
+    },
+    {
+     "key": "2",
+     "part_number": "590 71 62-01",
+     "sub": false,
+     "description": "MUFFLER",
+     "qty": "1",
+     "remarks": "",
+     "search": "590716201"
+    },
+    {
+     "key": "3",
+     "part_number": "4820-15310",
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "482015310"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.F MUFFLER HT220-75, CHT220-60"
+  },
+  {
+   "id": "7",
+   "number": "G",
+   "title": "CYLINDER & PISTON HT220-75, CHT220-60",
+   "image": "ht220_75-fig7.png",
+   "hotspots": [
+    {
+     "key": "5",
+     "x": 57.862,
+     "y": 25.895
+    },
+    {
+     "key": "6",
+     "x": 57.906,
+     "y": 28.614
+    },
+    {
+     "key": "7",
+     "x": 57.818,
+     "y": 32.816
+    },
+    {
+     "key": "8",
+     "x": 58.082,
+     "y": 38.141
+    },
+    {
+     "key": "4",
+     "x": 58.146,
+     "y": 42.367
+    },
+    {
+     "key": "3",
+     "x": 50.398,
+     "y": 45.357
+    },
+    {
+     "key": "2",
+     "x": 35.385,
+     "y": 48.101
+    },
+    {
+     "key": "1",
+     "x": 12.09,
+     "y": 65.698
+    },
+    {
+     "key": "9",
+     "x": 79.062,
+     "y": 29.68
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "4820-12130",
+     "sub": false,
+     "description": "BOLT",
+     "qty": "2",
+     "remarks": "",
+     "search": "482012130"
+    },
+    {
+     "key": "2",
+     "part_number": "T1600-12110",
+     "sub": false,
+     "description": "CYLINDER",
+     "qty": "1",
+     "remarks": "",
+     "search": "T160012110"
+    },
+    {
+     "key": "3",
+     "part_number": "8488C32300",
+     "sub": false,
+     "description": "RING",
+     "qty": "2",
+     "remarks": "",
+     "search": "8488C32300"
+    },
+    {
+     "key": "4",
+     "part_number": "5600-41111",
+     "sub": false,
+     "description": "PISTON",
+     "qty": "1",
+     "remarks": "",
+     "search": "560041111"
+    },
+    {
+     "key": "5",
+     "part_number": "1260-41320",
+     "sub": false,
+     "description": "RING",
+     "qty": "2",
+     "remarks": "",
+     "search": "126041320"
+    },
+    {
+     "key": "6",
+     "part_number": "1101-41340",
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "110141340"
+    },
+    {
+     "key": "7",
+     "part_number": "1101-41310",
+     "sub": false,
+     "description": "PIN, PISTON",
+     "qty": "1",
+     "remarks": "",
+     "search": "110141310"
+    },
+    {
+     "key": "8",
+     "part_number": "5500-41410",
+     "sub": false,
+     "description": "BEARING",
+     "qty": "1",
+     "remarks": "",
+     "search": "550041410"
+    },
+    {
+     "key": "9",
+     "part_number": "848E0A12B1",
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "848E0A12B1"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.G CYLINDER & PISTON HT220-75, CHT220-60"
+  },
+  {
+   "id": "8",
+   "number": "H",
+   "title": "CRANKCASE HT220-75, CHT220-60",
+   "image": "ht220_75-fig8.png",
+   "hotspots": [
+    {
+     "key": "3",
+     "x": 36.32,
+     "y": 11.958
+    },
+    {
+     "key": "2",
+     "x": 36.604,
+     "y": 38.669
+    },
+    {
+     "key": "2",
+     "x": 36.581,
+     "y": 40.693
+    },
+    {
+     "key": "2",
+     "x": 36.493,
+     "y": 44.826
+    },
+    {
+     "key": "4",
+     "x": 64.194,
+     "y": 47.727
+    },
+    {
+     "key": "1",
+     "x": 23.539,
+     "y": 51.072
+    },
+    {
+     "key": "5",
+     "x": 64.242,
+     "y": 52.763
+    },
+    {
+     "key": "6",
+     "x": 64.218,
+     "y": 58.807
+    },
+    {
+     "key": "7",
+     "x": 64.136,
+     "y": 65.45
+    },
+    {
+     "key": "8",
+     "x": 64.129,
+     "y": 76.882
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "594 10 93-01",
+     "sub": false,
+     "description": "CRANKCASE, COMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "594109301"
+    },
+    {
+     "key": "2",
+     "part_number": "2629-21130",
+     "sub": true,
+     "description": "PIN",
+     "qty": "3",
+     "remarks": "",
+     "search": "262921130"
+    },
+    {
+     "key": "3",
+     "part_number": "4820-13180",
+     "sub": false,
+     "description": "SCREW",
+     "qty": "3",
+     "remarks": "",
+     "search": "482013180"
+    },
+    {
+     "key": "4",
+     "part_number": "T1600-21220",
+     "sub": false,
+     "description": "SEAL",
+     "qty": "1",
+     "remarks": "10x26x5",
+     "search": "T160021220"
+    },
+    {
+     "key": "5",
+     "part_number": "04065-02612",
+     "sub": false,
+     "description": "SNAP RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "0406502612"
+    },
+    {
+     "key": "6",
+     "part_number": "T1600-21240",
+     "sub": false,
+     "description": "BALL BEARING",
+     "qty": "2",
+     "remarks": "",
+     "search": "T160021240"
+    },
+    {
+     "key": "7",
+     "part_number": "T1600-21140",
+     "sub": false,
+     "description": "GASKET, CASE",
+     "qty": "1",
+     "remarks": "",
+     "search": "T160021140"
+    },
+    {
+     "key": "8",
+     "part_number": "T1600-21210",
+     "sub": false,
+     "description": "SEAL",
+     "qty": "1",
+     "remarks": "10x20x5",
+     "search": "T160021210"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.H CRANKCASE HT220-75, CHT220-60"
+  },
+  {
+   "id": "9",
+   "number": "J",
+   "title": "CRANKSHAFT & CLUTCH HT220-75, CHT220-60",
+   "image": "ht220_75-fig9.png",
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 67.079,
+     "y": 36.079
+    },
+    {
+     "key": "3",
+     "x": 66.501,
+     "y": 58.514
+    },
+    {
+     "key": "2",
+     "x": 77.29,
+     "y": 60.566
+    },
+    {
+     "key": "3",
+     "x": 66.588,
+     "y": 65.765
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "848E024204",
+     "sub": false,
+     "description": "SHAFT, COMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "848E024204"
+    },
+    {
+     "key": "2",
+     "part_number": "T1666-51100",
+     "sub": false,
+     "description": "CLUTCH ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "T166651100"
+    },
+    {
+     "key": "3",
+     "part_number": "T1666-51230",
+     "sub": true,
+     "description": "SPRING",
+     "qty": "2",
+     "remarks": "",
+     "search": "T166651230"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.J CRANKSHAFT & CLUTCH HT220-75, CHT220-60"
+  },
+  {
+   "id": "10",
+   "number": "K",
+   "title": "HANDLE HT220-75",
+   "image": "ht220_75-fig10.png",
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 79.099,
+     "y": 6.119
+    },
+    {
+     "key": "3",
+     "x": 47.474,
+     "y": 8.948
+    },
+    {
+     "key": "5",
+     "x": 26.723,
+     "y": 15.397
+    },
+    {
+     "key": "2",
+     "x": 91.664,
+     "y": 16.299
+    },
+    {
+     "key": "4",
+     "x": 23.968,
+     "y": 19.305
+    },
+    {
+     "key": "6",
+     "x": 55.495,
+     "y": 29.101
+    },
+    {
+     "key": "7",
+     "x": 54.033,
+     "y": 38.989
+    },
+    {
+     "key": "8",
+     "x": 45.51,
+     "y": 42.889
+    },
+    {
+     "key": "9",
+     "x": 50.231,
+     "y": 45.561
+    },
+    {
+     "key": "10",
+     "x": 74.143,
+     "y": 48.624
+    },
+    {
+     "key": "11",
+     "x": 57.585,
+     "y": 51.616
+    },
+    {
+     "key": "12",
+     "x": 56.787,
+     "y": 57.374
+    },
+    {
+     "key": "13",
+     "x": 58.536,
+     "y": 61.894
+    },
+    {
+     "key": "16",
+     "x": 19.411,
+     "y": 64.823
+    },
+    {
+     "key": "18",
+     "x": 40.358,
+     "y": 67.518
+    },
+    {
+     "key": "17",
+     "x": 15.556,
+     "y": 69.931
+    },
+    {
+     "key": "19",
+     "x": 40.6,
+     "y": 70.254
+    },
+    {
+     "key": "20",
+     "x": 40.63,
+     "y": 74.104
+    },
+    {
+     "key": "15",
+     "x": 26.032,
+     "y": 75.879
+    },
+    {
+     "key": "14",
+     "x": 37.68,
+     "y": 83.999
+    },
+    {
+     "key": "21",
+     "x": 75.372,
+     "y": 86.328
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "590 64 11-01",
+     "sub": false,
+     "description": "LEVER, ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "590641101"
+    },
+    {
+     "key": "2",
+     "part_number": "590 72 38-01",
+     "sub": false,
+     "description": "STOPPER",
+     "qty": "1",
+     "remarks": "",
+     "search": "590723801"
+    },
+    {
+     "key": "3",
+     "part_number": "581 41 04-01",
+     "sub": false,
+     "description": "TUBE",
+     "qty": "1",
+     "remarks": "",
+     "search": "581410401"
+    },
+    {
+     "key": "4",
+     "part_number": "577 13 32-01",
+     "sub": false,
+     "description": "JOINT",
+     "qty": "1",
+     "remarks": "",
+     "search": "577133201"
+    },
+    {
+     "key": "5",
+     "part_number": "585 73 30-12",
+     "sub": false,
+     "description": "CABLE, COMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "585733012"
+    },
+    {
+     "key": "6",
+     "part_number": "590 78 43-01",
+     "sub": false,
+     "description": "HANDLEBAR, ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "590784301"
+    },
+    {
+     "key": "7",
+     "part_number": "T4503-31210",
+     "sub": false,
+     "description": "ABSORBER",
+     "qty": "4",
+     "remarks": "",
+     "search": "T450331210"
+    },
+    {
+     "key": "8",
+     "part_number": "578 79 69-01",
+     "sub": false,
+     "description": "BOLT",
+     "qty": "2",
+     "remarks": "",
+     "search": "578796901"
+    },
+    {
+     "key": "9",
+     "part_number": "581 49 98-01",
+     "sub": false,
+     "description": "BOLT",
+     "qty": "1",
+     "remarks": "",
+     "search": "581499801"
+    },
+    {
+     "key": "10",
+     "part_number": "590 72 44-01",
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "590724401"
+    },
+    {
+     "key": "11",
+     "part_number": "590 71 47-01",
+     "sub": false,
+     "description": "SLEEVE",
+     "qty": "2",
+     "remarks": "",
+     "search": "590714701"
+    },
+    {
+     "key": "12",
+     "part_number": "H734 18 14-55",
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "H734181455"
+    },
+    {
+     "key": "13",
+     "part_number": "544 21 84-05",
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "544218405"
+    },
+    {
+     "key": "14",
+     "part_number": "590 71 32-02",
+     "sub": false,
+     "description": "FRONT HANDLE, HS",
+     "qty": "1",
+     "remarks": "",
+     "search": "590713202"
+    },
+    {
+     "key": "15",
+     "part_number": "590 71 33-01",
+     "sub": false,
+     "description": "HANDLE GRIP, FRONT",
+     "qty": "1",
+     "remarks": "",
+     "search": "590713301"
+    },
+    {
+     "key": "16",
+     "part_number": "503 23 00-35",
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "503230035"
+    },
+    {
+     "key": "17",
+     "part_number": "T4970-52000",
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "T497052000"
+    },
+    {
+     "key": "18",
+     "part_number": "T4503-31230",
+     "sub": false,
+     "description": "HUB CAP",
+     "qty": "2",
+     "remarks": "",
+     "search": "T450331230"
+    },
+    {
+     "key": "19",
+     "part_number": "590 92 41-01",
+     "sub": false,
+     "description": "HOLDER",
+     "qty": "2",
+     "remarks": "",
+     "search": "590924101"
+    },
+    {
+     "key": "20",
+     "part_number": "525 63 36-01",
+     "sub": false,
+     "description": "ANTIVIBRATION ELEMENT, FRONT",
+     "qty": "4",
+     "remarks": "",
+     "search": "525633601"
+    },
+    {
+     "key": "21",
+     "part_number": "596 62 50-02",
+     "sub": false,
+     "description": "DECAL, HANDLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "596625002"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.K HANDLE HT220-75"
+  },
+  {
+   "id": "11",
+   "number": "L",
+   "title": "GEARBOX HT220-75",
+   "image": "ht220_75-fig11.png",
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 61.264,
+     "y": 7.598
+    },
+    {
+     "key": "3",
+     "x": 34.1,
+     "y": 12.839
+    },
+    {
+     "key": "2",
+     "x": 69.098,
+     "y": 13.75
+    },
+    {
+     "key": "4",
+     "x": 39.541,
+     "y": 25.515
+    },
+    {
+     "key": "7",
+     "x": 74.375,
+     "y": 25.713
+    },
+    {
+     "key": "5",
+     "x": 42.441,
+     "y": 28.706
+    },
+    {
+     "key": "8",
+     "x": 66.163,
+     "y": 35.538
+    },
+    {
+     "key": "6",
+     "x": 26.679,
+     "y": 36.716
+    },
+    {
+     "key": "9",
+     "x": 63.082,
+     "y": 44.879
+    },
+    {
+     "key": "10",
+     "x": 26.679,
+     "y": 49.576
+    },
+    {
+     "key": "11",
+     "x": 61.026,
+     "y": 61.406
+    },
+    {
+     "key": "12",
+     "x": 61.026,
+     "y": 74.141
+    },
+    {
+     "key": "13",
+     "x": 26.679,
+     "y": 78.071
+    },
+    {
+     "key": "14",
+     "x": 63.503,
+     "y": 80.904
+    },
+    {
+     "key": "15",
+     "x": 61.026,
+     "y": 85.817
+    },
+    {
+     "key": "16",
+     "x": 61.026,
+     "y": 89.705
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "590 53 64-02",
+     "sub": false,
+     "description": "CLUTCH DRUM",
+     "qty": "1",
+     "remarks": "",
+     "search": "590536402"
+    },
+    {
+     "key": "2",
+     "part_number": "590 53 62-01",
+     "sub": false,
+     "description": "GEAR HOUSING, UPPER COMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "590536201"
+    },
+    {
+     "key": "3",
+     "part_number": "3199-13350",
+     "sub": false,
+     "description": "FITTING",
+     "qty": "1",
+     "remarks": "",
+     "search": "319913350"
+    },
+    {
+     "key": "4",
+     "part_number": "590 71 36-01",
+     "sub": false,
+     "description": "CLAMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "590713601"
+    },
+    {
+     "key": "5",
+     "part_number": "T4950-62040",
+     "sub": false,
+     "description": "BOLT",
+     "qty": "3",
+     "remarks": "",
+     "search": "T495062040"
+    },
+    {
+     "key": "6",
+     "part_number": "590 53 69-01",
+     "sub": false,
+     "description": "PLATE, THRUST",
+     "qty": "2",
+     "remarks": "",
+     "search": "590536901"
+    },
+    {
+     "key": "7",
+     "part_number": "590 71 41-01",
+     "sub": false,
+     "description": "EXHAUST PIPE, ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "590714101"
+    },
+    {
+     "key": "8",
+     "part_number": "577 94 23-01",
+     "sub": false,
+     "description": "BOLT",
+     "qty": "2",
+     "remarks": "",
+     "search": "577942301"
+    },
+    {
+     "key": "9",
+     "part_number": "598 64 15-01",
+     "sub": false,
+     "description": "ROD, KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "598641501"
+    },
+    {
+     "key": "10",
+     "part_number": "593 65 13-01",
+     "sub": false,
+     "description": "GEAR, WHEEL ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "593651301"
+    },
+    {
+     "key": "11",
+     "part_number": "590 53 76-01",
+     "sub": false,
+     "description": "GASKET, GEAR HOUSING",
+     "qty": "1",
+     "remarks": "",
+     "search": "590537601"
+    },
+    {
+     "key": "12",
+     "part_number": "590 53 65-01",
+     "sub": false,
+     "description": "GEAR, DRIVE",
+     "qty": "1",
+     "remarks": "",
+     "search": "590536501"
+    },
+    {
+     "key": "13",
+     "part_number": "590 53 70-01",
+     "sub": false,
+     "description": "SEALING, FELT",
+     "qty": "1",
+     "remarks": "",
+     "search": "590537001"
+    },
+    {
+     "key": "14",
+     "part_number": "590 53 72-01",
+     "sub": false,
+     "description": "GEAR HOUSING, LOWER COMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "590537201"
+    },
+    {
+     "key": "15",
+     "part_number": "590 64 94-01",
+     "sub": false,
+     "description": "SCREW PLUG",
+     "qty": "1",
+     "remarks": "",
+     "search": "590649401"
+    },
+    {
+     "key": "16",
+     "part_number": "575 70 10-01",
+     "sub": false,
+     "description": "SCREW",
+     "qty": "6",
+     "remarks": "",
+     "search": "575701001"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.L GEARBOX HT220-75"
+  },
+  {
+   "id": "12",
+   "number": "M",
+   "title": "CUTTING EQUIPMENT HT220-75",
+   "image": "ht220_75-fig12.png",
+   "hotspots": [
+    {
+     "key": "18",
+     "x": 37.398,
+     "y": 17.599
+    },
+    {
+     "key": "17",
+     "x": 27.509,
+     "y": 20.46
+    },
+    {
+     "key": "2",
+     "x": 15.608,
+     "y": 26.429
+    },
+    {
+     "key": "3",
+     "x": 85.18,
+     "y": 28.98
+    },
+    {
+     "key": "1",
+     "x": 12.024,
+     "y": 31.376
+    },
+    {
+     "key": "4",
+     "x": 85.185,
+     "y": 33.436
+    },
+    {
+     "key": "5",
+     "x": 85.361,
+     "y": 37.456
+    },
+    {
+     "key": "6",
+     "x": 86.313,
+     "y": 43.506
+    },
+    {
+     "key": "16",
+     "x": 90.669,
+     "y": 48.543
+    },
+    {
+     "key": "7",
+     "x": 85.366,
+     "y": 52.083
+    },
+    {
+     "key": "8",
+     "x": 85.717,
+     "y": 56.531
+    },
+    {
+     "key": "9",
+     "x": 85.615,
+     "y": 59.408
+    },
+    {
+     "key": "10",
+     "x": 85.435,
+     "y": 63.862
+    },
+    {
+     "key": "11",
+     "x": 78.094,
+     "y": 67.928
+    },
+    {
+     "key": "12",
+     "x": 64.204,
+     "y": 71.905
+    },
+    {
+     "key": "13",
+     "x": 44.88,
+     "y": 76.084
+    },
+    {
+     "key": "14",
+     "x": 25.204,
+     "y": 83.51
+    },
+    {
+     "key": "15",
+     "x": 46.591,
+     "y": 88.8
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "590 33 99-01",
+     "sub": false,
+     "description": "PLATE, LEAF CATCHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "590339901"
+    },
+    {
+     "key": "2",
+     "part_number": "592 75 13-01",
+     "sub": false,
+     "description": "NUT",
+     "qty": "8",
+     "remarks": "",
+     "search": "592751301"
+    },
+    {
+     "key": "3",
+     "part_number": "593 64 46-02",
+     "sub": true,
+     "description": "BAR PLATE, UPPER",
+     "qty": "1",
+     "remarks": "",
+     "search": "593644602"
+    },
+    {
+     "key": "4",
+     "part_number": "590 32 70-02",
+     "sub": true,
+     "description": "GUIDE BAR",
+     "qty": "1",
+     "remarks": "",
+     "search": "590327002"
+    },
+    {
+     "key": "5",
+     "part_number": "590 32 72-02",
+     "sub": true,
+     "description": "WEAR PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "590327202"
+    },
+    {
+     "key": "6",
+     "part_number": "598 64 16-02",
+     "sub": true,
+     "description": "BLADE KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "598641602"
+    },
+    {
+     "key": "7",
+     "part_number": "590 33 92-01",
+     "sub": true,
+     "description": "SPACER",
+     "qty": "10",
+     "remarks": "",
+     "search": "590339201"
+    },
+    {
+     "key": "8",
+     "part_number": "590 32 77-02",
+     "sub": true,
+     "description": "BAR PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "590327702"
+    },
+    {
+     "key": "9",
+     "part_number": "590 33 93-01",
+     "sub": true,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "590339301"
+    },
+    {
+     "key": "10",
+     "part_number": "525 75 51-09",
+     "sub": true,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "525755109"
+    },
+    {
+     "key": "11",
+     "part_number": "525 75 51-04",
+     "sub": true,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "525755104"
+    },
+    {
+     "key": "12",
+     "part_number": "592 73 25-02",
+     "sub": true,
+     "description": "SCREW",
+     "qty": "6",
+     "remarks": "",
+     "search": "592732502"
+    },
+    {
+     "key": "13",
+     "part_number": "592 73 81-01",
+     "sub": true,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "592738101"
+    },
+    {
+     "key": "14",
+     "part_number": "590 78 49-01",
+     "sub": true,
+     "description": "PROTECTION, BLADE TIP",
+     "qty": "1",
+     "remarks": "",
+     "search": "590784901"
+    },
+    {
+     "key": "15",
+     "part_number": "590 71 30-03",
+     "sub": true,
+     "description": "TRANSPORT GUARD",
+     "qty": "1",
+     "remarks": "",
+     "search": "590713003"
+    },
+    {
+     "key": "16",
+     "part_number": "590 32 65-03",
+     "sub": false,
+     "description": "CUTTING DECK ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "590326503"
+    },
+    {
+     "key": "17",
+     "part_number": "596 62 51-01",
+     "sub": false,
+     "description": "DECAL, PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "596625101"
+    },
+    {
+     "key": "18",
+     "part_number": "594 06 22-02",
+     "sub": false,
+     "description": "DECAL, CAUTION",
+     "qty": "1",
+     "remarks": "",
+     "search": "594062202"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.M CUTTING EQUIPMENT HT220-75"
+  },
+  {
+   "id": "13",
+   "number": "N",
+   "title": "CARURETOR HT220-75, CHT220-60",
+   "image": "ht220_75-fig13.png",
+   "hotspots": [
+    {
+     "key": "2",
+     "x": 38.061,
+     "y": 14.261
+    },
+    {
+     "key": "3",
+     "x": 54.914,
+     "y": 16.992
+    },
+    {
+     "key": "4",
+     "x": 57.345,
+     "y": 23.045
+    },
+    {
+     "key": "5",
+     "x": 37.986,
+     "y": 29.12
+    },
+    {
+     "key": "6",
+     "x": 55.121,
+     "y": 38.421
+    },
+    {
+     "key": "7",
+     "x": 57.528,
+     "y": 40.629
+    },
+    {
+     "key": "1",
+     "x": 14.15,
+     "y": 41.484
+    },
+    {
+     "key": "8",
+     "x": 60.21,
+     "y": 44.585
+    },
+    {
+     "key": "9",
+     "x": 60.13,
+     "y": 48.339
+    },
+    {
+     "key": "10",
+     "x": 59.425,
+     "y": 51.834
+    },
+    {
+     "key": "16",
+     "x": 29.437,
+     "y": 55.769
+    },
+    {
+     "key": "11",
+     "x": 41.455,
+     "y": 58.955
+    },
+    {
+     "key": "12",
+     "x": 58.28,
+     "y": 60.014
+    },
+    {
+     "key": "13",
+     "x": 42.197,
+     "y": 61.98
+    },
+    {
+     "key": "14",
+     "x": 39.465,
+     "y": 63.648
+    },
+    {
+     "key": "15",
+     "x": 55.547,
+     "y": 64.163
+    },
+    {
+     "key": "17",
+     "x": 58.792,
+     "y": 68.019
+    },
+    {
+     "key": "18",
+     "x": 58.628,
+     "y": 71.778
+    },
+    {
+     "key": "19",
+     "x": 58.852,
+     "y": 75.589
+    },
+    {
+     "key": "20",
+     "x": 58.684,
+     "y": 79.739
+    },
+    {
+     "key": "21",
+     "x": 58.921,
+     "y": 83.571
+    },
+    {
+     "key": "22",
+     "x": 58.606,
+     "y": 88.629
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "848E0A8102",
+     "sub": false,
+     "description": "CARBURETOR ASSY",
+     "qty": "1",
+     "remarks": "WYL-190B",
+     "search": "848E0A8102"
+    },
+    {
+     "key": "2",
+     "part_number": "1881-81140",
+     "sub": true,
+     "description": "SWIVEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "188181140"
+    },
+    {
+     "key": "3",
+     "part_number": "5850-81110",
+     "sub": true,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "585081110"
+    },
+    {
+     "key": "4",
+     "part_number": "T1659-81150",
+     "sub": true,
+     "description": "VALVE",
+     "qty": "1",
+     "remarks": "",
+     "search": "T165981150"
+    },
+    {
+     "key": "5",
+     "part_number": "1751-81130",
+     "sub": true,
+     "description": "RETAINER RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "175181130"
+    },
+    {
+     "key": "6",
+     "part_number": "1751-81240",
+     "sub": true,
+     "description": "O-RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "175181240"
+    },
+    {
+     "key": "7",
+     "part_number": "5502-81250",
+     "sub": true,
+     "description": "JET",
+     "qty": "1",
+     "remarks": "#39",
+     "search": "550281250"
+    },
+    {
+     "key": "8",
+     "part_number": "1065-81410",
+     "sub": true,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "106581410"
+    },
+    {
+     "key": "9",
+     "part_number": "1065-81420",
+     "sub": true,
+     "description": "DIAPHRAGM",
+     "qty": "1",
+     "remarks": "",
+     "search": "106581420"
+    },
+    {
+     "key": "10",
+     "part_number": "3306-81380",
+     "sub": true,
+     "description": "・SCREEN",
+     "qty": "1",
+     "remarks": "",
+     "search": "330681380"
+    },
+    {
+     "key": "11",
+     "part_number": "1794-81270",
+     "sub": true,
+     "description": "・SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "179481270"
+    },
+    {
+     "key": "12",
+     "part_number": "3356-81310",
+     "sub": true,
+     "description": "・VALVE, INLET",
+     "qty": "1",
+     "remarks": "",
+     "search": "335681310"
+    },
+    {
+     "key": "13",
+     "part_number": "3310-81230",
+     "sub": true,
+     "description": "・LEVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "331081230"
+    },
+    {
+     "key": "14",
+     "part_number": "3310-81250",
+     "sub": true,
+     "description": "・PIN",
+     "qty": "1",
+     "remarks": "",
+     "search": "331081250"
+    },
+    {
+     "key": "15",
+     "part_number": "1850-81220",
+     "sub": true,
+     "description": "・SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "185081220"
+    },
+    {
+     "key": "16",
+     "part_number": "1794-81450",
+     "sub": true,
+     "description": "BODY, A",
+     "qty": "1",
+     "remarks": "",
+     "search": "179481450"
+    },
+    {
+     "key": "17",
+     "part_number": "1850-81470",
+     "sub": true,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "185081470"
+    },
+    {
+     "key": "18",
+     "part_number": "3310-81260",
+     "sub": true,
+     "description": "DIAPHRAGM",
+     "qty": "1",
+     "remarks": "",
+     "search": "331081260"
+    },
+    {
+     "key": "19",
+     "part_number": "1850-81490",
+     "sub": true,
+     "description": "BODY",
+     "qty": "1",
+     "remarks": "",
+     "search": "185081490"
+    },
+    {
+     "key": "20",
+     "part_number": "1751-81510",
+     "sub": true,
+     "description": "PUMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "175181510"
+    },
+    {
+     "key": "21",
+     "part_number": "1850-81520",
+     "sub": true,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "185081520"
+    },
+    {
+     "key": "22",
+     "part_number": "1850-81530",
+     "sub": true,
+     "description": "SCREW",
+     "qty": "4",
+     "remarks": "",
+     "search": "185081530"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.N CARURETOR HT220-75, CHT220-60"
+  },
+  {
+   "id": "14",
+   "number": "P",
+   "title": "ACCESSORIES HT220-75, CHT220-60",
+   "image": "ht220_75-fig14.png",
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 30.032,
+     "y": 24.891
+    },
+    {
+     "key": "2",
+     "x": 69.95,
+     "y": 34.343
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "3180-96212",
+     "sub": false,
+     "description": "GREASE (COLD DISTRICT SPECIFICATION)",
+     "qty": "1",
+     "remarks": "",
+     "search": "318096212"
+    },
+    {
+     "key": "1",
+     "part_number": "3180-96251",
+     "sub": false,
+     "description": "GREASE (GENERAL SPECIFICATION)",
+     "qty": "1",
+     "remarks": "",
+     "search": "318096251"
+    },
+    {
+     "key": "2",
+     "part_number": "577 87 34-01",
+     "sub": false,
+     "description": "WRENCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "577873401"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.P ACCESSORIES HT220-75, CHT220-60"
+  }
+ ]
+}
