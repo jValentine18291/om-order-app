@@ -165,19 +165,37 @@ async function nextKey() {
   return top + 1;
 }
 
-// The order number is the slip number with a suffix, the way OM already writes
-// them: slip 32255 converted twice gives 32255-1 and 32255-2.
-async function nextDocNo(slipNumber) {
-  const rows = await query(
-    "SELECT DocNo FROM SO WHERE DocNo = @exact OR DocNo LIKE @like",
-    { exact: String(slipNumber), like: `${slipNumber}-%` }
-  );
+// Numbered the way OM's other documents are: SO-YYMM-NNN, so August 2026 runs
+// SO-2608-001, -002 and so on, starting again each month. It used to be the
+// slip number with a suffix, which read nothing like their DO-2608-160.
+//
+// The running number is taken from what is already in AutoCount for this month
+// rather than counted locally, so a document keyed by hand cannot collide with
+// one written by the app.
+function docNoPrefix(when) {
+  const yy = String(when.getFullYear()).slice(2);
+  const mm = String(when.getMonth() + 1).padStart(2, "0");
+  return `SO-${yy}${mm}-`;
+}
+
+async function nextDocNo(when) {
+  const prefix = docNoPrefix(when);
+  const rows = await query("SELECT DocNo FROM SO WHERE DocNo LIKE @like", { like: `${prefix}%` });
   let highest = 0;
   for (const r of rows) {
-    const m = /-(\d+)$/.exec(String(r.DocNo || ""));
-    if (m) highest = Math.max(highest, Number(m[1]));
+    // No dynamic regular expression here: the prefix contains hyphens and
+    // building a pattern out of it invites exactly the escaping mistakes that
+    // silently match nothing. Comparing strings is plainer and cannot misfire.
+    const no = String(r.DocNo || "");
+    if (!no.startsWith(prefix)) continue;
+    const tail = no.slice(prefix.length);
+    if (!/^[0-9]+$/.test(tail)) continue;
+    highest = Math.max(highest, Number(tail));
   }
-  return `${slipNumber}-${highest + 1}`;
+  const next = highest + 1;
+  // Three digits normally; a month that somehow passes 999 keeps counting
+  // rather than wrapping back onto a number already used.
+  return prefix + String(next).padStart(3, "0");
 }
 
 // Read the customer's own details rather than assuming column names: pick the
@@ -245,7 +263,7 @@ async function buildRows({ slipNumber, debtorCode, contactName, contactNumber, s
   const codes = [...new Set(lines.filter((l) => l.item_code).map((l) => l.item_code))];
   const desc2 = await desc2For(codes);
 
-  const docNo = await nextDocNo(slipNumber);
+  const docNo = await nextDocNo(date);
   const today = new Date();
   const date = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 

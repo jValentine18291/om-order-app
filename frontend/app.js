@@ -1001,8 +1001,14 @@ function buildSlipPdf(slip) {
 
   // ---- Signature ----
   // Customer only: the counter staff are already identified by the letterhead.
+  // Pinned to the foot of the last page rather than left to flow. A slip with
+  // enough machines to need a second page used to strand the signature half
+  // way down it, which reads as though the document carries on.
   const SIG_H = 66;
-  need(SIG_H + 4);
+  const SIG_BOTTOM = 786;          // just clear of the footer rule at 800
+  const sigY = SIG_BOTTOM - SIG_H;
+  if (y > sigY) { doc.addPage(); }
+  y = sigY;
   setDraw(BORDER); setFill(255); doc.setLineWidth(0.8);
   doc.roundedRect(LEFT, y, W, SIG_H, 5, 5, "FD");
   const sigLineY = y + SIG_H - 22;
@@ -3005,6 +3011,21 @@ $("machine-parts").addEventListener("click", (e) => {
     if (p) setPartQty(id, Math.max(0, p.quantity - 1));
   }
 });
+// Tapping a price to correct it should not mean deleting "0.00" a character at
+// a time. Selecting on focus means typing simply replaces it.
+//
+// The timeout is not decoration: on a phone the browser sets the caret after
+// the focus event, so selecting synchronously is undone a moment later.
+function selectOnFocus(e) {
+  const el = e.target;
+  if (!el || el.tagName !== "INPUT" || el.type !== "number") return;
+  setTimeout(() => { try { el.select(); } catch (_) {} }, 0);
+}
+$("machine-parts").addEventListener("focusin", selectOnFocus);
+// Same for the labour charge, which is corrected just as often.
+const labourField = $("os-labour");
+if (labourField) labourField.addEventListener("focus", selectOnFocus);
+
 $("machine-parts").addEventListener("change", (e) => {
   if (e.target.dataset.pqty !== undefined) {
     const p = session.pendingParts[Number(e.target.dataset.pqty)];
