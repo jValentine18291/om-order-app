@@ -394,12 +394,15 @@ for (let p = 1; p <= pageCount; p++) {
       hotspots,
       parts: rows.map((r) => ({ ...r, search: searchCode(r.part_number) })),
     });
-    // Reported against the top-level rows, which is what a technician sees as
-    // "numbers on the drawing" — sub-components share their parent's callout.
+    // Counted by key, NOT by printed callout — a number the book prints twice
+    // counts as covered once either instance is found. So this is an upper
+    // bound, and it read 98% on a figure where one of the two 38s had no
+    // hotspot at all. The only way to know is to look at the drawing; the
+    // number below is a smoke alarm, not a survey.
     const topKeys = new Set(rows.filter((r) => !r.depth).map((r) => r.key));
-    const pct = topKeys.size ? Math.round([...topKeys].filter((k) => hit.has(k)).length / topKeys.size * 100) : 100;
+    const reached = [...topKeys].filter((k) => hit.has(k)).length;
     console.log(`  Fig.${head.number} ${head.title}: ${rows.length} parts, ${hotspots.length} hotspots` +
-                `, ${pct}% of numbered parts tappable${ocr ? " (read off the scan)" : ""}`);
+                `, ${reached}/${topKeys.size} numbered parts reachable${ocr ? " (read off the scan)" : ""}`);
 
     pending = null;
   } else if (!isTable) {

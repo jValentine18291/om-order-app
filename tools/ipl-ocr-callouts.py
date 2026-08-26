@@ -114,8 +114,14 @@ def survey(png, keys):
         # 4A and 4B for the 14" and 16" bars. Treating a single letter as
         # lettering threw away all six of those - the bars, chains and
         # protectors, which are among the parts most often ordered.
+        # Confidence has to be high, not merely decent. The real lettering on
+        # these pages is set clean and reads at 93-97% ("Fig.", "POWER",
+        # "UNIT"). Everything between 50 and 75 was Tesseract finding letters
+        # in the line drawing - "oe", "Ms", "ZZ", "Ber", "xX" - and one of
+        # those, an "oe" spanning 216x80 pixels of dashed rectangle, sat right
+        # on top of callout 39 and excluded it.
         letters = sum(1 for c in txt if c.isalpha())
-        if letters >= 2 and txt not in keys and float(f[10]) >= 50:
+        if letters >= 2 and txt not in keys and float(f[10]) >= 80:
             words.append((x, y, x + w, y + h))
     return (float(np.median(hs)) if len(hs) >= 5 else None), words
 
@@ -160,10 +166,19 @@ def callouts(pdf, page, keys, max_y=100.0):
         )
 
     glyphs = []
-    for s in objs:
+    for idx, s in enumerate(objs):
         h = s[0].stop - s[0].start
         w = s[1].stop - s[1].start
         if not (lo <= h <= hi):
+            continue
+        # How much of the box is actually ink. A printed digit is a solid
+        # thing and fills a third to a half of its box; the corner of a dashed
+        # rectangle fills an eighth, and Tesseract read one of those as a "4"
+        # at 79% confidence, right between callouts 14 and 15. Confidence
+        # cannot tell them apart but density can: on this book every genuine
+        # digit is above 0.25 and every piece of line art below 0.22.
+        blob = lab[s] == idx + 1
+        if blob.sum() / blob.size < 0.24:
             continue
         # Width matters more than it looks. A printed digit in these books is
         # about two thirds as wide as it is tall, and even a "1" - with its
@@ -173,7 +188,7 @@ def callouts(pdf, page, keys, max_y=100.0):
         # first figure and confidence could not tell them apart.
         if w > h * 1.6 or w < h * 0.30:
             continue
-        glyphs.append([s[1].start, s[0].start, s[1].stop, s[0].stop])
+        glyphs.append([s[1].start, s[0].start, s[1].stop, s[0].stop, 1])
 
     # Group digits into numbers: same line, touching distance apart.
     #
@@ -190,21 +205,51 @@ def callouts(pdf, page, keys, max_y=100.0):
         placed = False
         for grp in groups:
             same_line = abs(g[1] - grp[1]) < med * 0.55
+            # Height has to match, or a drawn part standing beside a number
+            # gets taken for another digit: a small bolt beside callout 38
+            # joined it, the crop read "383", and that callout was lost.
+            #
+            # The GAP stays generous. Tightening it to 0.35 looked reasonable -
+            # real digits sit 3 to 4 pixels apart - and split genuine pairs
+            # across three figures instead, leaving "15" as a "1" and a "5"
+            # sitting side by side, each matching a key of its own. Two rings
+            # on one number is the fault we are trying to remove, so the height
+            # test does the work and the distance stays where it was.
+            similar_height = abs((g[3] - g[1]) - (grp[3] - grp[1])) < med * 0.25
             # Distance between the two boxes whichever way round they sit;
             # negative means they overlap.
             gap = max(g[0] - grp[2], grp[0] - g[2])
-            if same_line and gap < med * 0.55:
+            if same_line and similar_height and gap < med * 0.55:
                 grp[0] = min(grp[0], g[0]); grp[1] = min(grp[1], g[1])
                 grp[2] = max(grp[2], g[2]); grp[3] = max(grp[3], g[3])
+                grp[4] += 1          # how many glyphs this number is made of
                 placed = True
                 break
         if not placed:
             groups.append(list(g))
 
+    def crowding(x1, y1, x2, y2):
+        """How much ink surrounds this candidate. A printed callout stands in
+        clear paper with a thin leader line touching it, so almost nothing is
+        around it. A shape that merely looks like a digit — a cut-out in a
+        gasket, say — is embedded in artwork and hemmed in on every side."""
+        r = int(med * 0.75)
+        oy0, oy1 = max(0, y1 - r), min(H, y2 + r)
+        ox0, ox1 = max(0, x1 - r), min(W, x2 + r)
+        outer = ink[oy0:oy1, ox0:ox1]
+        inner = ink[y1:y2, x1:x2]
+        around = outer.size - inner.size
+        return (outer.sum() - inner.sum()) / max(1, around)
+
     pad = int(med * 0.45)
     spots = []
-    for x1, y1, x2, y2 in groups:
+    for x1, y1, x2, y2, nglyphs in groups:
         if in_lettering(x1, y1, x2, y2):
+            continue
+        # Measured across a whole figure: every genuine callout sits under
+        # 0.062, most under 0.02, while the gasket cut-out that Tesseract read
+        # as "24" sat at 0.192. Three times clear of anything real.
+        if crowding(x1, y1, x2, y2) > 0.12:
             continue
         crop = im.crop((max(0, x1 - pad), max(0, y1 - pad),
                         min(W, x2 + pad), min(H, y2 + pad)))
@@ -221,7 +266,14 @@ def callouts(pdf, page, keys, max_y=100.0):
         hit = None
         for psm in (8, 7):
             a, ca = read_one(crop, 3, psm)
-            if a not in keys:
+            # The reading has to account for every glyph in the group. On these
+            # scans one blob is one character, so a two-glyph number read as a
+            # single digit is a partial reading — and a partial reading is not
+            # a miss, it is a wrong part: "11" on the carburetor figure came
+            # back as "1", putting CARBURETOR ASS'Y on the shaft's callout.
+            # Confidence gives no warning at all here; that one read as 0, and
+            # so do dozens of perfectly good callouts.
+            if a not in keys or len(a) != nglyphs:
                 continue
             b, cb = read_one(crop, 5, psm)
             if b == a:
