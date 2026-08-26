@@ -54,6 +54,15 @@
   "parts": 172
  },
  {
+  "id": "g3800",
+  "name": "Zenoah G3800 Chainsaw",
+  "short": "G3800",
+  "brand": "Zenoah",
+  "category": "Chainsaw",
+  "figures": 4,
+  "parts": 183
+ },
+ {
   "id": "hbz260ez",
   "name": "Zenoah HBZ260EZ",
   "short": "HBZ260EZ",

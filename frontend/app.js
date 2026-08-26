@@ -3614,9 +3614,15 @@ function showIplFigure(id) {
   // that cannot work.
   const hint = $("ipl-hint");
   if (hint) {
-    hint.textContent = fig.hotspots.length
-      ? "Pinch to zoom · drag to move · tap a number"
-      : "Pinch to zoom · drag to move · pick a part from the list below";
+    // On the older books the drawing is a scan, so the numbers were read off
+    // the picture rather than lifted from the file. Most are there; a few are
+    // not, and it is fairer to say so than to leave someone tapping a number
+    // that was never found.
+    hint.textContent = !fig.hotspots.length
+      ? "Pinch to zoom · drag to move · pick a part from the list below"
+      : fig.ocr
+        ? "Pinch to zoom · tap a number · scanned drawing, a few numbers may not respond"
+        : "Pinch to zoom · drag to move · tap a number";
   }
 
   $("ipl-filter").value = "";

@@ -58,25 +58,105 @@ function wordsForPage(page) {
     words.push({
       x1: parseFloat(m[1]), y1: parseFloat(m[2]),
       x2: parseFloat(m[3]), y2: parseFloat(m[4]),
-      text: m[5].replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;/g, "'").trim(),
+      // &apos; matters as much as the rest: without it the Q'TY heading arrives
+      // as the literal "Q&apos;TY", never matches, and every quantity in the
+      // G3800 was filed under NOTE.
+      text: m[5].replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+                .replace(/&#39;/g, "'").replace(/&apos;/g, "'").replace(/&quot;/g, '"').trim(),
     });
   }
   return { width, height, words };
 }
 
 // Group words into rows by their vertical position, then into columns by x.
-// The tables are laid out on a fixed grid, so column edges are constants.
-const COLS = { key: 90, part: 195, desc: 415, qty: 448 };  // right edge of each
-function columnOf(x) {
-  if (x < COLS.key) return "key";
-  if (x < COLS.part) return "part";
-  if (x < COLS.desc) return "desc";
-  if (x < COLS.qty) return "qty";
-  return "remarks";
+//
+// Where the column edges come from: the table prints its own header —
+// "Key# PART NUMBER DESCRIPTION Q'TY REMARKS" — so read the edges off that
+// rather than hard-coding them. Books that look identical are not: the G3800
+// puts its NOTE column at x=275 where the HT220-75 has REMARKS at 466, and a
+// fixed grid tuned for one silently folds two columns together in the other.
+//
+// These are the edges that grid used, kept only for a page whose header cannot
+// be found at all.
+const FALLBACK_COLS = { key: 90, part: 195, desc: 415, qty: 448 };
+
+const HEADERS = [
+  { col: "key",     match: /^Key#?$/i },
+  { col: "part",    match: /^PART$/i },
+  { col: "desc",    match: /^DESCRIPTION$/i },
+  { col: "qty",     match: /^Q[’'`]?TY$/i },
+  { col: "remarks", match: /^(REMARKS?|NOTES?)$/i },
+];
+
+// Every table block on the page, left to right. Usually one; the G3800 runs two
+// side by side, each with its own header and its own key numbering.
+function tableBlocks(words) {
+  const anchors = words.filter((w) => /^Key#?$/i.test(w.text)).sort((a, b) => a.x1 - b.x1);
+  if (!anchors.length) return [];
+
+  return anchors.map((anchor, i) => {
+    const next = anchors[i + 1];
+    // The header can wrap — "Q'TY" above "/UNIT" — so take a band rather than
+    // one baseline, and stop at the next block's first column.
+    const band = words.filter((w) =>
+      Math.abs(w.y1 - anchor.y1) < 14 &&
+      w.x1 >= anchor.x1 - 2 &&
+      (!next || w.x1 < next.x1 - 2)
+    );
+
+    const found = [];
+    for (const { col, match } of HEADERS) {
+      const hit = band.find((w) => match.test(w.text));
+      if (hit) found.push({ col, x1: hit.x1, x2: hit.x2 });
+    }
+    if (found.length < 3) return null;   // not a real header
+
+    // A boundary sits in the gap between two headers, but nearer the left one:
+    // REMARKS is left-aligned while the value under it can start a little
+    // before its heading — "HT220-75" begins 15pt left of the word REMARKS.
+    const edges = [];
+    for (let j = 0; j < found.length - 1; j++) {
+      const gap = found[j + 1].x1 - found[j].x2;
+      edges.push({ col: found[j].col, upTo: found[j].x2 + gap * 0.1 });
+    }
+    edges.push({ col: found[found.length - 1].col, upTo: Infinity });
+
+    return {
+      x1: anchor.x1 - 6,
+      x2: next ? next.x1 - 6 : Infinity,
+      yHeader: anchor.y1,
+      columnOf(x) {
+        for (const e of edges) if (x < e.upTo) return e.col;
+        return "remarks";
+      },
+    };
+  }).filter(Boolean);
+}
+
+function fallbackBlock() {
+  return {
+    x1: -Infinity, x2: Infinity, yHeader: 65,
+    columnOf(x) {
+      if (x < FALLBACK_COLS.key) return "key";
+      if (x < FALLBACK_COLS.part) return "part";
+      if (x < FALLBACK_COLS.desc) return "desc";
+      if (x < FALLBACK_COLS.qty) return "qty";
+      return "remarks";
+    },
+  };
 }
 
 function parseTable(page) {
   const { words, height } = wordsForPage(page);
+  const blocks = tableBlocks(words);
+  return (blocks.length ? blocks : [fallbackBlock()])
+    .map((b) => parseTableBlock(words, height, b))
+    .flat();
+}
+
+function parseTableBlock(allWords, height, block) {
+  const columnOf = (x) => block.columnOf(x);
+  const words = allWords.filter((w) => w.x1 >= block.x1 && w.x1 < block.x2);
 
   // Cluster words into rows by proximity rather than by rounding to a fixed
   // grid: rows sit ~15pt apart but a "・" or a wrapped remark can sit a point
@@ -88,8 +168,12 @@ function parseTable(page) {
   // were folded into the last part of every table — so the closing row of all
   // 14 figures across the three Zenoah models read "JOINT 2" with a remark of
   // "2017.08", and on one of them that displaced a real remark.
+  // Start below this block's own header rather than at a fixed 80pt: the G3800
+  // prints its header at y=90 where the HT220-75 has it at y=66, and a fixed
+  // cut read one book's headings in as a part.
+  const top = block.yHeader + 12;
   const body = words
-    .filter((w) => w.y1 >= 80 && w.y1 < height - 55)
+    .filter((w) => w.y1 >= top && w.y1 < height - 55)
     .sort((a, b) => a.y1 - b.y1);
   const rows = [];
   for (const w of body) {
@@ -133,7 +217,7 @@ function parseTable(page) {
     // ASSY. Stripping a single mark left the second one sitting in the
     // description, so 41 rows across the Zenoah models read "・HOLDER ASSY"
     // under a bullet the viewer had already drawn. Count them instead.
-    const marks = desc.match(/^[・·]+/);
+    const marks = desc.match(/^[・·•]+/);
     const depth = marks ? marks[0].length : 0;
 
     out.push({
@@ -141,7 +225,7 @@ function parseTable(page) {
       part_number: part,
       depth,
       sub: depth > 0,
-      description: desc.replace(/^[・·\s]+/, "").trim(),
+      description: desc.replace(/^[・·•\s]+/, "").trim(),
       qty,
       remarks,
     });
@@ -183,6 +267,14 @@ function parseFigure(page, keys) {
   // on the right, and both went missing. So measure the heading instead — the
   // box around the words at the top of the page that are not callout-shaped —
   // and exclude only what falls inside it.
+  // Where the drawing shares its page with the table — the G3800's last two
+  // figures do — the table's own Key# column is a column of small integers that
+  // all match a key, so every one of them became a hotspot: 48 of them on a
+  // figure with 27 parts, scattered down the parts list. Cut the page off above
+  // the topmost table.
+  const blocks = tableBlocks(words);
+  const tableTop = blocks.length ? Math.min(...blocks.map((b) => b.yHeader)) - 8 : Infinity;
+
   const headWords = words.filter((w) => w.y1 < 70 && !/^\d+[A-Z]?$/.test(w.text));
   const head = headWords.length && {
     x1: Math.min(...headWords.map((w) => w.x1)) - 10,
@@ -195,6 +287,7 @@ function parseFigure(page, keys) {
   for (const w of words) {
     if (!/^\d+[A-Z]?$/.test(w.text)) continue;
     if (inHeading(w) || w.y2 > height - 55) continue;   // heading / page number
+    if (w.y1 >= tableTop) continue;                     // the parts table below
     if (!keys.has(w.text)) continue;                    // only real callouts
     spots.push({
       key: w.text,
@@ -204,6 +297,35 @@ function parseFigure(page, keys) {
     });
   }
   return spots;
+}
+
+// Where the drawing stops on a page it shares with its parts table, as a
+// percentage of page height. 100 when the drawing has the page to itself.
+function drawingLimit(page) {
+  const { height, words } = wordsForPage(page);
+  const blocks = tableBlocks(words);
+  if (!blocks.length) return 100;
+  const top = Math.min(...blocks.map((b) => b.yHeader)) - 8;
+  return Math.max(5, Math.min(100, (top / height) * 100));
+}
+
+// Reading the callouts off a scanned drawing is a different job — image work,
+// not text work — so it lives in tools/ipl-ocr-callouts.py and is shelled out
+// to. It takes roughly a minute a page, which is why it only runs when the
+// page has no callout text at all.
+function ocrCallouts(page, keys, maxY) {
+  const script = path.join(__dirname, "ipl-ocr-callouts.py");
+  try {
+    const out = execFileSync(
+      process.env.PYTHON || "python",
+      [script, PDF, String(page), keys.join(","), String(maxY)],
+      { maxBuffer: 16 * 1024 * 1024, env: { ...process.env, POPPLER_BIN: POPPLER } }
+    ).toString();
+    return JSON.parse(out);
+  } catch (e) {
+    console.log(`\n    (could not read the scan: ${String(e.message).split("\n")[0]})`);
+    return [];
+  }
 }
 
 // ---- walk the document -----------------------------------------------------
@@ -221,18 +343,42 @@ for (let p = 1; p <= pageCount; p++) {
   const isTable = /Key#/.test(text);
   const heading = readHeading(words);
 
-  if (isTable && pending) {
+  if (isTable) {
+    // Usually the drawing is the page before. The G3800 prints its last two
+    // figures with the drawing and the table on one sheet, so when nothing is
+    // pending the page is its own drawing.
+    const drawingPage = pending ? pending.page : p;
     // Prefer the heading printed on the drawing; fall back to the one on the
     // parts page, which is where the HT220-75 puts it.
-    const head = pending.head || heading || { number: String(figures.length + 1), title: "" };
+    const head = (pending && pending.head) || heading || { number: String(figures.length + 1), title: "" };
     const rows = parseTable(p);
     const keys = new Set(rows.map((r) => r.key));
-    const hotspots = parseFigure(pending.page, keys);
+    let hotspots = parseFigure(drawingPage, keys);
+    let ocr = false;
+
+    // The older books - roughly one in four, everything before about 2015 - are
+    // scans, so the callout numbers are part of the picture and there is no
+    // text to read coordinates from. Fall back to reading them off the image.
+    //
+    // Judged on every key, not only the top-level ones. Sub-components usually
+    // carry no callout, but on a carburetor figure they are the whole drawing:
+    // the G3800's has 27 parts of which 26 are sub-components, so counting only
+    // top-level rows saw one key, decided the figure was too small to judge,
+    // and left that drawing with nothing to tap.
+    const covered = new Set(hotspots.map((h) => h.key));
+    const coverage = keys.size ? [...keys].filter((k) => covered.has(k)).length / keys.size : 1;
+    if (coverage < 0.25 && keys.size >= 5) {
+      process.stdout.write(`  Fig.${head.number} ${head.title}: scanned drawing, reading the numbers off it… `);
+      const found = ocrCallouts(drawingPage, [...keys], drawingLimit(drawingPage));
+      if (found.length) { hotspots = found; ocr = true; }
+      console.log(`${found.length} placed`);
+    }
 
     const png = `${MODEL_ID}-fig${figures.length + 1}.png`;
-    run("pdftoppm", ["-png", "-r", "150", "-f", String(pending.page), "-l", String(pending.page),
+    run("pdftoppm", ["-png", "-r", "150", "-f", String(drawingPage), "-l", String(drawingPage),
                      "-singlefile", PDF, path.join(OUT_DIR, png.replace(/\.png$/, ""))]);
 
+    const hit = new Set(hotspots.map((h) => h.key));
     figures.push({
       // id is what the viewer selects on: a figure can run to more than one
       // sheet (the BK3410's Fig.1 DRIVE UNIT does), and keying on the printed
@@ -242,10 +388,18 @@ for (let p = 1; p <= pageCount; p++) {
       number: head.number,
       title: head.title || `Figure ${head.number}`,
       image: png,
+      // Recorded so the viewer can say so: on a scanned book the numbers were
+      // read off the picture, and a few will be missing.
+      ocr: ocr || undefined,
       hotspots,
       parts: rows.map((r) => ({ ...r, search: searchCode(r.part_number) })),
     });
-    console.log(`  Fig.${head.number} ${head.title}: ${rows.length} parts, ${hotspots.length} hotspots`);
+    // Reported against the top-level rows, which is what a technician sees as
+    // "numbers on the drawing" — sub-components share their parent's callout.
+    const topKeys = new Set(rows.filter((r) => !r.depth).map((r) => r.key));
+    const pct = topKeys.size ? Math.round([...topKeys].filter((k) => hit.has(k)).length / topKeys.size * 100) : 100;
+    console.log(`  Fig.${head.number} ${head.title}: ${rows.length} parts, ${hotspots.length} hotspots` +
+                `, ${pct}% of numbered parts tappable${ocr ? " (read off the scan)" : ""}`);
 
     pending = null;
   } else if (!isTable) {

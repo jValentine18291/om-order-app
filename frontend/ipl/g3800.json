@@ -1,0 +1,3015 @@
+{
+ "id": "g3800",
+ "name": "Zenoah G3800 Chainsaw",
+ "source": "IPL,ZENOAH,G3800,3-8Pitch,2015-10.pdf",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "POWER UNIT",
+   "image": "g3800-fig1.png",
+   "ocr": true,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 16.29,
+     "y": 45.455,
+     "conf": 60
+    },
+    {
+     "key": "1",
+     "x": 31.815,
+     "y": 45.113,
+     "conf": 68
+    },
+    {
+     "key": "1",
+     "x": 34.758,
+     "y": 62.154,
+     "conf": 64
+    },
+    {
+     "key": "1",
+     "x": 36.492,
+     "y": 45.241,
+     "conf": 57
+    },
+    {
+     "key": "10",
+     "x": 32.903,
+     "y": 45.113,
+     "conf": 36
+    },
+    {
+     "key": "10",
+     "x": 47.48,
+     "y": 25.876,
+     "conf": 56
+    },
+    {
+     "key": "12",
+     "x": 24.415,
+     "y": 32.716,
+     "conf": 77
+    },
+    {
+     "key": "14",
+     "x": 40.565,
+     "y": 70.718,
+     "conf": 95
+    },
+    {
+     "key": "14",
+     "x": 57.702,
+     "y": 63.651,
+     "conf": 95
+    },
+    {
+     "key": "15",
+     "x": 66.149,
+     "y": 60.117,
+     "conf": 90
+    },
+    {
+     "key": "16",
+     "x": 66.633,
+     "y": 21.773,
+     "conf": 76
+    },
+    {
+     "key": "16",
+     "x": 68.992,
+     "y": 59.02,
+     "conf": 96
+    },
+    {
+     "key": "17",
+     "x": 33.669,
+     "y": 73.311,
+     "conf": 95
+    },
+    {
+     "key": "18",
+     "x": 58.286,
+     "y": 52.921,
+     "conf": 89
+    },
+    {
+     "key": "19",
+     "x": 45.907,
+     "y": 69.08,
+     "conf": 94
+    },
+    {
+     "key": "19",
+     "x": 71.734,
+     "y": 75.549,
+     "conf": 66
+    },
+    {
+     "key": "2",
+     "x": 17.359,
+     "y": 45.44,
+     "conf": 0
+    },
+    {
+     "key": "2",
+     "x": 52.802,
+     "y": 43.388,
+     "conf": 93
+    },
+    {
+     "key": "21",
+     "x": 43.347,
+     "y": 77.13,
+     "conf": 84
+    },
+    {
+     "key": "22",
+     "x": 62.278,
+     "y": 45.44,
+     "conf": 88
+    },
+    {
+     "key": "23",
+     "x": 66.29,
+     "y": 44.771,
+     "conf": 85
+    },
+    {
+     "key": "24",
+     "x": 66.431,
+     "y": 50.655,
+     "conf": 77
+    },
+    {
+     "key": "25",
+     "x": 62.097,
+     "y": 50.185,
+     "conf": 85
+    },
+    {
+     "key": "26",
+     "x": 70.423,
+     "y": 48.048,
+     "conf": 84
+    },
+    {
+     "key": "27",
+     "x": 74.093,
+     "y": 48.105,
+     "conf": 91
+    },
+    {
+     "key": "28",
+     "x": 48.105,
+     "y": 50.983,
+     "conf": 82
+    },
+    {
+     "key": "29",
+     "x": 40.081,
+     "y": 50.841,
+     "conf": 72
+    },
+    {
+     "key": "3",
+     "x": 49.577,
+     "y": 43.061,
+     "conf": 96
+    },
+    {
+     "key": "3",
+     "x": 72.843,
+     "y": 50.085,
+     "conf": 30
+    },
+    {
+     "key": "31",
+     "x": 52.419,
+     "y": 52.209,
+     "conf": 87
+    },
+    {
+     "key": "32",
+     "x": 48.891,
+     "y": 56.996,
+     "conf": 81
+    },
+    {
+     "key": "33",
+     "x": 44.556,
+     "y": 58.991,
+     "conf": 88
+    },
+    {
+     "key": "33",
+     "x": 51.532,
+     "y": 56.398,
+     "conf": 85
+    },
+    {
+     "key": "34",
+     "x": 44.415,
+     "y": 62.61,
+     "conf": 0
+    },
+    {
+     "key": "35",
+     "x": 43.548,
+     "y": 20.946,
+     "conf": 79
+    },
+    {
+     "key": "36",
+     "x": 37.883,
+     "y": 22.029,
+     "conf": 87
+    },
+    {
+     "key": "37",
+     "x": 27.762,
+     "y": 21.488,
+     "conf": 86
+    },
+    {
+     "key": "38",
+     "x": 34.435,
+     "y": 18.495,
+     "conf": 79
+    },
+    {
+     "key": "4",
+     "x": 56.452,
+     "y": 43.873,
+     "conf": 93
+    },
+    {
+     "key": "4",
+     "x": 63.81,
+     "y": 60.117,
+     "conf": 79
+    },
+    {
+     "key": "41",
+     "x": 42.581,
+     "y": 25.677,
+     "conf": 82
+    },
+    {
+     "key": "43",
+     "x": 39.798,
+     "y": 33.485,
+     "conf": 39
+    },
+    {
+     "key": "44",
+     "x": 71.552,
+     "y": 33.813,
+     "conf": 84
+    },
+    {
+     "key": "45",
+     "x": 77.379,
+     "y": 25.064,
+     "conf": 19
+    },
+    {
+     "key": "47",
+     "x": 47.802,
+     "y": 86.378,
+     "conf": 31
+    },
+    {
+     "key": "48",
+     "x": 58.508,
+     "y": 86.862,
+     "conf": 80
+    },
+    {
+     "key": "5",
+     "x": 38.69,
+     "y": 48.347,
+     "conf": 81
+    },
+    {
+     "key": "5",
+     "x": 62.016,
+     "y": 81.177,
+     "conf": 0
+    },
+    {
+     "key": "5",
+     "x": 75.927,
+     "y": 64.705,
+     "conf": 15
+    },
+    {
+     "key": "50",
+     "x": 66.714,
+     "y": 75.691,
+     "conf": 77
+    },
+    {
+     "key": "51",
+     "x": 79.153,
+     "y": 61.456,
+     "conf": 85
+    },
+    {
+     "key": "52",
+     "x": 76.956,
+     "y": 64.691,
+     "conf": 31
+    },
+    {
+     "key": "54",
+     "x": 74.456,
+     "y": 72.955,
+     "conf": 90
+    },
+    {
+     "key": "59",
+     "x": 52.621,
+     "y": 72.756,
+     "conf": 77
+    },
+    {
+     "key": "6",
+     "x": 42.56,
+     "y": 36.492,
+     "conf": 96
+    },
+    {
+     "key": "6",
+     "x": 63.044,
+     "y": 81.163,
+     "conf": 61
+    },
+    {
+     "key": "60",
+     "x": 56.23,
+     "y": 72.214,
+     "conf": 95
+    },
+    {
+     "key": "60",
+     "x": 57.984,
+     "y": 83.5,
+     "conf": 93
+    },
+    {
+     "key": "61",
+     "x": 44.819,
+     "y": 83.984,
+     "conf": 87
+    },
+    {
+     "key": "63",
+     "x": 33.085,
+     "y": 83.101,
+     "conf": 80
+    },
+    {
+     "key": "64",
+     "x": 14.657,
+     "y": 80.707,
+     "conf": 66
+    },
+    {
+     "key": "65",
+     "x": 18.226,
+     "y": 50.955,
+     "conf": 66
+    },
+    {
+     "key": "66",
+     "x": 13.992,
+     "y": 57.552,
+     "conf": 0
+    },
+    {
+     "key": "68",
+     "x": 23.286,
+     "y": 57.823,
+     "conf": 47
+    },
+    {
+     "key": "69",
+     "x": 14.758,
+     "y": 55.97,
+     "conf": 0
+    },
+    {
+     "key": "7",
+     "x": 15.242,
+     "y": 65.574,
+     "conf": 71
+    },
+    {
+     "key": "7",
+     "x": 28.911,
+     "y": 36.15,
+     "conf": 95
+    },
+    {
+     "key": "70",
+     "x": 16.23,
+     "y": 65.574,
+     "conf": 22
+    },
+    {
+     "key": "71",
+     "x": 48.145,
+     "y": 38.059,
+     "conf": 91
+    },
+    {
+     "key": "8",
+     "x": 18.69,
+     "y": 34.939,
+     "conf": 89
+    },
+    {
+     "key": "9",
+     "x": 32.016,
+     "y": 39.156,
+     "conf": 51
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "2898-12111",
+     "depth": 0,
+     "sub": false,
+     "description": "Cylinder",
+     "qty": "1",
+     "remarks": "",
+     "search": "289812111"
+    },
+    {
+     "key": "2",
+     "part_number": "2867-14110",
+     "depth": 0,
+     "sub": false,
+     "description": "Insulator",
+     "qty": "1",
+     "remarks": "",
+     "search": "286714110"
+    },
+    {
+     "key": "3",
+     "part_number": "2850-14123",
+     "depth": 0,
+     "sub": false,
+     "description": "Gasket, inlet",
+     "qty": "1",
+     "remarks": "",
+     "search": "285014123"
+    },
+    {
+     "key": "4",
+     "part_number": "3330-14121",
+     "depth": 0,
+     "sub": false,
+     "description": "Gasket, carb",
+     "qty": "1",
+     "remarks": "",
+     "search": "333014121"
+    },
+    {
+     "key": "5",
+     "part_number": "2850-14212",
+     "depth": 0,
+     "sub": false,
+     "description": "Gasket, cylinder",
+     "qty": "1",
+     "remarks": "",
+     "search": "285014212"
+    },
+    {
+     "key": "6",
+     "part_number": "4820-13180",
+     "depth": 0,
+     "sub": false,
+     "description": "Bolt",
+     "qty": "4",
+     "remarks": "",
+     "search": "482013180"
+    },
+    {
+     "key": "7",
+     "part_number": "T2100-15112",
+     "depth": 0,
+     "sub": false,
+     "description": "Muffler",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210015112"
+    },
+    {
+     "key": "8",
+     "part_number": "T2100-15311",
+     "depth": 0,
+     "sub": false,
+     "description": "Stay",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210015311"
+    },
+    {
+     "key": "9",
+     "part_number": "T2100-15210",
+     "depth": 0,
+     "sub": false,
+     "description": "Gasket, muffler",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210015210"
+    },
+    {
+     "key": "10",
+     "part_number": "T2100-15220",
+     "depth": 0,
+     "sub": false,
+     "description": "Bolt, muffler",
+     "qty": "2",
+     "remarks": "",
+     "search": "T210015220"
+    },
+    {
+     "key": "11",
+     "part_number": "2850-15230",
+     "depth": 0,
+     "sub": false,
+     "description": "Nut, muffler M5",
+     "qty": "2",
+     "remarks": "",
+     "search": "285015230"
+    },
+    {
+     "key": "12",
+     "part_number": "2670-14320",
+     "depth": 0,
+     "sub": false,
+     "description": "Screw",
+     "qty": "1",
+     "remarks": "",
+     "search": "267014320"
+    },
+    {
+     "key": "13",
+     "part_number": "848C402102",
+     "depth": 0,
+     "sub": false,
+     "description": "Crankcase ass’y",
+     "qty": "1",
+     "remarks": "",
+     "search": "848C402102"
+    },
+    {
+     "key": "14",
+     "part_number": "84889C3200",
+     "depth": 1,
+     "sub": true,
+     "description": "Bearing",
+     "qty": "2",
+     "remarks": "",
+     "search": "84889C3200"
+    },
+    {
+     "key": "15",
+     "part_number": "04065-03212",
+     "depth": 1,
+     "sub": true,
+     "description": "Snap ring",
+     "qty": "1",
+     "remarks": "",
+     "search": "0406503212"
+    },
+    {
+     "key": "16",
+     "part_number": "2169-21210",
+     "depth": 1,
+     "sub": true,
+     "description": "Seal",
+     "qty": "1",
+     "remarks": "",
+     "search": "216921210"
+    },
+    {
+     "key": "17",
+     "part_number": "8488AC3210",
+     "depth": 1,
+     "sub": true,
+     "description": "Oil seal",
+     "qty": "1",
+     "remarks": "",
+     "search": "8488AC3210"
+    },
+    {
+     "key": "18",
+     "part_number": "2616-21230",
+     "depth": 1,
+     "sub": true,
+     "description": "Stud",
+     "qty": "2",
+     "remarks": "",
+     "search": "261621230"
+    },
+    {
+     "key": "19",
+     "part_number": "T2100-21310",
+     "depth": 1,
+     "sub": true,
+     "description": "Gasket, case",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210021310"
+    },
+    {
+     "key": "20",
+     "part_number": "4820-21310",
+     "depth": 0,
+     "sub": false,
+     "description": "Bolt",
+     "qty": "4",
+     "remarks": "",
+     "search": "482021310"
+    },
+    {
+     "key": "21",
+     "part_number": "T2100-21400",
+     "depth": 0,
+     "sub": false,
+     "description": "Pipe out comp.",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210021400"
+    },
+    {
+     "key": "22",
+     "part_number": "848C3066F1",
+     "depth": 0,
+     "sub": false,
+     "description": "Chain catcher",
+     "qty": "1",
+     "remarks": "",
+     "search": "848C3066F1"
+    },
+    {
+     "key": "23",
+     "part_number": "2850-25220",
+     "depth": 0,
+     "sub": false,
+     "description": "Screw",
+     "qty": "1",
+     "remarks": "",
+     "search": "285025220"
+    },
+    {
+     "key": "24",
+     "part_number": "T2100-53220",
+     "depth": 0,
+     "sub": false,
+     "description": "Nut tensioner",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210053220"
+    },
+    {
+     "key": "25",
+     "part_number": "T2100-53210",
+     "depth": 0,
+     "sub": false,
+     "description": "Screw",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210053210"
+    },
+    {
+     "key": "26",
+     "part_number": "2850-25411",
+     "depth": 0,
+     "sub": false,
+     "description": "Plate (A)",
+     "qty": "1",
+     "remarks": "",
+     "search": "285025411"
+    },
+    {
+     "key": "27",
+     "part_number": "2670-25430",
+     "depth": 0,
+     "sub": false,
+     "description": "Screw",
+     "qty": "1",
+     "remarks": "",
+     "search": "267025430"
+    },
+    {
+     "key": "28",
+     "part_number": "T2100-41110",
+     "depth": 0,
+     "sub": false,
+     "description": "Piston",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210041110"
+    },
+    {
+     "key": "29",
+     "part_number": "T2100-41210",
+     "depth": 0,
+     "sub": false,
+     "description": "Ring",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210041210"
+    },
+    {
+     "key": "30",
+     "part_number": "2850-41310",
+     "depth": 0,
+     "sub": false,
+     "description": "Piston pin",
+     "qty": "1",
+     "remarks": "",
+     "search": "285041310"
+    },
+    {
+     "key": "31",
+     "part_number": "1300-41320",
+     "depth": 0,
+     "sub": false,
+     "description": "Snap ring",
+     "qty": "2",
+     "remarks": "",
+     "search": "130041320"
+    },
+    {
+     "key": "32",
+     "part_number": "T2100-41410",
+     "depth": 0,
+     "sub": false,
+     "description": "Bearing",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210041410"
+    },
+    {
+     "key": "33",
+     "part_number": "2850-41510",
+     "depth": 0,
+     "sub": false,
+     "description": "Washer",
+     "qty": "2",
+     "remarks": "",
+     "search": "285041510"
+    },
+    {
+     "key": "34",
+     "part_number": "T2100-42000",
+     "depth": 0,
+     "sub": false,
+     "description": "Shaft comp.",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210042000"
+    },
+    {
+     "key": "35",
+     "part_number": "T2100-31100",
+     "depth": 0,
+     "sub": false,
+     "description": "Cover comp.",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210031100"
+    },
+    {
+     "key": "36",
+     "part_number": "2856-31120",
+     "depth": 1,
+     "sub": true,
+     "description": "Cap",
+     "qty": "1",
+     "remarks": "",
+     "search": "285631120"
+    },
+    {
+     "key": "37",
+     "part_number": "2810-83410",
+     "depth": 1,
+     "sub": true,
+     "description": "Grommet",
+     "qty": "1",
+     "remarks": "",
+     "search": "281083410"
+    },
+    {
+     "key": "38",
+     "part_number": "8488251911",
+     "depth": 0,
+     "sub": false,
+     "description": "Screw",
+     "qty": "4",
+     "remarks": "",
+     "search": "8488251911"
+    },
+    {
+     "key": "39",
+     "part_number": "T2100-31610",
+     "depth": 0,
+     "sub": false,
+     "description": "Label",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210031610"
+    },
+    {
+     "key": "40",
+     "part_number": "2850-82411",
+     "depth": 0,
+     "sub": false,
+     "description": "Rod",
+     "qty": "1",
+     "remarks": "",
+     "search": "285082411"
+    },
+    {
+     "key": "41",
+     "part_number": "T2100-82420",
+     "depth": 0,
+     "sub": false,
+     "description": "Grommet, choke",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210082420"
+    },
+    {
+     "key": "42",
+     "part_number": "2867-82320",
+     "depth": 0,
+     "sub": false,
+     "description": "Grommet",
+     "qty": "1",
+     "remarks": "",
+     "search": "286782320"
+    },
+    {
+     "key": "43",
+     "part_number": "T2100-82520",
+     "depth": 0,
+     "sub": false,
+     "description": "Grommet, throttle",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210082520"
+    },
+    {
+     "key": "44",
+     "part_number": "2850-83100",
+     "depth": 0,
+     "sub": false,
+     "description": "Air cleaner comp.",
+     "qty": "1",
+     "remarks": "",
+     "search": "285083100"
+    },
+    {
+     "key": "45",
+     "part_number": "2850-83303",
+     "depth": 0,
+     "sub": false,
+     "description": "Cleaner cover comp.",
+     "qty": "1",
+     "remarks": "",
+     "search": "285083303"
+    },
+    {
+     "key": "46",
+     "part_number": "2841-83320",
+     "depth": 1,
+     "sub": true,
+     "description": "Knob",
+     "qty": "1",
+     "remarks": "",
+     "search": "284183320"
+    },
+    {
+     "key": "47",
+     "part_number": "848C306732",
+     "depth": 0,
+     "sub": false,
+     "description": "Pipe in comp.",
+     "qty": "1",
+     "remarks": "",
+     "search": "848C306732"
+    },
+    {
+     "key": "48",
+     "part_number": "T2100-23200",
+     "depth": 0,
+     "sub": false,
+     "description": "Filter comp.",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210023200"
+    },
+    {
+     "key": "49",
+     "part_number": "2860-51111",
+     "depth": 0,
+     "sub": false,
+     "description": "Clutch drum",
+     "qty": "1",
+     "remarks": "",
+     "search": "286051111"
+    },
+    {
+     "key": "50",
+     "part_number": "3310-51310",
+     "depth": 0,
+     "sub": false,
+     "description": "Bearing",
+     "qty": "1",
+     "remarks": "",
+     "search": "331051310"
+    },
+    {
+     "key": "51",
+     "part_number": "848C405121",
+     "depth": 0,
+     "sub": false,
+     "description": "Clutch ass’y",
+     "qty": "1",
+     "remarks": "",
+     "search": "848C405121"
+    },
+    {
+     "key": "52",
+     "part_number": "2870-51230",
+     "depth": 1,
+     "sub": true,
+     "description": "Spring",
+     "qty": "1",
+     "remarks": "",
+     "search": "287051230"
+    },
+    {
+     "key": "54",
+     "part_number": "2850-51211",
+     "depth": 0,
+     "sub": false,
+     "description": "Plate",
+     "qty": "1",
+     "remarks": "",
+     "search": "285051211"
+    },
+    {
+     "key": "56",
+     "part_number": "848CA00640",
+     "depth": 0,
+     "sub": false,
+     "description": "Oil pump set • Oil pump • Worm",
+     "qty": "1",
+     "remarks": "",
+     "search": "848CA00640"
+    },
+    {
+     "key": "59",
+     "part_number": "T2100-55610",
+     "depth": 0,
+     "sub": false,
+     "description": "Cover, pump",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210055610"
+    },
+    {
+     "key": "60",
+     "part_number": "2670-55410",
+     "depth": 0,
+     "sub": false,
+     "description": "Screw",
+     "qty": "4",
+     "remarks": "",
+     "search": "267055410"
+    },
+    {
+     "key": "61",
+     "part_number": "2850-55211",
+     "depth": 0,
+     "sub": false,
+     "description": "Washer",
+     "qty": "1",
+     "remarks": "",
+     "search": "285055211"
+    },
+    {
+     "key": "63",
+     "part_number": "T2100-71100",
+     "depth": 0,
+     "sub": false,
+     "description": "Roter comp.",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210071100"
+    },
+    {
+     "key": "64",
+     "part_number": "1650-43230",
+     "depth": 0,
+     "sub": false,
+     "description": "Nut",
+     "qty": "1",
+     "remarks": "",
+     "search": "165043230"
+    },
+    {
+     "key": "65",
+     "part_number": "T2100-71300",
+     "depth": 0,
+     "sub": false,
+     "description": "Coil assy",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210071300"
+    },
+    {
+     "key": "66",
+     "part_number": "5500-72130",
+     "depth": 1,
+     "sub": true,
+     "description": "Grommet",
+     "qty": "1",
+     "remarks": "",
+     "search": "550072130"
+    },
+    {
+     "key": "67",
+     "part_number": "2850-72110",
+     "depth": 1,
+     "sub": true,
+     "description": "Cap",
+     "qty": "1",
+     "remarks": "",
+     "search": "285072110"
+    },
+    {
+     "key": "68",
+     "part_number": "1400-72121",
+     "depth": 1,
+     "sub": true,
+     "description": "Spring",
+     "qty": "1",
+     "remarks": "",
+     "search": "140072121"
+    },
+    {
+     "key": "69",
+     "part_number": "T2100-71510",
+     "depth": 1,
+     "sub": true,
+     "description": "Cord, switch",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210071510"
+    },
+    {
+     "key": "70",
+     "part_number": "2670-55410",
+     "depth": 0,
+     "sub": false,
+     "description": "Screw",
+     "qty": "2",
+     "remarks": "",
+     "search": "267055410"
+    },
+    {
+     "key": "71",
+     "part_number": "3699-90032-10",
+     "depth": 0,
+     "sub": false,
+     "description": "Spark plug (RCJ-7Y)",
+     "qty": "1",
+     "remarks": "",
+     "search": "36999003210"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 POWER UNIT"
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "POWER UNIT",
+   "image": "g3800-fig2.png",
+   "ocr": true,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 22.944,
+     "y": 24.551,
+     "conf": 43
+    },
+    {
+     "key": "10",
+     "x": 54.435,
+     "y": 85.323,
+     "conf": 90
+    },
+    {
+     "key": "10",
+     "x": 65.847,
+     "y": 23.425,
+     "conf": 59
+    },
+    {
+     "key": "12",
+     "x": 79.698,
+     "y": 73.055,
+     "conf": 86
+    },
+    {
+     "key": "13",
+     "x": 61.915,
+     "y": 84.155,
+     "conf": 0
+    },
+    {
+     "key": "14",
+     "x": 80.726,
+     "y": 84.483,
+     "conf": 80
+    },
+    {
+     "key": "16",
+     "x": 78.448,
+     "y": 80.878,
+     "conf": 60
+    },
+    {
+     "key": "17",
+     "x": 58.387,
+     "y": 64.876,
+     "conf": 95
+    },
+    {
+     "key": "18",
+     "x": 59.698,
+     "y": 66.429,
+     "conf": 59
+    },
+    {
+     "key": "19",
+     "x": 69.536,
+     "y": 60.701,
+     "conf": 95
+    },
+    {
+     "key": "2",
+     "x": 44.415,
+     "y": 21.815,
+     "conf": 94
+    },
+    {
+     "key": "20",
+     "x": 41.069,
+     "y": 71.701,
+     "conf": 0
+    },
+    {
+     "key": "21",
+     "x": 33.105,
+     "y": 65.275,
+     "conf": 86
+    },
+    {
+     "key": "22",
+     "x": 41.593,
+     "y": 62.197,
+     "conf": 0
+    },
+    {
+     "key": "23",
+     "x": 50.121,
+     "y": 61.528,
+     "conf": 87
+    },
+    {
+     "key": "24",
+     "x": 40.383,
+     "y": 66.7,
+     "conf": 80
+    },
+    {
+     "key": "25",
+     "x": 44.093,
+     "y": 67.113,
+     "conf": 65
+    },
+    {
+     "key": "26",
+     "x": 71.109,
+     "y": 78.911,
+     "conf": 80
+    },
+    {
+     "key": "27",
+     "x": 36.593,
+     "y": 51.24,
+     "conf": 89
+    },
+    {
+     "key": "28",
+     "x": 33.125,
+     "y": 54.545,
+     "conf": 79
+    },
+    {
+     "key": "28",
+     "x": 53.911,
+     "y": 51.582,
+     "conf": 84
+    },
+    {
+     "key": "29",
+     "x": 32.762,
+     "y": 57.823,
+     "conf": 67
+    },
+    {
+     "key": "3",
+     "x": 43.327,
+     "y": 76.973,
+     "conf": 0
+    },
+    {
+     "key": "30",
+     "x": 51.633,
+     "y": 57.196,
+     "conf": 82
+    },
+    {
+     "key": "31",
+     "x": 30.605,
+     "y": 59.02,
+     "conf": 91
+    },
+    {
+     "key": "32",
+     "x": 54.899,
+     "y": 35.708,
+     "conf": 41
+    },
+    {
+     "key": "33",
+     "x": 28.347,
+     "y": 60.274,
+     "conf": 0
+    },
+    {
+     "key": "33",
+     "x": 59.677,
+     "y": 31.946,
+     "conf": 47
+    },
+    {
+     "key": "34",
+     "x": 39.859,
+     "y": 51.24,
+     "conf": 70
+    },
+    {
+     "key": "35",
+     "x": 49.052,
+     "y": 45.854,
+     "conf": 51
+    },
+    {
+     "key": "36",
+     "x": 32.157,
+     "y": 81.305,
+     "conf": 47
+    },
+    {
+     "key": "36",
+     "x": 51.875,
+     "y": 49.188,
+     "conf": 70
+    },
+    {
+     "key": "37",
+     "x": 53.407,
+     "y": 24.109,
+     "conf": 0
+    },
+    {
+     "key": "38",
+     "x": 50.02,
+     "y": 28.584,
+     "conf": 0
+    },
+    {
+     "key": "39",
+     "x": 72.379,
+     "y": 21.374,
+     "conf": 77
+    },
+    {
+     "key": "4",
+     "x": 64.274,
+     "y": 68.267,
+     "conf": 94
+    },
+    {
+     "key": "4",
+     "x": 75.161,
+     "y": 25.962,
+     "conf": 34
+    },
+    {
+     "key": "42",
+     "x": 44.173,
+     "y": 64.962,
+     "conf": 0
+    },
+    {
+     "key": "43",
+     "x": 72.863,
+     "y": 27.472,
+     "conf": 78
+    },
+    {
+     "key": "45",
+     "x": 66.048,
+     "y": 28.17,
+     "conf": 0
+    },
+    {
+     "key": "46",
+     "x": 62.117,
+     "y": 28.983,
+     "conf": 0
+    },
+    {
+     "key": "47",
+     "x": 62.036,
+     "y": 30.821,
+     "conf": 0
+    },
+    {
+     "key": "48",
+     "x": 62.339,
+     "y": 24.537,
+     "conf": 83
+    },
+    {
+     "key": "49",
+     "x": 60.907,
+     "y": 26.076,
+     "conf": 24
+    },
+    {
+     "key": "5",
+     "x": 54.657,
+     "y": 38.8,
+     "conf": 0
+    },
+    {
+     "key": "5",
+     "x": 64.637,
+     "y": 70.134,
+     "conf": 93
+    },
+    {
+     "key": "5",
+     "x": 80.565,
+     "y": 34.212,
+     "conf": 9
+    },
+    {
+     "key": "50",
+     "x": 63.831,
+     "y": 32.032,
+     "conf": 79
+    },
+    {
+     "key": "51",
+     "x": 49.234,
+     "y": 31.946,
+     "conf": 43
+    },
+    {
+     "key": "51",
+     "x": 62.177,
+     "y": 33.742,
+     "conf": 82
+    },
+    {
+     "key": "54",
+     "x": 59.778,
+     "y": 34.084,
+     "conf": 63
+    },
+    {
+     "key": "55",
+     "x": 64.738,
+     "y": 40.923,
+     "conf": 61
+    },
+    {
+     "key": "57",
+     "x": 64.294,
+     "y": 36.606,
+     "conf": 94
+    },
+    {
+     "key": "6",
+     "x": 48.468,
+     "y": 78.056,
+     "conf": 67
+    },
+    {
+     "key": "6",
+     "x": 55.706,
+     "y": 38.786,
+     "conf": 60
+    },
+    {
+     "key": "60",
+     "x": 44.839,
+     "y": 35.138,
+     "conf": 94
+    },
+    {
+     "key": "61",
+     "x": 23.992,
+     "y": 36.848,
+     "conf": 95
+    },
+    {
+     "key": "62",
+     "x": 32.177,
+     "y": 41.237,
+     "conf": 93
+    },
+    {
+     "key": "63",
+     "x": 26.31,
+     "y": 42.605,
+     "conf": 78
+    },
+    {
+     "key": "64",
+     "x": 36.411,
+     "y": 39.641,
+     "conf": 90
+    },
+    {
+     "key": "65",
+     "x": 22.984,
+     "y": 41.351,
+     "conf": 70
+    },
+    {
+     "key": "66",
+     "x": 42.379,
+     "y": 44.714,
+     "conf": 95
+    },
+    {
+     "key": "67",
+     "x": 12.863,
+     "y": 46.765,
+     "conf": 95
+    },
+    {
+     "key": "67",
+     "x": 23.71,
+     "y": 56.882,
+     "conf": 95
+    },
+    {
+     "key": "68",
+     "x": 11.815,
+     "y": 50.527,
+     "conf": 80
+    },
+    {
+     "key": "69",
+     "x": 32.238,
+     "y": 78.74,
+     "conf": 0
+    },
+    {
+     "key": "7",
+     "x": 35.383,
+     "y": 84.597,
+     "conf": 0
+    },
+    {
+     "key": "7",
+     "x": 39.859,
+     "y": 79.31,
+     "conf": 19
+    },
+    {
+     "key": "7",
+     "x": 74.738,
+     "y": 52.978,
+     "conf": 68
+    },
+    {
+     "key": "70",
+     "x": 41.956,
+     "y": 79.196,
+     "conf": 19
+    },
+    {
+     "key": "71",
+     "x": 69.657,
+     "y": 52.636,
+     "conf": 94
+    },
+    {
+     "key": "72",
+     "x": 75.726,
+     "y": 52.964,
+     "conf": 49
+    },
+    {
+     "key": "73",
+     "x": 80,
+     "y": 53.121,
+     "conf": 73
+    },
+    {
+     "key": "74",
+     "x": 76.452,
+     "y": 46.21,
+     "conf": 86
+    },
+    {
+     "key": "75",
+     "x": 54.698,
+     "y": 45.554,
+     "conf": 93
+    },
+    {
+     "key": "8",
+     "x": 43.206,
+     "y": 83.386,
+     "conf": 0
+    },
+    {
+     "key": "8",
+     "x": 81.593,
+     "y": 34.198,
+     "conf": 61
+    },
+    {
+     "key": "9",
+     "x": 59.899,
+     "y": 86.064,
+     "conf": 44
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "T2100-32110",
+     "depth": 0,
+     "sub": false,
+     "description": "Left handle",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210032110"
+    },
+    {
+     "key": "2",
+     "part_number": "8488252711",
+     "depth": 0,
+     "sub": false,
+     "description": "Screw",
+     "qty": "4",
+     "remarks": "",
+     "search": "8488252711"
+    },
+    {
+     "key": "3",
+     "part_number": "T2100-33000",
+     "depth": 0,
+     "sub": false,
+     "description": "Right handle ass’y",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210033000"
+    },
+    {
+     "key": "4",
+     "part_number": "2850-33313",
+     "depth": 1,
+     "sub": true,
+     "description": "Throttle lever",
+     "qty": "1",
+     "remarks": "",
+     "search": "285033313"
+    },
+    {
+     "key": "5",
+     "part_number": "3356-33321",
+     "depth": 1,
+     "sub": true,
+     "description": "Throttle spring",
+     "qty": "1",
+     "remarks": "",
+     "search": "335633321"
+    },
+    {
+     "key": "6",
+     "part_number": "04025-00524",
+     "depth": 1,
+     "sub": true,
+     "description": "Spring pin",
+     "qty": "1",
+     "remarks": "",
+     "search": "0402500524"
+    },
+    {
+     "key": "7",
+     "part_number": "2670-34401",
+     "depth": 0,
+     "sub": false,
+     "description": "Tank cap ass’y",
+     "qty": "1",
+     "remarks": "",
+     "search": "267034401"
+    },
+    {
+     "key": "8",
+     "part_number": "2670-34430",
+     "depth": 1,
+     "sub": true,
+     "description": "Gasket",
+     "qty": "1",
+     "remarks": "",
+     "search": "267034430"
+    },
+    {
+     "key": "9",
+     "part_number": "2877-31800",
+     "depth": 0,
+     "sub": false,
+     "description": "Cap ass’y",
+     "qty": "1",
+     "remarks": "",
+     "search": "287731800"
+    },
+    {
+     "key": "10",
+     "part_number": "2841-31820",
+     "depth": 1,
+     "sub": true,
+     "description": "Gasket",
+     "qty": "1",
+     "remarks": "",
+     "search": "284131820"
+    },
+    {
+     "key": "11",
+     "part_number": "2850-34111",
+     "depth": 0,
+     "sub": false,
+     "description": "Grip cover",
+     "qty": "1",
+     "remarks": "",
+     "search": "285034111"
+    },
+    {
+     "key": "12",
+     "part_number": "848C3033E3",
+     "depth": 0,
+     "sub": false,
+     "description": "Arm",
+     "qty": "1",
+     "remarks": "",
+     "search": "848C3033E3"
+    },
+    {
+     "key": "13",
+     "part_number": "8488252711",
+     "depth": 0,
+     "sub": false,
+     "description": "Screw",
+     "qty": "1",
+     "remarks": "",
+     "search": "8488252711"
+    },
+    {
+     "key": "14",
+     "part_number": "2850-74102",
+     "depth": 0,
+     "sub": false,
+     "description": "Switch ass’y",
+     "qty": "1",
+     "remarks": "",
+     "search": "285074102"
+    },
+    {
+     "key": "16",
+     "part_number": "T2100-74210",
+     "depth": 0,
+     "sub": false,
+     "description": "Cord",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210074210"
+    },
+    {
+     "key": "17",
+     "part_number": "2850-34501",
+     "depth": 0,
+     "sub": false,
+     "description": "Breather ass’y",
+     "qty": "1",
+     "remarks": "",
+     "search": "285034501"
+    },
+    {
+     "key": "18",
+     "part_number": "3317-85120",
+     "depth": 0,
+     "sub": false,
+     "description": "Grommet",
+     "qty": "1",
+     "remarks": "",
+     "search": "331785120"
+    },
+    {
+     "key": "19",
+     "part_number": "T2100-82512",
+     "depth": 0,
+     "sub": false,
+     "description": "Throttle rod",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210082512"
+    },
+    {
+     "key": "20",
+     "part_number": "T2100-31500",
+     "depth": 0,
+     "sub": false,
+     "description": "Pipe comp.",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210031500"
+    },
+    {
+     "key": "21",
+     "part_number": "T2100-34301",
+     "depth": 0,
+     "sub": false,
+     "description": "Pipe ass’y",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210034301"
+    },
+    {
+     "key": "22",
+     "part_number": "2850-34311",
+     "depth": 1,
+     "sub": true,
+     "description": "Fuel pipe",
+     "qty": "1",
+     "remarks": "",
+     "search": "285034311"
+    },
+    {
+     "key": "23",
+     "part_number": "2851-34321",
+     "depth": 1,
+     "sub": true,
+     "description": "Grommet",
+     "qty": "1",
+     "remarks": "",
+     "search": "285134321"
+    },
+    {
+     "key": "24",
+     "part_number": "1850-85300",
+     "depth": 1,
+     "sub": true,
+     "description": "Filter ass’y",
+     "qty": "1",
+     "remarks": "",
+     "search": "185085300"
+    },
+    {
+     "key": "25",
+     "part_number": "1260-85460",
+     "depth": 1,
+     "sub": true,
+     "description": "Clip",
+     "qty": "1",
+     "remarks": "",
+     "search": "126085460"
+    },
+    {
+     "key": "26",
+     "part_number": "2851-33510",
+     "depth": 0,
+     "sub": false,
+     "description": "Cap",
+     "qty": "1",
+     "remarks": "",
+     "search": "285133510"
+    },
+    {
+     "key": "27",
+     "part_number": "T2100-25111",
+     "depth": 0,
+     "sub": false,
+     "description": "Engine case",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210025111"
+    },
+    {
+     "key": "28",
+     "part_number": "2670-14320",
+     "depth": 0,
+     "sub": false,
+     "description": "Screw",
+     "qty": "4",
+     "remarks": "",
+     "search": "267014320"
+    },
+    {
+     "key": "29",
+     "part_number": "T2100-35200",
+     "depth": 0,
+     "sub": false,
+     "description": "Damper comp.",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210035200"
+    },
+    {
+     "key": "30",
+     "part_number": "2616-35141",
+     "depth": 0,
+     "sub": false,
+     "description": "Damper",
+     "qty": "1",
+     "remarks": "",
+     "search": "261635141"
+    },
+    {
+     "key": "31",
+     "part_number": "8488251601",
+     "depth": 0,
+     "sub": false,
+     "description": "Screw",
+     "qty": "2",
+     "remarks": "",
+     "search": "8488251601"
+    },
+    {
+     "key": "32",
+     "part_number": "2856-35180",
+     "depth": 0,
+     "sub": false,
+     "description": "Cap",
+     "qty": "1",
+     "remarks": "",
+     "search": "285635180"
+    },
+    {
+     "key": "33",
+     "part_number": "2880-35250",
+     "depth": 0,
+     "sub": false,
+     "description": "Cap",
+     "qty": "1",
+     "remarks": "",
+     "search": "288035250"
+    },
+    {
+     "key": "34",
+     "part_number": "8488251911",
+     "depth": 0,
+     "sub": false,
+     "description": "Screw",
+     "qty": "1",
+     "remarks": "",
+     "search": "8488251911"
+    },
+    {
+     "key": "35",
+     "part_number": "T2100-35150",
+     "depth": 0,
+     "sub": false,
+     "description": "Spring rear",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210035150"
+    },
+    {
+     "key": "36",
+     "part_number": "8488251901",
+     "depth": 0,
+     "sub": false,
+     "description": "Screw",
+     "qty": "2",
+     "remarks": "",
+     "search": "8488251901"
+    },
+    {
+     "key": "37",
+     "part_number": "848C405404",
+     "depth": 0,
+     "sub": false,
+     "description": "Chain brake ass’y",
+     "qty": "1",
+     "remarks": "",
+     "search": "848C405404"
+    },
+    {
+     "key": "38",
+     "part_number": "2850-53250",
+     "depth": 1,
+     "sub": true,
+     "description": "Plate",
+     "qty": "1",
+     "remarks": "",
+     "search": "285053250"
+    },
+    {
+     "key": "39",
+     "part_number": "2850-54111",
+     "depth": 1,
+     "sub": true,
+     "description": "Front guard",
+     "qty": "1",
+     "remarks": "",
+     "search": "285054111"
+    },
+    {
+     "key": "40",
+     "part_number": "2850-54120",
+     "depth": 1,
+     "sub": true,
+     "description": "Return spring",
+     "qty": "1",
+     "remarks": "",
+     "search": "285054120"
+    },
+    {
+     "key": "41",
+     "part_number": "2850-54130",
+     "depth": 1,
+     "sub": true,
+     "description": "Screw",
+     "qty": "1",
+     "remarks": "",
+     "search": "285054130"
+    },
+    {
+     "key": "42",
+     "part_number": "2850-54140",
+     "depth": 1,
+     "sub": true,
+     "description": "Spacer",
+     "qty": "1",
+     "remarks": "",
+     "search": "285054140"
+    },
+    {
+     "key": "43",
+     "part_number": "2850-54211",
+     "depth": 1,
+     "sub": true,
+     "description": "Spacer",
+     "qty": "1",
+     "remarks": "",
+     "search": "285054211"
+    },
+    {
+     "key": "44",
+     "part_number": "848C605423",
+     "depth": 1,
+     "sub": true,
+     "description": "Weight",
+     "qty": "1",
+     "remarks": "",
+     "search": "848C605423"
+    },
+    {
+     "key": "45",
+     "part_number": "2872-54230",
+     "depth": 1,
+     "sub": true,
+     "description": "Spring",
+     "qty": "1",
+     "remarks": "",
+     "search": "287254230"
+    },
+    {
+     "key": "46",
+     "part_number": "2851-54260",
+     "depth": 1,
+     "sub": true,
+     "description": "Stopper plate",
+     "qty": "1",
+     "remarks": "",
+     "search": "285154260"
+    },
+    {
+     "key": "47",
+     "part_number": "2851-54270",
+     "depth": 1,
+     "sub": true,
+     "description": "Spring",
+     "qty": "1",
+     "remarks": "",
+     "search": "285154270"
+    },
+    {
+     "key": "48",
+     "part_number": "3330-75411",
+     "depth": 1,
+     "sub": true,
+     "description": "Washer",
+     "qty": "1",
+     "remarks": "",
+     "search": "333075411"
+    },
+    {
+     "key": "49",
+     "part_number": "3310-53331",
+     "depth": 1,
+     "sub": true,
+     "description": "Nut (B)",
+     "qty": "1",
+     "remarks": "",
+     "search": "331053331"
+    },
+    {
+     "key": "50",
+     "part_number": "2850-54626",
+     "depth": 1,
+     "sub": true,
+     "description": "Spring cover",
+     "qty": "1",
+     "remarks": "",
+     "search": "285054626"
+    },
+    {
+     "key": "51",
+     "part_number": "2670-54630",
+     "depth": 1,
+     "sub": true,
+     "description": "Screw",
+     "qty": "4",
+     "remarks": "",
+     "search": "267054630"
+    },
+    {
+     "key": "52",
+     "part_number": "2851-54301",
+     "depth": 1,
+     "sub": true,
+     "description": "Brake lever comp.",
+     "qty": "1",
+     "remarks": "",
+     "search": "285154301"
+    },
+    {
+     "key": "53",
+     "part_number": "2851-54350",
+     "depth": 1,
+     "sub": true,
+     "description": "Roller",
+     "qty": "1",
+     "remarks": "",
+     "search": "285154350"
+    },
+    {
+     "key": "54",
+     "part_number": "2670-54411",
+     "depth": 1,
+     "sub": true,
+     "description": "Slide arm",
+     "qty": "1",
+     "remarks": "",
+     "search": "267054411"
+    },
+    {
+     "key": "55",
+     "part_number": "2851-54510",
+     "depth": 1,
+     "sub": true,
+     "description": "Brake band",
+     "qty": "1",
+     "remarks": "",
+     "search": "285154510"
+    },
+    {
+     "key": "56",
+     "part_number": "3356-24140",
+     "depth": 1,
+     "sub": true,
+     "description": "Roller",
+     "qty": "1",
+     "remarks": "",
+     "search": "335624140"
+    },
+    {
+     "key": "57",
+     "part_number": "2670-54610",
+     "depth": 1,
+     "sub": true,
+     "description": "Brake spring",
+     "qty": "1",
+     "remarks": "",
+     "search": "267054610"
+    },
+    {
+     "key": "58",
+     "part_number": "T2100-53150",
+     "depth": 0,
+     "sub": false,
+     "description": "Label",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210053150"
+    },
+    {
+     "key": "59",
+     "part_number": "3350-53410",
+     "depth": 0,
+     "sub": false,
+     "description": "Nut",
+     "qty": "2",
+     "remarks": "",
+     "search": "335053410"
+    },
+    {
+     "key": "60",
+     "part_number": "T2100-75610",
+     "depth": 0,
+     "sub": false,
+     "description": "Fan cover",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210075610"
+    },
+    {
+     "key": "61",
+     "part_number": "T2100-75000",
+     "depth": 0,
+     "sub": false,
+     "description": "Starter ass’y",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210075000"
+    },
+    {
+     "key": "62",
+     "part_number": "T2100-75210",
+     "depth": 1,
+     "sub": true,
+     "description": "Reel",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210075210"
+    },
+    {
+     "key": "63",
+     "part_number": "2850-75301",
+     "depth": 1,
+     "sub": true,
+     "description": "Spring",
+     "qty": "1",
+     "remarks": "",
+     "search": "285075301"
+    },
+    {
+     "key": "64",
+     "part_number": "3317-75410",
+     "depth": 1,
+     "sub": true,
+     "description": "Rope",
+     "qty": "1",
+     "remarks": "",
+     "search": "331775410"
+    },
+    {
+     "key": "65",
+     "part_number": "3330-75421",
+     "depth": 1,
+     "sub": true,
+     "description": "Knob",
+     "qty": "1",
+     "remarks": "",
+     "search": "333075421"
+    },
+    {
+     "key": "66",
+     "part_number": "1850-75151",
+     "depth": 1,
+     "sub": true,
+     "description": "Screw",
+     "qty": "1",
+     "remarks": "",
+     "search": "185075151"
+    },
+    {
+     "key": "67",
+     "part_number": "8488251911",
+     "depth": 0,
+     "sub": false,
+     "description": "Screw",
+     "qty": "3",
+     "remarks": "",
+     "search": "8488251911"
+    },
+    {
+     "key": "68",
+     "part_number": "T2100-75130",
+     "depth": 0,
+     "sub": false,
+     "description": "Label",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210075130"
+    },
+    {
+     "key": "69",
+     "part_number": "T2100-35150",
+     "depth": 0,
+     "sub": false,
+     "description": "Spring front",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210035150"
+    },
+    {
+     "key": "70",
+     "part_number": "2670-14320",
+     "depth": 0,
+     "sub": false,
+     "description": "Screw",
+     "qty": "1",
+     "remarks": "",
+     "search": "267014320"
+    },
+    {
+     "key": "71",
+     "part_number": "848C408100",
+     "depth": 0,
+     "sub": false,
+     "description": "Carburetor ass’y",
+     "qty": "1",
+     "remarks": "",
+     "search": "848C408100"
+    },
+    {
+     "key": "72",
+     "part_number": "2850-82114",
+     "depth": 0,
+     "sub": false,
+     "description": "Manifold",
+     "qty": "1",
+     "remarks": "",
+     "search": "285082114"
+    },
+    {
+     "key": "73",
+     "part_number": "2867-82210",
+     "depth": 0,
+     "sub": false,
+     "description": "Bolt",
+     "qty": "2",
+     "remarks": "",
+     "search": "286782210"
+    },
+    {
+     "key": "74",
+     "part_number": "8488251911",
+     "depth": 0,
+     "sub": false,
+     "description": "Screw",
+     "qty": "1",
+     "remarks": "",
+     "search": "8488251911"
+    },
+    {
+     "key": "75",
+     "part_number": "T2102-35160",
+     "depth": 0,
+     "sub": false,
+     "description": "Plate",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210235160"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 POWER UNIT"
+  },
+  {
+   "id": "3",
+   "number": "3",
+   "title": "CARBURETOR COMPONENTS & ACCESSORIES",
+   "image": "g3800-fig3.png",
+   "ocr": true,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 16.149,
+     "y": 37.304,
+     "conf": 0
+    },
+    {
+     "key": "1",
+     "x": 79.032,
+     "y": 21.815,
+     "conf": 79
+    },
+    {
+     "key": "10",
+     "x": 22.984,
+     "y": 36.349,
+     "conf": 94
+    },
+    {
+     "key": "12",
+     "x": 69.496,
+     "y": 34.169,
+     "conf": 96
+    },
+    {
+     "key": "13",
+     "x": 66.371,
+     "y": 34.882,
+     "conf": 76
+    },
+    {
+     "key": "14",
+     "x": 83.75,
+     "y": 43.916,
+     "conf": 96
+    },
+    {
+     "key": "15",
+     "x": 45.827,
+     "y": 21.915,
+     "conf": 91
+    },
+    {
+     "key": "16",
+     "x": 40.04,
+     "y": 23.739,
+     "conf": 97
+    },
+    {
+     "key": "17",
+     "x": 45.524,
+     "y": 28.512,
+     "conf": 97
+    },
+    {
+     "key": "18",
+     "x": 57.54,
+     "y": 34.283,
+     "conf": 96
+    },
+    {
+     "key": "19",
+     "x": 56.935,
+     "y": 40.154,
+     "conf": 96
+    },
+    {
+     "key": "2",
+     "x": 27.319,
+     "y": 20.989,
+     "conf": 95
+    },
+    {
+     "key": "20",
+     "x": 61.855,
+     "y": 36.62,
+     "conf": 93
+    },
+    {
+     "key": "21",
+     "x": 59.758,
+     "y": 35.38,
+     "conf": 67
+    },
+    {
+     "key": "22",
+     "x": 60.141,
+     "y": 41.365,
+     "conf": 75
+    },
+    {
+     "key": "23",
+     "x": 20.282,
+     "y": 31.69,
+     "conf": 87
+    },
+    {
+     "key": "24",
+     "x": 61.331,
+     "y": 24.238,
+     "conf": 0
+    },
+    {
+     "key": "25",
+     "x": 55.081,
+     "y": 26.304,
+     "conf": 87
+    },
+    {
+     "key": "25",
+     "x": 65.806,
+     "y": 24.523,
+     "conf": 8
+    },
+    {
+     "key": "26",
+     "x": 58.629,
+     "y": 25.748,
+     "conf": 91
+    },
+    {
+     "key": "27",
+     "x": 68.548,
+     "y": 22.913,
+     "conf": 91
+    },
+    {
+     "key": "3",
+     "x": 22.742,
+     "y": 20.889,
+     "conf": 94
+    },
+    {
+     "key": "4",
+     "x": 79.536,
+     "y": 42.434,
+     "conf": 93
+    },
+    {
+     "key": "5",
+     "x": 51.552,
+     "y": 40.453,
+     "conf": 94
+    },
+    {
+     "key": "6",
+     "x": 17.681,
+     "y": 25.62,
+     "conf": 97
+    },
+    {
+     "key": "7",
+     "x": 14.677,
+     "y": 27.273,
+     "conf": 94
+    },
+    {
+     "key": "8",
+     "x": 23.165,
+     "y": 43.417,
+     "conf": 93
+    },
+    {
+     "key": "8",
+     "x": 61.714,
+     "y": 21.915,
+     "conf": 91
+    },
+    {
+     "key": "8",
+     "x": 72.52,
+     "y": 33.443,
+     "conf": 90
+    },
+    {
+     "key": "9",
+     "x": 23.165,
+     "y": 41.251,
+     "conf": 76
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "848C408100",
+     "depth": 0,
+     "sub": false,
+     "description": "CARBURETOR ASS'Y",
+     "qty": "",
+     "remarks": "",
+     "search": "848C408100"
+    },
+    {
+     "key": "2",
+     "part_number": "2850-81120",
+     "depth": 1,
+     "sub": true,
+     "description": "PUMP COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "285081120"
+    },
+    {
+     "key": "3",
+     "part_number": "3310-81130",
+     "depth": 1,
+     "sub": true,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "331081130"
+    },
+    {
+     "key": "4",
+     "part_number": "3310-81280",
+     "depth": 1,
+     "sub": true,
+     "description": "COVER, metering",
+     "qty": "1",
+     "remarks": "",
+     "search": "331081280"
+    },
+    {
+     "key": "5",
+     "part_number": "1480-81420",
+     "depth": 1,
+     "sub": true,
+     "description": "PLUG",
+     "qty": "1",
+     "remarks": "",
+     "search": "148081420"
+    },
+    {
+     "key": "6",
+     "part_number": "3350-81380",
+     "depth": 1,
+     "sub": true,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "335081380"
+    },
+    {
+     "key": "7",
+     "part_number": "2630-81330",
+     "depth": 1,
+     "sub": true,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "263081330"
+    },
+    {
+     "key": "8",
+     "part_number": "2880-81470",
+     "depth": 1,
+     "sub": true,
+     "description": "SCREW",
+     "qty": "3",
+     "remarks": "",
+     "search": "288081470"
+    },
+    {
+     "key": "9",
+     "part_number": "3356-81340",
+     "depth": 1,
+     "sub": true,
+     "description": "VALVE",
+     "qty": "1",
+     "remarks": "",
+     "search": "335681340"
+    },
+    {
+     "key": "10",
+     "part_number": "2670-81410",
+     "depth": 1,
+     "sub": true,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "267081410"
+    },
+    {
+     "key": "11",
+     "part_number": "T2108-81370",
+     "depth": 1,
+     "sub": true,
+     "description": "SHAFT ASS'Y",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210881370"
+    },
+    {
+     "key": "12",
+     "part_number": "2670-81440",
+     "depth": 1,
+     "sub": true,
+     "description": "LEVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "267081440"
+    },
+    {
+     "key": "13",
+     "part_number": "1148-81390",
+     "depth": 1,
+     "sub": true,
+     "description": "RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "114881390"
+    },
+    {
+     "key": "14",
+     "part_number": "3310-81351",
+     "depth": 1,
+     "sub": true,
+     "description": "SCREW",
+     "qty": "4",
+     "remarks": "",
+     "search": "331081351"
+    },
+    {
+     "key": "15",
+     "part_number": "T2100-06030",
+     "depth": 1,
+     "sub": true,
+     "description": "REBUILT KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210006030"
+    },
+    {
+     "key": "16",
+     "part_number": "T2100-06020",
+     "depth": 1,
+     "sub": true,
+     "description": "GASKET KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "T210006020"
+    },
+    {
+     "key": "17",
+     "part_number": "––––––––––",
+     "depth": 1,
+     "sub": true,
+     "description": "SCREEN",
+     "qty": "–",
+     "remarks": "",
+     "search": ""
+    },
+    {
+     "key": "18",
+     "part_number": "––––––––––",
+     "depth": 1,
+     "sub": true,
+     "description": "VALVE, inlet",
+     "qty": "–",
+     "remarks": "",
+     "search": ""
+    },
+    {
+     "key": "19",
+     "part_number": "––––––––––",
+     "depth": 1,
+     "sub": true,
+     "description": "SPRING",
+     "qty": "–",
+     "remarks": "",
+     "search": ""
+    },
+    {
+     "key": "20",
+     "part_number": "––––––––––",
+     "depth": 1,
+     "sub": true,
+     "description": "PIN",
+     "qty": "–",
+     "remarks": "",
+     "search": ""
+    },
+    {
+     "key": "21",
+     "part_number": "––––––––––",
+     "depth": 1,
+     "sub": true,
+     "description": "LEVER",
+     "qty": "–",
+     "remarks": "",
+     "search": ""
+    },
+    {
+     "key": "22",
+     "part_number": "––––––––––",
+     "depth": 1,
+     "sub": true,
+     "description": "SCREW",
+     "qty": "–",
+     "remarks": "",
+     "search": ""
+    },
+    {
+     "key": "23",
+     "part_number": "2850-81190",
+     "depth": 1,
+     "sub": true,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "285081190"
+    },
+    {
+     "key": "24",
+     "part_number": "2841-81450",
+     "depth": 1,
+     "sub": true,
+     "description": "VALVE, choke",
+     "qty": "1",
+     "remarks": "",
+     "search": "284181450"
+    },
+    {
+     "key": "25",
+     "part_number": "2850-81430",
+     "depth": 1,
+     "sub": true,
+     "description": "BUSH",
+     "qty": "1",
+     "remarks": "",
+     "search": "285081430"
+    },
+    {
+     "key": "26",
+     "part_number": "2850-81350",
+     "depth": 1,
+     "sub": true,
+     "description": "SPRING, choke",
+     "qty": "1",
+     "remarks": "",
+     "search": "285081350"
+    },
+    {
+     "key": "27",
+     "part_number": "2850-81461",
+     "depth": 1,
+     "sub": true,
+     "description": "SHAFT, choke",
+     "qty": "1",
+     "remarks": "",
+     "search": "285081461"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 CARBURETOR COMPONENTS & ACCESSORIES"
+  },
+  {
+   "id": "4",
+   "number": "4",
+   "title": "ACCESSORIES",
+   "image": "g3800-fig4.png",
+   "ocr": true,
+   "hotspots": [
+    {
+     "key": "10",
+     "x": 39.899,
+     "y": 42.633,
+     "conf": 97
+    },
+    {
+     "key": "13",
+     "x": 29.577,
+     "y": 50.071,
+     "conf": 0
+    },
+    {
+     "key": "14",
+     "x": 65.242,
+     "y": 50.513,
+     "conf": 91
+    },
+    {
+     "key": "2",
+     "x": 38.246,
+     "y": 20.134,
+     "conf": 95
+    },
+    {
+     "key": "3",
+     "x": 48.407,
+     "y": 16.8,
+     "conf": 95
+    },
+    {
+     "key": "7",
+     "x": 33.669,
+     "y": 25.449,
+     "conf": 92
+    },
+    {
+     "key": "8",
+     "x": 73.871,
+     "y": 30.892,
+     "conf": 87
+    },
+    {
+     "key": "9",
+     "x": 23.911,
+     "y": 42.633,
+     "conf": 68
+    }
+   ],
+   "parts": [
+    {
+     "key": "2",
+     "part_number": "3320-91140",
+     "depth": 0,
+     "sub": false,
+     "description": "Plug 13x19",
+     "qty": "1",
+     "remarks": "",
+     "search": "332091140"
+    },
+    {
+     "key": "3",
+     "part_number": "2670-91150",
+     "depth": 0,
+     "sub": false,
+     "description": "Driver",
+     "qty": "1",
+     "remarks": "",
+     "search": "267091150"
+    },
+    {
+     "key": "4A",
+     "part_number": "848CB24G23",
+     "depth": 0,
+     "sub": false,
+     "description": "Sprocket nose bar 14”",
+     "qty": "1",
+     "remarks": "",
+     "search": "848CB24G23"
+    },
+    {
+     "key": "4B",
+     "part_number": "3608-52112",
+     "depth": 0,
+     "sub": false,
+     "description": "Sprocket nose bar 16”",
+     "qty": "1",
+     "remarks": "",
+     "search": "360852112"
+    },
+    {
+     "key": "5A",
+     "part_number": "2931-52210-50",
+     "depth": 0,
+     "sub": false,
+     "description": "Chain for 14” bar",
+     "qty": "1",
+     "remarks": "(91VG-J52E)",
+     "search": "29315221050"
+    },
+    {
+     "key": "5B",
+     "part_number": "2932-52210-50",
+     "depth": 0,
+     "sub": false,
+     "description": "Chain for 16” bar",
+     "qty": "1",
+     "remarks": "(91VG-J57E)",
+     "search": "29325221050"
+    },
+    {
+     "key": "6A",
+     "part_number": "3617-97110",
+     "depth": 0,
+     "sub": false,
+     "description": "Protector for 14” bar",
+     "qty": "1",
+     "remarks": "",
+     "search": "361797110"
+    },
+    {
+     "key": "6B",
+     "part_number": "3637-97110",
+     "depth": 0,
+     "sub": false,
+     "description": "Protector for 16” bar",
+     "qty": "1",
+     "remarks": "",
+     "search": "363797110"
+    },
+    {
+     "key": "7",
+     "part_number": "T2100-06010",
+     "depth": 0,
+     "sub": false,
+     "description": "Gasket kit",
+     "qty": "1",
+     "remarks": "(OP)",
+     "search": "T210006010"
+    },
+    {
+     "key": "8",
+     "part_number": "T2100-06020",
+     "depth": 0,
+     "sub": false,
+     "description": "Gasket kit",
+     "qty": "1",
+     "remarks": "(OP)",
+     "search": "T210006020"
+    },
+    {
+     "key": "9",
+     "part_number": "2670-96210",
+     "depth": 0,
+     "sub": false,
+     "description": "Wrench (for clutch)",
+     "qty": "1",
+     "remarks": "(OP)",
+     "search": "267096210"
+    },
+    {
+     "key": "10",
+     "part_number": "2670-96220",
+     "depth": 0,
+     "sub": false,
+     "description": "Stopper (for piston)",
+     "qty": "1",
+     "remarks": "(OP)",
+     "search": "267096220"
+    },
+    {
+     "key": "11",
+     "part_number": "2670-96240",
+     "depth": 0,
+     "sub": false,
+     "description": "Wrench (for clutch ASS’Y)",
+     "qty": "3",
+     "remarks": "(OP)",
+     "search": "267096240"
+    },
+    {
+     "key": "12",
+     "part_number": "3330-97310",
+     "depth": 0,
+     "sub": false,
+     "description": "Gauge (for air gap)",
+     "qty": "1",
+     "remarks": "(OP)",
+     "search": "333097310"
+    },
+    {
+     "key": "13",
+     "part_number": "2850-96410",
+     "depth": 0,
+     "sub": false,
+     "description": "Wrench (T20xT25xT27)",
+     "qty": "1",
+     "remarks": "(OP)",
+     "search": "285096410"
+    },
+    {
+     "key": "14",
+     "part_number": "2670-96510",
+     "depth": 0,
+     "sub": false,
+     "description": "Guide (for break spring)",
+     "qty": "1",
+     "remarks": "(OP)",
+     "search": "267096510"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.4 ACCESSORIES"
+  }
+ ]
+}
