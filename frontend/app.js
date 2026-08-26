@@ -3339,6 +3339,40 @@ async function enterIpl() {
   showIplPicker();
 }
 
+// Each brand's own colour, sampled from the logo files the marketing folder
+// keeps at M:\SALES_&_MARKETING\WEBSITE IMAGES\Brand Logos, then darkened until
+// it is legible — the same thing the stylesheet does to the OM gradient, which
+// fails contrast at full strength. `fill` carries white text on the tile;
+// `ink` is the brand name on the picker's ground. Both clear 4.5:1.
+//
+// Every brand in that folder is listed, not just the two with IPLs loaded, so
+// the first Ferris or Billy Goat book arrives already in its own colour.
+const IPL_BRAND_COLOUR = {
+  husqvarna:   { fill: "#183060", ink: "#183060" },  // logo navy
+  zenoah:      { fill: "#dc3030", ink: "#ce2d2d" },  // logo red
+  billygoat:   { fill: "#008050", ink: "#008050" },
+  ferris:      { fill: "#8f1020", ink: "#8f1020" },
+  grasshopper: { fill: "#e01020", ink: "#d20f1e" },
+  pulsfog:     { fill: "#e12d3c", ink: "#d32a38" },
+  rayco:       { fill: "#91691a", ink: "#886218" },
+};
+// An unknown brand falls back to the app's own teal rather than to grey, so a
+// new brand looks deliberate on the day it lands.
+const IPL_BRAND_FALLBACK = { fill: "#0a7f86", ink: "#0a7f86" };
+
+function iplBrandColour(brand) {
+  const key = String(brand || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  return IPL_BRAND_COLOUR[key] || IPL_BRAND_FALLBACK;
+}
+
+// One big letter for a one-word brand, initials for the rest: "H", "Z",
+// "BG" — rather than the first two letters, which gives "BI" for Billy Goat.
+function iplBrandInitials(brand) {
+  const words = String(brand || "").trim().split(/\s+/).filter(Boolean);
+  if (words.length > 1) return words.slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+  return (words[0] || "?").slice(0, 1).toUpperCase();
+}
+
 // Models added before the picker existed have no brand or category, so fall
 // back rather than dropping them out of the list entirely.
 function iplBrand(m) { return m.brand || String(m.name || "").split(" ")[0] || "Other"; }
@@ -3446,9 +3480,10 @@ function renderIplPicker() {
     const rows = byBrand.get(b).slice().sort((x, y) =>
       iplShort(x).localeCompare(iplShort(y), undefined, { numeric: true })
     );
+    const col = iplBrandColour(b);
     return `<div class="mp-group">
-      <div class="mp-ghead">
-        <span class="mp-gmark">${escapeHtml(b.slice(0, 2).toUpperCase())}</span>
+      <div class="mp-ghead" style="--brand-fill:${col.fill};--brand-ink:${col.ink};">
+        <span class="mp-gmark">${escapeHtml(iplBrandInitials(b))}</span>
         <strong>${escapeHtml(b)}</strong><span class="n">${rows.length}</span>
       </div>
       <div class="mp-rows">` +

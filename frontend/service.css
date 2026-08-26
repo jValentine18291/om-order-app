@@ -1379,23 +1379,39 @@ select {
 .mp-rc small { font-size: .72rem; color: var(--ink-faint); }
 
 /* ---- brand groups ---- */
-.mp-group + .mp-group { margin-top: 16px; }
+.mp-group + .mp-group { margin-top: 22px; }
+
+/* The heading carries the brand's own colour. --brand-fill and --brand-ink are
+   set per group from app.js, sampled from the logo files marketing keeps and
+   darkened until both clear 4.5:1 - the raw logo reds do not. The fallbacks
+   here are the app's teal, so a heading still looks deliberate if the pair
+   never arrives. */
 .mp-ghead {
-  display: flex; align-items: center; gap: 9px;
+  display: flex; align-items: center; gap: 10px;
   /* Pinned below the topbar, not behind it. --topbar-h is measured at startup
      rather than hard-coded, because the bar grows when the language toggle
      appears. */
-  padding: 6px 2px 9px; position: sticky; top: var(--topbar-h, 63px); z-index: 2;
+  padding: 7px 2px 9px; position: sticky; top: var(--topbar-h, 63px); z-index: 2;
   background: var(--bg);
+  border-bottom: 2px solid var(--brand-fill, var(--primary));
+  margin-bottom: 11px;
 }
 .mp-gmark {
-  width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0;
+  width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
   display: grid; place-items: center;
-  background: var(--primary-tint); color: var(--primary);
-  font-family: var(--display); font-size: 12px; font-weight: 700;
+  background: var(--brand-fill, var(--primary)); color: #fff;
+  font-family: var(--display); font-size: 14px; font-weight: 700;
+  line-height: 1;
 }
-.mp-ghead strong { font-family: var(--display); font-size: 14.5px; font-weight: 600; }
-.mp-ghead .n { margin-left: auto; font-size: .78rem; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.mp-ghead strong {
+  font-family: var(--display); font-size: 17px; font-weight: 700;
+  letter-spacing: -.01em; color: var(--brand-ink, var(--primary));
+}
+.mp-ghead .n {
+  margin-left: auto; font-size: .74rem; font-weight: 600; color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+  border: 1px solid var(--border-2); border-radius: 999px; padding: 2px 9px;
+}
 
 .mp-rows { display: flex; flex-direction: column; gap: 8px; }
 .mp-row {
