@@ -234,6 +234,7 @@
     {
      "key": "1",
      "part_number": "3699-92672",
+     "depth": 0,
      "sub": false,
      "description": "SPARK PLUG",
      "qty": "1",
@@ -243,6 +244,7 @@
     {
      "key": "2",
      "part_number": "T4960-50810",
+     "depth": 0,
      "sub": false,
      "description": "SCREW",
      "qty": "2",
@@ -252,6 +254,7 @@
     {
      "key": "3",
      "part_number": "585 60 19-01",
+     "depth": 0,
      "sub": false,
      "description": "PLATE, CYLINDER",
      "qty": "1",
@@ -261,6 +264,7 @@
     {
      "key": "4",
      "part_number": "4820-13180",
+     "depth": 0,
      "sub": false,
      "description": "SCREW",
      "qty": "4",
@@ -270,6 +274,7 @@
     {
      "key": "5",
      "part_number": "577 97 90-01",
+     "depth": 0,
      "sub": false,
      "description": "CYLINDER, COMP",
      "qty": "1",
@@ -279,6 +284,7 @@
     {
      "key": "6",
      "part_number": "585 60 33-01",
+     "depth": 0,
      "sub": false,
      "description": "GASKET, INSULATOR",
      "qty": "1",
@@ -288,6 +294,7 @@
     {
      "key": "7",
      "part_number": "587 19 45-01",
+     "depth": 0,
      "sub": false,
      "description": "INSULATOR, ASSY",
      "qty": "1",
@@ -297,6 +304,7 @@
     {
      "key": "8",
      "part_number": "587 12 20-01",
+     "depth": 1,
      "sub": true,
      "description": "INSULATING SHEET",
      "qty": "1",
@@ -306,6 +314,7 @@
     {
      "key": "9",
      "part_number": "585 88 34-01",
+     "depth": 0,
      "sub": false,
      "description": "BOLT",
      "qty": "3",
@@ -315,6 +324,7 @@
     {
      "key": "10",
      "part_number": "585 60 39-01",
+     "depth": 0,
      "sub": false,
      "description": "GASKET, MUFFLER",
      "qty": "1",
@@ -324,6 +334,7 @@
     {
      "key": "11",
      "part_number": "586 23 17-01",
+     "depth": 0,
      "sub": false,
      "description": "MUFFLER ASSY",
      "qty": "1",
@@ -333,6 +344,7 @@
     {
      "key": "12",
      "part_number": "4820-13180",
+     "depth": 0,
      "sub": false,
      "description": "SCREW",
      "qty": "2",
@@ -342,6 +354,7 @@
     {
      "key": "13",
      "part_number": "585 60 18-01",
+     "depth": 0,
      "sub": false,
      "description": "GASKET, BASE",
      "qty": "1",
@@ -351,6 +364,7 @@
     {
      "key": "14",
      "part_number": "8488C34101",
+     "depth": 0,
      "sub": false,
      "description": "RING",
      "qty": "2",
@@ -360,6 +374,7 @@
     {
      "key": "15",
      "part_number": "577 91 74-01",
+     "depth": 0,
      "sub": false,
      "description": "PISTON",
      "qty": "1",
@@ -369,6 +384,7 @@
     {
      "key": "16",
      "part_number": "1260-41320",
+     "depth": 0,
      "sub": false,
      "description": "RING",
      "qty": "2",
@@ -378,6 +394,7 @@
     {
      "key": "17",
      "part_number": "1600-41310",
+     "depth": 0,
      "sub": false,
      "description": "PIN",
      "qty": "1",
@@ -387,6 +404,7 @@
     {
      "key": "18",
      "part_number": "576 40 27-01",
+     "depth": 0,
      "sub": false,
      "description": "BEARING",
      "qty": "1",
@@ -396,6 +414,7 @@
     {
      "key": "19",
      "part_number": "585 60 29-01",
+     "depth": 0,
      "sub": false,
      "description": "CRANKSHAFT, COMPLETE",
      "qty": "1",
@@ -405,6 +424,7 @@
     {
      "key": "20",
      "part_number": "1000-43240",
+     "depth": 0,
      "sub": false,
      "description": "KEY",
      "qty": "1",
@@ -414,6 +434,7 @@
     {
      "key": "21",
      "part_number": "06030-06001",
+     "depth": 0,
      "sub": false,
      "description": "BEARING",
      "qty": "2",
@@ -423,6 +444,7 @@
     {
      "key": "22",
      "part_number": "4810-21210",
+     "depth": 0,
      "sub": false,
      "description": "SEALING",
      "qty": "2",
@@ -432,6 +454,7 @@
     {
      "key": "23",
      "part_number": "585 60 26-01",
+     "depth": 0,
      "sub": false,
      "description": "GASKET, CASE",
      "qty": "1",
@@ -441,6 +464,7 @@
     {
      "key": "24",
      "part_number": "585 60 21-01",
+     "depth": 0,
      "sub": false,
      "description": "CRANKCASE, COMP",
      "qty": "1",
@@ -450,6 +474,7 @@
     {
      "key": "25",
      "part_number": "4820-13180",
+     "depth": 0,
      "sub": false,
      "description": "SCREW",
      "qty": "3",
@@ -459,6 +484,7 @@
     {
      "key": "26",
      "part_number": "585 68 31-01",
+     "depth": 0,
      "sub": false,
      "description": "FLYWHEEL ASSY",
      "qty": "1",
@@ -468,6 +494,7 @@
     {
      "key": "27",
      "part_number": "586 34 65-01",
+     "depth": 1,
      "sub": true,
      "description": "SPRING",
      "qty": "2",
@@ -477,6 +504,7 @@
     {
      "key": "28",
      "part_number": "586 34 63-01",
+     "depth": 1,
      "sub": true,
      "description": "RATCHET",
      "qty": "2",
@@ -486,6 +514,7 @@
     {
      "key": "29",
      "part_number": "586 34 64-01",
+     "depth": 1,
      "sub": true,
      "description": "BOLT",
      "qty": "2",
@@ -495,6 +524,7 @@
     {
      "key": "30",
      "part_number": "1650-43230",
+     "depth": 0,
      "sub": false,
      "description": "NUT",
      "qty": "1",
@@ -504,6 +534,7 @@
     {
      "key": "31",
      "part_number": "596 81 33-04",
+     "depth": 0,
      "sub": false,
      "description": "IGNITION COIL ASSY",
      "qty": "1",
@@ -513,6 +544,7 @@
     {
      "key": "32",
      "part_number": "585 60 37-02",
+     "depth": 1,
      "sub": true,
      "description": "SPARK PLUG CAP",
      "qty": "1",
@@ -522,6 +554,7 @@
     {
      "key": "33",
      "part_number": "577 88 47-01",
+     "depth": 1,
      "sub": true,
      "description": "SPRING",
      "qty": "1",
@@ -531,6 +564,7 @@
     {
      "key": "34",
      "part_number": "596 81 32-01",
+     "depth": 1,
      "sub": true,
      "description": "IGNITION CABLE",
      "qty": "1",
@@ -540,6 +574,7 @@
     {
      "key": "35",
      "part_number": "848F6L71E0",
+     "depth": 1,
      "sub": true,
      "description": "CAP",
      "qty": "1",
@@ -549,6 +584,7 @@
     {
      "key": "36",
      "part_number": "587 28 34-01",
+     "depth": 1,
      "sub": true,
      "description": "TUBE",
      "qty": "1",
@@ -558,6 +594,7 @@
     {
      "key": "37",
      "part_number": "588 17 14-01",
+     "depth": 0,
      "sub": false,
      "description": "SPACER",
      "qty": "2",
@@ -567,6 +604,7 @@
     {
      "key": "38",
      "part_number": "586 98 66-01",
+     "depth": 0,
      "sub": false,
      "description": "CORD, COMP",
      "qty": "1",
@@ -576,6 +614,7 @@
     {
      "key": "39",
      "part_number": "8488-142500",
+     "depth": 0,
      "sub": false,
      "description": "BOLT",
      "qty": "2",
@@ -585,6 +624,7 @@
     {
      "key": "40",
      "part_number": "585 60 40-01",
+     "depth": 0,
      "sub": false,
      "description": "PLATE, MUFFLER",
      "qty": "1",
@@ -594,6 +634,7 @@
     {
      "key": "41",
      "part_number": "4820-12350",
+     "depth": 0,
      "sub": false,
      "description": "SCREW",
      "qty": "2",
@@ -806,6 +847,7 @@
     {
      "key": "1",
      "part_number": "T4970-52000",
+     "depth": 0,
      "sub": false,
      "description": "SCREW",
      "qty": "20",
@@ -815,6 +857,7 @@
     {
      "key": "2",
      "part_number": "585 62 38-02",
+     "depth": 0,
      "sub": false,
      "description": "GUARD, NET",
      "qty": "1",
@@ -824,6 +867,7 @@
     {
      "key": "3",
      "part_number": "586 01 78-02",
+     "depth": 0,
      "sub": false,
      "description": "VOLUTE, COVER",
      "qty": "1",
@@ -833,6 +877,7 @@
     {
      "key": "4",
      "part_number": "586 01 77-02",
+     "depth": 0,
      "sub": false,
      "description": "VOLUTE, CASE",
      "qty": "1",
@@ -842,6 +887,7 @@
     {
      "key": "5",
      "part_number": "585 62 54-01",
+     "depth": 0,
      "sub": false,
      "description": "NUT",
      "qty": "1",
@@ -851,6 +897,7 @@
     {
      "key": "6",
      "part_number": "6811-12220",
+     "depth": 0,
      "sub": false,
      "description": "WASHER",
      "qty": "2",
@@ -860,6 +907,7 @@
     {
      "key": "7",
      "part_number": "585 62 53-01",
+     "depth": 0,
      "sub": false,
      "description": "FAN",
      "qty": "1",
@@ -869,6 +917,7 @@
     {
      "key": "8",
      "part_number": "4820-12130",
+     "depth": 0,
      "sub": false,
      "description": "BOLT",
      "qty": "3",
@@ -878,6 +927,7 @@
     {
      "key": "9",
      "part_number": "585 63 51-07",
+     "depth": 0,
      "sub": false,
      "description": "FUEL TANK ASSY",
      "qty": "1",
@@ -887,6 +937,7 @@
     {
      "key": "10",
      "part_number": "576 40 37-03",
+     "depth": 1,
      "sub": true,
      "description": "TANK CAP",
      "qty": "1",
@@ -896,8 +947,9 @@
     {
      "key": "11",
      "part_number": "577 04 87-01",
+     "depth": 2,
      "sub": true,
-     "description": "・GASKET",
+     "description": "GASKET",
      "qty": "1",
      "remarks": "",
      "search": "577048701"
@@ -905,6 +957,7 @@
     {
      "key": "12",
      "part_number": "577 04 91-02",
+     "depth": 1,
      "sub": true,
      "description": "HOLDER",
      "qty": "1",
@@ -914,6 +967,7 @@
     {
      "key": "13",
      "part_number": "596 63 04-04",
+     "depth": 1,
      "sub": true,
      "description": "PIPE, COMP",
      "qty": "1",
@@ -923,6 +977,7 @@
     {
      "key": "14",
      "part_number": "1260-85460",
+     "depth": 1,
      "sub": true,
      "description": "CLIP",
      "qty": "1",
@@ -932,6 +987,7 @@
     {
      "key": "15",
      "part_number": "503 44 32-01",
+     "depth": 1,
      "sub": true,
      "description": "FILTER",
      "qty": "1",
@@ -941,6 +997,7 @@
     {
      "key": "16",
      "part_number": "586 90 98-01",
+     "depth": 0,
      "sub": false,
      "description": "CLAMP",
      "qty": "1",
@@ -950,6 +1007,7 @@
     {
      "key": "17",
      "part_number": "585 88 37-01",
+     "depth": 0,
      "sub": false,
      "description": "BOLT",
      "qty": "1",
@@ -959,6 +1017,7 @@
     {
      "key": "18",
      "part_number": "4810-72120",
+     "depth": 0,
      "sub": false,
      "description": "GROMMET",
      "qty": "2",
@@ -968,6 +1027,7 @@
     {
      "key": "19",
      "part_number": "596 55 79-01",
+     "depth": 0,
      "sub": false,
      "description": "SWITCH ASSY",
      "qty": "1",
@@ -977,6 +1037,7 @@
     {
      "key": "20",
      "part_number": "586 01 79-01",
+     "depth": 0,
      "sub": false,
      "description": "THROTTLE LEVER",
      "qty": "1",
@@ -986,6 +1047,7 @@
     {
      "key": "21",
      "part_number": "586 01 80-01",
+     "depth": 0,
      "sub": false,
      "description": "THROTTLE ROD",
      "qty": "1",
@@ -995,6 +1057,7 @@
     {
      "key": "22",
      "part_number": "585 62 47-01",
+     "depth": 0,
      "sub": false,
      "description": "RATCHET",
      "qty": "1",
@@ -1004,6 +1067,7 @@
     {
      "key": "23",
      "part_number": "588 90 34-01",
+     "depth": 0,
      "sub": false,
      "description": "WASHER",
      "qty": "1",
@@ -1013,6 +1077,7 @@
     {
      "key": "24",
      "part_number": "586 01 81-02",
+     "depth": 0,
      "sub": false,
      "description": "ENGINE COVER",
      "qty": "1",
@@ -1022,6 +1087,7 @@
     {
      "key": "25",
      "part_number": "588 69 02-01",
+     "depth": 0,
      "sub": false,
      "description": "CONTROL LEVER",
      "qty": "1",
@@ -1031,6 +1097,7 @@
     {
      "key": "26",
      "part_number": "4820-12130",
+     "depth": 0,
      "sub": false,
      "description": "BOLT",
      "qty": "1",
@@ -1040,6 +1107,7 @@
     {
      "key": "27",
      "part_number": "586 01 86-01",
+     "depth": 0,
      "sub": false,
      "description": "HANDLE, ASSIST",
      "qty": "1",
@@ -1049,6 +1117,7 @@
     {
      "key": "28",
      "part_number": "586 01 87-01",
+     "depth": 0,
      "sub": false,
      "description": "SCREW",
      "qty": "2",
@@ -1058,6 +1127,7 @@
     {
      "key": "29",
      "part_number": "588 78 37-01",
+     "depth": 0,
      "sub": false,
      "description": "ISOLATOR",
      "qty": "4",
@@ -1067,6 +1137,7 @@
     {
      "key": "31",
      "part_number": "588 84 16-01",
+     "depth": 0,
      "sub": false,
      "description": "DECAL, CAUTION DECAL,",
      "qty": "1",
@@ -1076,6 +1147,7 @@
     {
      "key": "32",
      "part_number": "577 95 56-01",
+     "depth": 0,
      "sub": false,
      "description": "STRATOCHARGED",
      "qty": "1",
@@ -1248,6 +1320,7 @@
     {
      "key": "1",
      "part_number": "576 99 24-04",
+     "depth": 0,
      "sub": false,
      "description": "KNOB, CLEANER",
      "qty": "1",
@@ -1257,6 +1330,7 @@
     {
      "key": "2",
      "part_number": "585 60 48-02",
+     "depth": 0,
      "sub": false,
      "description": "FILTER COVER",
      "qty": "1",
@@ -1266,6 +1340,7 @@
     {
      "key": "3",
      "part_number": "585 60 50-01",
+     "depth": 0,
      "sub": false,
      "description": "AIR FILTER, URETHANE",
      "qty": "1",
@@ -1275,6 +1350,7 @@
     {
      "key": "4",
      "part_number": "585 60 49-02",
+     "depth": 0,
      "sub": false,
      "description": "AIR FILTER, FELT",
      "qty": "1",
@@ -1284,6 +1360,7 @@
     {
      "key": "5",
      "part_number": "585 60 46-01",
+     "depth": 0,
      "sub": false,
      "description": "PLATE",
      "qty": "1",
@@ -1293,6 +1370,7 @@
     {
      "key": "6",
      "part_number": "585 88 35-02",
+     "depth": 0,
      "sub": false,
      "description": "BOLT",
      "qty": "2",
@@ -1302,6 +1380,7 @@
     {
      "key": "7",
      "part_number": "585 60 45-02",
+     "depth": 0,
      "sub": false,
      "description": "CHOKE CONTROL",
      "qty": "1",
@@ -1311,6 +1390,7 @@
     {
      "key": "8",
      "part_number": "585 60 44-01",
+     "depth": 0,
      "sub": false,
      "description": "FILTER HOUSING",
      "qty": "1",
@@ -1320,6 +1400,7 @@
     {
      "key": "9",
      "part_number": "586 69 30-02",
+     "depth": 0,
      "sub": false,
      "description": "GASKET, CLEANER",
      "qty": "1",
@@ -1329,6 +1410,7 @@
     {
      "key": "10A",
      "part_number": "586 23 19-01",
+     "depth": 0,
      "sub": false,
      "description": "CARBURETTOR ASSY (DISCONTINUED)",
      "qty": "1H226B",
@@ -1338,6 +1420,7 @@
     {
      "key": "10B",
      "part_number": "586 23 19-02",
+     "depth": 0,
      "sub": false,
      "description": "CARBURETTOR ASSY (DISCONTINUED)",
      "qty": "1H226B-01",
@@ -1347,6 +1430,7 @@
     {
      "key": "10C",
      "part_number": "586 23 19-03",
+     "depth": 0,
      "sub": false,
      "description": "CARBURETTOR ASSY",
      "qty": "1H226B-02",
@@ -1356,6 +1440,7 @@
     {
      "key": "11",
      "part_number": "586 23 58-01",
+     "depth": 0,
      "sub": false,
      "description": "GASKET, CARBURETOR",
      "qty": "1",
@@ -1365,6 +1450,7 @@
     {
      "key": "12",
      "part_number": "580 39 63-01",
+     "depth": 0,
      "sub": false,
      "description": "CLIP",
      "qty": "1",
@@ -1374,6 +1460,7 @@
     {
      "key": "13",
      "part_number": "577 53 33-04",
+     "depth": 0,
      "sub": false,
      "description": "FUEL HOSE",
      "qty": "1",
@@ -1383,6 +1470,7 @@
     {
      "key": "14",
      "part_number": "2850-81900",
+     "depth": 0,
      "sub": false,
      "description": "PUMP",
      "qty": "1",
@@ -1392,6 +1480,7 @@
     {
      "key": "15",
      "part_number": "586 04 35-01",
+     "depth": 0,
      "sub": false,
      "description": "STARTER ASSY",
      "qty": "1",
@@ -1401,6 +1490,7 @@
     {
      "key": "16",
      "part_number": "575 48 95-02",
+     "depth": 1,
      "sub": true,
      "description": "STARTER HANDLE",
      "qty": "1",
@@ -1410,6 +1500,7 @@
     {
      "key": "17",
      "part_number": "848CE07530",
+     "depth": 1,
      "sub": true,
      "description": "SPRING ASSY",
      "qty": "1",
@@ -1419,6 +1510,7 @@
     {
      "key": "18",
      "part_number": "848CE075C1",
+     "depth": 1,
      "sub": true,
      "description": "REEL",
      "qty": "1",
@@ -1428,6 +1520,7 @@
     {
      "key": "19",
      "part_number": "848CE075F0",
+     "depth": 1,
      "sub": true,
      "description": "ROPE",
      "qty": "1",
@@ -1437,6 +1530,7 @@
     {
      "key": "20",
      "part_number": "586 31 88-01",
+     "depth": 1,
      "sub": true,
      "description": "SPRING, DAMPER",
      "qty": "1",
@@ -1446,6 +1540,7 @@
     {
      "key": "21",
      "part_number": "586 31 87-01",
+     "depth": 1,
      "sub": true,
      "description": "CAM, PLATE",
      "qty": "1",
@@ -1455,6 +1550,7 @@
     {
      "key": "22",
      "part_number": "4500-75150",
+     "depth": 1,
      "sub": true,
      "description": "SCREW",
      "qty": "1",
@@ -1464,6 +1560,7 @@
     {
      "key": "23",
      "part_number": "577 94 23-01",
+     "depth": 0,
      "sub": false,
      "description": "BOLT",
      "qty": "3",
@@ -1473,6 +1570,7 @@
     {
      "key": "24",
      "part_number": "586 07 63-11",
+     "depth": 0,
      "sub": false,
      "description": "DECAL, RECOIL",
      "qty": "1",
@@ -1482,6 +1580,7 @@
     {
      "key": "25",
      "part_number": "586 01 82-01",
+     "depth": 0,
      "sub": false,
      "description": "TUBE, UPPER, COMP",
      "qty": "1",
@@ -1491,6 +1590,7 @@
     {
      "key": "26",
      "part_number": "586 01 85-01",
+     "depth": 0,
      "sub": false,
      "description": "TUBE, END",
      "qty": "1",
@@ -1500,6 +1600,7 @@
     {
      "key": "27",
      "part_number": "586 23 20-01",
+     "depth": 0,
      "sub": false,
      "description": "NOZZLE, FLAT",
      "qty": "1",
@@ -1509,6 +1610,7 @@
     {
      "key": "28",
      "part_number": "588 84 14-01",
+     "depth": 0,
      "sub": false,
      "description": "WRENCH",
      "qty": "1",
@@ -1741,6 +1843,7 @@
     {
      "key": "1A",
      "part_number": "586 23 19-01",
+     "depth": 0,
      "sub": false,
      "description": "CARBURETOR ASSY (DISCONTINUED)",
      "qty": "1",
@@ -1750,6 +1853,7 @@
     {
      "key": "1B",
      "part_number": "586 23 19-02",
+     "depth": 0,
      "sub": false,
      "description": "CARBURETOR ASSY (DISCONITINUED)",
      "qty": "1",
@@ -1759,6 +1863,7 @@
     {
      "key": "1C",
      "part_number": "586 23 19-03",
+     "depth": 0,
      "sub": false,
      "description": "CARBURETOR ASSY",
      "qty": "1",
@@ -1768,6 +1873,7 @@
     {
      "key": "2",
      "part_number": "577 89 93-01",
+     "depth": 1,
      "sub": true,
      "description": "SCREW",
      "qty": "",
@@ -1777,6 +1883,7 @@
     {
      "key": "3",
      "part_number": "578 38 97-01",
+     "depth": 1,
      "sub": true,
      "description": "PLUG",
      "qty": "1",
@@ -1786,6 +1893,7 @@
     {
      "key": "4",
      "part_number": "579 63 17-01",
+     "depth": 1,
      "sub": true,
      "description": "SCREW, ADJUSTABLE",
      "qty": "1",
@@ -1795,6 +1903,7 @@
     {
      "key": "5",
      "part_number": "577 89 94-01",
+     "depth": 1,
      "sub": true,
      "description": "GASKET, PUMP",
      "qty": "1",
@@ -1804,6 +1913,7 @@
     {
      "key": "6",
      "part_number": "577 89 95-02",
+     "depth": 1,
      "sub": true,
      "description": "DIAPHRAGM, PUMP",
      "qty": "1",
@@ -1813,6 +1923,7 @@
     {
      "key": "7",
      "part_number": "577 89 97-01",
+     "depth": 1,
      "sub": true,
      "description": "SCREW",
      "qty": "4",
@@ -1822,6 +1933,7 @@
     {
      "key": "8",
      "part_number": "587 71 28-01",
+     "depth": 1,
      "sub": true,
      "description": "VALVE, THROTTLE",
      "qty": "1",
@@ -1831,6 +1943,7 @@
     {
      "key": "9",
      "part_number": "587 71 30-01",
+     "depth": 1,
      "sub": true,
      "description": "SHAFT ASSY, THROTTLE",
      "qty": "1",
@@ -1840,6 +1953,7 @@
     {
      "key": "10",
      "part_number": "587 71 29-01",
+     "depth": 1,
      "sub": true,
      "description": "SPRING, THROTTLE RETURN",
      "qty": "1",
@@ -1849,6 +1963,7 @@
     {
      "key": "11",
      "part_number": "577 90 04-01",
+     "depth": 1,
      "sub": true,
      "description": "E-RING",
      "qty": "1",
@@ -1858,6 +1973,7 @@
     {
      "key": "12A",
      "part_number": "588 99 55-01",
+     "depth": 1,
      "sub": true,
      "description": "LEVER",
      "qty": "1",
@@ -1867,6 +1983,7 @@
     {
      "key": "12B",
      "part_number": "588 99 55-02",
+     "depth": 1,
      "sub": true,
      "description": "LEVER",
      "qty": "1",
@@ -1876,6 +1993,7 @@
     {
      "key": "13",
      "part_number": "587 71 41-01",
+     "depth": 1,
      "sub": true,
      "description": "SHAFT ASSY, CHOKE",
      "qty": "1",
@@ -1885,6 +2003,7 @@
     {
      "key": "14",
      "part_number": "587 71 36-01",
+     "depth": 1,
      "sub": true,
      "description": "O-RING",
      "qty": "4",
@@ -1894,6 +2013,7 @@
     {
      "key": "15",
      "part_number": "588 99 56-01",
+     "depth": 1,
      "sub": true,
      "description": "VALVE, CHOKE",
      "qty": "1",
@@ -1903,6 +2023,7 @@
     {
      "key": "16A",
      "part_number": "587 71 37-01",
+     "depth": 1,
      "sub": true,
      "description": "SPRING, RETURN",
      "qty": "1",
@@ -1912,6 +2033,7 @@
     {
      "key": "16B",
      "part_number": "587 71 37-02",
+     "depth": 1,
      "sub": true,
      "description": "SPRING, RETURN",
      "qty": "1",
@@ -1921,6 +2043,7 @@
     {
      "key": "17A",
      "part_number": "588 99 58-01",
+     "depth": 1,
      "sub": true,
      "description": "LEVER",
      "qty": "1",
@@ -1930,6 +2053,7 @@
     {
      "key": "17B",
      "part_number": "588 99 58-02",
+     "depth": 1,
      "sub": true,
      "description": "LEVER",
      "qty": "1",
@@ -1939,6 +2063,7 @@
     {
      "key": "18",
      "part_number": "588 99 57-01",
+     "depth": 1,
      "sub": true,
      "description": "GASKET",
      "qty": "1",
@@ -1948,6 +2073,7 @@
     {
      "key": "19",
      "part_number": "587 71 40-01",
+     "depth": 1,
      "sub": true,
      "description": "LEVER",
      "qty": "1",
@@ -1957,6 +2083,7 @@
     {
      "key": "20",
      "part_number": "587 71 34-01",
+     "depth": 1,
      "sub": true,
      "description": "SCREW, IDLE MIXTURE",
      "qty": "1",
@@ -1966,6 +2093,7 @@
     {
      "key": "21",
      "part_number": "588 99 54-01",
+     "depth": 1,
      "sub": true,
      "description": "SCREW, MAIN MIXTURE",
      "qty": "1",
@@ -1975,6 +2103,7 @@
     {
      "key": "22",
      "part_number": "577 90 03-01",
+     "depth": 1,
      "sub": true,
      "description": "STRAINER",
      "qty": "1",
@@ -1984,6 +2113,7 @@
     {
      "key": "23",
      "part_number": "579 63 18-01",
+     "depth": 1,
      "sub": true,
      "description": "SPRING",
      "qty": "1",
@@ -1993,6 +2123,7 @@
     {
      "key": "24",
      "part_number": "579 63 19-01",
+     "depth": 1,
      "sub": true,
      "description": "VALVE, INLET",
      "qty": "1",
@@ -2002,6 +2133,7 @@
     {
      "key": "25",
      "part_number": "578 39 02-01",
+     "depth": 1,
      "sub": true,
      "description": "LEVER",
      "qty": "1",
@@ -2011,6 +2143,7 @@
     {
      "key": "26",
      "part_number": "578 39 06-01",
+     "depth": 1,
      "sub": true,
      "description": "PEN",
      "qty": "1",
@@ -2020,6 +2153,7 @@
     {
      "key": "27",
      "part_number": "578 39 03-01",
+     "depth": 1,
      "sub": true,
      "description": "SCREW",
      "qty": "1",
@@ -2029,6 +2163,7 @@
     {
      "key": "28",
      "part_number": "577 89 99-01",
+     "depth": 1,
      "sub": true,
      "description": "GASKET, METERING CHAMBER",
      "qty": "1",
@@ -2038,6 +2173,7 @@
     {
      "key": "29",
      "part_number": "577 90 01-01",
+     "depth": 1,
      "sub": true,
      "description": "DIAPHRAGM, ASSY METERING",
      "qty": "1",
@@ -2047,6 +2183,7 @@
     {
      "key": "30",
      "part_number": "577 90 00-01",
+     "depth": 1,
      "sub": true,
      "description": "COVER, METERING CHAMBER",
      "qty": "1",
@@ -2056,6 +2193,7 @@
     {
      "key": "31",
      "part_number": "577 90 05-01",
+     "depth": 1,
      "sub": true,
      "description": "SCREW",
      "qty": "4",
@@ -2065,6 +2203,7 @@
     {
      "key": "32",
      "part_number": "577 90 18-02",
+     "depth": 1,
      "sub": true,
      "description": "GASKET KIT",
      "qty": "1",
@@ -2074,6 +2213,7 @@
     {
      "key": "33",
      "part_number": "587 71 35-01",
+     "depth": 1,
      "sub": true,
      "description": "PLATE, SPLIT",
      "qty": "1",
@@ -2083,6 +2223,7 @@
     {
      "key": "34",
      "part_number": "577 90 16-01",
+     "depth": 1,
      "sub": true,
      "description": "SPRING, FRICTION",
      "qty": "1",
@@ -2092,6 +2233,7 @@
     {
      "key": "35",
      "part_number": "577 90 15-01",
+     "depth": 1,
      "sub": true,
      "description": "BALL, STEEL",
      "qty": "1",
@@ -2101,6 +2243,7 @@
     {
      "key": "36",
      "part_number": "587 71 38-01",
+     "depth": 1,
      "sub": true,
      "description": "PUMP, COVER",
      "qty": "1",

@@ -3393,6 +3393,13 @@ function showIplFigure(id) {
 function renderIplList() {
   const fig = ipl.figure;
   if (!fig) return;
+  // The books nest sub-components two deep — a screen inside a pump cover
+  // inside the carburetor assembly — so draw one bullet per level. depth is
+  // newer than sub; fall back so a model extracted before it still indents.
+  const iplIndent = (p) => {
+    const d = p.depth != null ? p.depth : (p.sub ? 1 : 0);
+    return d ? `<span class="sub">${"&middot; ".repeat(d)}</span>` : "";
+  };
   const q = $("ipl-filter").value.trim().toLowerCase();
   const rows = fig.parts.filter((p) =>
     !q || p.description.toLowerCase().includes(q) ||
@@ -3406,7 +3413,7 @@ function renderIplList() {
         <button type="button" class="ipl-row${p.key === ipl.selectedKey ? " on" : ""}" data-key="${escapeAttr(p.key)}" data-index="${fig.parts.indexOf(p)}">
           <span class="k">${escapeHtml(p.key)}</span>
           <span class="d">
-            <span class="n">${p.sub ? `<span class="sub">&middot; </span>` : ""}${escapeHtml(p.description)}</span>
+            <span class="n">${iplIndent(p)}${escapeHtml(p.description)}</span>
             <span class="c mono">${escapeHtml(p.part_number)}${p.remarks ? " &middot; " + escapeHtml(p.remarks) : ""}</span>
           </span>
           <span class="q">${p.qty ? "&times;" + escapeHtml(p.qty) : ""}</span>

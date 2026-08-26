@@ -123,13 +123,20 @@ function parseTable(page) {
     }
     if (!key) continue;
 
+    // "・" marks a sub-component of the row above, and the books nest two deep:
+    // "・・SCREEN" is a part of the "・PUMP COVER" that belongs to the CARBURETOR
+    // ASSY. Stripping a single mark left the second one sitting in the
+    // description, so 41 rows across the Zenoah models read "・HOLDER ASSY"
+    // under a bullet the viewer had already drawn. Count them instead.
+    const marks = desc.match(/^[・·]+/);
+    const depth = marks ? marks[0].length : 0;
+
     out.push({
       key,
       part_number: part,
-      // "・" marks a sub-component of the row above; keep it as a depth flag
-      // rather than leaving the character in the description.
-      sub: /^[・·]/.test(desc),
-      description: desc.replace(/^[・·]\s*/, "").trim(),
+      depth,
+      sub: depth > 0,
+      description: desc.replace(/^[・·\s]+/, "").trim(),
       qty,
       remarks,
     });
