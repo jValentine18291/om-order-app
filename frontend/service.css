@@ -1127,6 +1127,24 @@ select {
 }
 .desc-edit svg { width: 13px; height: 13px; }
 
+/* An order that has not reached AutoCount. Deliberately hard to miss: a write
+   into the accounts that silently did not happen is the thing to catch. */
+.ac-pending { margin-top: 12px; }
+.ac-pending-row {
+  display: flex; align-items: center; gap: 10px; padding: 11px 12px;
+  border: 1px solid var(--amber, #B26B12); border-radius: 10px;
+  background: #FDF6EC; margin-bottom: 8px;
+}
+.ac-pending-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ac-pending-main strong { font-size: .88rem; color: #8A5310; }
+.ac-pending-main span { font-size: .76rem; color: var(--ink-soft); line-height: 1.35; }
+.ac-retry {
+  flex: none; font: inherit; font-size: .8rem; font-weight: 600; padding: 8px 12px;
+  border-radius: 8px; border: 1px solid var(--amber, #B26B12);
+  background: #fff; color: #8A5310; cursor: pointer;
+}
+.ac-retry:disabled { opacity: .6; }
+
 /* Choosing which machines go onto a Sales Order. */
 .conv-row {
   display: flex; align-items: flex-start; gap: 11px; padding: 11px 12px;

@@ -1681,6 +1681,7 @@ function updateSlipFooter() {
   // A slip converted machine by machine sits at ALL_REPAIRED between orders, so
   // that status must not disable the button any more - only a slip whose every
   // machine is already on an order, or one that is closed.
+  renderAutoCountPending();
   const machinesLeft = (session.slip && (session.slip.machines || []).some((m) => !m.converted_at));
   $("os-create-so").disabled = !billable || !machinesLeft || st === "CLOSED" || st === "CONVERTED";
 }
@@ -1736,6 +1737,52 @@ $("os-no-quote").addEventListener("click", () => {
     toast("No quote needed — carry on", "ok");
   }
 });
+
+// An order that did not reach AutoCount must not sit unnoticed. The toast that
+// reported it lasts four seconds; this stays until the order is sent.
+async function renderAutoCountPending() {
+  const box = $("os-ac-pending");
+  if (!box || !session.slip) return;
+  let waiting = [];
+  try {
+    const r = await api("/api/orders/awaiting-autocount");
+    const mine = `S/S: ${session.slip.slip_number}`;
+    waiting = (r.orders || []).filter((o) => o.notes === mine);
+  } catch (_) {
+    box.style.display = "none";
+    return;
+  }
+  if (!waiting.length) { box.style.display = "none"; box.innerHTML = ""; return; }
+
+  box.style.display = "block";
+  box.innerHTML = waiting.map((o) => `
+    <div class="ac-pending-row" data-so="${escapeAttr(o.so_number)}">
+      <div class="ac-pending-main">
+        <strong>${escapeHtml(o.so_number)} is not in AutoCount</strong>
+        <span>${escapeHtml(o.autocount_error || "It has not been sent yet.")}</span>
+      </div>
+      <button type="button" class="ac-retry" data-retry="${escapeAttr(o.so_number)}">Send to AutoCount</button>
+    </div>`).join("");
+
+  box.querySelectorAll(".ac-retry").forEach((b) =>
+    b.addEventListener("click", async () => {
+      b.disabled = true;
+      const was = b.textContent;
+      b.textContent = "Sending…";
+      try {
+        const r = await api(`/api/orders/${encodeURIComponent(b.dataset.retry)}/push-to-autocount`, { method: "POST" });
+        if (r.pushed) toast(`Written into AutoCount as ${r.doc_no}`, "ok");
+        else toast(r.reason || "Still could not write it.", "err");
+      } catch (e) {
+        toast(e.message, "err");
+      }
+      b.disabled = false;
+      b.textContent = was;
+      await refreshSlip();
+      renderAutoCountPending();
+    })
+  );
+}
 
 // Ask which machines go on this order. A slip is converted a machine at a
 // time, so this is the normal case rather than a special one.

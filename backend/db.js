@@ -78,6 +78,7 @@ db.exec(`
     total_qty     INTEGER NOT NULL DEFAULT 0,
     total_amount  REAL    NOT NULL DEFAULT 0,
     autocount_doc_no TEXT DEFAULT '',   -- the Sales Order written into AutoCount
+    autocount_error  TEXT DEFAULT '',   -- why the last attempt to write it failed
     created_at    TEXT    DEFAULT (datetime('now'))
   );
 
@@ -191,6 +192,18 @@ try {
   }
 } catch (e) {
   console.error("[db] repair_comment migration check failed:", e.message);
+}
+
+// Migration: why an order failed to reach AutoCount. A transient toast is no
+// way to report a failed write to the accounts - the reason has to survive.
+try {
+  const cols = db.prepare("PRAGMA table_info(orders)").all();
+  if (!cols.some((c) => c.name === "autocount_error")) {
+    db.exec("ALTER TABLE orders ADD COLUMN autocount_error TEXT DEFAULT ''");
+    console.log("[db] migrated: added autocount_error to orders");
+  }
+} catch (e) {
+  console.error("[db] autocount_error migration check failed:", e.message);
 }
 
 // Migration: which AutoCount Sales Order an app order was written to. Blank

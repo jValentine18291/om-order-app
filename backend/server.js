@@ -76,6 +76,16 @@ app.post("/api/orders", async (req, res) => {
   }
 });
 
+// Orders the app has raised that never reached AutoCount, with the reason.
+app.get("/api/orders/awaiting-autocount", async (req, res) => {
+  try {
+    res.json({ orders: await data.slips.ordersAwaitingAutoCount() });
+  } catch (err) {
+    console.error("[GET /api/orders/awaiting-autocount]", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/orders/:so -> retrieve a submitted order
 app.get("/api/orders/:so", async (req, res) => {
   try {
@@ -559,6 +569,25 @@ app.patch("/api/slips/:slip/status", async (req, res) => {
 // Push an app order into AutoCount as a Sales Order. Kept separate from the
 // conversion itself so a failure here never undoes work the workshop has
 // already done - the slip stays converted and the push can be retried.
+// Every attempt, kept as plain text beside the app. A write into the accounts
+// that quietly does not happen is the failure mode worth guarding against, and
+// a toast lasts four seconds.
+function logAutoCountOrder(soNumber, outcome, detail) {
+  const fs = require("fs");
+  const path = require("path");
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, "0");
+  const when = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ` +
+               `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+  const flat = String(detail || "").split(/\s+/).join(" ").trim();
+  const line = `${when} | ${soNumber} | ${outcome} | ${flat}` + String.fromCharCode(10);
+  try {
+    fs.appendFileSync(path.join(__dirname, "autocount-orders.log"), line);
+  } catch (e) {
+    console.error("[autocount-orders log]", e.message);
+  }
+}
+
 async function pushOrderToAutoCount(soNumber) {
   const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
   if (itemsSource !== "autocount") return { pushed: false, reason: "AutoCount is not enabled." };
@@ -576,14 +605,23 @@ async function pushOrderToAutoCount(soNumber) {
   const slip = slipNumber ? await data.slips.getSlip(slipNumber) : null;
   if (!slip) return { pushed: false, reason: `Could not find the service slip behind ${soNumber}.` };
 
-  const out = await so.createSalesOrder({
-    slipNumber: slip.slip_number,
-    debtorCode: slip.debtor_code || "C0112",
-    contactName: slip.contact_name,
-    contactNumber: slip.contact_number,
-    lines: order.lines || [],
-  });
+  let out;
+  try {
+    out = await so.createSalesOrder({
+      slipNumber: slip.slip_number,
+      debtorCode: slip.debtor_code || "C0112",
+      contactName: slip.contact_name,
+      contactNumber: slip.contact_number,
+      lines: order.lines || [],
+    });
+  } catch (e) {
+    // Keep the reason on the order itself, so it can be read tomorrow.
+    await data.slips.setOrderAutocountError(soNumber, e.message);
+    logAutoCountOrder(soNumber, "FAILED", e.message);
+    throw e;
+  }
   await data.slips.setOrderAutocountDocNo(soNumber, out.doc_no);
+  logAutoCountOrder(soNumber, "WRITTEN", `${out.doc_no} (DocKey ${out.doc_key}, ${out.lines} lines)`);
 
   // Adopt AutoCount's number as the app's own, so staff see one number for the
   // order rather than the app's SO-2026-00003 next to AutoCount's SO-2608-003.

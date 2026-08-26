@@ -540,9 +540,29 @@ function renameOrder(oldSoNumber, newSoNumber) {
   return { ok: true, so_number: to };
 }
 
-// Record which AutoCount Sales Order an app order became.
+// Record which AutoCount Sales Order an app order became, clearing any earlier
+// failure - it has arrived, so the old reason is history.
 function setOrderAutocountDocNo(soNumber, docNo) {
-  db.prepare("UPDATE orders SET autocount_doc_no = ? WHERE so_number = ?").run(String(docNo || ""), soNumber);
+  db.prepare("UPDATE orders SET autocount_doc_no = ?, autocount_error = '' WHERE so_number = ?")
+    .run(String(docNo || ""), soNumber);
+}
+
+// Why the last attempt failed, kept so it can be read long after the toast has
+// gone.
+function setOrderAutocountError(soNumber, reason) {
+  db.prepare("UPDATE orders SET autocount_error = ? WHERE so_number = ?")
+    .run(String(reason || "").slice(0, 500), soNumber);
+}
+
+// Orders the app has raised that are not in AutoCount. Newest first, because
+// the one that just failed is the one someone is looking for.
+function ordersAwaitingAutoCount() {
+  return db.prepare(
+    `SELECT so_number, notes, total_amount, autocount_error, created_at
+       FROM orders
+      WHERE autocount_doc_no IS NULL OR autocount_doc_no = ''
+      ORDER BY id DESC`
+  ).all();
 }
 
 // Close a slip: record the DO/CS/INV reference, set status CLOSED.
@@ -632,7 +652,7 @@ function searchSlips(query = "", scope = "all", limit = 20) {
 }
 
 const slips = {
-  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, setSlipStatus, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, renameOrder, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, setSlipStatus, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, closeSlip,
 };
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };

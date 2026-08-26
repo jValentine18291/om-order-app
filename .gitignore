@@ -22,6 +22,7 @@ backend/service-out.log
 backend/service-err.log
 backend/price-updates.log
 backend/whatsapp-sends.log
+backend/autocount-orders.log
 *.log
 
 # Dependencies (restored by npm install)
