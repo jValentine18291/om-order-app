@@ -28,9 +28,14 @@ const path = require("path");
 const POPPLER = process.env.POPPLER_BIN || "";
 const bin = (name) => (POPPLER ? path.join(POPPLER, name) : name);
 
-const [, , PDF, MODEL_ID, MODEL_NAME] = process.argv;
+const { writeIndex } = require("./ipl-index");
+
+// CATEGORY is optional: without it the category comes from the folder the PDF
+// was filed in on M:, which is right most of the time. Pass one when it is not
+// — a pole hedge trimmer is filed under "Hedge Trimmer" like the rest.
+const [, , PDF, MODEL_ID, MODEL_NAME, CATEGORY] = process.argv;
 if (!PDF || !MODEL_ID) {
-  console.error('Usage: node tools/ipl-extract.js "<IPL.pdf>" <model-id> ["Model Name"]');
+  console.error('Usage: node tools/ipl-extract.js "<IPL.pdf>" <model-id> ["Model Name"] ["Category"]');
   process.exit(1);
 }
 
@@ -273,13 +278,8 @@ const model = {
 };
 fs.writeFileSync(path.join(OUT_DIR, `${MODEL_ID}.json`), JSON.stringify(model, null, 1));
 
-// Refresh the index the viewer reads to populate its model list.
-const indexPath = path.join(OUT_DIR, "index.json");
-let index = [];
-try { index = JSON.parse(fs.readFileSync(indexPath, "utf8")); } catch (_) {}
-index = index.filter((m) => m.id !== MODEL_ID);
-index.push({ id: model.id, name: model.name, figures: figures.length });
-index.sort((a, b) => a.name.localeCompare(b.name));
-fs.writeFileSync(indexPath, JSON.stringify(index, null, 1));
+// Refresh the index the picker reads to populate its model list.
+const entry = writeIndex(OUT_DIR, model, PDF, CATEGORY, figures.length);
 
 console.log(`\nwrote frontend/ipl/${MODEL_ID}.json (${figures.length} figures) and refreshed index.json`);
+console.log(`  picker entry: ${entry.brand} / ${entry.short} / ${entry.category || "(no category)"}`);

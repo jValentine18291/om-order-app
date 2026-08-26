@@ -69,7 +69,7 @@ const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip",
 // right buttons and recording who did what, not about keeping anyone out.
 //
 // THE ONE PLACE TO EDIT when somebody joins or leaves. Groups:
-//   sales      register, close and view slips, find parts, parts diagrams
+//   sales      register, close and view slips, find parts, IPLs
 //   purchaser  everything Sales has, plus requested parts
 //   tech       open service, view slips, find parts - and a Chinese interface
 //   admin      everything
@@ -218,8 +218,8 @@ function applyRoleToHome() {
   const ROLE_FUNCTIONS = {
     sales: ["new", "close", "view", "find", "ipl"],
     tech: ["open", "view", "find"],
-    // Purchaser is Sales plus requested parts, so it inherits the parts
-    // diagrams too rather than being a separate shorter list.
+    // Purchaser is Sales plus requested parts, so it inherits the
+    // IPLs too rather than being a separate shorter list.
     purchaser: ["new", "close", "view", "find", "ipl", "requests"],
     admin: ["new", "open", "close", "view", "find", "ipl", "requests"],
   };
@@ -3301,38 +3301,198 @@ function sigPadData() {
 
 sigPadSetup();
 
-// ---- IPL: interactive parts diagram -----------------------------------------
+// ---- IPL: illustrated parts list --------------------------------------------
 // Data comes from tools/ipl-extract.js, which reads the manufacturer's IPL PDF.
 // Callout coordinates are lifted from the PDF's own text layer, so the hotspots
 // sit exactly on the printed numbers rather than being placed by hand.
-const ipl = { models: null, model: null, figure: null, selectedKey: null };
+const ipl = { models: null, model: null, figure: null, selectedKey: null, q: "", type: "" };
+
+// The last few models this phone opened, most recent first. Per device rather
+// than per account: it is a convenience, not a record, and it never leaves the
+// phone.
+const IPL_RECENT_KEY = "om_ipl_recent";
+const IPL_RECENT_MAX = 3;
+
+function iplRecent() {
+  try {
+    const v = JSON.parse(localStorage.getItem(IPL_RECENT_KEY) || "[]");
+    return Array.isArray(v) ? v.filter((x) => typeof x === "string") : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+function iplRemember(id) {
+  const next = [id].concat(iplRecent().filter((x) => x !== id)).slice(0, IPL_RECENT_MAX);
+  try { localStorage.setItem(IPL_RECENT_KEY, JSON.stringify(next)); } catch (_) {}
+}
 
 async function enterIpl() {
   showScreen("ipl");
-  if (ipl.models) return;
-  try {
-    ipl.models = await api("./ipl/index.json");
-  } catch (_) {
-    ipl.models = [];
+  if (!ipl.models) {
+    try {
+      ipl.models = await api("./ipl/index.json");
+    } catch (_) {
+      ipl.models = [];
+    }
   }
-  const sel = $("ipl-model");
-  if (!ipl.models.length) {
-    sel.innerHTML = `<option value="">No diagrams installed yet</option>`;
-    $("ipl-list").innerHTML = `<div class="ipl-empty">No parts diagrams have been added yet.</div>`;
+  showIplPicker();
+}
+
+// Models added before the picker existed have no brand or category, so fall
+// back rather than dropping them out of the list entirely.
+function iplBrand(m) { return m.brand || String(m.name || "").split(" ")[0] || "Other"; }
+function iplShort(m) { return m.short || m.name || m.id; }
+function iplCategory(m) { return m.category || ""; }
+
+function iplMatches(m, q) {
+  if (!q) return true;
+  const hay = `${iplBrand(m)} ${iplShort(m)} ${m.name} ${iplCategory(m)}`.toLowerCase();
+  if (hay.includes(q)) return true;
+  // Also match with punctuation dropped, so "bk3410" finds "BK3410FL / FL-S"
+  // and "pht750" finds "PHT750 / PHT1200 / PHT1500".
+  const strip = (s) => s.replace(/[^a-z0-9]/g, "");
+  return strip(hay).includes(strip(q));
+}
+
+// Highlight the matched run, so it is obvious why a row is showing when the
+// match was in the machine type rather than the name you were reading.
+function iplMark(text, q) {
+  const s = String(text || "");
+  if (!q) return escapeHtml(s);
+  const i = s.toLowerCase().indexOf(q);
+  if (i < 0) return escapeHtml(s);
+  return escapeHtml(s.slice(0, i)) + "<mark>" + escapeHtml(s.slice(i, i + q.length)) +
+         "</mark>" + escapeHtml(s.slice(i + q.length));
+}
+
+function showIplPicker() {
+  $("ipl-picker").style.display = "";
+  $("ipl-viewer").style.display = "none";
+  renderIplPicker();
+}
+
+function renderIplPicker() {
+  const all = ipl.models || [];
+  const box = $("ipl-models");
+
+  if (!all.length) {
+    $("ipl-types").innerHTML = "";
+    $("ipl-recent").innerHTML = "";
+    box.innerHTML = `<div class="mp-empty"><strong>No IPLs installed yet</strong>Ask John to add one.</div>`;
     return;
   }
-  sel.innerHTML = ipl.models.map((m) =>
-    `<option value="${escapeAttr(m.id)}">${escapeHtml(m.name)}</option>`
-  ).join("");
-  await loadIplModel(ipl.models[0].id);
+
+  const q = ipl.q.trim().toLowerCase();
+  $("ipl-search-clear").classList.toggle("on", !!ipl.q);
+
+  // Type chips, commonest first, counted from the data — a category with
+  // nothing in it never appears.
+  const counts = new Map();
+  all.forEach((m) => {
+    const c = iplCategory(m);
+    if (c) counts.set(c, (counts.get(c) || 0) + 1);
+  });
+  const types = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  // A filter matching nothing would leave a blank screen; drop it instead.
+  if (ipl.type && !counts.has(ipl.type)) ipl.type = "";
+
+  $("ipl-types").innerHTML =
+    `<button type="button" class="mp-chip" data-type="" aria-pressed="${!ipl.type}">All ${all.length}</button>` +
+    types.map(([t, n]) =>
+      `<button type="button" class="mp-chip" data-type="${escapeAttr(t)}" aria-pressed="${ipl.type === t}">${escapeHtml(t)} ${n}</button>`
+    ).join("");
+  $("ipl-types").querySelectorAll(".mp-chip").forEach((c) =>
+    c.addEventListener("click", () => {
+      ipl.type = ipl.type === c.dataset.type ? "" : c.dataset.type;
+      renderIplPicker();
+    })
+  );
+
+  // Recently opened, but only while nothing is being narrowed — with a search
+  // running it is just a second list competing with the results.
+  const recent = (!q && !ipl.type)
+    ? iplRecent().map((id) => all.find((m) => m.id === id)).filter(Boolean)
+    : [];
+  $("ipl-recent").innerHTML = recent.length
+    ? `<div class="mp-lab">Recently opened</div><div class="mp-recent-row">` +
+      recent.map((m) =>
+        `<button type="button" class="mp-rc" data-id="${escapeAttr(m.id)}">
+           <strong>${escapeHtml(iplShort(m))}</strong>
+           <small>${escapeHtml(iplBrand(m))}${iplCategory(m) ? " &middot; " + escapeHtml(iplCategory(m)) : ""}</small>
+         </button>`).join("") + `</div>`
+    : "";
+
+  const list = all.filter((m) =>
+    (!ipl.type || iplCategory(m) === ipl.type) && iplMatches(m, q)
+  );
+
+  if (!list.length) {
+    box.innerHTML =
+      `<div class="mp-empty"><strong>Nothing matches &ldquo;${escapeHtml(ipl.q)}&rdquo;</strong>` +
+      `Try the model number printed on the machine.</div>`;
+    wireIplPicks();
+    return;
+  }
+
+  const byBrand = new Map();
+  list.forEach((m) => {
+    const b = iplBrand(m);
+    if (!byBrand.has(b)) byBrand.set(b, []);
+    byBrand.get(b).push(m);
+  });
+
+  box.innerHTML = [...byBrand.keys()].sort().map((b) => {
+    const rows = byBrand.get(b).slice().sort((x, y) =>
+      iplShort(x).localeCompare(iplShort(y), undefined, { numeric: true })
+    );
+    return `<div class="mp-group">
+      <div class="mp-ghead">
+        <span class="mp-gmark">${escapeHtml(b.slice(0, 2).toUpperCase())}</span>
+        <strong>${escapeHtml(b)}</strong><span class="n">${rows.length}</span>
+      </div>
+      <div class="mp-rows">` +
+      rows.map((m) =>
+        `<button type="button" class="mp-row" data-id="${escapeAttr(m.id)}">
+           <span class="txt">
+             <span class="nm">${iplMark(iplShort(m), q)}</span>
+             <span class="mt">${iplCategory(m) ? "<b>" + iplMark(iplCategory(m), q) + "</b> &middot; " : ""}${m.figures} figure${m.figures === 1 ? "" : "s"}${m.parts ? " &middot; " + m.parts + " parts" : ""}</span>
+           </span>
+           <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+         </button>`).join("") +
+      `</div></div>`;
+  }).join("");
+
+  wireIplPicks();
+}
+
+function wireIplPicks() {
+  document.querySelectorAll("#ipl-picker .mp-row, #ipl-picker .mp-rc").forEach((b) =>
+    b.addEventListener("click", () => openIplModel(b.dataset.id))
+  );
+}
+
+async function openIplModel(id) {
+  const entry = (ipl.models || []).find((m) => m.id === id);
+  if (!entry) return;
+  const ok = await loadIplModel(id);
+  if (!ok) return;
+  iplRemember(id);
+  $("ipl-chosen-name").textContent = `${iplBrand(entry)} ${iplShort(entry)}`.trim();
+  $("ipl-chosen-meta").textContent =
+    [iplCategory(entry), `${entry.figures} figure${entry.figures === 1 ? "" : "s"}`]
+      .filter(Boolean).join(" · ");
+  $("ipl-picker").style.display = "none";
+  $("ipl-viewer").style.display = "";
+  window.scrollTo({ top: 0 });
 }
 
 async function loadIplModel(id) {
   try {
     ipl.model = await api(`./ipl/${encodeURIComponent(id)}.json`);
   } catch (e) {
-    toast("Couldn't load that diagram", "err");
-    return;
+    toast("Couldn't load that IPL", "err");
+    return false;
   }
   // Selected by id, not by the printed figure number — a figure can span
   // several sheets and they would otherwise collide.
@@ -3345,6 +3505,7 @@ async function loadIplModel(id) {
     b.addEventListener("click", () => showIplFigure(b.dataset.fig))
   );
   showIplFigure(ipl.model.figures[0].id);
+  return true;
 }
 
 function showIplFigure(id) {
@@ -3536,7 +3697,22 @@ function closeIplPart() {
 }
 $("ipl-part-close").addEventListener("click", closeIplPart);
 $("ipl-modal").addEventListener("click", (e) => { if (e.target === $("ipl-modal")) closeIplPart(); });
-$("ipl-model").addEventListener("change", (e) => loadIplModel(e.target.value));
+$("ipl-search").addEventListener("input", (e) => {
+  ipl.q = e.target.value;
+  // Re-rendering replaces the chips and rows around it, not the input itself,
+  // so the caret and the keyboard both stay put.
+  renderIplPicker();
+});
+$("ipl-search-clear").addEventListener("click", () => {
+  ipl.q = "";
+  $("ipl-search").value = "";
+  renderIplPicker();
+  $("ipl-search").focus();
+});
+$("ipl-change").addEventListener("click", () => {
+  showIplPicker();
+  window.scrollTo({ top: 0 });
+});
 $("ipl-filter").addEventListener("input", renderIplList);
 
 // ---- Diagram pinch / pan ----------------------------------------------------
@@ -3817,3 +3993,16 @@ function openSetPrice(tier, tierName) {
     }
   });
 }
+
+// The IPL picker's brand headings pin themselves below the topbar, which needs
+// its height as a number. Measured rather than hard-coded: the bar is taller
+// for technicians, who get a language toggle in it.
+function syncTopbarHeight() {
+  const bar = document.querySelector(".topbar");
+  if (bar && bar.offsetHeight) {
+    document.documentElement.style.setProperty("--topbar-h", bar.offsetHeight + "px");
+  }
+}
+syncTopbarHeight();
+window.addEventListener("resize", syncTopbarHeight);
+window.addEventListener("orientationchange", syncTopbarHeight);

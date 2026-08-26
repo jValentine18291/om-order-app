@@ -28,9 +28,13 @@ const fs = require("fs");
 const path = require("path");
 const https = require("https");
 
-const [, , CSV, MODEL_ID, MODEL_NAME] = process.argv;
+const { writeIndex } = require("./ipl-index");
+
+// A Husqvarna CSV export carries no folder to read a category from, so pass one
+// - it is what the picker's filter chips group on.
+const [, , CSV, MODEL_ID, MODEL_NAME, CATEGORY] = process.argv;
 if (!CSV || !MODEL_ID) {
-  console.error('Usage: node tools/ipl-extract-csv.js "<export.csv>" <model-id> ["Model Name"]');
+  console.error('Usage: node tools/ipl-extract-csv.js "<export.csv>" <model-id> ["Model Name"] ["Category"]');
   process.exit(1);
 }
 
@@ -189,13 +193,8 @@ async function main() {
   };
   fs.writeFileSync(path.join(OUT_DIR, `${MODEL_ID}.json`), JSON.stringify(model, null, 1));
 
-  const indexPath = path.join(OUT_DIR, "index.json");
-  let index = [];
-  try { index = JSON.parse(fs.readFileSync(indexPath, "utf8")); } catch (_) {}
-  index = index.filter((m) => m.id !== MODEL_ID);
-  index.push({ id: model.id, name: model.name, figures: figures.length });
-  index.sort((a, b) => a.name.localeCompare(b.name));
-  fs.writeFileSync(indexPath, JSON.stringify(index, null, 1));
+  const entry = writeIndex(OUT_DIR, model, CSV, CATEGORY, figures.length);
+  console.log(`  picker entry: ${entry.brand} / ${entry.short} / ${entry.category || "(no category)"}`);
 
   const totalSpots = figures.reduce((a, f) => a + f.hotspots.length, 0);
   console.log(`\nwrote frontend/ipl/${MODEL_ID}.json — ${figures.length} figures, ${totalSpots} hotspots`);

@@ -1000,7 +1000,7 @@ select {
 }
 .so-row-sub .so-desc { font-weight: 700; letter-spacing: .04em; }
 
-/* ===== IPL / parts diagram viewer =======================================
+/* ===== IPL / illustrated parts list viewer =======================================
    The diagram is a fixed-aspect drawing with callout numbers whose positions
    come from the PDF itself, so hotspots are placed in percentages and scale
    with whatever zoom the user picks.
@@ -1315,3 +1315,132 @@ select {
   margin-top: 9px; font-size: .74rem; line-height: 1.4; color: var(--ink-faint);
 }
 
+
+/* ===== IPL model picker =================================================
+   Replaces the model dropdown. A dropdown was fine at three models and
+   workable at nine; a phone shows about seven options at a time in one flat
+   alphabetical run with nothing to type into, so it stops working well
+   before the catalogue is finished. Search first, then brand groups.
+   ======================================================================== */
+
+/* ---- search ---- */
+.mp-search { position: relative; margin-bottom: 13px; }
+.mp-search input {
+  width: 100%; height: var(--tap); padding: 0 42px 0 44px;
+  background: var(--surface); border: 1.5px solid var(--border-2);
+  border-radius: var(--radius-sm); color: var(--ink);
+  font: inherit; font-size: 16.5px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.mp-search input::placeholder { color: var(--ink-faint); }
+.mp-search input:focus {
+  outline: none; border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-tint);
+}
+.mp-search .ic {
+  position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px; color: var(--ink-faint); pointer-events: none;
+}
+.mp-clear {
+  position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
+  width: 28px; height: 28px; border: 0; border-radius: 50%;
+  background: var(--border); color: var(--ink-soft);
+  font-size: 15px; line-height: 1; display: none;
+}
+.mp-clear.on { display: block; }
+
+/* ---- machine-type chips ---- */
+.mp-chips { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 12px; }
+.mp-chip {
+  flex: 0 0 auto; border: 1px solid var(--border-2); background: var(--surface);
+  color: var(--ink-soft); border-radius: 999px; padding: 7px 13px;
+  font: inherit; font-size: 13px; font-weight: 600; white-space: nowrap;
+  transition: background .13s, color .13s, border-color .13s;
+}
+.mp-chip[aria-pressed="true"] {
+  background: var(--primary); border-color: var(--primary); color: #fff;
+}
+
+/* ---- recently opened ---- */
+.mp-recent:not(:empty) { margin-bottom: 18px; }
+.mp-lab {
+  font-size: .72rem; font-weight: 600; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px;
+}
+.mp-recent-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 3px; }
+.mp-rc {
+  flex: 0 0 auto; display: flex; flex-direction: column; gap: 1px;
+  align-items: flex-start; text-align: left;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px 14px;
+  box-shadow: var(--shadow); font: inherit;
+}
+.mp-rc strong { font-family: var(--display); font-size: 15px; font-weight: 600; color: var(--ink); }
+.mp-rc small { font-size: .72rem; color: var(--ink-faint); }
+
+/* ---- brand groups ---- */
+.mp-group + .mp-group { margin-top: 16px; }
+.mp-ghead {
+  display: flex; align-items: center; gap: 9px;
+  /* Pinned below the topbar, not behind it. --topbar-h is measured at startup
+     rather than hard-coded, because the bar grows when the language toggle
+     appears. */
+  padding: 6px 2px 9px; position: sticky; top: var(--topbar-h, 63px); z-index: 2;
+  background: var(--bg);
+}
+.mp-gmark {
+  width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0;
+  display: grid; place-items: center;
+  background: var(--primary-tint); color: var(--primary);
+  font-family: var(--display); font-size: 12px; font-weight: 700;
+}
+.mp-ghead strong { font-family: var(--display); font-size: 14.5px; font-weight: 600; }
+.mp-ghead .n { margin-left: auto; font-size: .78rem; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+
+.mp-rows { display: flex; flex-direction: column; gap: 8px; }
+.mp-row {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 13px 14px;
+  text-align: left; font: inherit; box-shadow: var(--shadow);
+  transition: border-color .13s, transform .06s;
+}
+.mp-row:active { transform: scale(.995); }
+.mp-row .txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.mp-row .nm {
+  font-family: var(--display); font-size: 16px; font-weight: 600;
+  color: var(--ink); letter-spacing: -.01em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* Why a row is showing, when the match was not in the part of the name you
+   were looking at. */
+.mp-row mark { background: #fdf0b8; color: inherit; border-radius: 3px; padding: 0 1px; }
+.mp-row .mt { font-size: .78rem; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.mp-row .mt b { color: var(--ink-soft); font-weight: 600; }
+.mp-row .chev { width: 16px; height: 16px; color: var(--ink-faint); flex-shrink: 0; }
+
+.mp-empty {
+  text-align: center; padding: 40px 20px; color: var(--ink-faint); font-size: .92rem;
+}
+.mp-empty strong {
+  display: block; font-family: var(--display); color: var(--ink-soft);
+  font-size: .98rem; margin-bottom: 4px;
+}
+
+/* ---- the chosen model, once the picker is closed ---- */
+.mp-chosen {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 14px;
+  text-align: left; font: inherit; box-shadow: var(--shadow);
+}
+.mp-chosen .txt { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
+.mp-chosen .nm {
+  font-family: var(--display); font-size: 16px; font-weight: 600; color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.mp-chosen .mt { font-size: .78rem; color: var(--ink-faint); }
+.mp-chosen .act {
+  flex-shrink: 0; font-size: .82rem; font-weight: 600; color: var(--primary);
+  background: var(--primary-tint); border-radius: 999px; padding: 6px 12px;
+}

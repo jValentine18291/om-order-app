@@ -2,46 +2,82 @@
  {
   "id": "hus365",
   "name": "Husqvarna 365 Chainsaw",
-  "figures": 15
+  "short": "365",
+  "brand": "Husqvarna",
+  "category": "Chainsaw",
+  "figures": 15,
+  "parts": 249
  },
  {
   "id": "hus525bx",
   "name": "Husqvarna 525BX Blower",
-  "figures": 11
+  "short": "525BX",
+  "brand": "Husqvarna",
+  "category": "Blower",
+  "figures": 11,
+  "parts": 112
  },
  {
   "id": "am550epos",
   "name": "Husqvarna Automower 550 EPOS",
-  "figures": 9
+  "short": "Automower 550 EPOS",
+  "brand": "Husqvarna",
+  "category": "Robotic Mower",
+  "figures": 9,
+  "parts": 214
  },
  {
   "id": "bk3410fl",
   "name": "Zenoah BK3410FL / FL-S",
-  "figures": 6
+  "short": "BK3410FL / FL-S",
+  "brand": "Zenoah",
+  "category": "Brushcutter",
+  "figures": 6,
+  "parts": 198
  },
  {
   "id": "cht220_60",
   "name": "Zenoah CHT220-60 Hedge Trimmer",
-  "figures": 14
+  "short": "CHT220-60",
+  "brand": "Zenoah",
+  "category": "Hedge Trimmer",
+  "figures": 14,
+  "parts": 157
  },
  {
   "id": "ex2600ph",
   "name": "Zenoah EX2600-PH Hedge Trimmer",
-  "figures": 5
+  "short": "EX2600-PH",
+  "brand": "Zenoah",
+  "category": "Pole Hedge Trimmer",
+  "figures": 5,
+  "parts": 172
  },
  {
   "id": "hbz260ez",
   "name": "Zenoah HBZ260EZ",
-  "figures": 4
+  "short": "HBZ260EZ",
+  "brand": "Zenoah",
+  "category": "Blower",
+  "figures": 4,
+  "parts": 143
  },
  {
   "id": "ht220_75",
   "name": "Zenoah HT220-75 Hedge Trimmer",
-  "figures": 14
+  "short": "HT220-75",
+  "brand": "Zenoah",
+  "category": "Hedge Trimmer",
+  "figures": 14,
+  "parts": 158
  },
  {
   "id": "pht750_1200_1500",
   "name": "Zenoah PHT750 / PHT1200 / PHT1500",
-  "figures": 4
+  "short": "PHT750 / PHT1200 / PHT1500",
+  "brand": "Zenoah",
+  "category": "Pole Hedge Trimmer",
+  "figures": 4,
+  "parts": 149
  }
 ]
