@@ -63,6 +63,7 @@ module.exports = {
     getSlipOrder: (...a) => dataRepo.slips.getSlipOrder(...a),
     getSlipOrders: (...a) => dataRepo.slips.getSlipOrders(...a),
     setOrderAutocountDocNo: (...a) => dataRepo.slips.setOrderAutocountDocNo(...a),
+    renameOrder: (...a) => dataRepo.slips.renameOrder(...a),
     closeSlip: (...a) => dataRepo.slips.closeSlip(...a),
   },
   requests: {

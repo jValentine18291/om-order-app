@@ -514,6 +514,32 @@ function getSlipOrders(slipNumber) {
   return rows.map((r) => getOrder(r.so_number)).filter(Boolean);
 }
 
+// Take AutoCount's number as the app's own, so staff see one number rather
+// than two for the same order. AutoCount is the authority here: it allocates
+// the number, and a slip that never reaches AutoCount simply keeps the
+// provisional one, which is honest about what has and has not been written.
+function renameOrder(oldSoNumber, newSoNumber) {
+  const from = String(oldSoNumber || "").trim();
+  const to = String(newSoNumber || "").trim();
+  if (!from || !to || from === to) return { ok: true, so_number: from };
+
+  const clash = db.prepare("SELECT id FROM orders WHERE so_number = ?").get(to);
+  if (clash) {
+    // Vanishingly unlikely, but renaming onto an existing number would lose an
+    // order. Keep the provisional number rather than destroy anything.
+    return { ok: false, so_number: from, reason: `${to} is already used by another order in the app.` };
+  }
+
+  const tx = db.transaction(() => {
+    db.prepare("UPDATE orders SET so_number = ? WHERE so_number = ?").run(to, from);
+    // The machines point at the order by number, so they move with it.
+    db.prepare("UPDATE slip_machines SET so_number = ? WHERE so_number = ?").run(to, from);
+    db.prepare("UPDATE orders SET notes = notes WHERE so_number = ?").run(to);
+  });
+  tx();
+  return { ok: true, so_number: to };
+}
+
 // Record which AutoCount Sales Order an app order became.
 function setOrderAutocountDocNo(soNumber, docNo) {
   db.prepare("UPDATE orders SET autocount_doc_no = ? WHERE so_number = ?").run(String(docNo || ""), soNumber);
@@ -606,7 +632,7 @@ function searchSlips(query = "", scope = "all", limit = 20) {
 }
 
 const slips = {
-  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, setSlipStatus, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, setSlipStatus, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, renameOrder, closeSlip,
 };
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };

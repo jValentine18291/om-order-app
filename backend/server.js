@@ -105,84 +105,6 @@ app.post("/api/slips", async (req, res) => {
   }
 });
 
-// TEMPORARY: how AutoCount records a real SubTotal line. Read-only.
-app.get("/api/_diag/subtotals", async (req, res) => {
-  res.type("text/plain");
-  try {
-    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
-    if (itemsSource !== "autocount") return res.send("AutoCount is not enabled on this server.");
-    const sch = require("./data/autocountSchema");
-    const out = [];
-
-    out.push("== Line types in use ==");
-    const types = await sch.detailTypes();
-    for (const [table, rows] of Object.entries(types)) {
-      out.push("  " + table + ":");
-      for (const r of rows) {
-        if (r.error) { out.push("    error: " + r.error); continue; }
-        out.push(`    DtlType ${JSON.stringify(r.DtlType)}  ${String(r.lines).padStart(7)} lines   e.g. ${String(r.example || "").slice(0, 40)}`);
-      }
-    }
-
-    out.push("");
-    out.push("== Lines that are, or mention, a SubTotal ==");
-    const rows = await sch.subtotalRows();
-    for (const [table, list] of Object.entries(rows)) {
-      out.push("  " + table + ":");
-      if (!list.length) { out.push("    (none)"); continue; }
-      for (const r of list) {
-        if (r.error) { out.push("    error: " + r.error); continue; }
-        out.push(`    Seq ${String(r.Seq).padStart(4)} | DtlType ${JSON.stringify(r.DtlType)}` +
-                 ` | AddToSubTotal ${JSON.stringify(r.AddToSubTotal)} | MainItem ${JSON.stringify(r.MainItem)}` +
-                 ` | Numbering ${r.Numbering === null ? "-" : r.Numbering} | Indent ${r.Indent === null ? "-" : r.Indent}`);
-        out.push(`             desc ${JSON.stringify(String(r.Description || "").slice(0, 40))}` +
-                 ` | item ${r.ItemCode || "-"} | qty ${r.Qty === null ? "-" : r.Qty}` +
-                 ` | sub ${r.SubTotal === null ? "-" : r.SubTotal} | tax ${r.Tax === null ? "-" : r.Tax}`);
-      }
-    }
-    res.send(out.join(String.fromCharCode(10)));
-  } catch (err) {
-    res.send("FAILED: " + err.message);
-  }
-});
-
-// TEMPORARY: every constraint the Sales Order tables impose, and who counts as
-// a valid AutoCount user. Read-only.
-app.get("/api/_diag/so-constraints", async (req, res) => {
-  res.type("text/plain");
-  try {
-    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
-    if (itemsSource !== "autocount") return res.send("AutoCount is not enabled on this server.");
-    const sch = require("./data/autocountSchema");
-    const out = [];
-
-    out.push("== Foreign keys on SO and SODTL ==");
-    const fks = await sch.foreignKeys(["SO", "SODTL"]);
-    if (!fks.length) out.push("  (none)");
-    for (const f of fks) {
-      out.push(`  ${f.table}.${f.column}  ->  ${f.refTable}.${f.refColumn}   [${f.constraintName}]`);
-    }
-
-    out.push("");
-    out.push("== Valid AutoCount users ==");
-    try {
-      const users = await sch.autocountUsers();
-      if (!users.length) out.push("  (none)");
-      for (const u of users) {
-        const id = u.UserID || u.UserId || u.LoginID || "?";
-        const name = u.UserName || u.Description || u.FullName || "";
-        const active = u.IsActive !== undefined ? ` active=${u.IsActive}` : "";
-        out.push(`  ${String(id).padEnd(12)} ${String(name).slice(0, 40)}${active}`);
-      }
-    } catch (e) {
-      out.push("  could not read Users: " + e.message);
-    }
-    res.send(out.join(String.fromCharCode(10)));
-  } catch (err) {
-    res.send("FAILED: " + err.message);
-  }
-});
-
 // Preview exactly what would be written into AutoCount for an order the app
 // has already produced. Writes nothing, whatever the switch says.
 app.get("/api/orders/:so/autocount-preview", async (req, res) => {
@@ -237,208 +159,6 @@ app.get("/api/orders/:so/autocount-preview", async (req, res) => {
     t.push("== Header columns that would be set ==");
     for (const [k, v] of Object.entries(out.header)) t.push(`  ${k} = ${v instanceof Date ? v.toISOString().slice(0,10) : v}`);
     res.send(t.join(String.fromCharCode(10)));
-  } catch (err) {
-    res.send("FAILED: " + err.message);
-  }
-});
-
-// ---- TEMPORARY: is the next key simply "highest anywhere, plus one"? -------
-app.get("/api/_diag/keyrule", async (req, res) => {
-  res.type("text/plain");
-  try {
-    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
-    if (itemsSource !== "autocount") return res.send("AutoCount is not enabled on this server.");
-    const sch = require("./data/autocountSchema");
-    const rows = await sch.topKeys();
-    const out = ["== Highest key in each document table, biggest first =="];
-    for (const r of rows.slice(0, 14)) out.push("  " + String(r.spot).padEnd(22) + " " + r.maxKey);
-
-    const top = Number(rows[0].maxKey);
-    const second = Number(rows[1] ? rows[1].maxKey : 0);
-    out.push("");
-    out.push("== Reading ==");
-    out.push("  highest anywhere      : " + top + "  (" + rows[0].spot + ")");
-    out.push("  next highest          : " + second + "  (" + (rows[1] ? rows[1].spot : "-") + ")");
-    out.push("  gap between them      : " + (top - second));
-    out.push("");
-    if (top - second <= 2) {
-      out.push("  The newest keys run consecutively across tables, which fits");
-      out.push("  'next key = highest anywhere + 1'.");
-    } else {
-      out.push("  There is a gap, so the next key is NOT simply the highest plus one -");
-      out.push("  AutoCount is getting it from somewhere we have not found.");
-    }
-    res.send(out.join(String.fromCharCode(10)));
-  } catch (err) {
-    res.send("FAILED: " + err.message);
-  }
-});
-
-// ---- TEMPORARY: watch AutoCount allocate a key -----------------------------
-// Take a reading before creating a Sales Order in AutoCount, and another
-// afterwards. Whatever moved is the counter. Reading only; the snapshot is
-// kept in a file beside the app so the two visits can be compared.
-app.get("/api/_diag/keyprobe", async (req, res) => {
-  res.type("text/plain");
-  const fs = require("fs");
-  const path = require("path");
-  const SNAP = path.join(__dirname, "_keyprobe.json");
-  try {
-    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
-    if (itemsSource !== "autocount") return res.send("AutoCount is not enabled on this server.");
-    const sch = require("./data/autocountSchema");
-
-    const now = await sch.snapshot(2000);
-    const count = Object.keys(now).length;
-
-    if (!req.query.compare) {
-      fs.writeFileSync(SNAP, JSON.stringify(now));
-      return res.send(
-        ["BEFORE reading taken: " + count + " columns.", "",
-         "Now create a Sales Order in AutoCount, then open this page again with",
-         "?compare=1 on the end."].join(String.fromCharCode(10))
-      );
-    }
-
-    if (!fs.existsSync(SNAP)) return res.send("No BEFORE reading. Open this page without ?compare=1 first.");
-    const before = JSON.parse(fs.readFileSync(SNAP, "utf8"));
-
-    const moved = [];
-    for (const [spot, val] of Object.entries(now)) {
-      if (before[spot] === undefined) moved.push(`${spot}: (new) -> ${val}`);
-      else if (before[spot] !== val) moved.push(`${spot}: ${before[spot]} -> ${val}`);
-    }
-
-    const out = [`AFTER reading: ${count} columns, ${moved.length} moved.`, ""];
-    if (!moved.length) {
-      out.push("Nothing moved. Either no order was created, or the counter lives");
-      out.push("in a table larger than 2000 rows, or it is not a number.");
-    } else {
-      out.push("== What changed while the Sales Order was created ==");
-      for (const m of moved.sort()) out.push("  " + m);
-    }
-    res.send(out.join(String.fromCharCode(10)));
-  } catch (err) {
-    res.send("FAILED: " + err.message);
-  }
-});
-
-// ---- TEMPORARY: read-only look at AutoCount's Sales Order schema -----------
-// Here so the Sales Order insert can be built from the real tables rather than
-// a guess. Every query behind it is a SELECT. REMOVE once the insert is built.
-// Returns plain text because the output is meant to be read and pasted.
-app.get("/api/_diag/so-schema", async (req, res) => {
-  res.type("text/plain");
-  try {
-    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
-    if (itemsSource !== "autocount") return res.send("AutoCount is not enabled on this server.");
-    const sch = require("./data/autocountSchema");
-
-    const header = String(req.query.header || "SO");
-    const detail = String(req.query.detail || "SODTL");
-    const key = String(req.query.key || "DocKey");
-    const out = [];
-
-    out.push("== Tables that look like sales orders or numbering ==");
-    for (const t of await sch.findTables()) out.push("  " + t.name);
-
-    for (const [label, table] of [["HEADER", header], ["DETAIL", detail]]) {
-      const cols = await sch.columns(table);
-      out.push("", `== ${label}: ${table} - ${cols.length} columns ==`);
-      if (!cols.length) { out.push("  (no such table - tell me the right name)"); continue; }
-      out.push("  -- required (NOT NULL, no default) --");
-      for (const c of cols.filter((c) => c.nullable === "NO" && c.default === null)) {
-        out.push(`    ${c.name}  ${c.type}${c.len ? "(" + c.len + ")" : ""}`);
-      }
-      out.push("  -- all columns --");
-      out.push("    " + cols.map((c) => c.name).join(", "));
-    }
-
-    try {
-      const s = await sch.sampleOrder(header, detail, key);
-      out.push("", "== Most recent Sales Order: columns that are actually filled in ==");
-      if (!s.header) {
-        out.push("  (no sales orders found)");
-      } else {
-        out.push("  -- header --");
-        for (const line of sch.usedColumns(s.header)) out.push("    " + line);
-        out.push(`  -- ${s.lines.length} line(s), first three --`);
-        s.lines.slice(0, 3).forEach((l, i) => {
-          out.push(`    [line ${i + 1}]`);
-          for (const line of sch.usedColumns(l)) out.push("      " + line);
-        });
-      }
-    } catch (e) {
-      out.push("", "Sample order failed: " + e.message + "  (wrong key column? try ?key=DocKey or ?key=DocNo)");
-    }
-
-        // ---- round two: the things that decide how the insert is written ----
-    try {
-      out.push("", "== Are the keys auto-generated? ==");
-      const ids = await sch.identityColumns([header, detail]);
-      if (!ids.length) {
-        out.push("  NO identity columns - DocKey and DtlKey must be allocated by us.");
-      } else {
-        for (const i of ids) out.push(`  ${i.table}.${i.column} IS an identity (last = ${i.last})`);
-      }
-
-      const ver = await sch.serverVersion();
-      out.push("", "== SQL Server ==");
-      out.push("  " + String(ver[0].version).split(String.fromCharCode(10))[0] + "  (product " + ver[0].product + ")");
-
-      out.push("", "== Columns that look like a next-number holder ==");
-      const ncols = await sch.numberingColumns();
-      if (!ncols.length) out.push("  (none)");
-      for (const c of ncols.slice(0, 60)) out.push(`  ${c.table}.${c.column}  ${c.type}`);
-
-      out.push("", "== Stored procedures / functions that may allocate keys ==");
-      const rts = await sch.keyRoutines();
-      if (!rts.length) out.push("  (none)");
-      for (const r of rts.slice(0, 60)) out.push(`  ${r.type}  ${r.name}`);
-
-      out.push("", "== Highest DocKey across the document system ==");
-      const gmax = await sch.globalMaxDocKey();
-      for (const g of gmax.slice(0, 8)) out.push(`  ${g.table}: ${g.maxKey}`);
-      const highest = Number(gmax.length ? gmax[0].maxKey : 0);
-      out.push(`  -> the counter must sit just above ${highest}`);
-
-      out.push("", "== What each document type was last used ==");
-      for (const u of (await sch.lastUsed()).filter((u) => u.docs > 0)
-             .sort((a, b) => new Date(b.lastDate) - new Date(a.lastDate))) {
-        out.push(`  ${String(u.table).padEnd(12)} ${String(u.lastDate).slice(0, 10)}   ${u.docs} documents`);
-      }
-
-      // ---- the decisive test, this time in the right range ----
-      out.push("", "== Hunting the global DocKey counter by value ==");
-      const cands = await sch.smallTableNumericColumns(500);
-      out.push(`  scanning ${cands.length} numeric columns in tables of 500 rows or fewer`);
-      out.push(`  looking for a value between ${highest} and ${highest + 20000}`);
-      const hits = await sch.findValueNear(cands, highest, highest + 20000);
-      if (!hits.length) {
-        out.push("  NOTHING FOUND - not a small numeric column.");
-      } else {
-        for (const h of hits) out.push(`  HIT  ${h.spot} = ${h.val}`);
-      }
-
-      out.push("", "== Other tables carrying a DocKey ==");
-      out.push("  " + (await sch.docKeyTables()).map((t) => t.table).join(", "));
-
-      const s2 = await sch.sampleOrder(header, detail, key);
-      if (s2.header) {
-        const lines = await sch.allLines(detail, key, s2.header[key]);
-        out.push("", `== All ${lines.length} lines of ${s2.header.DocNo}, compactly ==`);
-        for (const l of lines) {
-          out.push(`  Seq ${l.Seq} | ${l.ItemCode || "(no code)"} | ${String(l.Description || "").slice(0, 46)}`
-            + ` | qty ${l.Qty === null ? "-" : l.Qty} | price ${l.UnitPrice === null ? "-" : l.UnitPrice}`
-            + ` | sub ${l.SubTotal === null ? "-" : l.SubTotal} | DtlType ${l.DtlType} | AddToSubTotal ${l.AddToSubTotal}`
-            + ` | MainItem ${l.MainItem} | Numbering ${l.Numbering === null ? "-" : l.Numbering}`);
-        }
-      }
-    } catch (e) {
-      out.push("", "Round two failed: " + e.message);
-    }
-
-res.send(out.join("\n"));
   } catch (err) {
     res.send("FAILED: " + err.message);
   }
@@ -864,7 +584,20 @@ async function pushOrderToAutoCount(soNumber) {
     lines: order.lines || [],
   });
   await data.slips.setOrderAutocountDocNo(soNumber, out.doc_no);
-  return { pushed: true, doc_no: out.doc_no, doc_key: out.doc_key, lines: out.lines, totals: out.totals };
+
+  // Adopt AutoCount's number as the app's own, so staff see one number for the
+  // order rather than the app's SO-2026-00003 next to AutoCount's SO-2608-003.
+  const renamed = await data.slips.renameOrder(soNumber, out.doc_no);
+
+  return {
+    pushed: true,
+    doc_no: out.doc_no,
+    doc_key: out.doc_key,
+    lines: out.lines,
+    totals: out.totals,
+    so_number: renamed.so_number,
+    rename_note: renamed.ok ? undefined : renamed.reason,
+  };
 }
 
 // Retry pushing an order that did not reach AutoCount the first time.
@@ -960,7 +693,10 @@ app.post("/api/slips/:slip/order", async (req, res) => {
       console.error("[autocount SO]", e.message);
     }
 
-    res.status(201).json({ ...result, price_sync: priceSync, autocount });
+    // Report the number the order actually carries now - AutoCount's, if it
+    // got there.
+    const finalSo = (autocount && autocount.so_number) || result.so_number;
+    res.status(201).json({ ...result, so_number: finalSo, price_sync: priceSync, autocount });
   } catch (err) {
     if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
     console.error("[POST /api/slips/:slip/order]", err);

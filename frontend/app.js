@@ -1806,7 +1806,12 @@ async function createSalesOrder() {
     // when they went looking for it.
     const ac = result.autocount || {};
     if (ac.pushed) {
-      setTimeout(() => toast(`Written into AutoCount as Sales Order ${ac.doc_no}`, "ok"), 1600);
+      // The app has taken AutoCount's number, so there is only one to report.
+      setTimeout(() => toast(
+        ac.rename_note
+          ? `In AutoCount as ${ac.doc_no} (the app kept ${result.so_number}: ${ac.rename_note})`
+          : `Written into AutoCount as Sales Order ${ac.doc_no}`,
+        ac.rename_note ? "err" : "ok"), 1600);
     } else if (ac.error) {
       setTimeout(() => toast(`NOT written to AutoCount: ${ac.error}`, "err"), 1600);
     } else if (ac.reason && !/switched off|not enabled/i.test(ac.reason)) {
