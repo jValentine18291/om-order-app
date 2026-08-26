@@ -2785,22 +2785,35 @@ async function showPartStock(code) {
 }
 
 // ---- Order More popup -------------------------------------------------------
-$("fp-order-more").addEventListener("click", () => {
-  if (!fpCurrentPart) return;
-  $("om-part-name").textContent = `${fpCurrentPart.description} · ${fpCurrentPart.item_code}`;
+// Opened from two places now — the Find Part card and the IPL part sheet — so
+// the part being ordered is held here rather than read back off either screen.
+let orderPart = null;
+
+function openOrderModal(part) {
+  if (!part || !part.item_code) return;
+  orderPart = part;
+  $("om-part-name").textContent = `${part.description} · ${part.item_code}`;
   $("om-qty").value = "";
-  $("om-requester").value = "";
+  // The app knows who is signed in, so there is no reason to make them type
+  // their own name; it stays editable for someone ordering on another's behalf.
+  $("om-requester").value = userName();
   $("order-modal").style.display = "flex";
   document.body.style.overflow = "hidden";
   setTimeout(() => $("om-qty").focus(), 50);
-});
+}
+
+$("fp-order-more").addEventListener("click", () => openOrderModal(fpCurrentPart));
+
 function closeOrderModal() {
   $("order-modal").style.display = "none";
-  document.body.style.overflow = "";
+  // Ordering from the IPL stacks this on top of the part sheet, which is still
+  // open underneath — releasing the scroll lock here would let the page behind
+  // it slide about.
+  if ($("ipl-modal").style.display !== "flex") document.body.style.overflow = "";
 }
 $("om-close").addEventListener("click", closeOrderModal);
 $("om-submit").addEventListener("click", async () => {
-  if (!fpCurrentPart) return;
+  if (!orderPart) return;
   const qty = parseInt($("om-qty").value, 10);
   const requester = $("om-requester").value.trim();
   if (!Number.isFinite(qty) || qty < 1) { toast("Enter an order quantity", "err"); return; }
@@ -2811,8 +2824,8 @@ $("om-submit").addEventListener("click", async () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        item_code: fpCurrentPart.item_code,
-        description: fpCurrentPart.description,
+        item_code: orderPart.item_code,
+        description: orderPart.description,
         qty_requested: qty,
         requester,
       }),
@@ -3718,6 +3731,9 @@ async function openIplPart(index) {
   // different prices. Binding happens below, once the item is resolved.
   iplPriceState = { code: null, itemCode: null };
   renderIplPriceButton(null);
+  // Nothing to order until the diagram number resolves to an AutoCount item.
+  iplOrderPart = null;
+  $("ipl-order-more").style.display = "none";
   $("ipl-modal").style.display = "flex";
   document.body.style.overflow = "hidden";
 
@@ -3749,9 +3765,15 @@ async function openIplPart(index) {
   }
 }
 
+// The part the IPL sheet is currently showing, once it is a real AutoCount
+// item — which is the only thing a reorder request can name.
+let iplOrderPart = null;
+
 async function renderIplStock(itemCode) {
   const box = $("ipl-part-stock");
   box.innerHTML = `<div class="fp-loading">Looking up stock…</div>`;
+  iplOrderPart = null;
+  $("ipl-order-more").style.display = "none";
   // Stock and price must describe the same item. This is the single point where
   // the diagram number becomes a real AutoCount item, so bind the price here.
   iplPriceState = { code: itemCode, itemCode };
@@ -3765,10 +3787,14 @@ async function renderIplStock(itemCode) {
       <div class="fp-row"><span class="fp-lbl">Description</span><span class="fp-val">${escapeHtml(p.description)}${p.desc2 ? `<br><span class="fp-val-model">${escapeHtml(p.desc2)}</span>` : ""}</span></div>
       <div class="fp-row"><span class="fp-lbl">Location / Shelf</span><span class="fp-val">${p.shelf ? escapeHtml(p.shelf) : "—"}</span></div>
       <div class="fp-row"><span class="fp-lbl">Bal. Qty</span><span class="fp-val fp-qty ${qty > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${qtyStr}${p.uom ? " " + escapeHtml(p.uom) : ""}</span></div>`;
+    iplOrderPart = p;
+    $("ipl-order-more").style.display = "block";
   } catch (e) {
     box.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Stock lookup failed")}</div>`;
   }
 }
+
+$("ipl-order-more").addEventListener("click", () => openOrderModal(iplOrderPart));
 
 function closeIplPart() {
   $("ipl-modal").style.display = "none";

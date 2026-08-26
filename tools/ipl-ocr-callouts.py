@@ -241,7 +241,16 @@ def callouts(pdf, page, keys, max_y=100.0):
         around = outer.size - inner.size
         return (outer.sum() - inner.sum()) / max(1, around)
 
-    pad = int(med * 0.45)
+    # How much paper to leave round the crop, and which segmentation mode.
+    # Tried in order, first full reading wins, so an easy callout still costs
+    # one attempt. Padding is not a detail: on Fig.2 the "59" read as "5" at
+    # 14px of margin, and as "59" at 85-90% confidence at 10px. Tesseract is
+    # simply sensitive to what else falls inside the box, and there is no way
+    # to know in advance which framing suits a given number.
+    CROPS = [(int(med * 0.45), 8), (int(med * 0.45), 7),
+             (int(med * 0.30), 8), (int(med * 0.30), 7),
+             (int(med * 0.60), 8), (int(med * 0.60), 7)]
+
     spots = []
     for x1, y1, x2, y2, nglyphs in groups:
         if in_lettering(x1, y1, x2, y2):
@@ -251,9 +260,6 @@ def callouts(pdf, page, keys, max_y=100.0):
         # as "24" sat at 0.192. Three times clear of anything real.
         if crowding(x1, y1, x2, y2) > 0.12:
             continue
-        crop = im.crop((max(0, x1 - pad), max(0, y1 - pad),
-                        min(W, x2 + pad), min(H, y2 + pad)))
-
         # Two segmentation modes, because neither wins on its own. "one word"
         # is the better all-rounder but returns nothing at all for "11" — two
         # identical thin strokes it will not commit to. "one text line" reads
@@ -264,7 +270,9 @@ def callouts(pdf, page, keys, max_y=100.0):
         # Within a mode the crop is read at two scales and both must agree,
         # which is what stops a doubtful glyph becoming a confident wrong part.
         hit = None
-        for psm in (8, 7):
+        for pad2, psm in CROPS:
+            crop = im.crop((max(0, x1 - pad2), max(0, y1 - pad2),
+                            min(W, x2 + pad2), min(H, y2 + pad2)))
             a, ca = read_one(crop, 3, psm)
             # The reading has to account for every glyph in the group. On these
             # scans one blob is one character, so a two-glyph number read as a
@@ -275,9 +283,17 @@ def callouts(pdf, page, keys, max_y=100.0):
             # so do dozens of perfectly good callouts.
             if a not in keys or len(a) != nglyphs:
                 continue
-            b, cb = read_one(crop, 5, psm)
-            if b == a:
-                hit = (a, min(ca, cb))
+            # Best of three scales rather than agreement between two. Fig.2's
+            # "11" reads as 11, 11, 17 across scales — one dissenting "17" was
+            # enough to veto it under the old rule, and the callout was lost.
+            # A majority still means a wrong number needs two independent
+            # readings to agree on it, which is the point of the check.
+            votes = [(a, ca)] + [read_one(crop, sc, psm) for sc in (4, 5)]
+            tally = {}
+            for t, c in votes:
+                tally.setdefault(t, []).append(c)
+            if len(tally.get(a, [])) >= 2:
+                hit = (a, min(tally[a]))
                 break
         if not hit:
             continue
