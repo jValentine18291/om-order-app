@@ -308,6 +308,30 @@ function setPartPrice(partId, price) {
   return { ok: true, unit_price: p };
 }
 
+// Some item codes stand in for something that is not really in the catalogue -
+// the A5 to A8 service and sundry codes, and anything filed under MISC. The
+// code is right for the accounts; the description is whatever the part
+// actually was, and only the person holding it knows that.
+function isFreeTextPart(itemCode) {
+  const code = String(itemCode || "").trim().toUpperCase();
+  return /^A[5-8]\b/.test(code) || code.startsWith("MISC");
+}
+
+function setPartDescription(partId, description) {
+  const row = db.prepare("SELECT id, item_code FROM machine_parts WHERE id = ?").get(partId);
+  if (!row) { const e = new Error("Part not found."); e.status = 404; throw e; }
+  if (!isFreeTextPart(row.item_code)) {
+    const e = new Error(
+      `${row.item_code} takes its description from AutoCount. Only the A5-A8 and MISC codes can be described by hand.`
+    );
+    e.status = 400; throw e;
+  }
+  const text = String(description || "").replace(/[\r\n\t]+/g, " ").trim().slice(0, 200);
+  if (!text) { const e = new Error("A description is required."); e.status = 400; throw e; }
+  db.prepare("UPDATE machine_parts SET description = ? WHERE id = ?").run(text, partId);
+  return { ok: true, description: text };
+}
+
 // Create the Sales Order for chosen machines on a slip. The slip only reaches
 // CONVERTED once every one of its machines has been put on an order.
 // Mock SO for now — same shape as createOrder — but tagged with the slip number.
@@ -387,10 +411,15 @@ function createSlipOrder(slipNumber, machineIds) {
     const techs = [...new Set(parts.map((p) => p.technician).filter(Boolean))];
     const who = techs.length ? ` (${techs.join("/")})` : "";
     const serial = String(m.serial_no || "").trim();
+    // Drop the "- 1/2" the app adds when several of the same machine come in
+    // together. On the slip it tells one unit from another; on the Sales Order
+    // it collides with the position, so a line would read "525BX - 1/2 ... -
+    // 1/3". Only the position on the slip belongs here.
+    const model = String(m.machine_desc || "").replace(/\s-\s\d+\/\d+$/, "").trim();
     lines.push({
       note: true,
       description:
-        `${m.machine_desc}` +
+        `${model}` +
         (serial ? `, S/N: ${serial}` : "") +
         `, S/S: ${slip.slip_number}${who} - ${pos}/${total}`,
     });
@@ -577,7 +606,7 @@ function searchSlips(query = "", scope = "all", limit = 20) {
 }
 
 const slips = {
-  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setMachineComment, setMachineLabour, setSlipStatus, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, setSlipStatus, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, closeSlip,
 };
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };

@@ -1120,6 +1120,13 @@ select {
 
 /* The WhatsApp send button, once it has succeeded. Deliberately looks spent
    rather than clickable, so nobody sends the same slip twice. */
+/* Editing the description of a sundry part (A5-A8, MISC). */
+.desc-edit {
+  border: none; background: transparent; padding: 0 4px; cursor: pointer;
+  color: var(--primary); line-height: 0; vertical-align: -2px;
+}
+.desc-edit svg { width: 13px; height: 13px; }
+
 /* Choosing which machines go onto a Sales Order. */
 .conv-row {
   display: flex; align-items: flex-start; gap: 11px; padding: 11px 12px;

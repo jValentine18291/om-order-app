@@ -97,6 +97,22 @@ const STAFF = [
   { id: "alvin",     name: "Alvin",       group: "admin" },
 ];
 
+// The initials recorded against a part. The four technicians keep the codes
+// already on every record they have ever made (WJ, XL, KM, R) - changing those
+// would divorce new work from old. Anyone else gets the first letter of each
+// part of their name, so Kee Seng is KS and John is J.
+function initialsFor(user) {
+  if (!user) return "";
+  if (user.tech) return user.tech;
+  return String(user.name || "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => [...w][0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 4);
+}
+
 const GROUP_LABEL = {
   sales: "Sales",
   purchaser: "Purchaser",
@@ -1239,21 +1255,13 @@ function openMachineModal(machineId) {
   session.machineId = machineId;
   session.pendingParts = [];
 
-  // Phones are personal, so a technician does not need to say who they are on
-  // every machine - the app already knows. Anyone else with access to this
-  // screen (an Admin) has no technician code, so they still pick one, and the
-  // part is recorded against the technician who did the work rather than
-  // whoever happened to key it in.
+  // Whoever opens the machine is the person working on it, so there is nothing
+  // to ask. Technicians keep their long-standing codes; anyone else is recorded
+  // by their initials.
   const me = getUser();
-  if (me && me.tech) {
-    session.technician = me.tech;
-    $("os-tech").value = me.tech;
-    $("os-tech-field").style.display = "none";
-  } else {
-    session.technician = "";
-    $("os-tech").value = "";
-    $("os-tech-field").style.display = "block";
-  }
+  session.technician = initialsFor(me);
+  $("os-tech").value = session.technician;
+  $("os-tech-field").style.display = "none";
   $("os-entry").style.display = "none";
   const m = currentMachine();
   $("mm-title").textContent = m ? m.machine_desc : "Machine";
@@ -1383,8 +1391,8 @@ async function saveCurrentComment() {
 // agree, but there is no reason to show someone a code for their own name.
 function technicianLabel() {
   const me = getUser();
-  if (me && me.tech && me.tech === session.technician) return me.name;
-  const other = STAFF.find((u) => u.tech && u.tech === session.technician);
+  if (me && initialsFor(me) === session.technician) return me.name;
+  const other = STAFF.find((u) => initialsFor(u) === session.technician);
   return other ? other.name : session.technician;
 }
 
@@ -1431,14 +1439,31 @@ async function addByCode(code) {
     if (existing) {
       existing.quantity += 1;
     } else {
+      let description = item.description;
+      // The moment to name one of these is now, while the part is in hand -
+      // not later from a list of identical "SPARE PARTS" lines.
+      if (isFreeTextPart(item.item_code)) {
+        const typed = prompt(
+          `${item.item_code}
+
+What is this part? It will appear on the Sales Order.`,
+          ""
+        );
+        if (typed === null) return;                  // changed their mind
+        if (typed.trim()) description = typed.trim();
+      }
       session.pendingParts.push({
         item_code: item.item_code,
-        description: item.description,
+        description,
         uom: item.uom,
         unit_price: item.unit_price,
         quantity: 1,
         technician: session.technician,
       });
+      toast(`Added ${description} — tap Save when done`, "ok");
+      renderMachineParts();
+      updateSlipFooter();
+      return;
     }
     toast(`Added ${item.description} — tap Save when done`, "ok");
     renderMachineParts();
@@ -1463,11 +1488,38 @@ async function refreshSlip() {
   }
 }
 
+const PENCIL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17.5 17.5 3a2.1 2.1 0 0 1 3 3L6 20.5 2 21z"/></svg>';
 const TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6M14 11v6"/></svg>';
 
 function currentMachine() {
   if (!session.slip) return null;
   return session.slip.machines.find((m) => m.id === session.machineId) || null;
+}
+
+// The A5-A8 and MISC codes stand in for something not really in the catalogue.
+// The code is right for the accounts; what the part actually was is only known
+// to whoever is holding it.
+function isFreeTextPart(itemCode) {
+  const code = String(itemCode || "").trim().toUpperCase();
+  return /^A[5-8]\b/.test(code) || code.startsWith("MISC");
+}
+
+async function editPartDescription(partId, current) {
+  const text = prompt("What is this part? It will appear on the Sales Order.", current || "");
+  if (text === null) return;
+  const clean = text.trim();
+  if (!clean) { toast("A description is required.", "err"); return; }
+  try {
+    await api(`/api/parts/${partId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ description: clean }),
+    });
+    await refreshSlip();
+    renderMachineParts();
+  } catch (e) {
+    toast(e.message, "err");
+  }
 }
 
 function renderMachineParts() {
@@ -1527,7 +1579,11 @@ function renderMachineParts() {
     el.innerHTML = `
       <div class="head">
         <div class="info">
-          <div class="desc">${escapeHtml(p.description)}</div>
+          <div class="desc">${escapeHtml(p.description)}${
+            isFreeTextPart(p.item_code)
+              ? ` <button type="button" class="desc-edit" data-desc="${p.id}" aria-label="Edit description">${PENCIL}</button>`
+              : ""
+          }</div>
           <div class="sku mono">${escapeHtml(p.item_code)} · ${escapeHtml(p.technician || "")}</div>
           ${noPrice ? `<div class="no-price-tag">No price — enter one</div>` : ""}
         </div>
@@ -2923,6 +2979,14 @@ $("machine-parts").addEventListener("click", (e) => {
     else if (pdec) p.quantity = Math.max(1, p.quantity - 1);
     renderMachineParts();
     updateSlipFooter();
+    return;
+  }
+  const descBtn = e.target.closest("[data-desc]");
+  if (descBtn) {
+    const id = Number(descBtn.dataset.desc);
+    const m = currentMachine();
+    const p = m && m.parts.find((x) => x.id === id);
+    editPartDescription(id, p ? p.description : "");
     return;
   }
   const del = e.target.closest("[data-del]");

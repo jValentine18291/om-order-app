@@ -774,7 +774,8 @@ app.post("/api/machines/:machineId/parts", async (req, res) => {
   }
 });
 
-// Update a part line: quantity (0 removes) and/or unit_price
+// Update a part line: quantity (0 removes), unit_price, and - for the A5-A8
+// and MISC codes only - the description.
 app.patch("/api/parts/:partId", async (req, res) => {
   try {
     const partId = Number(req.params.partId);
@@ -785,6 +786,9 @@ app.patch("/api/parts/:partId", async (req, res) => {
     }
     if (body.quantity !== undefined) {
       result = await data.slips.setPartQuantity(partId, body.quantity);
+    }
+    if (body.description !== undefined) {
+      result = await data.slips.setPartDescription(partId, body.description);
     }
     res.json(result);
   } catch (err) {
