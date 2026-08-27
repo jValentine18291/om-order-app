@@ -3,7 +3,7 @@
 // Bump CACHE on every deploy (v7 -> v8 -> ...). The new worker deletes old
 // caches in activate, and core files are fetched network-first so a normal
 // reopen always gets the latest code. Cache is only used as an offline fallback.
-const CACHE = "om-order-v99";
+const CACHE = "om-order-v100";
 
 // IPL artwork lives in its own cache, deliberately NOT version-stamped.
 // They are large, they are already fetched only when a section is opened, and
@@ -56,6 +56,13 @@ self.addEventListener("fetch", (e) => {
   // Never cache API calls — always hit the network for live data.
   if (url.pathname.startsWith("/api/")) return;
 
+  // The certificate has to be fetched by the browser itself, not through here.
+  // A service worker's own fetch does not inherit the exception you tap through
+  // on the warning page, so on a self-signed site every fetch made in here
+  // fails — which is exactly why the icon never arrives, and why asking for
+  // /cert.pem through the worker failed instead of downloading.
+  if (url.pathname === "/cert.pem") return;
+
   // Only manage GET requests; let the browser handle the rest normally.
   if (e.request.method !== "GET") return;
 
@@ -75,7 +82,13 @@ self.addEventListener("fetch", (e) => {
               }
               return res;
             })
-            .catch(() => hit);
+            // Same trap as below: with nothing cached and the network gone,
+            // returning `hit` returns undefined.
+            .catch(
+              () =>
+                hit ||
+                new Response("", { status: 504, statusText: "Offline" })
+            );
           return hit || fresh;
         })
       )
@@ -95,6 +108,20 @@ self.addEventListener("fetch", (e) => {
         }
         return res;
       })
-      .catch(() => caches.match(e.request))
+      // A cache miss here used to resolve to undefined, and respondWith takes
+      // that as a failure — Safari then reports "Returned response is null",
+      // which says nothing about what went wrong. Answer with a real response
+      // so the browser shows an ordinary error instead.
+      .catch(() =>
+        caches.match(e.request).then(
+          (hit) =>
+            hit ||
+            new Response("Offline, and this page is not in the cache.", {
+              status: 504,
+              statusText: "Offline",
+              headers: { "Content-Type": "text/plain; charset=utf-8" },
+            })
+        )
+      )
   );
 });
