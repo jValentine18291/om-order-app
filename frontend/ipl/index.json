@@ -18,6 +18,15 @@
   "parts": 112
  },
  {
+  "id": "am450x",
+  "name": "Husqvarna Automower 450X",
+  "short": "Automower 450X",
+  "brand": "Husqvarna",
+  "category": "Robotic Mower",
+  "figures": 9,
+  "parts": 257
+ },
+ {
   "id": "am550epos",
   "name": "Husqvarna Automower 550 EPOS",
   "short": "Automower 550 EPOS",

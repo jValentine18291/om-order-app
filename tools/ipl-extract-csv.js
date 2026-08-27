@@ -162,12 +162,23 @@ async function main() {
         search: searchCode(article),
       });
       // A part called out twice gets a hotspot per box, both selecting the row.
+      //
+      // But several PARTS routinely share one callout: the 450X lists three
+      // BODY KITs at Ref 1 — grey, white and orange — each carrying the same
+      // box, and the Chassis Lower's Ref 1 is four parts across two positions,
+      // which came out as eight hotspots stacked in pairs. They select the same
+      // key and so behave identically; the viewer just built eight buttons on
+      // top of each other where two would do. One per printed callout.
       for (const [x1, y1, x2, y2] of parseBoxes(r[iCoord])) {
-        hotspots.push({
+        const spot = {
           key,
           x: +(((x1 + x2) / 2 / size.width) * 100).toFixed(3),
           y: +(((y1 + y2) / 2 / size.height) * 100).toFixed(3),
-        });
+        };
+        const already = hotspots.some(
+          (h) => h.key === spot.key && h.x === spot.x && h.y === spot.y
+        );
+        if (!already) hotspots.push(spot);
       }
     }
 
