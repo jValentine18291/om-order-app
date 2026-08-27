@@ -588,6 +588,14 @@
         <div class="total"><div class="val" id="mm-total">$0.00</div></div>
       </div>
       <button class="btn-primary" id="mm-save" style="margin-top:12px;">Save</button>
+
+      <!-- Quoting, for this machine on its own. A slip with two machines is
+           routinely half finished, and the slip-level button below covers the
+           other case: everything ready together. -->
+      <div class="mm-quote" id="mm-quote-row" style="display:none">
+        <div class="mm-quote-state" id="mm-quote-state"></div>
+        <button type="button" class="btn-secondary" id="mm-quote-btn">Send this machine for quoting</button>
+      </div>
     </div>
   </div>
 

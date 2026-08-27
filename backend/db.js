@@ -130,6 +130,7 @@ db.exec(`
     so_number      TEXT    DEFAULT '',      -- which Sales Order it went onto
     repair_comment TEXT    DEFAULT '',
     labour_charge  REAL    DEFAULT 0,     -- technician labour billed for this machine
+    quote_status   TEXT    DEFAULT '',    -- '' | NEED_QUOTE | QUOTED, per machine
     FOREIGN KEY (slip_id) REFERENCES service_slips(id) ON DELETE CASCADE
   );
 
@@ -258,6 +259,31 @@ try {
   }
 } catch (e) {
   console.error("[db] serial_no migration check failed:", e.message);
+}
+
+// Migration: quoting is per machine, not per slip. A slip with two machines is
+// routinely half finished - one repaired and ready to price, one still in
+// pieces - and the slip-level status could not say so.
+// Blank means "no quote needed"; the two values otherwise are NEED_QUOTE and
+// QUOTED.
+//
+// Slips already waiting for a quote have their machines filled in to match. A
+// slip marked before this existed meant every machine on it, so leaving them
+// blank would show a slip waiting to be quoted with nothing on it waiting.
+try {
+  const cols = db.prepare("PRAGMA table_info(slip_machines)").all();
+  if (!cols.some((c) => c.name === "quote_status")) {
+    db.exec("ALTER TABLE slip_machines ADD COLUMN quote_status TEXT DEFAULT ''");
+    const back = db.prepare(
+      `UPDATE slip_machines SET quote_status = (
+         SELECT status FROM service_slips WHERE id = slip_machines.slip_id
+       )
+       WHERE slip_id IN (SELECT id FROM service_slips WHERE status IN ('NEED_QUOTE','QUOTED'))`
+    ).run();
+    console.log(`[db] migrated: added quote_status to slip_machines (${back.changes} existing machine(s) filled in)`);
+  }
+} catch (e) {
+  console.error("[db] quote_status migration check failed:", e.message);
 }
 
 // Migration: add labour_charge to slip_machines if an older DB lacks it.

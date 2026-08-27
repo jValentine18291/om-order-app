@@ -658,6 +658,45 @@ app.patch("/api/slips/:slip/status", async (req, res) => {
   }
 });
 
+// Send one machine on a slip for quoting, or take it back. A slip with two
+// machines is often half done, and marking the whole slip either quoted work
+// that had not happened or held back work that had.
+//
+// The slip's own status follows the machines, so the sales list and the push
+// below carry on working unchanged.
+app.patch("/api/slips/:slip/machines/:id/quote", async (req, res) => {
+  try {
+    const before = await data.slips.getSlip(req.params.slip);
+    const wanted = (req.body || {}).quote_status;
+    const slip = await data.slips.setMachineQuoteStatus(
+      req.params.slip, Number(req.params.id), wanted
+    );
+    res.json(slip);
+
+    // Only when this machine has just been sent for quoting - not when the
+    // slip happened to be in that state already because another machine was
+    // waiting, which would tell sales the same thing twice.
+    const was = ((before && before.machines) || []).find((m) => m.id === Number(req.params.id));
+    const isNew = String(wanted || "").toUpperCase() === "NEED_QUOTE" &&
+                  (!was || was.quote_status !== "NEED_QUOTE");
+    if (isNew) {
+      const m = (slip.machines || []).find((x) => x.id === Number(req.params.id));
+      const waiting = (slip.machines || []).filter((x) => x.quote_status === "NEED_QUOTE").length;
+      const total = (slip.machines || []).length;
+      push.notify(pushDb, QUOTE_NOTIFY_ROLES, {
+        title: "Ready to quote",
+        body: `${slip.slip_number} · ${slip.company} · ${m ? m.machine_desc : "1 machine"}` +
+              (total > 1 ? ` (${waiting} of ${total})` : ""),
+        slip: slip.slip_number,
+      }).catch((e) => console.error("[push] notify failed:", e.message));
+    }
+  } catch (err) {
+    if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
+    console.error("[PATCH /api/slips/:slip/machines/:id/quote]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to update machine" });
+  }
+});
+
 // Push an app order into AutoCount as a Sales Order. Kept separate from the
 // conversion itself so a failure here never undoes work the workshop has
 // already done - the slip stays converted and the push can be retried.

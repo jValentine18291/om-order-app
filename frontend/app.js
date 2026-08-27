@@ -1241,11 +1241,17 @@ function renderSlipScreen() {
     let total = labour; for (const p of parts) total += p.unit_price * p.quantity;
     const hasComment = !!String(m.repair_comment || "").trim();
     const worked = parts.length > 0 || hasComment || labour > 0;
+    // Quoting is per machine, so the state has to be visible per machine -
+    // otherwise the only way to find out which one is waiting is to open each.
+    const q = m.quote_status || "";
+    const qTag = q === "NEED_QUOTE" ? `<span class="machine-quote mq-need">Waiting to quote</span>`
+               : q === "QUOTED"     ? `<span class="machine-quote mq-done">Quoted</span>`
+               : "";
     return `
       <button type="button" class="machine-btn ${worked ? "machine-btn-worked" : ""}" data-machine="${m.id}">
         <div class="machine-btn-top">
           <strong>${escapeHtml(m.machine_desc)}</strong>
-          ${worked ? `<span class="machine-tick">✓</span>` : `<span class="machine-untouched">Need Repair</span>`}
+          ${qTag || (worked ? `<span class="machine-tick">✓</span>` : `<span class="machine-untouched">Need Repair</span>`)}
         </div>
         <div class="machine-btn-sub">${m.serial_no ? "S/N " + escapeHtml(m.serial_no) + " · " : ""}${parts.length} part${parts.length === 1 ? "" : "s"}${hasComment ? " · has comment" : ""}${total > 0 ? " · " + money(total) : ""}</div>
       </button>`;
@@ -1277,6 +1283,7 @@ function openMachineModal(machineId) {
   loadCommentForCurrentMachine();
   loadLabourForCurrentMachine();
   renderMachineParts();
+  renderMachineQuoteRow();
   updateSlipFooter();
   $("machine-modal").style.display = "flex";
   document.body.style.overflow = "hidden";
@@ -1688,6 +1695,75 @@ function updateSlipFooter() {
   $("os-create-so").disabled = !billable || !machinesLeft || st === "CLOSED" || st === "CONVERTED";
 }
 
+// ---- Quoting one machine ----------------------------------------------------
+// A technician who has finished one machine on a two-machine slip can hand that
+// one over to be priced without claiming the other is done. The slip's own
+// buttons still cover "all of them together".
+function renderMachineQuoteRow() {
+  const row = $("mm-quote-row");
+  if (!row) return;
+  const m = currentMachine();
+  const slipStatus = session.slip ? session.slip.status : "";
+  // Once a slip is fully repaired, converted or closed it has left quoting
+  // behind, and the buttons would only offer a state it cannot go back to.
+  const live = slipStatus === "OPEN" || slipStatus === "IN_PROGRESS" ||
+               slipStatus === "NEED_QUOTE" || slipStatus === "QUOTED";
+  if (!m || !live) { row.style.display = "none"; return; }
+
+  const q = m.quote_status || "";
+  const state = $("mm-quote-state");
+  const btn = $("mm-quote-btn");
+  row.style.display = "flex";
+
+  if (q === "NEED_QUOTE") {
+    state.innerHTML = `<span class="machine-quote mq-need">Waiting to quote</span> Sales have been told about this machine.`;
+    btn.textContent = "Undo — still repairing";
+    btn.dataset.next = "";
+  } else if (q === "QUOTED") {
+    state.innerHTML = `<span class="machine-quote mq-done">Quoted</span> Already sent to the customer.`;
+    btn.textContent = "Send for quoting again";
+    btn.dataset.next = "NEED_QUOTE";
+  } else {
+    state.textContent = "This machine has not been sent for quoting.";
+    btn.textContent = "Send this machine for quoting";
+    btn.dataset.next = "NEED_QUOTE";
+  }
+}
+
+$("mm-quote-btn").addEventListener("click", async () => {
+  const m = currentMachine();
+  if (!m || !session.slipNumber) return;
+  const next = $("mm-quote-btn").dataset.next || "";
+
+  // Anything scanned but not yet saved would otherwise be missing from the very
+  // quote this is asking for.
+  if (next === "NEED_QUOTE" && session.pendingParts.length) {
+    try {
+      await commitPendingParts();
+      await saveCurrentLabour();
+      await saveCurrentComment();
+    } catch (e) { toast(e.message, "err"); return; }
+  }
+
+  const btn = $("mm-quote-btn");
+  btn.disabled = true;
+  try {
+    await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/machines/${m.id}/quote`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ quote_status: next }),
+    });
+    await refreshSlip();
+    renderMachineParts();
+    renderMachineQuoteRow();
+    updateSlipFooter();
+    toast(next === "NEED_QUOTE" ? "Sent for quoting" : "Taken back", "ok");
+  } catch (e) {
+    toast(e.message, "err");
+  }
+  btn.disabled = false;
+});
+
 // ---- Slip status UI (Open Service) ------------------------------------------
 // Shows the current status as a badge next to the slip number, and decides
 // which manual status buttons apply:
@@ -1704,10 +1780,21 @@ function renderSlipStatusUI() {
   }
   const wrap = $("os-status-actions");
   if (!wrap) return;
-  const showQuote = status === "OPEN" || status === "IN_PROGRESS";
+  const machines = (session.slip && session.slip.machines) || [];
+  const live = status === "OPEN" || status === "IN_PROGRESS" ||
+               status === "NEED_QUOTE" || status === "QUOTED";
+  // Machines can now be sent for quoting one at a time, so this button is the
+  // "all of them together" case: offered while any machine is still not
+  // waiting, including on a slip already part-way through quoting.
+  const someLeft = machines.some((m) => (m.quote_status || "") !== "NEED_QUOTE");
+  const showQuote = live && someLeft;
   const showQuoted = status === "NEED_QUOTE";
-  const showNoQuote = status === "OPEN" || status === "IN_PROGRESS" || status === "NEED_QUOTE" || status === "QUOTED";
-  $("os-need-quote").style.display = showQuote ? "inline-flex" : "none";
+  const showNoQuote = live;
+  const quoteBtn = $("os-need-quote");
+  quoteBtn.textContent = machines.length > 1
+    ? (status === "NEED_QUOTE" ? "Quote the rest too" : "Quote all machines")
+    : "Need to Quote";
+  quoteBtn.style.display = showQuote ? "inline-flex" : "none";
   $("os-mark-quoted").style.display = showQuoted ? "inline-flex" : "none";
   $("os-no-quote").style.display = showNoQuote ? "inline-flex" : "none";
   wrap.style.display = (showQuote || showQuoted || showNoQuote) ? "flex" : "none";
@@ -2093,7 +2180,9 @@ function renderSlipDetail(slip) {
 
     html += `
       <div class="vs-machine">
-        <div class="vs-machine-name">${escapeHtml(m.machine_desc)}</div>
+        <div class="vs-machine-name">${escapeHtml(m.machine_desc)}${
+          m.quote_status === "NEED_QUOTE" ? ` <span class="machine-quote mq-need">Waiting to quote</span>`
+        : m.quote_status === "QUOTED"     ? ` <span class="machine-quote mq-done">Quoted</span>` : ""}</div>
         ${m.serial_no ? `<div class="vs-machine-serial">S/N ${escapeHtml(m.serial_no)}</div>` : ""}`;
 
     if (m.repair_comment) {
@@ -2883,7 +2972,12 @@ async function enterNeedToQuote() {
       return;
     }
     wrap.innerHTML = rows.map((s) => {
-      const machines = (s.machines || []).length;
+      const all = s.machines || [];
+      // Machines are quoted one at a time now, so the count on its own would be
+      // misleading: two machines, one waiting, reads as two to price.
+      const waiting = all.filter((m) => m.quote_status === "NEED_QUOTE");
+      const list = (waiting.length ? waiting : all).map((m) => m.machine_desc);
+      const machines = all.length;
       const created = formatDate(s.created_at);
       return `
       <button type="button" class="slip-card" data-slip="${escapeAttr(s.slip_number)}">
@@ -2892,7 +2986,9 @@ async function enterNeedToQuote() {
           <span class="vs-status vs-NEED_QUOTE">Need to Quote</span>
         </div>
         <div class="slip-card-co">${escapeHtml(s.company)}</div>
-        <div class="slip-card-sub">${machines} machine${machines === 1 ? "" : "s"}${created ? " · " + escapeHtml(created) : ""}</div>
+        <div class="slip-card-sub">${escapeHtml(list.join(", "))}${
+          waiting.length && waiting.length < machines ? ` · ${waiting.length} of ${machines}` : ""
+        }${created ? " · " + escapeHtml(created) : ""}</div>
       </button>`;
     }).join("");
     // Straight into View Slips, which already lists every part with its price

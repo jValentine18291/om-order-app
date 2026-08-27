@@ -632,6 +632,25 @@ select {
 .machine-untouched { font-size: .75rem; font-weight: 600; color: #A85B00; background: #FDF0E0; padding: 4px 10px; border-radius: 999px; }
 .machine-btn-sub { margin-top: 4px; font-size: .82rem; color: var(--ink-faint); }
 
+/* Where a machine stands on quoting. Shown per machine, on the slip list and
+   in View Slips, because a slip is routinely half finished. */
+.machine-quote {
+  font-size: .75rem; font-weight: 700; padding: 4px 10px; border-radius: 999px;
+  white-space: nowrap;
+}
+.mq-need { color: #8A4B00; background: #FFF1DC; }
+.mq-done { color: #1B7A42; background: #E7F5EC; }
+
+/* The per-machine quote control, under Save in the machine modal. */
+.mm-quote {
+  margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line, #eef1f3);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.mm-quote-state {
+  font-size: .85rem; color: var(--ink-faint);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+
 /* ---- Machine modal ---- */
 .modal-overlay {
   position: fixed; inset: 0;

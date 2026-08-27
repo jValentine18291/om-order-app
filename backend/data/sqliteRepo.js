@@ -244,7 +244,7 @@ function listSlips(statusFilter = "active") {
     rows = db.prepare("SELECT * FROM service_slips WHERE status != 'CLOSED' ORDER BY slip_number").all();
   }
   // Attach machine list (lightweight — descriptions only) for dropdown display.
-  const getMachines = db.prepare("SELECT id, machine_desc FROM slip_machines WHERE slip_id = ?");
+  const getMachines = db.prepare("SELECT id, machine_desc, quote_status FROM slip_machines WHERE slip_id = ?");
   for (const r of rows) r.machines = getMachines.all(r.id);
   return rows;
 }
@@ -614,6 +614,21 @@ function setSlipStatus(slipNumber, status) {
     const e = new Error("Slip is already fully repaired."); e.status = 400; throw e;
   }
   db.prepare("UPDATE service_slips SET status = ? WHERE id = ?").run(s, slip.id);
+
+  // Keep the machines in step, so the slip-level buttons mean "all of them"
+  // and the per-machine marks below never disagree with the slip's own status.
+  //   Need to Quote   -> every machine is waiting
+  //   Mark as Quoted  -> everything that was waiting has now been quoted; a
+  //                      machine still being repaired is left alone, so it can
+  //                      be sent for quoting on its own later
+  //   Close w/o Quote -> nothing is waiting any more
+  if (s === "NEED_QUOTE") {
+    db.prepare("UPDATE slip_machines SET quote_status = 'NEED_QUOTE' WHERE slip_id = ?").run(slip.id);
+  } else if (s === "QUOTED") {
+    db.prepare("UPDATE slip_machines SET quote_status = 'QUOTED' WHERE slip_id = ? AND quote_status = 'NEED_QUOTE'").run(slip.id);
+  } else if (s === "IN_PROGRESS") {
+    db.prepare("UPDATE slip_machines SET quote_status = '' WHERE slip_id = ?").run(slip.id);
+  }
   return getSlip(slipNumber);
 }
 
@@ -649,14 +664,67 @@ function searchSlips(query = "", scope = "all", limit = 20) {
   const hasMore = rows.length > cap;
   const trimmed = hasMore ? rows.slice(0, cap) : rows;
 
-  const getMachines = db.prepare("SELECT id, machine_desc FROM slip_machines WHERE slip_id = ?");
+  const getMachines = db.prepare("SELECT id, machine_desc, quote_status FROM slip_machines WHERE slip_id = ?");
   for (const r of trimmed) r.machines = getMachines.all(r.id);
 
   return { results: trimmed, hasMore };
 }
 
+// ---- Quoting, per machine ---------------------------------------------------
+// A slip with two machines is routinely half finished: one repaired and ready
+// to price, one still in pieces. Marking the whole slip was the only thing on
+// offer, so sales either quoted work that was not done or waited for a machine
+// that had nothing to do with the one they could have priced.
+//
+// The slip's own status is still kept in step, because everything else reads it
+// - the sales list, the push, Open Service. It follows the machines rather than
+// being set directly: NEED_QUOTE while any machine wants a quote, and settling
+// afterwards to QUOTED if any were, or back to IN_PROGRESS if the marks were
+// simply cleared.
+const MACHINE_QUOTE_STATES = new Set(["NEED_QUOTE", "QUOTED", ""]);
+
+function setMachineQuoteStatus(slipNumber, machineId, status) {
+  const s = String(status === undefined || status === null ? "" : status).toUpperCase();
+  if (!MACHINE_QUOTE_STATES.has(s)) { const e = new Error("Invalid quote status."); e.status = 400; throw e; }
+
+  const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
+  if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
+  if (slip.status === "CLOSED") { const e = new Error("Slip is already closed."); e.status = 400; throw e; }
+
+  const machine = db.prepare("SELECT * FROM slip_machines WHERE id = ? AND slip_id = ?").get(machineId, slip.id);
+  if (!machine) { const e = new Error("Machine not found on this slip."); e.status = 404; throw e; }
+
+  db.prepare("UPDATE slip_machines SET quote_status = ? WHERE id = ?").run(s, machine.id);
+  syncSlipQuoteStatus(slip.id);
+  return getSlip(slipNumber);
+}
+
+function syncSlipQuoteStatus(slipId) {
+  const slip = db.prepare("SELECT * FROM service_slips WHERE id = ?").get(slipId);
+  // A slip that is finished, converted or closed has left quoting behind; its
+  // status means something else now and must not be rewritten.
+  if (!slip || ["ALL_REPAIRED", "CONVERTED", "CLOSED"].includes(slip.status)) return;
+
+  const counts = db.prepare(
+    `SELECT
+       SUM(CASE WHEN quote_status = 'NEED_QUOTE' THEN 1 ELSE 0 END) AS needing,
+       SUM(CASE WHEN quote_status = 'QUOTED'     THEN 1 ELSE 0 END) AS quoted
+     FROM slip_machines WHERE slip_id = ?`
+  ).get(slipId);
+
+  const next = counts.needing > 0 ? "NEED_QUOTE"
+             : counts.quoted  > 0 ? "QUOTED"
+             : "IN_PROGRESS";
+  // Undoing the only mark on an untouched slip leaves it OPEN. "In Progress"
+  // would be a claim that work has started, which nothing here establishes.
+  if (next === "IN_PROGRESS" && slip.status === "OPEN") return;
+  if (next !== slip.status) {
+    db.prepare("UPDATE service_slips SET status = ? WHERE id = ?").run(next, slipId);
+  }
+}
+
 const slips = {
-  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, setSlipStatus, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, setSlipStatus, setMachineQuoteStatus, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, closeSlip,
 };
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };
