@@ -1606,3 +1606,18 @@ select {
 }
 /* No .vs-NEED_QUOTE here on purpose: the pill already has its colours further
    up, and a second rule this far down would quietly win and change them. */
+
+/* ---- "Tell me when one arrives" ---------------------------------------- */
+.push-row {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 14px 16px;
+  box-shadow: var(--shadow);
+}
+.push-row .push-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.push-row .push-txt strong { font-family: var(--display); font-size: 1rem; color: var(--ink); }
+.push-row .push-txt small { font-size: .82rem; color: var(--ink-soft); line-height: 1.4; }
+.push-row .push-btn {
+  flex: 0 0 auto; width: auto; min-height: 42px; padding: 0 16px;
+  font-size: .92rem;
+}

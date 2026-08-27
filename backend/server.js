@@ -59,6 +59,46 @@ function sendCertificate(_req, res) {
 app.get("/api/cert.pem", sendCertificate);
 app.get("/cert.pem", sendCertificate);
 
+// ---- Web push --------------------------------------------------------------
+// Telling sales, on their phone, that a repair is finished and waiting to be
+// priced. See backend/push.js for what it needs; DEVICE-SETUP.md for turning it
+// on per device.
+// Who hears about a slip needing a quote. Not the technicians - they are the
+// ones who just marked it.
+const QUOTE_NOTIFY_ROLES = ["sales", "purchaser", "admin"];
+
+const push = require("./push");
+const pushDb = require("./db");
+push.init(pushDb);
+
+// The public half of the signing key. A browser needs it to subscribe, and it
+// is public by definition - the private half never leaves the server.
+app.get("/api/push/key", (_req, res) => res.json({ key: push.publicKey }));
+
+app.post("/api/push/subscribe", (req, res) => {
+  try {
+    const { subscription, user_id, role } = req.body || {};
+    res.json(push.subscribe(pushDb, { subscription, user_id, role }));
+  } catch (err) {
+    res.status(err.status || 500).json({ error: err.message || "Could not subscribe" });
+  }
+});
+
+app.post("/api/push/unsubscribe", (req, res) => {
+  try {
+    res.json(push.unsubscribe(pushDb, (req.body || {}).endpoint));
+  } catch (err) {
+    res.status(err.status || 500).json({ error: err.message || "Could not unsubscribe" });
+  }
+});
+
+// How many devices would be told. Lets the app say "3 devices" rather than
+// leaving someone wondering whether it is on anywhere at all.
+app.get("/api/push/status", (_req, res) => {
+  res.json({ devices: push.countFor(pushDb, QUOTE_NOTIFY_ROLES) });
+});
+
+
 // ---- API: item lookup ------------------------------------------------------
 // Tolerant matching handled in the repository: a scanned "SZEN 140051111" also
 // matches "SZEN140051111" or "140051111".
@@ -588,6 +628,18 @@ app.patch("/api/slips/:slip/status", async (req, res) => {
   try {
     const slip = await data.slips.setSlipStatus(req.params.slip, (req.body || {}).status);
     res.json(slip);
+
+    // Answer first, notify after. A push takes a round trip to Google or Apple,
+    // and the technician who tapped the button should not wait for it - nor
+    // should their slip update fail if a push service is having a bad day.
+    if (slip && slip.status === "NEED_QUOTE") {
+      const machines = (slip.machines || []).length;
+      push.notify(pushDb, QUOTE_NOTIFY_ROLES, {
+        title: "Ready to quote",
+        body: `${slip.slip_number} · ${slip.company} · ${machines} machine${machines === 1 ? "" : "s"}`,
+        slip: slip.slip_number,
+      }).catch((e) => console.error("[push] notify failed:", e.message));
+    }
   } catch (err) {
     if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
     console.error("[PATCH /api/slips/:slip/status]", err);

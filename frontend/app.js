@@ -2872,6 +2872,7 @@ $("om-submit").addEventListener("click", async () => {
 // the list of them, so nothing sits waiting because nobody knew.
 async function enterNeedToQuote() {
   showScreen("quote");
+  renderPushRow();
   const wrap = $("q-list");
   wrap.innerHTML = `<div class="fp-loading">Loading…</div>`;
   try {
@@ -2926,6 +2927,152 @@ async function refreshQuoteCount() {
     badge.style.display = "none";
   }
 }
+
+// ---- Push notifications ----------------------------------------------------
+// Per device. A subscription belongs to one browser on one phone, so someone
+// with a phone and a tablet turns it on twice and is told on both.
+//
+// What has to be true for the button to do anything: HTTPS with a certificate
+// the device trusts, and on iOS the app added to the Home Screen, on 16.4 or
+// later. Safari tabs on iOS get nothing at all, so the row is hidden there
+// rather than offering something that cannot work.
+function pushSupported() {
+  return "serviceWorker" in navigator &&
+         "PushManager" in window &&
+         "Notification" in window;
+}
+
+function urlBase64ToUint8Array(base64) {
+  const padded = (base64 + "=".repeat((4 - (base64.length % 4)) % 4))
+    .replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(padded);
+  return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
+}
+
+// navigator.serviceWorker.ready never rejects and never times out: with no
+// worker registered it simply hangs for ever. Waiting on it before checking
+// anything else left the row stuck on its default text and the button dead to
+// the touch. Race it, so a worker that is not there yet reports as much.
+function swReady(ms = 4000) {
+  if (!("serviceWorker" in navigator)) return Promise.resolve(null);
+  return Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise((resolve) => setTimeout(() => resolve(null), ms)),
+  ]);
+}
+
+async function currentPushSubscription() {
+  if (!pushSupported()) return null;
+  const reg = await swReady();
+  return reg ? reg.pushManager.getSubscription() : null;
+}
+
+async function renderPushRow() {
+  const row = $("push-row");
+  if (!row) return;
+  if (!pushSupported()) { row.style.display = "none"; return; }
+  row.style.display = "flex";
+
+  const btn = $("push-toggle");
+  const sub = $("push-sub");
+
+  // Checked first, and without awaiting: it is the one answer that settles the
+  // row on its own, and it costs nothing to read.
+  if (Notification.permission === "denied") {
+    btn.style.display = "none";
+    sub.textContent = "Notifications are blocked for this site in the phone's settings";
+    return;
+  }
+  const existing = await currentPushSubscription();
+  btn.style.display = "";
+  btn.disabled = false;
+  if (existing) {
+    btn.textContent = "Turn off";
+    let others = "";
+    try {
+      const st = await api("/api/push/status");
+      others = st.devices ? ` · ${st.devices} device${st.devices === 1 ? "" : "s"} being told` : "";
+    } catch (_) {}
+    sub.textContent = "On for this device" + others;
+  } else {
+    btn.textContent = "Turn on";
+    sub.textContent = "Notify this device as soon as a technician finishes a repair";
+  }
+}
+
+async function togglePush() {
+  const btn = $("push-toggle");
+  btn.disabled = true;
+  try {
+    const reg = await swReady();
+    if (!reg) {
+      toast("The app is still starting up — try again in a moment", "err");
+      btn.disabled = false;
+      return;
+    }
+    const existing = await reg.pushManager.getSubscription();
+
+    if (existing) {
+      await api("/api/push/unsubscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ endpoint: existing.endpoint }),
+      }).catch(() => {});
+      await existing.unsubscribe();
+      toast("Notifications off for this device", "ok");
+    } else {
+      // Must be asked from a tap. iOS refuses outright otherwise, and Chrome
+      // holds it against the site.
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        toast(permission === "denied"
+          ? "Notifications blocked — allow them in the phone's settings"
+          : "Notifications not enabled", "err");
+        await renderPushRow();
+        return;
+      }
+      const { key } = await api("/api/push/key");
+      const subscription = await reg.pushManager.subscribe({
+        // Required, and the only value browsers accept: every push must show
+        // something. There is no silent background push here.
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(key),
+      });
+      await api("/api/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subscription: subscription.toJSON(),
+          user_id: (getUser() || {}).id || "",
+          role: getRole(),
+        }),
+      });
+      toast("Notifications on for this device", "ok");
+    }
+  } catch (e) {
+    toast(e.message || "Could not change notifications", "err");
+  }
+  await renderPushRow();
+}
+
+// Tapping a notification asks an already-open window to move, rather than
+// opening a second one.
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.addEventListener("message", (e) => {
+    if (e.data && e.data.type === "go" && e.data.screen === "quote") enterNeedToQuote();
+  });
+}
+
+// ...and a notification that opened the app cold arrives as ?go=quote.
+(function openFromNotification() {
+  try {
+    const go = new URLSearchParams(location.search).get("go");
+    if (go === "quote") {
+      // After the role has been read, or the screen is shown to nobody.
+      setTimeout(() => { if (getUser()) enterNeedToQuote(); }, 300);
+    }
+  } catch (_) {}
+})();
 
 // ---- Purchaser screen: pending reorder requests -----------------------------
 function enterPurchaser() {
@@ -3892,6 +4039,7 @@ async function renderIplStock(itemCode) {
 }
 
 $("ipl-order-more").addEventListener("click", () => openOrderModal(iplOrderPart));
+$("push-toggle").addEventListener("click", togglePush);
 
 function closeIplPart() {
   $("ipl-modal").style.display = "none";

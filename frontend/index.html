@@ -203,6 +203,15 @@
         <p class="eyebrow">Sales</p>
         <h2>Need to Quote</h2>
       </div>
+      <!-- Per device, not per person: turning it on here asks THIS phone for
+           permission. Hidden entirely where the browser cannot do it. -->
+      <div class="push-row" id="push-row" style="display:none;">
+        <div class="push-txt">
+          <strong>Tell me when one arrives</strong>
+          <small id="push-sub">Notify this device as soon as a technician finishes a repair</small>
+        </div>
+        <button type="button" class="btn-secondary push-btn" id="push-toggle">Turn on</button>
+      </div>
       <div id="q-list"></div>
     </section>
 

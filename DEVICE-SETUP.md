@@ -50,6 +50,23 @@ Remove the home-screen shortcut and add it again. iOS takes the icon at the
 moment you add it and never re-fetches, so a shortcut created before the
 certificate was trusted keeps its letter tile for ever.
 
+### 3. Turn on notifications (sales, purchaser, admin)
+
+Open **Need to Quote** and tap **Turn on** in the row at the top. The phone asks
+once; allow it.
+
+This is **per device**, not per person. Someone with a phone and a tablet turns
+it on in both places and is told on both. The row tells you how many devices are
+currently being notified, so you can see it took.
+
+On iOS this only works for the app **added to the Home Screen**, on iOS 16.4 or
+later. Open in a Safari tab, the row hides itself rather than offering a button
+that cannot work. Do step 2 first.
+
+If the row says notifications are blocked, that is the phone's own setting and
+the app cannot undo it: **Settings → Notifications → OM Service**, or in Safari
+**Settings → Safari → Notifications**.
+
 ---
 
 ## Android

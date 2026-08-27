@@ -3,7 +3,7 @@
 // Bump CACHE on every deploy (v7 -> v8 -> ...). The new worker deletes old
 // caches in activate, and core files are fetched network-first so a normal
 // reopen always gets the latest code. Cache is only used as an offline fallback.
-const CACHE = "om-order-v103";
+const CACHE = "om-order-v105";
 
 // IPL artwork lives in its own cache, deliberately NOT version-stamped.
 // They are large, they are already fetched only when a section is opened, and
@@ -125,5 +125,49 @@ self.addEventListener("fetch", (e) => {
             })
         )
       )
+  );
+});
+
+// ---- Push notifications ----------------------------------------------------
+// The worker is what receives these. The app itself is not running when one
+// arrives — the phone wakes this file, shows the notification, and goes back to
+// sleep.
+self.addEventListener("push", (e) => {
+  let d = { title: "OM Service", body: "", slip: "" };
+  try {
+    if (e.data) d = Object.assign(d, e.data.json());
+  } catch (_) {
+    // A push with no readable payload still deserves to be shown: a silent
+    // failure here is a notification the person never sees.
+    if (e.data) d.body = e.data.text();
+  }
+  e.waitUntil(
+    self.registration.showNotification(d.title, {
+      body: d.body,
+      icon: "./icon-192.png",
+      badge: "./icon-192.png",
+      // Replaces rather than stacks when the same slip is marked twice.
+      tag: d.slip ? `slip-${d.slip}` : "om-service",
+      renotify: true,
+      data: { slip: d.slip || "" },
+    })
+  );
+});
+
+// Tapping it should land on the list, not just open the app somewhere.
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const target = new URL("./index.html?go=quote", self.location).href;
+  e.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => {
+      // Reuse a window that is already open rather than piling up new ones.
+      for (const w of wins) {
+        if (w.url.startsWith(self.location.origin) && "focus" in w) {
+          w.postMessage({ type: "go", screen: "quote" });
+          return w.focus();
+        }
+      }
+      return self.clients.openWindow(target);
+    })
   );
 });
