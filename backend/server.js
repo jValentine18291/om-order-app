@@ -39,7 +39,15 @@ app.use(express.static(path.join(__dirname, "..", "frontend")));
 // This is the PUBLIC certificate, which every device already receives during
 // the TLS handshake. The private key stays where it is and is never served.
 // Content-Type is what makes iOS offer to install it rather than download it.
-app.get("/cert.pem", (_req, res) => {
+// Two addresses for the same file, and /api/cert.pem is the one that works on a
+// device already running the app. A service worker only steps aside for a path
+// it was written to ignore, and the copy installed on the iPad predates
+// /cert.pem — so it intercepts that address, its own fetch fails on the
+// untrusted certificate, and the page hangs. It cannot update itself out of
+// this either: replacing a worker means fetching a new copy, which fails the
+// same way. Every version ever shipped has ignored /api/, so that is the one
+// door left open.
+function sendCertificate(_req, res) {
   const certFile = path.join(__dirname, "cert.pem");
   if (!require("fs").existsSync(certFile)) {
     return res.status(404).type("text/plain").send("No certificate — this server is running over plain HTTP.");
@@ -47,7 +55,9 @@ app.get("/cert.pem", (_req, res) => {
   res.type("application/x-x509-ca-cert");
   res.setHeader("Content-Disposition", 'attachment; filename="om-service.pem"');
   res.sendFile(certFile);
-});
+}
+app.get("/api/cert.pem", sendCertificate);
+app.get("/cert.pem", sendCertificate);
 
 // ---- API: item lookup ------------------------------------------------------
 // Tolerant matching handled in the repository: a scanned "SZEN 140051111" also
