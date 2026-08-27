@@ -95,6 +95,11 @@
      "y": 36.176
     },
     {
+     "key": "44",
+     "x": 86.864,
+     "y": 37.45
+    },
+    {
      "key": "33",
      "x": 74.798,
      "y": 38.591
@@ -103,6 +108,11 @@
      "key": "11",
      "x": 24.8,
      "y": 40.684
+    },
+    {
+     "key": "46",
+     "x": 57.78,
+     "y": 42.884
     },
     {
      "key": "16",
@@ -118,6 +128,11 @@
      "key": "6",
      "x": 62.464,
      "y": 43.705
+    },
+    {
+     "key": "49",
+     "x": 52.664,
+     "y": 47.57
     },
     {
      "key": "12",
@@ -160,6 +175,11 @@
      "y": 58.005
     },
     {
+     "key": "45",
+     "x": 72.719,
+     "y": 55.972
+    },
+    {
      "key": "42",
      "x": 37.087,
      "y": 58.673
@@ -175,6 +195,11 @@
      "y": 63.008
     },
     {
+     "key": "48",
+     "x": 56.81,
+     "y": 64.71
+    },
+    {
      "key": "27",
      "x": 24.862,
      "y": 66.062
@@ -188,6 +213,11 @@
      "key": "19",
      "x": 24.862,
      "y": 70.958
+    },
+    {
+     "key": "47",
+     "x": 61.908,
+     "y": 66.61
     },
     {
      "key": "39",
@@ -660,50 +690,7 @@
      "qty": "1",
      "remarks": "",
      "search": "618915111"
-    }
-   ],
-   "sheets": 2,
-   "sheet": 1,
-   "label": "Fig.1 DRIVE UNIT (1/2)"
-  },
-  {
-   "id": "2",
-   "number": "1",
-   "title": "DRIVE UNIT",
-   "image": "bk3410fl-fig2.png",
-   "hotspots": [
-    {
-     "key": "44",
-     "x": 86.864,
-     "y": 37.45
     },
-    {
-     "key": "46",
-     "x": 57.78,
-     "y": 42.884
-    },
-    {
-     "key": "49",
-     "x": 52.664,
-     "y": 47.57
-    },
-    {
-     "key": "45",
-     "x": 72.719,
-     "y": 55.972
-    },
-    {
-     "key": "48",
-     "x": 56.81,
-     "y": 64.71
-    },
-    {
-     "key": "47",
-     "x": 61.908,
-     "y": 66.61
-    }
-   ],
-   "parts": [
     {
      "key": "44",
      "part_number": "848BC059L0",
@@ -765,15 +752,15 @@
      "search": "028010504"
     }
    ],
-   "sheets": 2,
-   "sheet": 2,
-   "label": "Fig.1 DRIVE UNIT (2/2)"
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 DRIVE UNIT"
   },
   {
-   "id": "3",
+   "id": "2",
    "number": "2",
    "title": "ACCESSORIES",
-   "image": "bk3410fl-fig3.png",
+   "image": "bk3410fl-fig2.png",
    "hotspots": [
     {
      "key": "19",
@@ -1333,10 +1320,10 @@
    "label": "Fig.2 ACCESSORIES"
   },
   {
-   "id": "4",
+   "id": "3",
    "number": "3",
    "title": "ENGINE G34L",
-   "image": "bk3410fl-fig4.png",
+   "image": "bk3410fl-fig3.png",
    "hotspots": [
     {
      "key": "34",
@@ -2006,10 +1993,10 @@
    "label": "Fig.3 ENGINE G34L"
   },
   {
-   "id": "5",
+   "id": "4",
    "number": "4",
    "title": "HOUSING, COIL, AIR CLEANER, RECOIL",
-   "image": "bk3410fl-fig5.png",
+   "image": "bk3410fl-fig4.png",
    "hotspots": [
     {
      "key": "20",
@@ -2649,10 +2636,10 @@
    "label": "Fig.4 HOUSING, COIL, AIR CLEANER, RECOIL"
   },
   {
-   "id": "6",
+   "id": "5",
    "number": "5",
    "title": "CARBURETOR",
-   "image": "bk3410fl-fig6.png",
+   "image": "bk3410fl-fig5.png",
    "hotspots": [
     {
      "key": "27",

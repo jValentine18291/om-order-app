@@ -299,6 +299,29 @@ function parseFigure(page, keys) {
   return spots;
 }
 
+// Is this the same drawing as that one? Compared through the callout numbers
+// printed on each — where they are and what they say — rather than the picture,
+// which cannot be compared without an image library and would differ anyway:
+// the two copies carry different page numbers in the footer.
+//
+// Needs a decent crop of callouts to be sure. A scanned drawing has none at
+// all, and two blank signatures would otherwise "match" and merge two figures
+// that have nothing to do with each other.
+function sameDrawing(a, b) {
+  if (!a || !b || a === b) return false;
+  const signature = (page) => {
+    const { width, height, words } = wordsForPage(page);
+    return words
+      .filter((w) => /^\d+[A-Z]?$/.test(w.text) && w.y2 < height - 55)
+      .map((w) => `${w.text}@${Math.round((w.x1 / width) * 200)},${Math.round((w.y1 / height) * 200)}`)
+      .sort()
+      .join(" ");
+  };
+  const sa = signature(a);
+  if (sa.split(" ").length < 8) return false;
+  return sa === signature(b);
+}
+
 // Where the drawing stops on a page it shares with its parts table, as a
 // percentage of page height. 100 when the drawing has the page to itself.
 function drawingLimit(page) {
@@ -352,6 +375,27 @@ for (let p = 1; p <= pageCount; p++) {
     // parts page, which is where the HT220-75 puts it.
     const head = (pending && pending.head) || heading || { number: String(figures.length + 1), title: "" };
     const rows = parseTable(p);
+
+    // Some books reprint one drawing across two parts tables, because the list
+    // is too long for a page: the G2200T's ENGINE PARTS appears twice, once for
+    // parts 1-41 and again for 42-49, and the BK3410's DRIVE UNIT does the
+    // same. Treated as two figures, half the numbers on each copy are visible
+    // but dead - tap 45 on the first and nothing happens, because 45 lives in
+    // the other one's table. Fold them back into the single figure the book
+    // means, so every number on the drawing works.
+    const prev = figures[figures.length - 1];
+    if (prev && prev.number === head.number && sameDrawing(prev.drawingPage, drawingPage)) {
+      prev.parts = prev.parts.concat(rows.map((r) => ({ ...r, search: searchCode(r.part_number) })));
+      const allKeys = new Set(prev.parts.map((r) => r.key));
+      prev.hotspots = prev.ocr
+        ? ocrCallouts(prev.drawingPage, [...allKeys], drawingLimit(prev.drawingPage))
+        : parseFigure(prev.drawingPage, allKeys);
+      console.log(`  Fig.${head.number} ${head.title}: +${rows.length} parts from a second table` +
+                  ` (same drawing) — now ${prev.parts.length} parts, ${prev.hotspots.length} hotspots`);
+      pending = null;
+      continue;
+    }
+
     const keys = new Set(rows.map((r) => r.key));
     let hotspots = parseFigure(drawingPage, keys);
     let ocr = false;
@@ -388,6 +432,9 @@ for (let p = 1; p <= pageCount; p++) {
       number: head.number,
       title: head.title || `Figure ${head.number}`,
       image: png,
+      // Kept only while the document is being walked, so a following table can
+      // ask whether it belongs to this same drawing. Stripped before writing.
+      drawingPage,
       // Recorded so the viewer can say so: on a scanned book the numbers were
       // read off the picture, and a few will be missing.
       ocr: ocr || undefined,
@@ -425,6 +472,8 @@ for (const f of figures) {
   seen[f.number] = (seen[f.number] || 0) + 1;
   f.sheet = seen[f.number];
   f.label = `Fig.${f.number} ${f.title}` + (f.sheets > 1 ? ` (${f.sheet}/${f.sheets})` : "");
+  // Only needed while walking the document, to spot a reprinted drawing.
+  delete f.drawingPage;
 }
 
 const model = {

@@ -32,7 +32,7 @@
   "short": "BK3410FL / FL-S",
   "brand": "Zenoah",
   "category": "Brushcutter",
-  "figures": 6,
+  "figures": 5,
   "parts": 198
  },
  {
@@ -52,6 +52,15 @@
   "category": "Pole Hedge Trimmer",
   "figures": 5,
   "parts": 172
+ },
+ {
+  "id": "g2200t",
+  "name": "Zenoah G2200T Chainsaw",
+  "short": "G2200T",
+  "brand": "Zenoah",
+  "category": "Chainsaw",
+  "figures": 6,
+  "parts": 219
  },
  {
   "id": "g3800",
