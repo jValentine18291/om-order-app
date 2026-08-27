@@ -3596,7 +3596,7 @@ async function openIplModel(id) {
   $("ipl-picker").style.display = "none";
   $("ipl-viewer").style.display = "";
   window.scrollTo({ top: 0 });
-  syncIplColumnHeight();
+  syncIplStageSize();
 }
 
 async function loadIplModel(id) {
@@ -3617,7 +3617,7 @@ async function loadIplModel(id) {
     b.addEventListener("click", () => showIplFigure(b.dataset.fig))
   );
   showIplFigure(ipl.model.figures[0].id);
-  syncIplColumnHeight();
+  syncIplStageSize();
   return true;
 }
 
@@ -3633,7 +3633,13 @@ function showIplFigure(id) {
 
   const canvas = $("ipl-canvas");
   canvas.querySelectorAll(".ipl-spot").forEach((s) => s.remove());
-  $("ipl-img").src = `./ipl/${fig.image}`;
+  const img = $("ipl-img");
+  // Size the stage once this drawing's own shape is known, and again on every
+  // figure: the G3800 turns landscape for its carburetor sheet, so the room a
+  // figure can fill is not settled until its image is there.
+  img.onload = syncIplStageSize;
+  img.src = `./ipl/${fig.image}`;
+  if (img.complete) syncIplStageSize();
 
   // One hotspot per printed callout — a part shown twice on the drawing gets
   // two, both selecting the same row.
@@ -3867,7 +3873,11 @@ function iplApply() {
   const stage = $("ipl-stage");
   const w = stage.clientWidth, h = stage.clientHeight;
   const maxX = 0, maxY = 0;
-  const minX = Math.min(0, w - w * iplView.k);
+  // Measure the canvas rather than assuming it fills the stage. On a tablet the
+  // stage is capped to the drawing's own shape, so the two can differ, and
+  // using the stage's width as the canvas's would have let the drawing be
+  // dragged clear of its own frame.
+  const minX = Math.min(0, w - c.offsetWidth * iplView.k);
   const minY = Math.min(0, h - c.offsetHeight * iplView.k);
   iplView.tx = Math.max(minX, Math.min(maxX, iplView.tx));
   iplView.ty = Math.max(minY, Math.min(maxY, iplView.ty));
@@ -4126,46 +4136,39 @@ function openSetPrice(tier, tierName) {
   });
 }
 
-// On a tablet the diagram and the parts list stand side by side, and both
-// should fill the screen exactly — the point of that layout is that the drawing
-// does not move while the list is scrolled, which fails the moment the page
-// itself can scroll.
+// On a tablet the diagram should be as large as the screen allows, and never
+// cropped to get there.
 //
-// The height cannot be a constant. What sits above the columns varies with the
-// model: fourteen figure tabs wrap onto three rows where four fit on one, and a
-// guess of 230px left the G3800 scrolling. So measure where the diagram
-// actually starts and give both columns the rest.
-function syncIplColumnHeight() {
+// The stage is a plain block whose canvas fills its width, so the drawing's
+// height follows from the width it is given. Work backwards: measure the room
+// left below the figure tabs, then set a width that puts the height just inside
+// it. The shape comes from the figure itself, because it varies — the G3800
+// prints its carburetor sheet landscape while every other page is portrait, and
+// a single assumed aspect would crop one or waste the screen on the other.
+function syncIplStageSize() {
   const viewer = $("ipl-viewer");
   const stage = $("ipl-stage");
-  if (!viewer || !stage) return;
-  if (!window.matchMedia("(min-width: 1000px)").matches || viewer.style.display === "none") {
-    viewer.style.removeProperty("--ipl-col-h");
+  const img = $("ipl-img");
+  if (!viewer || !stage || !img) return;
+
+  // Phones keep the layout they have; this is a tablet-and-up affordance.
+  if (!window.matchMedia("(min-width: 700px)").matches || viewer.style.display === "none") {
+    stage.style.removeProperty("max-width");
     return;
   }
-  // Document coordinates, so the answer does not depend on how far the page
-  // happens to be scrolled when this runs.
-  const top = stage.getBoundingClientRect().top + window.scrollY;
-  let h = Math.max(300, window.innerHeight - top - 34);
-  viewer.style.setProperty("--ipl-col-h", h + "px");
+  const aspect = img.naturalWidth && img.naturalHeight
+    ? img.naturalWidth / img.naturalHeight
+    : 0;
+  if (!aspect) return;   // called before the drawing loaded; onload calls again
 
-  // Then correct by what is actually left over. Padding, the grid's own row
-  // rounding and the figure-tab strip together came to six pixels more than the
-  // arithmetic predicted, and six pixels is enough to make the page scroll —
-  // which is the one thing this layout exists to prevent. Measuring the
-  // overflow is easier than predicting every contributor to it.
-  // Then correct by what is actually left over — padding and the grid's own row
-  // rounding are easier to measure than to predict. But only keep the
-  // correction if it helps: some of what makes the page taller than the window
-  // has nothing to do with these columns, and shrinking the drawing to chase it
-  // would give up screen for no gain.
-  const before = document.documentElement.scrollHeight - window.innerHeight;
-  if (before > 0) {
-    viewer.style.setProperty("--ipl-col-h", Math.max(300, h - before) + "px");
-    if (document.documentElement.scrollHeight - window.innerHeight >= before) {
-      viewer.style.setProperty("--ipl-col-h", h + "px");
-    }
-  }
+  // A share of the screen, not what happens to be left below the figure tabs.
+  // Measuring the leftover was the obvious way and gave a drawing no bigger
+  // than a phone's: fifteen wrapped tabs push the stage 680px down a 1180px
+  // screen, leaving it the scraps. The page may scroll to show the parts list —
+  // it does on a phone too — so the drawing is not owed a place above the fold.
+  const full = viewer.clientWidth;
+  stage.style.maxWidth =
+    Math.round(Math.min(full, window.innerHeight * 0.78 * aspect)) + "px";
 }
 
 // The IPL picker's brand headings pin themselves below the topbar, which needs
@@ -4178,5 +4181,5 @@ function syncTopbarHeight() {
   }
 }
 syncTopbarHeight();
-window.addEventListener("resize", () => { syncTopbarHeight(); syncIplColumnHeight(); });
-window.addEventListener("orientationchange", () => { syncTopbarHeight(); syncIplColumnHeight(); });
+window.addEventListener("resize", () => { syncTopbarHeight(); syncIplStageSize(); });
+window.addEventListener("orientationchange", () => { syncTopbarHeight(); syncIplStageSize(); });

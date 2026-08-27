@@ -3,7 +3,7 @@
 // Bump CACHE on every deploy (v7 -> v8 -> ...). The new worker deletes old
 // caches in activate, and core files are fetched network-first so a normal
 // reopen always gets the latest code. Cache is only used as an offline fallback.
-const CACHE = "om-order-v95";
+const CACHE = "om-order-v97";
 
 // IPL artwork lives in its own cache, deliberately NOT version-stamped.
 // They are large, they are already fetched only when a section is opened, and
