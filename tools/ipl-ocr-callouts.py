@@ -85,6 +85,15 @@ def read_one(crop, scale, psm):
     return best
 
 
+def enclosed(mask):
+    """How many holes a shape has — background regions it closes off entirely.
+    Padding with background first means the paper around the shape is one
+    region connected to the outside, so only true holes are counted."""
+    padded = np.pad(~mask, 1, constant_values=True)
+    _, n = ndimage.label(padded)
+    return n - 1
+
+
 def survey(png, keys):
     """One pass over the whole page, for the two things it is good at even
     though it merges neighbouring callouts: how tall a callout is on this
@@ -188,6 +197,15 @@ def callouts(pdf, page, keys, max_y=100.0):
         # first figure and confidence could not tell them apart.
         if w > h * 1.6 or w < h * 0.30:
             continue
+        # How many enclosed spaces the shape has. No character we accept has
+        # more than two — "8" has two, "0", "4", "6", "9", "A", "B", "D" have
+        # one or two, the rest none. A drawn part often has more: the screw head
+        # below callout 63 has three and read as "8", and a fitting beside
+        # callout 48 has four and read as "5". Both sat within every other
+        # measure, and both are single digits, which is where a false reading
+        # does real harm - it matches a key on its own.
+        if enclosed(blob) > 2:
+            continue
         glyphs.append([s[1].start, s[0].start, s[1].stop, s[0].stop, 1])
 
     # Group digits into numbers: same line, touching distance apart.
@@ -204,7 +222,15 @@ def callouts(pdf, page, keys, max_y=100.0):
     for g in glyphs:
         placed = False
         for grp in groups:
-            same_line = abs(g[1] - grp[1]) < med * 0.55
+            # Digits of one number are set on a shared baseline and their tops
+            # agree to within a tenth of a glyph height — measured across all
+            # four figures, 758 same-line pairs, none between 0.10 and 0.20.
+            # Two SEPARATE callouts standing side by side do not agree nearly
+            # so well: "54" and "51" sit 0.36 apart on Fig.2, and a tolerance
+            # of 0.55 let the "4" of 54 join the 51 beside it. That left "541",
+            # which matches no key and was dropped, and a widowed "5" — which
+            # does match a key, so callout 54 offered part 5 instead.
+            same_line = abs(g[1] - grp[1]) < med * 0.15
             # Height has to match, or a drawn part standing beside a number
             # gets taken for another digit: a small bolt beside callout 38
             # joined it, the crop read "383", and that callout was lost.
