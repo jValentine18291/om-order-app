@@ -229,6 +229,10 @@ function listSlips(statusFilter = "active") {
   } else if (statusFilter === "working") {
     // Open Service scope: still being worked on (not repaired, not closed)
     rows = db.prepare("SELECT * FROM service_slips WHERE status NOT IN ('ALL_REPAIRED', 'CONVERTED', 'CLOSED') ORDER BY slip_number").all();
+  } else if (statusFilter === "need_quote") {
+    // What the technicians have handed back for pricing. Oldest first: the one
+    // waiting longest is the one the customer has been waiting on.
+    rows = db.prepare("SELECT * FROM service_slips WHERE status = 'NEED_QUOTE' ORDER BY slip_number").all();
   } else if (statusFilter === "repaired" || statusFilter === "call_customer") {
     rows = db.prepare("SELECT * FROM service_slips WHERE status IN ('ALL_REPAIRED', 'CONVERTED') ORDER BY slip_number").all();
   } else if (statusFilter === "closed") {

@@ -61,7 +61,7 @@ function formatDate(ts) {
 }
 
 // ---- Screen navigation -----------------------------------------------------
-const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip", "purchase", "ipl"];
+const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip", "purchase", "quote", "ipl"];
 
 // ---- Who is using this phone ------------------------------------------------
 // Staff pick their name once per phone; the choice is remembered and decides
@@ -216,12 +216,12 @@ function applyRoleToHome() {
   const role = getRole();
   // Which home functions each account sees (per John's mapping, 28 Jul 2026):
   const ROLE_FUNCTIONS = {
-    sales: ["new", "close", "view", "find", "ipl"],
+    sales: ["new", "close", "view", "find", "ipl", "quote"],
     tech: ["open", "view", "find", "ipl"],
     // Purchaser is Sales plus requested parts, so it inherits the
     // IPLs too rather than being a separate shorter list.
-    purchaser: ["new", "close", "view", "find", "ipl", "requests"],
-    admin: ["new", "open", "close", "view", "find", "ipl", "requests"],
+    purchaser: ["new", "close", "view", "find", "ipl", "quote", "requests"],
+    admin: ["new", "open", "close", "view", "find", "ipl", "quote", "requests"],
   };
   // An unknown group shows nothing rather than defaulting to Sales - silently
   // handing out someone else's functions is worse than an empty screen.
@@ -230,6 +230,8 @@ function applyRoleToHome() {
     b.style.display = allowed.includes(b.dataset.go) ? "flex" : "none";
   });
   updateLangToggle();
+  // Declared further down; guard so this is safe during startup.
+  if (typeof refreshQuoteCount === "function") refreshQuoteCount();
   const badge = $("role-badge");
   if (badge) {
     // The name, not the group: on a personal phone "文建" answers "am I logged
@@ -2685,6 +2687,7 @@ document.querySelectorAll(".home-btn").forEach((b) =>
     else if (go === "close") { enterCloseService(); }
     else if (go === "view") { enterViewSlips(); }
     else if (go === "find") { enterFindPart(); }
+    else if (go === "quote") { enterNeedToQuote(); }
     else if (go === "requests") { enterPurchaser(); }
     else if (go === "ipl") { enterIpl(); }
   })
@@ -2862,6 +2865,67 @@ $("om-submit").addEventListener("click", async () => {
   }
   $("om-submit").disabled = false;
 });
+
+// ---- Need to Quote: what the technicians have handed back -------------------
+// A technician finishing a repair marks the slip "Need to Quote". Until now
+// that status was only visible to whoever happened to open the slip; this is
+// the list of them, so nothing sits waiting because nobody knew.
+async function enterNeedToQuote() {
+  showScreen("quote");
+  const wrap = $("q-list");
+  wrap.innerHTML = `<div class="fp-loading">Loading…</div>`;
+  try {
+    const rows = await api(`/api/slips?status=need_quote`);
+    if (!rows.length) {
+      wrap.innerHTML = `<div class="fp-empty">Nothing waiting to be quoted</div>`;
+      refreshQuoteCount();
+      return;
+    }
+    wrap.innerHTML = rows.map((s) => {
+      const machines = (s.machines || []).length;
+      const created = formatDate(s.created_at);
+      return `
+      <button type="button" class="slip-card" data-slip="${escapeAttr(s.slip_number)}">
+        <div class="slip-card-top">
+          <strong>${escapeHtml(s.slip_number)}</strong>
+          <span class="vs-status vs-NEED_QUOTE">Need to Quote</span>
+        </div>
+        <div class="slip-card-co">${escapeHtml(s.company)}</div>
+        <div class="slip-card-sub">${machines} machine${machines === 1 ? "" : "s"}${created ? " · " + escapeHtml(created) : ""}</div>
+      </button>`;
+    }).join("");
+    // Straight into View Slips, which already lists every part with its price
+    // and carries the "Mark as Quoted" button — no second copy of any of it.
+    wrap.querySelectorAll(".slip-card").forEach((b) =>
+      b.addEventListener("click", () => {
+        showScreen("view");
+        if (viewSearch) viewSearch.reset();
+        onViewSlipChosen(b.dataset.slip);
+      })
+    );
+  } catch (e) {
+    wrap.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Could not load")}</div>`;
+  }
+  refreshQuoteCount();
+}
+
+// The count on the home tile. Cheap enough to refresh whenever home is shown,
+// and it is the whole point of the feature: seeing there is something waiting
+// without having to go looking for it.
+async function refreshQuoteCount() {
+  const badge = $("quote-count");
+  if (!badge) return;
+  const tile = document.querySelector('#screen-home .home-btn[data-go="quote"]');
+  if (!tile || tile.style.display === "none") return;
+  try {
+    const rows = await api(`/api/slips?status=need_quote`);
+    const n = rows.length;
+    badge.textContent = String(n);
+    badge.style.display = n ? "grid" : "none";
+  } catch (_) {
+    badge.style.display = "none";
+  }
+}
 
 // ---- Purchaser screen: pending reorder requests -----------------------------
 function enterPurchaser() {

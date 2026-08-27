@@ -101,6 +101,14 @@
           </span>
           <span class="home-txt"><strong>IPL</strong><small>Exploded views with live stock</small></span>
         </button>
+        <button class="home-btn" data-go="quote">
+          <span class="home-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h4"/><path d="M9 11h2"/></svg>
+          </span>
+          <span class="home-txt"><strong>Need to Quote</strong><small>Repairs waiting to be priced</small></span>
+          <!-- How many are waiting, so it can be seen without opening it. -->
+          <span class="home-count" id="quote-count" style="display:none;"></span>
+        </button>
         <button class="home-btn" data-go="requests">
           <span class="home-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
@@ -184,6 +192,18 @@
         </div>
         <div id="ipl-list"></div>
       </div>
+    </section>
+
+    <!-- ============ SCREEN: NEED TO QUOTE (sales) ============ -->
+    <!-- What the technicians have finished and handed back for pricing. Tapping
+         one opens it in View Slips, which already shows every part and carries
+         the "Mark as Quoted" button. -->
+    <section id="screen-quote" class="screen">
+      <div class="section-head">
+        <p class="eyebrow">Sales</p>
+        <h2>Need to Quote</h2>
+      </div>
+      <div id="q-list"></div>
     </section>
 
     <!-- ============ SCREEN: PURCHASER (requested parts) ============ -->
