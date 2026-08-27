@@ -1510,3 +1510,10 @@ select {
 .om-check-who {
   margin-top: 5px; font-size: .82rem; color: var(--ink-soft);
 }
+
+/* Order more is the one popup that opens on top of another — from the IPL part
+   sheet, and from the Find Part card. Every .modal-overlay shares z-index 60,
+   so which one wins is decided by document order, and the IPL sheet is written
+   further down the page: the order popup opened behind it and only appeared
+   once the part sheet was closed. Lift it above the rest. */
+#order-modal { z-index: 70; }
