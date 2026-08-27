@@ -30,6 +30,25 @@ app.use(express.json({ limit: "1mb" }));
 // Serve the PWA frontend from ../frontend
 app.use(express.static(path.join(__dirname, "..", "frontend")));
 
+// The site's own certificate, so a phone or tablet can be told to trust it.
+// Until it is trusted, iOS shows a warning on every visit and will not take the
+// home-screen icon — it fetches that outside the page, where the exception you
+// tapped through does not apply, so you get a grey tile with the first letter
+// of the address instead.
+//
+// This is the PUBLIC certificate, which every device already receives during
+// the TLS handshake. The private key stays where it is and is never served.
+// Content-Type is what makes iOS offer to install it rather than download it.
+app.get("/cert.pem", (_req, res) => {
+  const certFile = path.join(__dirname, "cert.pem");
+  if (!require("fs").existsSync(certFile)) {
+    return res.status(404).type("text/plain").send("No certificate — this server is running over plain HTTP.");
+  }
+  res.type("application/x-x509-ca-cert");
+  res.setHeader("Content-Disposition", 'attachment; filename="om-service.pem"');
+  res.sendFile(certFile);
+});
+
 // ---- API: item lookup ------------------------------------------------------
 // Tolerant matching handled in the repository: a scanned "SZEN 140051111" also
 // matches "SZEN140051111" or "140051111".
