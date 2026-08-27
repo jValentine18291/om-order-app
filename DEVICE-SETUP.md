@@ -76,11 +76,58 @@ the app cannot undo it: **Settings → Notifications → OM Service**, or in Saf
 
 ## Android
 
-Chrome reads the web manifest, so it is simpler: open the address, accept the
-certificate warning, then **⋮ → Add to Home screen**. Trusting the certificate
-is still worth doing to stop the warning on every visit — install the same file
+Chrome reads the web manifest, so the icon is simpler than on iOS. The
+certificate, however, is **not optional if you want notifications** — see below.
+
+### 1. Install the certificate
+
+Download it from `https://192.168.1.7:8443/api/cert.pem`, then install it
 through **Settings → Security → Encryption & credentials → Install a
-certificate → CA certificate**.
+certificate → CA certificate**. Android warns that someone could monitor the
+device; that warning is about CA certificates in general, and this one is the
+office server's own.
+
+> **Clicking through the certificate warning in Chrome is not enough.** Chrome
+> refuses to run a site's background worker on a connection whose certificate it
+> does not trust, and that worker is the thing that receives notifications. The
+> app itself still loads and works — which is why this looks like a
+> notifications problem rather than a certificate one. Until the certificate is
+> installed, the phone cannot subscribe at all, and nothing will ever arrive.
+
+### 2. Add it to the home screen
+
+Open the address, then **⋮ → Add to Home screen**.
+
+### 3. Turn on notifications
+
+Open **Need to Quote** and tap **Turn on** in the row at the top. The row shows
+how many devices are being notified, so you can see it took.
+
+If nothing arrives after that, the phone is blocking it: **Settings → Apps →
+Chrome → Notifications**, and check that battery optimisation is not restricting
+Chrome (**Settings → Apps → Chrome → Battery → Unrestricted**). Aggressive
+battery savers on Samsung and Xiaomi phones are the usual culprit.
+
+---
+
+## Checking who is actually subscribed
+
+On the server:
+
+    node backend\push-status.js
+
+It lists every subscribed device by role, which push service it belongs to
+(Apple or Google) and when it was added. That distinguishes the two causes of
+"my phone gets nothing":
+
+- **the phone is not in the list** — it never subscribed, so nothing was ever
+  going to reach it. On Android that is the certificate, above.
+- **the phone is in the list** — add `--send` to send it a real test
+  notification and print exactly what the push service says back.
+
+Only the push service and a short ID are printed, never the full address: those
+addresses are keys in their own right, and anyone holding one can send
+notifications to that device.
 
 ---
 
