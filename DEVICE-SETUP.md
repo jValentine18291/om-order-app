@@ -1,5 +1,10 @@
 # Putting the app on a phone or tablet
 
+> **Deploying a new version?** That is `deploy.bat` in this folder — right-click,
+> Run as administrator. It pulls, installs anything new and restarts the
+> service, stopping at the first step that fails rather than restarting over a
+> half-finished pull.
+
 Ten minutes per device, and the order matters. The certificate has to be trusted
 **before** the app is added to the home screen, because iOS decides the icon
 once, when you add it, and never asks again.
