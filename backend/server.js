@@ -93,9 +93,20 @@ app.post("/api/push/unsubscribe", (req, res) => {
 });
 
 // How many devices would be told. Lets the app say "3 devices" rather than
-// leaving someone wondering whether it is on anywhere at all.
+// leaving someone wondering whether it is on anywhere at all — and "0 devices"
+// is the answer to most of the ways this can appear broken.
 app.get("/api/push/status", (_req, res) => {
   res.json({ devices: push.countFor(pushDb, QUOTE_NOTIFY_ROLES) });
+});
+
+// Prove the whole chain from this device, without needing a technician and a
+// real slip to do it. Answers with what actually went wrong when it fails.
+app.post("/api/push/test", async (req, res) => {
+  try {
+    res.json(await push.testOne(pushDb, (req.body || {}).endpoint));
+  } catch (err) {
+    res.status(500).json({ ok: false, reason: err.message || "Test failed" });
+  }
 });
 
 

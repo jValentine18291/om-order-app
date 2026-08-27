@@ -2986,18 +2986,51 @@ async function renderPushRow() {
   const existing = await currentPushSubscription();
   btn.style.display = "";
   btn.disabled = false;
+
+  // Shown whether this device is on or off. "0 devices" is the answer to most
+  // of the ways this looks broken - everyone assumes someone else turned it on.
+  let devices = null;
+  try { devices = (await api("/api/push/status")).devices; } catch (_) {}
+  const across = devices === null ? ""
+    : devices === 0 ? " · no devices are being notified yet"
+    : ` · ${devices} device${devices === 1 ? "" : "s"} being notified`;
+
+  const test = $("push-test");
   if (existing) {
     btn.textContent = "Turn off";
-    let others = "";
-    try {
-      const st = await api("/api/push/status");
-      others = st.devices ? ` · ${st.devices} device${st.devices === 1 ? "" : "s"} being told` : "";
-    } catch (_) {}
-    sub.textContent = "On for this device" + others;
+    sub.textContent = "On for this device" + across;
+    if (test) test.style.display = "";
   } else {
     btn.textContent = "Turn on";
-    sub.textContent = "Notify this device as soon as a technician finishes a repair";
+    sub.textContent = "Notify this device when a technician finishes a repair" + across;
+    if (test) test.style.display = "none";
   }
+}
+
+// Proves the whole chain from this device: app to server, server to Google or
+// Apple, and back to the phone. Without it "no notification arrived" has half a
+// dozen possible causes and no way to tell them apart.
+async function sendTestPush() {
+  const test = $("push-test");
+  test.disabled = true;
+  const was = test.textContent;
+  test.textContent = "Sending…";
+  try {
+    const sub = await currentPushSubscription();
+    if (!sub) { toast("This device is not subscribed", "err"); return; }
+    const r = await api("/api/push/test", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ endpoint: sub.endpoint }),
+    });
+    if (r.ok) toast("Sent — it should appear in a moment", "ok");
+    else toast(r.reason || "The test did not go through", "err");
+  } catch (e) {
+    toast(e.message || "The test did not go through", "err");
+  }
+  test.textContent = was;
+  test.disabled = false;
+  renderPushRow();
 }
 
 async function togglePush() {
@@ -4040,6 +4073,7 @@ async function renderIplStock(itemCode) {
 
 $("ipl-order-more").addEventListener("click", () => openOrderModal(iplOrderPart));
 $("push-toggle").addEventListener("click", togglePush);
+$("push-test").addEventListener("click", sendTestPush);
 
 function closeIplPart() {
   $("ipl-modal").style.display = "none";

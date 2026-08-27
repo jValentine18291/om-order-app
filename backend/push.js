@@ -149,6 +149,32 @@ async function notify(db, roles, payload) {
   return { sent, gone, failed };
 }
 
+// Send to one device and report exactly what happened, rather than logging it
+// and returning nothing. "It didn't work" is not something anyone can act on;
+// "the push service said 403" is.
+async function testOne(db, endpoint) {
+  const row = db.prepare("SELECT * FROM push_subscriptions WHERE endpoint = ?").get(String(endpoint || ""));
+  if (!row) {
+    return { ok: false, reason: "This device is not subscribed on the server. Turn notifications off and on again." };
+  }
+  try {
+    await webpush.sendNotification(
+      { endpoint: row.endpoint, keys: { p256dh: row.p256dh, auth: row.auth } },
+      JSON.stringify({ title: "OM Service", body: "Notifications are working on this device.", slip: "" })
+    );
+    return { ok: true };
+  } catch (err) {
+    if (err && (err.statusCode === 404 || err.statusCode === 410)) {
+      db.prepare("DELETE FROM push_subscriptions WHERE endpoint = ?").run(row.endpoint);
+      return { ok: false, reason: "This device's subscription had expired. Turn notifications on again." };
+    }
+    const status = err && err.statusCode ? `HTTP ${err.statusCode}` : "no response from the push service";
+    const detail = (err && (err.body || err.message)) || "unknown";
+    console.error(`[push] test failed (${status}): ${String(detail).slice(0, 200)}`);
+    return { ok: false, reason: `${status}: ${String(detail).slice(0, 120)}` };
+  }
+}
+
 module.exports = {
   publicKey: keys.publicKey,
   init,
@@ -156,4 +182,5 @@ module.exports = {
   unsubscribe,
   countFor,
   notify,
+  testOne,
 };
