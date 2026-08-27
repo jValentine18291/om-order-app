@@ -1517,3 +1517,111 @@ select {
    further down the page: the order popup opened behind it and only appeared
    once the part sheet was closed. Lift it above the rest. */
 #order-modal { z-index: 70; }
+
+/* "Find in this figure" — the gap under the diagram. A class rather than an
+   inline style, so the tablet layout can lift it into its own column. */
+.ipl-find { margin-top: 14px; }
+
+/* ===========================================================================
+   TABLETS
+   ===========================================================================
+   The app was built for a phone held in one hand, and the 520px frame is right
+   for that. On a tablet it left the whole screen empty either side.
+
+   Two steps rather than a continuous stretch, because the useful shapes are
+   genuinely different. Around 700px — a tablet held upright — there is room for
+   two columns of cards and popups can stop being bottom sheets. Around 1000px —
+   a tablet turned on its side — the parts list fits BESIDE the diagram, which
+   is the layout a technician actually wants: tap a number, read the part,
+   without either one moving.
+
+   Everything here is min-width, so the phone layout is untouched.
+   ========================================================================== */
+
+@media (min-width: 700px) {
+  .app { max-width: 760px; }
+  .screen { padding: 16px 26px 28px; gap: 20px; }
+
+  /* Two across. The cards were already full-width buttons, so they simply
+     become half-width ones. */
+  .home-actions,
+  #os-slip-list,
+  #sd-machines,
+  .mp-rows {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .home-actions { margin-top: 4px; }
+
+  /* Figure tabs and type chips wrap instead of scrolling sideways: with the
+     room to show all fourteen figures of a chainsaw at once, hiding them
+     behind a swipe would be perverse. */
+  .ipl-figs, .mp-chips { flex-wrap: wrap; overflow-x: visible; }
+
+  /* A popup on a tablet is a dialog in the middle, not a sheet hanging off the
+     bottom edge. */
+  .modal-overlay { align-items: center; }
+  .modal-sheet {
+    border-radius: 18px;
+    max-height: 86vh;
+    padding: 20px 20px 24px;
+  }
+
+  .ipl-stage { max-height: 58vh; }
+}
+
+@media (min-width: 1000px) {
+  .app { max-width: 1240px; }
+  .screen { padding: 18px 32px 32px; }
+
+  .home-actions, #os-slip-list, #sd-machines {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .mp-rows { grid-template-columns: repeat(3, 1fr); }
+
+  /* The diagram and its parts list, side by side.
+     Laid out as areas rather than by source order, because the parts list is
+     written under the diagram in the HTML and has to move up beside it. */
+  #ipl-viewer {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr);
+    grid-template-areas:
+      "chosen chosen"
+      "figs   figs"
+      "bar    find"
+      "stage  list";
+    column-gap: 24px;
+    align-items: start;
+  }
+  #ipl-change { grid-area: chosen; }
+  /* Back to one scrolling row here. Wrapping is right on a tablet held upright,
+     where height is plentiful; side by side it is not - fifteen tabs across
+     three rows pushed the diagram so far down that neither column had room
+     left, which is the opposite of what this layout is for. */
+  #ipl-figs   { grid-area: figs; flex-wrap: nowrap; overflow-x: auto; margin-bottom: 4px; }
+  /* Sits at the foot of its row so it lines up with the search box opposite,
+     rather than floating at the top of a taller cell. */
+  .ipl-bar    { grid-area: bar; align-self: end; }
+  #ipl-stage  { grid-area: stage; margin-top: 0; }
+  .ipl-find   { grid-area: find; margin-top: 0; }
+  #ipl-list   { grid-area: list; }
+
+  /* Both columns get the height instead of the page scrolling: the drawing
+     stays put while the list is scrolled, which is the whole point of putting
+     them side by side. */
+  /* --ipl-col-h is measured in app.js from where the diagram actually starts,
+     because what sits above it changes with the model - fourteen figure tabs
+     wrap onto three rows where four fit on one. The fallback only applies for
+     the instant before that runs. */
+  /* No min-height: the floor lives in the measurement, so a CSS minimum could
+     only ever fight it and push the page into scrolling. */
+  .ipl-stage {
+    max-height: var(--ipl-col-h, calc(100vh - var(--topbar-h, 63px) - 260px));
+  }
+  #ipl-list {
+    height: var(--ipl-col-h, calc(100vh - var(--topbar-h, 63px) - 260px));
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+}

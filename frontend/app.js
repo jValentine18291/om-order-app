@@ -3596,6 +3596,7 @@ async function openIplModel(id) {
   $("ipl-picker").style.display = "none";
   $("ipl-viewer").style.display = "";
   window.scrollTo({ top: 0 });
+  syncIplColumnHeight();
 }
 
 async function loadIplModel(id) {
@@ -3616,6 +3617,7 @@ async function loadIplModel(id) {
     b.addEventListener("click", () => showIplFigure(b.dataset.fig))
   );
   showIplFigure(ipl.model.figures[0].id);
+  syncIplColumnHeight();
   return true;
 }
 
@@ -4124,6 +4126,48 @@ function openSetPrice(tier, tierName) {
   });
 }
 
+// On a tablet the diagram and the parts list stand side by side, and both
+// should fill the screen exactly — the point of that layout is that the drawing
+// does not move while the list is scrolled, which fails the moment the page
+// itself can scroll.
+//
+// The height cannot be a constant. What sits above the columns varies with the
+// model: fourteen figure tabs wrap onto three rows where four fit on one, and a
+// guess of 230px left the G3800 scrolling. So measure where the diagram
+// actually starts and give both columns the rest.
+function syncIplColumnHeight() {
+  const viewer = $("ipl-viewer");
+  const stage = $("ipl-stage");
+  if (!viewer || !stage) return;
+  if (!window.matchMedia("(min-width: 1000px)").matches || viewer.style.display === "none") {
+    viewer.style.removeProperty("--ipl-col-h");
+    return;
+  }
+  // Document coordinates, so the answer does not depend on how far the page
+  // happens to be scrolled when this runs.
+  const top = stage.getBoundingClientRect().top + window.scrollY;
+  let h = Math.max(300, window.innerHeight - top - 34);
+  viewer.style.setProperty("--ipl-col-h", h + "px");
+
+  // Then correct by what is actually left over. Padding, the grid's own row
+  // rounding and the figure-tab strip together came to six pixels more than the
+  // arithmetic predicted, and six pixels is enough to make the page scroll —
+  // which is the one thing this layout exists to prevent. Measuring the
+  // overflow is easier than predicting every contributor to it.
+  // Then correct by what is actually left over — padding and the grid's own row
+  // rounding are easier to measure than to predict. But only keep the
+  // correction if it helps: some of what makes the page taller than the window
+  // has nothing to do with these columns, and shrinking the drawing to chase it
+  // would give up screen for no gain.
+  const before = document.documentElement.scrollHeight - window.innerHeight;
+  if (before > 0) {
+    viewer.style.setProperty("--ipl-col-h", Math.max(300, h - before) + "px");
+    if (document.documentElement.scrollHeight - window.innerHeight >= before) {
+      viewer.style.setProperty("--ipl-col-h", h + "px");
+    }
+  }
+}
+
 // The IPL picker's brand headings pin themselves below the topbar, which needs
 // its height as a number. Measured rather than hard-coded: the bar is taller
 // for technicians, who get a language toggle in it.
@@ -4134,5 +4178,5 @@ function syncTopbarHeight() {
   }
 }
 syncTopbarHeight();
-window.addEventListener("resize", syncTopbarHeight);
-window.addEventListener("orientationchange", syncTopbarHeight);
+window.addEventListener("resize", () => { syncTopbarHeight(); syncIplColumnHeight(); });
+window.addEventListener("orientationchange", () => { syncTopbarHeight(); syncIplColumnHeight(); });
