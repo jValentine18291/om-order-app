@@ -3,7 +3,7 @@
 // Bump CACHE on every deploy (v7 -> v8 -> ...). The new worker deletes old
 // caches in activate, and core files are fetched network-first so a normal
 // reopen always gets the latest code. Cache is only used as an offline fallback.
-const CACHE = "om-order-v100";
+const CACHE = "om-order-v101";
 
 // IPL artwork lives in its own cache, deliberately NOT version-stamped.
 // They are large, they are already fetched only when a section is opened, and
@@ -21,6 +21,8 @@ const SHELL = [
   "./icon-192.png",
   "./icon-180.png",
   "./icon-512.png",
+  "./apple-touch-icon.png",
+  "./apple-touch-icon-precomposed.png",
   "./service.css",
   "./manifest.json",
 ];
