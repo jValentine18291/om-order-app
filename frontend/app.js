@@ -3074,14 +3074,24 @@ async function renderPushRow() {
 
   // Checked first, and without awaiting: it is the one answer that settles the
   // row on its own, and it costs nothing to read.
+  //
+  // Blocked is not the end of it. No website can ask a second time once the
+  // phone has been told "Don't allow" - but it can say where to undo it, and
+  // hiding the button instead read as the whole feature having disappeared.
   if (Notification.permission === "denied") {
-    btn.style.display = "none";
-    sub.textContent = "Notifications are blocked for this site in the phone's settings";
+    btn.style.display = "";
+    btn.disabled = false;
+    btn.textContent = "How to turn it on";
+    btn.dataset.mode = "help";
+    sub.textContent = "Blocked on this device — this can only be undone in the phone's own settings";
+    if ($("push-test")) $("push-test").style.display = "none";
     return;
   }
   const existing = await currentPushSubscription();
   btn.style.display = "";
   btn.disabled = false;
+  btn.dataset.mode = "";
+  hidePushHelp();
 
   // Shown whether this device is on or off. "0 devices" is the answer to most
   // of the ways this looks broken - everyone assumes someone else turned it on.
@@ -3102,6 +3112,67 @@ async function renderPushRow() {
     if (test) test.style.display = "none";
   }
 }
+
+// Where to undo a "Don't allow". The steps differ enough between the two that
+// showing both would have someone following the wrong one, so the device is
+// asked which it is.
+function pushHelpText() {
+  const ua = navigator.userAgent || "";
+  const iOS = /iPad|iPhone|iPod/.test(ua) ||
+              (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const android = /Android/.test(ua);
+
+  if (iOS) {
+    return `<strong>On this iPhone or iPad</strong>
+      <p>Settings &rarr; Notifications &rarr; <b>OM Service</b> &rarr; turn on
+         <b>Allow Notifications</b>.</p>
+      <p>If OM Service is not in that list, iOS never recorded a choice it can
+         show. Remove the app from the Home Screen and add it again from Safari,
+         then tap Turn on here — iOS only asks once per installation.</p>`;
+  }
+  if (android) {
+    return `<strong>On this Android phone</strong>
+      <p>Chrome &rarr; <b>⋮</b> &rarr; Settings &rarr; Site settings &rarr;
+         Notifications &rarr; find <b>${escapeHtml(location.host)}</b> &rarr;
+         <b>Allow</b>.</p>
+      <p>Then come back here and tap Turn on. Also check Settings &rarr; Apps
+         &rarr; Chrome &rarr; Notifications, which is a separate switch, and turn
+         off Chrome's own <b>Power saver</b> (⋮ &rarr; Settings &rarr; Power
+         saver) — it holds notifications back until the app is opened.</p>`;
+  }
+  return `<strong>On this device</strong>
+    <p>Open the browser's site settings for <b>${escapeHtml(location.host)}</b>
+       and set Notifications to <b>Allow</b>, then come back and tap Turn on.</p>
+    <p>In most browsers that is the icon at the left of the address bar.</p>`;
+}
+
+function showPushHelp() {
+  const box = $("push-help");
+  if (!box) return;
+  box.innerHTML = pushHelpText();
+  box.style.display = "block";
+}
+
+function hidePushHelp() {
+  const box = $("push-help");
+  if (box) { box.style.display = "none"; box.innerHTML = ""; }
+}
+
+// Permission is changed in the phone's settings, not here, so the app only
+// finds out when it is looked at again. Without this the row still says blocked
+// after the person has just fixed it, and they conclude it did not work.
+//
+// Two triggers, because which one a browser fires on returning from Settings
+// varies, and leaving the row stale is the whole failure being fixed. Entering
+// the screen re-renders it anyway; these cover the app already sitting on it.
+function recheckPushRow() {
+  const screen = document.getElementById("screen-quote");
+  if (screen && screen.classList.contains("active")) renderPushRow();
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") recheckPushRow();
+});
+window.addEventListener("focus", recheckPushRow);
 
 // Proves the whole chain from this device: app to server, server to Google or
 // Apple, and back to the phone. Without it "no notification arrived" has half a
@@ -3131,6 +3202,13 @@ async function sendTestPush() {
 
 async function togglePush() {
   const btn = $("push-toggle");
+  // Asking again would do nothing visible: the browser resolves a blocked
+  // request immediately without showing anything, so the tap would look broken.
+  if (btn.dataset.mode === "help" || Notification.permission === "denied") {
+    const open = $("push-help") && $("push-help").style.display === "block";
+    if (open) hidePushHelp(); else showPushHelp();
+    return;
+  }
   btn.disabled = true;
   try {
     const reg = await swReady();
@@ -3158,6 +3236,9 @@ async function togglePush() {
           ? "Notifications blocked — allow them in the phone's settings"
           : "Notifications not enabled", "err");
         await renderPushRow();
+        // Straight to the instructions: this is the moment it was blocked, and
+        // the phone will not offer the choice a second time.
+        if (permission === "denied") showPushHelp();
         return;
       }
       const { key } = await api("/api/push/key");
