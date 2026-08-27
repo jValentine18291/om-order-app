@@ -91,24 +91,52 @@ const HEADERS = [
 // Every table block on the page, left to right. Usually one; the G3800 runs two
 // side by side, each with its own header and its own key numbering.
 function tableBlocks(words) {
-  const anchors = words.filter((w) => /^Key#?$/i.test(w.text)).sort((a, b) => a.x1 - b.x1);
+  // "Key#" is what marks a column, but the word KEY is also a part description
+  // — the G621AVS lists one as part 125 — and the pattern matches either.
+  //
+  // A false anchor does not merely add a block of its own; that much the
+  // header test below would throw out. It sits BETWEEN the two real headers
+  // and cuts the left one's band short, so the real header lost DESCRIPTION,
+  // Q'TY and NOTE, failed the same test, and took its whole column with it.
+  // Fifty parts of the G621AVS's Fig.2 vanished — every callout on the right
+  // of that drawing was dead, and the totals said 39 of 40 because it had
+  // forgotten it ever wanted them.
+  //
+  // So candidates are vetted on their own first, against a band nothing else
+  // is allowed to truncate, and only the survivors go on to bound each other.
+  const bandFor = (anchor, rightLimit) => words
+    .filter((w) =>
+      Math.abs(w.y1 - anchor.y1) < 14 &&
+      w.x1 >= anchor.x1 - 2 &&
+      (rightLimit === undefined || w.x1 < rightLimit - 2)
+    )
+    .sort((a, b) => a.x1 - b.x1);
+
+  const headersIn = (band) => {
+    const found = [];
+    for (const { col, match } of HEADERS) {
+      const hit = band.find((w) => match.test(w.text));
+      if (hit) found.push({ col, x1: hit.x1, x2: hit.x2 });
+    }
+    return found;
+  };
+
+  const anchors = words
+    .filter((w) => /^Key#?$/i.test(w.text))
+    .sort((a, b) => a.x1 - b.x1)
+    // Vetted against everything to its right, so a neighbouring column cannot
+    // hide this one's own headings. Bands are sorted by x, so the nearest
+    // heading of each kind wins and the column to the right is not borrowed.
+    .filter((w) => headersIn(bandFor(w)).length >= 3);
   if (!anchors.length) return [];
 
   return anchors.map((anchor, i) => {
     const next = anchors[i + 1];
     // The header can wrap — "Q'TY" above "/UNIT" — so take a band rather than
     // one baseline, and stop at the next block's first column.
-    const band = words.filter((w) =>
-      Math.abs(w.y1 - anchor.y1) < 14 &&
-      w.x1 >= anchor.x1 - 2 &&
-      (!next || w.x1 < next.x1 - 2)
-    );
+    const band = bandFor(anchor, next ? next.x1 : undefined);
 
-    const found = [];
-    for (const { col, match } of HEADERS) {
-      const hit = band.find((w) => match.test(w.text));
-      if (hit) found.push({ col, x1: hit.x1, x2: hit.x2 });
-    }
+    const found = headersIn(band);
     if (found.length < 3) return null;   // not a real header
 
     // A boundary sits in the gap between two headers, but nearer the left one:

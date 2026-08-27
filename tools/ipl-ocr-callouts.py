@@ -44,6 +44,7 @@ from scipy import ndimage
 DPI = 300
 POPPLER = os.environ.get("POPPLER_BIN", "")
 TESSERACT = os.environ.get("TESSERACT_BIN", "")
+DEBUG = os.environ.get("IPL_OCR_DEBUG", "") not in ("", "0")
 
 
 def tool(name):
@@ -200,7 +201,26 @@ def callouts(pdf, page, keys, max_y=100.0):
         # narrowest, 0.88 at the widest — and 0.88 is the "A" of 4A, 5A and 6A,
         # the bar and chain options, so the ceiling cannot go below that. A
         # screw drawn below callout 60 is 1.10 and read as "2".
-        if w > h * 0.95 or w < h * 0.30:
+        if w < h * 0.30:
+            continue
+        # Above that ceiling the blob is not one character - but on this book it
+        # is very often two, printed touching. The G621AVS sets "106" with the 0
+        # and 6 joined, and "90" likewise; connected-component labelling sees one
+        # shape, it failed the ceiling, and all that survived was the lone "1" -
+        # a false hotspot for part 1 where 106 should have been, and 106 itself
+        # unreachable. Nine callouts on Fig.1 went that way.
+        #
+        # Two digits at their widest measure 0.850 each, so a touching pair
+        # reaches about 1.7; 1.90 allows for the join. Wider than that is not a
+        # number and is still refused. Admitting the pair is not a loosening:
+        # the blob is now declared to be TWO characters, so a reading has to
+        # produce two that match a key. The drawn screw that once read as "2"
+        # cannot satisfy that, where before only its width excluded it.
+        if w <= h * 0.95:
+            nsub = 1
+        elif w <= h * 1.90:
+            nsub = 2
+        else:
             continue
         # How many enclosed spaces the shape has. No character we accept has
         # more than two — "8" has two, "0", "4", "6", "9", "A", "B", "D" have
@@ -209,9 +229,12 @@ def callouts(pdf, page, keys, max_y=100.0):
         # callout 48 has four and read as "5". Both sat within every other
         # measure, and both are single digits, which is where a false reading
         # does real harm - it matches a key on its own.
-        if enclosed(blob) > 2:
+        # Per character, so a touching pair is allowed its two shares: "08"
+        # joined has three holes between them and would fail a flat limit.
+        if enclosed(blob) > 2 * nsub:
             continue
-        glyphs.append([s[1].start, s[0].start, s[1].stop, s[0].stop, 1])
+        glyphs.append([s[1].start, s[0].start, s[1].stop, s[0].stop, nsub,
+                       [(s[1].start, s[0].start, s[1].stop, s[0].stop, nsub)]])
 
     # Group digits into numbers: same line, touching distance apart.
     #
@@ -223,41 +246,74 @@ def callouts(pdf, page, keys, max_y=100.0):
     # tapping it could give either part.
     band = max(1.0, med * 0.6)
     glyphs.sort(key=lambda g: (int(g[1] / band), g[0]))
+    if DEBUG:
+        print(f"med={med:.1f} same_line<{med*0.15:.1f} "
+              f"height<{med*0.25:.1f} gap<{med*0.55:.1f}", file=sys.stderr)
+    def can_join(a, b):
+        """Are these two boxes parts of one printed number?
+
+        Digits of one number are set on a shared baseline and their tops agree
+        to within a tenth of a glyph height — measured across all four figures,
+        758 same-line pairs, none between 0.10 and 0.20. Two SEPARATE callouts
+        standing side by side do not agree nearly so well: "54" and "51" sit
+        0.36 apart on Fig.2, and a tolerance of 0.55 let the "4" of 54 join the
+        51 beside it. That left "541", which matches no key and was dropped, and
+        a widowed "5" — which does match a key, so callout 54 offered part 5.
+
+        Height has to match too, or a drawn part standing beside a number gets
+        taken for another digit: a small bolt beside callout 38 joined it, the
+        crop read "383", and that callout was lost.
+
+        The GAP stays generous. Tightening it to 0.35 looked reasonable — real
+        digits sit 3 to 4 pixels apart — and split genuine pairs across three
+        figures instead, leaving "15" as a "1" and a "5" side by side, each
+        matching a key of its own.
+        """
+        same_line = abs(a[1] - b[1]) < med * 0.15
+        similar_height = abs((a[3] - a[1]) - (b[3] - b[1])) < med * 0.25
+        # Distance whichever way round they sit; negative means they overlap.
+        gap = max(b[0] - a[2], a[0] - b[2])
+        return same_line and similar_height and gap < med * 0.55
+
+    def absorb(a, b):
+        a[0] = min(a[0], b[0]); a[1] = min(a[1], b[1])
+        a[2] = max(a[2], b[2]); a[3] = max(a[3], b[3])
+        a[4] += b[4]        # how many characters this number is made of
+        a[5].extend(b[5])   # and the box of each, kept for the width check
+
     groups = []
     for g in glyphs:
         placed = False
         for grp in groups:
-            # Digits of one number are set on a shared baseline and their tops
-            # agree to within a tenth of a glyph height — measured across all
-            # four figures, 758 same-line pairs, none between 0.10 and 0.20.
-            # Two SEPARATE callouts standing side by side do not agree nearly
-            # so well: "54" and "51" sit 0.36 apart on Fig.2, and a tolerance
-            # of 0.55 let the "4" of 54 join the 51 beside it. That left "541",
-            # which matches no key and was dropped, and a widowed "5" — which
-            # does match a key, so callout 54 offered part 5 instead.
-            same_line = abs(g[1] - grp[1]) < med * 0.15
-            # Height has to match, or a drawn part standing beside a number
-            # gets taken for another digit: a small bolt beside callout 38
-            # joined it, the crop read "383", and that callout was lost.
-            #
-            # The GAP stays generous. Tightening it to 0.35 looked reasonable -
-            # real digits sit 3 to 4 pixels apart - and split genuine pairs
-            # across three figures instead, leaving "15" as a "1" and a "5"
-            # sitting side by side, each matching a key of its own. Two rings
-            # on one number is the fault we are trying to remove, so the height
-            # test does the work and the distance stays where it was.
-            similar_height = abs((g[3] - g[1]) - (grp[3] - grp[1])) < med * 0.25
-            # Distance between the two boxes whichever way round they sit;
-            # negative means they overlap.
-            gap = max(g[0] - grp[2], grp[0] - g[2])
-            if same_line and similar_height and gap < med * 0.55:
-                grp[0] = min(grp[0], g[0]); grp[1] = min(grp[1], g[1])
-                grp[2] = max(grp[2], g[2]); grp[3] = max(grp[3], g[3])
-                grp[4] += 1          # how many glyphs this number is made of
+            if can_join(grp, g):
+                absorb(grp, g)
                 placed = True
                 break
         if not placed:
             groups.append(list(g))
+
+    # Belonging to the same number is symmetric, so the answer must not depend
+    # on which digit was visited first — and it did. The three digits of "114"
+    # are set with the "4" one pixel higher than the two "1"s, and the sort
+    # buckets rows by band: 1600 and 1601 fall either side of a band boundary,
+    # so the "4" was visited a whole row early, made its own group, and was too
+    # far from the "1"s to be taken back. The book showed "1" and "14" as two
+    # separate hotspots on one printed number, and part 114 was unreachable.
+    #
+    # Merging until nothing more can merge removes the dependency on order
+    # altogether, and with it a whole class of one-pixel accidents.
+    changed = True
+    while changed:
+        changed = False
+        for i in range(len(groups)):
+            for j in range(i + 1, len(groups)):
+                if can_join(groups[i], groups[j]):
+                    absorb(groups[i], groups[j])
+                    groups.pop(j)
+                    changed = True
+                    break
+            if changed:
+                break
 
     def crowding(x1, y1, x2, y2):
         """How much ink surrounds this candidate. A printed callout stands in
@@ -272,6 +328,35 @@ def callouts(pdf, page, keys, max_y=100.0):
         around = outer.size - inner.size
         return (outer.sum() - inner.sum()) / max(1, around)
 
+    # A "1" is unmistakably narrower than any other character, and that settles
+    # the one confusion Tesseract cannot: 11 against 17. On the G621AVS's
+    # accessories the printed "11" read as 17 five times out of six, because a
+    # crop tight enough to isolate it is too tight to show the 7 has no bar.
+    # The shape does not care about the crop.
+    #
+    # Measured over all 347 glyphs of every accepted callout in this book's two
+    # largest figures: "1" runs 0.318 to 0.400 of its own height, and every
+    # other digit 0.591 to 0.850. Nothing lands between. The threshold sits in
+    # that gap, a quarter clear of the widest "1" and a fifth clear of the
+    # narrowest of the rest.
+    ONE_MAX_RATIO = 0.50
+
+    def width_agrees(reading, boxes):
+        """Does each character match the shape of the blob it claims to be?
+
+        A blob holding two touching digits is skipped rather than guessed at:
+        its width says nothing about either character on its own."""
+        if sum(b[4] for b in boxes) != len(reading):
+            return False
+        i = 0
+        for b in sorted(boxes, key=lambda b: b[0]):
+            if b[4] == 1:
+                narrow = (b[2] - b[0]) / max(1, b[3] - b[1]) < ONE_MAX_RATIO
+                if (reading[i] == "1") != narrow:
+                    return False
+            i += b[4]
+        return True
+
     # How much paper to leave round the crop, and which segmentation mode.
     # Tried in order, first full reading wins, so an easy callout still costs
     # one attempt. Padding is not a detail: on Fig.2 the "59" read as "5" at
@@ -283,13 +368,33 @@ def callouts(pdf, page, keys, max_y=100.0):
              (int(med * 0.60), 8), (int(med * 0.60), 7)]
 
     spots = []
-    for x1, y1, x2, y2, nglyphs in groups:
+    for x1, y1, x2, y2, nglyphs, boxes in groups:
         if in_lettering(x1, y1, x2, y2):
             continue
         # Measured across a whole figure: every genuine callout sits under
         # 0.062, most under 0.02, while the gasket cut-out that Tesseract read
         # as "24" sat at 0.192. Three times clear of anything real.
-        if crowding(x1, y1, x2, y2) > 0.12:
+        #
+        # A lone NARROW glyph is held to a stricter standard. Narrow means it
+        # can only be read as a "1" (see the width test below), and that is the
+        # one shape the drawing itself produces all the time: a slot milled in a
+        # bracket on the G621AVS is the same height, width, ink density and hole
+        # count as a printed 1, and put part 1 on that bracket. No other digit
+        # is at that risk - line art rarely closes a curve to exactly callout
+        # height - so no other digit pays for it.
+        #
+        # Holding every lone character to this was the wrong rule and cost a
+        # real one: the "6" beside callout 17 on Fig.3 sits at 0.074 and was
+        # thrown away. Genuine lone "1"s measure 0.002, 0.003, 0.012 and 0.041
+        # across the two books; the slot is 0.089. The limit is the midpoint of
+        # those two - and it is a thin margin, about 1.5x either way, so a book
+        # that breaks it should be looked at rather than trusted.
+        narrow_single = (
+            nglyphs == 1 and len(boxes) == 1 and
+            (boxes[0][2] - boxes[0][0]) / max(1, boxes[0][3] - boxes[0][1]) < ONE_MAX_RATIO
+        )
+        crowd_limit = 0.06 if narrow_single else 0.12
+        if crowding(x1, y1, x2, y2) > crowd_limit:
             continue
         # Two segmentation modes, because neither wins on its own. "one word"
         # is the better all-rounder but returns nothing at all for "11" — two
@@ -301,6 +406,7 @@ def callouts(pdf, page, keys, max_y=100.0):
         # Within a mode the crop is read at two scales and both must agree,
         # which is what stops a doubtful glyph becoming a confident wrong part.
         hit = None
+        ballot = {}   # every reading this glyph got, across all framings
         for pad2, psm in CROPS:
             crop = im.crop((max(0, x1 - pad2), max(0, y1 - pad2),
                             min(W, x2 + pad2), min(H, y2 + pad2)))
@@ -312,7 +418,7 @@ def callouts(pdf, page, keys, max_y=100.0):
             # back as "1", putting CARBURETOR ASS'Y on the shaft's callout.
             # Confidence gives no warning at all here; that one read as 0, and
             # so do dozens of perfectly good callouts.
-            if a not in keys or len(a) != nglyphs:
+            if a not in keys or len(a) != nglyphs or not width_agrees(a, boxes):
                 continue
             # Best of three scales rather than agreement between two. Fig.2's
             # "11" reads as 11, 11, 17 across scales — one dissenting "17" was
@@ -322,10 +428,48 @@ def callouts(pdf, page, keys, max_y=100.0):
             votes = [(a, ca)] + [read_one(crop, sc, psm) for sc in (4, 5)]
             tally = {}
             for t, c in votes:
-                tally.setdefault(t, []).append(c)
-            if len(tally.get(a, [])) >= 2:
+                # A vote for a reading the shapes contradict is not evidence.
+                if t in keys and width_agrees(t, boxes):
+                    tally.setdefault(t, []).append(c)
+            for t, cs in tally.items():
+                ballot.setdefault(t, []).extend(cs)
+            # Unanimous, so nothing later can outweigh it: take it and stop.
+            # Anything short of that is a glyph the reader is unsure of, and
+            # stopping at the first bare majority let one unlucky framing
+            # settle it. The G621AVS's accessories "11" read as 11 ten times
+            # out of twelve across the crops, and shipped as 17 - the one
+            # crop that happened to agree with itself first decided it, and
+            # put the piston-pin guide's number on the rotor puller.
+            if len(tally.get(a, [])) == 3:
                 hit = (a, min(tally[a]))
                 break
+        # No crop was certain. Decide on the whole ballot rather than on
+        # whichever framing was asked first: most readings wins, and ties go
+        # to the better-supported one. Still at least two agreeing readings,
+        # so a single stray glyph never becomes a part number.
+        if not hit and ballot:
+            best = max(ballot.items(), key=lambda kv: (len(kv[1]), sum(kv[1])))
+            if len(best[1]) >= 2:
+                hit = (best[0], min(best[1]))
+
+        # Set IPL_OCR_DEBUG=1 to see how each callout was decided. Chasing a
+        # wrong number without this means guessing at the crop the reader used,
+        # and a guessed crop reads differently from the real one - which is how
+        # an afternoon goes.
+        # IPL_OCR_WIDTHS=1 dumps every accepted character with the width of its
+        # own blob, which is how the "1" threshold above was measured. Merged
+        # pairs are skipped: their width belongs to neither character.
+        if os.environ.get("IPL_OCR_WIDTHS") and hit:
+            i = 0
+            for b in sorted(boxes, key=lambda b: b[0]):
+                if b[4] == 1:
+                    print(f"WIDTH	{hit[0][i]}	{(b[2]-b[0])/max(1,b[3]-b[1]):.3f}", file=sys.stderr)
+                i += b[4]
+        if DEBUG:
+            print(f"  group ({x1},{y1})-({x2},{y2}) glyphs={nglyphs} "
+                  f"crowd={crowding(x1, y1, x2, y2):.3f} "
+                  f"-> {hit[0] if hit else None}  ballot={ {t: [round(c) for c in cs] for t, cs in ballot.items()} }",
+                  file=sys.stderr)
         if not hit:
             continue
 
