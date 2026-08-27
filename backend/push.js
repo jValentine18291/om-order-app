@@ -66,12 +66,23 @@ function init(db) {
       auth       TEXT NOT NULL,
       user_id    TEXT NOT NULL DEFAULT '',
       role       TEXT NOT NULL DEFAULT '',
+      tech       TEXT NOT NULL DEFAULT '',
       created_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
     )
   `);
+  // Older installs have the table without it.
+  try {
+    const cols = db.prepare("PRAGMA table_info(push_subscriptions)").all().map((c) => c.name);
+    if (!cols.includes("tech")) {
+      db.exec("ALTER TABLE push_subscriptions ADD COLUMN tech TEXT NOT NULL DEFAULT ''");
+      console.log("[push] migrated: added tech to push_subscriptions");
+    }
+  } catch (e) {
+    console.error("[push] tech migration check failed:", e.message);
+  }
 }
 
-function subscribe(db, { subscription, user_id = "", role = "" }) {
+function subscribe(db, { subscription, user_id = "", role = "", tech = "" }) {
   const s = subscription || {};
   const keysIn = s.keys || {};
   if (!s.endpoint || !keysIn.p256dh || !keysIn.auth) {
@@ -83,12 +94,12 @@ function subscribe(db, { subscription, user_id = "", role = "" }) {
   // back the same endpoint, and the person or role attached to it may have
   // changed since.
   db.prepare(
-    `INSERT INTO push_subscriptions (endpoint, p256dh, auth, user_id, role)
-     VALUES (?, ?, ?, ?, ?)
+    `INSERT INTO push_subscriptions (endpoint, p256dh, auth, user_id, role, tech)
+     VALUES (?, ?, ?, ?, ?, ?)
      ON CONFLICT(endpoint) DO UPDATE SET
        p256dh = excluded.p256dh, auth = excluded.auth,
-       user_id = excluded.user_id, role = excluded.role`
-  ).run(s.endpoint, keysIn.p256dh, keysIn.auth, String(user_id), String(role));
+       user_id = excluded.user_id, role = excluded.role, tech = excluded.tech`
+  ).run(s.endpoint, keysIn.p256dh, keysIn.auth, String(user_id), String(role), String(tech));
   return { ok: true };
 }
 
@@ -119,11 +130,31 @@ const SEND_OPTS = { urgency: "high", TTL: 6 * 60 * 60 };
 // it. The status change is the thing that matters; telling people is a
 // courtesy on top.
 async function notify(db, roles, payload) {
-  let sent = 0, gone = 0, failed = 0;
   const marks = roles.map(() => "?").join(",");
   const rows = db.prepare(
     `SELECT * FROM push_subscriptions WHERE role IN (${marks})`
   ).all(...roles);
+  return sendTo(db, rows, payload);
+}
+
+// The technicians who worked on one machine, by the initials on their part
+// rows. Telling all four that a machine they never touched has been condemned
+// is how people learn to ignore notifications, so this is deliberately narrow -
+// but with NOBODY to tell (a machine with nothing scanned yet), every
+// technician is the honest fallback, since one of them has to act.
+async function notifyTechs(db, codes, payload) {
+  const list = (codes || []).map((c) => String(c).trim()).filter(Boolean);
+  const rows = list.length
+    ? db.prepare(
+        `SELECT * FROM push_subscriptions
+          WHERE role = 'tech' AND tech IN (${list.map(() => "?").join(",")})`
+      ).all(...list)
+    : db.prepare("SELECT * FROM push_subscriptions WHERE role = 'tech'").all();
+  return sendTo(db, rows, payload);
+}
+
+async function sendTo(db, rows, payload) {
+  let sent = 0, gone = 0, failed = 0;
 
   await Promise.all(rows.map(async (row) => {
     try {
@@ -195,5 +226,6 @@ module.exports = {
   unsubscribe,
   countFor,
   notify,
+  notifyTechs,
   testOne,
 };

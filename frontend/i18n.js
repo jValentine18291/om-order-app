@@ -179,6 +179,21 @@
 
     // ---- Machine modal ----
     "Machine": "机器",
+    // What Sales came back with. The technician acts on this, so it is the one
+    // set of strings here that must not be ambiguous.
+    "Go ahead and repair": "可以维修",
+    "The customer has confirmed this repair.": "客户已确认维修。",
+    "Do not repair — condemned": "不要维修 — 已报废",
+    "The customer does not want this machine repaired. Stop work on it.": "客户不维修这台机器。请停止作业。",
+    "Repair": "维修",
+    "Condemn": "报废",
+    "Repair confirmed": "已确认维修",
+    "Condemned": "已报废",
+    "Tell me what the customer said": "客户回复时通知我",
+    "Notify this device when Sales confirm a repair or condemn a machine": "销售确认维修或报废时通知本机",
+    "On for this device": "本机已开启",
+    "Turn on": "开启",
+    "Turn off": "关闭",
     "This machine has not been sent for quoting.": "这台机器尚未送去报价。",
     "Send this machine for quoting": "把这台机器送去报价",
     "Send for quoting again": "再次送去报价",
@@ -240,7 +255,6 @@
     // ---- Statuses (STATUS_LABEL in app.js) ----
     "Open": "待处理",
     "In Progress": "进行中",
-    "Quoted": "已报价",
     "All Repaired": "全部修好",
     "Closed": "已结单",
 

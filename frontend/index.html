@@ -304,6 +304,16 @@
         <p class="eyebrow">Open service</p>
         <h2>Pick a service slip</h2>
       </div>
+      <!-- Same row as the one on Need to Quote, for the other direction:
+           Sales decide, and the technician who did the work is told. -->
+      <div class="push-row" id="push-row-tech" style="display:none;">
+        <div class="push-txt">
+          <strong>Tell me what the customer said</strong>
+          <small id="push-sub-tech">Notify this device when Sales confirm a repair or condemn a machine</small>
+        </div>
+        <button type="button" class="btn-secondary push-btn" id="push-toggle-tech">Turn on</button>
+      </div>
+      <div class="push-help" id="push-help-tech" style="display:none;"></div>
       <div class="field">
         <label for="os-search">Search</label>
         <input id="os-search" type="text" autocomplete="off" placeholder="Slip number or company&hellip;" />
@@ -533,6 +543,10 @@
         </select>
       </div>
 
+      <!-- What Sales came back with, if they have rung the customer. Above
+           everything else because it decides whether to carry on at all. -->
+      <div class="decision-banner" id="mm-decision" style="display:none"></div>
+
       <div id="os-entry" style="display:none">
         <div class="slip-context" id="os-context"></div>
 
@@ -599,6 +613,39 @@
         <div class="mm-quote-state" id="mm-quote-state"></div>
         <button type="button" class="btn-secondary" id="mm-quote-btn">Send this machine for quoting</button>
       </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="location-modal" style="display:none">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div>
+          <strong>Change location</strong>
+          <div class="mm-sub" id="loc-part-name"></div>
+        </div>
+        <button class="modal-x" id="loc-close" aria-label="Close">&#10005;</button>
+      </div>
+
+      <div class="field" id="loc-entry-field">
+        <label for="loc-shelf">New location</label>
+        <input id="loc-shelf" type="text" autocomplete="off" autocapitalize="characters" placeholder="e.g. A1-03" />
+        <small class="loc-current" id="loc-current"></small>
+      </div>
+
+      <!-- Shown only at the confirmation step. This writes into AutoCount and
+           overwrites what is there, so the old and new values are put in front
+           of the person before anything is sent. -->
+      <div id="loc-confirm" style="display:none">
+        <div class="loc-confirm-box">
+          <div class="loc-confirm-line"><span>Part</span><b id="loc-c-part" class="mono"></b></div>
+          <div class="loc-confirm-line"><span>Now</span><b id="loc-c-old"></b></div>
+          <div class="loc-confirm-line"><span>Change to</span><b id="loc-c-new"></b></div>
+        </div>
+        <p class="loc-warn">This writes straight into AutoCount and replaces the current location.</p>
+      </div>
+
+      <button class="btn-primary" id="loc-submit" style="margin-top:8px;">Continue</button>
+      <button class="btn-secondary" id="loc-back" style="display:none; margin-top:8px;">Back</button>
     </div>
   </div>
 

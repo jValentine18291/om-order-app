@@ -699,6 +699,61 @@ function setMachineQuoteStatus(slipNumber, machineId, status) {
   return getSlip(slipNumber);
 }
 
+// ---- What the customer decided ---------------------------------------------
+// Sales ring the customer about a machine that is waiting to be quoted, and
+// come back with one of two answers. Recording it here is what lets the
+// technician be told: before this, the answer lived in whoever took the call.
+//
+// Deciding also settles the quote for that machine - it is no longer waiting -
+// so the slip falls out of the sales list on its own once every machine has an
+// answer.
+const MACHINE_DECISIONS = new Set(["REPAIR", "CONDEMN", ""]);
+
+function setMachineDecision(slipNumber, machineId, decision, by = "") {
+  const d = String(decision === undefined || decision === null ? "" : decision).toUpperCase();
+  if (!MACHINE_DECISIONS.has(d)) {
+    const e = new Error("Invalid decision."); e.status = 400; throw e;
+  }
+
+  const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
+  if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
+  if (slip.status === "CLOSED") { const e = new Error("Slip is already closed."); e.status = 400; throw e; }
+
+  const machine = db.prepare("SELECT * FROM slip_machines WHERE id = ? AND slip_id = ?")
+    .get(machineId, slip.id);
+  if (!machine) { const e = new Error("Machine not found on this slip."); e.status = 404; throw e; }
+
+  if (d === "") {
+    // Undoing a decision puts the machine back where it was: waiting to be
+    // quoted, so it returns to the sales list rather than disappearing.
+    db.prepare(
+      `UPDATE slip_machines
+          SET work_decision = '', decided_by = '', decided_at = '',
+              quote_status = CASE WHEN quote_status = 'QUOTED' THEN 'NEED_QUOTE' ELSE quote_status END
+        WHERE id = ?`
+    ).run(machine.id);
+  } else {
+    db.prepare(
+      `UPDATE slip_machines
+          SET work_decision = ?, decided_by = ?, decided_at = datetime('now','localtime'),
+              quote_status = 'QUOTED'
+        WHERE id = ?`
+    ).run(d, String(by || ""), machine.id);
+  }
+  syncSlipQuoteStatus(slip.id);
+  return getSlip(slipNumber);
+}
+
+// Which technicians worked on a machine, by the initials on their part rows -
+// the only record of who touched it. A machine with nothing scanned yet has
+// none, and the caller decides what to do about that.
+function techniciansForMachine(machineId) {
+  return db.prepare(
+    `SELECT DISTINCT technician FROM machine_parts
+      WHERE machine_id = ? AND TRIM(IFNULL(technician, '')) != ''`
+  ).all(machineId).map((r) => String(r.technician).trim());
+}
+
 function syncSlipQuoteStatus(slipId) {
   const slip = db.prepare("SELECT * FROM service_slips WHERE id = ?").get(slipId);
   // A slip that is finished, converted or closed has left quoting behind; its
@@ -736,7 +791,7 @@ function syncSlipQuoteStatus(slipId) {
 }
 
 const slips = {
-  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, setSlipStatus, setMachineQuoteStatus, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, setSlipStatus, setMachineQuoteStatus, setMachineDecision, techniciansForMachine, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, closeSlip,
 };
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };

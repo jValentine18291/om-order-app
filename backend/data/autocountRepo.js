@@ -242,6 +242,107 @@ async function setMissingPrice(exactItemCode, tier, newPrice) {
   return { ...base, status: "updated", old_price: 0 };
 }
 
+// ============================================================================
+// SHELF LOCATION WRITE-BACK
+// ============================================================================
+// The third thing this app writes into AutoCount, after prices and Sales
+// Orders. Admin only: when a part moves shelf, whoever moved it can correct it
+// from the phone in front of the bin instead of remembering to do it later at
+// a desk, which is how a location goes stale.
+//
+// It differs from the price write in one important way: a price may only ever
+// be filled in when blank, but a location is MEANT to be changed - that is the
+// whole point. So the safety is not "refuse if occupied", it is:
+//   - exact ItemCode only, never a loose match (see the IPL variant rule:
+//     848BE058B2 and 848BE058B2R are different parts)
+//   - one column, on the one base-UOM row, and rowsAffected is read not assumed
+//   - the old value is read first and shown to the person for confirmation,
+//     and both values go in the log
+//   - length checked against the column's ACTUAL width, read from the server
+//
+// Writing here bypasses AutoCount's own audit trail, so backend/location-
+// updates.log is the only record of who moved what. Do not delete it.
+
+function locationWritebackEnabled() {
+  // On unless deliberately switched off. The other two write-backs default off
+  // because they touch money; a shelf label does not, and John asked for this
+  // one to work on deployment.
+  return String(process.env.AUTOCOUNT_LOCATION_WRITEBACK || "true").toLowerCase() === "true";
+}
+
+// How wide ItemUOM.Shelf actually is, asked once and remembered. Guessing a cap
+// would either reject a legitimate location or let the driver raise "String or
+// binary data would be truncated", which tells the person at the bin nothing.
+let shelfWidth = null;
+async function shelfMaxChars() {
+  if (shelfWidth !== null) return shelfWidth;
+  try {
+    const rows = await query(
+      `SELECT CHARACTER_MAXIMUM_LENGTH AS Len
+         FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME = 'ItemUOM' AND COLUMN_NAME = 'Shelf'`
+    );
+    const n = rows.length ? Number(rows[0].Len) : 0;
+    // -1 means varchar(max); treat anything unreadable as a conservative 20.
+    shelfWidth = n === -1 ? 255 : (Number.isFinite(n) && n > 0 ? n : 20);
+  } catch (_) {
+    shelfWidth = 20;
+  }
+  return shelfWidth;
+}
+
+async function setPartShelf(exactItemCode, newShelf) {
+  const code = String(exactItemCode || "").trim();
+  if (!code) { const e = new Error("Missing item code."); e.status = 400; throw e; }
+
+  // Trimmed, and inner runs of whitespace collapsed: "A1  -  3" and "A1 - 3"
+  // are the same shelf and should not read as two.
+  const shelf = String(newShelf === undefined || newShelf === null ? "" : newShelf)
+    .replace(/\s+/g, " ").trim();
+  if (!shelf) {
+    const e = new Error("Enter a location. To clear one, do it in AutoCount.");
+    e.status = 400; throw e;
+  }
+  const cap = await shelfMaxChars();
+  if (shelf.length > cap) {
+    const e = new Error(`A location can be at most ${cap} characters in AutoCount.`);
+    e.status = 400; throw e;
+  }
+
+  const rows = await query(
+    `SELECT TOP 1 i.ItemCode, i.BaseUOM, u.UOM AS UomRow, u.Shelf AS CurrentShelf
+       FROM Item i
+       LEFT JOIN ItemUOM u ON u.ItemCode = i.ItemCode AND u.UOM = i.BaseUOM
+      WHERE i.ItemCode = @code`,
+    { code }
+  );
+  if (!rows.length) {
+    return { status: "not_found", item_code: code, old_shelf: null, new_shelf: shelf };
+  }
+  const row = rows[0];
+  const base = { item_code: row.ItemCode, new_shelf: shelf };
+  if (row.UomRow === null || row.UomRow === undefined) {
+    return { ...base, status: "no_uom_row", old_shelf: null };
+  }
+  const current = row.CurrentShelf === null || row.CurrentShelf === undefined
+    ? "" : String(row.CurrentShelf).trim();
+  if (current === shelf) {
+    return { ...base, status: "unchanged", old_shelf: current };
+  }
+
+  const res = await execute(
+    `UPDATE ItemUOM SET Shelf = @shelf WHERE ItemCode = @code AND UOM = @uom`,
+    { shelf, code: row.ItemCode, uom: row.BaseUOM }
+  );
+  if (!res.rowsAffected) {
+    return { ...base, status: "no_uom_row", old_shelf: current };
+  }
+  return { ...base, status: "updated", old_shelf: current };
+}
+
+module.exports.locationWritebackEnabled = locationWritebackEnabled;
+module.exports.setPartShelf = setPartShelf;
+
 module.exports.PRICE_TIERS = PRICE_TIERS;
 module.exports.setMissingPrice = setMissingPrice;
 

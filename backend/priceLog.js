@@ -43,4 +43,23 @@ function logPriceEvent({ source, itemCode, tier, oldPrice, newPrice, who, outcom
   }
 }
 
-module.exports = { logPriceEvent, LOG_PATH };
+// Shelf locations, same reasoning and a file of their own. A location is
+// MEANT to change, so unlike a price there is no "already set" guard to fall
+// back on - this log is the whole safety net for a shelf that was moved by
+// mistake, because it records what it used to be.
+const LOCATION_LOG_PATH = path.join(__dirname, "location-updates.log");
+
+function logLocationEvent({ source, itemCode, oldShelf, newShelf, who, outcome }) {
+  const place = (v) => (v === null || v === undefined || String(v).trim() === "" ? "not set" : String(v).trim());
+  const line =
+    `${ts()} | ${source || "-"} | ${itemCode || "-"} | ` +
+    `${place(oldShelf)} -> ${place(newShelf)} | ${who || "-"} | ${outcome}
+`;
+  try {
+    fs.appendFileSync(LOCATION_LOG_PATH, line);
+  } catch (e) {
+    console.error("[locationLog] could not write log:", e.message);
+  }
+}
+
+module.exports = { logPriceEvent, LOG_PATH, logLocationEvent, LOCATION_LOG_PATH };

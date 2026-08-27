@@ -1536,6 +1536,56 @@ select {
    further down the page: the order popup opened behind it and only appeared
    once the part sheet was closed. Lift it above the rest. */
 #order-modal { z-index: 70; }
+/* Same reason as the line above: every .modal-overlay shares z-index 60, so
+   without this the location popup opens BEHIND the IPL part sheet it was
+   launched from and looks like nothing happened. */
+#location-modal { z-index: 70; }
+
+/* ---- Change location (Admin only) -------------------------------------- */
+.loc-current { display: block; margin-top: 6px; font-size: .82rem; color: var(--ink-faint); }
+.loc-confirm-box {
+  background: var(--surface-2, #f6f9fa); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 14px; margin-top: 4px;
+}
+.loc-confirm-line {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  padding: 5px 0; font-size: .9rem; color: var(--ink-soft);
+}
+.loc-confirm-line b { color: var(--ink); text-align: right; word-break: break-word; }
+.loc-warn {
+  margin: 10px 0 0; padding: 10px 12px;
+  background: #FFF6E5; border-left: 3px solid #E0A22A; border-radius: 6px;
+  font-size: .84rem; color: #8A5B00; line-height: 1.45;
+}
+/* The button that opens it, sitting on the Location row of a stock card. */
+.fp-shelf-edit {
+  margin-left: 10px; padding: 3px 10px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface);
+  font-size: .75rem; font-weight: 600; color: var(--ink-soft); cursor: pointer;
+}
+.fp-shelf-edit:active { background: #eef3f5; }
+
+/* ---- What the customer decided ----------------------------------------- */
+.mq-repair  { color: #1B7A42; background: #E7F5EC; }
+.mq-condemn { color: #A32020; background: #FBE9E9; }
+.decision-banner {
+  margin: 10px 0 0; padding: 12px 14px; border-radius: var(--radius-sm);
+  font-size: .9rem; line-height: 1.5; border-left: 4px solid;
+}
+.decision-repair  { background: #E7F5EC; border-color: #1B7A42; color: #14532d; }
+.decision-condemn { background: #FBE9E9; border-color: #A32020; color: #7a1a1a; }
+.decision-banner b { display: block; font-size: 1rem; margin-bottom: 2px; }
+.decision-who { display: block; margin-top: 4px; font-size: .8rem; opacity: .8; }
+/* Sales' two answers, on a machine awaiting a quote. */
+.decide-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.decide-btn {
+  flex: 1 1 auto; min-height: 42px; padding: 0 14px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--surface);
+  font-size: .9rem; font-weight: 700; cursor: pointer;
+}
+.decide-repair  { color: #1B7A42; border-color: #9ed4b4; }
+.decide-condemn { color: #A32020; border-color: #e6b0b0; }
+.decide-btn:active { filter: brightness(.96); }
 
 /* "Find in this figure" — the gap under the diagram. A class rather than an
    inline style, so the tablet layout can lift it into its own column. */

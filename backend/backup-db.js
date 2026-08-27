@@ -29,6 +29,7 @@ const { DatabaseSync } = require("node:sqlite");
 
 const DB_PATH = path.join(__dirname, "om_orders.db");
 const LOG_PATH = path.join(__dirname, "price-updates.log");
+const LOCATION_LOG_PATH = path.join(__dirname, "location-updates.log");
 const DEST = process.argv[2] || process.env.OM_BACKUP_DIR || path.join(__dirname, "backups");
 const KEEP_DAYS = Math.max(1, Number(process.env.OM_BACKUP_KEEP_DAYS) || 30);
 const KEEP_AT_LEAST = 7; // never prune below this many, however old they are
@@ -108,13 +109,18 @@ function main() {
   // ---- the price audit log travels with it ----
   // AutoCount keeps no record of prices set from the app, so this file is the
   // only trail. It is excluded from GitHub, so backups are its only copy.
-  if (fs.existsSync(LOG_PATH)) {
-    const logOut = path.join(DEST, `price-updates-${stamp()}.log`);
+  // The same is true of shelf locations, so that log travels with it too.
+  for (const [src, prefix, what] of [
+    [LOG_PATH, "price-updates", "price"],
+    [LOCATION_LOG_PATH, "location-updates", "location"],
+  ]) {
+    if (!fs.existsSync(src)) continue;
+    const logOut = path.join(DEST, `${prefix}-${stamp()}.log`);
     try {
-      fs.copyFileSync(LOG_PATH, logOut);
-      console.log(`  copied the price audit log (${mb(fs.statSync(logOut).size)})`);
+      fs.copyFileSync(src, logOut);
+      console.log(`  copied the ${what} audit log (${mb(fs.statSync(logOut).size)})`);
     } catch (e) {
-      console.log(`  WARNING: could not copy the price audit log — ${e.message}`);
+      console.log(`  WARNING: could not copy the ${what} audit log — ${e.message}`);
     }
   }
 
@@ -131,8 +137,10 @@ function main() {
   for (const b of removable) {
     try {
       fs.unlinkSync(path.join(DEST, b.f));
-      const log = path.join(DEST, b.f.replace(PREFIX, "price-updates-").replace(/\.db$/, ".log"));
-      if (fs.existsSync(log)) fs.unlinkSync(log);
+      for (const prefix of ["price-updates-", "location-updates-"]) {
+        const log = path.join(DEST, b.f.replace(PREFIX, prefix).replace(/\.db$/, ".log"));
+        if (fs.existsSync(log)) fs.unlinkSync(log);
+      }
     } catch (e) {
       console.log(`  WARNING: could not remove ${b.f} — ${e.message}`);
     }

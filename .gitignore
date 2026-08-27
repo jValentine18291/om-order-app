@@ -22,6 +22,9 @@ backend/backup-last-run.txt
 backend/service-out.log
 backend/service-err.log
 backend/price-updates.log
+# Who moved a part to which shelf. AutoCount keeps no record of app writes,
+# so this is the only one. Never delete it.
+backend/location-updates.log
 backend/whatsapp-sends.log
 backend/autocount-orders.log
 *.log

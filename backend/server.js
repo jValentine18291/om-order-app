@@ -77,8 +77,8 @@ app.get("/api/push/key", (_req, res) => res.json({ key: push.publicKey }));
 
 app.post("/api/push/subscribe", (req, res) => {
   try {
-    const { subscription, user_id, role } = req.body || {};
-    res.json(push.subscribe(pushDb, { subscription, user_id, role }));
+    const { subscription, user_id, role, tech } = req.body || {};
+    res.json(push.subscribe(pushDb, { subscription, user_id, role, tech }));
   } catch (err) {
     res.status(err.status || 500).json({ error: err.message || "Could not subscribe" });
   }
@@ -95,8 +95,13 @@ app.post("/api/push/unsubscribe", (req, res) => {
 // How many devices would be told. Lets the app say "3 devices" rather than
 // leaving someone wondering whether it is on anywhere at all — and "0 devices"
 // is the answer to most of the ways this can appear broken.
-app.get("/api/push/status", (_req, res) => {
-  res.json({ devices: push.countFor(pushDb, QUOTE_NOTIFY_ROLES) });
+// How many devices are being notified. Asked by whichever row is on screen, so
+// it has to count the right group: telling a technician that "2 devices are
+// being notified" when those two are the sales phones is worse than silence.
+app.get("/api/push/status", (req, res) => {
+  const group = String((req.query || {}).group || "").toLowerCase() === "tech"
+    ? ["tech"] : QUOTE_NOTIFY_ROLES;
+  res.json({ devices: push.countFor(pushDb, group) });
 });
 
 // ---- API: item lookup ------------------------------------------------------
@@ -477,6 +482,71 @@ app.post("/api/part-prices", async (req, res) => {
   }
 });
 
+// Move a part to a different shelf (Find Part / IPL -> Change location).
+// The THIRD write into the accounting database, and unlike the price one it
+// deliberately overwrites: a location is meant to change when a part moves.
+// So the safety is a confirmation the person must read - the old value comes
+// back from the same query that performs the write - plus an exact item code,
+// one column on one row, and a permanent log of what it used to be.
+//
+// Admin only. As with prices, that is an accident guard rather than security:
+// the app has no logins, so the role comes from the browser. It stops a
+// technician changing a shelf by mistake, which is what it is for.
+app.post("/api/part-location", async (req, res) => {
+  const { logLocationEvent } = require("./priceLog");
+  const { item_code, shelf, who = "", role = "" } = req.body || {};
+  const stamp = (outcome, extra = {}) =>
+    logLocationEvent({
+      source: (req.body || {}).source || "Find Part",
+      itemCode: extra.item_code || item_code,
+      oldShelf: extra.old_shelf === undefined ? null : extra.old_shelf,
+      newShelf: extra.new_shelf || shelf,
+      who: `${who || "?"} (${role || "?"})`,
+      outcome,
+    });
+
+  try {
+    // Who is asking comes first: it is the cheapest check, it needs no database,
+    // and "Only Admin can change a location" is the honest answer to give a
+    // technician - "AutoCount is not enabled" would send them to the wrong place.
+    if (String(role || "").toLowerCase() !== "admin") {
+      stamp("REFUSED - not an admin");
+      return res.status(403).json({ error: "Only Admin can change a part's location." });
+    }
+    if (!String(who || "").trim()) {
+      return res.status(400).json({ error: "Missing initials, so the change could not be traced." });
+    }
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") {
+      return res.status(503).json({ error: "AutoCount is not enabled." });
+    }
+    const acRepo = require("./data/autocountRepo");
+    if (!acRepo.locationWritebackEnabled()) {
+      return res.status(403).json({
+        error: "Changing locations is switched off. Ask IT about AUTOCOUNT_LOCATION_WRITEBACK.",
+      });
+    }
+
+    const r = await acRepo.setPartShelf(item_code, shelf);
+    const messages = {
+      updated: `Location changed to ${r.new_shelf} in AutoCount.`,
+      unchanged: `That is already the location — nothing was changed.`,
+      not_found: `"${item_code}" is no longer in AutoCount.`,
+      no_uom_row: `This item has no unit-of-measure row in AutoCount, so the location must be set there.`,
+    };
+    stamp(r.status === "updated" ? "updated in AutoCount" : `no change - ${r.status}`, r);
+    if (r.status !== "updated") {
+      return res.status(409).json({ error: messages[r.status] || "Nothing was changed.", status: r.status });
+    }
+    res.json({ ...r, message: messages.updated });
+  } catch (err) {
+    stamp(`FAILED - ${err.message}`);
+    if (err.status === 400) return res.status(400).json({ error: err.message });
+    console.error("[POST /api/part-location]", err.message);
+    res.status(500).json({ error: "Could not save the location to AutoCount." });
+  }
+});
+
 // Find Part: search parts by description/code (suggestion list).
 app.get("/api/parts-search", async (req, res) => {
   try {
@@ -644,6 +714,41 @@ app.patch("/api/slips/:slip/status", async (req, res) => {
     if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
     console.error("[PATCH /api/slips/:slip/status]", err);
     res.status(err.status || 500).json({ error: err.message || "Failed to update status" });
+  }
+});
+
+// What the customer said, once Sales have rung them about a quoted machine:
+// repair it, or condemn it. The technicians who worked on THAT machine are
+// told, because the slip may hold another machine that is nothing to do with
+// them and a notification everyone gets is a notification nobody reads.
+app.patch("/api/slips/:slip/machines/:id/decision", async (req, res) => {
+  try {
+    const body = req.body || {};
+    const machineId = Number(req.params.id);
+    const wanted = String(body.decision || "").toUpperCase();
+    const slip = await data.slips.setMachineDecision(
+      req.params.slip, machineId, wanted, body.who || ""
+    );
+    res.json(slip);
+
+    // Answer first, notify after - the same reasoning as the quote push: the
+    // person who tapped the button should not wait on Google or Apple.
+    if (wanted === "REPAIR" || wanted === "CONDEMN") {
+      const m = (slip.machines || []).find((x) => x.id === machineId);
+      const techs = await data.slips.techniciansForMachine(machineId);
+      const action = wanted === "REPAIR" ? "Repair" : "Condemn";
+      push.notifyTechs(pushDb, techs, {
+        title: `${action}: ${m ? m.machine_desc : "machine"}`,
+        body: `${slip.slip_number} · ${slip.company} · the customer says ${
+          wanted === "REPAIR" ? "go ahead with the repair" : "do not repair - condemn it"
+        }`,
+        slip: slip.slip_number,
+      }).catch((e) => console.error("[push] notify failed:", e.message));
+    }
+  } catch (err) {
+    if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
+    console.error("[PATCH /api/slips/:slip/machines/:id/decision]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to record the decision" });
   }
 });
 

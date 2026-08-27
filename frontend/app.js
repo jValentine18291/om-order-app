@@ -1152,6 +1152,11 @@ function statusOk(m) { return `<span class="led" style="background:#38A32A;box-s
 // ---- Open Service: slip list -> slip detail -> machine modal ---------------
 async function enterOpenService() {
   showScreen("open");
+  // Technicians only: this row tells THEM what the customer said. Sales have
+  // their own on Need to Quote, pointing the other way. Anyone else opening a
+  // slip does not need a second notifications control.
+  if (getRole() === "tech") renderPushRow("tech");
+  else { const r = $("push-row-tech"); if (r) r.style.display = "none"; }
   session.slipNumber = null; session.slip = null; session.machineId = null;
   session.technician = ""; session.pendingParts = [];
   $("os-slip-list").innerHTML = `<div class="fp-loading">Loading slips…</div>`;
@@ -1244,7 +1249,12 @@ function renderSlipScreen() {
     // Quoting is per machine, so the state has to be visible per machine -
     // otherwise the only way to find out which one is waiting is to open each.
     const q = m.quote_status || "";
-    const qTag = q === "NEED_QUOTE" ? `<span class="machine-quote mq-need">Waiting to quote</span>`
+    // The customer's answer outranks the quoting state: it is what the
+    // technician has to act on.
+    const d = m.work_decision || "";
+    const qTag = d === "REPAIR"     ? `<span class="machine-quote mq-repair">Repair</span>`
+               : d === "CONDEMN"    ? `<span class="machine-quote mq-condemn">Condemn</span>`
+               : q === "NEED_QUOTE" ? `<span class="machine-quote mq-need">Waiting to quote</span>`
                : q === "QUOTED"     ? `<span class="machine-quote mq-done">Quoted</span>`
                : "";
     return `
@@ -1284,6 +1294,7 @@ function openMachineModal(machineId) {
   loadLabourForCurrentMachine();
   renderMachineParts();
   renderMachineQuoteRow();
+  renderMachineDecisionBanner();
   updateSlipFooter();
   $("machine-modal").style.display = "flex";
   document.body.style.overflow = "hidden";
@@ -1699,6 +1710,23 @@ function updateSlipFooter() {
 // A technician who has finished one machine on a two-machine slip can hand that
 // one over to be priced without claiming the other is done. The slip's own
 // buttons still cover "all of them together".
+function renderMachineDecisionBanner() {
+  const box = $("mm-decision");
+  if (!box) return;
+  const m = currentMachine();
+  const d = m ? (m.work_decision || "") : "";
+  if (!d) { box.style.display = "none"; box.innerHTML = ""; return; }
+  const who = m.decided_by ? ` ${escapeHtml(m.decided_by)}` : "";
+  const when = m.decided_at ? ` · ${escapeHtml(formatDate(m.decided_at) || m.decided_at)}` : "";
+  box.className = "decision-banner " + (d === "REPAIR" ? "decision-repair" : "decision-condemn");
+  box.innerHTML = d === "REPAIR"
+    ? `<b>Go ahead and repair</b>The customer has confirmed this repair.
+       <span class="decision-who">Confirmed by${who}${when}</span>`
+    : `<b>Do not repair — condemned</b>The customer does not want this machine repaired. Stop work on it.
+       <span class="decision-who">Decided by${who}${when}</span>`;
+  box.style.display = "block";
+}
+
 function renderMachineQuoteRow() {
   const row = $("mm-quote-row");
   if (!row) return;
@@ -1756,6 +1784,7 @@ $("mm-quote-btn").addEventListener("click", async () => {
     await refreshSlip();
     renderMachineParts();
     renderMachineQuoteRow();
+    renderMachineDecisionBanner();
     updateSlipFooter();
     toast(next === "NEED_QUOTE" ? "Sent for quoting" : "Taken back", "ok");
   } catch (e) {
@@ -2067,6 +2096,7 @@ async function onViewSlipChosen(slipNumber) {
     const slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
     wrap.innerHTML = renderSlipDetail(slip);
     wireVsStatusActions(slipNumber);
+    wireDecideButtons(wrap, slipNumber);
     // Rebuilt from the stored slip, so a re-issued copy matches the original.
     const share = document.getElementById("vs-share");
     if (share) share.addEventListener("click", () => shareSlipPdf(slip));
@@ -2178,12 +2208,30 @@ function renderSlipDetail(slip) {
     for (const p of parts) { mQty += p.quantity; mAmount += p.unit_price * p.quantity; }
     mAmount += mLabour;
 
+    // What the customer said, if they have been asked. It replaces the quoting
+    // pill because it is the later and more useful fact: "Quoted" only says
+    // Sales priced it, this says what came back.
+    const decision = m.work_decision || "";
+    const pill = decision === "REPAIR"  ? ` <span class="machine-quote mq-repair">Repair confirmed</span>`
+               : decision === "CONDEMN" ? ` <span class="machine-quote mq-condemn">Condemned</span>`
+               : m.quote_status === "NEED_QUOTE" ? ` <span class="machine-quote mq-need">Waiting to quote</span>`
+               : m.quote_status === "QUOTED"     ? ` <span class="machine-quote mq-done">Quoted</span>` : "";
+
     html += `
       <div class="vs-machine">
-        <div class="vs-machine-name">${escapeHtml(m.machine_desc)}${
-          m.quote_status === "NEED_QUOTE" ? ` <span class="machine-quote mq-need">Waiting to quote</span>`
-        : m.quote_status === "QUOTED"     ? ` <span class="machine-quote mq-done">Quoted</span>` : ""}</div>
-        ${m.serial_no ? `<div class="vs-machine-serial">S/N ${escapeHtml(m.serial_no)}</div>` : ""}`;
+        <div class="vs-machine-name">${escapeHtml(m.machine_desc)}${pill}</div>`;
+
+    // Sales ring the customer and come back with one of two answers. Offered
+    // while the machine is waiting, and again afterwards so a mistake or a
+    // change of mind can be corrected.
+    if (canDecide() && (m.quote_status === "NEED_QUOTE" || decision)) {
+      html += `<div class="decide-row" data-decide="${m.id}">
+          <button type="button" class="decide-btn decide-repair"${decision === "REPAIR" ? " disabled" : ""} data-decision="REPAIR">Confirm Repair</button>
+          <button type="button" class="decide-btn decide-condemn"${decision === "CONDEMN" ? " disabled" : ""} data-decision="CONDEMN">Condemn</button>
+          ${decision ? `<button type="button" class="decide-btn" data-decision="">Undo</button>` : ""}
+        </div>`;
+    }
+    html += `${m.serial_no ? `<div class="vs-machine-serial">S/N ${escapeHtml(m.serial_no)}</div>` : ""}`;
 
     if (m.repair_comment) {
       html += `<div class="vs-comment">${escapeHtml(m.repair_comment)}</div>`;
@@ -2243,6 +2291,39 @@ function renderSlipDetail(slip) {
   }
 
   return html;
+}
+
+// Recording what the customer said, and telling the technician who did the
+// work. Condemn is confirmed first: it tells someone to stop work on a machine,
+// and it is one tap away from Confirm Repair.
+function wireDecideButtons(wrap, slipNumber) {
+  wrap.querySelectorAll(".decide-row [data-decision]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const row = btn.closest(".decide-row");
+      const machineId = Number(row.dataset.decide);
+      const decision = btn.dataset.decision;
+      if (decision === "CONDEMN" && !confirm(
+        "Condemn this machine?\n\nThe technicians who worked on it will be told to stop."
+      )) return;
+
+      row.querySelectorAll("button").forEach((b) => { b.disabled = true; });
+      try {
+        await api(`/api/slips/${encodeURIComponent(slipNumber)}/machines/${machineId}/decision`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ decision, who: initialsFor(getUser()) }),
+        });
+        toast(decision === "REPAIR" ? "Repair confirmed — technician notified"
+            : decision === "CONDEMN" ? "Condemned — technician notified"
+            : "Decision undone", "ok");
+        onViewSlipChosen(slipNumber);
+        refreshQuoteCount();
+      } catch (e) {
+        toast(e.message || "Could not save that", "err");
+        row.querySelectorAll("button").forEach((b) => { b.disabled = false; });
+      }
+    });
+  });
 }
 
 // ---- Sales Order block ------------------------------------------------------
@@ -2868,13 +2949,130 @@ async function showPartStock(code) {
     detail.innerHTML = `
       <div class="fp-row"><span class="fp-lbl">Part No.</span><span class="fp-val mono">${escapeHtml(p.item_code)}</span></div>
       <div class="fp-row"><span class="fp-lbl">Description</span><span class="fp-val">${escapeHtml(p.description)}${p.desc2 ? `<br><span class="fp-val-model">${escapeHtml(p.desc2)}</span>` : ""}</span></div>
-      <div class="fp-row"><span class="fp-lbl">Location / Shelf</span><span class="fp-val">${p.shelf ? escapeHtml(p.shelf) : "—"}</span></div>
+      ${shelfRowHtml(p)}
       <div class="fp-row"><span class="fp-lbl">Bal. Qty</span><span class="fp-val fp-qty ${qty > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${qtyStr}${p.uom ? " " + escapeHtml(p.uom) : ""}</span></div>`;
     $("fp-order-more").style.display = "block";
+    wireShelfEdit(detail, p, (shelf) => { p.shelf = shelf; showPartStock(p.item_code); });
   } catch (e) {
     detail.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Lookup failed")}</div>`;
   }
 }
+
+// Sales take the call, so Sales record the answer. Purchaser and Admin share
+// the sales screens and cover for them, the same as everywhere else in the app.
+function canDecide() {
+  return ["sales", "purchaser", "admin"].includes(getRole());
+}
+
+// ---- Location row, shared by both stock cards -------------------------------
+// Find Part and the IPL part sheet render the same card. The row lives here so
+// the Change button cannot end up on one and not the other.
+function shelfRowHtml(p) {
+  const admin = getRole() === "admin";
+  return `<div class="fp-row">
+      <span class="fp-lbl">Location / Shelf</span>
+      <span class="fp-val">${p.shelf ? escapeHtml(p.shelf) : "—"}${
+        admin ? `<button type="button" class="fp-shelf-edit" data-shelf-edit>Change</button>` : ""
+      }</span>
+    </div>`;
+}
+
+// Wire whatever Change button that card just rendered. Called after the card is
+// written, because innerHTML replaces the previous button and its listener.
+function wireShelfEdit(container, part, onSaved) {
+  const btn = container.querySelector("[data-shelf-edit]");
+  if (btn) btn.addEventListener("click", () => openLocationModal(part, onSaved));
+}
+
+// ---- Change location (Admin only) -------------------------------------------
+// This WRITES to AutoCount and overwrites what is there - a location is meant
+// to change, so unlike a price there is no "already set" guard to fall back on.
+// The confirmation step is the guard: the current value and the new one are put
+// side by side before anything is sent.
+let locPart = null;
+let locOnSaved = null;
+
+function showLocationStep(step) {
+  const confirming = step === "confirm";
+  $("loc-entry-field").style.display = confirming ? "none" : "";
+  $("loc-confirm").style.display = confirming ? "" : "none";
+  $("loc-back").style.display = confirming ? "" : "none";
+  $("loc-submit").textContent = confirming ? "Change it in AutoCount" : "Continue";
+}
+
+function openLocationModal(part, onSaved) {
+  if (!part || !part.item_code) return;
+  locPart = part;
+  locOnSaved = onSaved || null;
+  $("loc-part-name").textContent = `${part.description || ""} · ${part.item_code}`;
+  $("loc-shelf").value = part.shelf || "";
+  $("loc-current").textContent = part.shelf
+    ? `Currently ${part.shelf}`
+    : "No location recorded yet";
+  showLocationStep("entry");
+  $("location-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+  setTimeout(() => { $("loc-shelf").focus(); $("loc-shelf").select(); }, 50);
+}
+
+function closeLocationModal() {
+  $("location-modal").style.display = "none";
+  // The IPL part sheet may still be open underneath; only release the page
+  // scroll if nothing else is holding it.
+  const stillOpen = ["ipl-modal", "machine-modal", "order-modal"]
+    .some((id) => $(id) && $(id).style.display === "flex");
+  if (!stillOpen) document.body.style.overflow = "";
+  locPart = null;
+  locOnSaved = null;
+}
+
+$("loc-close").addEventListener("click", closeLocationModal);
+$("loc-back").addEventListener("click", () => showLocationStep("entry"));
+
+$("loc-submit").addEventListener("click", async () => {
+  if (!locPart) return;
+  const shelf = $("loc-shelf").value.replace(/\s+/g, " ").trim();
+  if (!shelf) { toast("Enter a location", "err"); return; }
+
+  // First tap shows what is about to change; second tap sends it.
+  if ($("loc-confirm").style.display === "none") {
+    if (shelf === (locPart.shelf || "").trim()) {
+      toast("That is already the location", "err");
+      return;
+    }
+    $("loc-c-part").textContent = locPart.item_code;
+    $("loc-c-old").textContent = locPart.shelf || "not set";
+    $("loc-c-new").textContent = shelf;
+    showLocationStep("confirm");
+    return;
+  }
+
+  const btn = $("loc-submit");
+  btn.disabled = true;
+  try {
+    const me = getUser();
+    const r = await api("/api/part-location", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        item_code: locPart.item_code,
+        shelf,
+        who: initialsFor(me),
+        role: getRole(),
+        source: $("ipl-modal").style.display === "flex" ? "IPL" : "Find Part",
+      }),
+    });
+    const saved = locOnSaved;
+    toast(r.message || "Location changed", "ok");
+    closeLocationModal();
+    if (saved) saved(shelf);
+  } catch (e) {
+    toast(e.message || "Could not change the location", "err");
+    btn.disabled = false;
+    return;
+  }
+  btn.disabled = false;
+});
 
 // ---- Order More popup -------------------------------------------------------
 // Opened from two places now — the Find Part card and the IPL part sheet — so
@@ -2961,7 +3159,7 @@ $("om-submit").addEventListener("click", async () => {
 // the list of them, so nothing sits waiting because nobody knew.
 async function enterNeedToQuote() {
   showScreen("quote");
-  renderPushRow();
+  renderPushRow("quote");
   const wrap = $("q-list");
   wrap.innerHTML = `<div class="fp-loading">Loading…</div>`;
   try {
@@ -3063,14 +3261,34 @@ async function currentPushSubscription() {
   return reg ? reg.pushManager.getSubscription() : null;
 }
 
-async function renderPushRow() {
-  const row = $("push-row");
+// There are two of these rows now, because the notifications run both ways:
+// Sales are told a machine is ready to quote, and the technician who did the
+// work is told what the customer said. One set of behaviour, two sets of
+// elements - a second copy would drift, and the blocked-permission handling
+// took long enough to get right once.
+const PUSH_ROWS = {
+  quote: {
+    row: "push-row", btn: "push-toggle", sub: "push-sub", help: "push-help",
+    group: "", screen: "screen-quote",
+    off: "Notify this device when a technician finishes a repair",
+  },
+  tech: {
+    row: "push-row-tech", btn: "push-toggle-tech", sub: "push-sub-tech", help: "push-help-tech",
+    group: "tech", screen: "screen-open",
+    off: "Notify this device when Sales confirm a repair or condemn a machine",
+  },
+};
+
+async function renderPushRow(which = "quote") {
+  const ids = PUSH_ROWS[which] || PUSH_ROWS.quote;
+  const row = $(ids.row);
   if (!row) return;
   if (!pushSupported()) { row.style.display = "none"; return; }
   row.style.display = "flex";
 
-  const btn = $("push-toggle");
-  const sub = $("push-sub");
+  const btn = $(ids.btn);
+  const sub = $(ids.sub);
+  btn.dataset.push = which;
 
   // Checked first, and without awaiting: it is the one answer that settles the
   // row on its own, and it costs nothing to read.
@@ -3090,12 +3308,14 @@ async function renderPushRow() {
   btn.style.display = "";
   btn.disabled = false;
   btn.dataset.mode = "";
-  hidePushHelp();
+  hidePushHelp(which);
 
   // Shown whether this device is on or off. "0 devices" is the answer to most
   // of the ways this looks broken - everyone assumes someone else turned it on.
   let devices = null;
-  try { devices = (await api("/api/push/status")).devices; } catch (_) {}
+  try {
+    devices = (await api(`/api/push/status${ids.group ? "?group=" + ids.group : ""}`)).devices;
+  } catch (_) {}
   const across = devices === null ? ""
     : devices === 0 ? " · no devices are being notified yet"
     : ` · ${devices} device${devices === 1 ? "" : "s"} being notified`;
@@ -3105,7 +3325,7 @@ async function renderPushRow() {
     sub.textContent = "On for this device" + across;
   } else {
     btn.textContent = "Turn on";
-    sub.textContent = "Notify this device when a technician finishes a repair" + across;
+    sub.textContent = ids.off + across;
   }
 }
 
@@ -3142,15 +3362,15 @@ function pushHelpText() {
     <p>In most browsers that is the icon at the left of the address bar.</p>`;
 }
 
-function showPushHelp() {
-  const box = $("push-help");
+function showPushHelp(which = "quote") {
+  const box = $((PUSH_ROWS[which] || PUSH_ROWS.quote).help);
   if (!box) return;
   box.innerHTML = pushHelpText();
   box.style.display = "block";
 }
 
-function hidePushHelp() {
-  const box = $("push-help");
+function hidePushHelp(which = "quote") {
+  const box = $((PUSH_ROWS[which] || PUSH_ROWS.quote).help);
   if (box) { box.style.display = "none"; box.innerHTML = ""; }
 }
 
@@ -3162,21 +3382,25 @@ function hidePushHelp() {
 // varies, and leaving the row stale is the whole failure being fixed. Entering
 // the screen re-renders it anyway; these cover the app already sitting on it.
 function recheckPushRow() {
-  const screen = document.getElementById("screen-quote");
-  if (screen && screen.classList.contains("active")) renderPushRow();
+  for (const [which, ids] of Object.entries(PUSH_ROWS)) {
+    const screen = document.getElementById(ids.screen);
+    if (screen && screen.classList.contains("active")) renderPushRow(which);
+  }
 }
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") recheckPushRow();
 });
 window.addEventListener("focus", recheckPushRow);
 
-async function togglePush() {
-  const btn = $("push-toggle");
+async function togglePush(which = "quote") {
+  const ids = PUSH_ROWS[which] || PUSH_ROWS.quote;
+  const btn = $(ids.btn);
   // Asking again would do nothing visible: the browser resolves a blocked
   // request immediately without showing anything, so the tap would look broken.
   if (btn.dataset.mode === "help" || Notification.permission === "denied") {
-    const open = $("push-help") && $("push-help").style.display === "block";
-    if (open) hidePushHelp(); else showPushHelp();
+    const box = $(ids.help);
+    const open = box && box.style.display === "block";
+    if (open) hidePushHelp(which); else showPushHelp(which);
     return;
   }
   btn.disabled = true;
@@ -3205,10 +3429,10 @@ async function togglePush() {
         toast(permission === "denied"
           ? "Notifications blocked — allow them in the phone's settings"
           : "Notifications not enabled", "err");
-        await renderPushRow();
+        await renderPushRow(which);
         // Straight to the instructions: this is the moment it was blocked, and
         // the phone will not offer the choice a second time.
-        if (permission === "denied") showPushHelp();
+        if (permission === "denied") showPushHelp(which);
         return;
       }
       const { key } = await api("/api/push/key");
@@ -3225,6 +3449,7 @@ async function togglePush() {
           subscription: subscription.toJSON(),
           user_id: (getUser() || {}).id || "",
           role: getRole(),
+          tech: (getUser() || {}).tech || "",
         }),
       });
       toast("Notifications on for this device", "ok");
@@ -3232,7 +3457,7 @@ async function togglePush() {
   } catch (e) {
     toast(e.message || "Could not change notifications", "err");
   }
-  await renderPushRow();
+  await renderPushRow(which);
 }
 
 // Tapping a notification asks an already-open window to move, rather than
@@ -4209,17 +4434,19 @@ async function renderIplStock(itemCode) {
     box.innerHTML = `
       <div class="fp-row"><span class="fp-lbl">Part No.</span><span class="fp-val mono">${escapeHtml(p.item_code)}</span></div>
       <div class="fp-row"><span class="fp-lbl">Description</span><span class="fp-val">${escapeHtml(p.description)}${p.desc2 ? `<br><span class="fp-val-model">${escapeHtml(p.desc2)}</span>` : ""}</span></div>
-      <div class="fp-row"><span class="fp-lbl">Location / Shelf</span><span class="fp-val">${p.shelf ? escapeHtml(p.shelf) : "—"}</span></div>
+      ${shelfRowHtml(p)}
       <div class="fp-row"><span class="fp-lbl">Bal. Qty</span><span class="fp-val fp-qty ${qty > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${qtyStr}${p.uom ? " " + escapeHtml(p.uom) : ""}</span></div>`;
     iplOrderPart = p;
     $("ipl-order-more").style.display = "block";
+    wireShelfEdit(box, p, (shelf) => { p.shelf = shelf; renderIplStock(p.item_code); });
   } catch (e) {
     box.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Stock lookup failed")}</div>`;
   }
 }
 
 $("ipl-order-more").addEventListener("click", () => openOrderModal(iplOrderPart));
-$("push-toggle").addEventListener("click", togglePush);
+$("push-toggle").addEventListener("click", () => togglePush("quote"));
+$("push-toggle-tech").addEventListener("click", () => togglePush("tech"));
 
 function closeIplPart() {
   $("ipl-modal").style.display = "none";

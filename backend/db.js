@@ -131,6 +131,9 @@ db.exec(`
     repair_comment TEXT    DEFAULT '',
     labour_charge  REAL    DEFAULT 0,     -- technician labour billed for this machine
     quote_status   TEXT    DEFAULT '',    -- '' | NEED_QUOTE | QUOTED, per machine
+    work_decision  TEXT    DEFAULT '',    -- '' | REPAIR | CONDEMN, what the customer said
+    decided_by     TEXT    DEFAULT '',    -- who took the call
+    decided_at     TEXT    DEFAULT '',    -- when they took it
     FOREIGN KEY (slip_id) REFERENCES service_slips(id) ON DELETE CASCADE
   );
 
@@ -284,6 +287,27 @@ try {
   }
 } catch (e) {
   console.error("[db] quote_status migration check failed:", e.message);
+}
+
+// Migration: what the customer decided once Sales rang them about a quote.
+// Kept separate from quote_status, which says where the machine is in the
+// quoting process; this says what the answer was. A machine can be QUOTED with
+// no decision yet - Sales have priced it and are waiting for the customer.
+try {
+  const cols = db.prepare("PRAGMA table_info(slip_machines)").all().map((c) => c.name);
+  const adds = [
+    ["work_decision", "TEXT DEFAULT ''"],
+    ["decided_by", "TEXT DEFAULT ''"],
+    ["decided_at", "TEXT DEFAULT ''"],
+  ].filter(([name]) => !cols.includes(name));
+  for (const [name, type] of adds) {
+    db.exec(`ALTER TABLE slip_machines ADD COLUMN ${name} ${type}`);
+  }
+  if (adds.length) {
+    console.log(`[db] migrated: added ${adds.map(([n]) => n).join(", ")} to slip_machines`);
+  }
+} catch (e) {
+  console.error("[db] work_decision migration check failed:", e.message);
 }
 
 // Migration: add labour_charge to slip_machines if an older DB lacks it.
