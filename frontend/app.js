@@ -3084,7 +3084,6 @@ async function renderPushRow() {
     btn.textContent = "How to turn it on";
     btn.dataset.mode = "help";
     sub.textContent = "Blocked on this device — this can only be undone in the phone's own settings";
-    if ($("push-test")) $("push-test").style.display = "none";
     return;
   }
   const existing = await currentPushSubscription();
@@ -3101,15 +3100,12 @@ async function renderPushRow() {
     : devices === 0 ? " · no devices are being notified yet"
     : ` · ${devices} device${devices === 1 ? "" : "s"} being notified`;
 
-  const test = $("push-test");
   if (existing) {
     btn.textContent = "Turn off";
     sub.textContent = "On for this device" + across;
-    if (test) test.style.display = "";
   } else {
     btn.textContent = "Turn on";
     sub.textContent = "Notify this device when a technician finishes a repair" + across;
-    if (test) test.style.display = "none";
   }
 }
 
@@ -3173,32 +3169,6 @@ document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") recheckPushRow();
 });
 window.addEventListener("focus", recheckPushRow);
-
-// Proves the whole chain from this device: app to server, server to Google or
-// Apple, and back to the phone. Without it "no notification arrived" has half a
-// dozen possible causes and no way to tell them apart.
-async function sendTestPush() {
-  const test = $("push-test");
-  test.disabled = true;
-  const was = test.textContent;
-  test.textContent = "Sending…";
-  try {
-    const sub = await currentPushSubscription();
-    if (!sub) { toast("This device is not subscribed", "err"); return; }
-    const r = await api("/api/push/test", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ endpoint: sub.endpoint }),
-    });
-    if (r.ok) toast("Sent — it should appear in a moment", "ok");
-    else toast(r.reason || "The test did not go through", "err");
-  } catch (e) {
-    toast(e.message || "The test did not go through", "err");
-  }
-  test.textContent = was;
-  test.disabled = false;
-  renderPushRow();
-}
 
 async function togglePush() {
   const btn = $("push-toggle");
@@ -4250,7 +4220,6 @@ async function renderIplStock(itemCode) {
 
 $("ipl-order-more").addEventListener("click", () => openOrderModal(iplOrderPart));
 $("push-toggle").addEventListener("click", togglePush);
-$("push-test").addEventListener("click", sendTestPush);
 
 function closeIplPart() {
   $("ipl-modal").style.display = "none";

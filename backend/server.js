@@ -99,17 +99,6 @@ app.get("/api/push/status", (_req, res) => {
   res.json({ devices: push.countFor(pushDb, QUOTE_NOTIFY_ROLES) });
 });
 
-// Prove the whole chain from this device, without needing a technician and a
-// real slip to do it. Answers with what actually went wrong when it fails.
-app.post("/api/push/test", async (req, res) => {
-  try {
-    res.json(await push.testOne(pushDb, (req.body || {}).endpoint));
-  } catch (err) {
-    res.status(500).json({ ok: false, reason: err.message || "Test failed" });
-  }
-});
-
-
 // ---- API: item lookup ------------------------------------------------------
 // Tolerant matching handled in the repository: a scanned "SZEN 140051111" also
 // matches "SZEN140051111" or "140051111".
