@@ -1,13 +1,19 @@
 {
   "name": "OM Service",
   "short_name": "OM Service",
-  "description": "Outboard & Marine — service slips, parts and stock",
+  "description": "Outboard & Marine \u2014 service slips, parts and stock",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f1f4f2",
   "theme_color": "#f1f4f2",
-  "orientation": "portrait",
+  "orientation": "any",
   "icons": [
+    {
+      "src": "icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "icon-192.png",
       "sizes": "192x192",

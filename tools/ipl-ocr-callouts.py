@@ -195,7 +195,12 @@ def callouts(pdf, page, keys, max_y=100.0):
         # twentieth, and Tesseract reads a lone vertical stroke as "1" with
         # real confidence, so a loose lower bound put six false "1"s on the
         # first figure and confidence could not tell them apart.
-        if w > h * 1.6 or w < h * 0.30:
+        # Every character we accept is taller than it is wide. Measured across
+        # all 358 glyphs of every accepted callout in this book: 0.34 at the
+        # narrowest, 0.88 at the widest — and 0.88 is the "A" of 4A, 5A and 6A,
+        # the bar and chain options, so the ceiling cannot go below that. A
+        # screw drawn below callout 60 is 1.10 and read as "2".
+        if w > h * 0.95 or w < h * 0.30:
             continue
         # How many enclosed spaces the shape has. No character we accept has
         # more than two — "8" has two, "0", "4", "6", "9", "A", "B", "D" have
