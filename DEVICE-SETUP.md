@@ -103,10 +103,42 @@ Open the address, then **⋮ → Add to Home screen**.
 Open **Need to Quote** and tap **Turn on** in the row at the top. The row shows
 how many devices are being notified, so you can see it took.
 
-If nothing arrives after that, the phone is blocking it: **Settings → Apps →
-Chrome → Notifications**, and check that battery optimisation is not restricting
-Chrome (**Settings → Apps → Chrome → Battery → Unrestricted**). Aggressive
-battery savers on Samsung and Xiaomi phones are the usual culprit.
+### If notifications arrive only when she opens the app
+
+This is the Android failure worth knowing about, because it does not look like a
+failure — the notification does turn up, just hours late and only once the app
+is opened.
+
+On Android the notification is delivered to **Chrome**, which then wakes the
+app's worker to show it. If Chrome is not running in the background, Google
+holds the message in a queue and hands it over the moment Chrome next starts.
+On iOS this cannot happen: the phone keeps its own connection open whether the
+app is running or not, which is why an iPhone beside it works perfectly.
+
+Two separate power savers have to be dealt with, and they are in different
+places:
+
+**1. Chrome's own.** In Chrome: **⋮ → Settings → Power saver → off** (some
+versions call it Performance). This one is easy to miss because it lives inside
+Chrome rather than in Android's settings, and it was the cause here.
+
+**2. Android's.** **Settings → Apps → Chrome → Battery → Unrestricted.**
+"Optimised" is the default and is not enough.
+
+Samsung adds a third layer that overrides both: **Settings → Battery →
+Background usage limits** — Chrome must not be in *Sleeping apps* or *Deep
+sleeping apps*. Xiaomi, Oppo, Vivo and OnePlus need **Autostart** switched on
+for Chrome, and Chrome locked in the recent-apps list.
+
+Whatever the phone, do not swipe Chrome out of the recent-apps list. Several
+manufacturers treat that as a force-stop, which kills the connection until
+Chrome is opened again.
+
+### If nothing arrives at all
+
+**Settings → Apps → Chrome → Notifications** — Android gives each website its
+own switch there, separate from the permission Chrome asked for, and it can be
+off while Chrome still reports the site as allowed.
 
 ---
 
