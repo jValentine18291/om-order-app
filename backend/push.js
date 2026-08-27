@@ -104,6 +104,17 @@ function countFor(db, roles) {
 }
 
 // ---- sending ---------------------------------------------------------------
+// Android puts an idle phone into Doze, and a push sent at the default urgency
+// is allowed to wait there until the phone next wakes - which can be hours, and
+// looks exactly like the notification never arriving. "high" tells the push
+// service this is worth waking the device for. Apple ignores it; Google does
+// not.
+//
+// The TTL is how long a push service should keep trying if the phone is off or
+// out of signal. Six hours: a quote that has been waiting since this morning is
+// still worth knowing about, one from last week is noise.
+const SEND_OPTS = { urgency: "high", TTL: 6 * 60 * 60 };
+
 // Never throws: a notification failing must not take a slip update down with
 // it. The status change is the thing that matters; telling people is a
 // courtesy on top.
@@ -118,7 +129,8 @@ async function notify(db, roles, payload) {
     try {
       await webpush.sendNotification(
         { endpoint: row.endpoint, keys: { p256dh: row.p256dh, auth: row.auth } },
-        JSON.stringify(payload)
+        JSON.stringify(payload),
+        SEND_OPTS
       );
       sent++;
     } catch (err) {
@@ -160,7 +172,8 @@ async function testOne(db, endpoint) {
   try {
     await webpush.sendNotification(
       { endpoint: row.endpoint, keys: { p256dh: row.p256dh, auth: row.auth } },
-      JSON.stringify({ title: "OM Service", body: "Notifications are working on this device.", slip: "" })
+      JSON.stringify({ title: "OM Service", body: "Notifications are working on this device.", slip: "" }),
+      SEND_OPTS
     );
     return { ok: true };
   } catch (err) {
