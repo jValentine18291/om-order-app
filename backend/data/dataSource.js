@@ -59,6 +59,7 @@ module.exports = {
     setMachineComment: (...a) => dataRepo.slips.setMachineComment(...a),
     setMachineLabour: (...a) => dataRepo.slips.setMachineLabour(...a),
     setSlipStatus: (...a) => dataRepo.slips.setSlipStatus(...a),
+    setMachineQuoteStatus: (...a) => dataRepo.slips.setMachineQuoteStatus(...a),
     createSlipOrder: (...a) => dataRepo.slips.createSlipOrder(...a),
     getSlipOrder: (...a) => dataRepo.slips.getSlipOrder(...a),
     getSlipOrders: (...a) => dataRepo.slips.getSlipOrders(...a),

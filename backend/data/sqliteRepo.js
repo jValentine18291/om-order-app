@@ -712,12 +712,24 @@ function syncSlipQuoteStatus(slipId) {
      FROM slip_machines WHERE slip_id = ?`
   ).get(slipId);
 
+  // With nothing waiting, the slip falls back to how far the work has actually
+  // got. Undoing a mark on a slip nobody has touched must leave it OPEN: "In
+  // Progress" would claim work has started, which nothing here establishes.
+  let settled = "IN_PROGRESS";
+  if (!counts.needing && !counts.quoted) {
+    const work = db.prepare(
+      `SELECT COUNT(*) AS n FROM slip_machines m
+        WHERE m.slip_id = ?
+          AND (IFNULL(m.labour_charge, 0) > 0
+               OR TRIM(IFNULL(m.repair_comment, '')) != ''
+               OR EXISTS (SELECT 1 FROM machine_parts p WHERE p.machine_id = m.id))`
+    ).get(slipId).n;
+    if (!work) settled = "OPEN";
+  }
+
   const next = counts.needing > 0 ? "NEED_QUOTE"
              : counts.quoted  > 0 ? "QUOTED"
-             : "IN_PROGRESS";
-  // Undoing the only mark on an untouched slip leaves it OPEN. "In Progress"
-  // would be a claim that work has started, which nothing here establishes.
-  if (next === "IN_PROGRESS" && slip.status === "OPEN") return;
+             : settled;
   if (next !== slip.status) {
     db.prepare("UPDATE service_slips SET status = ? WHERE id = ?").run(next, slipId);
   }
