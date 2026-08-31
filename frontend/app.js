@@ -412,6 +412,7 @@ function renderNsMachines() {
         <span class="ns-machine-model">${escapeHtml(m.model)}</span>
         ${m.qty > 1 ? `<span class="ns-machine-qty-tag">&times;${m.qty}</span>` : ""}
         ${m.serial ? `<span class="ns-machine-serial">S/N ${escapeHtml(m.serial)}</span>` : ""}
+        ${m.remarks ? `<span class="ns-machine-remarks">${escapeHtml(m.remarks)}</span>` : ""}
       </div>
       <div class="ns-machine-acts">
         <button type="button" class="ns-machine-edit" data-i="${i}" aria-label="Edit machine">
@@ -433,12 +434,13 @@ function renderNsMachines() {
 
 function openMachineForm(index = -1) {
   nsEditIndex = index;
-  const m = index >= 0 ? nsMachines[index] : { model: "", qty: 1, serial: "" };
+  const m = index >= 0 ? nsMachines[index] : { model: "", qty: 1, serial: "", remarks: "" };
   $("nsm-title").textContent = index >= 0 ? "Edit machine" : "Add machine";
   $("nsm-add").textContent = index >= 0 ? "Save" : "Add";
   $("nsm-model").value = m.model;
   $("nsm-qty").value = m.qty;
   $("nsm-serial").value = m.serial;
+  $("nsm-remarks").value = m.remarks || "";
   $("nsm-status").innerHTML = "";
   nsmSerialHint();
   $("nsm-modal").style.display = "flex";
@@ -474,7 +476,7 @@ function commitMachineForm() {
   }
   let qty = parseInt($("nsm-qty").value, 10);
   if (!Number.isFinite(qty) || qty < 1) qty = 1;
-  const entry = { model, qty, serial: $("nsm-serial").value.trim() };
+  const entry = { model, qty, serial: $("nsm-serial").value.trim(), remarks: $("nsm-remarks").value.trim() };
   if (nsEditIndex >= 0) nsMachines[nsEditIndex] = entry;
   else nsMachines.push(entry);
   closeMachineForm();
@@ -510,10 +512,10 @@ async function submitNewService() {
   const machines = [];
   for (const m of nsMachines) {
     if (m.qty === 1) {
-      machines.push({ desc: m.model, serial: m.serial });
+      machines.push({ desc: m.model, serial: m.serial, remarks: m.remarks || "" });
     } else {
       for (let n = 1; n <= m.qty; n++) {
-        machines.push({ desc: `${m.model} - ${n}/${m.qty}`, serial: m.serial });
+        machines.push({ desc: `${m.model} - ${n}/${m.qty}`, serial: m.serial, remarks: m.remarks || "" });
       }
     }
   }
@@ -895,7 +897,9 @@ function buildSlipPdf(slip) {
     const serial = String(m.serial_no || "").trim();
     doc.setFontSize(8);
     const serialLines = serial ? doc.splitTextToSize("S/N " + serial, DESC_W - 26) : [];
-    const rowH = Math.max(30, 16 + lines.length * 12 + serialLines.length * 10);
+    const remark = String(m.remarks || "").trim();
+    const remarkLines = remark ? doc.splitTextToSize("Remarks: " + remark, DESC_W - 26) : [];
+    const rowH = Math.max(30, 16 + lines.length * 12 + serialLines.length * 10 + remarkLines.length * 10);
     if (need(rowH + 30)) drawTableHead();
 
     setDraw(BORDER); setFill(255); doc.setLineWidth(0.7);
@@ -910,6 +914,10 @@ function buildSlipPdf(slip) {
     if (serialLines.length) {
       doc.setFontSize(8); setText(125);
       doc.text(serialLines, LEFT + NO_W + 14, y + 19 + lines.length * 12);
+    }
+    if (remarkLines.length) {
+      doc.setFontSize(8); setText(125);
+      doc.text(remarkLines, LEFT + NO_W + 14, y + 19 + lines.length * 12 + serialLines.length * 10);
     }
     // Ticked by hand when the equipment goes back to the customer.
     setDraw(150); doc.setLineWidth(0.8); setFill(255);
@@ -1264,6 +1272,7 @@ function renderSlipScreen() {
           ${qTag || (worked ? `<span class="machine-tick">✓</span>` : `<span class="machine-untouched">Need Repair</span>`)}
         </div>
         <div class="machine-btn-sub">${m.serial_no ? "S/N " + escapeHtml(m.serial_no) + " · " : ""}${parts.length} part${parts.length === 1 ? "" : "s"}${hasComment ? " · has comment" : ""}${total > 0 ? " · " + money(total) : ""}</div>
+        ${m.remarks ? `<div class="machine-btn-remarks">“${escapeHtml(m.remarks)}”</div>` : ""}
       </button>`;
   }).join("");
   $("sd-machines").querySelectorAll(".machine-btn").forEach((btn) =>
@@ -1290,6 +1299,9 @@ function openMachineModal(machineId) {
   const m = currentMachine();
   $("mm-title").textContent = m ? m.machine_desc : "Machine";
   $("mm-sub").textContent = `Slip ${session.slipNumber} · ${session.slip.company}`;
+  const mmr = $("mm-remarks");
+  if (m && m.remarks) { mmr.textContent = `“${m.remarks}”`; mmr.style.display = "block"; }
+  else { mmr.style.display = "none"; mmr.textContent = ""; }
   loadCommentForCurrentMachine();
   loadLabourForCurrentMachine();
   renderMachineParts();
@@ -2231,7 +2243,8 @@ function renderSlipDetail(slip) {
           ${decision ? `<button type="button" class="decide-btn" data-decision="">Undo</button>` : ""}
         </div>`;
     }
-    html += `${m.serial_no ? `<div class="vs-machine-serial">S/N ${escapeHtml(m.serial_no)}</div>` : ""}`;
+    html += `${m.serial_no ? `<div class="vs-machine-serial">S/N ${escapeHtml(m.serial_no)}</div>` : ""}${
+      m.remarks ? `<div class="vs-machine-remarks">“${escapeHtml(m.remarks)}”</div>` : ""}`;
 
     if (m.repair_comment) {
       html += `<div class="vs-comment">${escapeHtml(m.repair_comment)}</div>`;

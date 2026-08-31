@@ -631,6 +631,13 @@ select {
 }
 .machine-untouched { font-size: .75rem; font-weight: 600; color: #A85B00; background: #FDF0E0; padding: 4px 10px; border-radius: 999px; }
 .machine-btn-sub { margin-top: 4px; font-size: .82rem; color: var(--ink-faint); }
+/* What the customer reported at registration, wherever the machine shows. */
+.machine-btn-remarks, .vs-machine-remarks, .mm-remarks, .ns-machine-remarks {
+  margin-top: 4px; font-size: .84rem; font-style: italic; color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
+.ns-machine-remarks { display: block; width: 100%; }
+.mm-remarks { margin-top: 2px; }
 
 /* Where a machine stands on quoting. Shown per machine, on the slip list and
    in View Slips, because a slip is routinely half finished. */
@@ -1580,10 +1587,16 @@ select {
   border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 8px;
 }
 .bo-line-main { flex: 1; min-width: 0; }
-.bo-qty {
-  width: 64px; min-height: 40px; text-align: center;
+/* Scoped under .bo-line, because the base stylesheet's input[type="number"]
+   rule (an element + attribute selector) outweighs a lone class and was
+   re-imposing width:100% and 15px side padding - a full-width box laid over
+   the description. Two classes beat it. */
+.bo-line .bo-qty {
+  width: 64px; flex: 0 0 auto; min-height: 40px; height: auto;
+  padding: 0 4px; text-align: center;
   border: 1px solid var(--border); border-radius: 8px; font-size: 1rem;
 }
+.bo-line-main { overflow-wrap: anywhere; }
 .bo-remove {
   flex: 0 0 auto; width: 36px; height: 36px; border-radius: 999px;
   border: 1px solid var(--border); background: var(--surface);

@@ -531,6 +531,10 @@
           <input id="nsm-serial" type="text" autocomplete="off" placeholder="e.g. 20231100123" />
           <p class="nsm-hint" id="nsm-serial-hint" style="display:none"></p>
         </div>
+        <div class="field">
+          <label for="nsm-remarks">Remarks <span style="color:var(--ink-faint);font-weight:400;">(optional — what the customer reported)</span></label>
+          <textarea id="nsm-remarks" rows="2" placeholder="e.g. Won't start, chain keeps slipping"></textarea>
+        </div>
         <div class="scan-hint" id="nsm-status" style="justify-content:flex-start;min-height:20px"></div>
         <button class="btn-primary" id="nsm-add" type="button" style="width:100%">Add</button>
       </div>
@@ -565,6 +569,9 @@
         <div>
           <strong id="mm-title">Machine</strong>
           <div class="mm-sub" id="mm-sub"></div>
+          <!-- What the customer reported at registration - the technician's
+               starting point, so it sits with the machine's name. -->
+          <div class="mm-remarks" id="mm-remarks" style="display:none"></div>
         </div>
         <button class="modal-x" id="mm-close" aria-label="Close">&#10005;</button>
       </div>

@@ -126,6 +126,7 @@ db.exec(`
     slip_id        INTEGER NOT NULL,
     machine_desc   TEXT    NOT NULL,
     serial_no      TEXT    DEFAULT '',     -- as given by the customer; often blank
+    remarks        TEXT    DEFAULT '',     -- what the customer reported at registration
     converted_at   TEXT,                    -- when this machine went onto a Sales Order
     so_number      TEXT    DEFAULT '',      -- which Sales Order it went onto
     repair_comment TEXT    DEFAULT '',
@@ -287,6 +288,19 @@ try {
   }
 } catch (e) {
   console.error("[db] quote_status migration check failed:", e.message);
+}
+
+// Migration: what the customer reported about each machine at registration
+// ("won't start", "chain keeps slipping"). Distinct from repair_comment, which
+// is the technician's account of what was done.
+try {
+  const cols = db.prepare("PRAGMA table_info(slip_machines)").all().map((c) => c.name);
+  if (!cols.includes("remarks")) {
+    db.exec("ALTER TABLE slip_machines ADD COLUMN remarks TEXT DEFAULT ''");
+    console.log("[db] migrated: added remarks to slip_machines");
+  }
+} catch (e) {
+  console.error("[db] slip_machines remarks migration check failed:", e.message);
 }
 
 // Migration: what the customer decided once Sales rang them about a quote.
