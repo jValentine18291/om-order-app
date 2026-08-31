@@ -89,11 +89,67 @@ function main() {
   }
   console.log("");
 
+  // A SECOND SAFETY, LEARNED THE HARD WAY.
+  //
+  // This script was run once to clear the test data, two real slips were
+  // opened afterwards, and it was run again - deleting them. --confirm alone
+  // is not enough, because the list it prints is not the list anyone approved
+  // minutes earlier. So the slip numbers being deleted must be named on the
+  // command line as well:
+  //
+  //   node purge-test-slips.js --confirm --slips 00001,00002,00003
+  //
+  // Anything that has appeared since is then refused by name rather than
+  // quietly swept up with the rest.
+  const named = (() => {
+    const i = process.argv.indexOf("--slips");
+    return i >= 0 && process.argv[i + 1]
+      ? process.argv[i + 1].split(",").map((x) => x.trim()).filter(Boolean)
+      : null;
+  })();
+
+  if (CONFIRM && !named) {
+    console.log("Refusing to delete without being told WHICH slips.");
+    console.log("Check the list above, then repeat it back:");
+    console.log("");
+    console.log(`    node purge-test-slips.js --confirm --slips ${list.map((s) => s.slip_number).join(",")}`);
+    console.log("");
+    console.log("This exists because the list can change between one run and the");
+    console.log("next - a slip opened in between would otherwise be deleted too.");
+    return;
+  }
+
+  if (CONFIRM) {
+    const have = new Set(list.map((s) => s.slip_number));
+    const unexpected = list.filter((s) => !named.includes(s.slip_number));
+    const absent = named.filter((n) => !have.has(n));
+    if (unexpected.length || absent.length) {
+      console.log("STOPPING — the database does not match what you named.");
+      if (unexpected.length) {
+        console.log("");
+        console.log("  In the database but NOT in your list (opened since?):");
+        for (const s of unexpected) console.log(`    ${s.slip_number}  ${s.company}`);
+      }
+      if (absent.length) {
+        console.log("");
+        console.log("  Named but not in the database: " + absent.join(", "));
+      }
+      console.log("");
+      console.log("Nothing has been deleted. Look at the list above and run again");
+      console.log("with the numbers you actually mean.");
+      console.log("");
+      return;
+    }
+  }
+
   if (!CONFIRM) {
     console.log("Nothing has been deleted.");
     console.log("Check the list above. If it is all test data, run:");
     console.log("");
-    console.log("    node purge-test-slips.js --confirm");
+    console.log(`    node purge-test-slips.js --confirm --slips ${list.map((s) => s.slip_number).join(",")}`);
+    console.log("");
+    console.log("Naming them means a slip opened between now and then is refused");
+    console.log("rather than deleted along with the rest.");
     console.log("");
     return;
   }
