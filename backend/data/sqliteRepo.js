@@ -266,7 +266,7 @@ function getSlip(slipNumber) {
 }
 
 // Add a scanned part to a specific machine (or bump qty if same part+technician).
-function addPartToMachine(machineId, { item_code, description, uom = "UNIT", unit_price = 0, quantity = 1, technician = "" } = {}) {
+function addPartToMachine(machineId, { item_code, description, uom = "UNIT", unit_price = 0, quantity = 1, technician = "", free_text } = {}) {
   const machine = db.prepare("SELECT * FROM slip_machines WHERE id = ?").get(machineId);
   if (!machine) { const e = new Error("Machine not found on any slip."); e.status = 404; throw e; }
   if (!item_code) { const e = new Error("item_code is required."); e.status = 400; throw e; }
@@ -281,9 +281,14 @@ function addPartToMachine(machineId, { item_code, description, uom = "UNIT", uni
       .run(Number(quantity) || 1, existing.id);
   } else {
     db.prepare(
-      `INSERT INTO machine_parts (machine_id, item_code, description, uom, unit_price, quantity, technician)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`
-    ).run(machineId, item_code, description || item_code, uom, Number(unit_price) || 0, Number(quantity) || 1, technician);
+      `INSERT INTO machine_parts (machine_id, item_code, description, uom, unit_price, quantity, technician, free_text)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(machineId, item_code, description || item_code, uom, Number(unit_price) || 0, Number(quantity) || 1, technician,
+          // The caller has seen the CATALOGUE description; by the time the row
+          // is written, the staff-typed name has replaced it, so the fact
+          // cannot be worked out here. Trust the flag, and still check the
+          // code ourselves so an old client that sends nothing still works.
+          (free_text || isFreeTextPart(item_code, description)) ? 1 : 0);
   }
   // Work has started on this slip: auto-bump OPEN -> IN_PROGRESS.
   db.prepare("UPDATE service_slips SET status = 'IN_PROGRESS' WHERE id = ? AND status = 'OPEN'")
@@ -314,21 +319,33 @@ function setPartPrice(partId, price) {
   return { ok: true, unit_price: p };
 }
 
-// Some item codes stand in for something that is not really in the catalogue -
-// the A5 to A8 service and sundry codes, and anything filed under MISC. The
+// Some catalogue entries stand in for something that is not really a catalogue
+// part - the A5 to A8 service and sundry codes, and the MISC placeholders. The
 // code is right for the accounts; the description is whatever the part
 // actually was, and only the person holding it knows that.
-function isFreeTextPart(itemCode) {
-  const code = String(itemCode || "").trim().toUpperCase();
-  return /^A[5-8]\b/.test(code) || code.startsWith("MISC");
+//
+// The marker can sit in EITHER field. "MISC - INDENT UNIT_PARTS" is one entry;
+// whether AutoCount carries that as the code or as the description of a code
+// like IU-001, it is the same kind of line and needs naming either way.
+function isFreeTextPart(itemCode, description = "") {
+  const norm = (v) => String(v || "").trim().toUpperCase();
+  const code = norm(itemCode);
+  if (/^A[5-8]\b/.test(code) || code.startsWith("MISC")) return true;
+  // Deliberately "starts with", not "contains": a real part whose description
+  // merely mentions miscellaneous something must not become free text.
+  return norm(description).startsWith("MISC");
 }
 
 function setPartDescription(partId, description) {
-  const row = db.prepare("SELECT id, item_code FROM machine_parts WHERE id = ?").get(partId);
+  const row = db.prepare("SELECT id, item_code, description, free_text FROM machine_parts WHERE id = ?").get(partId);
   if (!row) { const e = new Error("Part not found."); e.status = 404; throw e; }
-  if (!isFreeTextPart(row.item_code)) {
+  // The recorded answer first. Re-deriving it would fail the SECOND edit: by
+  // then the description has been replaced with the real part name and no
+  // longer looks like a placeholder. Older rows have no flag, so fall back.
+  const editable = row.free_text ? true : isFreeTextPart(row.item_code, row.description);
+  if (!editable) {
     const e = new Error(
-      `${row.item_code} takes its description from AutoCount. Only the A5-A8 and MISC codes can be described by hand.`
+      `${row.item_code} takes its description from AutoCount. Only the A5-A8 and MISC lines can be described by hand.`
     );
     e.status = 400; throw e;
   }

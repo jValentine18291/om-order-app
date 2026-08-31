@@ -149,6 +149,7 @@ db.exec(`
     unit_price     REAL    DEFAULT 0,
     quantity       INTEGER NOT NULL DEFAULT 1,
     technician     TEXT,                        -- WJ / XL / KM / R
+    free_text      INTEGER DEFAULT 0,           -- 1 = staff name this line themselves
     created_at     TEXT    DEFAULT (datetime('now')),
     FOREIGN KEY (machine_id) REFERENCES slip_machines(id) ON DELETE CASCADE
   );
@@ -288,6 +289,32 @@ try {
   }
 } catch (e) {
   console.error("[db] quote_status migration check failed:", e.message);
+}
+
+// Migration: whether a part line is one staff describe themselves.
+//
+// It is RECORDED rather than worked out each time, because the answer can
+// depend on the description - and the first thing someone does is replace that
+// description with what the part really was. Deriving it live would make the
+// line stop being editable the moment it was edited.
+try {
+  const cols = db.prepare("PRAGMA table_info(machine_parts)").all().map((c) => c.name);
+  if (!cols.includes("free_text")) {
+    db.exec("ALTER TABLE machine_parts ADD COLUMN free_text INTEGER DEFAULT 0");
+    // Existing rows: judged by their code, which is how they were judged when
+    // they were entered.
+    const n = db.prepare(
+      `UPDATE machine_parts SET free_text = 1
+        WHERE UPPER(TRIM(item_code)) LIKE 'MISC%'
+           OR UPPER(TRIM(item_code)) LIKE 'A5 %' OR UPPER(TRIM(item_code)) = 'A5'
+           OR UPPER(TRIM(item_code)) LIKE 'A6 %' OR UPPER(TRIM(item_code)) = 'A6'
+           OR UPPER(TRIM(item_code)) LIKE 'A7 %' OR UPPER(TRIM(item_code)) = 'A7'
+           OR UPPER(TRIM(item_code)) LIKE 'A8 %' OR UPPER(TRIM(item_code)) = 'A8'`
+    ).run();
+    console.log(`[db] migrated: added free_text to machine_parts (${n.changes} existing line(s) marked)`);
+  }
+} catch (e) {
+  console.error("[db] machine_parts free_text migration check failed:", e.message);
 }
 
 // Migration: what the customer reported about each machine at registration

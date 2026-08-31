@@ -1360,6 +1360,7 @@ async function commitPendingParts() {
       body: JSON.stringify({
         item_code: p.item_code, description: p.description, uom: p.uom,
         unit_price: p.unit_price, quantity: p.quantity, technician: p.technician,
+        free_text: !!p.free_text,
       }),
     });
     session.pendingParts.shift();
@@ -1478,9 +1479,13 @@ async function addByCode(code) {
       existing.quantity += 1;
     } else {
       let description = item.description;
+      // Judged on what the CATALOGUE says, before any renaming - and recorded
+      // on the line, because the rename is the whole point and would otherwise
+      // erase the evidence.
+      const freeText = isFreeTextPart(item.item_code, item.description);
       // The moment to name one of these is now, while the part is in hand -
       // not later from a list of identical "SPARE PARTS" lines.
-      if (isFreeTextPart(item.item_code)) {
+      if (freeText) {
         const typed = prompt(
           `${item.item_code}
 
@@ -1497,6 +1502,7 @@ What is this part? It will appear on the Sales Order.`,
         unit_price: item.unit_price,
         quantity: 1,
         technician: session.technician,
+        free_text: freeText,
       });
       toast(`Added ${description} — tap Save when done`, "ok");
       renderMachineParts();
@@ -1534,12 +1540,21 @@ function currentMachine() {
   return session.slip.machines.find((m) => m.id === session.machineId) || null;
 }
 
-// The A5-A8 and MISC codes stand in for something not really in the catalogue.
-// The code is right for the accounts; what the part actually was is only known
-// to whoever is holding it.
-function isFreeTextPart(itemCode) {
-  const code = String(itemCode || "").trim().toUpperCase();
-  return /^A[5-8]\b/.test(code) || code.startsWith("MISC");
+// The A5-A8 and MISC entries stand in for something not really in the
+// catalogue. The code is right for the accounts; what the part actually was is
+// only known to whoever is holding it.
+//
+// The marker can sit in EITHER field: "MISC - INDENT UNIT_PARTS" is one such
+// entry, and whether AutoCount carries that as the code or as the description
+// of some other code, it is the same kind of line. Kept identical to the
+// backend copy in data/sqliteRepo.js - if one changes, change both.
+function isFreeTextPart(itemCode, description = "") {
+  const norm = (v) => String(v || "").trim().toUpperCase();
+  const code = norm(itemCode);
+  if (/^A[5-8]\b/.test(code) || code.startsWith("MISC")) return true;
+  // "Starts with", not "contains": a real part whose description merely
+  // mentions miscellaneous something must not turn into a free-text line.
+  return norm(description).startsWith("MISC");
 }
 
 async function editPartDescription(partId, current) {
@@ -1575,7 +1590,11 @@ function renderMachineParts() {
         <div class="line line-pending">
           <div class="head">
             <div class="info">
-              <div class="desc">${escapeHtml(p.description)}</div>
+              <div class="desc">${escapeHtml(p.description)}${
+                p.free_text
+                  ? ` <button type="button" class="desc-edit" data-pdesc="${i}" aria-label="Edit description">${PENCIL}</button>`
+                  : ""
+              }</div>
               <div class="sku mono">${escapeHtml(p.item_code)} · ${escapeHtml(p.technician)}</div>
             </div>
             <div class="price-col">
@@ -1618,7 +1637,7 @@ function renderMachineParts() {
       <div class="head">
         <div class="info">
           <div class="desc">${escapeHtml(p.description)}${
-            isFreeTextPart(p.item_code)
+            (p.free_text || isFreeTextPart(p.item_code, p.description))
               ? ` <button type="button" class="desc-edit" data-desc="${p.id}" aria-label="Edit description">${PENCIL}</button>`
               : ""
           }</div>
@@ -4159,6 +4178,20 @@ $("machine-parts").addEventListener("click", (e) => {
     else if (pdec) p.quantity = Math.max(1, p.quantity - 1);
     renderMachineParts();
     updateSlipFooter();
+    return;
+  }
+  // A description typed at the prompt can be wrong, and until now it could
+  // only be corrected after saving - the pending block had no pencil at all.
+  const pdesc = e.target.closest("[data-pdesc]");
+  if (pdesc) {
+    const i = Number(pdesc.dataset.pdesc);
+    const p = session.pendingParts[i];
+    if (!p) return;
+    const typed = prompt("What is this part? It will appear on the Sales Order.", p.description || "");
+    if (typed !== null && typed.trim()) {
+      p.description = typed.trim().slice(0, 200);
+      renderMachineParts();
+    }
     return;
   }
   const descBtn = e.target.closest("[data-desc]");
