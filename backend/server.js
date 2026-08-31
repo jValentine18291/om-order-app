@@ -425,6 +425,28 @@ app.patch("/api/part-requests/batch/:batchId", async (req, res) => {
   }
 });
 
+// Delete an order outright, whatever its status. The purchaser asked for it
+// for the cases a status cannot express - a duplicate, a mistake, a request
+// cancelled by phone. Purchaser and Admin only: editing is a correction, this
+// is destruction, and it is the one action here with no undo. The frontend
+// confirms; the repository names whoever did it in the log; the nightly
+// backup is the way back.
+app.delete("/api/part-requests/batch/:batchId", async (req, res) => {
+  try {
+    const role = String((req.query || {}).role || "").toLowerCase();
+    if (!["purchaser", "admin"].includes(role)) {
+      return res.status(403).json({ error: "Only the Purchaser and Admin can delete an order." });
+    }
+    res.json(await data.requests.deletePartRequestBatch(
+      req.params.batchId, String((req.query || {}).who || "")
+    ));
+  } catch (err) {
+    if (err.status === 404) return res.status(404).json({ error: err.message });
+    console.error("[DELETE /api/part-requests/batch/:batchId]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to delete the order" });
+  }
+});
+
 // One order (batch) moves to ORDERED as a whole: the purchaser has keyed the
 // Purchase Order, and its parts travel together.
 app.patch("/api/part-requests/batch/:batchId/ordered", async (req, res) => {
@@ -625,6 +647,30 @@ app.post("/api/part-location", async (req, res) => {
     if (err.status === 400) return res.status(400).json({ error: err.message });
     console.error("[POST /api/part-location]", err.message);
     res.status(500).json({ error: "Could not save the location to AutoCount." });
+  }
+});
+
+// How much of this part is already on order from a supplier, and on which
+// Purchase Orders. Asked at the moment someone is about to request more, so
+// they can see it has been handled rather than asking twice.
+//
+// Answers { supported: false } when AutoCount's Purchase Orders cannot be
+// read in the shape expected - the app then shows nothing rather than a
+// number that might be wrong. Run backend/inspect-po.js to see what is there.
+app.get("/api/part-on-order/:code", async (req, res) => {
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") return res.json({ supported: false, qty: 0, orders: [] });
+    const acRepo = require("./data/autocountRepo");
+    const code = String(req.params.code || "").trim();
+    const map = await acRepo.getOnOrder([code]);
+    if (!map) return res.json({ supported: false, qty: 0, orders: [] });
+    const hit = map.get(code) || { qty: 0, orders: [] };
+    res.json({ supported: true, qty: hit.qty, orders: hit.orders });
+  } catch (err) {
+    console.error("[GET /api/part-on-order]", err.message);
+    // Never block an order over this: it is context, not permission.
+    res.json({ supported: false, qty: 0, orders: [] });
   }
 });
 

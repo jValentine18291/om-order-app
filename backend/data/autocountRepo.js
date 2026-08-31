@@ -478,6 +478,112 @@ async function getStockBalances(codes) {
   }
   return out;
 }
+// ---- What is already on order from a supplier ------------------------------
+// "Has this been ordered already?" - asked at the moment someone is about to
+// request more. The answer lives in AutoCount's Purchase Orders, which this
+// app had never read before, so NOTHING about their shape is assumed: the
+// tables and columns are looked up in the catalog once and the query is built
+// from what is actually there.
+//
+// If the shape is not what we expect, this returns null and the app shows
+// nothing rather than a number that might be wrong - a wrong "already on
+// order" is worse than no answer, because it stops a real order being placed.
+// backend/inspect-po.js prints what is there, for when that happens.
+let poShape;   // undefined = not looked up yet, null = unusable
+
+async function purchaseOrderShape() {
+  if (poShape !== undefined) return poShape;
+  try {
+    const cols = await query(
+      `SELECT TABLE_NAME, COLUMN_NAME
+         FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME IN ('PO', 'PODTL')`
+    );
+    const of = (t) => new Set(
+      cols.filter((c) => String(c.TABLE_NAME).toUpperCase() === t)
+          .map((c) => String(c.COLUMN_NAME))
+    );
+    const master = of("PO"), detail = of("PODTL");
+    const has = (set, name) => [...set].find((c) => c.toLowerCase() === name.toLowerCase());
+
+    const dtlItem = has(detail, "ItemCode");
+    const dtlDoc = has(detail, "DocKey");
+    const dtlQty = has(detail, "Qty");
+    const mDoc = has(master, "DocKey");
+    const mNo = has(master, "DocNo");
+    if (!dtlItem || !dtlDoc || !dtlQty || !mDoc || !mNo) { poShape = null; return poShape; }
+
+    // Outstanding, in order of preference. AutoCount spells the transferred
+    // column both ways depending on version, hence both spellings.
+    const outstanding = has(detail, "OutstandingQty");
+    const transferred = has(detail, "TransferedQty") || has(detail, "TransferredQty");
+    poShape = {
+      dtlItem, dtlDoc, dtlQty, mDoc, mNo,
+      outstanding, transferred,
+      cancelled: has(master, "Cancelled"),
+      docDate: has(master, "DocDate"),
+    };
+  } catch (e) {
+    console.error("[purchase orders] could not read the schema:", e.message);
+    poShape = null;
+  }
+  return poShape;
+}
+
+// Outstanding quantity per item code, plus the PO numbers it sits on.
+// Returns a Map, or null when Purchase Orders cannot be read.
+async function getOnOrder(codes) {
+  const list = [...new Set((codes || []).map((c) => String(c || "").trim()).filter(Boolean))];
+  if (!list.length) return new Map();
+  const shape = await purchaseOrderShape();
+  if (!shape) return null;
+
+  // What is still expected: an explicit outstanding column if the database has
+  // one, otherwise ordered minus already transferred in, otherwise the ordered
+  // quantity itself.
+  const qtyExpr = shape.outstanding
+    ? `d.[${shape.outstanding}]`
+    : shape.transferred
+      ? `(d.[${shape.dtlQty}] - ISNULL(d.[${shape.transferred}], 0))`
+      : `d.[${shape.dtlQty}]`;
+  const notCancelled = shape.cancelled ? `AND m.[${shape.cancelled}] = 'F'` : "";
+
+  const out = new Map();
+  for (let i = 0; i < list.length; i += 100) {
+    const chunk = list.slice(i, i + 100);
+    const params = {};
+    chunk.forEach((c, j) => { params[`c${j}`] = c; });
+    const rows = await query(
+      `SELECT d.[${shape.dtlItem}] AS ItemCode,
+              m.[${shape.mNo}]     AS DocNo,
+              ${shape.docDate ? `m.[${shape.docDate}]` : "NULL"} AS DocDate,
+              SUM(${qtyExpr})      AS OnOrder
+         FROM PODtl d
+         JOIN PO m ON m.[${shape.mDoc}] = d.[${shape.dtlDoc}]
+        WHERE d.[${shape.dtlItem}] IN (${chunk.map((_, j) => `@c${j}`).join(",")})
+          ${notCancelled}
+        GROUP BY d.[${shape.dtlItem}], m.[${shape.mNo}]${shape.docDate ? `, m.[${shape.docDate}]` : ""}
+       HAVING SUM(${qtyExpr}) > 0`,
+      params
+    );
+    for (const r of rows) {
+      const key = String(r.ItemCode).trim();
+      if (!out.has(key)) out.set(key, { qty: 0, orders: [] });
+      const entry = out.get(key);
+      entry.qty += Number(r.OnOrder) || 0;
+      entry.orders.push({
+        doc_no: r.DocNo,
+        date: r.DocDate ? String(r.DocDate).slice(0, 10) : "",
+        qty: Number(r.OnOrder) || 0,
+      });
+    }
+  }
+  return out;
+}
+
+module.exports.getOnOrder = getOnOrder;
+module.exports.purchaseOrderShape = purchaseOrderShape;
+
 module.exports.getStockBalances = getStockBalances;
 
 module.exports.searchParts = searchParts;

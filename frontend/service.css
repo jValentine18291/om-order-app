@@ -1614,6 +1614,23 @@ select {
   font-size: .9rem; padding: 8px 12px;
 }
 
+/* "Already on order" in the Order More popup. Amber, not red: it is a thing
+   to notice before ordering more, not an error. */
+.om-onorder {
+  margin-bottom: 12px; padding: 10px 12px; border-radius: var(--radius-sm);
+  background: #FFF6E5; border-left: 3px solid #E0A22A;
+  font-size: .86rem; color: #8A5B00; line-height: 1.5;
+}
+.om-onorder b { display: block; font-size: .95rem; margin-bottom: 2px; }
+.om-onorder-none { background: var(--surface-2, #f6f9fa); border-left-color: var(--border); color: var(--ink-faint); }
+.pu-delete {
+  flex: 0 0 auto; padding: 6px 12px; border-radius: 999px;
+  border: 1px solid #e6b0b0; background: var(--surface);
+  font-size: .8rem; font-weight: 600; color: #A32020; cursor: pointer;
+  margin-right: 8px;
+}
+.pu-delete:active { background: #fbe9e9; }
+
 /* ---- Editing an order (purchaser list) ---------------------------------- */
 .pu-edit {
   flex: 0 0 auto; padding: 6px 12px; border-radius: 999px;

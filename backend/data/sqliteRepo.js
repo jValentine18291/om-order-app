@@ -1000,6 +1000,21 @@ function updatePartRequestBatch(batchId, { lines = [], batch_remarks } = {}) {
   return db.prepare("SELECT * FROM part_requests WHERE batch_id = ? ORDER BY id").all(String(batchId));
 }
 
+// Delete a whole order, whatever its status. The purchaser asked for this for
+// the cases a status cannot express: a duplicate, a part ordered by mistake, a
+// request that was cancelled by phone. Unlike editing - which is refused once
+// Ordered, because that row is the record of a Purchase Order - deleting is
+// deliberate destruction, so the frontend confirms and the caller is named in
+// the log. The nightly backup is the way back if one goes wrong.
+function deletePartRequestBatch(batchId, who = "") {
+  const rows = db.prepare("SELECT * FROM part_requests WHERE batch_id = ?").all(String(batchId || ""));
+  if (!rows.length) { const e = new Error("Order not found."); e.status = 404; throw e; }
+  db.prepare("DELETE FROM part_requests WHERE batch_id = ?").run(String(batchId));
+  const parts = rows.map((r) => `${r.qty_requested} x ${r.item_code}`).join(", ");
+  console.log(`[orders] ${who || "?"} deleted ${rows[0].status} order ${batchId}: ${parts}`);
+  return { ok: true, removed: rows.length };
+}
+
 // Everything a batch holds becomes ORDERED together - the purchaser transfers
 // the whole request to one Purchase Order, so its parts move as one.
 function markPartRequestBatchOrdered(batchId) {
@@ -1028,7 +1043,7 @@ function markPartRequestOrdered(id) {
   return { ok: true };
 }
 
-const partRequests = { createPartRequest, createPartRequestBatch, listPartRequests, markPartRequestOrdered, markPartRequestBatchOrdered, updatePartRequestBatch };
+const partRequests = { createPartRequest, createPartRequestBatch, listPartRequests, markPartRequestOrdered, markPartRequestBatchOrdered, updatePartRequestBatch, deletePartRequestBatch };
 module.exports.partRequests = partRequests;
 
 // Fast count of pending reorder requests (for the Purchaser notification).

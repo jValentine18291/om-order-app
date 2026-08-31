@@ -79,6 +79,7 @@ module.exports = {
     markPartRequestOrdered: (...a) => sqliteRepo.partRequests.markPartRequestOrdered(...a),
     markPartRequestBatchOrdered: (...a) => sqliteRepo.partRequests.markPartRequestBatchOrdered(...a),
     updatePartRequestBatch: (...a) => sqliteRepo.partRequests.updatePartRequestBatch(...a),
+    deletePartRequestBatch: (...a) => sqliteRepo.partRequests.deletePartRequestBatch(...a),
     countPendingPartRequests: (...a) => sqliteRepo.partRequests.countPendingPartRequests(...a),
   },
 };

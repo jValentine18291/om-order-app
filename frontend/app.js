@@ -3209,10 +3209,43 @@ function openOrderModal(part) {
   $("om-part-name").textContent = `${part.description} · ${part.item_code}`;
   $("om-qty").value = "";
   $("om-remarks").value = "";
+  renderOnOrder(part.item_code);
   showOrderStep("qty");
   $("order-modal").style.display = "flex";
   document.body.style.overflow = "hidden";
   setTimeout(() => $("om-qty").focus(), 50);
+}
+
+// Whether a supplier has already been asked for this part. The point is to
+// stop the second person ordering what the first already did - so it is shown
+// BEFORE the quantity box, not after the request is sent.
+//
+// It never blocks: when AutoCount cannot answer, the row is hidden rather than
+// guessed at, and the popup behaves exactly as it did before.
+async function renderOnOrder(itemCode) {
+  const box = $("om-onorder");
+  if (!box) return;
+  box.style.display = "none";
+  box.className = "om-onorder";
+  box.textContent = "";
+  try {
+    const r = await api(`/api/part-on-order/${encodeURIComponent(itemCode)}`);
+    if (!r.supported) return;                       // nothing honest to say
+    if (!r.qty) {
+      box.className = "om-onorder om-onorder-none";
+      box.textContent = "Not on any Purchase Order at the moment.";
+      box.style.display = "block";
+      return;
+    }
+    const qty = Number.isInteger(r.qty) ? r.qty : Number(r.qty).toFixed(2);
+    const list = (r.orders || [])
+      .map((o) => `${escapeHtml(o.doc_no)}${o.date ? ` (${escapeHtml(o.date)})` : ""} — ${o.qty}`)
+      .join("<br>");
+    box.innerHTML = `<b>${qty} already on order</b>${list}`;
+    box.style.display = "block";
+  } catch (_) {
+    // Context, not permission: a failure here leaves the popup as it was.
+  }
 }
 
 $("fp-order-more").addEventListener("click", () => openOrderModal(fpCurrentPart));
@@ -3679,6 +3712,8 @@ async function loadPartRequests() {
           <div>
             ${pending && canDecide()
               ? `<button class="pu-edit" data-edit="${escapeAttr(b.key)}">Edit</button>` : ""}
+            ${["purchaser", "admin"].includes(getRole())
+              ? `<button class="pu-delete" data-delete="${escapeAttr(b.key)}">Delete</button>` : ""}
             ${pending && ["purchaser", "admin"].includes(getRole())
               ? `<button class="pu-done" data-batch="${escapeAttr(b.key)}">Mark as Ordered</button>` : ""}
           </div>
@@ -3690,6 +3725,32 @@ async function loadPartRequests() {
 
     wrap.querySelectorAll(".pu-edit").forEach((btn) =>
       btn.addEventListener("click", () => { puEditing = btn.dataset.edit; loadPartRequests(); })
+    );
+    // Deleting is the one action here with no undo, so the confirmation names
+    // every part that will go, and says plainly that it cannot be undone.
+    wrap.querySelectorAll(".pu-delete").forEach((btn) =>
+      btn.addEventListener("click", async () => {
+        const b = byId.get(btn.dataset.delete);
+        if (!b) return;
+        const what = b.rows.map((r) => `  ${r.qty_requested} × ${r.description || r.item_code}`).join("\n");
+        const state = b.rows.some((r) => r.status === "PENDING") ? "Need to Order" : "Ordered";
+        if (!confirm(
+          `Delete this ${state} order?\n\n${what}\n\nThis cannot be undone.`
+        )) return;
+        btn.disabled = true;
+        try {
+          const me = getUser();
+          await api(`/api/part-requests/batch/${encodeURIComponent(btn.dataset.delete)}` +
+                    `?role=${encodeURIComponent(getRole())}&who=${encodeURIComponent(initialsFor(me))}`,
+                    { method: "DELETE" });
+          toast("Order deleted", "ok");
+          if (puEditing === btn.dataset.delete) puEditing = null;
+          loadPartRequests();
+        } catch (e) {
+          toast(e.message, "err");
+          btn.disabled = false;
+        }
+      })
     );
     wireOrderEditCard(wrap);
     wrap.querySelectorAll(".pu-done").forEach((btn) =>
