@@ -1077,6 +1077,11 @@ async function sendSlipWhatsApp(slipIn, { auto = false } = {}) {
   // The customer signed against these terms, so the copy they receive must
   // carry the signature - it is fetched rather than assumed present.
   const slip = await withSignature(slipIn);
+  // The customer's own copy, so this one refuses outright rather than asking:
+  // sending an unsigned slip to the customer is worse than not sending one.
+  if (!slip.signature) {
+    return { ok: false, error: "The signature could not be loaded, so nothing was sent. Close the app fully, reopen it and try again." };
+  }
   let blob;
   try {
     blob = buildSlipPdf(slip);
@@ -1139,8 +1144,24 @@ async function withSignature(slip) {
   }
 }
 
+// A slip PDF without the signature is a document missing the customer's
+// acceptance of the printed terms. It used to be impossible to produce one by
+// accident; once the signature moved off the slip response it became possible,
+// and the first way it happened was a phone still running the previous version
+// of the app - which looked for a signature the server had stopped sending and
+// found none. Silence was the wrong answer to that, so this asks.
+async function confirmUnsigned(slip) {
+  if (slip && slip.signature) return true;
+  return confirm(
+    `Slip ${slip ? slip.slip_number : ""} has no signature on it.\n\n` +
+    "If this app was updated moments ago, close it fully and open it again — " +
+    "that usually fixes it.\n\nProduce the PDF without the signature anyway?"
+  );
+}
+
 async function shareSlipPdf(slipIn) {
   const slip = await withSignature(slipIn);
+  if (!(await confirmUnsigned(slip))) return;
   let blob;
   try {
     blob = buildSlipPdf(slip);
