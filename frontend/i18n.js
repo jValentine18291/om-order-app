@@ -74,6 +74,8 @@
     "Point at a QR code": "对准二维码",
     "Stop scanning": "停止扫描",
     "Order more": "申请补货",
+    "Note": "备注",
+    "Add this part anyway?": "仍要添加此零件吗？",
     "Part No.": "零件编号",
     "Description": "名称",
     "Location / Shelf": "位置 / 货架",

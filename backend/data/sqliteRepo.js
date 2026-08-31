@@ -886,6 +886,51 @@ const slips = {
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };
 
+// ---- Notes kept against a part ---------------------------------------------
+// Read by everyone, written by Sales, Purchaser and Admin. Lookups are exact:
+// a note on the wrong variant of a part is worse than no note.
+function getPartNotes(codes) {
+  const list = [...new Set((codes || []).map((c) => String(c || "").trim()).filter(Boolean))];
+  if (!list.length) return {};
+  const marks = list.map(() => "?").join(",");
+  const rows = db.prepare(
+    `SELECT item_code, note, updated_by, updated_at FROM part_notes WHERE item_code IN (${marks})`
+  ).all(...list);
+  const out = {};
+  for (const r of rows) out[r.item_code] = r;
+  return out;
+}
+
+function getPartNote(itemCode) {
+  const code = String(itemCode || "").trim();
+  if (!code) return null;
+  return db.prepare("SELECT * FROM part_notes WHERE item_code = ?").get(code) || null;
+}
+
+function setPartNote(itemCode, note, who = "") {
+  const code = String(itemCode || "").trim();
+  if (!code) { const e = new Error("Missing item code."); e.status = 400; throw e; }
+  const text = String(note === undefined || note === null ? "" : note)
+    .replace(/[\r\n\t]+/g, " ").trim().slice(0, 300);
+
+  // An empty note removes it. Keeping a blank row would show an empty comment
+  // box on the part for ever.
+  if (!text) {
+    db.prepare("DELETE FROM part_notes WHERE item_code = ?").run(code);
+    return { ok: true, item_code: code, note: "", removed: true };
+  }
+  db.prepare(
+    `INSERT INTO part_notes (item_code, note, updated_by, updated_at)
+     VALUES (?, ?, ?, datetime('now','localtime'))
+     ON CONFLICT(item_code) DO UPDATE SET
+       note = excluded.note, updated_by = excluded.updated_by, updated_at = excluded.updated_at`
+  ).run(code, text, String(who || "").trim());
+  return getPartNote(code);
+}
+
+const partNotes = { getPartNote, getPartNotes, setPartNote };
+module.exports.partNotes = partNotes;
+
 // ---- Part reorder requests ("Order more" / "Bulk Order" -> Orders list) -----
 // Every request belongs to a batch: a bulk order is several parts submitted
 // together and reviewed as ONE order, and a part ordered on its own is simply a

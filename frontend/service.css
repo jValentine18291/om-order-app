@@ -1655,6 +1655,32 @@ select {
 .pu-edit-actions { display: flex; gap: 8px; margin-top: 12px; }
 .pu-edit-actions button { flex: 1; }
 
+/* ---- A note kept against a part ----------------------------------------- */
+/* Amber, like "already on order": something to read before acting, not an
+   error. It sits at the TOP of the card because a superseded part is the
+   first thing worth knowing about it. */
+#note-modal { z-index: 70; }
+.part-note {
+  margin-bottom: 12px; padding: 10px 12px; border-radius: var(--radius-sm);
+  background: #FFF6E5; border-left: 3px solid #E0A22A;
+  font-size: .88rem; color: #8A5B00; line-height: 1.5;
+}
+.part-note b { display: block; font-size: .78rem; letter-spacing: .04em;
+  text-transform: uppercase; opacity: .8; margin-bottom: 2px; }
+.part-note-who { display: block; margin-top: 4px; font-size: .78rem; opacity: .75; }
+.part-note-edit {
+  margin-left: 8px; padding: 2px 9px; border-radius: 999px;
+  border: 1px solid #e0c48a; background: transparent;
+  font-size: .74rem; font-weight: 600; color: #8A5B00; cursor: pointer;
+}
+/* The "add one" affordance when a part has no note yet. */
+.part-note-add {
+  margin-bottom: 12px; padding: 8px 12px; border-radius: var(--radius-sm);
+  border: 1px dashed var(--border); background: transparent;
+  font-size: .82rem; color: var(--ink-faint); cursor: pointer; width: 100%;
+  text-align: left;
+}
+
 /* ---- Change location (Admin only) -------------------------------------- */
 .loc-current { display: block; margin-top: 6px; font-size: .82rem; color: var(--ink-faint); }
 .loc-confirm-box {

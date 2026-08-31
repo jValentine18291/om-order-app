@@ -73,6 +73,11 @@ module.exports = {
     ordersAwaitingAutoCount: (...a) => dataRepo.slips.ordersAwaitingAutoCount(...a),
     closeSlip: (...a) => dataRepo.slips.closeSlip(...a),
   },
+  notes: {
+    getPartNote: (...a) => sqliteRepo.partNotes.getPartNote(...a),
+    getPartNotes: (...a) => sqliteRepo.partNotes.getPartNotes(...a),
+    setPartNote: (...a) => sqliteRepo.partNotes.setPartNote(...a),
+  },
   requests: {
     createPartRequest: (...a) => sqliteRepo.partRequests.createPartRequest(...a),
     createPartRequestBatch: (...a) => sqliteRepo.partRequests.createPartRequestBatch(...a),

@@ -494,4 +494,26 @@ try {
   console.error("[db] part_requests migration check failed:", e.message);
 }
 
+// ---- Notes kept against a part ---------------------------------------------
+// Mostly supersessions: "replaced by SZEN 123456789". The knowledge exists in
+// people's heads and gets discovered at the worst moment - when the part is
+// already on order, or already on a slip.
+//
+// Keyed on the EXACT AutoCount item code, never a diagram number. A printed
+// number does not identify one item: 848BE058B2 matches both SZEN 848BE058B2
+// and SZEN 848BE058B2R, which are different parts. The IPL resolves that to a
+// single item before anything is shown, and the note hangs off the result.
+//
+// This is the app's own reference material, so it lives here and NOT in
+// AutoCount - no write-back, no permissions to worry about, and it travels
+// with the nightly backup like everything else in this file.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS part_notes (
+    item_code  TEXT PRIMARY KEY,        -- exact AutoCount ItemCode
+    note       TEXT NOT NULL,
+    updated_by TEXT DEFAULT '',
+    updated_at TEXT DEFAULT (datetime('now','localtime'))
+  )
+`);
+
 module.exports = db;

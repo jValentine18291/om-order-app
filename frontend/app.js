@@ -1513,6 +1513,21 @@ async function addByCode(code) {
     const existing = session.pendingParts.find(
       (p) => p.item_code === item.item_code && p.technician === session.technician
     );
+
+    // A part that has been superseded is worth knowing about while it is still
+    // in your hand, not after the job is quoted. Only on the FIRST scan of it:
+    // the technician has already read it by the second, and a warning that
+    // repeats is a warning people learn to dismiss.
+    if (!existing) {
+      const note = await fetchPartNote(item.item_code);
+      if (note && note.note) {
+        const ok = confirm(
+          `${item.item_code}\n${item.description || ""}\n\n${note.note}\n\nAdd this part anyway?`
+        );
+        if (!ok) return;
+      }
+    }
+
     if (existing) {
       existing.quantity += 1;
     } else {
@@ -3123,6 +3138,7 @@ async function showPartStock(code) {
       <div class="fp-row"><span class="fp-lbl">Bal. Qty</span><span class="fp-val fp-qty ${qty > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${qtyStr}${p.uom ? " " + escapeHtml(p.uom) : ""}</span></div>`;
     $("fp-order-more").style.display = "block";
     wireShelfEdit(detail, p, (shelf) => { p.shelf = shelf; showPartStock(p.item_code); });
+    renderPartNote(detail, p, () => showPartStock(p.item_code));
   } catch (e) {
     detail.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Lookup failed")}</div>`;
   }
@@ -3133,6 +3149,113 @@ async function showPartStock(code) {
 function canDecide() {
   return ["sales", "purchaser", "admin"].includes(getRole());
 }
+
+// ---- A note kept against a part --------------------------------------------
+// Chiefly supersessions - "replaced by X". The knowledge lives in people's
+// heads and surfaces at the worst moment, so it is recorded against the part
+// and shown wherever that part is looked at.
+//
+// Written by Sales, Purchaser and Admin; read by everyone. Keyed on the exact
+// AutoCount item code, so a note on 848BE058B2 never appears on 848BE058B2R.
+function canEditNote() {
+  return ["sales", "purchaser", "admin"].includes(getRole());
+}
+
+async function fetchPartNote(itemCode) {
+  try {
+    const r = await api(`/api/part-notes/${encodeURIComponent(itemCode)}`);
+    return r && r.note ? r : null;
+  } catch (_) {
+    return null;                       // a note must never break a lookup
+  }
+}
+
+function partNoteHtml(note) {
+  if (note && note.note) {
+    const who = [note.updated_by, String(note.updated_at || "").split(" ")[0]]
+      .filter(Boolean).join(" · ");
+    return `<div class="part-note">
+        <b>Note</b>${escapeHtml(note.note)}${
+          canEditNote() ? `<button type="button" class="part-note-edit" data-note-edit>Edit</button>` : ""
+        }${who ? `<span class="part-note-who">${escapeHtml(who)}</span>` : ""}
+      </div>`;
+  }
+  return canEditNote()
+    ? `<button type="button" class="part-note-add" data-note-edit>+ Add a note (e.g. what replaced this part)</button>`
+    : "";
+}
+
+// Put the note at the top of a card and wire its button. Called after the card
+// is written, because innerHTML replaces whatever was there.
+async function renderPartNote(container, part, onSaved) {
+  if (!container || !part || !part.item_code) return;
+  const note = await fetchPartNote(part.item_code);
+  const html = partNoteHtml(note);
+  if (!html) return;
+  container.insertAdjacentHTML("afterbegin", html);
+  const btn = container.querySelector("[data-note-edit]");
+  if (btn) btn.addEventListener("click", () => openNoteModal(part, note, onSaved));
+}
+
+let notePart = null;
+let noteOnSaved = null;
+
+function openNoteModal(part, note, onSaved) {
+  notePart = part;
+  noteOnSaved = onSaved || null;
+  $("note-part-name").textContent = `${part.description || ""} · ${part.item_code}`;
+  $("note-text").value = (note && note.note) || "";
+  $("note-who").textContent = note && note.updated_by
+    ? `Last changed by ${note.updated_by} on ${String(note.updated_at || "").split(" ")[0]}`
+    : "";
+  $("note-delete").style.display = note && note.note ? "" : "none";
+  $("note-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+  setTimeout(() => $("note-text").focus(), 50);
+}
+
+function closeNoteModal() {
+  $("note-modal").style.display = "none";
+  // Another sheet may still be open underneath - releasing the scroll lock
+  // then would let the page behind it slide about.
+  const stillOpen = ["ipl-modal", "machine-modal", "order-modal"]
+    .some((id) => $(id) && $(id).style.display === "flex");
+  if (!stillOpen) document.body.style.overflow = "";
+  notePart = null;
+  noteOnSaved = null;
+}
+$("note-close").addEventListener("click", closeNoteModal);
+
+async function saveNote(text) {
+  if (!notePart) return;
+  const btn = $("note-save");
+  btn.disabled = true;
+  try {
+    await api("/api/part-notes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        item_code: notePart.item_code,
+        note: text,
+        who: initialsFor(getUser()),
+        role: getRole(),
+      }),
+    });
+    const saved = noteOnSaved;
+    toast(text ? "Note saved" : "Note removed", "ok");
+    closeNoteModal();
+    if (saved) saved();
+  } catch (e) {
+    toast(e.message || "Could not save the note", "err");
+  }
+  btn.disabled = false;
+}
+
+$("note-save").addEventListener("click", () => saveNote($("note-text").value.trim()));
+$("note-delete").addEventListener("click", () => {
+  if (!confirm("Remove this note?\n\nNobody looking up this part will see it any more.")) return;
+  saveNote("");
+});
 
 // ---- Location row, shared by both stock cards -------------------------------
 // Find Part and the IPL part sheet render the same card. The row lives here so
@@ -5035,6 +5158,7 @@ async function renderIplStock(itemCode) {
     iplOrderPart = p;
     $("ipl-order-more").style.display = "block";
     wireShelfEdit(box, p, (shelf) => { p.shelf = shelf; renderIplStock(p.item_code); });
+    renderPartNote(box, p, () => renderIplStock(p.item_code));
   } catch (e) {
     box.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Stock lookup failed")}</div>`;
   }

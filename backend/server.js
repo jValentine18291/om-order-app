@@ -674,6 +674,33 @@ app.get("/api/part-on-order/:code", async (req, res) => {
   }
 });
 
+// A note kept against a part - usually what replaced it. Read by anyone;
+// written by Sales, Purchaser and Admin. The role check is the same accident
+// guard used everywhere else here: this app has no logins, so it stops a
+// technician changing something by mistake rather than stopping an intruder.
+app.get("/api/part-notes/:code", async (req, res) => {
+  try {
+    res.json(await data.notes.getPartNote(req.params.code) || { note: "" });
+  } catch (err) {
+    console.error("[GET /api/part-notes]", err.message);
+    res.json({ note: "" });          // a missing note must never break a lookup
+  }
+});
+
+app.post("/api/part-notes", async (req, res) => {
+  try {
+    const { item_code, note, who = "", role = "" } = req.body || {};
+    if (!["sales", "purchaser", "admin"].includes(String(role).toLowerCase())) {
+      return res.status(403).json({ error: "Only Sales, Purchaser and Admin can change a part note." });
+    }
+    res.json(await data.notes.setPartNote(item_code, note, who));
+  } catch (err) {
+    if (err.status === 400) return res.status(400).json({ error: err.message });
+    console.error("[POST /api/part-notes]", err);
+    res.status(500).json({ error: "Could not save the note." });
+  }
+});
+
 // Find Part: search parts by description/code (suggestion list).
 app.get("/api/parts-search", async (req, res) => {
   try {

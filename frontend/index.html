@@ -718,6 +718,27 @@
     </div>
   </div>
 
+  <!-- A note kept against a part - usually what replaced it. -->
+  <div class="modal-overlay" id="note-modal" style="display:none">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div>
+          <strong>Part note</strong>
+          <div class="mm-sub" id="note-part-name"></div>
+        </div>
+        <button class="modal-x" id="note-close" aria-label="Close">&#10005;</button>
+      </div>
+      <div class="field">
+        <label for="note-text">Note <span style="color:var(--ink-faint);font-weight:400;">(what replaced it, or anything worth knowing)</span></label>
+        <textarea id="note-text" rows="3" maxlength="300" placeholder="e.g. Superseded — order SZEN 848BE058B2R instead"></textarea>
+        <small class="loc-current" id="note-who"></small>
+      </div>
+      <p class="loc-warn">Everyone who looks this part up will see this, including the technicians.</p>
+      <button class="btn-primary" id="note-save" style="margin-top:8px;">Save note</button>
+      <button class="btn-secondary" id="note-delete" style="display:none; margin-top:8px;">Remove the note</button>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="location-modal" style="display:none">
     <div class="modal-sheet">
       <div class="modal-head">
