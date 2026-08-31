@@ -1,9 +1,15 @@
-// sw.js — app-shell cache for PWA (network-first for fresh deploys)
+// sw.js — app-shell cache for PWA (cache-first, refreshed in the background)
 //
 // Bump CACHE on every deploy (v7 -> v8 -> ...). The new worker deletes old
-// caches in activate, and core files are fetched network-first so a normal
-// reopen always gets the latest code. Cache is only used as an offline fallback.
-const CACHE = "om-order-v113";
+// caches in activate and precaches the new shell.
+//
+// The shell was network-first for a long time: every open waited for ~400KB
+// to come over workshop Wi-Fi - with a copy already sitting on the phone -
+// so a deploy would reach phones one open sooner. That guarantee was priced
+// on EVERY open, and opens outnumber deploys a hundred to one. Now the cached
+// copy is served instantly and the fresh one is fetched behind it, so a
+// deploy shows one open later and startup does not touch the network at all.
+const CACHE = "om-order-v114";
 
 // IPL artwork lives in its own cache, deliberately NOT version-stamped.
 // They are large, they are already fetched only when a section is opened, and
@@ -98,33 +104,37 @@ self.addEventListener("fetch", (e) => {
     return;
   }
 
-  // Network-first: try the network, update the cache with the fresh copy,
-  // and fall back to the cached version only when offline / the fetch fails.
+  // Cache-first, refreshed behind: the same shape the IPL diagrams have used
+  // in production since v65. The cached copy answers immediately; the network
+  // copy replaces it for the NEXT open. The versioned install above still
+  // hard-refreshes everything whenever CACHE is bumped, so the two update
+  // paths back each other up.
+  //
+  // A cache miss (fresh install, or iOS cleared storage under pressure) falls
+  // through to the network. And a miss that also fails the network answers
+  // with a real Response - respondWith(undefined) is how Safari ends up
+  // saying "Returned response is null", which helps nobody.
   e.respondWith(
-    fetch(e.request)
-      .then((res) => {
-        // Cache a clone of successful same-origin responses for offline use.
-        if (res && res.status === 200 && res.type === "basic") {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
-        }
-        return res;
-      })
-      // A cache miss here used to resolve to undefined, and respondWith takes
-      // that as a failure — Safari then reports "Returned response is null",
-      // which says nothing about what went wrong. Answer with a real response
-      // so the browser shows an ordinary error instead.
-      .catch(() =>
-        caches.match(e.request).then(
-          (hit) =>
+    caches.match(e.request).then((hit) => {
+      const fresh = fetch(e.request)
+        .then((res) => {
+          if (res && res.status === 200 && res.type === "basic") {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+          }
+          return res;
+        })
+        .catch(
+          () =>
             hit ||
             new Response("Offline, and this page is not in the cache.", {
               status: 504,
               statusText: "Offline",
               headers: { "Content-Type": "text/plain; charset=utf-8" },
             })
-        )
-      )
+        );
+      return hit || fresh;
+    })
   );
 });
 

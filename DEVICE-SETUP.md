@@ -4,6 +4,12 @@
 > Run as administrator. It pulls, installs anything new and restarts the
 > service, stopping at the first step that fails rather than restarting over a
 > half-finished pull.
+>
+> Phones pick the new version up **one open late**: the app now starts from
+> the copy on the phone (that is what made startup fast) and fetches the new
+> code behind it. So: open once after a deploy, close it fully, open again —
+> the second open runs the new version. No urgency for routine deploys; staff
+> simply catch up the next time they use the app twice.
 
 Ten minutes per device, and the order matters. The certificate has to be trusted
 **before** the app is added to the home screen, because iOS decides the icon

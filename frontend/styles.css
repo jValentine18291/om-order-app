@@ -10,7 +10,12 @@
    The stack below still names the platform CJK faces after Noto, so if the
    workshop Wi-Fi is slow the text renders in PingFang / YaHei rather than
    flashing blank — the same thing the phones do today. */
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&display=swap');
+/* The Google Fonts stylesheet is loaded from index.html, asynchronously.
+   It used to be an @import here, which is the slowest possible arrangement:
+   the browser had to download this file, discover the import, then fetch CSS
+   from the INTERNET - this is a LAN app - before painting anything. Startup
+   now paints in the system faces and the brand faces swap in when they
+   arrive; if the office internet is down, nothing waits on it. */
 
 :root {
   --cjk: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
