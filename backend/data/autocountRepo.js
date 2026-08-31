@@ -445,6 +445,41 @@ async function getPartStock(code) {
   };
 }
 
+// Stock balances for a LIST of parts in one round trip, for the Orders list.
+// getPartStock exists for one part typed by a person, so it matches the code
+// case-insensitively with spaces stripped - which SQL Server cannot index, and
+// costs a full scan of the stock-movement table. Fine once; ruinous in a loop.
+//
+// Here the codes were stored by the app AND CAME FROM AUTOCOUNT in the first
+// place (the search resolved them before the request was saved), so they are
+// matched exactly and the whole list is one indexed query.
+async function getStockBalances(codes) {
+  const list = [...new Set((codes || []).map((c) => String(c || "").trim()).filter(Boolean))];
+  const out = new Map();
+  // Chunked well under SQL Server's parameter limit; one chunk in practice.
+  for (let i = 0; i < list.length; i += 100) {
+    const chunk = list.slice(i, i + 100);
+    const params = {};
+    chunk.forEach((c, j) => { params[`c${j}`] = c; });
+    const rows = await query(
+      `SELECT i.ItemCode,
+              COALESCE(NULLIF(i.Description, ''), NULLIF(i.Desc2, ''), i.ItemCode) AS Descr,
+              (SELECT SUM(s.Qty) FROM StockDTL s WHERE s.ItemCode = i.ItemCode) AS BalQty
+         FROM Item i
+        WHERE i.ItemCode IN (${chunk.map((_, j) => `@c${j}`).join(",")})`,
+      params
+    );
+    for (const r of rows) {
+      out.set(r.ItemCode, {
+        description: r.Descr,
+        bal_qty: r.BalQty === null || r.BalQty === undefined ? 0 : Number(r.BalQty),
+      });
+    }
+  }
+  return out;
+}
+module.exports.getStockBalances = getStockBalances;
+
 module.exports.searchParts = searchParts;
 module.exports.getPartStock = getPartStock;
 

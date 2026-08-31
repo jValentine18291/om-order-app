@@ -405,18 +405,30 @@ app.get("/api/part-requests/count", async (req, res) => {
 app.get("/api/part-requests", async (req, res) => {
   try {
     const rows = await data.requests.listPartRequests(String(req.query.status || "PENDING"));
+    for (const r of rows) r.current_qty = null;
+
+    // Live stock is there to help decide the purchase, so only rows still
+    // waiting get it - an ordered row's balance answers nothing, and the
+    // history grows forever. And it is ONE batched, exact-match query: asking
+    // per row, case-insensitively, cost a full scan of the stock-movement
+    // table per part, which is why this list crawled once history existed.
     const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
-    if (itemsSource === "autocount" && rows.length) {
-      const acRepo = require("./data/autocountRepo");
-      for (const r of rows) {
-        try {
-          const info = await acRepo.getPartStock(r.item_code);
-          r.current_qty = info ? info.bal_qty : null;
-          if (info && !r.description) r.description = info.description;
-        } catch (_) { r.current_qty = null; }
+    const pending = rows.filter((r) => r.status === "PENDING");
+    if (itemsSource === "autocount" && pending.length) {
+      try {
+        const acRepo = require("./data/autocountRepo");
+        const stock = await acRepo.getStockBalances(pending.map((r) => r.item_code));
+        for (const r of pending) {
+          const info = stock.get(String(r.item_code).trim());
+          if (info) {
+            r.current_qty = info.bal_qty;
+            if (!r.description) r.description = info.description;
+          }
+        }
+      } catch (e) {
+        // The list is still useful without balances; say so in the log only.
+        console.error("[GET /api/part-requests] stock lookup failed:", e.message);
       }
-    } else {
-      for (const r of rows) r.current_qty = null;
     }
     res.json(rows);
   } catch (err) {
