@@ -36,6 +36,15 @@
   "parts": 214
  },
  {
+  "id": "k10sp",
+  "name": "PulsFOG K-10-SP",
+  "short": "K-10-SP",
+  "brand": "PulsFOG",
+  "category": "Thermal Fogger",
+  "figures": 8,
+  "parts": 0
+ },
+ {
   "id": "bk3410fl",
   "name": "Zenoah BK3410FL / FL-S",
   "short": "BK3410FL / FL-S",

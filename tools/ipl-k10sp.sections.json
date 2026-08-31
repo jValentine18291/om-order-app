@@ -1,0 +1,66 @@
+{
+  "_comment": [
+    "Every page of the book, in order, correctly rotated.",
+    "",
+    "The parts tables are included AS PAGES rather than as data. The book is a",
+    "2012 photocopy and OCR of it is not trustworthy: checked against the print,",
+    "6 of 22 rows on page 2 came back wrong - 401.100.00 for 101.100.00,",
+    "DIN 934 for DIN 931, position 64 for 61. A parts list that wrong is worse",
+    "than none, because somebody orders the wrong part from it. As images the",
+    "tables are exactly what the book says, and they are legible on a phone.",
+    "",
+    "rotate is anticlockwise degrees. Only page 1 needs it: its drawing is set",
+    "sideways on an upright page, so -90 turns it back."
+  ],
+  "sections": [
+    {
+      "title": "Resonator side — extralong protective grating",
+      "label": "Fig.1 Resonator side (extralong grating)",
+      "drawing": 1,
+      "rotate": -90,
+      "tables": []
+    },
+    {
+      "title": "Resonator side",
+      "label": "Fig.2 Resonator side",
+      "drawing": 2,
+      "tables": []
+    },
+    {
+      "title": "Fog solution installation",
+      "label": "Fig.3 Fog solution installation",
+      "drawing": 3,
+      "tables": []
+    },
+    {
+      "title": "Fog solution installation — parts list",
+      "label": "Fig.4 Fog solution installation (parts list)",
+      "drawing": 4,
+      "tables": []
+    },
+    {
+      "title": "Starting installation",
+      "label": "Fig.5 Starting installation",
+      "drawing": 5,
+      "tables": []
+    },
+    {
+      "title": "Starting installation — parts list",
+      "label": "Fig.6 Starting installation (parts list)",
+      "drawing": 6,
+      "tables": []
+    },
+    {
+      "title": "Primer and ignition installation",
+      "label": "Fig.7 Primer and ignition installation",
+      "drawing": 7,
+      "tables": []
+    },
+    {
+      "title": "Primer and ignition installation — parts list",
+      "label": "Fig.8 Primer and ignition installation (parts list)",
+      "drawing": 8,
+      "tables": []
+    }
+  ]
+}

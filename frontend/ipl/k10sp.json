@@ -1,0 +1,95 @@
+{
+ "id": "k10sp",
+ "name": "PulsFOG K-10-SP",
+ "source": "PF_K10SP_IPL.pdf",
+ "figures": [
+  {
+   "id": "1",
+   "number": 1,
+   "title": "Resonator side \u2014 extralong protective grating",
+   "label": "Fig.1 Resonator side (extralong grating)",
+   "sheet": 1,
+   "sheets": 1,
+   "image": "k10sp-fig1.png",
+   "hotspots": [],
+   "parts": []
+  },
+  {
+   "id": "2",
+   "number": 2,
+   "title": "Resonator side",
+   "label": "Fig.2 Resonator side",
+   "sheet": 1,
+   "sheets": 1,
+   "image": "k10sp-fig2.png",
+   "hotspots": [],
+   "parts": []
+  },
+  {
+   "id": "3",
+   "number": 3,
+   "title": "Fog solution installation",
+   "label": "Fig.3 Fog solution installation",
+   "sheet": 1,
+   "sheets": 1,
+   "image": "k10sp-fig3.png",
+   "hotspots": [],
+   "parts": []
+  },
+  {
+   "id": "4",
+   "number": 4,
+   "title": "Fog solution installation \u2014 parts list",
+   "label": "Fig.4 Fog solution installation (parts list)",
+   "sheet": 1,
+   "sheets": 1,
+   "image": "k10sp-fig4.png",
+   "hotspots": [],
+   "parts": []
+  },
+  {
+   "id": "5",
+   "number": 5,
+   "title": "Starting installation",
+   "label": "Fig.5 Starting installation",
+   "sheet": 1,
+   "sheets": 1,
+   "image": "k10sp-fig5.png",
+   "hotspots": [],
+   "parts": []
+  },
+  {
+   "id": "6",
+   "number": 6,
+   "title": "Starting installation \u2014 parts list",
+   "label": "Fig.6 Starting installation (parts list)",
+   "sheet": 1,
+   "sheets": 1,
+   "image": "k10sp-fig6.png",
+   "hotspots": [],
+   "parts": []
+  },
+  {
+   "id": "7",
+   "number": 7,
+   "title": "Primer and ignition installation",
+   "label": "Fig.7 Primer and ignition installation",
+   "sheet": 1,
+   "sheets": 1,
+   "image": "k10sp-fig7.png",
+   "hotspots": [],
+   "parts": []
+  },
+  {
+   "id": "8",
+   "number": 8,
+   "title": "Primer and ignition installation \u2014 parts list",
+   "label": "Fig.8 Primer and ignition installation (parts list)",
+   "sheet": 1,
+   "sheets": 1,
+   "image": "k10sp-fig8.png",
+   "hotspots": [],
+   "parts": []
+  }
+ ]
+}

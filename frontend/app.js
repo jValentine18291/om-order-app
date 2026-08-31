@@ -4870,7 +4870,13 @@ function showIplFigure(id) {
     // the picture rather than lifted from the file. Most are there; a few are
     // not, and it is fairer to say so than to leave someone tapping a number
     // that was never found.
-    hint.textContent = !fig.hotspots.length
+    // A book with neither hotspots NOR a parts list is a set of page images -
+    // the PulsFOG manuals are like this, their parts tables printed as pages of
+    // their own. Telling someone to pick from a list that is not there reads as
+    // a fault in the app.
+    hint.textContent = !fig.hotspots.length && !(fig.parts || []).length
+      ? "Pinch to zoom · drag to move · the parts tables are pages of their own in this book"
+      : !fig.hotspots.length
       ? "Pinch to zoom · drag to move · pick a part from the list below"
       : fig.ocr
         ? "Pinch to zoom · tap a number · scanned drawing, a few numbers may not respond"

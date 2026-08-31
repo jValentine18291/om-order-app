@@ -120,6 +120,9 @@
     "No parts match that.": "没有符合的零件。",
     "Pinch to zoom · drag to move · tap a number": "双指缩放 · 拖动移动 · 点击数字",
     "Pinch to zoom · drag to move · pick a part from the list below": "双指缩放 · 拖动移动 · 从下方列表选择零件",
+    "Pinch to zoom · drag to move · the parts tables are pages of their own in this book":
+      "双指缩放 · 拖动移动 · 本手册的零件表是独立的页面",
+    "Thermal Fogger": "热雾机",
     "Pinch to zoom · tap a number · scanned drawing, a few numbers may not respond":
       "双指缩放 · 点击数字 · 扫描图纸，少数数字可能无反应",
     "No IPLs installed yet": "尚未添加 IPL",
