@@ -895,9 +895,16 @@ function openRequestFor(code) {
 //
 // "Real" means: present, and not still the placeholder it came with - if it
 // starts with MISC or is just the code back again, nobody has said anything.
-function describedEnough(itemCode, description) {
+function isPlaceholderLine(itemCode, flag) {
+  // The flag comes from the client, which saw the CATALOGUE description before
+  // staff replaced it - the only moment that fact is visible. The code test
+  // stands on its own so an old app, or a direct API call, is still judged.
+  return !!flag || isFreeTextPart(itemCode, "");
+}
+
+function describedEnough(itemCode, description, flag) {
   const text = String(description || "").trim();
-  if (!isFreeTextPart(itemCode, "")) return true;      // ordinary part: catalogue name is fine
+  if (!isPlaceholderLine(itemCode, flag)) return true;  // ordinary part: catalogue name is fine
   if (!text) return false;
   const norm = (v) => String(v || "").trim().toUpperCase();
   if (norm(text) === norm(itemCode)) return false;
@@ -918,13 +925,14 @@ function clashMessage(existing) {
   return `${existing.qty_requested} requested by ${who}${when ? " on " + when : ""}`;
 }
 
-function createPartRequest({ item_code, description = "", qty_requested, requester = "", remarks = "", stock_at_request = null } = {}) {
+function createPartRequest({ item_code, description = "", qty_requested, requester = "", remarks = "", stock_at_request = null, free_text = false } = {}) {
   const code = String(item_code || "").trim();
   const qty = Number(qty_requested);
   if (!code) { const e = new Error("Part code is required."); e.status = 400; throw e; }
   if (!Number.isFinite(qty) || qty < 1) { const e = new Error("Order quantity must be at least 1."); e.status = 400; throw e; }
 
-  if (!describedEnough(code, description)) throw describeError(code);
+  const placeholder = isPlaceholderLine(code, free_text);
+  if (!describedEnough(code, description, free_text)) throw describeError(code);
 
   // Failsafe: one open request per part, so the purchaser never orders the same
   // part twice because two people noticed the same empty shelf.
@@ -932,7 +940,7 @@ function createPartRequest({ item_code, description = "", qty_requested, request
   // NOT for the placeholder codes. Every indent part shares one code, so two
   // open requests against it are two DIFFERENT things to buy - refusing the
   // second would be refusing a real order because an unrelated one exists.
-  if (!isFreeTextPart(code, "")) {
+  if (!placeholder) {
     const existing = openRequestFor(code);
     if (existing) {
       const e = new Error(`This part already has an open request: ${clashMessage(existing)}.`);
@@ -942,10 +950,10 @@ function createPartRequest({ item_code, description = "", qty_requested, request
 
   const snap = Number.isFinite(Number(stock_at_request)) ? Number(stock_at_request) : null;
   const info = db.prepare(
-    `INSERT INTO part_requests (item_code, description, qty_requested, requester, remarks, batch_id, stock_at_request)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO part_requests (item_code, description, qty_requested, requester, remarks, batch_id, stock_at_request, free_text)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
   ).run(code, String(description || ""), Math.floor(qty), String(requester || "").trim(),
-        String(remarks || "").trim().slice(0, 500), nextBatchId(), snap);
+        String(remarks || "").trim().slice(0, 500), nextBatchId(), snap, placeholder ? 1 : 0);
   return db.prepare("SELECT * FROM part_requests WHERE id = ?").get(info.lastInsertRowid);
 }
 
@@ -966,8 +974,8 @@ function createPartRequestBatch({ items, requester = "", batch_remarks = "" } = 
     const label = code || `line ${i + 1}`;
     if (!code) problems.push(`Line ${i + 1} has no part code.`);
     if (!Number.isFinite(qty) || qty < 1) problems.push(`${label}: quantity must be at least 1.`);
-    const placeholder = code && isFreeTextPart(code, "");
-    if (code && !describedEnough(code, (it || {}).description)) {
+    const placeholder = code && isPlaceholderLine(code, (it || {}).free_text);
+    if (code && !describedEnough(code, (it || {}).description, (it || {}).free_text)) {
       problems.push(`${label} is a placeholder code - type what to order.`);
     }
     // Both duplicate checks are skipped for placeholder codes: several indent
@@ -987,6 +995,7 @@ function createPartRequestBatch({ items, requester = "", batch_remarks = "" } = 
       description: String((it || {}).description || ""),
       remarks: String((it || {}).remarks || "").trim().slice(0, 500),
       snap: Number.isFinite(snap) ? snap : null,
+      placeholder: !!placeholder,
     };
   });
   if (problems.length) {
@@ -997,13 +1006,13 @@ function createPartRequestBatch({ items, requester = "", batch_remarks = "" } = 
 
   const orderRemarks = String(batch_remarks || "").trim().slice(0, 500);
   const insert = db.prepare(
-    `INSERT INTO part_requests (item_code, description, qty_requested, requester, remarks, batch_remarks, batch_id, stock_at_request)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO part_requests (item_code, description, qty_requested, requester, remarks, batch_remarks, batch_id, stock_at_request, free_text)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
   const tx = db.transaction(() => {
     const batch = nextBatchId();
     for (const c of cleaned) {
-      insert.run(c.code, c.description, c.qty, String(requester || "").trim(), c.remarks, orderRemarks, batch, c.snap);
+      insert.run(c.code, c.description, c.qty, String(requester || "").trim(), c.remarks, orderRemarks, batch, c.snap, c.placeholder ? 1 : 0);
     }
     return batch;
   });
@@ -1034,18 +1043,31 @@ function updatePartRequestBatch(batchId, { lines = [], batch_remarks } = {}) {
     if (!Number.isFinite(qty) || qty < 1) {
       const e = new Error(`${row.item_code}: quantity must be at least 1.`); e.status = 400; throw e;
     }
-    changes.push({ id: row.id, qty: Math.floor(qty), remarks: String(l.remarks || "").trim().slice(0, 500) });
+    // Only a placeholder line's description may be changed: an ordinary part's
+    // name belongs to AutoCount, and rewriting it here would put a description
+    // on the Purchase Order that matches nothing in the catalogue.
+    const placeholder = isPlaceholderLine(row.item_code, row.free_text);
+    let description = row.description;
+    if (l.description !== undefined && placeholder) {
+      description = String(l.description).trim().slice(0, 200);
+      if (!describedEnough(row.item_code, description, row.free_text)) throw describeError(row.item_code);
+    }
+    changes.push({
+      id: row.id, qty: Math.floor(qty),
+      remarks: String(l.remarks || "").trim().slice(0, 500),
+      description,
+    });
   }
   if (removals.length >= rows.length) {
     const e = new Error("An order cannot lose every part - remove the whole request instead of its last line.");
     e.status = 400; throw e;
   }
 
-  const upd = db.prepare("UPDATE part_requests SET qty_requested = ?, remarks = ? WHERE id = ?");
+  const upd = db.prepare("UPDATE part_requests SET qty_requested = ?, remarks = ?, description = ? WHERE id = ?");
   const del = db.prepare("DELETE FROM part_requests WHERE id = ?");
   const updOrder = db.prepare("UPDATE part_requests SET batch_remarks = ? WHERE batch_id = ?");
   const tx = db.transaction(() => {
-    for (const c of changes) upd.run(c.qty, c.remarks, c.id);
+    for (const c of changes) upd.run(c.qty, c.remarks, c.description, c.id);
     for (const id of removals) del.run(id);
     if (batch_remarks !== undefined) {
       updOrder.run(String(batch_remarks || "").trim().slice(0, 500), String(batchId));

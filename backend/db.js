@@ -452,6 +452,7 @@ db.exec(`
     remarks       TEXT DEFAULT '',       -- optional note from the requester, per part
     batch_remarks TEXT DEFAULT '',       -- optional note for the whole order (same on every row)
     batch_id      TEXT DEFAULT '',       -- one order = one batch; single parts are a batch of one
+    free_text     INTEGER DEFAULT 0,     -- 1 = a placeholder code, named by staff
     stock_at_request REAL,               -- AutoCount balance when the order was made; NULL if unknown
     created_at    TEXT DEFAULT (datetime('now', 'localtime')),
     ordered_at    TEXT
@@ -466,6 +467,20 @@ try {
   const cols = db.prepare("PRAGMA table_info(part_requests)").all().map((c) => c.name);
   if (!cols.includes("remarks")) db.exec("ALTER TABLE part_requests ADD COLUMN remarks TEXT DEFAULT ''");
   if (!cols.includes("batch_remarks")) db.exec("ALTER TABLE part_requests ADD COLUMN batch_remarks TEXT DEFAULT ''");
+  // Same reasoning as machine_parts.free_text: the description is the thing
+  // staff replace, so a rule derived from it erases its own evidence. Recorded
+  // when the line is made; existing rows judged by their code, as they were.
+  if (!cols.includes("free_text")) {
+    db.exec("ALTER TABLE part_requests ADD COLUMN free_text INTEGER DEFAULT 0");
+    db.prepare(
+      `UPDATE part_requests SET free_text = 1
+        WHERE UPPER(TRIM(item_code)) LIKE 'MISC%'
+           OR UPPER(TRIM(item_code)) LIKE 'A5 %' OR UPPER(TRIM(item_code)) = 'A5'
+           OR UPPER(TRIM(item_code)) LIKE 'A6 %' OR UPPER(TRIM(item_code)) = 'A6'
+           OR UPPER(TRIM(item_code)) LIKE 'A7 %' OR UPPER(TRIM(item_code)) = 'A7'
+           OR UPPER(TRIM(item_code)) LIKE 'A8 %' OR UPPER(TRIM(item_code)) = 'A8'`
+    ).run();
+  }
   // The balance at the moment of ordering. John decided the list should show
   // what the stock WAS when the order was made, not what it is now - the
   // snapshot is the decision's context, and it never needs AutoCount again.

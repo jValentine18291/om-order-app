@@ -1644,6 +1644,13 @@ select {
 .pu-edit-line .pu-eremove { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--ink-faint); cursor: pointer; }
 .pu-edit-line.pu-removed { opacity: .45; }
 .pu-edit-line.pu-removed .pu-line-main { text-decoration: line-through; }
+/* A placeholder line's name, editable in place. Scoped past the base
+   input[type="text"] rule the same way .bo-qty had to be. */
+.pu-edit-line .pu-edesc {
+  width: 100%; min-height: 38px; height: 38px; padding: 0 10px;
+  font-size: .92rem; font-weight: 700;
+  border: 1px solid var(--border); border-radius: 8px;
+}
 .pu-eremarks { width: 100%; margin-top: 6px; min-height: 38px; height: 38px; resize: none; font-size: .88rem; padding: 7px 11px; }
 .pu-edit-actions { display: flex; gap: 8px; margin-top: 12px; }
 .pu-edit-actions button { flex: 1; }

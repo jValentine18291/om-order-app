@@ -3324,6 +3324,9 @@ $("om-submit").addEventListener("click", async () => {
         qty_requested: qty,
         requester,
         remarks: $("om-remarks").value.trim(),
+        // Recorded on the row: by the time anyone edits it, the typed name has
+        // replaced the catalogue description and the marker is gone.
+        free_text: placeholder,
       }),
     });
     toast("Request submitted", "ok");
@@ -3812,9 +3815,11 @@ let puEditing = null;
 function renderOrderEditCard(b) {
   const first = b.rows[b.rows.length - 1];
   const lines = b.rows.slice().reverse().map((r) => `
-    <div class="pu-edit-line" data-line="${r.id}">
+    <div class="pu-edit-line" data-line="${r.id}"${r.free_text ? ' data-placeholder="1"' : ""} data-was="${escapeAttr(r.description || "")}">
       <div class="pu-line-main">
-        <div class="pu-desc">${escapeHtml(r.description || r.item_code)}</div>
+        ${r.free_text
+          ? `<input class="pu-edesc" type="text" value="${escapeAttr(r.description || "")}" aria-label="What this part is" />`
+          : `<div class="pu-desc">${escapeHtml(r.description || r.item_code)}</div>`}
         <div class="pu-code mono">${escapeHtml(r.item_code)}</div>
       </div>
       <input class="pu-eqty" type="number" min="1" inputmode="numeric" value="${r.qty_requested}" aria-label="Quantity" />
@@ -3856,21 +3861,31 @@ function wireOrderEditCard(wrap) {
     const lines = [];
     const summary = [];
     let bad = null;
+    let unnamed = null;
     card.querySelectorAll(".pu-edit-line").forEach((el) => {
       const id = Number(el.dataset.line);
-      const desc = el.querySelector(".pu-desc").textContent;
+      const descInput = el.querySelector(".pu-edesc");
+      const was = el.dataset.was || "";
+      const desc = descInput ? descInput.value.trim() : el.querySelector(".pu-desc").textContent;
       if (el.classList.contains("pu-removed")) {
         lines.push({ id, remove: true });
-        summary.push(`Remove ${desc}`);
+        summary.push(`Remove ${was || desc}`);
         return;
       }
       const q = parseInt(el.querySelector(".pu-eqty").value, 10);
-      if (!Number.isFinite(q) || q < 1) { bad = desc; return; }
+      if (!Number.isFinite(q) || q < 1) { bad = was || desc; return; }
+      // A placeholder code carries no name of its own, so an empty box would
+      // leave the purchaser with nothing to buy.
+      if (descInput && !desc) { unnamed = el.querySelector(".pu-code").textContent; return; }
       const rk = (card.querySelector(`.pu-eremarks[data-line="${id}"]`) || { value: "" }).value.trim();
-      lines.push({ id, qty_requested: q, remarks: rk });
+      const line = { id, qty_requested: q, remarks: rk };
+      if (descInput) line.description = desc;
+      lines.push(line);
+      if (descInput && desc !== was) summary.push(`“${was}” → “${desc}”`);
       summary.push(`${desc}: qty ${q}${rk ? ` — “${rk}”` : ""}`);
     });
     if (bad) { toast(`Quantity for ${bad} must be at least 1`, "err"); return; }
+    if (unnamed) { toast(`${unnamed} is a placeholder code — type what to order`, "err"); return; }
     const orderRemarks = $("pu-eorder-remarks").value.trim();
     if (orderRemarks) summary.push(`Order remarks: “${orderRemarks}”`);
 
@@ -4040,6 +4055,7 @@ $("bo-submit").addEventListener("click", async () => {
           description: c.description,
           qty_requested: c.qty,
           remarks: (c.remarks || "").trim(),
+          free_text: !!c.placeholder,
         })),
       }),
     });
