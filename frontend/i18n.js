@@ -89,6 +89,9 @@
 
     // ---- Order-more modal / purchasing ----
     "Order quantity": "申请数量",
+    "Remarks": "备注",
+    "(optional)": "（可选）",
+    "e.g. Customer waiting, urgent": "例如：客户在等，加急",
     "Requester": "申请人",
     "Your name": "你的名字",
     "Submit request": "提交申请",

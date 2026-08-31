@@ -66,6 +66,9 @@ app.get("/cert.pem", sendCertificate);
 // Who hears about a slip needing a quote. Not the technicians - they are the
 // ones who just marked it.
 const QUOTE_NOTIFY_ROLES = ["sales", "purchaser", "admin"];
+// Orders are the purchaser's job; admins cover for her when she is away, and
+// there is exactly one of her. Sales are the ones asking, so not them.
+const ORDER_NOTIFY_ROLES = ["purchaser", "admin"];
 
 const push = require("./push");
 const pushDb = require("./db");
@@ -338,10 +341,51 @@ app.post("/api/part-requests", async (req, res) => {
   try {
     const row = await data.requests.createPartRequest(req.body || {});
     res.status(201).json(row);
+
+    // Tell the purchaser a request is waiting. Until now she found out by
+    // opening the Orders list; the point of the list is that nothing waits
+    // because nobody knew.
+    push.notify(pushDb, ORDER_NOTIFY_ROLES, {
+      title: "New part order",
+      body: `${row.qty_requested} × ${row.description || row.item_code} · from ${row.requester || "?"}`,
+      slip: "",
+    }).catch((e) => console.error("[push] notify failed:", e.message));
   } catch (err) {
     if (err.status === 400 || err.status === 409) return res.status(err.status).json({ error: err.message });
     console.error("[POST /api/part-requests]", err);
     res.status(err.status || 500).json({ error: err.message || "Failed to save request" });
+  }
+});
+
+// A whole order at once - the Bulk Order cart. All-or-nothing in the
+// repository, so a clash reports every problem together and saves nothing.
+app.post("/api/part-requests/bulk", async (req, res) => {
+  try {
+    const rows = await data.requests.createPartRequestBatch(req.body || {});
+    res.status(201).json({ batch_id: rows[0].batch_id, rows });
+
+    const n = rows.length;
+    push.notify(pushDb, ORDER_NOTIFY_ROLES, {
+      title: "New bulk order",
+      body: `${n} part${n === 1 ? "" : "s"} · from ${rows[0].requester || "?"}`,
+      slip: "",
+    }).catch((e) => console.error("[push] notify failed:", e.message));
+  } catch (err) {
+    if (err.status === 400 || err.status === 409) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/part-requests/bulk]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to save the order" });
+  }
+});
+
+// One order (batch) moves to ORDERED as a whole: the purchaser has keyed the
+// Purchase Order, and its parts travel together.
+app.patch("/api/part-requests/batch/:batchId/ordered", async (req, res) => {
+  try {
+    res.json(await data.requests.markPartRequestBatchOrdered(req.params.batchId));
+  } catch (err) {
+    if (err.status === 404) return res.status(404).json({ error: err.message });
+    console.error("[PATCH /api/part-requests/batch/:batchId/ordered]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to update the order" });
   }
 });
 

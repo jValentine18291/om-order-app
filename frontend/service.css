@@ -1541,6 +1541,56 @@ select {
    launched from and looks like nothing happened. */
 #location-modal { z-index: 70; }
 
+/* ---- Orders (purchaser) -------------------------------------------------- */
+/* John asked for the two states by colour: Need to Order red, Ordered green.
+   The tint is on the card's edge and status pill rather than the whole card,
+   so the parts stay readable. */
+.pu-filters { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.pu-chip {
+  padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--surface); font-size: .85rem; font-weight: 600;
+  color: var(--ink-soft); cursor: pointer;
+}
+.pu-chip-on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.pu-card-pending { border-left: 4px solid #C0392B; }
+.pu-card-ordered { border-left: 4px solid #1B7A42; }
+.pu-status {
+  display: inline-block; font-size: .75rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 999px;
+}
+.pu-st-need { color: #A32020; background: #FBE9E9; }
+.pu-st-done { color: #1B7A42; background: #E7F5EC; }
+.pu-meta { margin-top: 4px; font-size: .8rem; color: var(--ink-faint); }
+.pu-line {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-top: 1px solid var(--line, #eef1f3);
+}
+.pu-line-main { flex: 1; min-width: 0; }
+.pu-line-qty {
+  display: grid; grid-template-columns: auto auto; gap: 2px 8px;
+  align-items: baseline; text-align: right; flex: 0 0 auto;
+}
+.pu-line-qty .pu-lbl { font-size: .72rem; }
+.pu-remarks { margin-top: 6px; font-size: .85rem; color: var(--ink-soft); font-style: italic; }
+
+/* ---- Bulk Order ----------------------------------------------------------- */
+.bo-line {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 8px;
+}
+.bo-line-main { flex: 1; min-width: 0; }
+.bo-qty {
+  width: 64px; min-height: 40px; text-align: center;
+  border: 1px solid var(--border); border-radius: 8px; font-size: 1rem;
+}
+.bo-remove {
+  flex: 0 0 auto; width: 36px; height: 36px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--ink-faint); font-size: .9rem; cursor: pointer;
+}
+.bo-remove:active { background: #fbe9e9; color: #a32020; }
+
 /* ---- Change location (Admin only) -------------------------------------- */
 .loc-current { display: block; margin-top: 6px; font-size: .82rem; color: var(--ink-faint); }
 .loc-confirm-box {

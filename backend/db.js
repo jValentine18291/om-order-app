@@ -408,9 +408,27 @@ db.exec(`
     qty_requested INTEGER NOT NULL,
     requester     TEXT DEFAULT '',
     status        TEXT DEFAULT 'PENDING',
+    remarks       TEXT DEFAULT '',       -- optional note from the requester
+    batch_id      TEXT DEFAULT '',       -- one order = one batch; single parts are a batch of one
     created_at    TEXT DEFAULT (datetime('now', 'localtime')),
     ordered_at    TEXT
   )
 `);
+
+// Migration: remarks and batch_id on part_requests. A bulk order is several
+// parts submitted together and reviewed as ONE order, so rows share a batch id;
+// a part ordered on its own gets a batch of its own. Existing rows are each
+// their own batch, which is what they were.
+try {
+  const cols = db.prepare("PRAGMA table_info(part_requests)").all().map((c) => c.name);
+  if (!cols.includes("remarks")) db.exec("ALTER TABLE part_requests ADD COLUMN remarks TEXT DEFAULT ''");
+  if (!cols.includes("batch_id")) {
+    db.exec("ALTER TABLE part_requests ADD COLUMN batch_id TEXT DEFAULT ''");
+    db.exec("UPDATE part_requests SET batch_id = 'R' || id WHERE batch_id = ''");
+    console.log("[db] migrated: added remarks and batch_id to part_requests");
+  }
+} catch (e) {
+  console.error("[db] part_requests migration check failed:", e.message);
+}
 
 module.exports = db;

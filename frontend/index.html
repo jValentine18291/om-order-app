@@ -109,11 +109,17 @@
           <!-- How many are waiting, so it can be seen without opening it. -->
           <span class="home-count" id="quote-count" style="display:none;"></span>
         </button>
+        <button class="home-btn" data-go="bulk">
+          <span class="home-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/><path d="M12 6v6M9 9h6"/></svg>
+          </span>
+          <span class="home-txt"><strong>Bulk Order</strong><small>Request several parts at once</small></span>
+        </button>
         <button class="home-btn" data-go="requests">
           <span class="home-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
           </span>
-          <span class="home-txt"><strong>Requested Parts</strong><small>Parts requested for reordering</small></span>
+          <span class="home-txt"><strong>Orders</strong><small>Part orders and their status</small></span>
         </button>
       </div>
       <button class="switch-role" id="switch-role">Switch role</button>
@@ -223,9 +229,37 @@
     <section id="screen-purchase" class="screen">
       <div class="section-head">
         <p class="eyebrow">Purchasing</p>
-        <h2>Requested parts</h2>
+        <h2>Orders</h2>
+      </div>
+      <!-- Which orders to show. Need to Order is the work; Ordered is the
+           record it leaves behind, kept so an old request can be looked up. -->
+      <div class="pu-filters" id="pu-filters">
+        <button type="button" class="pu-chip pu-chip-on" data-status="PENDING">Need to Order</button>
+        <button type="button" class="pu-chip" data-status="ORDERED">Ordered</button>
+        <button type="button" class="pu-chip" data-status="ALL">All</button>
       </div>
       <div id="pu-list"></div>
+    </section>
+
+    <!-- ============ SCREEN: BULK ORDER ============ -->
+    <!-- A cart: add parts one at a time, submit the lot as one order. Nothing
+         reaches the purchaser until Submit, so a half-built list costs nothing. -->
+    <section id="screen-bulk" class="screen">
+      <div class="section-head">
+        <p class="eyebrow">Purchasing</p>
+        <h2>Bulk Order</h2>
+      </div>
+      <div class="field">
+        <label for="bo-q">Add a part</label>
+        <input id="bo-q" type="text" autocomplete="off" placeholder="Search by description or part no.&hellip;" />
+      </div>
+      <div id="bo-results"></div>
+      <div id="bo-cart"></div>
+      <div class="field" id="bo-remarks-field" style="display:none;">
+        <label for="bo-remarks">Remarks <span style="color:var(--ink-faint);font-weight:400;">(optional, for the whole order)</span></label>
+        <textarea id="bo-remarks" rows="2" placeholder="e.g. Stock-up for December"></textarea>
+      </div>
+      <button class="btn-primary" id="bo-submit" style="display:none; margin-top:12px;">Submit order</button>
     </section>
 
     <!-- ============ SCREEN: NEW SERVICE ============ -->
@@ -423,6 +457,8 @@
       <div class="field" id="om-qty-field">
         <label for="om-qty">Order quantity</label>
         <input id="om-qty" type="number" min="1" inputmode="numeric" placeholder="e.g. 5" />
+        <label for="om-remarks" style="margin-top:10px;">Remarks <span style="color:var(--ink-faint);font-weight:400;">(optional)</span></label>
+        <textarea id="om-remarks" rows="2" placeholder="e.g. Customer waiting, urgent"></textarea>
       </div>
       <div class="om-check" id="om-confirm" style="display:none;">
         <div class="om-check-line" id="om-check-line"></div>

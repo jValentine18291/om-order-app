@@ -61,7 +61,7 @@ function formatDate(ts) {
 }
 
 // ---- Screen navigation -----------------------------------------------------
-const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip", "purchase", "quote", "ipl"];
+const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip", "purchase", "quote", "ipl", "bulk"];
 
 // ---- Who is using this phone ------------------------------------------------
 // Staff pick their name once per phone; the choice is remembered and decides
@@ -216,12 +216,12 @@ function applyRoleToHome() {
   const role = getRole();
   // Which home functions each account sees (per John's mapping, 28 Jul 2026):
   const ROLE_FUNCTIONS = {
-    sales: ["new", "close", "view", "find", "ipl", "quote"],
+    sales: ["new", "close", "view", "find", "ipl", "quote", "bulk"],
     tech: ["open", "view", "find", "ipl"],
-    // Purchaser is Sales plus requested parts, so it inherits the
+    // Purchaser is Sales plus the orders list, so it inherits the
     // IPLs too rather than being a separate shorter list.
-    purchaser: ["new", "close", "view", "find", "ipl", "quote", "requests"],
-    admin: ["new", "open", "close", "view", "find", "ipl", "quote", "requests"],
+    purchaser: ["new", "close", "view", "find", "ipl", "quote", "bulk", "requests"],
+    admin: ["new", "open", "close", "view", "find", "ipl", "quote", "bulk", "requests"],
   };
   // An unknown group shows nothing rather than defaulting to Sales - silently
   // handing out someone else's functions is worse than an empty screen.
@@ -2859,6 +2859,7 @@ document.querySelectorAll(".home-btn").forEach((b) =>
     else if (go === "find") { enterFindPart(); }
     else if (go === "quote") { enterNeedToQuote(); }
     else if (go === "requests") { enterPurchaser(); }
+    else if (go === "bulk") { enterBulkOrder(); }
     else if (go === "ipl") { enterIpl(); }
   })
 );
@@ -3095,6 +3096,7 @@ function openOrderModal(part) {
   orderPart = part;
   $("om-part-name").textContent = `${part.description} · ${part.item_code}`;
   $("om-qty").value = "";
+  $("om-remarks").value = "";
   showOrderStep("qty");
   $("order-modal").style.display = "flex";
   document.body.style.overflow = "hidden";
@@ -3127,8 +3129,10 @@ $("om-submit").addEventListener("click", async () => {
 
   // First tap shows what is about to be sent; the second sends it.
   if ($("om-confirm").style.display === "none") {
+    const rk = $("om-remarks").value.trim();
     $("om-check-line").textContent = `Order ${qty} × ${orderPart.description}`;
-    $("om-check-who").textContent = `${orderPart.item_code} · requested by ${requester}`;
+    $("om-check-who").textContent = `${orderPart.item_code} · requested by ${requester}` +
+      (rk ? ` · “${rk}”` : "");
     showOrderStep("confirm");
     return;
   }
@@ -3143,6 +3147,7 @@ $("om-submit").addEventListener("click", async () => {
         description: orderPart.description,
         qty_requested: qty,
         requester,
+        remarks: $("om-remarks").value.trim(),
       }),
     });
     toast("Request submitted", "ok");
@@ -3485,42 +3490,94 @@ function enterPurchaser() {
   loadPartRequests();
 }
 
+// Which orders the purchaser is looking at. Need to Order is the default: it
+// is the work. Ordered is the record it leaves, kept for looking things up.
+let puStatus = "PENDING";
+$("pu-filters").querySelectorAll(".pu-chip").forEach((chip) =>
+  chip.addEventListener("click", () => {
+    puStatus = chip.dataset.status;
+    $("pu-filters").querySelectorAll(".pu-chip").forEach((c) =>
+      c.classList.toggle("pu-chip-on", c === chip));
+    loadPartRequests();
+  })
+);
+
 async function loadPartRequests() {
   const wrap = $("pu-list");
-  wrap.innerHTML = `<div class="fp-loading">Loading requests…</div>`;
+  wrap.innerHTML = `<div class="fp-loading">Loading orders…</div>`;
   try {
-    const rows = await api(`/api/part-requests`);
+    const rows = await api(`/api/part-requests?status=${encodeURIComponent(puStatus)}`);
     if (!rows.length) {
-      wrap.innerHTML = `<div class="fp-empty">No parts have been requested</div>`;
+      wrap.innerHTML = `<div class="fp-empty">${
+        puStatus === "PENDING" ? "Nothing waiting to be ordered"
+        : puStatus === "ORDERED" ? "Nothing has been ordered yet" : "No orders yet"}</div>`;
       return;
     }
-    wrap.innerHTML = rows.map((r) => {
-      const cur = r.current_qty === null || r.current_qty === undefined
-        ? "—"
-        : (Number.isInteger(Number(r.current_qty)) ? String(r.current_qty) : Number(r.current_qty).toFixed(2));
-      const low = r.current_qty !== null && Number(r.current_qty) <= 0;
-      return `
-      <div class="pu-card">
-        <div class="pu-top">
-          <div>
+
+    // One card per ORDER, not per part: a bulk order was submitted together and
+    // is reviewed and marked together. Rows already arrive newest first; the
+    // batch keeps its place by its newest row.
+    const batches = [];
+    const byId = new Map();
+    for (const r of rows) {
+      const key = r.batch_id || "R" + r.id;
+      if (!byId.has(key)) { byId.set(key, { key, rows: [] }); batches.push(byId.get(key)); }
+      byId.get(key).rows.push(r);
+    }
+
+    const qty = (v) => (v === null || v === undefined ? "—"
+      : Number.isInteger(Number(v)) ? String(v) : Number(v).toFixed(2));
+    const day = (t) => String(t || "").split(" ")[0];
+
+    wrap.innerHTML = batches.map((b) => {
+      const first = b.rows[b.rows.length - 1]; // oldest row carries the submission
+      const pending = b.rows.some((r) => r.status === "PENDING");
+      // The whole-order remarks are stored on every line; show once when they
+      // are one value, per line when they differ.
+      const distinct = [...new Set(b.rows.map((r) => r.remarks || "").filter(Boolean))];
+      const orderRemark = distinct.length === 1 && b.rows.every((r) => (r.remarks || "") === distinct[0])
+        ? distinct[0] : "";
+
+      const lines = b.rows.slice().reverse().map((r) => {
+        const cur = qty(r.current_qty);
+        const low = r.current_qty !== null && r.current_qty !== undefined && Number(r.current_qty) <= 0;
+        return `
+        <div class="pu-line">
+          <div class="pu-line-main">
             <div class="pu-desc">${escapeHtml(r.description || r.item_code)}</div>
             <div class="pu-code mono">${escapeHtml(r.item_code)}</div>
+            ${!orderRemark && r.remarks ? `<div class="pu-remarks">“${escapeHtml(r.remarks)}”</div>` : ""}
           </div>
-          <button class="pu-done" data-req="${r.id}">Mark ordered</button>
+          <div class="pu-line-qty">
+            <span class="pu-lbl">Order</span><span class="pu-val">${r.qty_requested}</span>
+            <span class="pu-lbl">Stock</span><span class="pu-val ${low ? "fp-qty-zero" : ""}">${cur}</span>
+          </div>
+        </div>`;
+      }).join("");
+
+      return `
+      <div class="pu-card ${pending ? "pu-card-pending" : "pu-card-ordered"}">
+        <div class="pu-top">
+          <div>
+            <span class="pu-status ${pending ? "pu-st-need" : "pu-st-done"}">${pending ? "Need to Order" : "Ordered"}</span>
+            <div class="pu-meta">${escapeHtml(first.requester || "—")} · ${escapeHtml(day(first.created_at))}${
+              !pending && first.ordered_at ? ` · ordered ${escapeHtml(day(b.rows[0].ordered_at || first.ordered_at))}` : ""}</div>
+          </div>
+          ${pending && ["purchaser", "admin"].includes(getRole())
+            ? `<button class="pu-done" data-batch="${escapeAttr(b.key)}">Mark as Ordered</button>` : ""}
         </div>
-        <div class="pu-grid">
-          <div class="pu-cell"><span class="pu-lbl">Current Qty</span><span class="pu-val ${low ? "fp-qty-zero" : ""}">${cur}</span></div>
-          <div class="pu-cell"><span class="pu-lbl">Qty Requested</span><span class="pu-val">${r.qty_requested}</span></div>
-          <div class="pu-cell"><span class="pu-lbl">Requester</span><span class="pu-val">${escapeHtml(r.requester || "—")}</span></div>
-        </div>
+        ${lines}
+        ${orderRemark ? `<div class="pu-remarks">“${escapeHtml(orderRemark)}”</div>` : ""}
       </div>`;
     }).join("");
+
     wrap.querySelectorAll(".pu-done").forEach((btn) =>
       btn.addEventListener("click", async () => {
+        if (!confirm("Mark this order as Ordered?\n\nDo this once it has been transferred to a Purchase Order.")) return;
         btn.disabled = true;
         try {
-          await api(`/api/part-requests/${btn.dataset.req}/ordered`, { method: "PATCH" });
-          toast("Marked as ordered", "ok");
+          await api(`/api/part-requests/batch/${encodeURIComponent(btn.dataset.batch)}/ordered`, { method: "PATCH" });
+          toast("Marked as Ordered", "ok");
           loadPartRequests();
         } catch (e) {
           toast(e.message, "err");
@@ -3533,6 +3590,143 @@ async function loadPartRequests() {
     toast(e.message, "err");
   }
 }
+
+// ---- Bulk Order --------------------------------------------------------------
+// A cart. Parts are added one at a time from the same live search Find Part
+// uses, quantities adjusted in place, and NOTHING reaches the purchaser until
+// Submit - so a half-built list costs nothing and can simply be walked away
+// from. Submitting sends the lot as ONE order for her to review.
+let boCart = [];   // { item_code, description, qty }
+
+function enterBulkOrder() {
+  boCart = [];
+  $("bo-q").value = "";
+  $("bo-results").innerHTML = "";
+  $("bo-remarks").value = "";
+  renderBulkCart();
+  showScreen("bulk");
+  setTimeout(() => $("bo-q").focus(), 50);
+}
+
+let boDebounce = null;
+$("bo-q").addEventListener("input", () => {
+  clearTimeout(boDebounce);
+  const q = $("bo-q").value.trim();
+  const box = $("bo-results");
+  if (q.length < 2) { box.innerHTML = ""; return; }
+  boDebounce = setTimeout(async () => {
+    try {
+      const data = await api(`/api/parts-search?q=${encodeURIComponent(q)}`);
+      const list = data.results || [];
+      if (!list.length) { box.innerHTML = `<div class="fp-empty">No matching parts</div>`; return; }
+      box.innerHTML = list.map((r) => `
+        <button type="button" class="company-option" data-code="${escapeAttr(r.item_code)}" data-desc="${escapeAttr(r.description)}">
+          <span class="fp-opt-desc">${escapeHtml(r.description)}${r.desc2 ? ` <span class="fp-val-model">${escapeHtml(r.desc2)}</span>` : ""}</span>
+          <span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>
+        </button>`).join("");
+      box.querySelectorAll(".company-option").forEach((b) =>
+        b.addEventListener("click", () => {
+          addToBulkCart(b.dataset.code, b.dataset.desc);
+          $("bo-q").value = "";
+          box.innerHTML = "";
+          $("bo-q").focus();
+        })
+      );
+    } catch (e) {
+      box.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Search failed")}</div>`;
+    }
+  }, 250);
+});
+
+function addToBulkCart(code, desc) {
+  // The same part tapped twice means "more of it", not an error.
+  const hit = boCart.find((c) => c.item_code === code);
+  if (hit) hit.qty += 1;
+  else boCart.push({ item_code: code, description: desc || code, qty: 1 });
+  renderBulkCart();
+}
+
+function renderBulkCart() {
+  const wrap = $("bo-cart");
+  const has = boCart.length > 0;
+  $("bo-remarks-field").style.display = has ? "" : "none";
+  $("bo-submit").style.display = has ? "" : "none";
+  $("bo-submit").textContent = `Submit order (${boCart.length} part${boCart.length === 1 ? "" : "s"})`;
+  delete $("bo-submit").dataset.armed;
+  if (!has) {
+    wrap.innerHTML = `<div class="fp-empty">No parts added yet — search above to build the order</div>`;
+    return;
+  }
+  wrap.innerHTML = boCart.map((c, i) => `
+    <div class="bo-line">
+      <div class="bo-line-main">
+        <div class="pu-desc">${escapeHtml(c.description)}</div>
+        <div class="pu-code mono">${escapeHtml(c.item_code)}</div>
+      </div>
+      <input class="bo-qty" type="number" min="1" inputmode="numeric" value="${c.qty}" data-i="${i}" aria-label="Quantity" />
+      <button type="button" class="bo-remove" data-i="${i}" aria-label="Remove">&#10005;</button>
+    </div>`).join("");
+  wrap.querySelectorAll(".bo-qty").forEach((inp) =>
+    inp.addEventListener("change", () => {
+      const n = parseInt(inp.value, 10);
+      const c = boCart[Number(inp.dataset.i)];
+      if (c && Number.isFinite(n) && n >= 1) { c.qty = n; }
+      else if (c) { inp.value = c.qty; }
+      delete $("bo-submit").dataset.armed;
+      $("bo-submit").textContent = `Submit order (${boCart.length} part${boCart.length === 1 ? "" : "s"})`;
+    })
+  );
+  wrap.querySelectorAll(".bo-remove").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      boCart.splice(Number(btn.dataset.i), 1);
+      renderBulkCart();
+    })
+  );
+}
+
+$("bo-submit").addEventListener("click", async () => {
+  if (!boCart.length) return;
+  const requester = userName();
+  if (!requester) { toast("Choose your name from the top bar first", "err"); return; }
+  const btn = $("bo-submit");
+
+  // Two taps, like everything else that sends: the first shows the total, the
+  // second commits. Editing the cart in between disarms it.
+  if (!btn.dataset.armed) {
+    const total = boCart.reduce((n, c) => n + c.qty, 0);
+    btn.dataset.armed = "1";
+    btn.textContent = `Tap again to send — ${boCart.length} part${boCart.length === 1 ? "" : "s"}, ${total} pcs`;
+    return;
+  }
+
+  btn.disabled = true;
+  const remarks = $("bo-remarks").value.trim();
+  try {
+    await api(`/api/part-requests/bulk`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        requester,
+        items: boCart.map((c) => ({
+          item_code: c.item_code,
+          description: c.description,
+          qty_requested: c.qty,
+          remarks,
+        })),
+      }),
+    });
+    toast("Order submitted", "ok");
+    boCart = [];
+    $("bo-remarks").value = "";
+    renderBulkCart();
+  } catch (e) {
+    // The repository reports every problem at once; show them all.
+    alert(e.message || "Could not submit the order");
+    delete btn.dataset.armed;
+    renderBulkCart();
+  }
+  btn.disabled = false;
+});
 
 // New Service
 $("ns-add-machine").addEventListener("click", () => openMachineForm(-1));

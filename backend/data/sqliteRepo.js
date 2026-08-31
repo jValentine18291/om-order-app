@@ -796,36 +796,121 @@ const slips = {
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };
 
-// ---- Part reorder requests ("Order more" -> Purchaser list) -----------------
-function createPartRequest({ item_code, description = "", qty_requested, requester = "" } = {}) {
+// ---- Part reorder requests ("Order more" / "Bulk Order" -> Orders list) -----
+// Every request belongs to a batch: a bulk order is several parts submitted
+// together and reviewed as ONE order, and a part ordered on its own is simply a
+// batch of one. The purchaser's list groups by it, and "ordered" is marked per
+// batch - which is how she works: one request, one Purchase Order.
+function nextBatchId() {
+  // Readable and unique: the highest id the table has seen, plus one. Two
+  // people submitting at the same instant still differ, because the id is read
+  // inside the same transaction that inserts the rows.
+  const row = db.prepare("SELECT IFNULL(MAX(id), 0) + 1 AS n FROM part_requests").get();
+  return "B" + row.n;
+}
+
+// The open request a part clashes with, if any. Shared by the single and bulk
+// paths so the guard cannot drift between them.
+function openRequestFor(code) {
+  const norm = String(code).replace(/\s+/g, "").toUpperCase();
+  return db.prepare(
+    `SELECT * FROM part_requests
+      WHERE status = 'PENDING'
+        AND REPLACE(UPPER(item_code), ' ', '') = ?`
+  ).get(norm);
+}
+
+function clashMessage(existing) {
+  const who = existing.requester || "someone";
+  const when = String(existing.created_at || "").split(" ")[0];
+  return `${existing.qty_requested} requested by ${who}${when ? " on " + when : ""}`;
+}
+
+function createPartRequest({ item_code, description = "", qty_requested, requester = "", remarks = "" } = {}) {
   const code = String(item_code || "").trim();
   const qty = Number(qty_requested);
   if (!code) { const e = new Error("Part code is required."); e.status = 400; throw e; }
   if (!Number.isFinite(qty) || qty < 1) { const e = new Error("Order quantity must be at least 1."); e.status = 400; throw e; }
 
-  // Failsafe: one open request per part. If a PENDING request already exists
-  // for this part (codes compared space-stripped, case-insensitive), refuse
-  // and tell the requester who already asked and for how many.
-  const norm = code.replace(/\s+/g, "").toUpperCase();
-  const existing = db.prepare(
-    `SELECT * FROM part_requests
-      WHERE status = 'PENDING'
-        AND REPLACE(UPPER(item_code), ' ', '') = ?`
-  ).get(norm);
+  // Failsafe: one open request per part, so the purchaser never orders the same
+  // part twice because two people noticed the same empty shelf.
+  const existing = openRequestFor(code);
   if (existing) {
-    const who = existing.requester || "someone";
-    const when = String(existing.created_at || "").split(" ")[0];
-    const e = new Error(
-      `This part already has an open request: ${existing.qty_requested} requested by ${who}${when ? " on " + when : ""}.`
-    );
+    const e = new Error(`This part already has an open request: ${clashMessage(existing)}.`);
     e.status = 409; throw e;
   }
 
   const info = db.prepare(
-    `INSERT INTO part_requests (item_code, description, qty_requested, requester)
-     VALUES (?, ?, ?, ?)`
-  ).run(code, String(description || ""), Math.floor(qty), String(requester || "").trim());
+    `INSERT INTO part_requests (item_code, description, qty_requested, requester, remarks, batch_id)
+     VALUES (?, ?, ?, ?, ?, ?)`
+  ).run(code, String(description || ""), Math.floor(qty), String(requester || "").trim(),
+        String(remarks || "").trim().slice(0, 500), nextBatchId());
   return db.prepare("SELECT * FROM part_requests WHERE id = ?").get(info.lastInsertRowid);
+}
+
+// A whole order at once. All-or-nothing: if anything is wrong - a bad quantity,
+// a part already requested, the same part twice in the cart - NOTHING is saved
+// and every problem is reported together, so the person fixes the cart once
+// rather than resubmitting to discover the next complaint.
+function createPartRequestBatch({ items, requester = "" } = {}) {
+  const list = Array.isArray(items) ? items : [];
+  if (!list.length) { const e = new Error("The order is empty."); e.status = 400; throw e; }
+  if (list.length > 50) { const e = new Error("An order can hold at most 50 parts."); e.status = 400; throw e; }
+
+  const problems = [];
+  const seen = new Set();
+  const cleaned = list.map((it, i) => {
+    const code = String((it || {}).item_code || "").trim();
+    const qty = Number((it || {}).qty_requested);
+    const label = code || `line ${i + 1}`;
+    if (!code) problems.push(`Line ${i + 1} has no part code.`);
+    if (!Number.isFinite(qty) || qty < 1) problems.push(`${label}: quantity must be at least 1.`);
+    const norm = code.replace(/\s+/g, "").toUpperCase();
+    if (norm && seen.has(norm)) problems.push(`${label} is in the order twice - combine the quantities.`);
+    if (norm) seen.add(norm);
+    if (code) {
+      const existing = openRequestFor(code);
+      if (existing) problems.push(`${label} already has an open request: ${clashMessage(existing)}.`);
+    }
+    return {
+      code,
+      qty: Math.floor(qty),
+      description: String((it || {}).description || ""),
+      remarks: String((it || {}).remarks || "").trim().slice(0, 500),
+    };
+  });
+  if (problems.length) {
+    const e = new Error(problems.join("\n"));
+    e.status = problems.some((t) => t.includes("open request")) ? 409 : 400;
+    throw e;
+  }
+
+  const insert = db.prepare(
+    `INSERT INTO part_requests (item_code, description, qty_requested, requester, remarks, batch_id)
+     VALUES (?, ?, ?, ?, ?, ?)`
+  );
+  const tx = db.transaction(() => {
+    const batch = nextBatchId();
+    for (const c of cleaned) {
+      insert.run(c.code, c.description, c.qty, String(requester || "").trim(), c.remarks, batch);
+    }
+    return batch;
+  });
+  const batch = tx();
+  return db.prepare("SELECT * FROM part_requests WHERE batch_id = ? ORDER BY id").all(batch);
+}
+
+// Everything a batch holds becomes ORDERED together - the purchaser transfers
+// the whole request to one Purchase Order, so its parts move as one.
+function markPartRequestBatchOrdered(batchId) {
+  const rows = db.prepare("SELECT * FROM part_requests WHERE batch_id = ?").all(String(batchId || ""));
+  if (!rows.length) { const e = new Error("Order not found."); e.status = 404; throw e; }
+  db.prepare(
+    `UPDATE part_requests
+        SET status = 'ORDERED', ordered_at = datetime('now','localtime')
+      WHERE batch_id = ? AND status = 'PENDING'`
+  ).run(String(batchId));
+  return { ok: true };
 }
 
 function listPartRequests(status = "PENDING") {
@@ -843,7 +928,7 @@ function markPartRequestOrdered(id) {
   return { ok: true };
 }
 
-const partRequests = { createPartRequest, listPartRequests, markPartRequestOrdered };
+const partRequests = { createPartRequest, createPartRequestBatch, listPartRequests, markPartRequestOrdered, markPartRequestBatchOrdered };
 module.exports.partRequests = partRequests;
 
 // Fast count of pending reorder requests (for the Purchaser notification).
