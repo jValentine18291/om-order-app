@@ -1668,6 +1668,15 @@ select {
 .part-note b { display: block; font-size: .78rem; letter-spacing: .04em;
   text-transform: uppercase; opacity: .8; margin-bottom: 2px; }
 .part-note-who { display: block; margin-top: 4px; font-size: .78rem; opacity: .75; }
+/* A part code inside a note. Underlined rather than coloured: the note sits on
+   an amber panel already, and a second colour in there reads as a warning
+   about the code itself. */
+.part-note-link {
+  padding: 0; border: 0; background: none; cursor: pointer;
+  font: inherit; font-weight: 700; color: inherit;
+  text-decoration: underline; text-underline-offset: 2px;
+}
+.part-note-link:active { opacity: .6; }
 .part-note-edit {
   margin-left: 8px; padding: 2px 9px; border-radius: 999px;
   border: 1px solid #e0c48a; background: transparent;

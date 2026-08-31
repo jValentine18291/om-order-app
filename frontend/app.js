@@ -3170,12 +3170,73 @@ async function fetchPartNote(itemCode) {
   }
 }
 
+// A part code written inside a note becomes tappable, so "replaced by
+// SZEN 140051112" takes you to that part instead of leaving you to retype it.
+//
+// The pattern is deliberately mean. Anything with five or more digits in it is
+// a part code around here; anything with fewer is a model, a year or a size -
+// "fits 525 and 545", "from 2024 onward" - and turning those into links would
+// make the notes look like nonsense. An optional short uppercase prefix is
+// taken with the number, because SZEN 140051111 is the whole code.
+const PART_CODE_RE = /\b(?:[A-Z]{2,5}\s+)?[A-Za-z0-9][A-Za-z0-9._-]{4,}\b/g;
+
+function looksLikePartCode(token) {
+  return (token.match(/\d/g) || []).length >= 5;
+}
+
+// Escapes everything, then wraps the codes. Building it the other way round -
+// wrapping first - would put the note's own text through escaping twice.
+function linkifyPartCodes(text) {
+  let out = "", last = 0;
+  for (const m of String(text).matchAll(PART_CODE_RE)) {
+    if (!looksLikePartCode(m[0])) continue;
+    out += escapeHtml(text.slice(last, m.index));
+    out += `<button type="button" class="part-note-link" data-part-code="${escapeAttr(m[0])}">${escapeHtml(m[0])}</button>`;
+    last = m.index + m[0].length;
+  }
+  return out + escapeHtml(text.slice(last));
+}
+
+// Take someone to the part a note points at. The code is resolved rather than
+// assumed: a note may name a part without its prefix, and a bare number can
+// match both a part and its R variant - so more than one match asks, exactly
+// as the IPL does, instead of silently picking one.
+async function openPartByCode(code) {
+  try {
+    const data = await api(`/api/parts-search?q=${encodeURIComponent(code)}`);
+    const list = data.results || [];
+    if (!list.length) {
+      toast(`${code} is not in AutoCount`, "err");
+      return;
+    }
+    // Leaving the diagram for the parts screen is the honest move: the sheet
+    // behind is about a different part and its title would start lying.
+    if ($("ipl-modal").style.display === "flex") closeIplPart();
+    enterFindPart();
+    if (list.length === 1) {
+      showPartStock(list[0].item_code);
+      return;
+    }
+    const box = $("fp-results");
+    box.innerHTML = list.map((r) =>
+      `<button type="button" class="company-option" data-code="${escapeAttr(r.item_code)}">
+         <span class="fp-opt-desc">${escapeHtml(r.description)}</span>
+         <span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>
+       </button>`).join("");
+    box.querySelectorAll(".company-option").forEach((b) =>
+      b.addEventListener("click", () => showPartStock(b.dataset.code))
+    );
+  } catch (e) {
+    toast(e.message || "Could not look that part up", "err");
+  }
+}
+
 function partNoteHtml(note) {
   if (note && note.note) {
     const who = [note.updated_by, String(note.updated_at || "").split(" ")[0]]
       .filter(Boolean).join(" · ");
     return `<div class="part-note">
-        <b>Note</b>${escapeHtml(note.note)}${
+        <b>Note</b>${linkifyPartCodes(note.note)}${
           canEditNote() ? `<button type="button" class="part-note-edit" data-note-edit>Edit</button>` : ""
         }${who ? `<span class="part-note-who">${escapeHtml(who)}</span>` : ""}
       </div>`;
@@ -3195,6 +3256,9 @@ async function renderPartNote(container, part, onSaved) {
   container.insertAdjacentHTML("afterbegin", html);
   const btn = container.querySelector("[data-note-edit]");
   if (btn) btn.addEventListener("click", () => openNoteModal(part, note, onSaved));
+  container.querySelectorAll("[data-part-code]").forEach((el) =>
+    el.addEventListener("click", () => openPartByCode(el.dataset.partCode))
+  );
 }
 
 let notePart = null;
