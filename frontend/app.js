@@ -3228,6 +3228,11 @@ function openOrderModal(part) {
   $("om-part-name").textContent = `${part.description} · ${part.item_code}`;
   $("om-qty").value = "";
   $("om-remarks").value = "";
+  // A placeholder code says nothing about what to buy, so the name is asked
+  // for here rather than left for the purchaser to chase.
+  const placeholder = isFreeTextPart(part.item_code, part.description);
+  $("om-desc-field").style.display = placeholder ? "" : "none";
+  $("om-desc").value = "";
   renderOnOrder(part.item_code);
   showOrderStep("qty");
   $("order-modal").style.display = "flex";
@@ -3287,6 +3292,13 @@ $("om-submit").addEventListener("click", async () => {
   const qty = parseInt($("om-qty").value, 10);
   const requester = userName();
   if (!Number.isFinite(qty) || qty < 1) { toast("Enter an order quantity", "err"); return; }
+  const placeholder = isFreeTextPart(orderPart.item_code, orderPart.description);
+  const typedDesc = $("om-desc").value.trim();
+  if (placeholder && !typedDesc) {
+    toast("Type what this part is", "err");
+    $("om-desc").focus();
+    return;
+  }
   // Nobody signed in means nothing to put in the requester column, and the
   // purchaser would have no idea who asked.
   if (!requester) { toast("Choose your name from the top bar first", "err"); return; }
@@ -3294,7 +3306,7 @@ $("om-submit").addEventListener("click", async () => {
   // First tap shows what is about to be sent; the second sends it.
   if ($("om-confirm").style.display === "none") {
     const rk = $("om-remarks").value.trim();
-    $("om-check-line").textContent = `Order ${qty} × ${orderPart.description}`;
+    $("om-check-line").textContent = `Order ${qty} × ${placeholder ? typedDesc : orderPart.description}`;
     $("om-check-who").textContent = `${orderPart.item_code} · requested by ${requester}` +
       (rk ? ` · “${rk}”` : "");
     showOrderStep("confirm");
@@ -3308,7 +3320,7 @@ $("om-submit").addEventListener("click", async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         item_code: orderPart.item_code,
-        description: orderPart.description,
+        description: placeholder ? typedDesc : orderPart.description,
         qty_requested: qty,
         requester,
         remarks: $("om-remarks").value.trim(),
@@ -3926,8 +3938,19 @@ $("bo-q").addEventListener("input", () => {
 });
 
 function addToBulkCart(code, desc) {
-  // The same part tapped twice means "more of it", not an error.
-  const hit = boCart.find((c) => c.item_code === code);
+  // A placeholder code needs naming as it goes in - and two of them are two
+  // DIFFERENT things, so they never merge the way a repeated real part does.
+  if (isFreeTextPart(code, desc)) {
+    const typed = prompt(`${code}\n\nWhat is this part? The purchaser sees this, not the code.`, "");
+    if (typed === null) return;
+    const name = typed.trim();
+    if (!name) { toast("A placeholder part needs a name", "err"); return; }
+    boCart.push({ item_code: code, description: name, qty: 1, remarks: "", placeholder: true });
+    renderBulkCart();
+    return;
+  }
+  // The same ordinary part tapped twice means "more of it", not an error.
+  const hit = boCart.find((c) => c.item_code === code && !c.placeholder);
   if (hit) hit.qty += 1;
   else boCart.push({ item_code: code, description: desc || code, qty: 1, remarks: "" });
   renderBulkCart();
@@ -3948,7 +3971,11 @@ function renderBulkCart() {
     <div class="bo-item">
       <div class="bo-line">
         <div class="bo-line-main">
-          <div class="pu-desc">${escapeHtml(c.description)}</div>
+          <div class="pu-desc">${escapeHtml(c.description)}${
+            c.placeholder
+              ? ` <button type="button" class="desc-edit" data-bdesc="${i}" aria-label="Edit description">${PENCIL}</button>`
+              : ""
+          }</div>
           <div class="pu-code mono">${escapeHtml(c.item_code)}</div>
         </div>
         <input class="bo-qty" type="number" min="1" inputmode="numeric" value="${c.qty}" data-i="${i}" aria-label="Quantity" />
@@ -3958,6 +3985,14 @@ function renderBulkCart() {
     </div>`).join("");
   wrap.querySelectorAll(".bo-line-remarks").forEach((ta) =>
     ta.addEventListener("input", () => { boCart[Number(ta.dataset.i)].remarks = ta.value; })
+  );
+  wrap.querySelectorAll("[data-bdesc]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const c = boCart[Number(btn.dataset.bdesc)];
+      if (!c) return;
+      const typed = prompt("What is this part? The purchaser sees this, not the code.", c.description || "");
+      if (typed !== null && typed.trim()) { c.description = typed.trim().slice(0, 200); renderBulkCart(); }
+    })
   );
   wrap.querySelectorAll(".bo-qty").forEach((inp) =>
     inp.addEventListener("change", () => {

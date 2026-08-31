@@ -889,6 +889,29 @@ function openRequestFor(code) {
   ).get(norm);
 }
 
+// A5-A8 and MISC codes stand for something not in the catalogue, so on an
+// order the typed description is the ONLY thing that says what to buy. An
+// order reading "MISC - INDENT UNIT_PARTS x 2" tells the purchaser nothing.
+//
+// "Real" means: present, and not still the placeholder it came with - if it
+// starts with MISC or is just the code back again, nobody has said anything.
+function describedEnough(itemCode, description) {
+  const text = String(description || "").trim();
+  if (!isFreeTextPart(itemCode, "")) return true;      // ordinary part: catalogue name is fine
+  if (!text) return false;
+  const norm = (v) => String(v || "").trim().toUpperCase();
+  if (norm(text) === norm(itemCode)) return false;
+  return !norm(text).startsWith("MISC");
+}
+
+function describeError(itemCode) {
+  const e = new Error(
+    `${itemCode} is a placeholder code, so it needs a description saying what to order.`
+  );
+  e.status = 400;
+  return e;
+}
+
 function clashMessage(existing) {
   const who = existing.requester || "someone";
   const when = String(existing.created_at || "").split(" ")[0];
@@ -901,12 +924,20 @@ function createPartRequest({ item_code, description = "", qty_requested, request
   if (!code) { const e = new Error("Part code is required."); e.status = 400; throw e; }
   if (!Number.isFinite(qty) || qty < 1) { const e = new Error("Order quantity must be at least 1."); e.status = 400; throw e; }
 
+  if (!describedEnough(code, description)) throw describeError(code);
+
   // Failsafe: one open request per part, so the purchaser never orders the same
   // part twice because two people noticed the same empty shelf.
-  const existing = openRequestFor(code);
-  if (existing) {
-    const e = new Error(`This part already has an open request: ${clashMessage(existing)}.`);
-    e.status = 409; throw e;
+  //
+  // NOT for the placeholder codes. Every indent part shares one code, so two
+  // open requests against it are two DIFFERENT things to buy - refusing the
+  // second would be refusing a real order because an unrelated one exists.
+  if (!isFreeTextPart(code, "")) {
+    const existing = openRequestFor(code);
+    if (existing) {
+      const e = new Error(`This part already has an open request: ${clashMessage(existing)}.`);
+      e.status = 409; throw e;
+    }
   }
 
   const snap = Number.isFinite(Number(stock_at_request)) ? Number(stock_at_request) : null;
@@ -935,10 +966,17 @@ function createPartRequestBatch({ items, requester = "", batch_remarks = "" } = 
     const label = code || `line ${i + 1}`;
     if (!code) problems.push(`Line ${i + 1} has no part code.`);
     if (!Number.isFinite(qty) || qty < 1) problems.push(`${label}: quantity must be at least 1.`);
+    const placeholder = code && isFreeTextPart(code, "");
+    if (code && !describedEnough(code, (it || {}).description)) {
+      problems.push(`${label} is a placeholder code - type what to order.`);
+    }
+    // Both duplicate checks are skipped for placeholder codes: several indent
+    // parts legitimately share one code, and they are told apart by their
+    // descriptions, not by it.
     const norm = code.replace(/\s+/g, "").toUpperCase();
-    if (norm && seen.has(norm)) problems.push(`${label} is in the order twice - combine the quantities.`);
-    if (norm) seen.add(norm);
-    if (code) {
+    if (norm && !placeholder && seen.has(norm)) problems.push(`${label} is in the order twice - combine the quantities.`);
+    if (norm && !placeholder) seen.add(norm);
+    if (code && !placeholder) {
       const existing = openRequestFor(code);
       if (existing) problems.push(`${label} already has an open request: ${clashMessage(existing)}.`);
     }

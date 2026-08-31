@@ -470,6 +470,13 @@
       <!-- Whether this part is already on a supplier's Purchase Order. Filled
            in when the popup opens; hidden entirely when AutoCount cannot say. -->
       <div class="om-onorder" id="om-onorder" style="display:none;"></div>
+      <!-- Placeholder codes (A5-A8, MISC) only: the typed description is the
+           only thing that says what to buy. Hidden for ordinary parts. -->
+      <div class="field" id="om-desc-field" style="display:none;">
+        <label for="om-desc">What is this part? <span class="req">*</span></label>
+        <input id="om-desc" type="text" autocomplete="off" placeholder="e.g. Indent: crankshaft seal" />
+        <small class="loc-current">This code is a placeholder, so the purchaser needs the name.</small>
+      </div>
       <div class="field" id="om-qty-field">
         <label for="om-qty">Order quantity</label>
         <input id="om-qty" type="number" min="1" inputmode="numeric" placeholder="e.g. 5" />
