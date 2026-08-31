@@ -1669,6 +1669,9 @@ select {
    error. It sits at the TOP of the card because a superseded part is the
    first thing worth knowing about it. */
 #note-modal { z-index: 70; }
+/* Above the note popup as well: a replacement can be opened from a note that
+   is itself being read on top of the IPL sheet. */
+#peek-modal { z-index: 75; }
 .part-note {
   margin-bottom: 12px; padding: 10px 12px; border-radius: var(--radius-sm);
   background: #FFF6E5; border-left: 3px solid #E0A22A;

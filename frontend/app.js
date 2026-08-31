@@ -3203,13 +3203,37 @@ function canEditNote() {
   return ["sales", "purchaser", "admin"].includes(getRole());
 }
 
-async function fetchPartNote(itemCode) {
-  try {
-    const r = await api(`/api/part-notes/${encodeURIComponent(itemCode)}`);
-    return r && r.note ? r : null;
-  } catch (_) {
-    return null;                       // a note must never break a lookup
-  }
+// Most parts are keyed on their exact AutoCount item code. Some IPL parts are
+// not in AutoCount at all - obsolete, never stocked, or a whole assembly - and
+// those are exactly the ones somebody wants to write "no longer available, use
+// X" against. They get a key of their own, in a namespace that cannot collide
+// with an item code:
+//
+//     IPL:ZENOAH:848BE058B2
+//
+// Scoped to the BRAND, not the model: the same part number across two of a
+// brand's machines is the same part and should share one note, while an
+// identical number under another brand is a different part entirely.
+function iplNoteKey(part) {
+  const brand = String((ipl.model && ipl.model.name) || "").trim().split(/\s+/)[0] || "?";
+  const num = String(part.search || part.part_number || "").replace(/[^A-Za-z0-9]/g, "");
+  return `IPL:${brand.toUpperCase()}:${num.toUpperCase()}`;
+}
+
+async function fetchPartNote(itemCode, fallbackKey) {
+  const read = async (k) => {
+    try {
+      const r = await api(`/api/part-notes/${encodeURIComponent(k)}`);
+      return r && r.note ? { ...r, item_code: k } : null;
+    } catch (_) {
+      return null;                     // a note must never break a lookup
+    }
+  };
+  const first = await read(itemCode);
+  if (first) return first;
+  // A note written while the part was unknown to AutoCount should not vanish
+  // the day it is added to the catalogue.
+  return fallbackKey && fallbackKey !== itemCode ? read(fallbackKey) : null;
 }
 
 // A part code written inside a note becomes tappable, so "replaced by
@@ -3239,41 +3263,90 @@ function linkifyPartCodes(text) {
   return out + escapeHtml(text.slice(last));
 }
 
-// Take someone to the part a note points at. The code is resolved rather than
-// assumed: a note may name a part without its prefix, and a bare number can
-// match both a part and its R variant - so more than one match asks, exactly
-// as the IPL does, instead of silently picking one.
-async function openPartByCode(code) {
+// One part's details, without leaving what you were reading. Opened from a
+// code inside a note: the question is "what is that replacement?", and being
+// carried to another screen answers it while losing your place.
+let peekCode = null;
+
+function openPeek() {
+  $("peek-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function closePeek() {
+  $("peek-modal").style.display = "none";
+  const stillOpen = ["ipl-modal", "machine-modal", "order-modal", "note-modal"]
+    .some((id) => $(id) && $(id).style.display === "flex");
+  if (!stillOpen) document.body.style.overflow = "";
+  peekCode = null;
+}
+$("peek-close").addEventListener("click", closePeek);
+$("peek-open").addEventListener("click", () => {
+  const code = peekCode;
+  closePeek();
+  if ($("ipl-modal").style.display === "flex") closeIplPart();
+  enterFindPart();
+  showPartStock(code);
+});
+
+async function peekAtPart(code) {
+  $("peek-title").textContent = code;
+  $("peek-sub").textContent = "";
+  $("peek-body").innerHTML = `<div class="fp-loading">Looking it up…</div>`;
+  $("peek-open").style.display = "none";
+  peekCode = null;
+  openPeek();
+
   try {
     const data = await api(`/api/parts-search?q=${encodeURIComponent(code)}`);
     const list = data.results || [];
     if (!list.length) {
-      toast(`${code} is not in AutoCount`, "err");
+      $("peek-body").innerHTML =
+        `<div class="fp-empty">${escapeHtml(code)} is not in AutoCount.</div>`;
       return;
     }
-    // Leaving the diagram for the parts screen is the honest move: the sheet
-    // behind is about a different part and its title would start lying.
-    if ($("ipl-modal").style.display === "flex") closeIplPart();
-    enterFindPart();
-    if (list.length === 1) {
-      showPartStock(list[0].item_code);
+    // A bare number can match a part and its R variant. Ask rather than pick.
+    if (list.length > 1) {
+      $("peek-sub").textContent = `${list.length} parts match that number`;
+      $("peek-body").innerHTML = list.map((r) =>
+        `<button type="button" class="company-option" data-code="${escapeAttr(r.item_code)}">
+           <span class="fp-opt-desc">${escapeHtml(r.description)}</span>
+           <span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>
+         </button>`).join("");
+      $("peek-body").querySelectorAll(".company-option").forEach((b) =>
+        b.addEventListener("click", () => peekAtPart(b.dataset.code))
+      );
       return;
     }
-    const box = $("fp-results");
-    box.innerHTML = list.map((r) =>
-      `<button type="button" class="company-option" data-code="${escapeAttr(r.item_code)}">
-         <span class="fp-opt-desc">${escapeHtml(r.description)}</span>
-         <span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>
-       </button>`).join("");
-    box.querySelectorAll(".company-option").forEach((b) =>
-      b.addEventListener("click", () => showPartStock(b.dataset.code))
-    );
+    await showPeekStock(list[0].item_code);
   } catch (e) {
-    toast(e.message || "Could not look that part up", "err");
+    $("peek-body").innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Lookup failed")}</div>`;
   }
 }
 
-function partNoteHtml(note) {
+async function showPeekStock(itemCode) {
+  peekCode = itemCode;
+  try {
+    const p = await api(`/api/part-stock/${encodeURIComponent(itemCode)}`);
+    const qty = Number(p.bal_qty);
+    const qtyStr = Number.isInteger(qty) ? String(qty) : qty.toFixed(2);
+    $("peek-title").textContent = p.description || p.item_code;
+    $("peek-sub").textContent = p.item_code;
+    $("peek-body").innerHTML = `
+      <div class="fp-row"><span class="fp-lbl">Part No.</span><span class="fp-val mono">${escapeHtml(p.item_code)}</span></div>
+      <div class="fp-row"><span class="fp-lbl">Description</span><span class="fp-val">${escapeHtml(p.description)}${p.desc2 ? `<br><span class="fp-val-model">${escapeHtml(p.desc2)}</span>` : ""}</span></div>
+      <div class="fp-row"><span class="fp-lbl">Location / Shelf</span><span class="fp-val">${p.shelf ? escapeHtml(p.shelf) : "—"}</span></div>
+      <div class="fp-row"><span class="fp-lbl">Bal. Qty</span><span class="fp-val fp-qty ${qty > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${qtyStr}${p.uom ? " " + escapeHtml(p.uom) : ""}</span></div>`;
+    // A replacement can have been replaced in its turn, so its own note shows
+    // here too - and its codes are tappable, which walks the chain.
+    await renderPartNote($("peek-body"), p, () => showPeekStock(itemCode), { addIfEmpty: false });
+    $("peek-open").style.display = "";
+  } catch (e) {
+    $("peek-body").innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Lookup failed")}</div>`;
+  }
+}
+
+function partNoteHtml(note, addIfEmpty = true) {
   if (note && note.note) {
     const who = [note.updated_by, String(note.updated_at || "").split(" ")[0]]
       .filter(Boolean).join(" · ");
@@ -3283,23 +3356,25 @@ function partNoteHtml(note) {
         }${who ? `<span class="part-note-who">${escapeHtml(who)}</span>` : ""}
       </div>`;
   }
-  return canEditNote()
+  return canEditNote() && addIfEmpty
     ? `<button type="button" class="part-note-add" data-note-edit>+ Add a note (e.g. what replaced this part)</button>`
     : "";
 }
 
 // Put the note at the top of a card and wire its button. Called after the card
 // is written, because innerHTML replaces whatever was there.
-async function renderPartNote(container, part, onSaved) {
+async function renderPartNote(container, part, onSaved, { addIfEmpty = true } = {}) {
   if (!container || !part || !part.item_code) return;
-  const note = await fetchPartNote(part.item_code);
-  const html = partNoteHtml(note);
+  const note = await fetchPartNote(part.item_code, part.note_key);
+  // The peek popup answers "what is that part". An invitation to write a note,
+  // above the details and before you have read them, is not that answer.
+  const html = partNoteHtml(note, addIfEmpty);
   if (!html) return;
   container.insertAdjacentHTML("afterbegin", html);
   const btn = container.querySelector("[data-note-edit]");
   if (btn) btn.addEventListener("click", () => openNoteModal(part, note, onSaved));
   container.querySelectorAll("[data-part-code]").forEach((el) =>
-    el.addEventListener("click", () => openPartByCode(el.dataset.partCode))
+    el.addEventListener("click", () => peekAtPart(el.dataset.partCode))
   );
 }
 
@@ -3341,7 +3416,9 @@ async function saveNote(text) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        item_code: notePart.item_code,
+        // An unresolved IPL part carries its own key; a resolved one is
+        // written against the AutoCount item, which is the stabler identity.
+        item_code: notePart.note_key && !notePart.resolved ? notePart.note_key : notePart.item_code,
         note: text,
         who: initialsFor(getUser()),
         role: getRole(),
@@ -5188,9 +5265,12 @@ function selectIplKey(key, fromDiagram) {
 // getPartStock matches the code exactly and would miss otherwise.
 // Takes the part's index within the figure, not its callout number: several
 // parts can share a number and differ only by article number.
+let iplDiagramPart = null;      // the part as the BOOK lists it
+
 async function openIplPart(index) {
   const part = ipl.figure.parts[index];
   if (!part) return;
+  iplDiagramPart = part;
 
   $("ipl-part-title").textContent = part.description || part.part_number;
   $("ipl-part-sub").textContent =
@@ -5217,6 +5297,16 @@ async function openIplPart(index) {
     if (!list.length) {
       $("ipl-part-stock").innerHTML =
         `<div class="fp-empty">Not found in AutoCount under this number.</div>`;
+      // A part the catalogue does not hold is the one most likely to have been
+      // replaced by something else, so this is where a note earns its keep.
+      // It is keyed to the book's own number rather than an item code, since
+      // there is no item code to key it to.
+      await renderPartNote($("ipl-part-stock"), {
+        item_code: iplNoteKey(part),
+        note_key: iplNoteKey(part),
+        resolved: false,
+        description: part.description || part.part_number,
+      }, () => openIplPart(index));
       return;
     }
     if (list.length > 1) {
@@ -5264,7 +5354,11 @@ async function renderIplStock(itemCode) {
     iplOrderPart = p;
     $("ipl-order-more").style.display = "block";
     wireShelfEdit(box, p, (shelf) => { p.shelf = shelf; renderIplStock(p.item_code); });
-    renderPartNote(box, p, () => renderIplStock(p.item_code));
+    renderPartNote(box, {
+      ...p,
+      note_key: iplDiagramPart ? iplNoteKey(iplDiagramPart) : null,
+      resolved: true,
+    }, () => renderIplStock(p.item_code));
   } catch (e) {
     box.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Stock lookup failed")}</div>`;
   }

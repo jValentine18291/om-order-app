@@ -124,7 +124,10 @@
         </button>
         <button class="home-btn" data-go="bulk">
           <span class="home-ic">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/><path d="M12 6v6M9 9h6"/></svg>
+            <!-- A list being built, not a second trolley. The plus used to sit inside
+                 the cart basket and read as a scribble; and Bulk Order wants its own
+                 shape anyway, since Orders next to it is the cart. -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h13M4 11h13M4 16h6"/><path d="M17 15v6M14 18h6"/></svg>
           </span>
           <span class="home-txt"><strong>Bulk Order</strong><small>Request several parts at once</small></span>
         </button>
@@ -715,6 +718,23 @@
       </div>
       <div id="vse-machines"></div>
       <button class="btn-primary" id="vse-save" style="margin-top:12px;">Save changes</button>
+    </div>
+  </div>
+
+  <!-- One part's details, opened from a code inside a note. Deliberately a
+       popup: tapping a replacement while reading a diagram should answer the
+       question, not carry you off to another screen and lose your place. -->
+  <div class="modal-overlay" id="peek-modal" style="display:none">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div>
+          <strong id="peek-title">Part</strong>
+          <div class="mm-sub" id="peek-sub"></div>
+        </div>
+        <button class="modal-x" id="peek-close" aria-label="Close">&#10005;</button>
+      </div>
+      <div id="peek-body"></div>
+      <button class="btn-secondary" id="peek-open" style="display:none; margin-top:12px;">Open in Find Part</button>
     </div>
   </div>
 
