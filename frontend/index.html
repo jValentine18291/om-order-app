@@ -659,6 +659,42 @@
     </div>
   </div>
 
+  <!-- Edit a slip's registration details. The machine fields are generated
+       per machine when it opens; parts and labour stay in Open Service. -->
+  <div class="modal-overlay" id="vse-modal" style="display:none">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div>
+          <strong>Edit slip</strong>
+          <div class="mm-sub" id="vse-sub"></div>
+        </div>
+        <button class="modal-x" id="vse-close" aria-label="Close">&#10005;</button>
+      </div>
+      <div class="field">
+        <label for="vse-company">Company <span class="req">*</span></label>
+        <input id="vse-company" type="text" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="vse-contact-name">Contact name</label>
+        <input id="vse-contact-name" type="text" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="vse-contact-number">Contact number</label>
+        <input id="vse-contact-number" type="text" autocomplete="off" inputmode="tel" />
+      </div>
+      <div class="field">
+        <label for="vse-whatsapp">WhatsApp number</label>
+        <input id="vse-whatsapp" type="text" autocomplete="off" inputmode="tel" />
+      </div>
+      <div class="field">
+        <label for="vse-notes">Notes</label>
+        <textarea id="vse-notes" rows="2"></textarea>
+      </div>
+      <div id="vse-machines"></div>
+      <button class="btn-primary" id="vse-save" style="margin-top:12px;">Save changes</button>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="location-modal" style="display:none">
     <div class="modal-sheet">
       <div class="modal-head">

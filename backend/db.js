@@ -422,8 +422,10 @@ db.exec(`
     qty_requested INTEGER NOT NULL,
     requester     TEXT DEFAULT '',
     status        TEXT DEFAULT 'PENDING',
-    remarks       TEXT DEFAULT '',       -- optional note from the requester
+    remarks       TEXT DEFAULT '',       -- optional note from the requester, per part
+    batch_remarks TEXT DEFAULT '',       -- optional note for the whole order (same on every row)
     batch_id      TEXT DEFAULT '',       -- one order = one batch; single parts are a batch of one
+    stock_at_request REAL,               -- AutoCount balance when the order was made; NULL if unknown
     created_at    TEXT DEFAULT (datetime('now', 'localtime')),
     ordered_at    TEXT
   )
@@ -436,6 +438,11 @@ db.exec(`
 try {
   const cols = db.prepare("PRAGMA table_info(part_requests)").all().map((c) => c.name);
   if (!cols.includes("remarks")) db.exec("ALTER TABLE part_requests ADD COLUMN remarks TEXT DEFAULT ''");
+  if (!cols.includes("batch_remarks")) db.exec("ALTER TABLE part_requests ADD COLUMN batch_remarks TEXT DEFAULT ''");
+  // The balance at the moment of ordering. John decided the list should show
+  // what the stock WAS when the order was made, not what it is now - the
+  // snapshot is the decision's context, and it never needs AutoCount again.
+  if (!cols.includes("stock_at_request")) db.exec("ALTER TABLE part_requests ADD COLUMN stock_at_request REAL");
   if (!cols.includes("batch_id")) {
     db.exec("ALTER TABLE part_requests ADD COLUMN batch_id TEXT DEFAULT ''");
     db.exec("UPDATE part_requests SET batch_id = 'R' || id WHERE batch_id = ''");

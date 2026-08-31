@@ -59,6 +59,7 @@ module.exports = {
     setMachineComment: (...a) => dataRepo.slips.setMachineComment(...a),
     setMachineLabour: (...a) => dataRepo.slips.setMachineLabour(...a),
     setSlipStatus: (...a) => dataRepo.slips.setSlipStatus(...a),
+    updateSlipDetails: (...a) => dataRepo.slips.updateSlipDetails(...a),
     setMachineQuoteStatus: (...a) => dataRepo.slips.setMachineQuoteStatus(...a),
     setMachineDecision: (...a) => dataRepo.slips.setMachineDecision(...a),
     techniciansForMachine: (...a) => dataRepo.slips.techniciansForMachine(...a),
@@ -77,6 +78,7 @@ module.exports = {
     listPartRequests: (...a) => sqliteRepo.partRequests.listPartRequests(...a),
     markPartRequestOrdered: (...a) => sqliteRepo.partRequests.markPartRequestOrdered(...a),
     markPartRequestBatchOrdered: (...a) => sqliteRepo.partRequests.markPartRequestBatchOrdered(...a),
+    updatePartRequestBatch: (...a) => sqliteRepo.partRequests.updatePartRequestBatch(...a),
     countPendingPartRequests: (...a) => sqliteRepo.partRequests.countPendingPartRequests(...a),
   },
 };

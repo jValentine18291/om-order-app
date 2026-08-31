@@ -337,9 +337,31 @@ app.get("/api/whatsapp/status", (req, res) => {
 });
 
 // ---- Part reorder requests (Find Part "Order more" -> Purchaser screen) ----
+// The stock snapshot taken when an order is made. John decided the list shows
+// what the balance WAS at that moment - the context of the decision - rather
+// than live stock, so this is the only time AutoCount is asked at all. A
+// failure here must never block the order: the snapshot is context, not data.
+async function stockSnapshot(codes) {
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount" || !codes.length) return new Map();
+    const acRepo = require("./data/autocountRepo");
+    return await acRepo.getStockBalances(codes);
+  } catch (e) {
+    console.error("[part-requests] stock snapshot failed:", e.message);
+    return new Map();
+  }
+}
+
 app.post("/api/part-requests", async (req, res) => {
   try {
-    const row = await data.requests.createPartRequest(req.body || {});
+    const body = req.body || {};
+    const snap = await stockSnapshot([body.item_code]);
+    const hit = snap.get(String(body.item_code || "").trim());
+    const row = await data.requests.createPartRequest({
+      ...body,
+      stock_at_request: hit ? hit.bal_qty : null,
+    });
     res.status(201).json(row);
 
     // Tell the purchaser a request is waiting. Until now she found out by
@@ -361,7 +383,16 @@ app.post("/api/part-requests", async (req, res) => {
 // repository, so a clash reports every problem together and saves nothing.
 app.post("/api/part-requests/bulk", async (req, res) => {
   try {
-    const rows = await data.requests.createPartRequestBatch(req.body || {});
+    const body = req.body || {};
+    const items = Array.isArray(body.items) ? body.items : [];
+    const snap = await stockSnapshot(items.map((it) => (it || {}).item_code));
+    const rows = await data.requests.createPartRequestBatch({
+      ...body,
+      items: items.map((it) => {
+        const hit = snap.get(String((it || {}).item_code || "").trim());
+        return { ...it, stock_at_request: hit ? hit.bal_qty : null };
+      }),
+    });
     res.status(201).json({ batch_id: rows[0].batch_id, rows });
 
     const n = rows.length;
@@ -374,6 +405,23 @@ app.post("/api/part-requests/bulk", async (req, res) => {
     if (err.status === 400 || err.status === 409) return res.status(err.status).json({ error: err.message });
     console.error("[POST /api/part-requests/bulk]", err);
     res.status(err.status || 500).json({ error: err.message || "Failed to save the order" });
+  }
+});
+
+// Edit a pending order: quantities, per-part remarks, removed lines, and the
+// order's own remarks. Refused once marked Ordered - that is a record of what
+// was keyed into a Purchase Order.
+app.patch("/api/part-requests/batch/:batchId", async (req, res) => {
+  try {
+    const body = req.body || {};
+    if (!["sales", "purchaser", "admin"].includes(String(body.role || "").toLowerCase())) {
+      return res.status(403).json({ error: "Only Sales, Purchaser and Admin can edit an order." });
+    }
+    res.json(await data.requests.updatePartRequestBatch(req.params.batchId, body));
+  } catch (err) {
+    if ([400, 404, 409].includes(err.status)) return res.status(err.status).json({ error: err.message });
+    console.error("[PATCH /api/part-requests/batch/:batchId]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to save the edit" });
   }
 });
 
@@ -404,33 +452,10 @@ app.get("/api/part-requests/count", async (req, res) => {
 // AutoCount is enabled) so the purchaser sees live stock next to the ask.
 app.get("/api/part-requests", async (req, res) => {
   try {
-    const rows = await data.requests.listPartRequests(String(req.query.status || "PENDING"));
-    for (const r of rows) r.current_qty = null;
-
-    // Live stock is there to help decide the purchase, so only rows still
-    // waiting get it - an ordered row's balance answers nothing, and the
-    // history grows forever. And it is ONE batched, exact-match query: asking
-    // per row, case-insensitively, cost a full scan of the stock-movement
-    // table per part, which is why this list crawled once history existed.
-    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
-    const pending = rows.filter((r) => r.status === "PENDING");
-    if (itemsSource === "autocount" && pending.length) {
-      try {
-        const acRepo = require("./data/autocountRepo");
-        const stock = await acRepo.getStockBalances(pending.map((r) => r.item_code));
-        for (const r of pending) {
-          const info = stock.get(String(r.item_code).trim());
-          if (info) {
-            r.current_qty = info.bal_qty;
-            if (!r.description) r.description = info.description;
-          }
-        }
-      } catch (e) {
-        // The list is still useful without balances; say so in the log only.
-        console.error("[GET /api/part-requests] stock lookup failed:", e.message);
-      }
-    }
-    res.json(rows);
+    // No AutoCount here at all: the stock number shown is the balance WHEN THE
+    // ORDER WAS MADE, captured at creation and stored with the row. The list
+    // is a plain local read however long the history grows.
+    res.json(await data.requests.listPartRequests(String(req.query.status || "PENDING")));
   } catch (err) {
     console.error("[GET /api/part-requests]", err);
     res.status(500).json({ error: "Failed to load requests" });
@@ -805,6 +830,23 @@ app.patch("/api/slips/:slip/machines/:id/decision", async (req, res) => {
     if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
     console.error("[PATCH /api/slips/:slip/machines/:id/decision]", err);
     res.status(err.status || 500).json({ error: err.message || "Failed to record the decision" });
+  }
+});
+
+// Edit a slip's registration details: company, contacts, notes, and each
+// machine's name, serial and intake remarks. The work - parts, labour,
+// status - is untouched; a closed slip is refused.
+app.patch("/api/slips/:slip/details", async (req, res) => {
+  try {
+    const body = req.body || {};
+    if (!["sales", "purchaser", "admin"].includes(String(body.role || "").toLowerCase())) {
+      return res.status(403).json({ error: "Only Sales, Purchaser and Admin can edit a slip." });
+    }
+    res.json(await data.slips.updateSlipDetails(req.params.slip, body));
+  } catch (err) {
+    if ([400, 404, 409].includes(err.status)) return res.status(err.status).json({ error: err.message });
+    console.error("[PATCH /api/slips/:slip/details]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to save the edit" });
   }
 });
 

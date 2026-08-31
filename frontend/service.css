@@ -1603,6 +1603,33 @@ select {
   color: var(--ink-faint); font-size: .9rem; cursor: pointer;
 }
 .bo-remove:active { background: #fbe9e9; color: #a32020; }
+/* One cart item is a row plus its own remark line. */
+.bo-item {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 8px;
+}
+.bo-item .bo-line { border: none; padding: 0; margin: 0; background: none; }
+.bo-item .bo-line-remarks {
+  width: 100%; margin-top: 8px; min-height: 40px; height: 40px; resize: none;
+  font-size: .9rem; padding: 8px 12px;
+}
+
+/* ---- Editing an order (purchaser list) ---------------------------------- */
+.pu-edit {
+  flex: 0 0 auto; padding: 6px 12px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface);
+  font-size: .8rem; font-weight: 600; color: var(--ink-soft); cursor: pointer;
+  margin-right: 8px;
+}
+.pu-edit-line { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.pu-edit-line .pu-line-main { flex: 1; min-width: 0; }
+.pu-edit-line .pu-eqty { width: 64px; flex: 0 0 auto; min-height: 40px; height: auto; padding: 0 4px; text-align: center; border: 1px solid var(--border); border-radius: 8px; }
+.pu-edit-line .pu-eremove { flex: 0 0 auto; width: 34px; height: 34px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--ink-faint); cursor: pointer; }
+.pu-edit-line.pu-removed { opacity: .45; }
+.pu-edit-line.pu-removed .pu-line-main { text-decoration: line-through; }
+.pu-eremarks { width: 100%; margin-top: 6px; min-height: 38px; height: 38px; resize: none; font-size: .88rem; padding: 7px 11px; }
+.pu-edit-actions { display: flex; gap: 8px; margin-top: 12px; }
+.pu-edit-actions button { flex: 1; }
 
 /* ---- Change location (Admin only) -------------------------------------- */
 .loc-current { display: block; margin-top: 6px; font-size: .82rem; color: var(--ink-faint); }

@@ -2109,6 +2109,8 @@ async function onViewSlipChosen(slipNumber) {
     wrap.innerHTML = renderSlipDetail(slip);
     wireVsStatusActions(slipNumber);
     wireDecideButtons(wrap, slipNumber);
+    const editBtn = document.getElementById("vs-edit");
+    if (editBtn) editBtn.addEventListener("click", () => openSlipEdit(slip));
     // Rebuilt from the stored slip, so a re-issued copy matches the original.
     const share = document.getElementById("vs-share");
     if (share) share.addEventListener("click", () => shareSlipPdf(slip));
@@ -2294,7 +2296,9 @@ function renderSlipDetail(slip) {
 
   // Re-issue the customer's copy — same PDF as registration, signature and all.
   html += `
-    <button class="btn-primary" id="vs-share" style="margin-top:14px;">Share slip (PDF)</button>`;
+    <button class="btn-primary" id="vs-share" style="margin-top:14px;">Share slip (PDF)</button>${
+      canDecide() && slip.status !== "CLOSED"
+        ? `<button class="btn-secondary" id="vs-edit" style="margin-top:10px;width:100%;">Edit slip</button>` : ""}`;
 
   // Once an order exists, the keyable AutoCount block stays reachable — sales
   // may key it in later, or need it again.
@@ -2338,6 +2342,101 @@ function wireDecideButtons(wrap, slipNumber) {
     });
   });
 }
+
+// ---- Editing a slip's registration details -----------------------------------
+// What was written at the counter can be wrong - a misspelt company, a serial
+// read off the wrong plate. This fixes THAT: contacts, notes, machine names,
+// serials and intake remarks. Parts, labour and status are the work and live
+// in Open Service; a closed slip is a finished record and has no Edit button.
+// Saving asks for confirmation with a summary of exactly what changes.
+let vseSlip = null;
+
+function openSlipEdit(slip) {
+  vseSlip = slip;
+  $("vse-sub").textContent = `Slip ${slip.slip_number} · ${slip.company}`;
+  $("vse-company").value = slip.company || "";
+  $("vse-contact-name").value = slip.contact_name || "";
+  $("vse-contact-number").value = slip.contact_number || "";
+  $("vse-whatsapp").value = slip.whatsapp_number || "";
+  $("vse-notes").value = slip.notes || "";
+  $("vse-machines").innerHTML = (slip.machines || []).map((m) => `
+    <div class="field vse-machine" data-machine="${m.id}" style="border-top:1px solid var(--line,#eef1f3); padding-top:12px; margin-top:12px;">
+      <label>Machine</label>
+      <input class="vse-m-desc" type="text" value="${escapeAttr(m.machine_desc)}" />
+      <label style="margin-top:8px;">Serial No.</label>
+      <input class="vse-m-serial" type="text" value="${escapeAttr(m.serial_no || "")}" />
+      <label style="margin-top:8px;">Remarks</label>
+      <textarea class="vse-m-remarks" rows="2">${escapeHtml(m.remarks || "")}</textarea>
+    </div>`).join("");
+  $("vse-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function closeSlipEdit() {
+  $("vse-modal").style.display = "none";
+  document.body.style.overflow = "";
+  vseSlip = null;
+}
+$("vse-close").addEventListener("click", closeSlipEdit);
+
+$("vse-save").addEventListener("click", async () => {
+  if (!vseSlip) return;
+  const val = (id) => $(id).value.trim();
+  const fields = {
+    company: [vseSlip.company || "", val("vse-company"), "Company"],
+    contact_name: [vseSlip.contact_name || "", val("vse-contact-name"), "Contact name"],
+    contact_number: [vseSlip.contact_number || "", val("vse-contact-number"), "Contact number"],
+    whatsapp_number: [vseSlip.whatsapp_number || "", val("vse-whatsapp"), "WhatsApp"],
+    notes: [vseSlip.notes || "", val("vse-notes"), "Notes"],
+  };
+  if (!fields.company[1]) { toast("Company cannot be empty", "err"); return; }
+
+  const summary = [];
+  const payload = { role: getRole() };
+  for (const [key, [before, after, label]] of Object.entries(fields)) {
+    payload[key] = after;
+    if (before.trim() !== after) summary.push(`${label}: “${before || "—"}” → “${after || "—"}”`);
+  }
+
+  const machines = [];
+  let badMachine = false;
+  document.querySelectorAll(".vse-machine").forEach((el) => {
+    const id = Number(el.dataset.machine);
+    const m = (vseSlip.machines || []).find((x) => x.id === id);
+    const desc = el.querySelector(".vse-m-desc").value.trim();
+    const serial = el.querySelector(".vse-m-serial").value.trim();
+    const remarks = el.querySelector(".vse-m-remarks").value.trim();
+    if (!desc) { badMachine = true; return; }
+    machines.push({ id, machine_desc: desc, serial_no: serial, remarks });
+    if (m) {
+      if ((m.machine_desc || "") !== desc) summary.push(`Machine: “${m.machine_desc}” → “${desc}”`);
+      if ((m.serial_no || "").trim() !== serial) summary.push(`${desc} serial: “${m.serial_no || "—"}” → “${serial || "—"}”`);
+      if ((m.remarks || "").trim() !== remarks) summary.push(`${desc} remarks: “${m.remarks || "—"}” → “${remarks || "—"}”`);
+    }
+  });
+  if (badMachine) { toast("A machine's description cannot be empty", "err"); return; }
+  payload.machines = machines;
+
+  if (!summary.length) { toast("Nothing was changed", "ok"); closeSlipEdit(); return; }
+  if (!confirm(`Save these changes to slip ${vseSlip.slip_number}?\n\n${summary.join("\n")}`)) return;
+
+  const btn = $("vse-save");
+  btn.disabled = true;
+  try {
+    await api(`/api/slips/${encodeURIComponent(vseSlip.slip_number)}/details`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    toast("Slip updated", "ok");
+    const n = vseSlip.slip_number;
+    closeSlipEdit();
+    onViewSlipChosen(n);
+  } catch (e) {
+    alert(e.message || "Could not save the edit");
+  }
+  btn.disabled = false;
+});
 
 // ---- Sales Order block ------------------------------------------------------
 // Shows the order exactly as it is keyed into AutoCount: one block per machine,
@@ -3545,29 +3644,30 @@ async function loadPartRequests() {
     wrap.innerHTML = batches.map((b) => {
       const first = b.rows[b.rows.length - 1]; // oldest row carries the submission
       const pending = b.rows.some((r) => r.status === "PENDING");
-      // The whole-order remarks are stored on every line; show once when they
-      // are one value, per line when they differ.
-      const distinct = [...new Set(b.rows.map((r) => r.remarks || "").filter(Boolean))];
-      const orderRemark = distinct.length === 1 && b.rows.every((r) => (r.remarks || "") === distinct[0])
-        ? distinct[0] : "";
+      // The order's own note; the same value rides on every row of the batch.
+      const orderRemark = first.batch_remarks || "";
 
       const lines = b.rows.slice().reverse().map((r) => {
-        const cur = qty(r.current_qty);
-        const low = r.current_qty !== null && r.current_qty !== undefined && Number(r.current_qty) <= 0;
+        // The balance WHEN THE ORDER WAS MADE - the context of the decision.
+        // John chose this over live stock; rows from before the change have
+        // none and show a dash.
+        const cur = qty(r.stock_at_request);
+        const low = r.stock_at_request !== null && r.stock_at_request !== undefined && Number(r.stock_at_request) <= 0;
         return `
         <div class="pu-line">
           <div class="pu-line-main">
             <div class="pu-desc">${escapeHtml(r.description || r.item_code)}</div>
             <div class="pu-code mono">${escapeHtml(r.item_code)}</div>
-            ${!orderRemark && r.remarks ? `<div class="pu-remarks">“${escapeHtml(r.remarks)}”</div>` : ""}
+            ${r.remarks ? `<div class="pu-remarks">“${escapeHtml(r.remarks)}”</div>` : ""}
           </div>
           <div class="pu-line-qty">
             <span class="pu-lbl">Order</span><span class="pu-val">${r.qty_requested}</span>
-            <span class="pu-lbl">Stock</span><span class="pu-val ${low ? "fp-qty-zero" : ""}">${cur}</span>
+            <span class="pu-lbl">Stock then</span><span class="pu-val ${low ? "fp-qty-zero" : ""}">${cur}</span>
           </div>
         </div>`;
       }).join("");
 
+      if (pending && puEditing === b.key) return renderOrderEditCard(b);
       return `
       <div class="pu-card ${pending ? "pu-card-pending" : "pu-card-ordered"}">
         <div class="pu-top">
@@ -3576,14 +3676,22 @@ async function loadPartRequests() {
             <div class="pu-meta">${escapeHtml(first.requester || "—")} · ${escapeHtml(day(first.created_at))}${
               !pending && first.ordered_at ? ` · ordered ${escapeHtml(day(b.rows[0].ordered_at || first.ordered_at))}` : ""}</div>
           </div>
-          ${pending && ["purchaser", "admin"].includes(getRole())
-            ? `<button class="pu-done" data-batch="${escapeAttr(b.key)}">Mark as Ordered</button>` : ""}
+          <div>
+            ${pending && canDecide()
+              ? `<button class="pu-edit" data-edit="${escapeAttr(b.key)}">Edit</button>` : ""}
+            ${pending && ["purchaser", "admin"].includes(getRole())
+              ? `<button class="pu-done" data-batch="${escapeAttr(b.key)}">Mark as Ordered</button>` : ""}
+          </div>
         </div>
         ${lines}
         ${orderRemark ? `<div class="pu-remarks">“${escapeHtml(orderRemark)}”</div>` : ""}
       </div>`;
     }).join("");
 
+    wrap.querySelectorAll(".pu-edit").forEach((btn) =>
+      btn.addEventListener("click", () => { puEditing = btn.dataset.edit; loadPartRequests(); })
+    );
+    wireOrderEditCard(wrap);
     wrap.querySelectorAll(".pu-done").forEach((btn) =>
       btn.addEventListener("click", async () => {
         if (!confirm("Mark this order as Ordered?\n\nDo this once it has been transferred to a Purchase Order.")) return;
@@ -3602,6 +3710,92 @@ async function loadPartRequests() {
     wrap.innerHTML = "";
     toast(e.message, "err");
   }
+}
+
+// ---- Editing a pending order -------------------------------------------------
+// In place, on the card. Once Ordered it is a record and the button is gone.
+// Saving asks for confirmation with a summary of exactly what will change.
+let puEditing = null;
+
+function renderOrderEditCard(b) {
+  const first = b.rows[b.rows.length - 1];
+  const lines = b.rows.slice().reverse().map((r) => `
+    <div class="pu-edit-line" data-line="${r.id}">
+      <div class="pu-line-main">
+        <div class="pu-desc">${escapeHtml(r.description || r.item_code)}</div>
+        <div class="pu-code mono">${escapeHtml(r.item_code)}</div>
+      </div>
+      <input class="pu-eqty" type="number" min="1" inputmode="numeric" value="${r.qty_requested}" aria-label="Quantity" />
+      <button type="button" class="pu-eremove" aria-label="Remove line">&#10005;</button>
+    </div>
+    <textarea class="pu-eremarks" data-line="${r.id}" placeholder="Remarks for this part (optional)">${escapeHtml(r.remarks || "")}</textarea>`).join("");
+  return `
+  <div class="pu-card pu-card-pending" data-editing="${escapeAttr(b.key)}">
+    <div class="pu-top">
+      <div>
+        <span class="pu-status pu-st-need">Editing</span>
+        <div class="pu-meta">${escapeHtml(first.requester || "—")} · tap &#10005; to remove a line</div>
+      </div>
+    </div>
+    ${lines}
+    <textarea class="pu-eremarks" id="pu-eorder-remarks" placeholder="Remarks for the whole order (optional)">${escapeHtml(first.batch_remarks || "")}</textarea>
+    <div class="pu-edit-actions">
+      <button type="button" class="btn-secondary" data-edit-cancel>Cancel</button>
+      <button type="button" class="btn-primary" data-edit-save>Save changes</button>
+    </div>
+  </div>`;
+}
+
+function wireOrderEditCard(wrap) {
+  const card = wrap.querySelector("[data-editing]");
+  if (!card) return;
+  card.querySelectorAll(".pu-eremove").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      const line = btn.closest(".pu-edit-line");
+      line.classList.toggle("pu-removed");
+      btn.textContent = line.classList.contains("pu-removed") ? "↩" : "\u2715";
+    })
+  );
+  card.querySelector("[data-edit-cancel]").addEventListener("click", () => {
+    puEditing = null;
+    loadPartRequests();
+  });
+  card.querySelector("[data-edit-save]").addEventListener("click", async () => {
+    const lines = [];
+    const summary = [];
+    let bad = null;
+    card.querySelectorAll(".pu-edit-line").forEach((el) => {
+      const id = Number(el.dataset.line);
+      const desc = el.querySelector(".pu-desc").textContent;
+      if (el.classList.contains("pu-removed")) {
+        lines.push({ id, remove: true });
+        summary.push(`Remove ${desc}`);
+        return;
+      }
+      const q = parseInt(el.querySelector(".pu-eqty").value, 10);
+      if (!Number.isFinite(q) || q < 1) { bad = desc; return; }
+      const rk = (card.querySelector(`.pu-eremarks[data-line="${id}"]`) || { value: "" }).value.trim();
+      lines.push({ id, qty_requested: q, remarks: rk });
+      summary.push(`${desc}: qty ${q}${rk ? ` — “${rk}”` : ""}`);
+    });
+    if (bad) { toast(`Quantity for ${bad} must be at least 1`, "err"); return; }
+    const orderRemarks = $("pu-eorder-remarks").value.trim();
+    if (orderRemarks) summary.push(`Order remarks: “${orderRemarks}”`);
+
+    if (!confirm(`Save these changes?\n\n${summary.join("\n")}`)) return;
+    try {
+      await api(`/api/part-requests/batch/${encodeURIComponent(card.dataset.editing)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: getRole(), lines, batch_remarks: orderRemarks }),
+      });
+      toast("Order updated", "ok");
+      puEditing = null;
+      loadPartRequests();
+    } catch (e) {
+      alert(e.message || "Could not save the edit");
+    }
+  });
 }
 
 // ---- Bulk Order --------------------------------------------------------------
@@ -3655,7 +3849,7 @@ function addToBulkCart(code, desc) {
   // The same part tapped twice means "more of it", not an error.
   const hit = boCart.find((c) => c.item_code === code);
   if (hit) hit.qty += 1;
-  else boCart.push({ item_code: code, description: desc || code, qty: 1 });
+  else boCart.push({ item_code: code, description: desc || code, qty: 1, remarks: "" });
   renderBulkCart();
 }
 
@@ -3671,14 +3865,20 @@ function renderBulkCart() {
     return;
   }
   wrap.innerHTML = boCart.map((c, i) => `
-    <div class="bo-line">
-      <div class="bo-line-main">
-        <div class="pu-desc">${escapeHtml(c.description)}</div>
-        <div class="pu-code mono">${escapeHtml(c.item_code)}</div>
+    <div class="bo-item">
+      <div class="bo-line">
+        <div class="bo-line-main">
+          <div class="pu-desc">${escapeHtml(c.description)}</div>
+          <div class="pu-code mono">${escapeHtml(c.item_code)}</div>
+        </div>
+        <input class="bo-qty" type="number" min="1" inputmode="numeric" value="${c.qty}" data-i="${i}" aria-label="Quantity" />
+        <button type="button" class="bo-remove" data-i="${i}" aria-label="Remove">&#10005;</button>
       </div>
-      <input class="bo-qty" type="number" min="1" inputmode="numeric" value="${c.qty}" data-i="${i}" aria-label="Quantity" />
-      <button type="button" class="bo-remove" data-i="${i}" aria-label="Remove">&#10005;</button>
+      <textarea class="bo-line-remarks" data-i="${i}" placeholder="Remarks for this part (optional)">${escapeHtml(c.remarks || "")}</textarea>
     </div>`).join("");
+  wrap.querySelectorAll(".bo-line-remarks").forEach((ta) =>
+    ta.addEventListener("input", () => { boCart[Number(ta.dataset.i)].remarks = ta.value; })
+  );
   wrap.querySelectorAll(".bo-qty").forEach((inp) =>
     inp.addEventListener("change", () => {
       const n = parseInt(inp.value, 10);
@@ -3713,18 +3913,18 @@ $("bo-submit").addEventListener("click", async () => {
   }
 
   btn.disabled = true;
-  const remarks = $("bo-remarks").value.trim();
   try {
     await api(`/api/part-requests/bulk`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         requester,
+        batch_remarks: $("bo-remarks").value.trim(),
         items: boCart.map((c) => ({
           item_code: c.item_code,
           description: c.description,
           qty_requested: c.qty,
-          remarks,
+          remarks: (c.remarks || "").trim(),
         })),
       }),
     });

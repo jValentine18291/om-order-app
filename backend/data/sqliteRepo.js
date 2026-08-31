@@ -672,6 +672,56 @@ function searchSlips(query = "", scope = "all", limit = 20) {
   return { results: trimmed, hasMore };
 }
 
+// ---- Editing a slip's registration details ----------------------------------
+// What was written down at the counter: company, contacts, notes, and each
+// machine's name, serial and intake remarks. Parts, labour, comments and
+// status are the WORK and live in Open Service - not touched here. A closed
+// slip is a finished record and is refused.
+function updateSlipDetails(slipNumber, { company, contact_name, contact_number, whatsapp_number, notes, machines } = {}) {
+  const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
+  if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
+  if (slip.status === "CLOSED") { const e = new Error("Slip is closed and can no longer be edited."); e.status = 409; throw e; }
+
+  const newCompany = company === undefined ? slip.company : String(company || "").trim();
+  if (!newCompany) { const e = new Error("Company cannot be empty."); e.status = 400; throw e; }
+
+  const own = db.prepare("SELECT id FROM slip_machines WHERE slip_id = ?").all(slip.id).map((r) => r.id);
+  const ownSet = new Set(own);
+  const mEdits = (Array.isArray(machines) ? machines : []).map((m) => {
+    const id = Number((m || {}).id);
+    if (!ownSet.has(id)) { const e = new Error("A machine in the edit does not belong to this slip."); e.status = 400; throw e; }
+    const desc = String((m || {}).machine_desc || "").trim();
+    if (!desc) { const e = new Error("A machine's description cannot be empty."); e.status = 400; throw e; }
+    return {
+      id,
+      desc,
+      serial: String((m || {}).serial_no || "").trim(),
+      remarks: String((m || {}).remarks || "").trim().slice(0, 500),
+    };
+  });
+
+  const updSlip = db.prepare(
+    `UPDATE service_slips SET company = ?, contact_name = ?, contact_number = ?, whatsapp_number = ?, notes = ?
+      WHERE id = ?`
+  );
+  const updMachine = db.prepare(
+    "UPDATE slip_machines SET machine_desc = ?, serial_no = ?, remarks = ? WHERE id = ?"
+  );
+  const tx = db.transaction(() => {
+    updSlip.run(
+      newCompany,
+      contact_name === undefined ? slip.contact_name : String(contact_name || "").trim(),
+      contact_number === undefined ? slip.contact_number : String(contact_number || "").trim(),
+      whatsapp_number === undefined ? slip.whatsapp_number : String(whatsapp_number || "").trim(),
+      notes === undefined ? slip.notes : String(notes || "").trim(),
+      slip.id
+    );
+    for (const m of mEdits) updMachine.run(m.desc, m.serial, m.remarks, m.id);
+  });
+  tx();
+  return getSlip(slipNumber);
+}
+
 // ---- Quoting, per machine ---------------------------------------------------
 // A slip with two machines is routinely half finished: one repaired and ready
 // to price, one still in pieces. Marking the whole slip was the only thing on
@@ -793,7 +843,7 @@ function syncSlipQuoteStatus(slipId) {
 }
 
 const slips = {
-  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, setSlipStatus, setMachineQuoteStatus, setMachineDecision, techniciansForMachine, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, setSlipStatus, updateSlipDetails, setMachineQuoteStatus, setMachineDecision, techniciansForMachine, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, closeSlip,
 };
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };
@@ -828,7 +878,7 @@ function clashMessage(existing) {
   return `${existing.qty_requested} requested by ${who}${when ? " on " + when : ""}`;
 }
 
-function createPartRequest({ item_code, description = "", qty_requested, requester = "", remarks = "" } = {}) {
+function createPartRequest({ item_code, description = "", qty_requested, requester = "", remarks = "", stock_at_request = null } = {}) {
   const code = String(item_code || "").trim();
   const qty = Number(qty_requested);
   if (!code) { const e = new Error("Part code is required."); e.status = 400; throw e; }
@@ -842,11 +892,12 @@ function createPartRequest({ item_code, description = "", qty_requested, request
     e.status = 409; throw e;
   }
 
+  const snap = Number.isFinite(Number(stock_at_request)) ? Number(stock_at_request) : null;
   const info = db.prepare(
-    `INSERT INTO part_requests (item_code, description, qty_requested, requester, remarks, batch_id)
-     VALUES (?, ?, ?, ?, ?, ?)`
+    `INSERT INTO part_requests (item_code, description, qty_requested, requester, remarks, batch_id, stock_at_request)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`
   ).run(code, String(description || ""), Math.floor(qty), String(requester || "").trim(),
-        String(remarks || "").trim().slice(0, 500), nextBatchId());
+        String(remarks || "").trim().slice(0, 500), nextBatchId(), snap);
   return db.prepare("SELECT * FROM part_requests WHERE id = ?").get(info.lastInsertRowid);
 }
 
@@ -854,7 +905,7 @@ function createPartRequest({ item_code, description = "", qty_requested, request
 // a part already requested, the same part twice in the cart - NOTHING is saved
 // and every problem is reported together, so the person fixes the cart once
 // rather than resubmitting to discover the next complaint.
-function createPartRequestBatch({ items, requester = "" } = {}) {
+function createPartRequestBatch({ items, requester = "", batch_remarks = "" } = {}) {
   const list = Array.isArray(items) ? items : [];
   if (!list.length) { const e = new Error("The order is empty."); e.status = 400; throw e; }
   if (list.length > 50) { const e = new Error("An order can hold at most 50 parts."); e.status = 400; throw e; }
@@ -874,11 +925,13 @@ function createPartRequestBatch({ items, requester = "" } = {}) {
       const existing = openRequestFor(code);
       if (existing) problems.push(`${label} already has an open request: ${clashMessage(existing)}.`);
     }
+    const snap = Number((it || {}).stock_at_request);
     return {
       code,
       qty: Math.floor(qty),
       description: String((it || {}).description || ""),
       remarks: String((it || {}).remarks || "").trim().slice(0, 500),
+      snap: Number.isFinite(snap) ? snap : null,
     };
   });
   if (problems.length) {
@@ -887,19 +940,64 @@ function createPartRequestBatch({ items, requester = "" } = {}) {
     throw e;
   }
 
+  const orderRemarks = String(batch_remarks || "").trim().slice(0, 500);
   const insert = db.prepare(
-    `INSERT INTO part_requests (item_code, description, qty_requested, requester, remarks, batch_id)
-     VALUES (?, ?, ?, ?, ?, ?)`
+    `INSERT INTO part_requests (item_code, description, qty_requested, requester, remarks, batch_remarks, batch_id, stock_at_request)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
   );
   const tx = db.transaction(() => {
     const batch = nextBatchId();
     for (const c of cleaned) {
-      insert.run(c.code, c.description, c.qty, String(requester || "").trim(), c.remarks, batch);
+      insert.run(c.code, c.description, c.qty, String(requester || "").trim(), c.remarks, orderRemarks, batch, c.snap);
     }
     return batch;
   });
   const batch = tx();
   return db.prepare("SELECT * FROM part_requests WHERE batch_id = ? ORDER BY id").all(batch);
+}
+
+// Edit a pending order. Once marked Ordered it is the record of what was
+// transferred to a Purchase Order, so editing is refused - undo does not
+// exist for a document someone else has already keyed from.
+function updatePartRequestBatch(batchId, { lines = [], batch_remarks } = {}) {
+  const rows = db.prepare("SELECT * FROM part_requests WHERE batch_id = ?").all(String(batchId || ""));
+  if (!rows.length) { const e = new Error("Order not found."); e.status = 404; throw e; }
+  if (rows.some((r) => r.status !== "PENDING")) {
+    const e = new Error("This order has already been marked Ordered and can no longer be edited.");
+    e.status = 409; throw e;
+  }
+
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  const edits = Array.isArray(lines) ? lines : [];
+  const removals = [];
+  const changes = [];
+  for (const l of edits) {
+    const row = byId.get(Number((l || {}).id));
+    if (!row) { const e = new Error("A line in the edit does not belong to this order."); e.status = 400; throw e; }
+    if (l.remove) { removals.push(row.id); continue; }
+    const qty = Number(l.qty_requested);
+    if (!Number.isFinite(qty) || qty < 1) {
+      const e = new Error(`${row.item_code}: quantity must be at least 1.`); e.status = 400; throw e;
+    }
+    changes.push({ id: row.id, qty: Math.floor(qty), remarks: String(l.remarks || "").trim().slice(0, 500) });
+  }
+  if (removals.length >= rows.length) {
+    const e = new Error("An order cannot lose every part - remove the whole request instead of its last line.");
+    e.status = 400; throw e;
+  }
+
+  const upd = db.prepare("UPDATE part_requests SET qty_requested = ?, remarks = ? WHERE id = ?");
+  const del = db.prepare("DELETE FROM part_requests WHERE id = ?");
+  const updOrder = db.prepare("UPDATE part_requests SET batch_remarks = ? WHERE batch_id = ?");
+  const tx = db.transaction(() => {
+    for (const c of changes) upd.run(c.qty, c.remarks, c.id);
+    for (const id of removals) del.run(id);
+    if (batch_remarks !== undefined) {
+      updOrder.run(String(batch_remarks || "").trim().slice(0, 500), String(batchId));
+    }
+  });
+  tx();
+  return db.prepare("SELECT * FROM part_requests WHERE batch_id = ? ORDER BY id").all(String(batchId));
 }
 
 // Everything a batch holds becomes ORDERED together - the purchaser transfers
@@ -930,7 +1028,7 @@ function markPartRequestOrdered(id) {
   return { ok: true };
 }
 
-const partRequests = { createPartRequest, createPartRequestBatch, listPartRequests, markPartRequestOrdered, markPartRequestBatchOrdered };
+const partRequests = { createPartRequest, createPartRequestBatch, listPartRequests, markPartRequestOrdered, markPartRequestBatchOrdered, updatePartRequestBatch };
 module.exports.partRequests = partRequests;
 
 // Fast count of pending reorder requests (for the Purchaser notification).
