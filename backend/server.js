@@ -757,6 +757,18 @@ app.get("/api/slips/:slip", async (req, res) => {
   }
 });
 
+// The customer's signature, fetched only when the slip PDF is being drawn.
+// It is deliberately NOT part of the slip response - see getSlip.
+app.get("/api/slips/:slip/signature", async (req, res) => {
+  try {
+    res.json(await data.slips.getSlipSignature(req.params.slip));
+  } catch (err) {
+    if (err.status === 404) return res.status(404).json({ error: err.message });
+    console.error("[GET /api/slips/:slip/signature]", err);
+    res.status(500).json({ error: "Failed to fetch the signature" });
+  }
+});
+
 // Add a scanned part to a specific machine on a slip
 app.post("/api/machines/:machineId/parts", async (req, res) => {
   try {

@@ -252,17 +252,38 @@ function listSlips(statusFilter = "active") {
 }
 
 // Full slip detail: slip + machines, and each machine's scanned parts.
-function getSlip(slipNumber) {
+// The signature is OFF by default, and that is the whole point.
+//
+// It is a drawn PNG carried as a data URL - 60KB is ordinary and the cap is
+// 400KB - and it was attached to every slip this function returns. That is not
+// only opening a slip: it is every part scanned, every save, every status
+// change, because each of those returns the slip afterwards. Eleven refresh
+// points in the app, each re-sending a picture nobody was looking at, over
+// workshop Wi-Fi.
+//
+// Exactly one thing needs it: the printed slip PDF, which fetches it on its
+// own. Keeping it in its own table was the first half of this; not putting it
+// on the wire is the second.
+function getSlip(slipNumber, includeSignature = false) {
   const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
   if (!slip) return null;
   const machines = db.prepare("SELECT * FROM slip_machines WHERE slip_id = ?").all(slip.id);
   const getParts = db.prepare("SELECT * FROM machine_parts WHERE machine_id = ? ORDER BY id");
   for (const m of machines) m.parts = getParts.all(m.id);
   slip.machines = machines;
-  // Signature lives in its own table so it never rides along on list queries.
-  const sig = db.prepare("SELECT image FROM slip_signatures WHERE slip_id = ?").get(slip.id);
-  slip.signature = sig ? sig.image : "";
+  if (includeSignature) {
+    const sig = db.prepare("SELECT image FROM slip_signatures WHERE slip_id = ?").get(slip.id);
+    slip.signature = sig ? sig.image : "";
+  }
   return slip;
+}
+
+// The signature on its own, for the one caller that draws it.
+function getSlipSignature(slipNumber) {
+  const slip = db.prepare("SELECT id FROM service_slips WHERE slip_number = ?").get(slipNumber);
+  if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
+  const sig = db.prepare("SELECT image FROM slip_signatures WHERE slip_id = ?").get(slip.id);
+  return { signature: sig ? sig.image : "" };
 }
 
 // Add a scanned part to a specific machine (or bump qty if same part+technician).
@@ -860,7 +881,7 @@ function syncSlipQuoteStatus(slipId) {
 }
 
 const slips = {
-  createSlip, listSlips, searchSlips, getSlip, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, setSlipStatus, updateSlipDetails, setMachineQuoteStatus, setMachineDecision, techniciansForMachine, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, setSlipStatus, updateSlipDetails, setMachineQuoteStatus, setMachineDecision, techniciansForMachine, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, closeSlip,
 };
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };

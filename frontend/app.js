@@ -1073,7 +1073,10 @@ function whatsappStatus() {
 // copy staff look at - then posted up as raw bytes. Sending the finished file
 // rather than asking the server to rebuild it means the customer cannot
 // receive a subtly different document from the one that was signed.
-async function sendSlipWhatsApp(slip, { auto = false } = {}) {
+async function sendSlipWhatsApp(slipIn, { auto = false } = {}) {
+  // The customer signed against these terms, so the copy they receive must
+  // carry the signature - it is fetched rather than assumed present.
+  const slip = await withSignature(slipIn);
   let blob;
   try {
     blob = buildSlipPdf(slip);
@@ -1123,7 +1126,21 @@ function wireWhatsappButton(btn, slip, { auto = false } = {}) {
 
 // Share the PDF via the device's native share sheet (WhatsApp/email/AirDrop),
 // falling back to a plain download where sharing files isn't supported.
-async function shareSlipPdf(slip) {
+// The slip object no longer carries the signature - it is fetched here, by the
+// one thing that draws it. Failing to get it must not stop the PDF: a slip
+// without the drawn signature is still the slip.
+async function withSignature(slip) {
+  if (!slip || slip.signature) return slip;
+  try {
+    const r = await api(`/api/slips/${encodeURIComponent(slip.slip_number)}/signature`);
+    return { ...slip, signature: r.signature || "" };
+  } catch (_) {
+    return slip;
+  }
+}
+
+async function shareSlipPdf(slipIn) {
+  const slip = await withSignature(slipIn);
   let blob;
   try {
     blob = buildSlipPdf(slip);
