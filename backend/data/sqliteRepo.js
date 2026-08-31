@@ -162,7 +162,26 @@ function cleanSignature(sig) {
   return sig;
 }
 
+// Everything the customer could read on the slip they signed. The comparison
+// later is against THIS, not against a guess at what mattered - every field
+// here is printed on the PDF, so every one of them is material.
+function signedShape(slip, machines) {
+  return {
+    company: slip.company || "",
+    contact_name: slip.contact_name || "",
+    contact_number: slip.contact_number || "",
+    whatsapp_number: slip.whatsapp_number || "",
+    notes: slip.notes || "",
+    machines: (machines || []).map((m) => ({
+      machine_desc: m.machine_desc || "",
+      serial_no: m.serial_no || "",
+      remarks: m.remarks || "",
+    })),
+  };
+}
+
 function createSlip({ company, debtor_code = "", contact_name = "", contact_number = "", whatsapp_number = "", check_service = false, quote_first = false, notes = "", machines = [], signature = "" } = {}) {
+  const newCompanyName = String(company || "").trim();
   if (!company || !String(company).trim()) {
     const e = new Error("Company is required to register a service slip.");
     e.status = 400; throw e;
@@ -191,7 +210,7 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
     "INSERT INTO slip_machines (slip_id, machine_desc, serial_no, remarks) VALUES (?, ?, ?, ?)"
   );
   const insertSignature = db.prepare(
-    "INSERT INTO slip_signatures (slip_id, image) VALUES (?, ?)"
+    "INSERT INTO slip_signatures (slip_id, image, signed_content) VALUES (?, ?, ?)"
   );
 
   // The signature is the customer accepting the printed terms, so it is
@@ -215,7 +234,14 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
     const info = insertSlip.run(slipNumber, String(company).trim(), String(debtor_code || "").trim(), contact_name, contact_number, whatsapp_number, check_service ? 1 : 0, quote_first ? 1 : 0, notes);
     const slipId = info.lastInsertRowid;
     for (const m of machineList) insertMachine.run(slipId, m.desc, m.serial, m.remarks);
-    if (sig) insertSignature.run(slipId, sig);
+    if (sig) {
+      // Written inside the same transaction as the slip, so a signature can
+      // never exist without a record of what it was given for.
+      insertSignature.run(slipId, sig, JSON.stringify(signedShape(
+        { company: newCompanyName, contact_name, contact_number, whatsapp_number, notes },
+        machineList.map((m) => ({ machine_desc: m.desc, serial_no: m.serial, remarks: m.remarks }))
+      )));
+    }
     return slipNumber;
   });
 
@@ -271,6 +297,11 @@ function getSlip(slipNumber, includeSignature = false) {
   const getParts = db.prepare("SELECT * FROM machine_parts WHERE machine_id = ? ORDER BY id");
   for (const m of machines) m.parts = getParts.all(m.id);
   slip.machines = machines;
+  // Small and always present: whatever displays a slip needs to know it was
+  // changed after signing, and a flag nobody fetched is a flag nobody sees.
+  slip.amendments = db.prepare(
+    "SELECT field, before, after, changed_by, changed_at FROM slip_amendments WHERE slip_id = ? ORDER BY id"
+  ).all(slip.id);
   if (includeSignature) {
     const sig = db.prepare("SELECT image FROM slip_signatures WHERE slip_id = ?").get(slip.id);
     slip.signature = sig ? sig.image : "";
@@ -282,8 +313,13 @@ function getSlip(slipNumber, includeSignature = false) {
 function getSlipSignature(slipNumber) {
   const slip = db.prepare("SELECT id FROM service_slips WHERE slip_number = ?").get(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
-  const sig = db.prepare("SELECT image FROM slip_signatures WHERE slip_id = ?").get(slip.id);
-  return { signature: sig ? sig.image : "" };
+  const sig = db.prepare(
+    "SELECT image, signed_at, signed_content FROM slip_signatures WHERE slip_id = ?"
+  ).get(slip.id);
+  if (!sig) return { signature: "", signed_at: "", signed_content: null };
+  let content = null;
+  try { content = sig.signed_content ? JSON.parse(sig.signed_content) : null; } catch (_) {}
+  return { signature: sig.image || "", signed_at: sig.signed_at || "", signed_content: content };
 }
 
 // Add a scanned part to a specific machine (or bump qty if same part+technician).
@@ -715,7 +751,7 @@ function searchSlips(query = "", scope = "all", limit = 20) {
 // machine's name, serial and intake remarks. Parts, labour, comments and
 // status are the WORK and live in Open Service - not touched here. A closed
 // slip is a finished record and is refused.
-function updateSlipDetails(slipNumber, { company, contact_name, contact_number, whatsapp_number, notes, machines } = {}) {
+function updateSlipDetails(slipNumber, { company, contact_name, contact_number, whatsapp_number, notes, machines, who = "" } = {}) {
   const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
   if (slip.status === "CLOSED") { const e = new Error("Slip is closed and can no longer be edited."); e.status = 409; throw e; }
@@ -738,6 +774,38 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
     };
   });
 
+  // What is about to change, in the customer's terms. Recorded against the
+  // slip as it stands now rather than against the signature, so a field
+  // corrected twice reads as two corrections instead of one confusing jump.
+  const before = signedShape(slip, db.prepare(
+    "SELECT machine_desc, serial_no, remarks FROM slip_machines WHERE slip_id = ? ORDER BY id"
+  ).all(slip.id));
+  const machineById = new Map(db.prepare(
+    "SELECT id, machine_desc, serial_no, remarks FROM slip_machines WHERE slip_id = ?"
+  ).all(slip.id).map((m) => [m.id, m]));
+
+  const changes = [];
+  const note = (field, was, now) => {
+    if (String(was || "").trim() !== String(now || "").trim()) {
+      changes.push({ field, before: was || "", after: now || "" });
+    }
+  };
+  note("Company", before.company, newCompany);
+  note("Contact name", before.contact_name, contact_name === undefined ? before.contact_name : contact_name);
+  note("Contact number", before.contact_number, contact_number === undefined ? before.contact_number : contact_number);
+  note("WhatsApp number", before.whatsapp_number, whatsapp_number === undefined ? before.whatsapp_number : whatsapp_number);
+  note("Notes", before.notes, notes === undefined ? before.notes : notes);
+  for (const m of mEdits) {
+    const was = machineById.get(m.id) || {};
+    note(`Machine "${was.machine_desc || ""}"`, was.machine_desc, m.desc);
+    note(`${was.machine_desc || "Machine"} — serial`, was.serial_no, m.serial);
+    note(`${was.machine_desc || "Machine"} — remarks`, was.remarks, m.remarks);
+  }
+
+  const insertAmendment = db.prepare(
+    `INSERT INTO slip_amendments (slip_id, field, before, after, changed_by)
+     VALUES (?, ?, ?, ?, ?)`
+  );
   const updSlip = db.prepare(
     `UPDATE service_slips SET company = ?, contact_name = ?, contact_number = ?, whatsapp_number = ?, notes = ?
       WHERE id = ?`
@@ -755,6 +823,15 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
       slip.id
     );
     for (const m of mEdits) updMachine.run(m.desc, m.serial, m.remarks, m.id);
+    // Only where the slip carries a signature. An unsigned slip - which the
+    // app does not allow, but old data might - has nothing to be amended
+    // against, and logging changes to it would say something untrue.
+    const signed = db.prepare("SELECT slip_id FROM slip_signatures WHERE slip_id = ?").get(slip.id);
+    if (signed) {
+      for (const c of changes) {
+        insertAmendment.run(slip.id, c.field, c.before, c.after, String(who || "").trim());
+      }
+    }
   });
   tx();
   return getSlip(slipNumber);

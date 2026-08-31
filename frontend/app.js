@@ -956,6 +956,31 @@ function buildSlipPdf(slip) {
     y += boxH + 24;
   }
 
+  // ---- Changed after signing ----
+  // The customer signed what was on the page at the time. Anything altered
+  // afterwards has to travel with the document, or the signature silently
+  // starts covering things nobody agreed to.
+  const amendments = slip.amendments || [];
+  if (amendments.length) {
+    const rows = amendments.map((a) => {
+      const stamp = [a.changed_by, a.changed_at ? String(a.changed_at).slice(0, 16) : ""]
+        .filter(Boolean).join(", ");
+      return `${a.field}: "${a.before || "—"}" changed to "${a.after || "—"}"` +
+             (stamp ? `  (${stamp})` : "");
+    });
+    doc.setFontSize(8.6); doc.setFont("helvetica", "normal");
+    const wrapped = rows.flatMap((r) => doc.splitTextToSize(r, W - 40));
+    need(wrapped.length * 11 + 52);
+    sectionHead("CHANGED AFTER SIGNING", "clipboard");
+    y += 4;
+    const boxH = 18 + wrapped.length * 11;
+    setDraw([200, 140, 40]); setFill([255, 248, 232]); doc.setLineWidth(1);
+    doc.roundedRect(LEFT, y, W, boxH, 5, 5, "FD");
+    doc.setFontSize(8.6); setText([120, 80, 10]);
+    doc.text(wrapped, LEFT + 16, y + 16);
+    y += boxH + 24;
+  }
+
   // ---- Terms, balanced across two columns ----
   const T_SIZE = 7.2, T_LEAD = 9.6, T_GAP = 34;
   const tColW = (W - T_GAP) / 2 - 22;
@@ -1038,6 +1063,14 @@ function buildSlipPdf(slip) {
   doc.setCharSpace(1.1);
   doc.text("CUSTOMER SIGNATURE   ·   I ACCEPT THE TERMS ABOVE", LEFT + 18, sigLineY + 14);
   doc.setCharSpace(0);
+  if (amendments.length) {
+    doc.setFontSize(7); doc.setFont("helvetica", "bold"); setText([150, 90, 10]);
+    doc.text(
+      `Signed before ${amendments.length} later change${amendments.length === 1 ? "" : "s"} — see "Changed after signing"`,
+      LEFT + 18, sigLineY + 25
+    );
+    doc.setFont("helvetica", "normal");
+  }
 
   // ---- Page footers ----
   const pages = doc.getNumberOfPages();
@@ -2280,6 +2313,10 @@ function renderSlipDetail(slip) {
         <span class="vs-status vs-${escapeAttr(slip.status)}">${escapeHtml(STATUS_LABEL[slip.status] || slip.status)}</span>
       </div>
       ${meta.length ? `<div class="vs-sub">${meta.join(" · ")}</div>` : ""}
+      ${(slip.amendments || []).length ? `<div class="vs-amended"><b>Changed after the customer signed</b>${
+        slip.amendments.map((a) => `<div>${escapeHtml(a.field)}: &ldquo;${escapeHtml(a.before || "—")}&rdquo; &rarr; &ldquo;${escapeHtml(a.after || "—")}&rdquo;${
+          a.changed_by ? ` · ${escapeHtml(a.changed_by)}` : ""}${a.changed_at ? ` · ${escapeHtml(String(a.changed_at).slice(0, 10))}` : ""}</div>`).join("")
+      }</div>` : ""}
       ${(slip.check_service || slip.quote_first) ? `<div class="vs-requests">${slip.check_service ? `<span class="vs-req-badge">Check &amp; Service for all</span>` : ""}${slip.quote_first ? `<span class="vs-req-badge">Quote first</span>` : ""}</div>` : ""}
       ${slip.notes ? `<div class="vs-notes">${escapeHtml(slip.notes)}</div>` : ""}
       ${slip.status === "CLOSED" && slip.closing_ref ? `<div class="vs-sub">Closed with: <strong>${escapeHtml(slip.closing_ref)}</strong>${slip.closed_at ? " on " + escapeHtml(formatDate(slip.closed_at)) : ""}</div>` : ""}
@@ -2464,7 +2501,7 @@ $("vse-save").addEventListener("click", async () => {
   if (!fields.company[1]) { toast("Company cannot be empty", "err"); return; }
 
   const summary = [];
-  const payload = { role: getRole() };
+  const payload = { role: getRole(), who: initialsFor(getUser()) };
   for (const [key, [before, after, label]] of Object.entries(fields)) {
     payload[key] = after;
     if (before.trim() !== after) summary.push(`${label}: “${before || "—"}” → “${after || "—"}”`);
@@ -2490,7 +2527,12 @@ $("vse-save").addEventListener("click", async () => {
   payload.machines = machines;
 
   if (!summary.length) { toast("Nothing was changed", "ok"); closeSlipEdit(); return; }
-  if (!confirm(`Save these changes to slip ${vseSlip.slip_number}?\n\n${summary.join("\n")}`)) return;
+  // Not obvious that correcting a typo puts a note on a document the customer
+  // signed - and better learnt here than from a customer holding the printout.
+  if (!confirm(
+    `Save these changes to slip ${vseSlip.slip_number}?\n\n${summary.join("\n")}\n\n` +
+    "This slip has been signed, so the change will be recorded on it."
+  )) return;
 
   const btn = $("vse-save");
   btn.disabled = true;

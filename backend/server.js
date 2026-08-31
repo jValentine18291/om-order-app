@@ -927,7 +927,7 @@ app.patch("/api/slips/:slip/details", async (req, res) => {
     if (!["sales", "purchaser", "admin"].includes(String(body.role || "").toLowerCase())) {
       return res.status(403).json({ error: "Only Sales, Purchaser and Admin can edit a slip." });
     }
-    res.json(await data.slips.updateSlipDetails(req.params.slip, body));
+    res.json(await data.slips.updateSlipDetails(req.params.slip, { ...body, who: body.who || "" }));
   } catch (err) {
     if ([400, 404, 409].includes(err.status)) return res.status(err.status).json({ error: err.message });
     console.error("[PATCH /api/slips/:slip/details]", err);

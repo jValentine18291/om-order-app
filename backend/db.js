@@ -179,9 +179,66 @@ db.exec(`
     slip_id    INTEGER PRIMARY KEY,
     image      TEXT    NOT NULL,
     signed_at  TEXT    DEFAULT (datetime('now')),
+    -- What the customer was actually looking at when they signed, as JSON.
+    -- Without it there is no way to say whether a slip still matches its
+    -- signature, only that it might not.
+    signed_content TEXT DEFAULT '',
+    FOREIGN KEY (slip_id) REFERENCES service_slips(id) ON DELETE CASCADE
+  );
+
+  -- Every change made to a slip after the customer signed it. The signature
+  -- attests to what was on the page at the time; anything altered afterwards
+  -- has to travel with the document, or the signature starts covering things
+  -- nobody agreed to.
+  CREATE TABLE IF NOT EXISTS slip_amendments (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    slip_id    INTEGER NOT NULL,
+    field      TEXT NOT NULL,          -- "Company", "Zenoah G3800 serial", ...
+    before     TEXT DEFAULT '',
+    after      TEXT DEFAULT '',
+    changed_by TEXT DEFAULT '',
+    changed_at TEXT DEFAULT (datetime('now','localtime')),
     FOREIGN KEY (slip_id) REFERENCES service_slips(id) ON DELETE CASCADE
   );
 `);
+
+// Migration: signed_content on slips that predate it.
+//
+// Backfilled from the slip AS IT STANDS NOW. That is an assumption, and it is
+// stated rather than hidden: slip editing shipped days before this, so any
+// slip here has almost certainly never been edited. Where it has, the
+// snapshot records the edited state as the signed one - which is why the
+// amendment log starts from this point rather than pretending to be complete.
+try {
+  const cols = db.prepare("PRAGMA table_info(slip_signatures)").all().map((c) => c.name);
+  if (!cols.includes("signed_content")) {
+    db.exec("ALTER TABLE slip_signatures ADD COLUMN signed_content TEXT DEFAULT ''");
+    const slips = db.prepare(
+      "SELECT s.id, s.company, s.contact_name, s.contact_number, s.whatsapp_number, s.notes " +
+      "FROM service_slips s JOIN slip_signatures g ON g.slip_id = s.id"
+    ).all();
+    const machinesOf = db.prepare(
+      "SELECT machine_desc, serial_no, remarks FROM slip_machines WHERE slip_id = ? ORDER BY id"
+    );
+    const upd = db.prepare("UPDATE slip_signatures SET signed_content = ? WHERE slip_id = ?");
+    for (const s of slips) {
+      upd.run(JSON.stringify({
+        company: s.company || "", contact_name: s.contact_name || "",
+        contact_number: s.contact_number || "", whatsapp_number: s.whatsapp_number || "",
+        notes: s.notes || "",
+        machines: machinesOf.all(s.id).map((m) => ({
+          machine_desc: m.machine_desc || "", serial_no: m.serial_no || "", remarks: m.remarks || "",
+        })),
+        backfilled: true,
+      }), s.id);
+    }
+    if (slips.length) {
+      console.log(`[db] migrated: recorded what was signed for ${slips.length} existing slip(s)`);
+    }
+  }
+} catch (e) {
+  console.error("[db] signed_content migration check failed:", e.message);
+}
 
 db.prepare(
   "INSERT OR IGNORE INTO counters (name, value) VALUES ('slip_number', 0)"

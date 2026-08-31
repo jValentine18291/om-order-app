@@ -1655,6 +1655,15 @@ select {
 .pu-edit-actions { display: flex; gap: 8px; margin-top: 12px; }
 .pu-edit-actions button { flex: 1; }
 
+/* ---- A slip changed after it was signed ---------------------------------- */
+.vs-amended {
+  margin: 10px 0 0; padding: 12px 14px; border-radius: var(--radius-sm);
+  background: #FFF6E5; border-left: 4px solid #E0A22A;
+  font-size: .85rem; color: #8A5B00; line-height: 1.55;
+}
+.vs-amended b { display: block; margin-bottom: 4px; }
+.vs-amended div { overflow-wrap: anywhere; }
+
 /* ---- A note kept against a part ----------------------------------------- */
 /* Amber, like "already on order": something to read before acting, not an
    error. It sits at the TOP of the card because a superseded part is the
