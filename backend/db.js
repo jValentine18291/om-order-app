@@ -119,6 +119,11 @@ db.exec(`
     quote_first     INTEGER DEFAULT 0,
     notes          TEXT,
     status         TEXT    NOT NULL DEFAULT 'OPEN',  -- OPEN | CALL_CUSTOMER | CLOSED
+    -- The staff-only Drive copy of this slip's PDF. The id is kept so a
+    -- re-send REPLACES that file rather than adding a second one, which keeps
+    -- a link already given to a customer pointing at the current document.
+    drive_file_id  TEXT    DEFAULT '',
+    drive_link     TEXT    DEFAULT '',
     closing_ref    TEXT,                       -- DO/CS/INV number entered at close
     created_at     TEXT    DEFAULT (datetime('now')),
     closed_at      TEXT
@@ -393,6 +398,18 @@ try {
   }
 } catch (e) {
   console.error("[db] machine_parts free_text migration check failed:", e.message);
+}
+
+// Migration: remember where each slip's PDF lives in Drive.
+try {
+  const cols = db.prepare("PRAGMA table_info(service_slips)").all().map((c) => c.name);
+  if (!cols.includes("drive_file_id")) {
+    db.exec("ALTER TABLE service_slips ADD COLUMN drive_file_id TEXT DEFAULT ''");
+    db.exec("ALTER TABLE service_slips ADD COLUMN drive_link TEXT DEFAULT ''");
+    console.log("[db] migrated: added drive_file_id / drive_link to service_slips");
+  }
+} catch (e) {
+  console.error("[db] drive column check failed:", e.message);
 }
 
 // Migration: fold quote_status and work_decision into one state.

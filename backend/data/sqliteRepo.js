@@ -661,6 +661,16 @@ function ordersAwaitingAutoCount() {
   ).all();
 }
 
+// Where this slip's PDF sits in Drive. Written after an upload, so the next
+// send replaces that file instead of leaving a second copy of the same slip.
+function setSlipDrive(slipNumber, fileId, link) {
+  const slip = db.prepare("SELECT id FROM service_slips WHERE slip_number = ?").get(slipNumber);
+  if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
+  db.prepare("UPDATE service_slips SET drive_file_id = ?, drive_link = ? WHERE id = ?")
+    .run(String(fileId || ""), String(link || ""), slip.id);
+  return { ok: true };
+}
+
 // Close a slip: record the DO/CS/INV reference, set status CLOSED.
 function closeSlip(slipNumber, closingRef) {
   const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
@@ -992,7 +1002,7 @@ function techniciansForMachine(machineId) {
 }
 
 const slips = {
-  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, setMachineState, setAllMachineStates, setMachineDisposal, deriveSlipStatus, techniciansForMachine, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, setMachineState, setAllMachineStates, setMachineDisposal, deriveSlipStatus, techniciansForMachine, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };

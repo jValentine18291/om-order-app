@@ -336,6 +336,69 @@ app.get("/api/whatsapp/status", (req, res) => {
   res.json({ enabled: r.enabled, configured: r.configured, auto_send: r.autoSend });
 });
 
+// ---- The customer's copy, kept in Drive -------------------------------------
+// Asked before the app offers a link, so staff are never shown a button that
+// cannot work. The missing-settings list is deliberately included: when this is
+// off it is nearly always one unset value on the server.
+app.get("/api/drive/status", (req, res) => {
+  const drive = require("./drive");
+  const r = drive.readiness();
+  res.json({ enabled: r.enabled, configured: r.configured, missing: r.missing });
+});
+
+// The PDF is built on the phone, by the same code that draws the copy staff
+// look at, then posted up as raw bytes. Sending the finished file rather than
+// having the server rebuild it means the customer cannot be given a subtly
+// different document from the one that was signed.
+//
+// Uploading REPLACES this slip's existing file when there is one, so editing a
+// slip and sending it again updates the document a customer already has a link
+// to, instead of leaving two versions in the folder.
+app.post(
+  "/api/slips/:slip/pdf",
+  express.raw({ type: "application/pdf", limit: "10mb" }),
+  async (req, res) => {
+    const drive = require("./drive");
+    try {
+      const ready = drive.readiness();
+      if (!ready.enabled) {
+        return res.status(403).json({ error: "Google Drive is switched off on this server." });
+      }
+      if (!ready.configured) {
+        return res.status(503).json({ error: `Google Drive is not set up (missing ${ready.missing.join(", ")}).` });
+      }
+      if (!req.body || !req.body.length) {
+        return res.status(400).json({ error: "No PDF was received." });
+      }
+
+      const slip = await data.slips.getSlip(req.params.slip);
+      if (!slip) return res.status(404).json({ error: "Slip not found." });
+
+      // Sharing is asked for only by the send path. Filing a slip on
+      // registration leaves it readable by staff alone.
+      const share = req.query.share === "1";
+      const { fileId, link } = await drive.storeAndShare({
+        slipNumber: slip.slip_number,
+        company: slip.company,
+        pdf: req.body,
+        fileId: slip.drive_file_id || "",
+        share,
+      });
+      // A link is only recorded once one exists; archiving must not wipe the
+      // link a previous send handed to a customer.
+      await data.slips.setSlipDrive(slip.slip_number, fileId, link || slip.drive_link || "");
+      console.log(`[drive] slip ${slip.slip_number} ${share ? "shared" : "filed"} (${req.body.length} bytes)`);
+      res.json({ ok: true, link });
+    } catch (err) {
+      // A Drive failure must never look like the slip itself failed - the
+      // record is safe either way, and the app falls back to sharing the file
+      // off the phone.
+      console.error("[POST /api/slips/:slip/pdf]", err.message);
+      res.status(502).json({ error: err.message || "Could not save the PDF to Drive." });
+    }
+  }
+);
+
 // ---- Part reorder requests (Find Part "Order more" -> Purchaser screen) ----
 // The stock snapshot taken when an order is made. John decided the list shows
 // what the balance WAS at that moment - the context of the decision - rather

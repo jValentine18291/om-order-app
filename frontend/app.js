@@ -623,6 +623,7 @@ function showSlipCreated(slip) {
   $("ns-share").addEventListener("click", () => shareSlipPdf(slip));
   $("ns-done").addEventListener("click", goHome);
   wireContactActions(panel, slip);
+  driveArchive(slip);
   window.scrollTo(0, 0);
 
   // Offered only when the server can actually send, so staff are never shown a
@@ -1226,7 +1227,7 @@ function waDigits(slip) {
 
 // Sent before the PDF, so it says the copy follows rather than claiming to
 // carry it - the file goes in the next message, from the share sheet.
-function waOpeningMessage(slip) {
+function waOpeningMessage(slip, link = "") {
   // Whoever was written down at the counter. The contact is a person and the
   // company is not, so the person is preferred; with neither, the greeting
   // stays polite rather than addressing an empty space.
@@ -1237,7 +1238,9 @@ function waOpeningMessage(slip) {
     `Dear ${name},`,
     "Thank you for allowing us to assist you with repairing and servicing of your machine(s).",
     "",
-    "Kindly find your service slip attached below.",
+    link
+      ? `Kindly find your service slip here:\n${link}`
+      : "Kindly find your service slip attached below.",
     "",
     "We will contact you once our technicians have checked and/or worked on it.",
     "",
@@ -1245,6 +1248,47 @@ function waOpeningMessage(slip) {
     "",
     "- Outboard & Marine Pte Ltd",
   ].join("\n");
+}
+
+// ---- The customer's copy, kept in Drive -------------------------------------
+// Asked once and remembered, the same way the WhatsApp setting is: whether the
+// server can file a PDF in Drive at all. When it cannot, everything below is
+// skipped and the app behaves exactly as it did before - open the chat, then
+// share the file off the phone.
+let driveStatusPromise = null;
+function driveStatus() {
+  if (!driveStatusPromise) {
+    driveStatusPromise = api("/api/drive/status").catch(() => ({ enabled: false, configured: false }));
+  }
+  return driveStatusPromise;
+}
+
+// Build this slip's PDF and file it in Drive, returning the link to it.
+//
+// The PDF is built HERE, by the same code that draws the copy staff look at,
+// and posted up as bytes - so the document in Drive is the one that was signed
+// rather than something the server assembled separately. Uploading again
+// replaces the same file, which is what keeps a link already sent to a
+// customer pointing at the current version after a slip is edited.
+async function driveStoreSlip(slipIn, { share = false } = {}) {
+  const slip = await withSignature(slipIn);
+  const blob = buildSlipPdf(slip);
+  const r = await api(
+    `/api/slips/${encodeURIComponent(slip.slip_number)}/pdf${share ? "?share=1" : ""}`,
+    { method: "POST", headers: { "Content-Type": "application/pdf" }, body: blob }
+  );
+  return r.link || "";
+}
+
+// Filed as soon as the slip is registered, so the folder is a complete record
+// rather than only the slips somebody happened to send. Deliberately silent:
+// this runs behind the success card, and a customer standing at the counter
+// should not be shown a Drive error about a slip that saved perfectly well.
+function driveArchive(slip) {
+  driveStatus().then((d) => {
+    if (!d.enabled || !d.configured) return;
+    driveStoreSlip(slip).catch((e) => console.warn("[drive] archive failed:", e.message));
+  });
 }
 
 function contactActionHtml(slip) {
@@ -1271,15 +1315,49 @@ function wireContactActions(scope, slip) {
   (scope || document).querySelectorAll("[data-wa]").forEach((btn) => {
     if (btn.dataset.waWired) return;
     btn.dataset.waWired = "1";
-    btn.addEventListener("click", () => {
-      // A new tab rather than this one: the app must still be here to come
-      // back to for the PDF.
-      window.open(
-        `https://wa.me/${btn.dataset.wa}?text=${encodeURIComponent(waOpeningMessage(slip))}`,
-        "_blank", "noopener"
-      );
-    });
+    btn.addEventListener("click", () => openCustomerChat(btn, slip));
   });
+  // The wording under the buttons depends on whether a link can be sent, and
+  // that answer comes from the server, so it is filled in once it arrives.
+  driveStatus().then((d) => {
+    const hint = (scope || document).querySelector(".contact-hint");
+    if (hint && d.enabled && d.configured) hint.innerHTML = LINK_HINT;
+  });
+}
+
+const LINK_HINT =
+  "Opens WhatsApp with the message and a link to this slip. " +
+  "Only the customer holding the link can open it — it shows this slip and nothing else.";
+
+// Send the customer their copy.
+//
+// With Drive set up this is one trip: the PDF is filed, and its link goes
+// inside the message, so staff tap once here and once in WhatsApp. Without it,
+// the old path - open the chat, send, come back, Share PDF - still works, and
+// a Drive that is merely having a bad day falls back to it rather than
+// stranding somebody at the counter.
+async function openCustomerChat(btn, slip) {
+  const d = await driveStatus();
+  let link = "";
+  if (d.enabled && d.configured) {
+    const idle = btn.innerHTML;
+    btn.disabled = true;
+    btn.textContent = "Preparing…";
+    try {
+      link = await driveStoreSlip(slip, { share: true });
+    } catch (e) {
+      toast("Couldn't put the slip in Drive — send it with Share PDF instead", "err");
+      console.warn("[drive]", e.message);
+    }
+    btn.disabled = false;
+    btn.innerHTML = idle;
+  }
+  // A new tab rather than this one: without a link the app must still be here
+  // to come back to for Share PDF.
+  window.open(
+    `https://wa.me/${btn.dataset.wa}?text=${encodeURIComponent(waOpeningMessage(slip, link))}`,
+    "_blank", "noopener"
+  );
 }
 
 // Share the PDF via the device's native share sheet (WhatsApp/email/AirDrop),

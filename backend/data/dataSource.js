@@ -71,6 +71,7 @@ module.exports = {
     renameOrder: (...a) => dataRepo.slips.renameOrder(...a),
     setOrderAutocountError: (...a) => dataRepo.slips.setOrderAutocountError(...a),
     ordersAwaitingAutoCount: (...a) => dataRepo.slips.ordersAwaitingAutoCount(...a),
+    setSlipDrive: (...a) => dataRepo.slips.setSlipDrive(...a),
     closeSlip: (...a) => dataRepo.slips.closeSlip(...a),
   },
   notes: {

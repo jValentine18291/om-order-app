@@ -41,3 +41,10 @@ __pycache__/
 
 # Web push signing keys — the private half is a credential
 backend/vapid.json
+
+# Google service account key — this is the whole credential for the Drive
+# folder. Google hands it over as a .json download, and the obvious place to
+# drop it is next to the server, so it is ignored by name AND by shape.
+backend/drive-key.json
+backend/*-service-account*.json
+backend/*credentials*.json
