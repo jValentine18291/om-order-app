@@ -251,6 +251,7 @@
     "Quote before repairing this one": "这台机器维修前先报价",
     "Sales are told as soon as the slip is registered.": "服务单一开出，销售就会收到通知。",
     "Quote first": "先报价",
+    "Recently looked up": "最近查看",
     "Select your name…": "选择你的名字…",
     "Pick your name first": "请先选择你的名字",
     "Upload photos": "上传照片",

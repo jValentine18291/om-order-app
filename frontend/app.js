@@ -3703,6 +3703,59 @@ $("home-link").addEventListener("click", goHome);
 // ---- Find Part --------------------------------------------------------------
 // Search AutoCount by description or code; tap a result to see the stock card
 // (part no., description, shelf location, balance qty). Read-only.
+// ---- The last few parts looked up ------------------------------------------
+// Part numbers here are long and unfriendly - SZEN 848CE037A0 - and checking
+// the same one twice in a shift means typing it twice. Five is enough to cover
+// a job without becoming a list of its own to read.
+//
+// Kept on the phone, per person: these phones are shared, and 小刘's lookups
+// are no use to 文建. Nothing goes to the server; it is a convenience, not a
+// record.
+const RECENT_MAX = 5;
+const recentKey = () => `om_recent_parts_${(getUser() || {}).id || "?"}`;
+
+function recentParts() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(recentKey()) || "[]");
+    return Array.isArray(raw) ? raw.filter((r) => r && r.item_code) : [];
+  } catch (_) {
+    return [];                       // unreadable or full: simply no history
+  }
+}
+
+function rememberPart(p) {
+  if (!p || !p.item_code) return;
+  try {
+    const keep = { item_code: p.item_code, description: p.description || p.item_code };
+    // Looking at the same part again moves it to the top rather than adding a
+    // second row of it.
+    const list = [keep, ...recentParts().filter((r) => r.item_code !== keep.item_code)];
+    localStorage.setItem(recentKey(), JSON.stringify(list.slice(0, RECENT_MAX)));
+  } catch (_) { /* a phone with storage off just gets no history */ }
+}
+
+// Shown only on the empty screen: once someone is searching or reading a part,
+// the list is in the way of what they asked for.
+function renderRecentParts() {
+  const box = $("fp-recent");
+  if (!box) return;
+  const list = recentParts();
+  const busy = $("fp-q").value.trim() || $("fp-detail").style.display === "block"
+            || $("fp-scan-area").style.display === "flex";
+  if (!list.length || busy) { box.style.display = "none"; box.innerHTML = ""; return; }
+  box.innerHTML =
+    `<p class="eyebrow fp-recent-head">Recently looked up</p>` +
+    list.map((r) =>
+      `<button type="button" class="company-option" data-recent="${escapeAttr(r.item_code)}">
+         <span class="fp-opt-desc">${escapeHtml(r.description)}</span>
+         <span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>
+       </button>`).join("");
+  box.style.display = "block";
+  box.querySelectorAll("[data-recent]").forEach((b) =>
+    b.addEventListener("click", () => showPartStock(b.dataset.recent))
+  );
+}
+
 function enterFindPart() {
   $("fp-q").value = "";
   $("fp-results").innerHTML = "";
@@ -3713,6 +3766,7 @@ function enterFindPart() {
   $("fp-scan-area").style.display = "none";
   $("fp-scan").style.display = "flex";
   showScreen("find");
+  renderRecentParts();
   setTimeout(() => $("fp-q").focus(), 50);
 }
 // QR scanning inside Find Part: scan a part's code to jump straight to its
@@ -3721,6 +3775,7 @@ function stopFindScan() {
   $("fp-scan-area").style.display = "none";
   $("fp-scan").style.display = "flex";
   try { stopQrScanner(); } catch (_) {}
+  renderRecentParts();
 }
 $("fp-scan").addEventListener("click", () => {
   $("fp-results").innerHTML = "";
@@ -3728,6 +3783,7 @@ $("fp-scan").addEventListener("click", () => {
   $("fp-order-more").style.display = "none";
   $("fp-scan").style.display = "none";
   $("fp-scan-area").style.display = "flex";
+  $("fp-recent").style.display = "none";
   startQrScanner({
     videoId: "fp-video",
     statusId: "fp-scan-status",
@@ -3746,7 +3802,8 @@ $("fp-q").addEventListener("input", () => {
   const box = $("fp-results");
   $("fp-detail").style.display = "none";
   $("fp-order-more").style.display = "none";
-  if (q.length < 2) { box.innerHTML = ""; return; }
+  if (q.length < 2) { box.innerHTML = ""; renderRecentParts(); return; }
+  $("fp-recent").style.display = "none";
   fpDebounce = setTimeout(async () => {
     try {
       const data = await api(`/api/parts-search?q=${encodeURIComponent(q)}`);
@@ -3780,6 +3837,8 @@ async function showPartStock(code) {
   try {
     const p = await api(`/api/part-stock/${encodeURIComponent(code)}`);
     fpCurrentPart = p;
+    rememberPart(p);
+    renderRecentParts();          // now reading a part: stand the list down
     const qty = Number(p.bal_qty);
     const qtyStr = Number.isInteger(qty) ? String(qty) : qty.toFixed(2);
     detail.innerHTML = `

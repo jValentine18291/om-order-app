@@ -681,6 +681,9 @@ select {
 /* A plain fact rather than a state - "not yet collected" beside "Condemned". */
 .mq-none { color: var(--ink-faint); background: #F1F4F6; font-weight: 600; }
 
+/* The last few parts looked up, on the otherwise empty Find Part screen. */
+.fp-recent-head { margin: 18px 0 8px; }
+
 /* ---- What a part fits -------------------------------------------------------
    The machines were always on screen, as an unlabelled grey line under the
    description. Labelled and tappable, they answer "what else fits this?". */

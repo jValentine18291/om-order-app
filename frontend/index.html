@@ -172,6 +172,9 @@
         <div class="scan-hint" id="fp-scan-status"><span class="led"></span> Point at a QR code</div>
         <button class="fp-scan-stop" id="fp-scan-stop">Stop scanning</button>
       </div>
+      <!-- The last few parts this person looked at, so a code like
+           SZEN 848CE037A0 does not have to be typed twice in a morning. -->
+      <div id="fp-recent" style="display:none"></div>
       <div class="fp-card" id="fp-detail" style="display:none;"></div>
       <button class="btn-primary" id="fp-order-more" style="display:none; margin-top:12px;">Order more</button>
     </section>
