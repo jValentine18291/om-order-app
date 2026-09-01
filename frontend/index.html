@@ -70,51 +70,51 @@
       <button class="pu-notify" id="pu-notify" style="display:none;"></button>
       <div class="section-head">
         <div class="home-head-row">
-          <div>
+          <div class="home-head-top">
             <p class="eyebrow">Service desk</p>
-            <h2>What would you like to do?</h2>
+            <span class="role-badge" id="role-badge"></span>
           </div>
-          <span class="role-badge" id="role-badge"></span>
+          <h2>What would you like to do?</h2>
         </div>
       </div>
       <div class="home-actions">
-        <button class="home-btn" data-go="new">
+        <button class="home-btn home-sales home-wide" data-go="new">
           <span class="home-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
           </span>
           <span class="home-txt"><strong>New Service</strong><small>Register a customer's machines</small></span>
         </button>
-        <button class="home-btn" data-go="open">
+        <button class="home-btn home-tech home-wide" data-go="open">
           <span class="home-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 21v.01M21 14v.01M14 21v.01"/></svg>
           </span>
           <span class="home-txt"><strong>Open Service</strong><small>Scan parts onto a service slip</small></span>
         </button>
-        <button class="home-btn" data-go="close">
+        <button class="home-btn home-sales" data-go="close">
           <span class="home-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
           </span>
           <span class="home-txt"><strong>Close Service</strong><small>Record DO/CS/INV and close</small></span>
         </button>
-        <button class="home-btn" data-go="view">
+        <button class="home-btn home-all" data-go="view">
           <span class="home-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
           </span>
           <span class="home-txt"><strong>View Slips</strong><small>Look up any service slip</small></span>
         </button>
-        <button class="home-btn" data-go="find">
+        <button class="home-btn home-tech" data-go="find">
           <span class="home-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
           </span>
           <span class="home-txt"><strong>Find Part</strong><small>Check part location and stock</small></span>
         </button>
-        <button class="home-btn" data-go="ipl">
+        <button class="home-btn home-tech" data-go="ipl">
           <span class="home-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3z"/><circle cx="17.5" cy="17.5" r="3.5"/></svg>
           </span>
           <span class="home-txt"><strong>IPL</strong><small>Exploded views with live stock</small></span>
         </button>
-        <button class="home-btn" data-go="quote">
+        <button class="home-btn home-sales" data-go="quote">
           <span class="home-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h4"/><path d="M9 11h2"/></svg>
           </span>
@@ -122,7 +122,7 @@
           <!-- How many are waiting, so it can be seen without opening it. -->
           <span class="home-count" id="quote-count" style="display:none;"></span>
         </button>
-        <button class="home-btn" data-go="bulk">
+        <button class="home-btn home-buy" data-go="bulk">
           <span class="home-ic">
             <!-- A list being built, not a second trolley. The plus used to sit inside
                  the cart basket and read as a scribble; and Bulk Order wants its own
@@ -131,7 +131,7 @@
           </span>
           <span class="home-txt"><strong>Bulk Order</strong><small>Request several parts at once</small></span>
         </button>
-        <button class="home-btn" data-go="requests">
+        <button class="home-btn home-buy" data-go="requests">
           <span class="home-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
           </span>

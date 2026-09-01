@@ -8,18 +8,26 @@
 }
 
 /* ---- Home screen action buttons ---- */
+/* Nine tiles, two to a row, so the whole menu is on one screen instead of one
+   and a half. The two the day starts with keep the full width. */
 .home-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 6px;
+}
+.home-btn.home-wide { grid-column: 1 / -1; }
+/* A half-width tile stacks its icon above its name; a full-width one keeps the
+   icon beside it, which is why the two differ below rather than sharing one
+   layout. */
+.home-btn {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-top: 8px;
-}
-.home-btn {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+  align-items: flex-start;
+  gap: 7px;
   width: 100%;
-  padding: 22px 18px;
+  padding: 10px 13px;
   background: #fff;
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -31,16 +39,42 @@
 .home-btn:active { transform: scale(.99); }
 .home-btn .home-ic {
   flex: 0 0 auto;
-  width: 48px; height: 48px;
+  width: 38px; height: 38px;
   display: flex; align-items: center; justify-content: center;
   background: var(--primary-grad);
   color: #fff;
-  border-radius: 13px;
+  border-radius: 11px;
 }
-.home-btn .home-ic svg { width: 26px; height: 26px; }
-.home-btn .home-txt { display: flex; flex-direction: column; gap: 2px; }
-.home-btn .home-txt strong { font-size: 1.15rem; font-weight: 700; color: var(--ink); }
-.home-btn .home-txt small { color: var(--ink-soft); font-size: .95rem; }
+.home-btn .home-ic svg { width: 21px; height: 21px; }
+.home-btn .home-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.home-btn .home-txt strong { font-size: 1rem; font-weight: 700; color: var(--ink); line-height: 1.25; }
+/* The one-line description only earns its space on a full-width tile. At half
+   width it wraps to three cramped lines to say what the name already says. */
+.home-btn .home-txt small { display: none; }
+
+.home-btn.home-wide {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 15px;
+}
+.home-btn.home-wide .home-ic { width: 44px; height: 44px; border-radius: 12px; }
+.home-btn.home-wide .home-ic svg { width: 24px; height: 24px; }
+.home-btn.home-wide .home-txt strong { font-size: 1.1rem; }
+.home-btn.home-wide .home-txt small { display: block; color: var(--ink-soft); font-size: .88rem; }
+
+/* ---- Which part of the shop a tile belongs to ------------------------------
+   The same four colours the role picker gives people on the first screen
+   anyone sees, so there is no second scheme to learn:
+     teal   sales     - the counter: taking machines in, pricing, closing
+     purple workshop  - the technicians: scanning parts, looking them up
+     amber  purchasing- requesting and ordering parts
+     slate  everyone  - records anybody looks at
+   It marks where a job BELONGS, not who may press it. Nothing here locks. */
+.home-sales .home-ic { background: linear-gradient(140deg, #0f8f97, #086970); }
+.home-tech  .home-ic { background: linear-gradient(140deg, #7a5cbd, #58408c); }
+.home-buy   .home-ic { background: linear-gradient(140deg, #c47a1c, #94590f); }
+.home-all   .home-ic { background: linear-gradient(140deg, #667a72, #47564f); }
 
 /* ---- Required-field asterisk ---- */
 .req { color: #c61f2b; font-weight: 700; }
@@ -434,12 +468,13 @@ select {
 .role-tech .home-txt small { color: #185FA5; }
 
 /* Role badge on the home screen */
-.home-head-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
+/* The chip sits with the eyebrow, not the heading: sharing a line with the
+   heading is what made "What would you like to do?" wrap underneath it. */
+.home-head-row { display: block; }
+.home-head-top {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
 }
+.home-head-top .eyebrow { margin: 0; }
 .role-badge {
   flex: 0 0 auto;
   font-size: .72rem;
@@ -456,7 +491,7 @@ select {
 .switch-role {
   display: block;
   width: 100%;
-  margin-top: 16px;
+  margin-top: 8px;
   padding: 10px;
   background: none;
   border: none;
@@ -2039,13 +2074,16 @@ select {
 /* The point of the screen is knowing there is something waiting without
    opening it, so the number sits on the tile itself. */
 .home-btn .home-count {
-  margin-left: auto;
+  position: absolute; top: 10px; right: 10px;
   flex: 0 0 auto;
   min-width: 30px; height: 30px;
   display: grid; place-items: center;
   padding: 0 9px;
   border-radius: 999px;
-  background: var(--amber); color: #fff;
+  /* Not amber any more: amber now means PURCHASING on this screen, and a count
+     in that colour sitting on a sales tile reads as the wrong thing. Red is
+     what a count wanting attention has always been. */
+  background: #C0392B; color: #fff;
   font-family: var(--display);
   font-size: .92rem; font-weight: 700;
   font-variant-numeric: tabular-nums;
