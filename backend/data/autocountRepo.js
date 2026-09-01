@@ -586,6 +586,64 @@ module.exports.purchaseOrderShape = purchaseOrderShape;
 
 module.exports.getStockBalances = getStockBalances;
 
+// ---- Every part that fits one machine ---------------------------------------
+// The machines a part fits are kept on the item's SECOND description line.
+// A survey of the live catalogue settled how to read it: 5,722 of 7,536 active
+// items have one, they average 8 characters, 96% contain a digit, and 873
+// distinct values are shared across those parts - so it is a real vocabulary of
+// model codes, not free text. Only 17% carry a comma, meaning most parts list
+// exactly one machine and the rest are comma-separated.
+//
+// Matching is done on whole entries rather than a substring, because "365"
+// appearing inside "3650" is a different machine. SQL narrows the rows and the
+// exact token check happens here, which keeps the query simple and the
+// matching honest.
+const modelKey = (s) => String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+// Does this item's second line name that machine? Exported so the app, the
+// route and the tests all ask the same question of the same code, rather than
+// each carrying its own copy that can drift.
+function fitsModel(desc2, model) {
+  const wanted = modelKey(model);
+  if (!wanted) return false;          // "everything" is not a machine
+  return String(desc2 || "").split(",").some((entry) => modelKey(entry) === wanted);
+}
+
+async function partsForModel(model, limit = 200) {
+  const wanted = modelKey(model);
+  if (!wanted) return { model: "", total: 0, results: [], truncated: false };
+  const cap = Math.max(1, Math.min(500, Number(limit) || 200));
+
+  const rows = await query(
+    `SELECT i.ItemCode,
+            COALESCE(NULLIF(i.Description, ''), NULLIF(i.Desc2, ''), i.ItemCode) AS Descr,
+            NULLIF(i.Desc2, '') AS Desc2
+       FROM Item i
+      WHERE i.IsActive = 'T'
+        AND i.Desc2 LIKE '%' + @m + '%'
+      ORDER BY i.ItemCode`,
+    { m: String(model).trim() }
+  );
+
+  // The row matched somewhere in the line; keep it only if the machine is one
+  // of the entries, so a part for "3650" is not returned as fitting a "365".
+  const exact = rows.filter((r) => fitsModel(r.Desc2, model));
+
+  return {
+    model: String(model).trim(),
+    total: exact.length,
+    truncated: exact.length > cap,
+    results: exact.slice(0, cap).map((r) => ({
+      item_code: r.ItemCode,
+      description: r.Descr,
+      desc2: r.Desc2 && r.Desc2 !== r.Descr ? r.Desc2 : "",
+    })),
+  };
+}
+
+module.exports.partsForModel = partsForModel;
+module.exports.modelKey = modelKey;
+module.exports.fitsModel = fitsModel;
 module.exports.searchParts = searchParts;
 module.exports.getPartStock = getPartStock;
 

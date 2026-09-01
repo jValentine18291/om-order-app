@@ -769,6 +769,24 @@
     </div>
   </div>
 
+  <!-- Everything that fits one machine, opened by tapping a machine on a part.
+       A popup rather than a screen for the same reason the part peek is: the
+       question is "what else fits this?", and being carried somewhere else
+       answers it while losing the part you were looking at. -->
+  <div class="modal-overlay" id="fits-modal" style="display:none">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div>
+          <strong id="fits-title">Machine</strong>
+          <div class="mm-sub" id="fits-sub"></div>
+        </div>
+        <button class="modal-x" id="fits-close" aria-label="Close">&#10005;</button>
+      </div>
+      <button class="btn-secondary" id="fits-ipl" style="display:none;width:100%;margin-bottom:12px;">Open the parts diagram</button>
+      <div id="fits-body"></div>
+    </div>
+  </div>
+
   <!-- One part's details, opened from a code inside a note. Deliberately a
        popup: tapping a replacement while reading a diagram should answer the
        question, not carry you off to another screen and lose your place. -->

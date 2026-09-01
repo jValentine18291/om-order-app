@@ -1250,6 +1250,138 @@ function waOpeningMessage(slip, link = "") {
   ].join("\n");
 }
 
+// ---- What a part fits ---------------------------------------------------------
+// AutoCount keeps the machines a part fits on the item's second description
+// line. The app has always fetched and shown it - as an unlabelled grey line
+// under the description, which nobody could be expected to read as "fits
+// these machines". Labelling it and making each machine tappable turns a field
+// that was already there into the answer to "what else fits this?".
+//
+// A survey of the catalogue shaped this: 76% of active items have the line, it
+// averages 8 characters, and 873 model codes are shared across 5,722 parts, so
+// it is a real vocabulary. Most parts name one machine; the rest separate them
+// with commas.
+function fitsList(part) {
+  return String((part && part.desc2) || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+// We hold exploded diagrams for 14 machines and AutoCount names 873, so most
+// taps cannot lead to a diagram. Listing the machine's parts is the action that
+// always works, and the diagram is offered on top when we happen to have it.
+function iplIdFor(model) {
+  const key = (s) => String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const want = key(model);
+  if (!want || !ipl.models) return null;
+  for (const m of ipl.models) {
+    // A book covers "BK3410FL / FL-S" while a part says "BK3410", so either may
+    // be the start of the other. Loose on purpose: this only ever navigates,
+    // and the rule for the app is that loose matching is fine for finding and
+    // never for writing.
+    //
+    // Prefixes only count from four characters, though. The catalogue contains
+    // model codes as short as "T3", and two characters would happily match a
+    // book for something else entirely.
+    for (const alt of String(m.short || "").split("/")) {
+      const c = key(alt);
+      if (!c) continue;
+      if (c === want) return m.id;
+      const shorter = Math.min(c.length, want.length);
+      if (shorter >= 4 && (c.startsWith(want) || want.startsWith(c))) return m.id;
+    }
+  }
+  return null;
+}
+
+function fitsRowHtml(part) {
+  const models = fitsList(part);
+  if (!models.length) return "";
+  return `
+    <div class="fp-row fp-fits">
+      <span class="fp-lbl">Fits</span>
+      <span class="fp-val">${models.map((m) =>
+        `<button type="button" class="fits-chip" data-model="${escapeAttr(m)}">${escapeHtml(m)}</button>`
+      ).join("")}</span>
+    </div>`;
+}
+
+// Every part that fits one machine. Read from AutoCount rather than from the
+// diagrams, so it covers all 873 machines the catalogue names and not only the
+// 14 we hold books for.
+let fitsModel = null;
+
+function closeFitsSheet() {
+  $("fits-modal").style.display = "none";
+  const stillOpen = ["ipl-modal", "machine-modal", "peek-modal", "note-modal", "order-modal"]
+    .some((id) => $(id) && $(id).style.display === "flex");
+  if (!stillOpen) document.body.style.overflow = "";
+  fitsModel = null;
+}
+$("fits-close").addEventListener("click", closeFitsSheet);
+
+$("fits-ipl").addEventListener("click", () => {
+  const id = iplIdFor(fitsModel);
+  closeFitsSheet();
+  closeIplPart && closeIplPart();
+  if (id) { showScreen("ipl"); openIplModel(id); }
+});
+
+async function showModelParts(model) {
+  fitsModel = model;
+  $("fits-title").textContent = model;
+  $("fits-sub").textContent = "";
+  $("fits-body").innerHTML = `<div class="fp-loading">Looking up parts…</div>`;
+  $("fits-ipl").style.display = "none";
+  $("fits-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+
+  // Offered only when a diagram for this machine actually exists - most
+  // machines in the catalogue have no book, and a button that leads nowhere is
+  // worse than no button.
+  const iplId = iplIdFor(model);
+  if (iplId) {
+    const m = (ipl.models || []).find((x) => x.id === iplId);
+    $("fits-ipl").textContent = `Open the ${m ? m.name : model} diagram`;
+    $("fits-ipl").style.display = "";
+  }
+
+  try {
+    const r = await api(`/api/parts-by-model?model=${encodeURIComponent(model)}`);
+    const list = r.results || [];
+    if (!list.length) {
+      $("fits-body").innerHTML =
+        `<div class="fp-empty">No other parts in AutoCount list ${escapeHtml(model)}.</div>`;
+      return;
+    }
+    $("fits-sub").textContent = r.truncated
+      ? `${list.length} of ${r.total} parts`
+      : `${r.total} part${r.total === 1 ? "" : "s"}`;
+    $("fits-body").innerHTML = list.map((x) =>
+      `<button type="button" class="company-option" data-code="${escapeAttr(x.item_code)}">
+         <span class="fp-opt-desc">${escapeHtml(x.description)}</span>
+         <span class="fp-opt-code mono">${escapeHtml(x.item_code)}</span>
+       </button>`).join("") +
+      (r.truncated ? `<div class="fp-empty">Showing the first ${list.length}. Search the part number to find a specific one.</div>` : "");
+    // Straight into the part peek, which already shows stock, shelf and notes -
+    // and its own "Fits" row, so one machine leads to another.
+    $("fits-body").querySelectorAll(".company-option").forEach((b) =>
+      b.addEventListener("click", () => { closeFitsSheet(); peekAtPart(b.dataset.code); })
+    );
+  } catch (e) {
+    $("fits-body").innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Lookup failed")}</div>`;
+  }
+}
+
+function wireFits(scope) {
+  (scope || document).querySelectorAll(".fits-chip").forEach((b) => {
+    if (b.dataset.fitsWired) return;
+    b.dataset.fitsWired = "1";
+    b.addEventListener("click", () => showModelParts(b.dataset.model));
+  });
+}
+
 // ---- The customer's copy, kept in Drive -------------------------------------
 // Asked once and remembered, the same way the WhatsApp setting is: whether the
 // server can file a PDF in Drive at all. When it cannot, everything below is
@@ -3643,11 +3775,13 @@ async function showPartStock(code) {
     const qtyStr = Number.isInteger(qty) ? String(qty) : qty.toFixed(2);
     detail.innerHTML = `
       <div class="fp-row"><span class="fp-lbl">Part No.</span><span class="fp-val mono">${escapeHtml(p.item_code)}</span></div>
-      <div class="fp-row"><span class="fp-lbl">Description</span><span class="fp-val">${escapeHtml(p.description)}${p.desc2 ? `<br><span class="fp-val-model">${escapeHtml(p.desc2)}</span>` : ""}</span></div>
+      <div class="fp-row"><span class="fp-lbl">Description</span><span class="fp-val">${escapeHtml(p.description)}</span></div>
+      ${fitsRowHtml(p)}
       ${shelfRowHtml(p)}
       <div class="fp-row"><span class="fp-lbl">Bal. Qty</span><span class="fp-val fp-qty ${qty > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${qtyStr}${p.uom ? " " + escapeHtml(p.uom) : ""}</span></div>`;
     $("fp-order-more").style.display = "block";
     wireShelfEdit(detail, p, (shelf) => { p.shelf = shelf; showPartStock(p.item_code); });
+    wireFits(detail);
     renderPartNote(detail, p, () => showPartStock(p.item_code));
   } catch (e) {
     detail.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Lookup failed")}</div>`;
@@ -3802,11 +3936,13 @@ async function showPeekStock(itemCode) {
     $("peek-sub").textContent = p.item_code;
     $("peek-body").innerHTML = `
       <div class="fp-row"><span class="fp-lbl">Part No.</span><span class="fp-val mono">${escapeHtml(p.item_code)}</span></div>
-      <div class="fp-row"><span class="fp-lbl">Description</span><span class="fp-val">${escapeHtml(p.description)}${p.desc2 ? `<br><span class="fp-val-model">${escapeHtml(p.desc2)}</span>` : ""}</span></div>
+      <div class="fp-row"><span class="fp-lbl">Description</span><span class="fp-val">${escapeHtml(p.description)}</span></div>
+      ${fitsRowHtml(p)}
       <div class="fp-row"><span class="fp-lbl">Location / Shelf</span><span class="fp-val">${p.shelf ? escapeHtml(p.shelf) : "—"}</span></div>
       <div class="fp-row"><span class="fp-lbl">Bal. Qty</span><span class="fp-val fp-qty ${qty > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${qtyStr}${p.uom ? " " + escapeHtml(p.uom) : ""}</span></div>`;
     // A replacement can have been replaced in its turn, so its own note shows
     // here too - and its codes are tappable, which walks the chain.
+    wireFits($("peek-body"));
     await renderPartNote($("peek-body"), p, () => showPeekStock(itemCode), { addIfEmpty: false });
     $("peek-open").style.display = "";
   } catch (e) {
@@ -5816,12 +5952,14 @@ async function renderIplStock(itemCode) {
     const qtyStr = Number.isInteger(qty) ? String(qty) : qty.toFixed(2);
     box.innerHTML = `
       <div class="fp-row"><span class="fp-lbl">Part No.</span><span class="fp-val mono">${escapeHtml(p.item_code)}</span></div>
-      <div class="fp-row"><span class="fp-lbl">Description</span><span class="fp-val">${escapeHtml(p.description)}${p.desc2 ? `<br><span class="fp-val-model">${escapeHtml(p.desc2)}</span>` : ""}</span></div>
+      <div class="fp-row"><span class="fp-lbl">Description</span><span class="fp-val">${escapeHtml(p.description)}</span></div>
+      ${fitsRowHtml(p)}
       ${shelfRowHtml(p)}
       <div class="fp-row"><span class="fp-lbl">Bal. Qty</span><span class="fp-val fp-qty ${qty > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${qtyStr}${p.uom ? " " + escapeHtml(p.uom) : ""}</span></div>`;
     iplOrderPart = p;
     $("ipl-order-more").style.display = "block";
     wireShelfEdit(box, p, (shelf) => { p.shelf = shelf; renderIplStock(p.item_code); });
+    wireFits(box);
     renderPartNote(box, {
       ...p,
       note_key: iplDiagramPart ? iplNoteKey(iplDiagramPart) : null,

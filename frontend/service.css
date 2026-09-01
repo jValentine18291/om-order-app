@@ -650,6 +650,22 @@ select {
 /* A plain fact rather than a state - "not yet collected" beside "Condemned". */
 .mq-none { color: var(--ink-faint); background: #F1F4F6; font-weight: 600; }
 
+/* ---- What a part fits -------------------------------------------------------
+   The machines were always on screen, as an unlabelled grey line under the
+   description. Labelled and tappable, they answer "what else fits this?". */
+.fp-fits .fp-val { display: flex; flex-wrap: wrap; gap: 6px; }
+.fits-chip {
+  font-family: inherit; font-size: 14px; font-weight: 700;
+  padding: 5px 12px; border-radius: 999px;
+  background: var(--primary-tint); color: var(--primary);
+  border: 1.5px solid transparent;
+}
+.fits-chip:active { border-color: var(--primary); }
+
+/* Above the part peek, since a machine is opened FROM a part and the part must
+   still be underneath to come back to. */
+#fits-modal { z-index: 80; }
+
 /* ---- The customer's number, and the way in to their chat -------------------
    WhatsApp will not offer a number nobody has messaged, so this opens the chat
    first. It sits directly above Share PDF because that is the order of use. */

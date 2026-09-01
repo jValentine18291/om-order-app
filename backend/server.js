@@ -778,6 +778,22 @@ app.get("/api/parts-search", async (req, res) => {
   }
 });
 
+// Every part that fits one machine, from the item's second description line.
+// Separate from parts-search because that matches the code and description too:
+// searching "365" there returns anything with 365 in a part number, while this
+// answers only "what fits a 365".
+app.get("/api/parts-by-model", async (req, res) => {
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") return res.json({ model: "", total: 0, results: [] });
+    const acRepo = require("./data/autocountRepo");
+    res.json(await acRepo.partsForModel(String(req.query.model || ""), Number(req.query.limit) || 200));
+  } catch (err) {
+    console.error("[GET /api/parts-by-model]", err.message);
+    res.json({ model: String(req.query.model || ""), total: 0, results: [], error: "Lookup failed." });
+  }
+});
+
 // Find Part: stock card for one part (code, description, shelf, balance qty).
 app.get("/api/part-stock/:code", async (req, res) => {
   try {
