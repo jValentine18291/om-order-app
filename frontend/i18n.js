@@ -166,7 +166,8 @@
     "Keep typing to narrow results…": "继续输入以缩小范围…",
 
     // ---- Slip detail ----
-    "← All slips": "← 所有服务单",
+    // Shortened when it moved into the header beside Home.
+    "← Slips": "← 服务单",
     "Machines — tap one to work on it": "机器 — 点击一台开始作业",
     "Need to Quote": "需要报价",
     "Quote all machines": "全部机器一起报价",

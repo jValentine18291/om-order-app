@@ -50,8 +50,16 @@
       <h1>OM Service <span>&middot; OM</span></h1>
       <!-- Technician-only language toggle. The label shows the language it
            switches TO; data-no-i18n keeps the translation layer off it. -->
-      <button class="pill lang-toggle" id="lang-toggle" data-no-i18n style="display:none"></button>
-      <button class="pill home-link" id="home-link" style="display:none">Home</button>
+      <!-- One group, pushed to the right, so two or three chips space
+           themselves instead of each carrying its own margin.
+           Going back lives in this corner too: it used to be a link floating
+           in the middle of the slip screen, so "back" was in a different place
+           depending on which screen you were on. -->
+      <div class="topbar-actions">
+        <button class="pill lang-toggle" id="lang-toggle" data-no-i18n style="display:none"></button>
+        <button class="pill back-chip" id="top-back" style="display:none">&larr; Slips</button>
+        <button class="pill home-link" id="home-link" style="display:none">Home</button>
+      </div>
     </header>
 
     <!-- ============ SCREEN: ROLE (who is using the app) ============ -->
@@ -372,7 +380,6 @@
 
     <!-- ============ SCREEN: SLIP DETAIL (machines as buttons) ============ -->
     <section id="screen-slip" class="screen">
-      <button class="back-link" id="sd-back">&larr; All slips</button>
       <div id="sd-head"></div>
       <div class="section-head" style="margin-top:14px;">
         <p class="eyebrow">Machines — tap one to work on it</p>

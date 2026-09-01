@@ -113,16 +113,50 @@ html, body {
   display: grid; place-items: center;
 }
 .topbar .mark img { width: 34px; height: 34px; display: block; }
+/* The title gives way before the buttons do. With a back chip beside Home
+   there is not room for everything on a 375px phone, and a title that
+   truncates is better than controls that wrap or get pushed off. */
 .topbar h1 {
   font-family: var(--display);
   font-size: 16px; font-weight: 700; letter-spacing: -0.01em; margin: 0;
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .topbar h1 span { color: var(--ink-faint); font-weight: 500; }
+/* These were 28px tall with 11px soft-grey text - half the height of every
+   other control on the same screens, and well under the 44px a fingertip
+   needs. They are the way out of every screen, pressed with a workshop hand.
+   Bigger and firmer rather than coloured: colour means a part of the shop on
+   the home screen now, and navigation belongs to none of them. */
 .topbar .pill {
-  margin-left: auto; font-size: 11px; font-weight: 600;
-  color: var(--ink-soft); background: var(--surface);
-  border: 1px solid var(--border); border-radius: 999px;
-  padding: 5px 11px; letter-spacing: 0.02em;
+  flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 0 15px;
+  font-size: 13px; font-weight: 700; letter-spacing: 0.01em;
+  color: var(--ink); background: var(--surface);
+  border: 1.5px solid var(--border-2); border-radius: 999px;
+}
+.topbar .pill:active { background: var(--surface-2); }
+.topbar-actions {
+  margin-left: auto; flex: none;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* Going back one step is the more common move, so it reads a shade stronger
+   than Home without taking a colour of its own. */
+.topbar .back-chip { border-color: var(--ink-faint); }
+
+/* On a narrow phone a technician can have three chips up here - language,
+   back and home - and the name is what gets squeezed. Dropping the "· OM" and
+   tightening the chips buys back enough for "OM Service" to sit whole, which
+   is better than the "OM ..." it truncated to. */
+/* On a phone the name gives up its place to the buttons. A technician can have
+   three chips here - language, back, home - and at 44px each there is not room
+   for the name as well; it truncated to "OM Se...", which looks broken in a way
+   that no name does not. The logo still says whose app this is, and every
+   screen carries its own heading underneath. */
+@media (max-width: 430px) {
+  .topbar h1 { display: none; }
+  .topbar .pill { padding: 0 13px; }
 }
 
 /* ---- Step indicator ---------------------------------------------------- */

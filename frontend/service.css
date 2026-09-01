@@ -639,11 +639,7 @@ select {
 .slip-card-sub { margin-top: 2px; font-size: .82rem; color: var(--ink-faint); }
 
 /* ---- Slip detail: back link + machine buttons ---- */
-.back-link {
-  background: none; border: none; font: inherit;
-  color: var(--primary); font-weight: 600;
-  padding: 0 0 10px; cursor: pointer;
-}
+
 #sd-machines { display: flex; flex-direction: column; gap: 10px; }
 .machine-btn {
   width: 100%;

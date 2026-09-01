@@ -271,6 +271,8 @@ function showScreen(name) {
   SCREENS.forEach((s) => $("screen-" + s).classList.toggle("active", s === name));
   // Home link visible everywhere except home/role
   $("home-link").style.display = (name === "home" || name === "role") ? "none" : "inline-flex";
+  // And the way back one step, on the only screen that has one.
+  $("top-back").style.display = name === "slip" ? "inline-flex" : "none";
   // The pad is sized when its popup opens, not here — it measures zero while
   // the popup is closed, whatever screen is showing.
   // Leaving the working context: hide the machine modal and stop any camera.
@@ -1605,7 +1607,7 @@ function renderSlipList() {
   );
 }
 $("os-search").addEventListener("input", renderSlipList);
-$("sd-back").addEventListener("click", enterOpenService);
+$("top-back").addEventListener("click", enterOpenService);
 
 async function onSlipChosen(slipNumber) {
   if (!slipNumber) return;
