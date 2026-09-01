@@ -1227,12 +1227,24 @@ function waDigits(slip) {
 // Sent before the PDF, so it says the copy follows rather than claiming to
 // carry it - the file goes in the next message, from the share sheet.
 function waOpeningMessage(slip) {
-  const machines = (slip.machines || []).map((m) => m.machine_desc).filter(Boolean);
+  // Whoever was written down at the counter. The contact is a person and the
+  // company is not, so the person is preferred; with neither, the greeting
+  // stays polite rather than addressing an empty space.
+  const name = String(slip.contact_name || "").trim() ||
+               String(slip.company || "").trim() ||
+               "Sir/Madam";
   return [
-    `Outboard & Marine — Service Slip ${slip.slip_number}`,
-    slip.company,
-    machines.join(", "),
-  ].filter(Boolean).join("\n") + "\n\nYour copy of the service slip follows.";
+    `Dear ${name},`,
+    "Thank you for allowing us to assist you with repairing and servicing of your machine(s).",
+    "",
+    "Kindly find your service slip attached below.",
+    "",
+    "We will contact you once our technicians have checked and/or worked on it.",
+    "",
+    "Thank you for your patience.",
+    "",
+    "- Outboard & Marine Pte Ltd",
+  ].join("\n");
 }
 
 function contactActionHtml(slip) {
