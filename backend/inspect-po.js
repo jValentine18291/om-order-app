@@ -23,6 +23,7 @@
 // cannot change anything in AutoCount.
 // ============================================================================
 
+require("./serviceEnv").load();
 const { query } = require("./data/autocountConnection");
 
 const SAMPLE_ITEM = process.argv[2] || "";

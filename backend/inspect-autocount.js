@@ -19,6 +19,7 @@
 // sample. There are no INSERT/UPDATE/DELETE statements anywhere in this file.
 // ============================================================================
 
+require("./serviceEnv").load();
 const { query } = require("./data/autocountConnection");
 
 async function main() {

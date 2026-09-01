@@ -8,6 +8,7 @@
 // Only SELECTs against system catalogs, views list, and per-item samples.
 // ============================================================================
 
+require("./serviceEnv").load();
 const { query } = require("./data/autocountConnection");
 
 const itemCode = process.argv[2] || "";

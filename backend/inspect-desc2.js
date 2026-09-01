@@ -15,10 +15,14 @@
 // Only SELECTs. Nothing is written, and no credentials are printed.
 //
 // USAGE (on the server, from the backend folder):
-//   inspect-desc2.bat
-//   inspect-desc2.bat "544RR"        <- also show what one part says
+//   node inspect-desc2.js
+//   node inspect-desc2.js "544RR"    <- also show what one part says
+//
+// No .bat wrapper and no credentials to type: the AutoCount login is borrowed
+// from the OMService service's own settings, and never printed.
 // ============================================================================
 
+require("./serviceEnv").load();
 const { query } = require("./data/autocountConnection");
 
 const probe = process.argv[2] || "";

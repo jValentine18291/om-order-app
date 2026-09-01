@@ -20,6 +20,7 @@
 //   node inspect-prices.js "SZEN 8488C34101"
 // ============================================================================
 
+require("./serviceEnv").load();
 const { query } = require("./data/autocountConnection");
 
 const SAMPLE_ITEM = process.argv[2] || "";
