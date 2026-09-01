@@ -690,6 +690,10 @@
 
   <!-- Edit a slip's registration details. The machine fields are generated
        per machine when it opens; parts and labour stay in Open Service. -->
+  <!-- Editing a registered slip. Grouped into a customer block and one card
+       per machine: the machines all carry the same three labels, so without a
+       card and a name on each, the only way to tell which one you are editing
+       is to read the value inside the box. -->
   <div class="modal-overlay" id="vse-modal" style="display:none">
     <div class="modal-sheet">
       <div class="modal-head">
@@ -699,28 +703,97 @@
         </div>
         <button class="modal-x" id="vse-close" aria-label="Close">&#10005;</button>
       </div>
-      <div class="field">
-        <label for="vse-company">Company <span class="req">*</span></label>
-        <input id="vse-company" type="text" autocomplete="off" />
+
+      <!-- Said before they start typing, not in the dialog after they press
+           Save, which is too late to be of any use. -->
+      <div class="vse-signed" id="vse-signed" style="display:none">
+        <span aria-hidden="true">&#9998;</span>
+        <span>The customer signed this slip. Anything you change here is recorded on it.</span>
       </div>
-      <div class="field">
-        <label for="vse-contact-name">Contact name</label>
-        <input id="vse-contact-name" type="text" autocomplete="off" />
+
+      <div class="vse-sec"><span>Customer</span></div>
+      <div class="vse-card">
+        <div class="vse-card-body">
+          <div class="field">
+            <label for="vse-company">Company <span class="req">*</span></label>
+            <input id="vse-company" type="text" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="vse-contact-name">Contact name</label>
+            <input id="vse-contact-name" type="text" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="vse-contact-number">Contact number</label>
+            <input id="vse-contact-number" type="text" autocomplete="off" inputmode="tel" />
+          </div>
+          <div class="field">
+            <label for="vse-whatsapp">WhatsApp number</label>
+            <input id="vse-whatsapp" type="text" autocomplete="off" inputmode="tel" />
+          </div>
+          <div class="field">
+            <label for="vse-notes">Notes</label>
+            <textarea id="vse-notes" rows="2"></textarea>
+          </div>
+        </div>
       </div>
-      <div class="field">
-        <label for="vse-contact-number">Contact number</label>
-        <input id="vse-contact-number" type="text" autocomplete="off" inputmode="tel" />
-      </div>
-      <div class="field">
-        <label for="vse-whatsapp">WhatsApp number</label>
-        <input id="vse-whatsapp" type="text" autocomplete="off" inputmode="tel" />
-      </div>
-      <div class="field">
-        <label for="vse-notes">Notes</label>
-        <textarea id="vse-notes" rows="2"></textarea>
-      </div>
+
+      <div class="vse-sec"><span id="vse-machines-label">Machines</span></div>
       <div id="vse-machines"></div>
-      <button class="btn-primary" id="vse-save" style="margin-top:12px;">Save changes</button>
+
+      <!-- Sticky, so Save is at the bottom of the SCREEN rather than the
+           bottom of a scroll that grows with every machine on the slip. -->
+      <div class="vse-savebar">
+        <button class="btn-secondary vse-cancel" id="vse-cancel" type="button">Cancel</button>
+        <button class="btn-primary" id="vse-save" type="button">Save changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- What is about to change, in the app's own words. This used to be the
+       browser's grey confirm() box, which cannot be read at a glance and
+       cannot show a machine's name against its own changes. -->
+  <div class="modal-overlay" id="vsr-modal" style="display:none">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div>
+          <strong>Review changes</strong>
+          <div class="mm-sub" id="vsr-sub"></div>
+        </div>
+        <button class="modal-x" id="vsr-close" aria-label="Close">&#10005;</button>
+      </div>
+      <div id="vsr-list"></div>
+      <div class="vse-savebar">
+        <button class="btn-secondary vse-cancel" id="vsr-back" type="button">Back</button>
+        <button class="btn-primary" id="vsr-confirm" type="button">Save changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Who the slip is about to be sent to. WhatsApp will not let a web page
+       choose the chat for it - only the phone's own share sheet can attach a
+       file, and that always asks which chat. So the number is named HERE,
+       before the sheet opens, because the thing being sent is a document the
+       customer signed and the cost of the wrong chat is high. -->
+  <div class="modal-overlay" id="wa-modal" style="display:none">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div>
+          <strong>Send on WhatsApp</strong>
+          <div class="mm-sub" id="wa-sub"></div>
+        </div>
+        <button class="modal-x" id="wa-close" aria-label="Close">&#10005;</button>
+      </div>
+      <div class="wa-to">
+        <div class="wa-to-lab">Send to</div>
+        <div class="wa-to-name" id="wa-name"></div>
+        <div class="wa-to-num mono" id="wa-num"></div>
+      </div>
+      <p class="wa-hint" id="wa-hint"></p>
+      <div class="wa-msg" id="wa-msg"></div>
+      <div class="vse-savebar">
+        <button class="btn-secondary vse-cancel" id="wa-cancel" type="button">Cancel</button>
+        <button class="btn-primary" id="wa-go" type="button">Open WhatsApp</button>
+      </div>
     </div>
   </div>
 

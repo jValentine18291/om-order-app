@@ -614,26 +614,23 @@ function showSlipCreated(slip) {
       </div>
       <div class="created-title">Service slip ${escapeHtml(slip.slip_number)} created</div>
       <div class="created-sub">${escapeHtml(slip.company)} · ${slip.machines.length} machine(s)</div>
-      <button class="btn-primary" id="ns-share" style="width:100%;margin-top:14px;">Share slip (PDF)</button>
+      <div class="slip-actions">
+        <button class="btn-secondary" id="ns-share" type="button">Print PDF</button>
+        <button class="btn-primary" id="ns-wa" type="button">WhatsApp</button>
+      </div>
       <button class="btn-secondary" id="ns-done" style="width:100%;margin-top:8px;">Done</button>
     </div>`;
   // Hide the form bits while the success card is up
   $("ns-status").innerHTML = "";
   $("ns-share").addEventListener("click", () => shareSlipPdf(slip));
+  $("ns-wa").addEventListener("click", () => whatsappSlip(slip));
   $("ns-done").addEventListener("click", goHome);
   window.scrollTo(0, 0);
 
-  // Offered only when the server can actually send, so staff are never shown a
-  // button that cannot work.
+  // Once the server can send by itself, a newly registered slip goes out
+  // without anyone tapping anything - which is what auto_send is for.
   whatsappStatus().then((wa) => {
-    if (!wa.enabled || !wa.configured) return;
-    const btn = document.createElement("button");
-    btn.className = "btn-primary wa-send";
-    btn.type = "button";
-    btn.style.cssText = "width:100%;margin-top:8px;";
-    btn.textContent = "Send to customer on WhatsApp";
-    $("ns-share").insertAdjacentElement("beforebegin", btn);
-    wireWhatsappButton(btn, slip, { auto: wa.auto_send });
+    if (wa.enabled && wa.configured && wa.auto_send) whatsappSlip(slip, { auto: true });
   });
 }
 
@@ -1177,28 +1174,138 @@ async function sendSlipWhatsApp(slipIn, { auto = false } = {}) {
   }
 }
 
-// One button, used on the success card and again in View Slips - the second
-// one matters, because a send that fails needs somewhere to be retried from.
-function wireWhatsappButton(btn, slip, { auto = false } = {}) {
-  const idle = btn.textContent;
-  const run = async (isAuto) => {
-    btn.disabled = true;
-    btn.textContent = isAuto ? "Sending to customerâ€¦" : "Sendingâ€¦";
-    const r = await sendSlipWhatsApp(slip, { auto: isAuto });
-    if (r.ok) {
-      btn.textContent = "Sent to " + r.to;
-      btn.classList.add("wa-sent");
-      toast("Slip sent on WhatsApp", "ok");
-    } else {
-      btn.disabled = false;
-      btn.textContent = idle;
-      // Left on screen rather than a toast that vanishes: a failed send is
-      // something someone has to act on.
-      toast(r.error, "err");
-    }
-  };
-  btn.addEventListener("click", () => run(false));
-  if (auto) run(true);
+// Staff type these by hand: "9123 4567", "+65 9123 4567", "6591234567". The
+// server normalises the same way before it sends; this copy is only ever used
+// to open a chat, never to send, so the worst it can do is open the wrong one -
+// which is why the number is shown for checking before anything opens.
+function waNumber(slip) {
+  const raw = String(slip.whatsapp_number || slip.contact_number || "");
+  const digits = raw.replace(/\D/g, "");
+  if (!digits) return "";
+  // A local Singapore mobile, as typed on the counter pad.
+  if (digits.length === 8 && /^[689]/.test(digits)) return "65" + digits;
+  return digits;
+}
+
+function waPretty(digits) {
+  if (digits.length === 10 && digits.startsWith("65")) {
+    const n = digits.slice(2);
+    return `+65 ${n.slice(0, 4)} ${n.slice(4)}`;
+  }
+  return digits ? "+" + digits : "";
+}
+
+// What the customer reads above their copy. Short: it sits in a chat, not on
+// letterhead, and the PDF says everything else.
+function waMessage(slip) {
+  const machines = (slip.machines || []).map((m) => m.machine_desc).filter(Boolean);
+  const head = [
+    `Outboard & Marine — Service Slip ${slip.slip_number}`,
+    slip.company,
+    machines.join(", "),
+  ].filter(Boolean);
+  return head.join("\n") + "\n\nYour copy of the service slip is attached. Thank you.";
+}
+
+// Sending a slip to its customer.
+//
+// When the server is set up to send for itself, it does: the PDF goes straight
+// to the number on the slip and nobody picks anything. That is waiting on Meta
+// approving the business account.
+//
+// Until then it goes out through the phone. WhatsApp gives a web page two
+// choices and neither does everything: a wa.me link opens the RIGHT chat but
+// cannot carry a file, while the phone's share sheet CAN carry the file but
+// always asks which chat. Attaching the PDF matters more than saving a tap -
+// hunting for a file in the phone's document picker is the slower, more
+// error-prone half - so the file goes with it and the number is named on
+// screen first, for checking.
+async function whatsappSlip(slipIn, { auto = false } = {}) {
+  const wa = await whatsappStatus();
+  if (wa.enabled && wa.configured) return whatsappViaServer(slipIn, { auto });
+  if (auto) return;                       // nothing automatic about a share sheet
+
+  const slip = await withSignature(slipIn);
+  if (!slip.signature && !(await confirmUnsigned(slip))) return;
+
+  const digits = waNumber(slip);
+  $("wa-sub").textContent = `Slip ${slip.slip_number} · ${slip.company}`;
+  $("wa-name").textContent = slip.contact_name || slip.company;
+  $("wa-num").textContent = digits ? waPretty(digits) : "No number on this slip";
+  $("wa-hint").textContent = digits
+    ? "WhatsApp will ask which chat to send to — choose this number. The slip PDF and the message below go with it."
+    : "This slip has no WhatsApp or contact number, so choose the customer's chat yourself. The slip PDF and the message below go with it.";
+  $("wa-msg").textContent = waMessage(slip);
+  $("wa-go").disabled = false;
+  $("wa-go").textContent = "Open WhatsApp";
+  waPending = slip;
+  $("wa-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+let waPending = null;
+
+function closeWaSheet() {
+  $("wa-modal").style.display = "none";
+  const stillOpen = ["vse-modal", "vsr-modal", "machine-modal", "ipl-modal"]
+    .some((id) => $(id) && $(id).style.display === "flex");
+  if (!stillOpen) document.body.style.overflow = "";
+  waPending = null;
+}
+$("wa-close").addEventListener("click", closeWaSheet);
+$("wa-cancel").addEventListener("click", closeWaSheet);
+
+$("wa-go").addEventListener("click", async () => {
+  const slip = waPending;
+  if (!slip) return;
+  const btn = $("wa-go");
+  btn.disabled = true;
+  btn.textContent = "Preparing…";
+
+  let blob;
+  try {
+    blob = buildSlipPdf(slip);
+  } catch (e) {
+    toast("Couldn't build PDF: " + e.message, "err");
+    btn.disabled = false; btn.textContent = "Open WhatsApp";
+    return;
+  }
+  const file = new File([blob], `ServiceSlip_${slip.slip_number}.pdf`, { type: "application/pdf" });
+  const message = waMessage(slip);
+  const digits = waNumber(slip);
+  closeWaSheet();
+
+  // The phone's share sheet: the one route that carries the PDF. WhatsApp puts
+  // the text in as the caption.
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], text: message });
+      return;
+    } catch (_) { /* cancelled, or the sheet refused - fall through */ }
+  }
+
+  // No file sharing (a desktop, usually). Open the right chat with the message
+  // ready and put the PDF in Downloads, so the only manual step is the paperclip.
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `ServiceSlip_${slip.slip_number}.pdf`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+
+  window.open(
+    digits ? `https://wa.me/${digits}?text=${encodeURIComponent(message)}`
+           : `https://wa.me/?text=${encodeURIComponent(message)}`,
+    "_blank", "noopener"
+  );
+  toast("PDF downloaded — attach it in WhatsApp", "ok");
+});
+
+// The server sending for itself: the PDF goes straight to the number on the
+// slip. Built and waiting on Meta approving the business account.
+async function whatsappViaServer(slip, { auto = false } = {}) {
+  const r = await sendSlipWhatsApp(slip, { auto });
+  if (r.ok) toast("Slip sent on WhatsApp to " + r.to, "ok");
+  else if (!auto) toast(r.error, "err");
 }
 
 // Share the PDF via the device's native share sheet (WhatsApp/email/AirDrop),
@@ -2336,20 +2443,10 @@ async function onViewSlipChosen(slipNumber) {
     // Rebuilt from the stored slip, so a re-issued copy matches the original.
     const share = document.getElementById("vs-share");
     if (share) share.addEventListener("click", () => shareSlipPdf(slip));
-    if (share) {
-      whatsappStatus().then((wa) => {
-        if (!wa.enabled || !wa.configured) return;
-        const btn = document.createElement("button");
-        btn.className = "btn-secondary wa-send";
-        btn.type = "button";
-        btn.style.cssText = "width:100%;margin-top:8px;";
-        btn.textContent = "Send to customer on WhatsApp";
-        share.insertAdjacentElement("afterend", btn);
-        // Never automatic here - this screen is opened to look at old slips,
-        // and re-sending one just because it was viewed would be alarming.
-        wireWhatsappButton(btn, slip, { auto: false });
-      });
-    }
+    const waBtn = document.getElementById("vs-wa");
+    // Never automatic here - this screen is opened to look at old slips, and
+    // re-sending one just because it was viewed would be alarming.
+    if (waBtn) waBtn.addEventListener("click", () => whatsappSlip(slip));
     const soBtn = document.getElementById("vs-so");
     if (soBtn) soBtn.addEventListener("click", () => showSlipOrder(slip.slip_number));
   } catch (e) {
@@ -2537,7 +2634,10 @@ function renderSlipDetail(slip) {
 
   // Re-issue the customer's copy — same PDF as registration, signature and all.
   html += `
-    <button class="btn-primary" id="vs-share" style="margin-top:14px;">Share slip (PDF)</button>${
+    <div class="slip-actions" style="margin-top:14px;">
+      <button class="btn-secondary" id="vs-share" type="button">Print PDF</button>
+      <button class="btn-primary" id="vs-wa" type="button">WhatsApp</button>
+    </div>${
       canDecide() && slip.status !== "CLOSED"
         ? `<button class="btn-secondary" id="vs-edit" style="margin-top:10px;width:100%;">Edit slip</button>` : ""}`;
 
@@ -2611,6 +2711,23 @@ function wireDecideButtons(wrap, slipNumber) {
 // Saving asks for confirmation with a summary of exactly what changes.
 let vseSlip = null;
 
+// What the fields started as, so a change can be marked the moment it is made
+// rather than only listed once Save has been pressed.
+function vseOriginal() {
+  const m = {};
+  for (const x of (vseSlip.machines || [])) {
+    m[x.id] = { desc: x.machine_desc || "", serial: (x.serial_no || "").trim(), remarks: (x.remarks || "").trim() };
+  }
+  return {
+    company: vseSlip.company || "",
+    contact_name: vseSlip.contact_name || "",
+    contact_number: vseSlip.contact_number || "",
+    whatsapp_number: vseSlip.whatsapp_number || "",
+    notes: vseSlip.notes || "",
+    machines: m,
+  };
+}
+
 function openSlipEdit(slip) {
   vseSlip = slip;
   $("vse-sub").textContent = `Slip ${slip.slip_number} · ${slip.company}`;
@@ -2619,73 +2736,212 @@ function openSlipEdit(slip) {
   $("vse-contact-number").value = slip.contact_number || "";
   $("vse-whatsapp").value = slip.whatsapp_number || "";
   $("vse-notes").value = slip.notes || "";
-  $("vse-machines").innerHTML = (slip.machines || []).map((m) => `
-    <div class="field vse-machine" data-machine="${m.id}" style="border-top:1px solid var(--line,#eef1f3); padding-top:12px; margin-top:12px;">
-      <label>Machine</label>
-      <input class="vse-m-desc" type="text" value="${escapeAttr(m.machine_desc)}" />
-      <label style="margin-top:8px;">Serial No.</label>
-      <input class="vse-m-serial" type="text" value="${escapeAttr(m.serial_no || "")}" />
-      <label style="margin-top:8px;">Remarks</label>
-      <textarea class="vse-m-remarks" rows="2">${escapeHtml(m.remarks || "")}</textarea>
+
+  const machines = slip.machines || [];
+  $("vse-machines-label").textContent =
+    machines.length === 1 ? "Machine" : `Machines (${machines.length})`;
+
+  // The card header keeps the name the machine was REGISTERED with, even while
+  // the name field is being retyped. Retitling the card as someone types turns
+  // the one fixed landmark on the screen into a moving one.
+  $("vse-machines").innerHTML = machines.map((m, i) => `
+    <div class="vse-card vse-machine" data-machine="${m.id}">
+      <div class="vse-m-head">
+        <span class="vse-m-num">${i + 1}</span>
+        <span class="vse-m-name">${escapeHtml(m.machine_desc)}</span>
+        ${machinePill(m)}
+      </div>
+      <div class="vse-card-body">
+        <div class="field" data-f="desc">
+          <div class="vse-lab"><label>Machine <span class="req">*</span></label></div>
+          <input class="vse-m-desc" type="text" value="${escapeAttr(m.machine_desc)}" />
+        </div>
+        <div class="field" data-f="serial">
+          <div class="vse-lab"><label>Serial No.</label></div>
+          <input class="vse-m-serial" type="text" value="${escapeAttr(m.serial_no || "")}" />
+        </div>
+        <div class="field" data-f="remarks">
+          <div class="vse-lab"><label>Remarks</label></div>
+          <textarea class="vse-m-remarks" rows="2">${escapeHtml(m.remarks || "")}</textarea>
+        </div>
+      </div>
     </div>`).join("");
+
+  // Only a signed slip carries an amendment note, so only a signed slip says so.
+  $("vse-signed").style.display = slip.has_signature ? "flex" : "none";
+
   $("vse-modal").style.display = "flex";
   document.body.style.overflow = "hidden";
+  vseWatch();
+  vseMarkAll();
+}
+
+// Every field reports itself as it is typed in, which keeps the Save button's
+// count and the amber marks honest without re-reading the form on a timer.
+function vseWatch() {
+  const fields = [
+    ...["vse-company", "vse-contact-name", "vse-contact-number", "vse-whatsapp", "vse-notes"].map((id) => $(id)),
+    ...document.querySelectorAll("#vse-machines input, #vse-machines textarea"),
+  ];
+  for (const el of fields) {
+    if (el.dataset.vseWired) continue;
+    el.dataset.vseWired = "1";
+    el.addEventListener("input", vseMarkAll);
+  }
+}
+
+// A field that differs from what was registered is outlined and says what it
+// was. At the counter with a customer waiting, that catches the typed-in-the-
+// wrong-box mistake while it can still be undone by looking.
+function vseMark(field, before, after) {
+  if (!field) return false;
+  const changed = before !== after;
+  field.classList.toggle("vse-changed", changed);
+  const lab = field.querySelector(".vse-lab") || field;
+  let tag = lab.querySelector(".vse-chg");
+  let was = field.querySelector(".vse-was");
+  if (changed) {
+    if (!tag) {
+      tag = document.createElement("span");
+      tag.className = "vse-chg";
+      tag.textContent = "changed";
+      lab.appendChild(tag);
+    }
+    if (!was) {
+      was = document.createElement("div");
+      was.className = "vse-was";
+      field.appendChild(was);
+    }
+    was.textContent = before ? `was ${before}` : "was empty";
+  } else {
+    if (tag) tag.remove();
+    if (was) was.remove();
+  }
+  return changed;
+}
+
+function vseMarkAll() {
+  if (!vseSlip) return 0;
+  const o = vseOriginal();
+  let n = 0;
+  const pairs = [
+    ["vse-company", o.company], ["vse-contact-name", o.contact_name],
+    ["vse-contact-number", o.contact_number], ["vse-whatsapp", o.whatsapp_number],
+    ["vse-notes", o.notes],
+  ];
+  for (const [id, before] of pairs) {
+    const el = $(id);
+    if (vseMark(el.closest(".field"), before.trim(), el.value.trim())) n++;
+  }
+  document.querySelectorAll("#vse-machines .vse-machine").forEach((card) => {
+    const was = o.machines[Number(card.dataset.machine)];
+    if (!was) return;
+    const get = (sel) => card.querySelector(sel).value.trim();
+    if (vseMark(card.querySelector('[data-f="desc"]'), was.desc, get(".vse-m-desc"))) n++;
+    if (vseMark(card.querySelector('[data-f="serial"]'), was.serial, get(".vse-m-serial"))) n++;
+    if (vseMark(card.querySelector('[data-f="remarks"]'), was.remarks, get(".vse-m-remarks"))) n++;
+  });
+
+  // The button says what it will do. Nothing to save is a disabled button
+  // rather than a button that answers "Nothing was changed" after a tap.
+  const btn = $("vse-save");
+  btn.disabled = n === 0;
+  btn.textContent = n === 0 ? "Save changes"
+                  : n === 1 ? "Save 1 change" : `Save ${n} changes`;
+  return n;
 }
 
 function closeSlipEdit() {
   $("vse-modal").style.display = "none";
+  $("vsr-modal").style.display = "none";
   document.body.style.overflow = "";
   vseSlip = null;
 }
 $("vse-close").addEventListener("click", closeSlipEdit);
+$("vse-cancel").addEventListener("click", closeSlipEdit);
 
-$("vse-save").addEventListener("click", async () => {
-  if (!vseSlip) return;
+// What the form says now, against what was registered. One pass produces both
+// the payload and the list a person reads, so the two cannot disagree.
+function vseCollect() {
   const val = (id) => $(id).value.trim();
-  const fields = {
-    company: [vseSlip.company || "", val("vse-company"), "Company"],
-    contact_name: [vseSlip.contact_name || "", val("vse-contact-name"), "Contact name"],
-    contact_number: [vseSlip.contact_number || "", val("vse-contact-number"), "Contact number"],
-    whatsapp_number: [vseSlip.whatsapp_number || "", val("vse-whatsapp"), "WhatsApp"],
-    notes: [vseSlip.notes || "", val("vse-notes"), "Notes"],
+  const payload = {
+    role: getRole(), who: initialsFor(getUser()),
+    company: val("vse-company"),
+    contact_name: val("vse-contact-name"),
+    contact_number: val("vse-contact-number"),
+    whatsapp_number: val("vse-whatsapp"),
+    notes: val("vse-notes"),
+    machines: [],
   };
-  if (!fields.company[1]) { toast("Company cannot be empty", "err"); return; }
-
-  const summary = [];
-  const payload = { role: getRole(), who: initialsFor(getUser()) };
-  for (const [key, [before, after, label]] of Object.entries(fields)) {
-    payload[key] = after;
-    if (before.trim() !== after) summary.push(`${label}: “${before || "—"}” → “${after || "—"}”`);
+  const o = vseOriginal();
+  const groups = [];
+  const customer = [];
+  for (const [key, label] of [
+    ["company", "Company"], ["contact_name", "Contact name"],
+    ["contact_number", "Contact number"], ["whatsapp_number", "WhatsApp"],
+    ["notes", "Notes"],
+  ]) {
+    if (o[key].trim() !== payload[key]) customer.push({ label, before: o[key].trim(), after: payload[key] });
   }
+  if (customer.length) groups.push({ title: "Customer", rows: customer });
 
-  const machines = [];
-  let badMachine = false;
-  document.querySelectorAll(".vse-machine").forEach((el) => {
-    const id = Number(el.dataset.machine);
-    const m = (vseSlip.machines || []).find((x) => x.id === id);
-    const desc = el.querySelector(".vse-m-desc").value.trim();
-    const serial = el.querySelector(".vse-m-serial").value.trim();
-    const remarks = el.querySelector(".vse-m-remarks").value.trim();
-    if (!desc) { badMachine = true; return; }
-    machines.push({ id, machine_desc: desc, serial_no: serial, remarks });
-    if (m) {
-      if ((m.machine_desc || "") !== desc) summary.push(`Machine: “${m.machine_desc}” → “${desc}”`);
-      if ((m.serial_no || "").trim() !== serial) summary.push(`${desc} serial: “${m.serial_no || "—"}” → “${serial || "—"}”`);
-      if ((m.remarks || "").trim() !== remarks) summary.push(`${desc} remarks: “${m.remarks || "—"}” → “${remarks || "—"}”`);
-    }
+  let blank = false;
+  document.querySelectorAll("#vse-machines .vse-machine").forEach((card) => {
+    const id = Number(card.dataset.machine);
+    const was = o.machines[id];
+    const get = (sel) => card.querySelector(sel).value.trim();
+    const desc = get(".vse-m-desc");
+    if (!desc) { blank = true; return; }
+    payload.machines.push({ id, machine_desc: desc, serial_no: get(".vse-m-serial"), remarks: get(".vse-m-remarks") });
+    if (!was) return;
+    const rows = [];
+    if (was.desc !== desc) rows.push({ label: "Machine", before: was.desc, after: desc });
+    if (was.serial !== get(".vse-m-serial")) rows.push({ label: "Serial No.", before: was.serial, after: get(".vse-m-serial") });
+    if (was.remarks !== get(".vse-m-remarks")) rows.push({ label: "Remarks", before: was.remarks, after: get(".vse-m-remarks") });
+    // Named by what it was registered as, so the heading still matches the
+    // machine when its name is the thing being corrected.
+    if (rows.length) groups.push({ title: was.desc, rows });
   });
-  if (badMachine) { toast("A machine's description cannot be empty", "err"); return; }
-  payload.machines = machines;
 
-  if (!summary.length) { toast("Nothing was changed", "ok"); closeSlipEdit(); return; }
-  // Not obvious that correcting a typo puts a note on a document the customer
-  // signed - and better learnt here than from a customer holding the printout.
-  if (!confirm(
-    `Save these changes to slip ${vseSlip.slip_number}?\n\n${summary.join("\n")}\n\n` +
-    "This slip has been signed, so the change will be recorded on it."
-  )) return;
+  return { payload, groups, blank, count: groups.reduce((n, g) => n + g.rows.length, 0) };
+}
 
-  const btn = $("vse-save");
+$("vse-save").addEventListener("click", () => {
+  if (!vseSlip) return;
+  const { payload, groups, blank, count } = vseCollect();
+  if (!payload.company) { toast("Company cannot be empty", "err"); $("vse-company").focus(); return; }
+  if (blank) { toast("A machine's description cannot be empty", "err"); return; }
+  if (!count) { toast("Nothing was changed", "ok"); return; }
+
+  $("vsr-sub").textContent =
+    `Slip ${vseSlip.slip_number} · ${count === 1 ? "1 change" : count + " changes"}`;
+  $("vsr-list").innerHTML = groups.map((g) => `
+    <div class="vsr-group">
+      <div class="vsr-group-title">${escapeHtml(g.title)}</div>
+      ${g.rows.map((r) => `
+        <div class="vsr-row">
+          <div class="vsr-label">${escapeHtml(r.label)}</div>
+          <div class="vsr-before">${escapeHtml(r.before || "—")}</div>
+          <div class="vsr-after">${escapeHtml(r.after || "—")}</div>
+        </div>`).join("")}
+    </div>`).join("") +
+    (vseSlip.has_signature
+      ? `<div class="vse-signed vsr-note"><span aria-hidden="true">&#9998;</span>
+           <span>This slip has been signed, so the change will be recorded on it.</span></div>`
+      : "");
+  $("vsr-confirm").disabled = false;
+  $("vsr-confirm").textContent = count === 1 ? "Save 1 change" : `Save ${count} changes`;
+  $("vsr-modal").style.display = "flex";
+});
+
+const vsrBack = () => { $("vsr-modal").style.display = "none"; };
+$("vsr-back").addEventListener("click", vsrBack);
+$("vsr-close").addEventListener("click", vsrBack);
+
+$("vsr-confirm").addEventListener("click", async () => {
+  if (!vseSlip) return;
+  const { payload } = vseCollect();
+  const btn = $("vsr-confirm");
   btn.disabled = true;
   try {
     await api(`/api/slips/${encodeURIComponent(vseSlip.slip_number)}/details`, {
@@ -2698,9 +2954,9 @@ $("vse-save").addEventListener("click", async () => {
     closeSlipEdit();
     onViewSlipChosen(n);
   } catch (e) {
-    alert(e.message || "Could not save the edit");
+    toast(e.message || "Could not save the edit", "err");
+    btn.disabled = false;
   }
-  btn.disabled = false;
 });
 
 // ---- Sales Order block ------------------------------------------------------

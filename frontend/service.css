@@ -650,6 +650,117 @@ select {
 /* A plain fact rather than a state - "not yet collected" beside "Condemned". */
 .mq-none { color: var(--ink-faint); background: #F1F4F6; font-weight: 600; }
 
+/* ---- Print / WhatsApp ------------------------------------------------------
+   Two things staff do with a finished slip: put it on paper, or send it to the
+   customer. They sit side by side because they are alternatives, not a
+   sequence, and WhatsApp is the primary one. */
+.slip-actions { display: flex; gap: 10px; }
+.slip-actions button { flex: 1; margin: 0; }
+
+/* Who it is about to go to. Shown before the share sheet opens, because the
+   sheet asks which chat and a signed slip in the wrong chat cannot be recalled. */
+.wa-to {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 13px 15px; margin-bottom: 12px;
+}
+.wa-to-lab {
+  font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-faint); margin-bottom: 4px;
+}
+.wa-to-name { font-size: 16px; font-weight: 700; }
+.wa-to-num { font-size: 18px; font-weight: 700; color: var(--primary); letter-spacing: .01em; }
+.wa-hint { font-size: 13px; color: var(--ink-soft); line-height: 1.5; margin: 0 0 12px; }
+.wa-msg {
+  background: var(--surface-2); border: 1px dashed var(--border-2);
+  border-radius: 12px; padding: 12px 14px;
+  font-size: 13.5px; line-height: 1.55; color: var(--ink-soft);
+  white-space: pre-wrap; word-break: break-word;
+}
+
+/* ---- Edit slip -------------------------------------------------------------
+   Nine identical boxes in one column, with each machine repeating the same
+   three labels behind a hairline, gave no way to tell which machine you were
+   editing without reading the value inside the box. Sections and a card per
+   machine, each carrying the name it was registered under. */
+.vse-signed {
+  display: flex; gap: 9px; align-items: flex-start;
+  background: #FFF1DC; color: #7a4a00; border-left: 4px solid #C97A00;
+  border-radius: 10px; padding: 10px 12px;
+  font-size: 12.5px; line-height: 1.45; margin-bottom: 16px;
+}
+.vse-sec { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; }
+.vse-sec span {
+  font-size: 11.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--ink-faint); white-space: nowrap;
+}
+.vse-sec::after { content: ""; height: 1px; background: var(--border); flex: 1; }
+.vse-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden; margin-bottom: 14px;
+}
+.vse-card-body { padding: 14px; display: flex; flex-direction: column; gap: 13px; }
+.vse-m-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; background: var(--surface-2); border-bottom: 1px solid var(--border);
+}
+.vse-m-num {
+  width: 24px; height: 24px; border-radius: 8px; flex: none;
+  background: var(--primary); color: #fff;
+  font-size: 12.5px; font-weight: 700; display: grid; place-items: center;
+  font-variant-numeric: tabular-nums;
+}
+.vse-m-name {
+  font-weight: 700; font-size: 14.5px; flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.vse-lab { display: flex; align-items: center; }
+
+/* A field that no longer matches what was registered. Marked as it is typed,
+   so a wrong-box mistake is caught while it can still be seen. */
+.vse-changed input, .vse-changed textarea { border-color: #C97A00; background: #FFFCF6; }
+.vse-chg {
+  font-size: 11px; font-weight: 700; color: #8A4B00; background: #FFF1DC;
+  padding: 2px 7px; border-radius: 999px; margin-left: 6px;
+}
+.vse-was { font-size: 11.5px; color: var(--ink-faint); }
+
+/* Save at the bottom of the SCREEN, not the bottom of a scroll that grows with
+   every machine on the slip. */
+.vse-savebar {
+  position: sticky; bottom: 0; z-index: 1;
+  margin: 18px -16px -20px; padding: 12px 16px 16px;
+  background: linear-gradient(to top, var(--bg) 72%, transparent);
+  display: flex; gap: 10px;
+}
+.vse-savebar .btn-primary { flex: 1; margin: 0; }
+.vse-savebar .btn-primary:disabled { opacity: .5; }
+.vse-cancel { flex: none; width: auto; padding: 0 18px; margin: 0; }
+
+/* ---- Review changes --------------------------------------------------------
+   What is about to be saved, grouped by what it belongs to. This replaced the
+   browser's confirm() box, which could not show a machine's name against its
+   own changes and could not be read at a glance. */
+#vsr-modal { z-index: 70; }
+.vsr-group { margin-bottom: 14px; }
+.vsr-group-title {
+  font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-faint); margin-bottom: 7px;
+}
+.vsr-row {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 11px 13px; margin-bottom: 8px;
+}
+.vsr-label { font-size: 12.5px; font-weight: 700; color: var(--ink-soft); margin-bottom: 3px; }
+.vsr-before {
+  font-size: 14px; color: var(--ink-faint); text-decoration: line-through;
+  word-break: break-word;
+}
+.vsr-after {
+  font-size: 15px; font-weight: 600; color: var(--ink); word-break: break-word;
+}
+.vsr-after::before { content: "→  "; color: var(--primary); font-weight: 700; }
+.vsr-note { margin: 14px 0 0; }
+
 /* Why this slip will not close, on the Close Service screen. */
 .cs-blocked {
   margin-top: 8px; padding: 10px 12px; border-radius: var(--radius-sm);

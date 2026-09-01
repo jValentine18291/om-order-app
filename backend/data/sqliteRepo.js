@@ -323,6 +323,12 @@ function getSlip(slipNumber, includeSignature = false) {
   slip.amendments = db.prepare(
     "SELECT field, before, after, changed_by, changed_at FROM slip_amendments WHERE slip_id = ? ORDER BY id"
   ).all(slip.id);
+  // Whether it was signed, without the image itself - the image is hundreds of
+  // kilobytes and is fetched only by what draws it. Anything warning that an
+  // edit gets recorded on a signed slip needs the fact, not the picture.
+  slip.has_signature = !!db.prepare(
+    "SELECT 1 FROM slip_signatures WHERE slip_id = ?"
+  ).get(slip.id);
   if (includeSignature) {
     const sig = db.prepare("SELECT image FROM slip_signatures WHERE slip_id = ?").get(slip.id);
     slip.signature = sig ? sig.image : "";
