@@ -124,5 +124,14 @@
   "category": "Pole Hedge Trimmer",
   "figures": 4,
   "parts": 149
+ },
+ {
+  "id": "sr3100",
+  "name": "Zenoah SR3100 Chipper Shredder",
+  "short": "SR3100",
+  "brand": "Zenoah",
+  "category": "Chipper Shredder",
+  "figures": 51,
+  "parts": 1356
  }
 ]
