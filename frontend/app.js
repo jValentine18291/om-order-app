@@ -614,7 +614,7 @@ function showSlipCreated(slip) {
       </div>
       <div class="created-title">Service slip ${escapeHtml(slip.slip_number)} created</div>
       <div class="created-sub">${escapeHtml(slip.company)} · ${slip.machines.length} machine(s)</div>
-      ${contactCopyHtml(slip)}
+      ${contactActionHtml(slip)}
       <button class="btn-primary" id="ns-share" type="button" style="width:100%;margin-top:10px;">Share PDF</button>
       <button class="btn-secondary" id="ns-done" style="width:100%;margin-top:8px;">Done</button>
     </div>`;
@@ -622,7 +622,7 @@ function showSlipCreated(slip) {
   $("ns-status").innerHTML = "";
   $("ns-share").addEventListener("click", () => shareSlipPdf(slip));
   $("ns-done").addEventListener("click", goHome);
-  wireContactCopy(panel);
+  wireContactActions(panel, slip);
   window.scrollTo(0, 0);
 
   // Offered only when the server can actually send, so staff are never shown a
@@ -1203,75 +1203,69 @@ function wireWhatsappButton(btn, slip, { auto = false } = {}) {
   if (auto) run(true);
 }
 
-// ---- The customer's number, one tap from the clipboard ----------------------
-// Sharing a slip means the phone's share sheet, then WhatsApp, then finding the
-// right chat - and the number is back on the previous screen by then. So it is
-// put on the clipboard before any of that starts.
+// ---- Getting the slip to a customer nobody has messaged before --------------
 //
-// What is copied is exactly what is shown, which is exactly what was written on
-// the slip. A number that is silently reformatted on its way to the clipboard
-// is a number nobody can check.
-function contactCopyHtml(slip) {
-  const number = String(slip.whatsapp_number || slip.contact_number || "").trim();
-  if (!number) return "";
+// WhatsApp's send-to list is saved contacts and existing chats only, so a new
+// customer simply is not in it - staff could produce the PDF and then have
+// nowhere to send it. A wa.me link is the way in: it opens a chat with a number
+// that is in nobody's address book. Once that chat exists it appears in the
+// share sheet like any other, so the order on screen is the order of use:
+//
+//   Open chat   ->  creates the conversation
+//   Share PDF   ->  the conversation is now there to pick
+//
+// Nothing about the PDF changes, and no customer data leaves the network.
+function waDigits(slip) {
+  const digits = String(slip.whatsapp_number || slip.contact_number || "").replace(/\D/g, "");
+  if (!digits) return "";
+  // A local Singapore mobile, as typed on the counter pad. wa.me needs the
+  // country code; anything already carrying one is left alone.
+  if (digits.length === 8 && /^[689]/.test(digits)) return "65" + digits;
+  return digits;
+}
+
+// Sent before the PDF, so it says the copy follows rather than claiming to
+// carry it - the file goes in the next message, from the share sheet.
+function waOpeningMessage(slip) {
+  const machines = (slip.machines || []).map((m) => m.machine_desc).filter(Boolean);
+  return [
+    `Outboard & Marine — Service Slip ${slip.slip_number}`,
+    slip.company,
+    machines.join(", "),
+  ].filter(Boolean).join("\n") + "\n\nYour copy of the service slip follows.";
+}
+
+function contactActionHtml(slip) {
+  const shown = String(slip.whatsapp_number || slip.contact_number || "").trim();
+  if (!shown) return "";
   const who = slip.contact_name || slip.company || "";
+  const digits = waDigits(slip);
   return `
-    <button type="button" class="copy-num" data-copy="${escapeAttr(number)}">
-      <span class="copy-num-text">
-        <span class="copy-num-lab">${slip.whatsapp_number ? "WhatsApp" : "Contact"}${
+    <div class="contact-row">
+      <div class="contact-text">
+        <span class="contact-lab">${slip.whatsapp_number ? "WhatsApp" : "Contact"}${
           who ? " · " + escapeHtml(who) : ""}</span>
-        <span class="copy-num-val mono">${escapeHtml(number)}</span>
-      </span>
-      <span class="copy-num-act">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
-        Copy
-      </span>
-    </button>`;
+        <span class="contact-num mono">${escapeHtml(shown)}</span>
+      </div>
+      ${digits ? `<button type="button" class="contact-act" data-wa="${escapeAttr(digits)}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.9-.9L3 20.5l1.6-4.9A8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4z"/></svg>
+        Open chat
+      </button>` : ""}
+    </div>
+    <p class="contact-hint">Never messaged this customer before? Open the chat first, then Share PDF and pick them from the list.</p>`;
 }
 
-async function copyText(text) {
-  // The modern route needs a secure context. The app is served over HTTPS on
-  // the phones, but not on a plain-HTTP desktop, so the old route is kept.
-  try {
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(text);
-      return true;
-    }
-  } catch (_) { /* fall through and try the old way */ }
-  try {
-    const ta = document.createElement("textarea");
-    ta.value = text;
-    ta.setAttribute("readonly", "");
-    ta.style.cssText = "position:fixed;top:-1000px;opacity:0;";
-    document.body.appendChild(ta);
-    ta.select();
-    const ok = document.execCommand("copy");
-    ta.remove();
-    return ok;
-  } catch (_) {
-    return false;
-  }
-}
-
-function wireContactCopy(scope) {
-  (scope || document).querySelectorAll("[data-copy]").forEach((btn) => {
-    if (btn.dataset.copyWired) return;
-    btn.dataset.copyWired = "1";
-    btn.addEventListener("click", async () => {
-      const ok = await copyText(btn.dataset.copy);
-      if (!ok) { toast("Could not copy - press and hold the number instead", "err"); return; }
-      // Said on the button itself as well as in a toast: on a phone the toast
-      // can be under a thumb, and this is the confirmation that matters before
-      // someone walks off to WhatsApp.
-      const act = btn.querySelector(".copy-num-act");
-      const before = act.innerHTML;
-      btn.classList.add("copied");
-      act.textContent = "Copied";
-      toast("Number copied", "ok");
-      setTimeout(() => {
-        btn.classList.remove("copied");
-        act.innerHTML = before;
-      }, 2000);
+function wireContactActions(scope, slip) {
+  (scope || document).querySelectorAll("[data-wa]").forEach((btn) => {
+    if (btn.dataset.waWired) return;
+    btn.dataset.waWired = "1";
+    btn.addEventListener("click", () => {
+      // A new tab rather than this one: the app must still be here to come
+      // back to for the PDF.
+      window.open(
+        `https://wa.me/${btn.dataset.wa}?text=${encodeURIComponent(waOpeningMessage(slip))}`,
+        "_blank", "noopener"
+      );
     });
   });
 }
@@ -2411,7 +2405,7 @@ async function onViewSlipChosen(slipNumber) {
     // Rebuilt from the stored slip, so a re-issued copy matches the original.
     const share = document.getElementById("vs-share");
     if (share) share.addEventListener("click", () => shareSlipPdf(slip));
-    wireContactCopy(wrap);
+    wireContactActions(wrap, slip);
     if (share) {
       whatsappStatus().then((wa) => {
         if (!wa.enabled || !wa.configured) return;
@@ -2613,7 +2607,7 @@ function renderSlipDetail(slip) {
 
   // Re-issue the customer's copy — same PDF as registration, signature and all.
   html += `
-    ${contactCopyHtml(slip)}
+    ${contactActionHtml(slip)}
     <button class="btn-primary" id="vs-share" type="button" style="margin-top:10px;">Share PDF</button>${
       canDecide() && slip.status !== "CLOSED"
         ? `<button class="btn-secondary" id="vs-edit" style="margin-top:10px;width:100%;">Edit slip</button>` : ""}`;

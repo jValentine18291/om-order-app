@@ -650,41 +650,38 @@ select {
 /* A plain fact rather than a state - "not yet collected" beside "Condemned". */
 .mq-none { color: var(--ink-faint); background: #F1F4F6; font-weight: 600; }
 
-/* ---- The customer's number, one tap from the clipboard ---------------------
-   Sharing a slip means the share sheet, then WhatsApp, then finding the chat -
-   by which point the number is two screens back. It sits directly above Share
-   PDF because that is the order the two are used in. */
-.copy-num {
+/* ---- The customer's number, and the way in to their chat -------------------
+   WhatsApp will not offer a number nobody has messaged, so this opens the chat
+   first. It sits directly above Share PDF because that is the order of use. */
+.contact-row {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   width: 100%; margin-top: 14px; padding: 11px 14px;
-  background: var(--surface); border: 1.5px solid var(--border-2);
-  border-radius: 14px; text-align: left;
-  font-family: inherit; color: var(--ink);
-  transition: border-color .15s, background .15s;
+  background: var(--surface); border: 1.5px solid var(--border-2); border-radius: 14px;
 }
-.copy-num:active { background: var(--surface-2); }
-.copy-num-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.copy-num-lab {
+.contact-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.contact-lab {
   font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
   color: var(--ink-faint);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-/* Selectable even though it sits inside a button: if the clipboard is refused,
-   the message tells staff to press and hold the number, and that has to be
-   true. Text inside a button is not selectable by default. */
-.copy-num-val {
+/* Selectable, so the number can still be pressed and held to copy it - the one
+   thing the old copy button was for that opening a chat does not replace. */
+.contact-num {
   font-size: 17px; font-weight: 700; letter-spacing: .02em;
   -webkit-user-select: text; user-select: text;
 }
-.copy-num-act {
-  display: inline-flex; align-items: center; gap: 6px; flex: none;
-  font-size: 13.5px; font-weight: 700; color: var(--primary);
+.contact-act {
+  display: inline-flex; align-items: center; gap: 7px; flex: none;
+  min-height: 40px; padding: 0 14px; border-radius: 12px;
+  background: var(--primary-tint); color: var(--primary);
+  border: 1.5px solid transparent;
+  font-family: inherit; font-size: 14px; font-weight: 700;
 }
-.copy-num-act svg { width: 16px; height: 16px; }
-/* Confirmed on the button itself: on a phone a toast can be under a thumb, and
-   this is the one thing worth being sure of before walking off to WhatsApp. */
-.copy-num.copied { border-color: #1B7A42; background: #E7F5EC; }
-.copy-num.copied .copy-num-act { color: #1B7A42; }
+.contact-act:active { border-color: var(--primary); }
+.contact-act svg { width: 17px; height: 17px; }
+.contact-hint {
+  margin: 7px 2px 0; font-size: 12.5px; line-height: 1.45; color: var(--ink-faint);
+}
 
 /* ---- Edit slip -------------------------------------------------------------
    Nine identical boxes in one column, with each machine repeating the same
