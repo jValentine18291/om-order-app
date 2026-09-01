@@ -1264,7 +1264,7 @@ function contactActionHtml(slip) {
         Open chat
       </button>` : ""}
     </div>
-    <p class="contact-hint">Never messaged this customer before? Open the chat first, then Share PDF and pick them from the list.</p>`;
+    <p class="contact-hint">New customer? <b>Open chat</b>, send the message, then come back and <b>Share PDF</b> — WhatsApp only lists a customer once something has been sent to them. Needed once per customer; after that, Share PDF on its own.</p>`;
 }
 
 function wireContactActions(scope, slip) {
