@@ -873,18 +873,25 @@ select {
   border-radius: 14px;
   padding: 14px 16px;
 }
-.pu-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+/* Status on the left, who asked and when on the right - one line, nothing
+   competing for it. The actions used to sit here too, which is what made a
+   phone wrap the pill, the date and all three buttons onto separate lines. */
+.pu-top {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; margin-bottom: 4px;
+}
 .pu-desc { font-weight: 700; color: var(--ink); }
 .pu-code { font-size: .8rem; color: var(--ink-faint); margin-top: 2px; }
 .pu-done {
   flex: 0 0 auto;
-  padding: 8px 12px;
-  border-radius: 10px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
   border: 1.5px solid #2FA45C;
   background: #E7F5EC;
   color: #135A31;
   font: inherit;
-  font-size: .8rem;
+  font-size: .85rem;
   font-weight: 700;
   cursor: pointer;
 }
@@ -1707,11 +1714,25 @@ select {
 .pu-card-ordered { border-left: 4px solid #1B7A42; }
 .pu-status {
   display: inline-block; font-size: .75rem; font-weight: 700;
-  padding: 3px 10px; border-radius: 999px;
+  padding: 4px 11px; border-radius: 999px;
+  white-space: nowrap; flex: none;
 }
+
+/* The actions, on their own row under the order. "Mark as Ordered" takes the
+   room left over because it is the one this screen exists for; Edit and Delete
+   stay just wide enough for their words. */
+.pu-actions {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid var(--line, #eef1f3);
+}
+.pu-actions .pu-done { flex: 1; min-width: 0; }
 .pu-st-need { color: #A32020; background: #FBE9E9; }
 .pu-st-done { color: #1B7A42; background: #E7F5EC; }
-.pu-meta { margin-top: 4px; font-size: .8rem; color: var(--ink-faint); }
+.pu-meta {
+  font-size: .8rem; color: var(--ink-faint); text-align: right;
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .pu-line {
   display: flex; align-items: center; gap: 12px;
   padding: 10px 0; border-top: 1px solid var(--line, #eef1f3);
@@ -1768,19 +1789,17 @@ select {
 .om-onorder b { display: block; font-size: .95rem; margin-bottom: 2px; }
 .om-onorder-none { background: var(--surface-2, #f6f9fa); border-left-color: var(--border); color: var(--ink-faint); }
 .pu-delete {
-  flex: 0 0 auto; padding: 6px 12px; border-radius: 999px;
+  flex: 0 0 auto; min-height: 40px; padding: 0 14px; border-radius: 999px;
   border: 1px solid #e6b0b0; background: var(--surface);
-  font-size: .8rem; font-weight: 600; color: #A32020; cursor: pointer;
-  margin-right: 8px;
+  font-size: .85rem; font-weight: 600; color: #A32020; cursor: pointer;
 }
 .pu-delete:active { background: #fbe9e9; }
 
 /* ---- Editing an order (purchaser list) ---------------------------------- */
 .pu-edit {
-  flex: 0 0 auto; padding: 6px 12px; border-radius: 999px;
+  flex: 0 0 auto; min-height: 40px; padding: 0 14px; border-radius: 999px;
   border: 1px solid var(--border); background: var(--surface);
-  font-size: .8rem; font-weight: 600; color: var(--ink-soft); cursor: pointer;
-  margin-right: 8px;
+  font-size: .85rem; font-weight: 600; color: var(--ink-soft); cursor: pointer;
 }
 .pu-edit-line { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
 .pu-edit-line .pu-line-main { flex: 1; min-width: 0; }
@@ -1795,7 +1814,14 @@ select {
   font-size: .92rem; font-weight: 700;
   border: 1px solid var(--border); border-radius: 8px;
 }
-.pu-eremarks { width: 100%; margin-top: 6px; min-height: 38px; height: 38px; resize: none; font-size: .88rem; padding: 7px 11px; }
+/* Two lines to start, and it grows rather than clipping: a fixed 38px cut a
+   remark off mid-sentence, which is worse than no remark because the reader
+   cannot tell there is more. */
+.pu-eremarks {
+  width: 100%; margin-top: 6px;
+  min-height: 62px; height: auto; resize: vertical;
+  font-size: .88rem; padding: 7px 11px; line-height: 1.45;
+}
 .pu-edit-actions { display: flex; gap: 8px; margin-top: 12px; }
 .pu-edit-actions button { flex: 1; }
 

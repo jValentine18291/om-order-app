@@ -4683,25 +4683,32 @@ async function loadPartRequests() {
       }).join("");
 
       if (pending && puEditing === b.key) return renderOrderEditCard(b);
+
+      // Actions live under the order, not beside its heading: you read what was
+      // asked for and then act on it. Three buttons sharing a row with the
+      // status and the date left every one of them wrapping on a phone.
+      const canManage = ["purchaser", "admin"].includes(getRole());
+      const actions = [
+        pending && canDecide() ? `<button class="pu-edit" data-edit="${escapeAttr(b.key)}">Edit</button>` : "",
+        canManage ? `<button class="pu-delete" data-delete="${escapeAttr(b.key)}">Delete</button>` : "",
+        pending && canManage ? `<button class="pu-done" data-batch="${escapeAttr(b.key)}">Mark as Ordered</button>` : "",
+      ].filter(Boolean).join("");
+
       return `
       <div class="pu-card ${pending ? "pu-card-pending" : "pu-card-ordered"}">
         <div class="pu-top">
-          <div>
-            <span class="pu-status ${pending ? "pu-st-need" : "pu-st-done"}">${pending ? "Need to Order" : "Ordered"}</span>
-            <div class="pu-meta">${escapeHtml(first.requester || "—")} · ${escapeHtml(day(first.created_at))}${
-              !pending && first.ordered_at ? ` · ordered ${escapeHtml(day(b.rows[0].ordered_at || first.ordered_at))}` : ""}</div>
-          </div>
-          <div>
-            ${pending && canDecide()
-              ? `<button class="pu-edit" data-edit="${escapeAttr(b.key)}">Edit</button>` : ""}
-            ${["purchaser", "admin"].includes(getRole())
-              ? `<button class="pu-delete" data-delete="${escapeAttr(b.key)}">Delete</button>` : ""}
-            ${pending && ["purchaser", "admin"].includes(getRole())
-              ? `<button class="pu-done" data-batch="${escapeAttr(b.key)}">Mark as Ordered</button>` : ""}
-          </div>
+          <span class="pu-status ${pending ? "pu-st-need" : "pu-st-done"}">${pending ? "Need to Order" : "Ordered"}</span>
+          <span class="pu-meta">${escapeHtml(first.requester || "—")} · ${
+            // On an ordered card the date worth showing is when it was ORDERED,
+            // not when it was asked for. Showing both ran past the width of a
+            // phone and the ellipsis ate the one that mattered.
+            !pending && (b.rows[0].ordered_at || first.ordered_at)
+              ? "ordered " + escapeHtml(day(b.rows[0].ordered_at || first.ordered_at))
+              : escapeHtml(day(first.created_at))}</span>
         </div>
         ${lines}
         ${orderRemark ? `<div class="pu-remarks">“${escapeHtml(orderRemark)}”</div>` : ""}
+        ${actions ? `<div class="pu-actions">${actions}</div>` : ""}
       </div>`;
     }).join("");
 
@@ -4777,10 +4784,8 @@ function renderOrderEditCard(b) {
   return `
   <div class="pu-card pu-card-pending" data-editing="${escapeAttr(b.key)}">
     <div class="pu-top">
-      <div>
-        <span class="pu-status pu-st-need">Editing</span>
-        <div class="pu-meta">${escapeHtml(first.requester || "—")} · tap &#10005; to remove a line</div>
-      </div>
+      <span class="pu-status pu-st-need">Editing</span>
+      <span class="pu-meta">${escapeHtml(first.requester || "—")} · tap &#10005; to remove a line</span>
     </div>
     ${lines}
     <textarea class="pu-eremarks" id="pu-eorder-remarks" placeholder="Remarks for the whole order (optional)">${escapeHtml(first.batch_remarks || "")}</textarea>
