@@ -699,6 +699,25 @@ select {
   margin: 7px 2px 0; font-size: 12.5px; line-height: 1.45; color: var(--ink-faint);
 }
 
+/* The machine screen's second header line - who is on it and when it came in.
+   These were the only two facts the old blue context card carried that the
+   header did not, and the card cost 90px above the parts list to say them. */
+.mm-who { color: var(--ink-faint); font-size: .8rem; margin-top: 1px; }
+
+/* Restarting the camera is a recovery action, so it shares the status line
+   instead of taking a full-width button between the scanner and the parts. */
+.scan-status-row { display: flex; align-items: center; gap: 10px; }
+.scan-status-row .scan-hint { flex: 1; justify-content: flex-start; }
+.btn-quiet {
+  flex: none; display: inline-flex; align-items: center; gap: 6px;
+  min-height: 36px; padding: 0 12px; border-radius: 999px;
+  border: 1px solid var(--border-2); background: var(--surface);
+  font-family: inherit; font-size: .82rem; font-weight: 600; color: var(--ink-soft);
+  cursor: pointer;
+}
+.btn-quiet svg { width: 15px; height: 15px; }
+.btn-quiet:active { background: var(--surface-2); }
+
 /* ---- Edit slip -------------------------------------------------------------
    Nine identical boxes in one column, with each machine repeating the same
    three labels behind a hairline, gave no way to tell which machine you were

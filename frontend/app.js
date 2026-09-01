@@ -1843,13 +1843,20 @@ function maybeShowEntry() {
   }
 }
 
+// The machine, the slip and the company are already in the header, so this is
+// only what the header does not carry: who is working on it and when it came
+// in. It used to be a card below repeating all five, which pushed the parts
+// list - the actual record of the job - off the bottom of the screen.
 function renderContext() {
-  const m = session.slip.machines.find((x) => x.id === session.machineId);
   const created = formatDate(session.slip.created_at);
-  $("os-context").innerHTML =
-    `<div><strong>${escapeHtml(session.slip.company)}</strong> · Slip ${escapeHtml(session.slipNumber)}</div>` +
-    `<div class="sub">Machine: ${escapeHtml(m ? m.machine_desc : "")} · Tech: ${escapeHtml(technicianLabel())}</div>` +
-    (created ? `<div class="sub">Created: ${escapeHtml(created)}</div>` : "");
+  const tech = technicianLabel();
+  // The labels are their own elements so they can be translated: the app
+  // matches whole strings, and "Tech WJ · Received 1 Sep" would never match
+  // anything - leaving this line in English on a technician's phone.
+  const bits = [];
+  if (tech) bits.push(`<span>Tech</span> ${escapeHtml(tech)}`);
+  if (created) bits.push(`<span>Received</span> ${escapeHtml(created)}`);
+  $("mm-who").innerHTML = bits.join(" · ");
 }
 
 // The scanned-part entry point. Parts are held as PENDING (not yet saved) and
@@ -2307,9 +2314,9 @@ async function recordDisposal(btn, machineId, disposal) {
 // ---- Slip status UI (Open Service) ------------------------------------------
 // Shows the current status as a badge next to the slip number, and decides
 // which manual status buttons apply:
-//   OPEN / IN_PROGRESS  -> [Need to Quote] [Close w/o Quote]
-//   NEED_QUOTE          -> [Mark as Quoted] [Close w/o Quote]
-//   QUOTED              -> [Close w/o Quote]  (returns to In Progress)
+//   OPEN / IN_PROGRESS  -> [Need to Quote] [No quote needed]
+//   NEED_QUOTE          -> [Mark as Quoted] [No quote needed]
+//   QUOTED              -> [No quote needed]  (returns to In Progress)
 //   ALL_REPAIRED/CLOSED -> no buttons
 function renderSlipStatusUI() {
   const status = session.slip ? session.slip.status : "";
@@ -2661,7 +2668,7 @@ function renderVsStatusActions(slip) {
   return `<div class="status-actions">
     ${showQuote ? `<button class="status-btn status-btn-quote" data-vs-state="AWAITING_QUOTE">Need to Quote</button>` : ""}
     ${showQuoted ? `<button class="status-btn status-btn-quoted" data-vs-state="QUOTED">Mark as Quoted</button>` : ""}
-    ${showNoQuote ? `<button class="status-btn status-btn-noquote" data-vs-state="NO_QUOTE">Close w/o Quote</button>` : ""}
+    ${showNoQuote ? `<button class="status-btn status-btn-noquote" data-vs-state="NO_QUOTE">No quote needed</button>` : ""}
   </div>`;
 }
 
@@ -2671,7 +2678,7 @@ function wireVsStatusActions(slipNumber) {
   document.querySelectorAll("#vs-detail [data-vs-state]").forEach((btn) =>
     btn.addEventListener("click", async () => {
       const action = btn.dataset.vsState;
-      // "Close w/o Quote" means "stop waiting, get on with it" - which is
+      // "No quote needed" means "stop waiting, get on with it" - which is
       // TO_REPAIR - and means nothing on a slip that was never waiting.
       const slip = action === "NO_QUOTE"
         ? await api(`/api/slips/${encodeURIComponent(slipNumber)}`) : null;

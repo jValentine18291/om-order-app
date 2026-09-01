@@ -381,7 +381,7 @@
       <div class="status-actions" id="os-status-actions" style="display:none;">
         <button class="status-btn status-btn-quote" id="os-need-quote">Need to Quote</button>
         <button class="status-btn status-btn-quoted" id="os-mark-quoted">Mark as Quoted</button>
-        <button class="status-btn status-btn-noquote" id="os-no-quote">Close w/o Quote</button>
+        <button class="status-btn status-btn-noquote" id="os-no-quote">No quote needed</button>
       </div>
       <div class="summary-card" style="margin-top:8px;">
         <div class="left">
@@ -598,6 +598,7 @@
         <div>
           <strong id="mm-title">Machine</strong>
           <div class="mm-sub" id="mm-sub"></div>
+          <div class="mm-sub mm-who" id="mm-who"></div>
           <!-- What the customer reported at registration - the technician's
                starting point, so it sits with the machine's name. -->
           <div class="mm-remarks" id="mm-remarks" style="display:none"></div>
@@ -620,7 +621,6 @@
       <div class="decision-banner" id="mm-decision" style="display:none"></div>
 
       <div id="os-entry" style="display:none">
-        <div class="slip-context" id="os-context"></div>
 
         <div class="toggle" id="mode-toggle">
           <button data-mode="qr">
@@ -638,11 +638,13 @@
             <video id="qr-video" playsinline muted></video>
             <div class="reticle"><span class="corner bl"></span><span class="corner br"></span></div>
           </div>
-          <div class="scan-hint" id="qr-status"><span class="led"></span> Point at a QR code</div>
-          <button class="btn-secondary" id="qr-restart" style="width:100%">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
-            Restart camera
-          </button>
+          <div class="scan-status-row">
+            <div class="scan-hint" id="qr-status"><span class="led"></span> Point at a QR code</div>
+            <button class="btn-quiet" id="qr-restart" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+              Restart
+            </button>
+          </div>
         </div>
 
         <div id="manual-pane" style="display:none">

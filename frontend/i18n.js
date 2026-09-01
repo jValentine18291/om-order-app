@@ -174,7 +174,7 @@
     "Waiting to quote": "等待报价",
     "Quoted": "已报价",
     "Mark as Quoted": "标记为已报价",
-    "Close w/o Quote": "无需报价结单",
+    "No quote needed": "无需报价",
     "Slip total": "服务单总额",
     "Create Sales Order": "生成销售订单",
     "Need Repair": "需要维修",
@@ -192,6 +192,10 @@
 
     // ---- Machine modal ----
     "Machine": "机器",
+    // The second header line on the machine screen: who is on it, and when the
+    // machine came in.
+    "Tech": "技术员",
+    "Received": "收件",
     // What Sales came back with. The technician acts on this, so it is the one
     // set of strings here that must not be ambiguous.
     "Go ahead and repair": "可以维修",
@@ -256,6 +260,8 @@
     "Camera blocked — switch to Type code": "相机被阻止 — 请改用手动输入",
     "Camera not ready": "相机未就绪",
     "Restart camera": "重启相机",
+    // Shortened when it moved onto the status line beside the camera hint.
+    "Restart": "重启",
     "Part number or barcode": "零件编号或条码",
     "e.g. 525IB": "例如：525IB",
     "Parts on this machine": "本机器的零件",
