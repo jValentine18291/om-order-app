@@ -7,7 +7,11 @@
 // and db.transaction(fn).
 
 const path = require("path");
-const DB_PATH = path.join(__dirname, "om_orders.db");
+// The live database, unless something deliberately points elsewhere. The
+// override exists so a change can be tried against a COPY of real data before
+// it is let anywhere near the real thing; the service sets no such variable,
+// so on the server this is exactly the path it always was.
+const DB_PATH = process.env.OM_DB_PATH || path.join(__dirname, "om_orders.db");
 
 let db;
 
@@ -131,8 +135,25 @@ db.exec(`
     so_number      TEXT    DEFAULT '',      -- which Sales Order it went onto
     repair_comment TEXT    DEFAULT '',
     labour_charge  REAL    DEFAULT 0,     -- technician labour billed for this machine
-    quote_status   TEXT    DEFAULT '',    -- '' | NEED_QUOTE | QUOTED, per machine
-    work_decision  TEXT    DEFAULT '',    -- '' | REPAIR | CONDEMN, what the customer said
+    -- WHERE THIS MACHINE IS, and the only thing that says so. The slip's own
+    -- status is worked out from these; nothing sets it directly except closing.
+    --   RECEIVED       in the workshop, nothing decided
+    --   AWAITING_QUOTE needs a quotation - Sales to call the customer
+    --   QUOTED         quoted, waiting on the customer's answer
+    --   TO_REPAIR      go ahead: approved, or no quotation needed
+    --   CONDEMNED      the customer does not want it repaired
+    state          TEXT    DEFAULT 'RECEIVED',
+    -- A condemned machine is still physically here. It is not finished with
+    -- until it has gone back to the customer or been scrapped, and a slip
+    -- cannot close while one is unaccounted for.
+    disposal       TEXT    DEFAULT '',    -- '' | COLLECTED | DISPOSED
+    disposal_at    TEXT    DEFAULT '',
+    disposal_by    TEXT    DEFAULT '',
+    -- Legacy, kept so nothing is lost: these two were the state before it was
+    -- one field. Mapped into "state" once, at migration, and never written
+    -- again. Read "state".
+    quote_status   TEXT    DEFAULT '',
+    work_decision  TEXT    DEFAULT '',
     decided_by     TEXT    DEFAULT '',    -- who took the call
     decided_at     TEXT    DEFAULT '',    -- when they took it
     FOREIGN KEY (slip_id) REFERENCES service_slips(id) ON DELETE CASCADE
@@ -372,6 +393,38 @@ try {
   }
 } catch (e) {
   console.error("[db] machine_parts free_text migration check failed:", e.message);
+}
+
+// Migration: fold quote_status and work_decision into one state.
+//
+// Two fields describing one thing is how a machine ends up quoted AND awaiting
+// a quote at the same time. The mapping is faithful - a decision outranks a
+// quoting step, because it came later - and the old columns are left in place
+// so nothing is thrown away.
+try {
+  const cols = db.prepare("PRAGMA table_info(slip_machines)").all().map((c) => c.name);
+  const add = (name, type) => { if (!cols.includes(name)) db.exec(`ALTER TABLE slip_machines ADD COLUMN ${name} ${type}`); };
+  if (!cols.includes("state")) {
+    add("state", "TEXT DEFAULT 'RECEIVED'");
+    add("disposal", "TEXT DEFAULT ''");
+    add("disposal_at", "TEXT DEFAULT ''");
+    add("disposal_by", "TEXT DEFAULT ''");
+    const n = db.prepare(
+      `UPDATE slip_machines SET state = CASE
+         WHEN work_decision = 'CONDEMN'    THEN 'CONDEMNED'
+         WHEN work_decision = 'REPAIR'     THEN 'TO_REPAIR'
+         WHEN quote_status  = 'NEED_QUOTE' THEN 'AWAITING_QUOTE'
+         WHEN quote_status  = 'QUOTED'     THEN 'QUOTED'
+         ELSE 'RECEIVED' END`
+    ).run();
+    console.log(`[db] migrated: one state per machine (${n.changes} machine(s) mapped)`);
+  } else {
+    add("disposal", "TEXT DEFAULT ''");
+    add("disposal_at", "TEXT DEFAULT ''");
+    add("disposal_by", "TEXT DEFAULT ''");
+  }
+} catch (e) {
+  console.error("[db] machine state migration check failed:", e.message);
 }
 
 // Migration: what the customer reported about each machine at registration

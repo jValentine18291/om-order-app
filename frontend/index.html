@@ -319,7 +319,6 @@
       <div class="field">
         <label>Common requests</label>
         <label class="ns-check-line"><input type="checkbox" id="ns-check-service" /> Check &amp; Service for all</label>
-        <label class="ns-check-line"><input type="checkbox" id="ns-quote-first" /> Quote first</label>
       </div>
 
       <div class="field">
@@ -561,6 +560,10 @@
           <label for="nsm-remarks">Remarks <span style="color:var(--ink-faint);font-weight:400;">(optional — what the customer reported)</span></label>
           <textarea id="nsm-remarks" rows="2" placeholder="e.g. Won't start, chain keeps slipping"></textarea>
         </div>
+        <div class="field">
+          <label class="ns-check-line"><input type="checkbox" id="nsm-quote" /> Quote before repairing this one</label>
+          <p class="nsm-hint">Sales are told as soon as the slip is registered.</p>
+        </div>
         <div class="scan-hint" id="nsm-status" style="justify-content:flex-start;min-height:20px"></div>
         <button class="btn-primary" id="nsm-add" type="button" style="width:100%">Add</button>
       </div>
@@ -680,7 +683,7 @@
            other case: everything ready together. -->
       <div class="mm-quote" id="mm-quote-row" style="display:none">
         <div class="mm-quote-state" id="mm-quote-state"></div>
-        <button type="button" class="btn-secondary" id="mm-quote-btn">Send this machine for quoting</button>
+        <div class="mm-quote-btns" id="mm-quote-btns"></div>
       </div>
     </div>
   </div>

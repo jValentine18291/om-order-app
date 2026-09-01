@@ -859,64 +859,164 @@ app.patch("/api/machines/:machineId/labour", async (req, res) => {
   }
 });
 
-// Manually set a slip's quoting status: NEED_QUOTE, QUOTED, or back to IN_PROGRESS.
-app.patch("/api/slips/:slip/status", async (req, res) => {
+// ---- Moving a machine along -------------------------------------------------
+//
+// One machine, one state, one route. Quoting and the customer's answer used to
+// be three separate endpoints writing two columns between them, which is how a
+// machine ended up quoted and awaiting a quote at once.
+//
+//   RECEIVED -> AWAITING_QUOTE   sales, please quote this
+//   AWAITING_QUOTE -> QUOTED     quoted; waiting on the customer
+//   QUOTED -> TO_REPAIR          the customer said go ahead
+//   QUOTED -> CONDEMNED          the customer said no
+//   anything -> TO_REPAIR        no quotation needed, just do it
+//
+// Who is told depends on the direction. Sales are told when work arrives for
+// them; the technicians who worked on THAT machine are told when the answer
+// comes back, because a slip may hold another machine that is nothing to do
+// with them and a notification everyone gets is one nobody reads.
+async function notifyStateChange(slip, machineId, before, state) {
   try {
-    const slip = await data.slips.setSlipStatus(req.params.slip, (req.body || {}).status);
-    res.json(slip);
+    const m = (slip.machines || []).find((x) => x.id === machineId);
+    const desc = m ? m.machine_desc : "machine";
 
-    // Answer first, notify after. A push takes a round trip to Google or Apple,
-    // and the technician who tapped the button should not wait for it - nor
-    // should their slip update fail if a push service is having a bad day.
-    if (slip && slip.status === "NEED_QUOTE") {
-      const machines = (slip.machines || []).length;
-      push.notify(pushDb, QUOTE_NOTIFY_ROLES, {
+    if (state === "AWAITING_QUOTE" && before !== "AWAITING_QUOTE") {
+      const waiting = (slip.machines || []).filter((x) => x.state === "AWAITING_QUOTE").length;
+      const total = (slip.machines || []).length;
+      await push.notify(pushDb, QUOTE_NOTIFY_ROLES, {
         title: "Ready to quote",
-        body: `${slip.slip_number} · ${slip.company} · ${machines} machine${machines === 1 ? "" : "s"}`,
+        body: `${slip.slip_number} · ${slip.company} · ${desc}` +
+              (total > 1 ? ` (${waiting} of ${total})` : ""),
         slip: slip.slip_number,
-      }).catch((e) => console.error("[push] notify failed:", e.message));
+      });
+      return;
     }
+
+    // The answer to a quotation, which is the only thing the workshop is
+    // waiting on. Deciding to repair a machine nobody quoted is not news.
+    const answered = (before === "QUOTED" || before === "AWAITING_QUOTE") &&
+                     (state === "TO_REPAIR" || state === "CONDEMNED");
+    if (answered) {
+      const techs = await data.slips.techniciansForMachine(machineId);
+      await push.notifyTechs(pushDb, techs, {
+        title: `${state === "TO_REPAIR" ? "Repair" : "Condemn"}: ${desc}`,
+        body: `${slip.slip_number} · ${slip.company} · the customer says ${
+          state === "TO_REPAIR" ? "go ahead with the repair" : "do not repair - condemn it"
+        }`,
+        slip: slip.slip_number,
+      });
+    }
+  } catch (e) {
+    console.error("[push] notify failed:", e.message);
+  }
+}
+
+async function handleMachineState(req, res) {
+  try {
+    const machineId = Number(req.params.id);
+    const state = String((req.body || {}).state || "").toUpperCase();
+    // Read the machine before the change: what to send, and to whom, depends
+    // on where it was, and afterwards that is gone.
+    const prev = await data.slips.getSlip(req.params.slip);
+    const before = ((prev && prev.machines) || []).find((m) => m.id === machineId);
+    const slip = await data.slips.setMachineState(
+      req.params.slip, machineId, state, (req.body || {}).who || ""
+    );
+    res.json(slip);
+    // Answer first, notify after: a push is a round trip to Google or Apple,
+    // and the person who tapped the button should not wait for it.
+    notifyStateChange(slip, machineId, before ? before.state : "", state);
   } catch (err) {
     if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
-    console.error("[PATCH /api/slips/:slip/status]", err);
-    res.status(err.status || 500).json({ error: err.message || "Failed to update status" });
+    console.error("[PATCH /api/slips/:slip/machines/:id/state]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to update the machine" });
   }
-});
+}
+app.patch("/api/slips/:slip/machines/:id/state", handleMachineState);
 
-// What the customer said, once Sales have rung them about a quoted machine:
-// repair it, or condemn it. The technicians who worked on THAT machine are
-// told, because the slip may hold another machine that is nothing to do with
-// them and a notification everyone gets is a notification nobody reads.
-app.patch("/api/slips/:slip/machines/:id/decision", async (req, res) => {
+// The same move applied to every machine on the slip - "all of these need
+// quoting", "none of them do". Machines already billed or already disposed of
+// are left where they are.
+async function handleSlipState(req, res) {
   try {
-    const body = req.body || {};
-    const machineId = Number(req.params.id);
-    const wanted = String(body.decision || "").toUpperCase();
-    const slip = await data.slips.setMachineDecision(
-      req.params.slip, machineId, wanted, body.who || ""
+    const state = String((req.body || {}).state || "").toUpperCase();
+    const prev = await data.slips.getSlip(req.params.slip);
+    const slip = await data.slips.setAllMachineStates(
+      req.params.slip, state, (req.body || {}).who || ""
     );
     res.json(slip);
 
-    // Answer first, notify after - the same reasoning as the quote push: the
-    // person who tapped the button should not wait on Google or Apple.
-    if (wanted === "REPAIR" || wanted === "CONDEMN") {
-      const m = (slip.machines || []).find((x) => x.id === machineId);
-      const techs = await data.slips.techniciansForMachine(machineId);
-      const action = wanted === "REPAIR" ? "Repair" : "Condemn";
-      push.notifyTechs(pushDb, techs, {
-        title: `${action}: ${m ? m.machine_desc : "machine"}`,
-        body: `${slip.slip_number} · ${slip.company} · the customer says ${
-          wanted === "REPAIR" ? "go ahead with the repair" : "do not repair - condemn it"
-        }`,
-        slip: slip.slip_number,
-      }).catch((e) => console.error("[push] notify failed:", e.message));
+    if (state === "AWAITING_QUOTE") {
+      // One push for the slip, not one per machine: sales are being told there
+      // is a slip to quote, and they will see the machines when they open it.
+      const fresh = ((prev && prev.machines) || [])
+        .filter((m) => m.state !== "AWAITING_QUOTE").length;
+      if (fresh) {
+        const n = (slip.machines || []).length;
+        push.notify(pushDb, QUOTE_NOTIFY_ROLES, {
+          title: "Ready to quote",
+          body: `${slip.slip_number} · ${slip.company} · ${n} machine${n === 1 ? "" : "s"}`,
+          slip: slip.slip_number,
+        }).catch((e) => console.error("[push] notify failed:", e.message));
+      }
     }
   } catch (err) {
     if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
-    console.error("[PATCH /api/slips/:slip/machines/:id/decision]", err);
-    res.status(err.status || 500).json({ error: err.message || "Failed to record the decision" });
+    console.error("[PATCH /api/slips/:slip/state]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to update the slip" });
+  }
+}
+app.patch("/api/slips/:slip/state", handleSlipState);
+
+// A condemned machine is still in the workshop until somebody says where it
+// went. Until then the slip will not close.
+app.patch("/api/slips/:slip/machines/:id/disposal", async (req, res) => {
+  try {
+    const slip = await data.slips.setMachineDisposal(
+      req.params.slip, Number(req.params.id),
+      String((req.body || {}).disposal || "").toUpperCase(), (req.body || {}).who || ""
+    );
+    res.json(slip);
+  } catch (err) {
+    if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
+    console.error("[PATCH /api/slips/:slip/machines/:id/disposal]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to record the disposal" });
   }
 });
+
+// ---- The three routes this replaced -----------------------------------------
+// A phone runs its cached copy of the app until its second open, so for a shift
+// or so after a deploy these are still being called. They translate into the
+// new model rather than 404 at a technician mid-job. Nothing new calls them.
+const LEGACY_STATE = {
+  NEED_QUOTE: "AWAITING_QUOTE",
+  QUOTED: "QUOTED",
+  IN_PROGRESS: "TO_REPAIR",
+  REPAIR: "TO_REPAIR",
+  CONDEMN: "CONDEMNED",
+  "": "RECEIVED",
+};
+
+app.patch("/api/slips/:slip/status", (req, res) => {
+  const state = LEGACY_STATE[String((req.body || {}).status || "").toUpperCase()];
+  if (!state) return res.status(400).json({ error: "Invalid status." });
+  req.body = { state, who: (req.body || {}).who || "" };
+  return handleSlipState(req, res);
+});
+
+for (const path of ["/api/slips/:slip/machines/:id/quote", "/api/slips/:slip/machines/:id/decision"]) {
+  app.patch(path, (req, res) => {
+    const body = req.body || {};
+    // "quote" sent quote_status, "decision" sent decision, and an empty
+    // quote_status meant "not waiting to be quoted" - a real value, not a
+    // missing one, so it is read with !== undefined rather than || "".
+    const asked = String(body.quote_status !== undefined ? body.quote_status : (body.decision || "")).toUpperCase();
+    const state = LEGACY_STATE[asked];
+    if (!state) return res.status(400).json({ error: "Invalid value." });
+    req.body = { state, who: body.who || "" };
+    return handleMachineState(req, res);
+  });
+}
 
 // Edit a slip's registration details: company, contacts, notes, and each
 // machine's name, serial and intake remarks. The work - parts, labour,
@@ -932,45 +1032,6 @@ app.patch("/api/slips/:slip/details", async (req, res) => {
     if ([400, 404, 409].includes(err.status)) return res.status(err.status).json({ error: err.message });
     console.error("[PATCH /api/slips/:slip/details]", err);
     res.status(err.status || 500).json({ error: err.message || "Failed to save the edit" });
-  }
-});
-
-// Send one machine on a slip for quoting, or take it back. A slip with two
-// machines is often half done, and marking the whole slip either quoted work
-// that had not happened or held back work that had.
-//
-// The slip's own status follows the machines, so the sales list and the push
-// below carry on working unchanged.
-app.patch("/api/slips/:slip/machines/:id/quote", async (req, res) => {
-  try {
-    const before = await data.slips.getSlip(req.params.slip);
-    const wanted = (req.body || {}).quote_status;
-    const slip = await data.slips.setMachineQuoteStatus(
-      req.params.slip, Number(req.params.id), wanted
-    );
-    res.json(slip);
-
-    // Only when this machine has just been sent for quoting - not when the
-    // slip happened to be in that state already because another machine was
-    // waiting, which would tell sales the same thing twice.
-    const was = ((before && before.machines) || []).find((m) => m.id === Number(req.params.id));
-    const isNew = String(wanted || "").toUpperCase() === "NEED_QUOTE" &&
-                  (!was || was.quote_status !== "NEED_QUOTE");
-    if (isNew) {
-      const m = (slip.machines || []).find((x) => x.id === Number(req.params.id));
-      const waiting = (slip.machines || []).filter((x) => x.quote_status === "NEED_QUOTE").length;
-      const total = (slip.machines || []).length;
-      push.notify(pushDb, QUOTE_NOTIFY_ROLES, {
-        title: "Ready to quote",
-        body: `${slip.slip_number} · ${slip.company} · ${m ? m.machine_desc : "1 machine"}` +
-              (total > 1 ? ` (${waiting} of ${total})` : ""),
-        slip: slip.slip_number,
-      }).catch((e) => console.error("[push] notify failed:", e.message));
-    }
-  } catch (err) {
-    if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
-    console.error("[PATCH /api/slips/:slip/machines/:id/quote]", err);
-    res.status(err.status || 500).json({ error: err.message || "Failed to update machine" });
   }
 });
 

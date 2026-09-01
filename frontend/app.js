@@ -384,11 +384,40 @@ const STATUS_LABEL = {
   OPEN: "Open",
   IN_PROGRESS: "In Progress",
   NEED_QUOTE: "Need to Quote",
-  QUOTED: "Quoted",
+  QUOTED: "Waiting on Customer",
   ALL_REPAIRED: "All Repaired",
   CALL_CUSTOMER: "All Repaired", // legacy name, shown as the new label
+  CONVERTED: "All Repaired",
   CLOSED: "Closed",
 };
+
+// Where a machine is. A slip's own status is worked out from these, so this is
+// the only thing anyone has to read to know what is happening to a machine.
+const MACHINE_STATE = {
+  RECEIVED:       { label: "Need Repair",        cls: "mq-none"    },
+  AWAITING_QUOTE: { label: "Waiting to quote",   cls: "mq-need"    },
+  QUOTED:         { label: "Waiting on customer",cls: "mq-done"    },
+  TO_REPAIR:      { label: "Repair confirmed",   cls: "mq-repair"  },
+  CONDEMNED:      { label: "Condemned",          cls: "mq-condemn" },
+};
+const DISPOSAL_LABEL = { COLLECTED: "Customer collected it", DISPOSED: "Disposed of" };
+
+// The pill next to a machine's name. A condemned machine says what became of
+// it, because that is the outstanding question and the thing that holds the
+// slip open.
+function machinePill(m) {
+  const st = MACHINE_STATE[m.state];
+  if (!st) return "";
+  if (m.state === "CONDEMNED") {
+    const d = DISPOSAL_LABEL[m.disposal] || "Not yet collected";
+    return ` <span class="machine-quote mq-condemn">Condemned</span>` +
+           ` <span class="machine-quote mq-none">${escapeHtml(d)}</span>`;
+  }
+  // "Need Repair" is the ordinary case and already the card's own default, so
+  // it is left to the card rather than repeated as a pill.
+  if (m.state === "RECEIVED") return "";
+  return ` <span class="machine-quote ${st.cls}">${escapeHtml(st.label)}</span>`;
+}
 
 // ============================================================================
 // NEW SERVICE
@@ -397,7 +426,7 @@ const STATUS_LABEL = {
 // Held here rather than read back off the form. Details are entered on a popup
 // and only land in this list once "Add" is pressed, so a half-typed machine
 // cannot be left sitting on the page and registered by accident.
-let nsMachines = [];      // [{ model, qty, serial }]
+let nsMachines = [];      // [{ model, qty, serial, remarks, quote }]
 let nsEditIndex = -1;     // -1 = adding, otherwise the entry being edited
 
 function renderNsMachines() {
@@ -413,6 +442,7 @@ function renderNsMachines() {
         ${m.qty > 1 ? `<span class="ns-machine-qty-tag">&times;${m.qty}</span>` : ""}
         ${m.serial ? `<span class="ns-machine-serial">S/N ${escapeHtml(m.serial)}</span>` : ""}
         ${m.remarks ? `<span class="ns-machine-remarks">${escapeHtml(m.remarks)}</span>` : ""}
+        ${m.quote ? `<span class="ns-machine-quote">Quote first</span>` : ""}
       </div>
       <div class="ns-machine-acts">
         <button type="button" class="ns-machine-edit" data-i="${i}" aria-label="Edit machine">
@@ -434,13 +464,19 @@ function renderNsMachines() {
 
 function openMachineForm(index = -1) {
   nsEditIndex = index;
-  const m = index >= 0 ? nsMachines[index] : { model: "", qty: 1, serial: "", remarks: "" };
+  // A new machine starts with whatever the last one was set to: a customer who
+  // wants one machine quoted usually wants the rest quoted too, and a tick that
+  // has to be found again for every machine is a tick that gets forgotten.
+  const last = nsMachines.length ? nsMachines[nsMachines.length - 1] : null;
+  const m = index >= 0 ? nsMachines[index]
+          : { model: "", qty: 1, serial: "", remarks: "", quote: !!(last && last.quote) };
   $("nsm-title").textContent = index >= 0 ? "Edit machine" : "Add machine";
   $("nsm-add").textContent = index >= 0 ? "Save" : "Add";
   $("nsm-model").value = m.model;
   $("nsm-qty").value = m.qty;
   $("nsm-serial").value = m.serial;
   $("nsm-remarks").value = m.remarks || "";
+  $("nsm-quote").checked = !!m.quote;
   $("nsm-status").innerHTML = "";
   nsmSerialHint();
   $("nsm-modal").style.display = "flex";
@@ -476,7 +512,12 @@ function commitMachineForm() {
   }
   let qty = parseInt($("nsm-qty").value, 10);
   if (!Number.isFinite(qty) || qty < 1) qty = 1;
-  const entry = { model, qty, serial: $("nsm-serial").value.trim(), remarks: $("nsm-remarks").value.trim() };
+  const entry = {
+    model, qty,
+    serial: $("nsm-serial").value.trim(),
+    remarks: $("nsm-remarks").value.trim(),
+    quote: $("nsm-quote").checked,
+  };
   if (nsEditIndex >= 0) nsMachines[nsEditIndex] = entry;
   else nsMachines.push(entry);
   closeMachineForm();
@@ -489,7 +530,6 @@ function resetNewServiceForm() {
   const wa = $("ns-whatsapp"); if (wa) wa.setAttribute("disabled", "true");
   const created = $("ns-created"); if (created) { created.style.display = "none"; created.innerHTML = ""; }
   const cs = $("ns-check-service"); if (cs) cs.checked = false;
-  const qf = $("ns-quote-first"); if (qf) qf.checked = false;
   nsMachines = [];
   renderNsMachines();
   $("ns-status").innerHTML = "";
@@ -512,10 +552,10 @@ async function submitNewService() {
   const machines = [];
   for (const m of nsMachines) {
     if (m.qty === 1) {
-      machines.push({ desc: m.model, serial: m.serial, remarks: m.remarks || "" });
+      machines.push({ desc: m.model, serial: m.serial, remarks: m.remarks || "", quote: !!m.quote });
     } else {
       for (let n = 1; n <= m.qty; n++) {
-        machines.push({ desc: `${m.model} - ${n}/${m.qty}`, serial: m.serial, remarks: m.remarks || "" });
+        machines.push({ desc: `${m.model} - ${n}/${m.qty}`, serial: m.serial, remarks: m.remarks || "", quote: !!m.quote });
       }
     }
   }
@@ -548,7 +588,6 @@ async function submitNewService() {
         contact_number: $("ns-contact-number").value.trim(),
         whatsapp_number: $("ns-whatsapp").value.trim(),
         check_service: $("ns-check-service").checked,
-        quote_first: $("ns-quote-first").checked,
         notes: $("ns-notes").value.trim(),
         machines,
         signature,
@@ -929,7 +968,7 @@ function buildSlipPdf(slip) {
   // ---- Requested ----
   const requests = [];
   if (slip.check_service) requests.push("CHECK & SERVICE FOR ALL");
-  if (slip.quote_first) requests.push("QUOTE FIRST");
+  if ((slip.machines || []).some((m) => m.state === "AWAITING_QUOTE")) requests.push("QUOTE FIRST");
   if (requests.length) {
     need(58);
     sectionHead("REQUESTED", "clipboard");
@@ -1312,10 +1351,9 @@ function renderSlipScreen() {
       ${meta.length ? `<div class="vs-sub">${meta.join(" · ")}</div>` : ""}
       ${slip.notes ? `<div class="vs-notes">${escapeHtml(slip.notes)}</div>` : ""}
     </div>
-    ${(slip.check_service || slip.quote_first) ? `
+    ${slip.check_service ? `
     <div class="sd-requests">
-      ${slip.check_service ? `<div class="sd-req sd-req-service">✓ Check &amp; Service for all</div>` : ""}
-      ${slip.quote_first ? `<div class="sd-req sd-req-quote">💬 Quote first</div>` : ""}
+      <div class="sd-req sd-req-service">✓ Check &amp; Service for all</div>
     </div>` : ""}`;
 
   // Machines as tappable buttons with per-machine progress.
@@ -1325,17 +1363,9 @@ function renderSlipScreen() {
     let total = labour; for (const p of parts) total += p.unit_price * p.quantity;
     const hasComment = !!String(m.repair_comment || "").trim();
     const worked = parts.length > 0 || hasComment || labour > 0;
-    // Quoting is per machine, so the state has to be visible per machine -
-    // otherwise the only way to find out which one is waiting is to open each.
-    const q = m.quote_status || "";
-    // The customer's answer outranks the quoting state: it is what the
-    // technician has to act on.
-    const d = m.work_decision || "";
-    const qTag = d === "REPAIR"     ? `<span class="machine-quote mq-repair">Repair</span>`
-               : d === "CONDEMN"    ? `<span class="machine-quote mq-condemn">Condemn</span>`
-               : q === "NEED_QUOTE" ? `<span class="machine-quote mq-need">Waiting to quote</span>`
-               : q === "QUOTED"     ? `<span class="machine-quote mq-done">Quoted</span>`
-               : "";
+    // Where this machine is, on the machine itself - otherwise the only way to
+    // find out which one is waiting is to open each in turn.
+    const qTag = machinePill(m).trim();
     return `
       <button type="button" class="machine-btn ${worked ? "machine-btn-worked" : ""}" data-machine="${m.id}">
         <div class="machine-btn-top">
@@ -1831,84 +1861,157 @@ function renderMachineDecisionBanner() {
   const box = $("mm-decision");
   if (!box) return;
   const m = currentMachine();
-  const d = m ? (m.work_decision || "") : "";
-  if (!d) { box.style.display = "none"; box.innerHTML = ""; return; }
+  const st = m ? m.state : "";
+  // Only the states a technician has to act on. "Received" is the ordinary
+  // case, and a banner shown always is a banner nobody reads.
+  if (st !== "TO_REPAIR" && st !== "CONDEMNED" && st !== "QUOTED") {
+    box.style.display = "none"; box.innerHTML = ""; return;
+  }
   const who = m.decided_by ? ` ${escapeHtml(m.decided_by)}` : "";
   const when = m.decided_at ? ` · ${escapeHtml(formatDate(m.decided_at) || m.decided_at)}` : "";
-  box.className = "decision-banner " + (d === "REPAIR" ? "decision-repair" : "decision-condemn");
-  box.innerHTML = d === "REPAIR"
-    ? `<b>Go ahead and repair</b>The customer has confirmed this repair.
-       <span class="decision-who">Confirmed by${who}${when}</span>`
-    : `<b>Do not repair — condemned</b>The customer does not want this machine repaired. Stop work on it.
-       <span class="decision-who">Decided by${who}${when}</span>`;
+  if (st === "QUOTED") {
+    box.className = "decision-banner decision-quoted";
+    box.innerHTML = `<b>Quoted — waiting on the customer</b>Hold off until they say yes or no.
+       <span class="decision-who">Quoted by${who}${when}</span>`;
+  } else if (st === "TO_REPAIR") {
+    box.className = "decision-banner decision-repair";
+    box.innerHTML = `<b>Go ahead and repair</b>The customer has confirmed this repair.
+       <span class="decision-who">Confirmed by${who}${when}</span>`;
+  } else {
+    const d = DISPOSAL_LABEL[m.disposal];
+    box.className = "decision-banner decision-condemn";
+    box.innerHTML = `<b>Do not repair — condemned</b>The customer does not want this machine repaired. Stop work on it.
+       <span class="decision-who">${d ? escapeHtml(d) + " · " : ""}Decided by${who}${when}</span>`;
+  }
   box.style.display = "block";
 }
 
+// The buttons that move THIS machine along. Which ones show depends only on
+// where the machine is, so a technician is never offered a step that makes no
+// sense from here.
 function renderMachineQuoteRow() {
   const row = $("mm-quote-row");
   if (!row) return;
   const m = currentMachine();
   const slipStatus = session.slip ? session.slip.status : "";
-  // Once a slip is fully repaired, converted or closed it has left quoting
-  // behind, and the buttons would only offer a state it cannot go back to.
-  const live = slipStatus === "OPEN" || slipStatus === "IN_PROGRESS" ||
-               slipStatus === "NEED_QUOTE" || slipStatus === "QUOTED";
-  if (!m || !live) { row.style.display = "none"; return; }
+  // A closed or fully billed slip has left all of this behind.
+  const live = slipStatus !== "CLOSED" && slipStatus !== "CONVERTED";
+  if (!m || !live || m.converted_at) { row.style.display = "none"; return; }
 
-  const q = m.quote_status || "";
   const state = $("mm-quote-state");
-  const btn = $("mm-quote-btn");
+  const btns = $("mm-quote-btns");
   row.style.display = "flex";
 
-  if (q === "NEED_QUOTE") {
-    state.innerHTML = `<span class="machine-quote mq-need">Waiting to quote</span> Sales have been told about this machine.`;
-    btn.textContent = "Undo — still repairing";
-    btn.dataset.next = "";
-  } else if (q === "QUOTED") {
-    state.innerHTML = `<span class="machine-quote mq-done">Quoted</span> Already sent to the customer.`;
-    btn.textContent = "Send for quoting again";
-    btn.dataset.next = "NEED_QUOTE";
+  // Sales and Admin ring the customer, so they get the answer buttons. A
+  // technician can send a machine for quoting and take it back, which is the
+  // part of this that is theirs.
+  const decide = canDecide();
+  let text, actions;
+  if (m.state === "AWAITING_QUOTE") {
+    text = `<span class="machine-quote mq-need">Waiting to quote</span> Sales have been told about this machine.`;
+    actions = [["TO_REPAIR", "Undo — no quote needed", "btn-secondary"]];
+    if (decide) actions.unshift(["QUOTED", "Mark as quoted", "btn-secondary"]);
+  } else if (m.state === "QUOTED") {
+    text = `<span class="machine-quote mq-done">Waiting on customer</span> Quoted; waiting for their answer.`;
+    actions = decide
+      ? [["TO_REPAIR", "They said go ahead", "btn-secondary"],
+         ["CONDEMNED", "They said no — condemn", "btn-secondary"]]
+      : [["AWAITING_QUOTE", "Send for quoting again", "btn-secondary"]];
+  } else if (m.state === "TO_REPAIR") {
+    text = `<span class="machine-quote mq-repair">Repair confirmed</span> Carry on with the repair.`;
+    actions = [["AWAITING_QUOTE", "Send for quoting", "btn-secondary"]];
+  } else if (m.state === "CONDEMNED") {
+    const d = DISPOSAL_LABEL[m.disposal];
+    text = `<span class="machine-quote mq-condemn">Condemned</span> <span>${escapeHtml(
+      d || "Still here — record where it goes before the slip can close.")}</span>`;
+    actions = [["TO_REPAIR", "Repair it after all", "btn-secondary"]];
   } else {
-    state.textContent = "This machine has not been sent for quoting.";
-    btn.textContent = "Send this machine for quoting";
-    btn.dataset.next = "NEED_QUOTE";
+    text = "This machine has not been sent for quoting.";
+    actions = [["AWAITING_QUOTE", "Send this machine for quoting", "btn-secondary"]];
+  }
+
+  state.innerHTML = text;
+  btns.innerHTML = actions.map(([to, label, cls]) =>
+    `<button type="button" class="${cls}" data-to="${escapeAttr(to)}">${escapeHtml(label)}</button>`).join("");
+  btns.querySelectorAll("[data-to]").forEach((b) =>
+    b.addEventListener("click", () => moveMachine(b, b.dataset.to)));
+
+  // Where a condemned machine went. Asked here because this is the screen
+  // someone is on when the customer turns up for it.
+  if (m.state === "CONDEMNED") {
+    btns.insertAdjacentHTML("beforeend", `
+      <div class="mm-disposal">
+        <div class="mm-disposal-q">What happened to it?</div>
+        <button type="button" class="btn-secondary" data-disposal="COLLECTED"${m.disposal === "COLLECTED" ? " disabled" : ""}>Customer collected it</button>
+        <button type="button" class="btn-secondary" data-disposal="DISPOSED"${m.disposal === "DISPOSED" ? " disabled" : ""}>We disposed of it</button>
+      </div>`);
+    btns.querySelectorAll("[data-disposal]").forEach((b) =>
+      b.addEventListener("click", () => recordDisposal(b, m.id, b.dataset.disposal)));
   }
 }
 
-$("mm-quote-btn").addEventListener("click", async () => {
+async function moveMachine(btn, to) {
   const m = currentMachine();
   if (!m || !session.slipNumber) return;
-  const next = $("mm-quote-btn").dataset.next || "";
 
   // Anything scanned but not yet saved would otherwise be missing from the very
   // quote this is asking for.
-  if (next === "NEED_QUOTE" && session.pendingParts.length) {
+  if (to === "AWAITING_QUOTE" && session.pendingParts.length) {
     try {
       await commitPendingParts();
       await saveCurrentLabour();
       await saveCurrentComment();
     } catch (e) { toast(e.message, "err"); return; }
   }
+  if (to === "CONDEMNED" && !confirm(
+    "Condemn this machine?\n\nThe technicians who worked on it will be told to stop."
+  )) return;
 
-  const btn = $("mm-quote-btn");
   btn.disabled = true;
   try {
-    await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/machines/${m.id}/quote`, {
+    await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/machines/${m.id}/state`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ quote_status: next }),
+      body: JSON.stringify({ state: to, who: initialsFor(getUser()) }),
     });
     await refreshSlip();
     renderMachineParts();
     renderMachineQuoteRow();
     renderMachineDecisionBanner();
     updateSlipFooter();
-    toast(next === "NEED_QUOTE" ? "Sent for quoting" : "Taken back", "ok");
+    refreshQuoteCount();
+    toast(MOVE_TOAST[to] || "Saved", "ok");
   } catch (e) {
     toast(e.message, "err");
+    btn.disabled = false;
   }
-  btn.disabled = false;
-});
+}
+
+const MOVE_TOAST = {
+  AWAITING_QUOTE: "Sent for quoting",
+  QUOTED: "Marked as quoted",
+  TO_REPAIR: "Repair confirmed",
+  CONDEMNED: "Condemned — technician notified",
+};
+
+async function recordDisposal(btn, machineId, disposal) {
+  btn.disabled = true;
+  try {
+    await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/machines/${machineId}/disposal`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ disposal, who: initialsFor(getUser()) }),
+    });
+    await refreshSlip();
+    renderMachineQuoteRow();
+    renderMachineDecisionBanner();
+    updateSlipFooter();
+    toast(DISPOSAL_LABEL[disposal], "ok");
+  } catch (e) {
+    toast(e.message, "err");
+    btn.disabled = false;
+  }
+}
 
 // ---- Slip status UI (Open Service) ------------------------------------------
 // Shows the current status as a badge next to the slip number, and decides
@@ -1929,10 +2032,9 @@ function renderSlipStatusUI() {
   const machines = (session.slip && session.slip.machines) || [];
   const live = status === "OPEN" || status === "IN_PROGRESS" ||
                status === "NEED_QUOTE" || status === "QUOTED";
-  // Machines can now be sent for quoting one at a time, so this button is the
-  // "all of them together" case: offered while any machine is still not
-  // waiting, including on a slip already part-way through quoting.
-  const someLeft = machines.some((m) => (m.quote_status || "") !== "NEED_QUOTE");
+  // Machines are sent for quoting one at a time, so this button is the "all of
+  // them together" case: offered while any machine is still not waiting.
+  const someLeft = machines.some((m) => m.state !== "AWAITING_QUOTE" && !m.converted_at);
   const showQuote = live && someLeft;
   const showQuoted = status === "NEED_QUOTE";
   const showNoQuote = live;
@@ -1946,13 +2048,16 @@ function renderSlipStatusUI() {
   wrap.style.display = (showQuote || showQuoted || showNoQuote) ? "flex" : "none";
 }
 
-async function changeSlipStatus(newStatus, confirmMsg) {
+// The slip-wide buttons move every machine at once. They post the same states
+// as the per-machine buttons, to the same model - "all of them" is the only
+// difference.
+async function changeSlipStatus(newState, confirmMsg) {
   if (!session.slipNumber) return;
   try {
-    await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/status`, {
+    await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/state`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: newStatus }),
+      body: JSON.stringify({ state: newState, who: initialsFor(getUser()) }),
     });
     await refreshSlip();
     updateSlipFooter();
@@ -1962,12 +2067,12 @@ async function changeSlipStatus(newStatus, confirmMsg) {
   }
 }
 
-$("os-need-quote").addEventListener("click", () => changeSlipStatus("NEED_QUOTE", "Marked: Need to Quote"));
-$("os-mark-quoted").addEventListener("click", () => changeSlipStatus("QUOTED", "Marked: Quoted"));
+$("os-need-quote").addEventListener("click", () => changeSlipStatus("AWAITING_QUOTE", "Sent for quoting"));
+$("os-mark-quoted").addEventListener("click", () => changeSlipStatus("QUOTED", "Marked as quoted"));
 $("os-no-quote").addEventListener("click", () => {
   const s = session.slip ? session.slip.status : "";
   if (s === "NEED_QUOTE" || s === "QUOTED") {
-    changeSlipStatus("IN_PROGRESS", "Continuing without quote");
+    changeSlipStatus("TO_REPAIR", "Continuing without quote");
   } else {
     toast("No quote needed — carry on", "ok");
   }
@@ -2156,10 +2261,22 @@ async function onCloseSlipChosen(slipNumber) {
   try {
     const slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
     $("cs-context").style.display = "block";
+    // A condemned machine still in the workshop stops the slip closing. Say so
+    // here, on the screen where someone is about to try, rather than only
+    // refusing once they have typed the DO number.
+    const stranded = (slip.machines || []).filter(
+      (m) => m.state === "CONDEMNED" && !String(m.disposal || "").trim()
+    );
     $("cs-context").innerHTML =
       `<div><strong>${escapeHtml(slip.company)}</strong> · Slip ${escapeHtml(slip.slip_number)}</div>` +
-      `<div class="sub">Status: ${escapeHtml(slip.status)} · ${slip.machines.length} machine(s)</div>` +
-      (formatDate(slip.created_at) ? `<div class="sub">Created: ${escapeHtml(formatDate(slip.created_at))}</div>` : "");
+      `<div class="sub">Status: ${escapeHtml(STATUS_LABEL[slip.status] || slip.status)} · ${slip.machines.length} machine(s)</div>` +
+      (formatDate(slip.created_at) ? `<div class="sub">Created: ${escapeHtml(formatDate(slip.created_at))}</div>` : "") +
+      (stranded.length ? `<div class="cs-blocked"><b>Cannot close yet</b>${
+        escapeHtml(stranded.map((m) => m.machine_desc).join(", "))} ${
+        stranded.length === 1
+          ? "was condemned and is still here. Record where it went under View Slips first."
+          : "were condemned and are still here. Record where each one went under View Slips first."
+      }</div>` : "");
   } catch (e) {
     toast(e.message, "err");
   }
@@ -2250,39 +2367,38 @@ function renderVsStatusActions(slip) {
   const showNoQuote = showQuote || showQuoted || s === "QUOTED";
   if (!showQuote && !showQuoted && !showNoQuote) return "";
   return `<div class="status-actions">
-    ${showQuote ? `<button class="status-btn status-btn-quote" data-vs-status="NEED_QUOTE">Need to Quote</button>` : ""}
-    ${showQuoted ? `<button class="status-btn status-btn-quoted" data-vs-status="QUOTED">Mark as Quoted</button>` : ""}
-    ${showNoQuote ? `<button class="status-btn status-btn-noquote" data-vs-status="NO_QUOTE">Close w/o Quote</button>` : ""}
+    ${showQuote ? `<button class="status-btn status-btn-quote" data-vs-state="AWAITING_QUOTE">Need to Quote</button>` : ""}
+    ${showQuoted ? `<button class="status-btn status-btn-quoted" data-vs-state="QUOTED">Mark as Quoted</button>` : ""}
+    ${showNoQuote ? `<button class="status-btn status-btn-noquote" data-vs-state="NO_QUOTE">Close w/o Quote</button>` : ""}
   </div>`;
 }
 
+// These move every machine on the slip at once. The per-machine buttons below
+// are the same model applied to one.
 function wireVsStatusActions(slipNumber) {
-  document.querySelectorAll("#vs-detail [data-vs-status]").forEach((btn) =>
+  document.querySelectorAll("#vs-detail [data-vs-state]").forEach((btn) =>
     btn.addEventListener("click", async () => {
-      const action = btn.dataset.vsStatus;
+      const action = btn.dataset.vsState;
+      // "Close w/o Quote" means "stop waiting, get on with it" - which is
+      // TO_REPAIR - and means nothing on a slip that was never waiting.
+      const slip = action === "NO_QUOTE"
+        ? await api(`/api/slips/${encodeURIComponent(slipNumber)}`) : null;
+      if (action === "NO_QUOTE" && slip.status !== "NEED_QUOTE" && slip.status !== "QUOTED") {
+        toast("No quote needed — carry on", "ok");
+        return;
+      }
+      const state = action === "NO_QUOTE" ? "TO_REPAIR" : action;
       try {
-        if (action === "NO_QUOTE") {
-          // Only meaningful when currently in a quoting state; otherwise confirm.
-          const slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
-          if (slip.status === "NEED_QUOTE" || slip.status === "QUOTED") {
-            await api(`/api/slips/${encodeURIComponent(slipNumber)}/status`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ status: "IN_PROGRESS" }),
-            });
-            toast("Continuing without quote", "ok");
-          } else {
-            toast("No quote needed — carry on", "ok");
-          }
-        } else {
-          await api(`/api/slips/${encodeURIComponent(slipNumber)}/status`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: action }),
-          });
-          toast(action === "NEED_QUOTE" ? "Marked: Need to Quote" : "Marked: Quoted", "ok");
-        }
+        await api(`/api/slips/${encodeURIComponent(slipNumber)}/state`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ state, who: initialsFor(getUser()) }),
+        });
+        toast(state === "AWAITING_QUOTE" ? "Sent for quoting"
+            : state === "QUOTED" ? "Marked as quoted"
+            : "Continuing without quote", "ok");
         onViewSlipChosen(slipNumber); // re-render with the new status
+        refreshQuoteCount();
       } catch (e) {
         toast(e.message, "err");
       }
@@ -2317,7 +2433,7 @@ function renderSlipDetail(slip) {
         slip.amendments.map((a) => `<div>${escapeHtml(a.field)}: &ldquo;${escapeHtml(a.before || "—")}&rdquo; &rarr; &ldquo;${escapeHtml(a.after || "—")}&rdquo;${
           a.changed_by ? ` · ${escapeHtml(a.changed_by)}` : ""}${a.changed_at ? ` · ${escapeHtml(String(a.changed_at).slice(0, 10))}` : ""}</div>`).join("")
       }</div>` : ""}
-      ${(slip.check_service || slip.quote_first) ? `<div class="vs-requests">${slip.check_service ? `<span class="vs-req-badge">Check &amp; Service for all</span>` : ""}${slip.quote_first ? `<span class="vs-req-badge">Quote first</span>` : ""}</div>` : ""}
+      ${slip.check_service ? `<div class="vs-requests"><span class="vs-req-badge">Check &amp; Service for all</span></div>` : ""}
       ${slip.notes ? `<div class="vs-notes">${escapeHtml(slip.notes)}</div>` : ""}
       ${slip.status === "CLOSED" && slip.closing_ref ? `<div class="vs-sub">Closed with: <strong>${escapeHtml(slip.closing_ref)}</strong>${slip.closed_at ? " on " + escapeHtml(formatDate(slip.closed_at)) : ""}</div>` : ""}
       ${renderVsStatusActions(slip)}
@@ -2331,27 +2447,43 @@ function renderSlipDetail(slip) {
     for (const p of parts) { mQty += p.quantity; mAmount += p.unit_price * p.quantity; }
     mAmount += mLabour;
 
-    // What the customer said, if they have been asked. It replaces the quoting
-    // pill because it is the later and more useful fact: "Quoted" only says
-    // Sales priced it, this says what came back.
-    const decision = m.work_decision || "";
-    const pill = decision === "REPAIR"  ? ` <span class="machine-quote mq-repair">Repair confirmed</span>`
-               : decision === "CONDEMN" ? ` <span class="machine-quote mq-condemn">Condemned</span>`
-               : m.quote_status === "NEED_QUOTE" ? ` <span class="machine-quote mq-need">Waiting to quote</span>`
-               : m.quote_status === "QUOTED"     ? ` <span class="machine-quote mq-done">Quoted</span>` : "";
+    const pill = machinePill(m);
 
     html += `
       <div class="vs-machine">
         <div class="vs-machine-name">${escapeHtml(m.machine_desc)}${pill}</div>`;
 
-    // Sales ring the customer and come back with one of two answers. Offered
-    // while the machine is waiting, and again afterwards so a mistake or a
-    // change of mind can be corrected.
-    if (canDecide() && (m.quote_status === "NEED_QUOTE" || decision)) {
-      html += `<div class="decide-row" data-decide="${m.id}">
-          <button type="button" class="decide-btn decide-repair"${decision === "REPAIR" ? " disabled" : ""} data-decision="REPAIR">Confirm Repair</button>
-          <button type="button" class="decide-btn decide-condemn"${decision === "CONDEMN" ? " disabled" : ""} data-decision="CONDEMN">Condemn</button>
-          ${decision ? `<button type="button" class="decide-btn" data-decision="">Undo</button>` : ""}
+    // Sales quote the machine, ring the customer, and come back with one of two
+    // answers. Each step is offered only from where the machine actually is,
+    // and the step already taken stays on screen so it can be corrected.
+    const live = slip.status !== "CLOSED" && !m.converted_at;
+    if (canDecide() && live && m.state !== "RECEIVED") {
+      const acts =
+        m.state === "AWAITING_QUOTE" ? [["QUOTED", "Mark as Quoted", "decide-quoted"],
+                                        ["TO_REPAIR", "No quote needed", ""]]
+      : m.state === "QUOTED"         ? [["TO_REPAIR", "Confirm Repair", "decide-repair"],
+                                        ["CONDEMNED", "Condemn", "decide-condemn"]]
+      : m.state === "TO_REPAIR"      ? [["AWAITING_QUOTE", "Send for quoting", ""]]
+      : m.state === "CONDEMNED"      ? [["TO_REPAIR", "Repair it after all", "decide-repair"]]
+      : [];
+      if (acts.length) {
+        html += `<div class="decide-row" data-decide="${m.id}">${acts.map(([to, label, cls]) =>
+          `<button type="button" class="decide-btn ${cls}" data-state="${escapeAttr(to)}">${escapeHtml(label)}</button>`
+        ).join("")}</div>`;
+      }
+    }
+
+    // A condemned machine is still in the workshop until somebody says where it
+    // went, and the slip will not close until they do. Asked here, on the
+    // screen sales are looking at when the customer rings about collecting it.
+    // Not gated on canDecide, unlike the decisions above: where a machine went
+    // is a fact rather than a customer's answer, the workshop often knows it
+    // first, and the slip cannot close until somebody records it.
+    if (live && m.state === "CONDEMNED") {
+      html += `<div class="decide-row decide-disposal" data-dispose="${m.id}">
+          <span class="decide-q">${m.disposal ? "Recorded:" : "Where did it go?"}</span>
+          <button type="button" class="decide-btn"${m.disposal === "COLLECTED" ? " disabled" : ""} data-disposal="COLLECTED">Customer collected</button>
+          <button type="button" class="decide-btn"${m.disposal === "DISPOSED" ? " disabled" : ""} data-disposal="DISPOSED">We disposed of it</button>
         </div>`;
     }
     html += `${m.serial_no ? `<div class="vs-machine-serial">S/N ${escapeHtml(m.serial_no)}</div>` : ""}${
@@ -2419,31 +2551,50 @@ function renderSlipDetail(slip) {
   return html;
 }
 
-// Recording what the customer said, and telling the technician who did the
-// work. Condemn is confirmed first: it tells someone to stop work on a machine,
-// and it is one tap away from Confirm Repair.
+// Moving a machine along from the sales screen, and telling the technician who
+// did the work. Condemn is confirmed first: it tells someone to stop work on a
+// machine, and it sits one tap away from Confirm Repair.
 function wireDecideButtons(wrap, slipNumber) {
-  wrap.querySelectorAll(".decide-row [data-decision]").forEach((btn) => {
+  wrap.querySelectorAll(".decide-row [data-state]").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const row = btn.closest(".decide-row");
       const machineId = Number(row.dataset.decide);
-      const decision = btn.dataset.decision;
-      if (decision === "CONDEMN" && !confirm(
+      const state = btn.dataset.state;
+      if (state === "CONDEMNED" && !confirm(
         "Condemn this machine?\n\nThe technicians who worked on it will be told to stop."
       )) return;
 
       row.querySelectorAll("button").forEach((b) => { b.disabled = true; });
       try {
-        await api(`/api/slips/${encodeURIComponent(slipNumber)}/machines/${machineId}/decision`, {
+        await api(`/api/slips/${encodeURIComponent(slipNumber)}/machines/${machineId}/state`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ decision, who: initialsFor(getUser()) }),
+          body: JSON.stringify({ state, who: initialsFor(getUser()) }),
         });
-        toast(decision === "REPAIR" ? "Repair confirmed — technician notified"
-            : decision === "CONDEMN" ? "Condemned — technician notified"
-            : "Decision undone", "ok");
+        toast(MOVE_TOAST[state] || "Saved", "ok");
         onViewSlipChosen(slipNumber);
         refreshQuoteCount();
+      } catch (e) {
+        toast(e.message || "Could not save that", "err");
+        row.querySelectorAll("button").forEach((b) => { b.disabled = false; });
+      }
+    });
+  });
+
+  wrap.querySelectorAll(".decide-disposal [data-disposal]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const row = btn.closest(".decide-disposal");
+      const machineId = Number(row.dataset.dispose);
+      const disposal = btn.dataset.disposal;
+      row.querySelectorAll("button").forEach((b) => { b.disabled = true; });
+      try {
+        await api(`/api/slips/${encodeURIComponent(slipNumber)}/machines/${machineId}/disposal`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ disposal, who: initialsFor(getUser()) }),
+        });
+        toast(DISPOSAL_LABEL[disposal], "ok");
+        onViewSlipChosen(slipNumber);
       } catch (e) {
         toast(e.message || "Could not save that", "err");
         row.querySelectorAll("button").forEach((b) => { b.disabled = false; });
@@ -3701,7 +3852,7 @@ async function enterNeedToQuote() {
       const all = s.machines || [];
       // Machines are quoted one at a time now, so the count on its own would be
       // misleading: two machines, one waiting, reads as two to price.
-      const waiting = all.filter((m) => m.quote_status === "NEED_QUOTE");
+      const waiting = all.filter((m) => m.state === "AWAITING_QUOTE");
       const list = (waiting.length ? waiting : all).map((m) => m.machine_desc);
       const machines = all.length;
       const created = formatDate(s.created_at);

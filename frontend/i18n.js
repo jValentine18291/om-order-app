@@ -184,6 +184,11 @@
     "Continuing without quote": "继续，无需报价",
     "Marked: Need to Quote": "已标记：需要报价",
     "Marked: Quoted": "已标记：已报价",
+    // A quote that has gone to the customer: nobody in the workshop can do
+    // anything until they answer, which is what this has to say.
+    "Waiting on Customer": "等待客户回复",
+    "Waiting on customer": "等待客户回复",
+    "Marked as quoted": "已标记为已报价",
 
     // ---- Machine modal ----
     "Machine": "机器",
@@ -210,6 +215,37 @@
     "Already sent to the customer.": "已发送给客户。",
     "Sent for quoting": "已送去报价",
     "Taken back": "已撤销",
+
+    // ---- Moving a machine along ----
+    // One machine, one state. These are the buttons a technician sees, and the
+    // answer Sales bring back from the customer.
+    "Quoted; waiting for their answer.": "已报价；等待客户回复。",
+    "Carry on with the repair.": "可以继续维修。",
+    "Undo — no quote needed": "撤销 — 无需报价",
+    "Mark as quoted": "标记为已报价",
+    "They said go ahead": "客户同意维修",
+    "They said no — condemn": "客户不修 — 报废",
+    "Send for quoting": "送去报价",
+    "Repair it after all": "还是维修这台",
+    "Still here — record where it goes before the slip can close.": "机器仍在店内 — 结单前请记录去向。",
+    // Where a condemned machine went. The slip will not close until this is
+    // answered, so it is asked plainly.
+    "What happened to it?": "这台机器怎么处理？",
+    "Where did it go?": "机器去向？",
+    "Recorded:": "已记录：",
+    "Not yet collected": "尚未取回",
+    "Customer collected it": "客户已取回",
+    "Customer collected": "客户已取回",
+    "We disposed of it": "我们已处理掉",
+    "Disposed of": "已处理掉",
+    "Condemned — technician notified": "已报废 — 已通知技工",
+    "Repair confirmed — technician notified": "已确认维修 — 已通知技工",
+    "Quoted — waiting on the customer": "已报价 — 等待客户回复",
+    "Hold off until they say yes or no.": "请等客户答复后再动手。",
+    "Quoted by": "报价：",
+    "Quote before repairing this one": "这台机器维修前先报价",
+    "Sales are told as soon as the slip is registered.": "服务单一开出，销售就会收到通知。",
+    "Quote first": "先报价",
     "Select your name…": "选择你的名字…",
     "Pick your name first": "请先选择你的名字",
     "Upload photos": "上传照片",
