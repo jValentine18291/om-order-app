@@ -769,34 +769,6 @@
     </div>
   </div>
 
-  <!-- Who the slip is about to be sent to. WhatsApp will not let a web page
-       choose the chat for it - only the phone's own share sheet can attach a
-       file, and that always asks which chat. So the number is named HERE,
-       before the sheet opens, because the thing being sent is a document the
-       customer signed and the cost of the wrong chat is high. -->
-  <div class="modal-overlay" id="wa-modal" style="display:none">
-    <div class="modal-sheet">
-      <div class="modal-head">
-        <div>
-          <strong>Send on WhatsApp</strong>
-          <div class="mm-sub" id="wa-sub"></div>
-        </div>
-        <button class="modal-x" id="wa-close" aria-label="Close">&#10005;</button>
-      </div>
-      <div class="wa-to">
-        <div class="wa-to-lab">Send to</div>
-        <div class="wa-to-name" id="wa-name"></div>
-        <div class="wa-to-num mono" id="wa-num"></div>
-      </div>
-      <p class="wa-hint" id="wa-hint"></p>
-      <div class="wa-msg" id="wa-msg"></div>
-      <div class="vse-savebar">
-        <button class="btn-secondary vse-cancel" id="wa-cancel" type="button">Cancel</button>
-        <button class="btn-primary" id="wa-go" type="button">Open WhatsApp</button>
-      </div>
-    </div>
-  </div>
-
   <!-- One part's details, opened from a code inside a note. Deliberately a
        popup: tapping a replacement while reading a diagram should answer the
        question, not carry you off to another screen and lose your place. -->

@@ -614,23 +614,28 @@ function showSlipCreated(slip) {
       </div>
       <div class="created-title">Service slip ${escapeHtml(slip.slip_number)} created</div>
       <div class="created-sub">${escapeHtml(slip.company)} · ${slip.machines.length} machine(s)</div>
-      <div class="slip-actions">
-        <button class="btn-secondary" id="ns-share" type="button">Print PDF</button>
-        <button class="btn-primary" id="ns-wa" type="button">WhatsApp</button>
-      </div>
+      ${contactCopyHtml(slip)}
+      <button class="btn-primary" id="ns-share" type="button" style="width:100%;margin-top:10px;">Share PDF</button>
       <button class="btn-secondary" id="ns-done" style="width:100%;margin-top:8px;">Done</button>
     </div>`;
   // Hide the form bits while the success card is up
   $("ns-status").innerHTML = "";
   $("ns-share").addEventListener("click", () => shareSlipPdf(slip));
-  $("ns-wa").addEventListener("click", () => whatsappSlip(slip));
   $("ns-done").addEventListener("click", goHome);
+  wireContactCopy(panel);
   window.scrollTo(0, 0);
 
-  // Once the server can send by itself, a newly registered slip goes out
-  // without anyone tapping anything - which is what auto_send is for.
+  // Offered only when the server can actually send, so staff are never shown a
+  // button that cannot work. Waiting on Meta approving the business account.
   whatsappStatus().then((wa) => {
-    if (wa.enabled && wa.configured && wa.auto_send) whatsappSlip(slip, { auto: true });
+    if (!wa.enabled || !wa.configured) return;
+    const btn = document.createElement("button");
+    btn.className = "btn-primary wa-send";
+    btn.type = "button";
+    btn.style.cssText = "width:100%;margin-top:8px;";
+    btn.textContent = "Send to customer on WhatsApp";
+    $("ns-share").insertAdjacentElement("beforebegin", btn);
+    wireWhatsappButton(btn, slip, { auto: wa.auto_send });
   });
 }
 
@@ -1174,138 +1179,101 @@ async function sendSlipWhatsApp(slipIn, { auto = false } = {}) {
   }
 }
 
-// Staff type these by hand: "9123 4567", "+65 9123 4567", "6591234567". The
-// server normalises the same way before it sends; this copy is only ever used
-// to open a chat, never to send, so the worst it can do is open the wrong one -
-// which is why the number is shown for checking before anything opens.
-function waNumber(slip) {
-  const raw = String(slip.whatsapp_number || slip.contact_number || "");
-  const digits = raw.replace(/\D/g, "");
-  if (!digits) return "";
-  // A local Singapore mobile, as typed on the counter pad.
-  if (digits.length === 8 && /^[689]/.test(digits)) return "65" + digits;
-  return digits;
+// One button, used on the success card and again in View Slips - the second
+// one matters, because a send that fails needs somewhere to be retried from.
+function wireWhatsappButton(btn, slip, { auto = false } = {}) {
+  const idle = btn.textContent;
+  const run = async (isAuto) => {
+    btn.disabled = true;
+    btn.textContent = isAuto ? "Sending to customer…" : "Sending…";
+    const r = await sendSlipWhatsApp(slip, { auto: isAuto });
+    if (r.ok) {
+      btn.textContent = "Sent to " + r.to;
+      btn.classList.add("wa-sent");
+      toast("Slip sent on WhatsApp", "ok");
+    } else {
+      btn.disabled = false;
+      btn.textContent = idle;
+      // Left on screen rather than a toast that vanishes: a failed send is
+      // something someone has to act on.
+      toast(r.error, "err");
+    }
+  };
+  btn.addEventListener("click", () => run(false));
+  if (auto) run(true);
 }
 
-function waPretty(digits) {
-  if (digits.length === 10 && digits.startsWith("65")) {
-    const n = digits.slice(2);
-    return `+65 ${n.slice(0, 4)} ${n.slice(4)}`;
-  }
-  return digits ? "+" + digits : "";
-}
-
-// What the customer reads above their copy. Short: it sits in a chat, not on
-// letterhead, and the PDF says everything else.
-function waMessage(slip) {
-  const machines = (slip.machines || []).map((m) => m.machine_desc).filter(Boolean);
-  const head = [
-    `Outboard & Marine — Service Slip ${slip.slip_number}`,
-    slip.company,
-    machines.join(", "),
-  ].filter(Boolean);
-  return head.join("\n") + "\n\nYour copy of the service slip is attached. Thank you.";
-}
-
-// Sending a slip to its customer.
+// ---- The customer's number, one tap from the clipboard ----------------------
+// Sharing a slip means the phone's share sheet, then WhatsApp, then finding the
+// right chat - and the number is back on the previous screen by then. So it is
+// put on the clipboard before any of that starts.
 //
-// When the server is set up to send for itself, it does: the PDF goes straight
-// to the number on the slip and nobody picks anything. That is waiting on Meta
-// approving the business account.
-//
-// Until then it goes out through the phone. WhatsApp gives a web page two
-// choices and neither does everything: a wa.me link opens the RIGHT chat but
-// cannot carry a file, while the phone's share sheet CAN carry the file but
-// always asks which chat. Attaching the PDF matters more than saving a tap -
-// hunting for a file in the phone's document picker is the slower, more
-// error-prone half - so the file goes with it and the number is named on
-// screen first, for checking.
-async function whatsappSlip(slipIn, { auto = false } = {}) {
-  const wa = await whatsappStatus();
-  if (wa.enabled && wa.configured) return whatsappViaServer(slipIn, { auto });
-  if (auto) return;                       // nothing automatic about a share sheet
-
-  const slip = await withSignature(slipIn);
-  if (!slip.signature && !(await confirmUnsigned(slip))) return;
-
-  const digits = waNumber(slip);
-  $("wa-sub").textContent = `Slip ${slip.slip_number} · ${slip.company}`;
-  $("wa-name").textContent = slip.contact_name || slip.company;
-  $("wa-num").textContent = digits ? waPretty(digits) : "No number on this slip";
-  $("wa-hint").textContent = digits
-    ? "WhatsApp will ask which chat to send to — choose this number. The slip PDF and the message below go with it."
-    : "This slip has no WhatsApp or contact number, so choose the customer's chat yourself. The slip PDF and the message below go with it.";
-  $("wa-msg").textContent = waMessage(slip);
-  $("wa-go").disabled = false;
-  $("wa-go").textContent = "Open WhatsApp";
-  waPending = slip;
-  $("wa-modal").style.display = "flex";
-  document.body.style.overflow = "hidden";
+// What is copied is exactly what is shown, which is exactly what was written on
+// the slip. A number that is silently reformatted on its way to the clipboard
+// is a number nobody can check.
+function contactCopyHtml(slip) {
+  const number = String(slip.whatsapp_number || slip.contact_number || "").trim();
+  if (!number) return "";
+  const who = slip.contact_name || slip.company || "";
+  return `
+    <button type="button" class="copy-num" data-copy="${escapeAttr(number)}">
+      <span class="copy-num-text">
+        <span class="copy-num-lab">${slip.whatsapp_number ? "WhatsApp" : "Contact"}${
+          who ? " · " + escapeHtml(who) : ""}</span>
+        <span class="copy-num-val mono">${escapeHtml(number)}</span>
+      </span>
+      <span class="copy-num-act">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+        Copy
+      </span>
+    </button>`;
 }
 
-let waPending = null;
-
-function closeWaSheet() {
-  $("wa-modal").style.display = "none";
-  const stillOpen = ["vse-modal", "vsr-modal", "machine-modal", "ipl-modal"]
-    .some((id) => $(id) && $(id).style.display === "flex");
-  if (!stillOpen) document.body.style.overflow = "";
-  waPending = null;
-}
-$("wa-close").addEventListener("click", closeWaSheet);
-$("wa-cancel").addEventListener("click", closeWaSheet);
-
-$("wa-go").addEventListener("click", async () => {
-  const slip = waPending;
-  if (!slip) return;
-  const btn = $("wa-go");
-  btn.disabled = true;
-  btn.textContent = "Preparing…";
-
-  let blob;
+async function copyText(text) {
+  // The modern route needs a secure context. The app is served over HTTPS on
+  // the phones, but not on a plain-HTTP desktop, so the old route is kept.
   try {
-    blob = buildSlipPdf(slip);
-  } catch (e) {
-    toast("Couldn't build PDF: " + e.message, "err");
-    btn.disabled = false; btn.textContent = "Open WhatsApp";
-    return;
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (_) { /* fall through and try the old way */ }
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.cssText = "position:fixed;top:-1000px;opacity:0;";
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand("copy");
+    ta.remove();
+    return ok;
+  } catch (_) {
+    return false;
   }
-  const file = new File([blob], `ServiceSlip_${slip.slip_number}.pdf`, { type: "application/pdf" });
-  const message = waMessage(slip);
-  const digits = waNumber(slip);
-  closeWaSheet();
+}
 
-  // The phone's share sheet: the one route that carries the PDF. WhatsApp puts
-  // the text in as the caption.
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    try {
-      await navigator.share({ files: [file], text: message });
-      return;
-    } catch (_) { /* cancelled, or the sheet refused - fall through */ }
-  }
-
-  // No file sharing (a desktop, usually). Open the right chat with the message
-  // ready and put the PDF in Downloads, so the only manual step is the paperclip.
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = `ServiceSlip_${slip.slip_number}.pdf`;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 4000);
-
-  window.open(
-    digits ? `https://wa.me/${digits}?text=${encodeURIComponent(message)}`
-           : `https://wa.me/?text=${encodeURIComponent(message)}`,
-    "_blank", "noopener"
-  );
-  toast("PDF downloaded — attach it in WhatsApp", "ok");
-});
-
-// The server sending for itself: the PDF goes straight to the number on the
-// slip. Built and waiting on Meta approving the business account.
-async function whatsappViaServer(slip, { auto = false } = {}) {
-  const r = await sendSlipWhatsApp(slip, { auto });
-  if (r.ok) toast("Slip sent on WhatsApp to " + r.to, "ok");
-  else if (!auto) toast(r.error, "err");
+function wireContactCopy(scope) {
+  (scope || document).querySelectorAll("[data-copy]").forEach((btn) => {
+    if (btn.dataset.copyWired) return;
+    btn.dataset.copyWired = "1";
+    btn.addEventListener("click", async () => {
+      const ok = await copyText(btn.dataset.copy);
+      if (!ok) { toast("Could not copy - press and hold the number instead", "err"); return; }
+      // Said on the button itself as well as in a toast: on a phone the toast
+      // can be under a thumb, and this is the confirmation that matters before
+      // someone walks off to WhatsApp.
+      const act = btn.querySelector(".copy-num-act");
+      const before = act.innerHTML;
+      btn.classList.add("copied");
+      act.textContent = "Copied";
+      toast("Number copied", "ok");
+      setTimeout(() => {
+        btn.classList.remove("copied");
+        act.innerHTML = before;
+      }, 2000);
+    });
+  });
 }
 
 // Share the PDF via the device's native share sheet (WhatsApp/email/AirDrop),
@@ -2443,10 +2411,21 @@ async function onViewSlipChosen(slipNumber) {
     // Rebuilt from the stored slip, so a re-issued copy matches the original.
     const share = document.getElementById("vs-share");
     if (share) share.addEventListener("click", () => shareSlipPdf(slip));
-    const waBtn = document.getElementById("vs-wa");
-    // Never automatic here - this screen is opened to look at old slips, and
-    // re-sending one just because it was viewed would be alarming.
-    if (waBtn) waBtn.addEventListener("click", () => whatsappSlip(slip));
+    wireContactCopy(wrap);
+    if (share) {
+      whatsappStatus().then((wa) => {
+        if (!wa.enabled || !wa.configured) return;
+        const btn = document.createElement("button");
+        btn.className = "btn-secondary wa-send";
+        btn.type = "button";
+        btn.style.cssText = "width:100%;margin-top:8px;";
+        btn.textContent = "Send to customer on WhatsApp";
+        share.insertAdjacentElement("afterend", btn);
+        // Never automatic here - this screen is opened to look at old slips,
+        // and re-sending one just because it was viewed would be alarming.
+        wireWhatsappButton(btn, slip, { auto: false });
+      });
+    }
     const soBtn = document.getElementById("vs-so");
     if (soBtn) soBtn.addEventListener("click", () => showSlipOrder(slip.slip_number));
   } catch (e) {
@@ -2634,10 +2613,8 @@ function renderSlipDetail(slip) {
 
   // Re-issue the customer's copy — same PDF as registration, signature and all.
   html += `
-    <div class="slip-actions" style="margin-top:14px;">
-      <button class="btn-secondary" id="vs-share" type="button">Print PDF</button>
-      <button class="btn-primary" id="vs-wa" type="button">WhatsApp</button>
-    </div>${
+    ${contactCopyHtml(slip)}
+    <button class="btn-primary" id="vs-share" type="button" style="margin-top:10px;">Share PDF</button>${
       canDecide() && slip.status !== "CLOSED"
         ? `<button class="btn-secondary" id="vs-edit" style="margin-top:10px;width:100%;">Edit slip</button>` : ""}`;
 

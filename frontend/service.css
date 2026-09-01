@@ -650,32 +650,41 @@ select {
 /* A plain fact rather than a state - "not yet collected" beside "Condemned". */
 .mq-none { color: var(--ink-faint); background: #F1F4F6; font-weight: 600; }
 
-/* ---- Print / WhatsApp ------------------------------------------------------
-   Two things staff do with a finished slip: put it on paper, or send it to the
-   customer. They sit side by side because they are alternatives, not a
-   sequence, and WhatsApp is the primary one. */
-.slip-actions { display: flex; gap: 10px; }
-.slip-actions button { flex: 1; margin: 0; }
-
-/* Who it is about to go to. Shown before the share sheet opens, because the
-   sheet asks which chat and a signed slip in the wrong chat cannot be recalled. */
-.wa-to {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 14px; padding: 13px 15px; margin-bottom: 12px;
+/* ---- The customer's number, one tap from the clipboard ---------------------
+   Sharing a slip means the share sheet, then WhatsApp, then finding the chat -
+   by which point the number is two screens back. It sits directly above Share
+   PDF because that is the order the two are used in. */
+.copy-num {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  width: 100%; margin-top: 14px; padding: 11px 14px;
+  background: var(--surface); border: 1.5px solid var(--border-2);
+  border-radius: 14px; text-align: left;
+  font-family: inherit; color: var(--ink);
+  transition: border-color .15s, background .15s;
 }
-.wa-to-lab {
-  font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
-  color: var(--ink-faint); margin-bottom: 4px;
+.copy-num:active { background: var(--surface-2); }
+.copy-num-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.copy-num-lab {
+  font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-faint);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.wa-to-name { font-size: 16px; font-weight: 700; }
-.wa-to-num { font-size: 18px; font-weight: 700; color: var(--primary); letter-spacing: .01em; }
-.wa-hint { font-size: 13px; color: var(--ink-soft); line-height: 1.5; margin: 0 0 12px; }
-.wa-msg {
-  background: var(--surface-2); border: 1px dashed var(--border-2);
-  border-radius: 12px; padding: 12px 14px;
-  font-size: 13.5px; line-height: 1.55; color: var(--ink-soft);
-  white-space: pre-wrap; word-break: break-word;
+/* Selectable even though it sits inside a button: if the clipboard is refused,
+   the message tells staff to press and hold the number, and that has to be
+   true. Text inside a button is not selectable by default. */
+.copy-num-val {
+  font-size: 17px; font-weight: 700; letter-spacing: .02em;
+  -webkit-user-select: text; user-select: text;
 }
+.copy-num-act {
+  display: inline-flex; align-items: center; gap: 6px; flex: none;
+  font-size: 13.5px; font-weight: 700; color: var(--primary);
+}
+.copy-num-act svg { width: 16px; height: 16px; }
+/* Confirmed on the button itself: on a phone a toast can be under a thumb, and
+   this is the one thing worth being sure of before walking off to WhatsApp. */
+.copy-num.copied { border-color: #1B7A42; background: #E7F5EC; }
+.copy-num.copied .copy-num-act { color: #1B7A42; }
 
 /* ---- Edit slip -------------------------------------------------------------
    Nine identical boxes in one column, with each machine repeating the same
