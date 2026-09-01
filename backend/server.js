@@ -458,10 +458,14 @@ app.post("/api/part-requests/bulk", async (req, res) => {
     });
     res.status(201).json({ batch_id: rows[0].batch_id, rows });
 
+    // A one-line order is named rather than counted: "1 part" tells the
+    // purchaser nothing, while "Diesel" or the part's own description tells
+    // them whether it can wait until the afternoon.
     const n = rows.length;
+    const what = n === 1 ? (rows[0].description || rows[0].item_code) : `${n} parts`;
     push.notify(pushDb, ORDER_NOTIFY_ROLES, {
       title: "New bulk order",
-      body: `${n} part${n === 1 ? "" : "s"} · from ${rows[0].requester || "?"}`,
+      body: `${what} · from ${rows[0].requester || "?"}`,
       slip: "",
     }).catch((e) => console.error("[push] notify failed:", e.message));
   } catch (err) {

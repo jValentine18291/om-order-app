@@ -5048,6 +5048,63 @@ function renderBulkCart() {
   );
 }
 
+// ---- Diesel -----------------------------------------------------------------
+// The workshop runs on it, the purchaser always orders the same amount, and
+// AutoCount does not stock it - so there is no part to search for and no
+// quantity worth asking. One button, sent as a free-text line so it lands in
+// the purchaser's list beside everything else and gets the same Need to Order
+// / Ordered treatment.
+//
+// Armed on the first tap like the order button below it, because a single tap
+// that quietly orders a drum of diesel is a tap somebody will regret.
+const DIESEL_LINE = {
+  item_code: "DIESEL",
+  // Must differ from the code itself, or the server rejects it as a
+  // placeholder with no description - which is the right rule for a part
+  // somebody typed, and this has to satisfy it too.
+  description: "Diesel — usual amount",
+  qty_requested: 1,
+  free_text: true,
+};
+
+function disarmDiesel() {
+  const btn = $("bo-diesel");
+  if (!btn) return;
+  delete btn.dataset.armed;
+  btn.classList.remove("armed");
+  btn.innerHTML = dieselIdleHtml;
+}
+let dieselIdleHtml = "";
+
+$("bo-diesel").addEventListener("click", async () => {
+  const btn = $("bo-diesel");
+  if (!dieselIdleHtml) dieselIdleHtml = btn.innerHTML;
+  const requester = userName();
+  if (!requester) { toast("Choose your name from the top bar first", "err"); return; }
+
+  if (!btn.dataset.armed) {
+    btn.dataset.armed = "1";
+    btn.classList.add("armed");
+    btn.textContent = "Tap again to send";
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Sending…";
+  try {
+    await api(`/api/part-requests/bulk`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requester, batch_remarks: "", items: [DIESEL_LINE] }),
+    });
+    toast("Diesel order sent to the purchaser", "ok");
+  } catch (e) {
+    toast(e.message || "Could not send the order", "err");
+  }
+  btn.disabled = false;
+  disarmDiesel();
+});
+
 $("bo-submit").addEventListener("click", async () => {
   if (!boCart.length) return;
   const requester = userName();

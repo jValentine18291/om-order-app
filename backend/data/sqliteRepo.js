@@ -1112,6 +1112,18 @@ function clashMessage(existing) {
   return `${existing.qty_requested} requested by ${who}${when ? " on " + when : ""}`;
 }
 
+// "How much was on the shelf when this was asked for", or nothing at all.
+//
+// Number(null) is 0, not NaN, so the obvious Number.isFinite check quietly
+// turned "AutoCount has never heard of this" into "we have none left" - a real
+// difference to a purchaser deciding whether to order today. Anything that is
+// not actually a number stays null, and the app shows it as an em dash.
+function stockSnap(v) {
+  if (v === null || v === undefined || v === "") return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
 function createPartRequest({ item_code, description = "", qty_requested, requester = "", remarks = "", stock_at_request = null, free_text = false } = {}) {
   const code = String(item_code || "").trim();
   const qty = Number(qty_requested);
@@ -1135,7 +1147,7 @@ function createPartRequest({ item_code, description = "", qty_requested, request
     }
   }
 
-  const snap = Number.isFinite(Number(stock_at_request)) ? Number(stock_at_request) : null;
+  const snap = stockSnap(stock_at_request);
   const info = db.prepare(
     `INSERT INTO part_requests (item_code, description, qty_requested, requester, remarks, batch_id, stock_at_request, free_text)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
@@ -1175,7 +1187,7 @@ function createPartRequestBatch({ items, requester = "", batch_remarks = "" } = 
       const existing = openRequestFor(code);
       if (existing) problems.push(`${label} already has an open request: ${clashMessage(existing)}.`);
     }
-    const snap = Number((it || {}).stock_at_request);
+    const snap = stockSnap((it || {}).stock_at_request);
     return {
       code,
       qty: Math.floor(qty),

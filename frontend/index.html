@@ -276,6 +276,14 @@
         <p class="eyebrow">Purchasing</p>
         <h2>Bulk Order</h2>
       </div>
+      <!-- Diesel is not an AutoCount item, so it cannot be searched for like a
+           part. It is also the one thing ordered often enough, and always in
+           the same amount, to be worth its own button. -->
+      <button class="bo-diesel" id="bo-diesel" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s5 5.5 5 9a5 5 0 0 1-10 0c0-3.5 5-9 5-9Z"/></svg>
+        Order Diesel
+      </button>
+
       <div class="field">
         <label for="bo-q">Add a part</label>
         <input id="bo-q" type="text" autocomplete="off" placeholder="Search by description or part no.&hellip;" />

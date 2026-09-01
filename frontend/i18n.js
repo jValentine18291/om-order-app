@@ -252,6 +252,11 @@
     "Sales are told as soon as the slip is registered.": "服务单一开出，销售就会收到通知。",
     "Quote first": "先报价",
     "Recently looked up": "最近查看",
+    // The diesel shortcut on Bulk Order.
+    "Order Diesel": "订购柴油",
+    "Tap again to send": "再按一次发送",
+    "Sending…": "发送中…",
+    "Diesel order sent to the purchaser": "柴油订单已发送给采购",
     "Select your name…": "选择你的名字…",
     "Pick your name first": "请先选择你的名字",
     "Upload photos": "上传照片",

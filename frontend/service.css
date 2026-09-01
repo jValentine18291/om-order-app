@@ -681,6 +681,24 @@ select {
 /* A plain fact rather than a state - "not yet collected" beside "Condemned". */
 .mq-none { color: var(--ink-faint); background: #F1F4F6; font-weight: 600; }
 
+/* Order Diesel. Amber because it is a purchasing action, matching what that
+   colour came to mean on the home screen - and quiet enough that it does not
+   compete with the part search underneath it. */
+.bo-diesel {
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  width: 100%; min-height: 48px; margin: 4px 0 16px;
+  padding: 0 16px; border-radius: 14px;
+  border: 1.5px solid #d9a441; background: #FFF6E8;
+  font-family: inherit; font-size: 1rem; font-weight: 700; color: #8A4B00;
+  cursor: pointer;
+}
+.bo-diesel svg { width: 19px; height: 19px; }
+.bo-diesel:active { background: #FBEBD2; }
+/* Armed: the next tap sends, so it stops looking like an invitation to browse
+   and starts looking like a commitment. */
+.bo-diesel.armed { background: #8A4B00; border-color: #8A4B00; color: #fff; }
+.bo-diesel:disabled { opacity: .6; }
+
 /* The last few parts looked up, on the otherwise empty Find Part screen. */
 .fp-recent-head { margin: 18px 0 8px; }
 
