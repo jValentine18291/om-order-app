@@ -6,7 +6,7 @@
   {
    "id": "1",
    "number": "1",
-   "title": "FRAME",
+   "title": "BLOWER GROUP",
    "image": "ebz5100-fig1.png",
    "ocr": false,
    "hotspots": [
@@ -903,12 +903,12 @@
    ],
    "sheets": 1,
    "sheet": 1,
-   "label": "Fig.1 FRAME"
+   "label": "Fig.1 BLOWER GROUP"
   },
   {
    "id": "2",
    "number": "2",
-   "title": "ENGINE",
+   "title": "ENGINE GROUP 01",
    "image": "ebz5100-fig2.png",
    "ocr": false,
    "hotspots": [
@@ -1693,12 +1693,12 @@
    ],
    "sheets": 2,
    "sheet": 1,
-   "label": "Fig.2 ENGINE (1 of 2)"
+   "label": "Fig.2 ENGINE GROUP 01"
   },
   {
    "id": "3",
    "number": "2",
-   "title": "ENGINE",
+   "title": "ENGINE GROUP 02",
    "image": "ebz5100-fig3.png",
    "ocr": false,
    "hotspots": [
@@ -2219,12 +2219,12 @@
    ],
    "sheets": 2,
    "sheet": 2,
-   "label": "Fig.2 ENGINE (2 of 2)"
+   "label": "Fig.2 ENGINE GROUP 02"
   },
   {
    "id": "4",
    "number": "3",
-   "title": "CARBURETOR DETAILS",
+   "title": "CARBURETOR COMPONENTS",
    "image": "ebz5100-fig4.png",
    "ocr": false,
    "hotspots": [
@@ -2489,12 +2489,12 @@
    ],
    "sheets": 1,
    "sheet": 1,
-   "label": "Fig.3 CARBURETOR DETAILS"
+   "label": "Fig.3 CARBURETOR COMPONENTS"
   },
   {
    "id": "5",
    "number": "4",
-   "title": "THROTTLE CONTROLS",
+   "title": "LEVER SET",
    "image": "ebz5100-fig5.png",
    "ocr": false,
    "hotspots": [
@@ -2861,7 +2861,7 @@
    ],
    "sheets": 1,
    "sheet": 1,
-   "label": "Fig.4 THROTTLE CONTROLS"
+   "label": "Fig.4 LEVER SET"
   }
  ]
 }

@@ -1,0 +1,9 @@
+# Titles as printed on the EBZ5100's own drawings, read off the sheets.
+# The portal files these sheets as FRAME / ENGINE / CARBURETOR DETAILS /
+# THROTTLE CONTROLS, which is not what a technician is looking at.
+# One line per sheet, in the order --dry-run lists them.
+BLOWER GROUP
+ENGINE GROUP 01
+ENGINE GROUP 02
+CARBURETOR COMPONENTS
+LEVER SET

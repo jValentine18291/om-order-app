@@ -16,6 +16,18 @@ rows AND the hotspot boxes as Husqvarna themselves recorded them. Nothing is
 guessed: the numbers are exact and the hotspots land where the manufacturer put
 them. If a portal CSV exists for a model, it beats the PDF every time.
 
+SHEET TITLES
+The CSV names each sheet the way the portal files it - FRAME, THROTTLE CONTROLS
+- which is not always what is printed on the drawing the technician is looking
+at: BLOWER GROUP, LEVER SET. Where they disagree, the drawing wins, because that
+is the page in front of them. The titles are not in the export, so --titles
+takes them as a small text file, one line per sheet:
+
+    python tools/ipl-import-csv.py ... --dry-run          # lists the sheets
+    python tools/ipl-import-csv.py ... --titles ebz5100.titles.txt
+
+A line of "-" keeps the CSV's name for that sheet.
+
 WHAT IT PRODUCES
 frontend/ipl/<id>.json plus one PNG per sheet, and the index.json row, matching
 the format the earlier books already use so the app needs no changes.
@@ -129,6 +141,8 @@ def main():
     ap.add_argument("--short", required=True, help="what AutoCount calls it, e.g. SR3100")
     ap.add_argument("--brand", required=True)
     ap.add_argument("--category", required=True)
+    ap.add_argument("--titles", help="text file of sheet titles, one per sheet, "
+                                     "in the order --dry-run lists them")
     ap.add_argument("--cache", default=os.path.join(HERE, ".ipl-cache"))
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
@@ -153,6 +167,30 @@ def main():
     per_name = {}
     for name, _img in order:
         per_name[name] = per_name.get(name, 0) + 1
+
+    # The titles printed on the drawings, if we were given them. Counted
+    # against the sheets rather than zipped: a file one line short would
+    # otherwise retitle the wrong sheets from that point on and look fine.
+    titles = None
+    if a.titles:
+        with io.open(a.titles, encoding="utf-8") as f:
+            lines = [ln.strip() for ln in f if ln.strip() and not ln.startswith("#")]
+        if len(lines) != len(order):
+            sys.exit(f"--titles has {len(lines)} title(s) for {len(order)} sheet(s). "
+                     "Run with --dry-run to list them in order.")
+        titles = [None if ln == "-" else ln for ln in lines]
+
+    # A group whose sheets are titled apart - ENGINE GROUP 01 and 02 - does not
+    # also need "(1 of 2)" bolted on.
+    distinct = {}
+    for i, (name, _img) in enumerate(order):
+        distinct.setdefault(name, set()).add(titles[i] if titles else None)
+    self_titling = {n: len(v) > 1 and None not in v for n, v in distinct.items()}
+
+    print("sheets, in order:")
+    for i, (name, _img) in enumerate(order):
+        shown = (titles[i] if titles else None) or name
+        print(f"  {i + 1:2}. {shown}" + (f"   (CSV: {name})" if shown != name else ""))
 
     figures, seen_sheet, total_parts, total_spots, no_spots = [], {}, 0, 0, []
     cache_index = {}
@@ -189,8 +227,9 @@ def main():
             })
             spots.extend(hotspots_for(r.get("Coordinates"), ref, page_w, page_h))
 
-        label = f"Fig.{fig_no[name]} {name}"
-        if sheet_of > 1:
+        title = (titles[i - 1] if titles else None) or name
+        label = f"Fig.{fig_no[name]} {title}"
+        if sheet_of > 1 and not self_titling.get(name):
             label += f" ({sheet_no} of {sheet_of})"
 
         if not spots:
@@ -215,7 +254,7 @@ def main():
         figures.append({
             "id": str(i),
             "number": str(fig_no[name]),
-            "title": name,
+            "title": title,
             "image": image_name,
             # Not recognised from a picture: taken from the manufacturer's own
             # export, which is why every hotspot is worth trusting.
