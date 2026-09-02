@@ -196,5 +196,14 @@
   "category": "Brushcutter",
   "figures": 25,
   "parts": 266
+ },
+ {
+  "id": "hus525he4",
+  "name": "Husqvarna 525HE4",
+  "short": "525HE4",
+  "brand": "Husqvarna",
+  "category": "Pole Hedge Trimmer",
+  "figures": 16,
+  "parts": 197
  }
 ]

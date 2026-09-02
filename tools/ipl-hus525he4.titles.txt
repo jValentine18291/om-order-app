@@ -1,0 +1,28 @@
+# Titles as printed on the 525HE4's own drawings, read off the sheets.
+# Each heads itself "525HE4 / <title>" beside its section letter; SHORT BLOCK
+# has no letter.
+#
+# Only three differ from the portal, and only in wording: the ampersands, and
+# CYLINDER PISTON which the drawing sets as CYLINDER & PISTON. Kept anyway so
+# the tabs read as the sheet in front of the technician does.
+#
+# No market variants in this book - unlike the 531RB, nothing here is split
+# between Asia and South Korea.
+#
+# One line per sheet, in the order --dry-run lists them.
+GEAR HOUSING
+CUTTING EQUIPMENT
+SHAFT
+THROTTLE CONTROLS
+COVER
+CARBURETOR & AIR FILTER
+STARTER
+CRANKCASE
+FUEL TANK
+IGNITION SYSTEM & CLUTCH
+CYLINDER & PISTON
+CRANKSHAFT
+CARBURETOR
+MUFFLER
+SHORT BLOCK
+ACCESSORIES
