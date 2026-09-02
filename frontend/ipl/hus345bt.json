@@ -1,0 +1,733 @@
+{
+ "id": "hus345bt",
+ "name": "Husqvarna 345BT",
+ "source": "Husqvarna portal CSV export (345BT IPL.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "BLOWER HOUSING",
+   "image": "hus345bt-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 19.131,
+     "y": 16.686,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 36.99,
+     "y": 13.371,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 52.121,
+     "y": 12.743,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 63.778,
+     "y": 7.357,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 84.667,
+     "y": 8.514,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 32.626,
+     "y": 31.386,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 66.04,
+     "y": 29.286,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 85.758,
+     "y": 27.543,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 15.576,
+     "y": 47.657,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 40.889,
+     "y": 42.143,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 20.646,
+     "y": 53.571,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 19.152,
+     "y": 58.686,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 17.535,
+     "y": 63.829,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 57.899,
+     "y": 69.343,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 81.071,
+     "y": 57.886,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 27.96,
+     "y": 79.0,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 40.162,
+     "y": 89.143,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 59.515,
+     "y": 76.314,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 59.434,
+     "y": 84.029,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 70.566,
+     "y": 91.7,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "531147166",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147166"
+    },
+    {
+     "key": "2",
+     "part_number": "531147167",
+     "depth": 0,
+     "sub": false,
+     "description": "CASE",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147167"
+    },
+    {
+     "key": "3",
+     "part_number": "531147168",
+     "depth": 0,
+     "sub": false,
+     "description": "FAN",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147168"
+    },
+    {
+     "key": "4",
+     "part_number": "531147169",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147169"
+    },
+    {
+     "key": "5",
+     "part_number": "531147170",
+     "depth": 0,
+     "sub": false,
+     "description": "SUPPORT",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147170"
+    },
+    {
+     "key": "6",
+     "part_number": "501424333",
+     "depth": 0,
+     "sub": false,
+     "description": "REPAIR KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "501424333"
+    },
+    {
+     "key": "7",
+     "part_number": "531147171",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147171"
+    },
+    {
+     "key": "8",
+     "part_number": "531147172",
+     "depth": 0,
+     "sub": false,
+     "description": "FRAME",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147172"
+    },
+    {
+     "key": "9",
+     "part_number": "531147174",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147174"
+    },
+    {
+     "key": "10",
+     "part_number": "501424346",
+     "depth": 0,
+     "sub": false,
+     "description": "REPAIR KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "501424346"
+    },
+    {
+     "key": "11",
+     "part_number": "531147165",
+     "depth": 0,
+     "sub": false,
+     "description": "SWIVEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147165"
+    },
+    {
+     "key": "12",
+     "part_number": "531147164",
+     "depth": 0,
+     "sub": false,
+     "description": "PIPE",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147164"
+    },
+    {
+     "key": "13",
+     "part_number": "531147163",
+     "depth": 0,
+     "sub": false,
+     "description": "PIPE",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147163"
+    },
+    {
+     "key": "14",
+     "part_number": "531147162",
+     "depth": 0,
+     "sub": false,
+     "description": "PIPE",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147162"
+    },
+    {
+     "key": "15",
+     "part_number": "531147175",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147175"
+    },
+    {
+     "key": "16",
+     "part_number": "531147173",
+     "depth": 0,
+     "sub": false,
+     "description": "HARNESS",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147173"
+    },
+    {
+     "key": "17",
+     "part_number": "531147177",
+     "depth": 0,
+     "sub": false,
+     "description": "CAP",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147177"
+    },
+    {
+     "key": "18",
+     "part_number": "548937401",
+     "depth": 0,
+     "sub": false,
+     "description": "SPARE PARTS KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "548937401"
+    },
+    {
+     "key": "19",
+     "part_number": "531147179",
+     "depth": 0,
+     "sub": false,
+     "description": "FUEL FILTER",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147179"
+    },
+    {
+     "key": "20",
+     "part_number": "548937402",
+     "depth": 0,
+     "sub": false,
+     "description": "SPARE PARTS KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "548937402"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 BLOWER HOUSING"
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "ENGINE",
+   "image": "hus345bt-fig2.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 10.258,
+     "y": 38.94,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 20.536,
+     "y": 44.399,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 25.574,
+     "y": 26.967,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 32.991,
+     "y": 30.815,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 31.217,
+     "y": 47.662,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 53.184,
+     "y": 31.842,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 75.03,
+     "y": 17.617,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 69.911,
+     "y": 45.496,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 73.74,
+     "y": 49.031,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 45.607,
+     "y": 51.967,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 43.47,
+     "y": 64.909,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 18.702,
+     "y": 81.585,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 36.618,
+     "y": 74.145,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 44.337,
+     "y": 69.099,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 49.012,
+     "y": 68.301,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 50.967,
+     "y": 65.878,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 69.206,
+     "y": 58.808,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 54.414,
+     "y": 84.493,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 69.186,
+     "y": 88.113,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 46.312,
+     "y": 41.106,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 78.194,
+     "y": 51.126,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 27.449,
+     "y": 55.131,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 59.472,
+     "y": 89.595,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "535316001",
+     "depth": 0,
+     "sub": false,
+     "description": "KEEPER",
+     "qty": "1",
+     "remarks": "",
+     "search": "535316001"
+    },
+    {
+     "key": "2",
+     "part_number": "535316302",
+     "depth": 0,
+     "sub": false,
+     "description": "AIR FILTER ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "535316302"
+    },
+    {
+     "key": "3",
+     "part_number": "535542601",
+     "depth": 0,
+     "sub": false,
+     "description": "CARBURETTOR AIRBOX SYSTEM",
+     "qty": "1",
+     "remarks": "",
+     "search": "535542601"
+    },
+    {
+     "key": "4",
+     "part_number": "535316601",
+     "depth": 0,
+     "sub": false,
+     "description": "PURGE",
+     "qty": "1",
+     "remarks": "",
+     "search": "535316601"
+    },
+    {
+     "key": "5",
+     "part_number": "535316501",
+     "depth": 0,
+     "sub": false,
+     "description": "BAFFLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "535316501"
+    },
+    {
+     "key": "6",
+     "part_number": "503235111",
+     "depth": 0,
+     "sub": false,
+     "description": "SPARK PLUG",
+     "qty": "1",
+     "remarks": "",
+     "search": "503235111"
+    },
+    {
+     "key": "7",
+     "part_number": "531147160",
+     "depth": 0,
+     "sub": false,
+     "description": "MUFFLER",
+     "qty": "1",
+     "remarks": "Catalyst Muffler: For All Non-LATAM Markets",
+     "search": "531147160"
+    },
+    {
+     "key": "7",
+     "part_number": "548933301",
+     "depth": 0,
+     "sub": false,
+     "description": "MUFFLER",
+     "qty": "1",
+     "remarks": "Non-Catalyst Muffler: For all LATAM Markets",
+     "search": "548933301"
+    },
+    {
+     "key": "8",
+     "part_number": "535316801",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "535316801"
+    },
+    {
+     "key": "9",
+     "part_number": "531147153",
+     "depth": 0,
+     "sub": false,
+     "description": "PISTON",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147153"
+    },
+    {
+     "key": "10",
+     "part_number": "535316701",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "535316701"
+    },
+    {
+     "key": "11",
+     "part_number": "531147180",
+     "depth": 0,
+     "sub": false,
+     "description": "CARBURETTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147180"
+    },
+    {
+     "key": "12",
+     "part_number": "537547501",
+     "depth": 0,
+     "sub": false,
+     "description": "STARTER ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "537547501"
+    },
+    {
+     "key": "13",
+     "part_number": "531147157",
+     "depth": 0,
+     "sub": false,
+     "description": "SEAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147157"
+    },
+    {
+     "key": "14",
+     "part_number": "531147156",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147156"
+    },
+    {
+     "key": "15",
+     "part_number": "531147154",
+     "depth": 0,
+     "sub": false,
+     "description": "BEARING",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147154"
+    },
+    {
+     "key": "16",
+     "part_number": "531147155",
+     "depth": 0,
+     "sub": false,
+     "description": "CRANKSHAFT",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147155"
+    },
+    {
+     "key": "17",
+     "part_number": "531147158",
+     "depth": 0,
+     "sub": false,
+     "description": "SEAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147158"
+    },
+    {
+     "key": "18",
+     "part_number": "501424373",
+     "depth": 0,
+     "sub": false,
+     "description": "REPAIR KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "501424373"
+    },
+    {
+     "key": "19",
+     "part_number": "531147161",
+     "depth": 0,
+     "sub": false,
+     "description": "IGNITION COIL",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147161"
+    },
+    {
+     "key": "20",
+     "part_number": "548838101",
+     "depth": 0,
+     "sub": false,
+     "description": "CYLINDER",
+     "qty": "1",
+     "remarks": "",
+     "search": "548838101"
+    },
+    {
+     "key": "21",
+     "part_number": "548838201",
+     "depth": 0,
+     "sub": false,
+     "description": "RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "548838201"
+    },
+    {
+     "key": "22",
+     "part_number": "548838301",
+     "depth": 0,
+     "sub": false,
+     "description": "CARBURETTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "548838301"
+    },
+    {
+     "key": "23",
+     "part_number": "548838401",
+     "depth": 0,
+     "sub": false,
+     "description": "CRANKCASE",
+     "qty": "1",
+     "remarks": "",
+     "search": "548838401"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 ENGINE"
+  }
+ ]
+}

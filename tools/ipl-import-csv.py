@@ -237,6 +237,21 @@ def main():
             })
             spots.extend(hotspots_for(r.get("Coordinates"), ref, page_w, page_h))
 
+        # One callout can list several parts - the 345BT's muffler is catalyst
+        # or not depending on the market, both under "7", both boxed in the
+        # same place. That is two parts and one place to tap, so identical
+        # hotspots collapse. A part bolted on in four places keeps its four:
+        # those differ by position.
+        seen_spot, unique = set(), []
+        for h in spots:
+            k = (h["key"], h["x"], h["y"])
+            if k in seen_spot:
+                continue
+            seen_spot.add(k)
+            unique.append(h)
+        dropped = len(spots) - len(unique)
+        spots = unique
+
         title = (titles[i - 1] if titles else None) or name
         label = f"Fig.{fig_no[name]} {title}"
         if sheet_of > 1 and not self_titling.get(name):
@@ -246,6 +261,8 @@ def main():
             no_spots.append(name if sheet_of == 1 else f"{name} ({sheet_no} of {sheet_of})")
         total_parts += len(parts)
         total_spots += len(spots)
+        if dropped:
+            print(f"    {name}: {dropped} hotspot(s) collapsed - a callout listing more than one part")
 
         # A hotspot off the sheet means the page was read wrong, and the rest
         # of them are quietly wrong too - they just happen to still be on the

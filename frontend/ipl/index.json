@@ -151,5 +151,14 @@
   "category": "Blower",
   "figures": 16,
   "parts": 195
+ },
+ {
+  "id": "hus345bt",
+  "name": "Husqvarna 345BT",
+  "short": "345BT",
+  "brand": "Husqvarna",
+  "category": "Blower",
+  "figures": 2,
+  "parts": 44
  }
 ]
