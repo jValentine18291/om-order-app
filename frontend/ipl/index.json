@@ -187,5 +187,14 @@
   "category": "Brushcutter",
   "figures": 2,
   "parts": 199
+ },
+ {
+  "id": "hus531rb",
+  "name": "Husqvarna 531RB",
+  "short": "531RB",
+  "brand": "Husqvarna",
+  "category": "Brushcutter",
+  "figures": 25,
+  "parts": 266
  }
 ]

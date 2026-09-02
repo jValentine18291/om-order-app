@@ -1,0 +1,48 @@
+# Titles as printed on the 531RB's own drawings, read off the sheets.
+# Each heads itself "531 RB / <title>" beside its section letter, and eleven of
+# them carry a market in the opposite corner.
+#
+# THE MARKET IS THE POINT OF THIS FILE
+# Eight of the twenty-five sheets come in an Asia version and a South Korea
+# version of the SAME assembly - gear, tube & shaft, handlebar, throttle
+# controls, accessories - and the portal files both under one name. So the app
+# showed "GEAR (1 of 2)" and "GEAR (2 of 2)" with nothing to say which was
+# which, and the two sheets list different part numbers.
+#
+# OM are in Singapore, which is Asia. A South Korea sheet does not apply to
+# their machines at all, and LA is Latin America. Putting the market in the tab
+# is the difference between ordering the right gearcase and the wrong one.
+#
+# The starters are the same story under different names: J1 STARTER is general
+# and J2 EASY STARTER is South Korea only. They share 5 part numbers out of 15
+# and 16, so they are genuinely different starters.
+#
+# Naming the sheets apart also drops the "(n of 2)" suffix, because each sheet
+# now says for itself which one it is.
+#
+# One line per sheet, in the order --dry-run lists them.
+GEAR (Asia & LA)
+GEAR (South Korea)
+TUBE & SHAFT (Asia & LA)
+TUBE & SHAFT (South Korea)
+HANDLEBAR (Asia & LA)
+HANDLEBAR (South Korea)
+THROTTLE CONTROLS (LA)
+THROTTLE CONTROLS (Asia & South Korea)
+CLUTCH
+IGNITION SYSTEM
+CYLINDER COVER
+MUFFLER
+STARTER
+EASY STARTER (South Korea)
+FUEL TANK
+CARBURETOR & AIRFILTER
+CYLINDER & PISTON
+CRANK SHAFT
+CRANKCASE
+CARBURETOR
+ACCESSORIES
+ACCESSORIES (Asia & LA)
+ACCESSORIES (South Korea)
+FRAME
+HARNESS
