@@ -41,7 +41,11 @@ import numpy as np
 from PIL import Image
 from scipy import ndimage
 
-DPI = 300
+# 300 suits the older Zenoah scans. The EBZ3000RH's engine drawing is finer,
+# and its assembly callouts sit against dash-dot boundary lines that merge
+# with the digits at 300 - twenty of them were lost that way. Overridable so a
+# book can be read at the resolution it needs.
+DPI = int(os.environ.get("IPL_OCR_DPI", "300"))
 POPPLER = os.environ.get("POPPLER_BIN", "")
 TESSERACT = os.environ.get("TESSERACT_BIN", "")
 DEBUG = os.environ.get("IPL_OCR_DEBUG", "") not in ("", "0")

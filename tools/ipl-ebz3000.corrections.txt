@@ -1,0 +1,38 @@
+# EBZ3000RH — every reading the extractor got wrong, and what the page says.
+#
+#   <page> <what OCR read>      <what is printed>      a part number
+#   <page> KEY <part number>    <what is printed>      a key, named by its part
+#
+# HOW THIS LIST WAS ARRIVED AT
+# Not by pattern-matching. `--proof` puts each part-number cell beside the
+# reading this same code produced for it, and all 165 were compared by eye.
+# These are the differences. A line that stops matching aborts the build
+# rather than being ignored, so the file cannot quietly rot.
+#
+# WHAT IS NOT IN HERE, BECAUSE IT WAS FIXED PROPERLY INSTEAD
+#   letter O   Zenoah do not use it - every O-shape is a zero - so it was
+#              removed from the OCR alphabet. That alone fixed four numbers
+#              on the blower page: 848L2055K0, 848L2037H0, 848C1B90G0 and
+#              848L0L65E0, each of which had read with a letter O and each of
+#              which still looked perfectly orderable.
+#   ruling lines  a cell cropped to its edges brought the table rule with it
+#              and read it as a 1: key 19 came back as 119. Cells are inset.
+#   T -> 1/7   whole-page OCR got this wrong seven times on the lever page
+#              alone. Reading each cell on its own with a restricted alphabet
+#              fixed all but the five below.
+#
+# The PDF also carries 21 part numbers as real text, stamped over the original
+# print as corrections. Those are exact and beat OCR outright, so they need no
+# entry here - they are what first proved the reading could not be trusted.
+
+# --- Fig.2 ENGINE GROUP -------------------------------------------------------
+5 12070-72210 T2070-72210
+5 11512-82130 T1512-82130
+# Read as key 4, which already exists on this figure - two parts under one
+# number, and 41 with none.
+5 KEY 848F6L71A0 41
+
+# --- Fig.4 LEVER (R) SET ------------------------------------------------------
+7 14023-25310 T4023-25310
+7 14023-25721 T4023-25721
+7 14023-25730 T4023-25730

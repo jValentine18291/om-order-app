@@ -169,5 +169,14 @@
   "category": "Chipper Shredder",
   "figures": 51,
   "parts": 1356
+ },
+ {
+  "id": "ebz3000rh",
+  "name": "Zenoah EBZ3000RH",
+  "short": "EBZ3000RH",
+  "brand": "Zenoah",
+  "category": "Blower",
+  "figures": 4,
+  "parts": 165
  }
 ]
