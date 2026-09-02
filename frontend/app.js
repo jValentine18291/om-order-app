@@ -1037,30 +1037,15 @@ function buildSlipPdf(slip) {
     y += boxH + 24;
   }
 
-  // ---- Changed after signing ----
-  // The customer signed what was on the page at the time. Anything altered
-  // afterwards has to travel with the document, or the signature silently
-  // starts covering things nobody agreed to.
-  const amendments = slip.amendments || [];
-  if (amendments.length) {
-    const rows = amendments.map((a) => {
-      const stamp = [a.changed_by, a.changed_at ? String(a.changed_at).slice(0, 16) : ""]
-        .filter(Boolean).join(", ");
-      return `${a.field}: "${a.before || "—"}" changed to "${a.after || "—"}"` +
-             (stamp ? `  (${stamp})` : "");
-    });
-    doc.setFontSize(8.6); doc.setFont("helvetica", "normal");
-    const wrapped = rows.flatMap((r) => doc.splitTextToSize(r, W - 40));
-    need(wrapped.length * 11 + 52);
-    sectionHead("CHANGED AFTER SIGNING", "clipboard");
-    y += 4;
-    const boxH = 18 + wrapped.length * 11;
-    setDraw([200, 140, 40]); setFill([255, 248, 232]); doc.setLineWidth(1);
-    doc.roundedRect(LEFT, y, W, boxH, 5, 5, "FD");
-    doc.setFontSize(8.6); setText([120, 80, 10]);
-    doc.text(wrapped, LEFT + 16, y + 16);
-    y += boxH + 24;
-  }
+  // The slip used to print a "CHANGED AFTER SIGNING" box listing every
+  // correction, with who made it and when. Customers told the sales team it
+  // was a page of detail they had no use for - a corrected phone number is
+  // not something they need itemised - so the printed slip now shows what the
+  // job IS, and nothing about how it got there.
+  //
+  // The record itself is untouched: slip_amendments still logs every change,
+  // and View Slips still shows "Changed after the customer signed" to staff.
+  // It stopped being printed, it did not stop existing.
 
   // ---- Terms, balanced across two columns ----
   const T_SIZE = 7.2, T_LEAD = 9.6, T_GAP = 34;
@@ -1144,14 +1129,6 @@ function buildSlipPdf(slip) {
   doc.setCharSpace(1.1);
   doc.text("CUSTOMER SIGNATURE   ·   I ACCEPT THE TERMS ABOVE", LEFT + 18, sigLineY + 14);
   doc.setCharSpace(0);
-  if (amendments.length) {
-    doc.setFontSize(7); doc.setFont("helvetica", "bold"); setText([150, 90, 10]);
-    doc.text(
-      `Signed before ${amendments.length} later change${amendments.length === 1 ? "" : "s"} — see "Changed after signing"`,
-      LEFT + 18, sigLineY + 25
-    );
-    doc.setFont("helvetica", "normal");
-  }
 
   // ---- Page footers ----
   const pages = doc.getNumberOfPages();
