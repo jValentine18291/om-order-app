@@ -142,5 +142,14 @@
   "category": "Blower",
   "figures": 5,
   "parts": 174
+ },
+ {
+  "id": "hus360bt",
+  "name": "Husqvarna 360BT",
+  "short": "360BT",
+  "brand": "Husqvarna",
+  "category": "Blower",
+  "figures": 16,
+  "parts": 195
  }
 ]

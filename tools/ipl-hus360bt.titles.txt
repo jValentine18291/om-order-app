@@ -1,0 +1,22 @@
+# Titles as printed on the 360BT's own drawings, read off the sheets.
+# Each sheet heads itself "360BT / <title>" beside its section letter.
+# Six differ from the portal's names: TUBE/TUBES, CYLINDER PISTON/CYLINDER AND
+# PISTON, CRANKCASE/CRANK CASE, CRANKSHAFT/CRANK SHAFT, FAN/FAN HOUSING, and
+# the ampersand in the carburettor sheet.
+# One line per sheet, in the order --dry-run lists them.
+TUBES
+THROTTLE CONTROLS
+CYLINDER COVER
+STARTER
+CARBURETOR & AIR FILTER
+MUFFLER
+FUEL TANK
+IGNITION SYSTEM
+CYLINDER AND PISTON
+CRANK CASE
+CRANK SHAFT
+FAN HOUSING
+FRAME
+HARNESS
+CARBURETOR
+ACCESSORIES

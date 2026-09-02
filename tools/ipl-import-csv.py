@@ -47,7 +47,7 @@ Hotspots are stored as the box's CENTRE, as a percentage of the image, which is
 what the app draws.
 """
 
-import argparse, csv, io, json, os, sys, urllib.request
+import argparse, csv, hashlib, io, json, os, sys, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -98,8 +98,18 @@ def hotspots_for(coord_text, ref, page_w, page_h):
 
 
 def fetch(url, cache_dir, index):
+    """Download a sheet once, keyed by its URL.
+
+    This used to name the file after the sheet's POSITION - 001.png, 002.png -
+    and skip the download when that file already existed. The cache is shared
+    across books, so the second book imported reused the first book's sheets
+    for however many it had: the 360BT silently came out carrying five of the
+    EBZ5100's diagrams, with hotspots measured against the wrong pages.
+
+    The URL is the only thing that actually identifies a sheet, so it is the
+    key. `index` is now only for the message."""
     os.makedirs(cache_dir, exist_ok=True)
-    path = os.path.join(cache_dir, "%03d.png" % index)
+    path = os.path.join(cache_dir, hashlib.sha1(url.encode("utf-8")).hexdigest()[:16] + ".png")
     if os.path.exists(path) and os.path.getsize(path) > 0:
         return path
     print(f"    downloading sheet {index}…")
