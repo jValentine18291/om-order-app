@@ -178,5 +178,14 @@
   "category": "Blower",
   "figures": 4,
   "parts": 165
+ },
+ {
+  "id": "hus532rbs",
+  "name": "Husqvarna 532RBS",
+  "short": "532RBS",
+  "brand": "Husqvarna",
+  "category": "Brushcutter",
+  "figures": 2,
+  "parts": 199
  }
 ]
