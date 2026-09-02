@@ -370,6 +370,59 @@ def proof():
             print(f"  Fig.{F['no']} page {pno}: {len(rows)} rows -> {out}")
 
 
+def hotspot_overrides(figures):
+    """Corrections to the callouts, from tools/ipl-ebz3000.hotspots.txt.
+
+        <figure> add|drop <key> <x%> <y%>
+
+    Needed because the callout reader cannot resolve a three-digit number on
+    this book's engine drawing. Offered ONLY the 1xx keys it still found five
+    of twenty-nine, so this is not competition with the short keys - it cannot
+    read them. What it does instead is worse than missing them: it circles the
+    trailing digit and files it under that key, so the recoil spring 115 became
+    a hotspot for key 5, GASKET TR - and separately circles the leading 1, so
+    114 carried two hotspots, neither of them its own.
+
+    A drop that matches nothing aborts the build."""
+    path = os.path.join(HERE, "ipl-ebz3000.hotspots.txt")
+    if not os.path.exists(path):
+        return
+    added = dropped = 0
+    for line in open(path, encoding="utf-8"):
+        line = line.split("#")[0].strip()
+        if not line:
+            continue
+        fno, verb, key, xs, ys = line.split()
+        fig = next((f for f in figures if f["number"] == fno), None)
+        if not fig:
+            sys.exit(f"ipl-ebz3000.hotspots.txt: no figure {fno} - {line!r}")
+        x, y = float(xs), float(ys)
+        if verb == "add":
+            if not any(p["key"] == key for p in fig["parts"]):
+                sys.exit(f"ipl-ebz3000.hotspots.txt: figure {fno} has no part {key} - {line!r}")
+            fig["hotspots"].append({"key": key, "x": x, "y": y, "byHand": True})
+            added += 1
+        elif verb == "drop":
+            best, bestd = -1, 9e9
+            for i, h in enumerate(fig["hotspots"]):
+                if h["key"] != key:
+                    continue
+                dd = ((h["x"] - x) ** 2 + (h["y"] - y) ** 2) ** 0.5
+                if dd < bestd:
+                    best, bestd = i, dd
+            if best < 0 or bestd > 1.2:
+                sys.exit(f"ipl-ebz3000.hotspots.txt: nothing to drop near {x},{y} for key {key}"
+                         f"{' (no hotspot has that key)' if best < 0 else f' (nearest {bestd:.2f}% away)'}"
+                         f" - {line!r}")
+            fig["hotspots"].pop(best)
+            dropped += 1
+        else:
+            sys.exit(f"ipl-ebz3000.hotspots.txt: expected add or drop - {line!r}")
+    for f in figures:
+        f["hotspots"].sort(key=lambda h: (len(h["key"]), h["key"]))
+    print(f"  hotspots.txt: {added} placed by hand, {dropped} removed")
+
+
 def main():
     if "--proof" in sys.argv:
         proof(); return
@@ -403,6 +456,13 @@ def main():
                         "ocr": True, "hotspots": spots, "parts": parts,
                         "sheets": 1, "sheet": 1,
                         "label": f"Fig.{F['no']} {F['title']}"})
+
+    hotspot_overrides(figures)
+    for F, fig in zip(FIGURES, figures):
+        keys = {p["key"] for p in fig["parts"]}
+        hit = {h["key"] for h in fig["hotspots"]}
+        print(f"    Fig.{F['no']}: now {len(hit & keys)}/{len(keys)} reachable, "
+              f"{len(fig['hotspots'])} hotspots")
 
     stale = set(fixes) - used_fixes
     if stale:

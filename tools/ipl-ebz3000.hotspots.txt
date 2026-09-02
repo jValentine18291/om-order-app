@@ -1,0 +1,85 @@
+# EBZ3000RH Fig.2 — the three-digit callouts, placed by hand.
+#
+#   <figure> add|drop <key> <x%> <y%>
+#
+# WHY
+# The callout reader cannot resolve a three-digit number on this drawing.
+# Offered ONLY the 1xx keys it still found five of twenty-nine, so it is not
+# losing them to competition with the short keys - it cannot read them.
+#
+# What it does instead is worse than missing them. It circles the TRAILING
+# digits and files the hotspot under that key, so the recoil spring 115 became
+# a hotspot for key 5 (GASKET, TR) and the air filter cover 132 became one for
+# key 32 (RING). Tapping the right part of the diagram opened the wrong part.
+# It also circles the LEADING 1 separately, which is why 114 and 115 each
+# carried two hotspots and neither was their own.
+#
+# Positions are the reader's own - it found the ink, it only named it wrong -
+# nudged left to sit on the middle of the whole number rather than its last
+# digit. Everything here was read off frontend/ipl/ebz3000rh-fig2.png zoomed.
+
+# ---- the leading "1" of a three-digit callout, circled as key 1 -------------
+2 drop 1 58.59 81.05        # the 1 of 114
+2 drop 1 69.36 78.42        # the 1 of 115
+
+# ---- recoil assembly panel --------------------------------------------------
+2 drop 9  82.20 60.06
+2 add  119 81.50 60.06
+2 drop 22 77.42 62.76
+2 add  122 76.70 62.76
+2 drop 21 80.06 63.55
+2 add  121 79.40 63.55
+2 drop 1  73.41 75.47
+2 add  111 72.90 75.47
+2 drop 6  55.27 77.75
+2 add  116 54.60 77.75
+2 drop 5  70.83 78.44
+2 add  115 70.10 78.44
+2 drop 4  60.08 81.05
+2 add  114 59.34 81.05
+2 drop 7  62.16 82.69
+2 add  117 61.50 82.69
+2 drop 8  63.55 85.36
+2 add  118 62.90 85.36
+2 drop 23 83.15 88.89
+2 add  123 82.50 88.89
+
+# ---- air filter / choke panel -----------------------------------------------
+2 drop 3  25.92 67.42
+2 add  131 25.30 67.42
+2 drop 32 33.38 66.23
+2 add  132 32.70 66.23
+2 drop 36 39.21 66.59
+2 add  136 38.60 66.59
+2 drop 39 23.17 71.49
+2 add  139 22.50 71.49
+2 drop 38 30.54 72.38
+2 add  138 29.90 72.38
+
+# ---- three-digit callouts read as their trailing digits ----------------------
+# Same fault as the panels above, scattered across the rest of the drawing.
+# Each of these had the hotspot in the right place under the wrong key, so the
+# part it belonged to had none and another part had one too many.
+2 drop 9  22.13 60.38
+2 add  91 21.80 60.30        # printed 91, read as 9
+2 drop 9  44.52 60.97
+2 add  21 44.20 60.90        # printed 21, read as 9
+2 drop 5  24.32 33.55
+2 add  51 23.70 33.55        # printed 51, read as 5
+2 drop 8  75.25 30.71
+2 add  81 74.60 30.71        # printed 81, read as 8
+2 drop 3  54.83 47.12
+2 add  31 54.20 47.12        # printed 31, read as 3
+
+# ---- callouts the reader found nothing for at all ----------------------------
+# Measured off the diagram against a 1% grid.
+2 add 103 22.20 16.40
+2 add 101 30.30 21.50
+2 add 102 54.40 21.30
+2 add   1 68.20 34.40
+2 add 120 82.50 64.40
+2 add 140 14.00 72.40
+2 add 151 36.00 79.20
+2 add 113 56.60 80.20
+2 add 112 66.00 83.00
+2 add 161 50.10 84.80
