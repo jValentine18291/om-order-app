@@ -1,5 +1,23 @@
 [
  {
+  "id": "hus345bt",
+  "name": "Husqvarna 345BT",
+  "short": "345BT",
+  "brand": "Husqvarna",
+  "category": "Blower",
+  "figures": 2,
+  "parts": 44
+ },
+ {
+  "id": "hus360bt",
+  "name": "Husqvarna 360BT",
+  "short": "360BT",
+  "brand": "Husqvarna",
+  "category": "Blower",
+  "figures": 16,
+  "parts": 195
+ },
+ {
   "id": "hus365",
   "name": "Husqvarna 365 Chainsaw",
   "short": "365",
@@ -63,6 +81,15 @@
   "parts": 157
  },
  {
+  "id": "ebz5100",
+  "name": "Zenoah EBZ5100 Backpack Blower",
+  "short": "EBZ5100",
+  "brand": "Zenoah",
+  "category": "Blower",
+  "figures": 5,
+  "parts": 174
+ },
+ {
   "id": "ex2600ph",
   "name": "Zenoah EX2600-PH Hedge Trimmer",
   "short": "EX2600-PH",
@@ -99,6 +126,15 @@
   "parts": 253
  },
  {
+  "id": "hb2302",
+  "name": "Zenoah HB2302",
+  "short": "HB2302",
+  "brand": "Zenoah",
+  "category": "Blower",
+  "figures": 2,
+  "parts": 141
+ },
+ {
   "id": "hbz260ez",
   "name": "Zenoah HBZ260EZ",
   "short": "HBZ260EZ",
@@ -133,32 +169,5 @@
   "category": "Chipper Shredder",
   "figures": 51,
   "parts": 1356
- },
- {
-  "id": "ebz5100",
-  "name": "Zenoah EBZ5100 Backpack Blower",
-  "short": "EBZ5100",
-  "brand": "Zenoah",
-  "category": "Blower",
-  "figures": 5,
-  "parts": 174
- },
- {
-  "id": "hus360bt",
-  "name": "Husqvarna 360BT",
-  "short": "360BT",
-  "brand": "Husqvarna",
-  "category": "Blower",
-  "figures": 16,
-  "parts": 195
- },
- {
-  "id": "hus345bt",
-  "name": "Husqvarna 345BT",
-  "short": "345BT",
-  "brand": "Husqvarna",
-  "category": "Blower",
-  "figures": 2,
-  "parts": 44
  }
 ]

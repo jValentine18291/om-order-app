@@ -360,6 +360,97 @@ function drawingLimit(page) {
   return Math.max(5, Math.min(100, (top / height) * 100));
 }
 
+// A callout on a scanned drawing is read off the picture precisely BECAUSE it
+// is not text. It follows that anything the page does carry as text cannot be
+// a callout - it is the page's furniture: the model name at the top, the
+// figure title, the page number at the foot.
+//
+// That matters because these Zenoah scans centre their page number at the
+// bottom as "－2－", and OCR reads the 2. It arrived as a perfectly plausible
+// hotspot for key 2, dead centre, 96.5% down - on the HB2302 both figures
+// picked one up. drawingLimit() does not catch it: it derives its cutoff from
+// the parts table, and a scanned drawing page has no table on it.
+//
+// Comparing against the page's own text costs nothing and needs no threshold.
+function stripPageFurniture(page, hotspots) {
+  const { width, height, words } = wordsForPage(page);
+  if (!words.length) return hotspots;
+  const boxes = words.map((w) => ({
+    x1: (w.x1 / width) * 100, x2: (w.x2 / width) * 100,
+    y1: (w.y1 / height) * 100, y2: (w.y2 / height) * 100,
+    text: w.text,
+  }));
+  const kept = [];
+  for (const h of hotspots) {
+    const hit = boxes.find((b) => h.x >= b.x1 && h.x <= b.x2 && h.y >= b.y1 && h.y <= b.y2);
+    if (hit) {
+      console.log(`      dropped a "${h.key}" at ${h.x.toFixed(1)},${h.y.toFixed(1)}% —`
+                  + ` the page prints "${hit.text}" there`);
+      continue;
+    }
+    kept.push(h);
+  }
+  return kept;
+}
+
+// Reading a scan is very good but not perfect, and the failures are specific:
+// a callout printed as a bare "1" is dropped because a single stroke is not
+// worth trusting, and a two-digit callout can be read as its first digit and
+// filed under the wrong key. Both happened on the HB2302: key 20's callout was
+// missed, and the "2" of that same "20" was placed as key 2.
+//
+// Rather than hand-edit generated JSON - which the next run would overwrite -
+// corrections live in tools/ipl-<id>.hotspots.txt, one instruction a line:
+//
+//     <figure> add  <key> <x%> <y%>     put a hotspot here
+//     <figure> drop <key> <x%> <y%>     remove the one already here
+//
+// A drop that matches nothing is an error, not a shrug: it means the OCR has
+// changed under the file and the rest of it should be re-read before trusting.
+// Added hotspots record byHand so the data never claims a machine read them.
+function applyHotspotOverrides(figures) {
+  const file = path.join(__dirname, `ipl-${MODEL_ID}.hotspots.txt`);
+  if (!fs.existsSync(file)) return;
+  const lines = fs.readFileSync(file, "utf8").split(/\r?\n/)
+    .map((l) => l.trim()).filter((l) => l && !l.startsWith("#"));
+  let added = 0, dropped = 0;
+  for (const line of lines) {
+    const [figNo, verb, key, xs, ys] = line.split(/\s+/);
+    const fig = figures.find((f) => f.id === figNo);
+    if (!fig) throw new Error(`${path.basename(file)}: no figure ${figNo} — "${line}"`);
+    const x = parseFloat(xs), y = parseFloat(ys);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) throw new Error(`${path.basename(file)}: bad position — "${line}"`);
+    if (verb === "add") {
+      if (!fig.parts.some((pt) => pt.key === key)) {
+        throw new Error(`${path.basename(file)}: figure ${figNo} has no part ${key} — "${line}"`);
+      }
+      fig.hotspots.push({ key, x, y, byHand: true });
+      added++;
+    } else if (verb === "drop") {
+      // Nearest hotspot for that key, and it has to be close: a drop aimed at
+      // a callout that has since moved should fail rather than delete a
+      // different one.
+      let best = -1, bestD = Infinity;
+      fig.hotspots.forEach((h, i) => {
+        if (h.key !== key) return;
+        const dd = Math.hypot(h.x - x, h.y - y);
+        if (dd < bestD) { bestD = dd; best = i; }
+      });
+      if (best < 0 || bestD > 1.5) {
+        throw new Error(`${path.basename(file)}: nothing to drop near ${x},${y} for key ${key}` +
+                        (best < 0 ? " (no hotspot has that key)" : ` (nearest is ${bestD.toFixed(2)}% away)`) +
+                        ` — "${line}"`);
+      }
+      fig.hotspots.splice(best, 1);
+      dropped++;
+    } else {
+      throw new Error(`${path.basename(file)}: expected add or drop — "${line}"`);
+    }
+  }
+  for (const f of figures) f.hotspots.sort((a, b) => a.key.length - b.key.length || a.key.localeCompare(b.key));
+  console.log(`  ${path.basename(file)}: ${added} hotspot(s) placed by hand, ${dropped} removed`);
+}
+
 // Reading the callouts off a scanned drawing is a different job — image work,
 // not text work — so it lives in tools/ipl-ocr-callouts.py and is shelled out
 // to. It takes roughly a minute a page, which is why it only runs when the
@@ -416,7 +507,8 @@ for (let p = 1; p <= pageCount; p++) {
       prev.parts = prev.parts.concat(rows.map((r) => ({ ...r, search: searchCode(r.part_number) })));
       const allKeys = new Set(prev.parts.map((r) => r.key));
       prev.hotspots = prev.ocr
-        ? ocrCallouts(prev.drawingPage, [...allKeys], drawingLimit(prev.drawingPage))
+        ? stripPageFurniture(prev.drawingPage,
+            ocrCallouts(prev.drawingPage, [...allKeys], drawingLimit(prev.drawingPage)))
         : parseFigure(prev.drawingPage, allKeys);
       console.log(`  Fig.${head.number} ${head.title}: +${rows.length} parts from a second table` +
                   ` (same drawing) — now ${prev.parts.length} parts, ${prev.hotspots.length} hotspots`);
@@ -441,7 +533,8 @@ for (let p = 1; p <= pageCount; p++) {
     const coverage = keys.size ? [...keys].filter((k) => covered.has(k)).length / keys.size : 1;
     if (coverage < 0.25 && keys.size >= 5) {
       process.stdout.write(`  Fig.${head.number} ${head.title}: scanned drawing, reading the numbers off it… `);
-      const found = ocrCallouts(drawingPage, [...keys], drawingLimit(drawingPage));
+      const found = stripPageFurniture(drawingPage,
+        ocrCallouts(drawingPage, [...keys], drawingLimit(drawingPage)));
       if (found.length) { hotspots = found; ocr = true; }
       console.log(`${found.length} placed`);
     }
@@ -503,6 +596,9 @@ for (const f of figures) {
   // Only needed while walking the document, to spot a reprinted drawing.
   delete f.drawingPage;
 }
+
+// Corrections last, once every figure exists and its id is settled.
+applyHotspotOverrides(figures);
 
 const model = {
   id: MODEL_ID,

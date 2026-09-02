@@ -1,0 +1,16 @@
+# HB2302 — the three callouts on Fig.1 that reading the scan got wrong.
+# Positions read off frontend/ipl/hb2302-fig1.png against a 1% grid.
+#
+#   <figure> add|drop <key> <x%> <y%>
+#
+# Fig.2 is left alone: its two unplaced parts, 22 (LABEL) and 25 (WRENCH), are
+# not drawn on the diagram at all, so there is nothing to point at.
+
+# CYLINDER. Printed as a bare "1", which the reader will not trust on its own -
+# a single stroke is too easily a leader line.
+1 add 1 62.3 24.6
+
+# SNAP RING. Its "20" was read as a "2" and filed under that key, so the part
+# lost its callout and key 2 gained a second one it never had.
+1 add 20 45.4 49.9
+1 drop 2 44.9 49.8
