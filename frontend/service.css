@@ -386,6 +386,11 @@ select {
   padding: 4px 10px; border-radius: 999px;
   background: #eaf3ff; color: #1c5fb0;
 }
+/* The same three meanings as the full-width rows on the slip screen, at the
+   size a list of slips can carry. */
+.vs-req-service { background: #E7F5EC; color: #135A31; }
+.vs-req-repair  { background: #EDE7F8; color: #43307A; }
+.vs-req-quote   { background: #FDF0E0; color: #7A4200; }
 
 /* ---- Editable part price ---- */
 .price-edit {
@@ -863,6 +868,22 @@ select {
 .cs-blocked b { display: block; margin-bottom: 2px; }
 .mq-done { color: #1B7A42; background: #E7F5EC; }
 
+/* The customer asked for a quote at the counter. Amber, like every other
+   quote control in the app, so the colour already means "waiting on a price"
+   by the time a technician meets this. */
+.mm-ask-quote {
+  display: flex; gap: 9px; align-items: flex-start;
+  margin-top: 12px; padding: 10px 12px; border-radius: 11px;
+  background: var(--amber-tint); border: 1.5px solid #E4B45C;
+}
+.mm-ask-quote svg { width: 17px; height: 17px; flex: none; margin-top: 2px; color: #8A5A00; }
+.mm-ask-quote b { display: block; font-size: .88rem; color: #7A4E00; }
+.mm-ask-quote span { font-size: .8rem; color: #8A6023; }
+
+/* The quote line sits apart from the two service options above it: those two
+   are a choice between each other, this one is a separate question. */
+.ns-check-quote { border-top: 1px solid var(--border); margin-top: 4px; }
+
 /* The per-machine quote control, under Save in the machine modal. */
 .mm-quote {
   margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line, #eef1f3);
@@ -924,7 +945,14 @@ select {
   font-weight: 700;
   font-size: .95rem;
 }
+/* The tick is drawn, not written. Inline it made the row's text
+   "✓ Check & Service for all", which matches nothing in the Chinese
+   dictionary, so a technician's phone showed these rows in English. */
+.sd-req::before { content: "✓"; margin-right: 8px; }
 .sd-req-service { background: #E7F5EC; color: #135A31; border: 1.5px solid #2FA45C; }
+/* Purple: the workshop's colour everywhere else in the app, and this is an
+   instruction aimed squarely at the workshop. */
+.sd-req-repair  { background: #EDE7F8; color: #43307A; border: 1.5px solid #8B6FD8; }
 .sd-req-quote { background: #FDF0E0; color: #7A4200; border: 1.5px solid #EF9F27; }
 
 /* ---- Purchaser role card ---- */

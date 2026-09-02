@@ -407,6 +407,27 @@ const DISPOSAL_LABEL = { COLLECTED: "Customer collected it", DISPOSED: "Disposed
 // The pill next to a machine's name. A condemned machine says what became of
 // it, because that is the outstanding question and the thing that holds the
 // slip open.
+// The customer's requests, drawn the same way everywhere they appear. Two
+// callers with two markups drifted apart the moment a third request existed.
+const SLIP_REQUESTS = [
+  ["check_service", "Check & Service for all", "service"],
+  ["repair_only",   "Repair only — do not service", "repair"],
+  ["quote_first",   "Customer wants a quote first", "quote"],
+];
+
+function requestBadgesHtml(slip, style) {
+  const on = SLIP_REQUESTS.filter(([field]) => slip[field]);
+  if (!on.length) return "";
+  if (style === "sd") {
+    return `\n    <div class="sd-requests">${
+      on.map(([, label, cls]) => `<div class="sd-req sd-req-${cls}">${escapeHtml(label)}</div>`).join("")
+    }</div>`;
+  }
+  return `<div class="vs-requests">${
+    on.map(([, label, cls]) => `<span class="vs-req-badge vs-req-${cls}">${escapeHtml(label)}</span>`).join("")
+  }</div>`;
+}
+
 function machinePill(m) {
   const st = MACHINE_STATE[m.state];
   if (!st) return "";
@@ -428,7 +449,7 @@ function machinePill(m) {
 // Held here rather than read back off the form. Details are entered on a popup
 // and only land in this list once "Add" is pressed, so a half-typed machine
 // cannot be left sitting on the page and registered by accident.
-let nsMachines = [];      // [{ model, qty, serial, remarks, quote }]
+let nsMachines = [];      // [{ model, qty, serial, remarks }]
 let nsEditIndex = -1;     // -1 = adding, otherwise the entry being edited
 
 function renderNsMachines() {
@@ -466,19 +487,14 @@ function renderNsMachines() {
 
 function openMachineForm(index = -1) {
   nsEditIndex = index;
-  // A new machine starts with whatever the last one was set to: a customer who
-  // wants one machine quoted usually wants the rest quoted too, and a tick that
-  // has to be found again for every machine is a tick that gets forgotten.
-  const last = nsMachines.length ? nsMachines[nsMachines.length - 1] : null;
   const m = index >= 0 ? nsMachines[index]
-          : { model: "", qty: 1, serial: "", remarks: "", quote: !!(last && last.quote) };
+          : { model: "", qty: 1, serial: "", remarks: "" };
   $("nsm-title").textContent = index >= 0 ? "Edit machine" : "Add machine";
   $("nsm-add").textContent = index >= 0 ? "Save" : "Add";
   $("nsm-model").value = m.model;
   $("nsm-qty").value = m.qty;
   $("nsm-serial").value = m.serial;
   $("nsm-remarks").value = m.remarks || "";
-  $("nsm-quote").checked = !!m.quote;
   $("nsm-status").innerHTML = "";
   nsmSerialHint();
   $("nsm-modal").style.display = "flex";
@@ -518,7 +534,6 @@ function commitMachineForm() {
     model, qty,
     serial: $("nsm-serial").value.trim(),
     remarks: $("nsm-remarks").value.trim(),
-    quote: $("nsm-quote").checked,
   };
   if (nsEditIndex >= 0) nsMachines[nsEditIndex] = entry;
   else nsMachines.push(entry);
@@ -526,12 +541,27 @@ function commitMachineForm() {
   renderNsMachines();
 }
 
+// Check & Service and Repair only are a choice between each other: "service
+// everything, but do not service anything" is not a request anybody makes.
+// Ticking one clears the other rather than refusing the second tap.
+["ns-check-service", "ns-repair-only"].forEach((id, i, all) => {
+  const box = $(id);
+  if (!box) return;
+  box.addEventListener("change", () => {
+    if (!box.checked) return;
+    const other = $(all[1 - i]);
+    if (other) other.checked = false;
+  });
+});
+
 function resetNewServiceForm() {
   ["ns-company", "ns-contact-name", "ns-contact-number", "ns-whatsapp", "ns-notes"].forEach((id) => ($(id).value = ""));
   const same = $("ns-whatsapp-same"); if (same) same.checked = true;
   const wa = $("ns-whatsapp"); if (wa) wa.setAttribute("disabled", "true");
   const created = $("ns-created"); if (created) { created.style.display = "none"; created.innerHTML = ""; }
-  const cs = $("ns-check-service"); if (cs) cs.checked = false;
+  ["ns-check-service", "ns-repair-only", "ns-quote-first"].forEach((id) => {
+    const b = $(id); if (b) b.checked = false;
+  });
   nsMachines = [];
   renderNsMachines();
   $("ns-status").innerHTML = "";
@@ -554,10 +584,10 @@ async function submitNewService() {
   const machines = [];
   for (const m of nsMachines) {
     if (m.qty === 1) {
-      machines.push({ desc: m.model, serial: m.serial, remarks: m.remarks || "", quote: !!m.quote });
+      machines.push({ desc: m.model, serial: m.serial, remarks: m.remarks || "" });
     } else {
       for (let n = 1; n <= m.qty; n++) {
-        machines.push({ desc: `${m.model} - ${n}/${m.qty}`, serial: m.serial, remarks: m.remarks || "", quote: !!m.quote });
+        machines.push({ desc: `${m.model} - ${n}/${m.qty}`, serial: m.serial, remarks: m.remarks || "" });
       }
     }
   }
@@ -590,6 +620,8 @@ async function submitNewService() {
         contact_number: $("ns-contact-number").value.trim(),
         whatsapp_number: $("ns-whatsapp").value.trim(),
         check_service: $("ns-check-service").checked,
+        repair_only: $("ns-repair-only").checked,
+        quote_first: $("ns-quote-first").checked,
         notes: $("ns-notes").value.trim(),
         machines,
         signature,
@@ -971,9 +1003,14 @@ function buildSlipPdf(slip) {
   y += 26;
 
   // ---- Requested ----
+  // What the customer asked for at the counter - not where the job has since
+  // got to. Reading a machine's state here meant a slip reprinted after a
+  // technician sent something for quoting grew a request the customer never
+  // made.
   const requests = [];
   if (slip.check_service) requests.push("CHECK & SERVICE FOR ALL");
-  if ((slip.machines || []).some((m) => m.state === "AWAITING_QUOTE")) requests.push("QUOTE FIRST");
+  if (slip.repair_only) requests.push("REPAIR ONLY - DO NOT SERVICE");
+  if (slip.quote_first) requests.push("QUOTATION REQUIRED BEFORE REPAIR");
   if (requests.length) {
     need(58);
     sectionHead("REQUESTED", "clipboard");
@@ -1644,10 +1681,7 @@ function renderSlipScreen() {
       ${meta.length ? `<div class="vs-sub">${meta.join(" · ")}</div>` : ""}
       ${slip.notes ? `<div class="vs-notes">${escapeHtml(slip.notes)}</div>` : ""}
     </div>
-    ${slip.check_service ? `
-    <div class="sd-requests">
-      <div class="sd-req sd-req-service">✓ Check &amp; Service for all</div>
-    </div>` : ""}`;
+    ${requestBadgesHtml(slip, "sd")}`;
 
   // Machines as tappable buttons with per-machine progress.
   $("sd-machines").innerHTML = slip.machines.map((m) => {
@@ -1696,6 +1730,10 @@ function openMachineModal(machineId) {
   const mmr = $("mm-remarks");
   if (m && m.remarks) { mmr.textContent = `“${m.remarks}”`; mmr.style.display = "block"; }
   else { mmr.style.display = "none"; mmr.textContent = ""; }
+  // The same thing the machine's paper tag says. Shown on every machine of the
+  // slip, because the quotation was agreed for the job, not for one machine.
+  const ask = $("mm-ask-quote");
+  if (ask) ask.style.display = session.slip && session.slip.quote_first ? "flex" : "none";
   loadCommentForCurrentMachine();
   loadLabourForCurrentMachine();
   renderMachineParts();
@@ -2734,7 +2772,7 @@ function renderSlipDetail(slip) {
         slip.amendments.map((a) => `<div>${escapeHtml(a.field)}: &ldquo;${escapeHtml(a.before || "—")}&rdquo; &rarr; &ldquo;${escapeHtml(a.after || "—")}&rdquo;${
           a.changed_by ? ` · ${escapeHtml(a.changed_by)}` : ""}${a.changed_at ? ` · ${escapeHtml(String(a.changed_at).slice(0, 10))}` : ""}</div>`).join("")
       }</div>` : ""}
-      ${slip.check_service ? `<div class="vs-requests"><span class="vs-req-badge">Check &amp; Service for all</span></div>` : ""}
+      ${requestBadgesHtml(slip, "vs")}
       ${slip.notes ? `<div class="vs-notes">${escapeHtml(slip.notes)}</div>` : ""}
       ${slip.status === "CLOSED" && slip.closing_ref ? `<div class="vs-sub">Closed with: <strong>${escapeHtml(slip.closing_ref)}</strong>${slip.closed_at ? " on " + escapeHtml(formatDate(slip.closed_at)) : ""}</div>` : ""}
       ${renderVsStatusActions(slip)}

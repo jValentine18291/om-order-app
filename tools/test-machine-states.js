@@ -30,28 +30,34 @@ function check(what, got, want) {
 const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
 
 (async () => {
-  // Two machines in together: one the customer wants quoted, one he does not.
+  // Two machines in together, and the customer wants the job quoted.
   let slip = await data.slips.createSlip({
     company: "TEST STATE MODEL",
     contact_name: "A", contact_number: "9",
+    quote_first: true,
     machines: [
-      { desc: "Chainsaw 372XP", serial: "S1", remarks: "won't start", quote: true },
-      { desc: "Blower 580BTS", serial: "S2", remarks: "service", quote: false },
+      { desc: "Chainsaw 372XP", serial: "S1", remarks: "won't start" },
+      { desc: "Blower 580BTS", serial: "S2", remarks: "service" },
     ],
     signature: sig,
   });
   const no = slip.slip_number;
   const [saw, blower] = slip.machines;
   console.log(`\nSlip ${no}: ${slip.machines.map((m) => `${m.machine_desc} = ${m.state}`).join(", ")}`);
-  check("machine ticked at the counter", saw.state, "AWAITING_QUOTE");
-  check("machine not ticked", blower.state, "RECEIVED");
-  check("slip follows the machines", slip.status, "NEED_QUOTE");
+  // The counter records the request; it does not decide any machine's state.
+  // Quoting before a technician has looked means quoting nothing.
+  check("the customer's request is on the slip", slip.quote_first, 1);
+  check("the quoted machine still starts received", saw.state, "RECEIVED");
+  check("so does the other one", blower.state, "RECEIVED");
+  check("and the slip is simply open", slip.status, "OPEN");
 
-  // A technician starts on the blower. The slip still needs quoting: the
-  // machine nobody has rung about must not be hidden by work elsewhere.
+  // A technician works the blower, then finds the saw expensive and sends it.
   await data.slips.setMachineComment(blower.id, "cleaned carburettor");
   slip = await data.slips.getSlip(no);
-  check("work started, quote still outstanding", slip.status, "NEED_QUOTE");
+  check("work started, nothing to quote yet", slip.status, "IN_PROGRESS");
+
+  slip = await data.slips.setMachineState(no, saw.id, "AWAITING_QUOTE", "WJ");
+  check("the technician's tick is what asks for a quote", slip.status, "NEED_QUOTE");
 
   // Sales quote it; the customer is now the one holding things up.
   slip = await data.slips.setMachineState(no, saw.id, "QUOTED", "Iris");

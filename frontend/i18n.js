@@ -306,6 +306,11 @@
     "Machines received:": "收到的机器：",
     "Contact No.": "联络电话",
     "Check & Service for all": "全部检查与保养",
+    // The other two common requests, and the banner a technician meets on a
+    // machine whose customer asked for a quote.
+    "Repair only — do not service": "只维修 — 不做保养",
+    "Customer wants a quote first": "客户要求先报价",
+    "Add the parts and labour, then send it for quoting.": "先录入零件和工时，然后送去报价。",
     "Quote first": "先报价",
     "has comment": "有维修说明",
 

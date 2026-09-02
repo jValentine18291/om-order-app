@@ -180,7 +180,7 @@ function signedShape(slip, machines) {
   };
 }
 
-function createSlip({ company, debtor_code = "", contact_name = "", contact_number = "", whatsapp_number = "", check_service = false, quote_first = false, notes = "", machines = [], signature = "" } = {}) {
+function createSlip({ company, debtor_code = "", contact_name = "", contact_number = "", whatsapp_number = "", check_service = false, repair_only = false, quote_first = false, notes = "", machines = [], signature = "" } = {}) {
   const newCompanyName = String(company || "").trim();
   if (!company || !String(company).trim()) {
     const e = new Error("Company is required to register a service slip.");
@@ -196,18 +196,29 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
       : { desc: String((m && m.desc) || "").trim(),
           serial: String((m && m.serial) || "").trim(),
           remarks: String((m && m.remarks) || "").trim().slice(0, 500),
-          // Ticked per machine at the counter. An app old enough not to send
-          // it falls back to the slip-wide tick, which is what it used to mean.
-          quote: m && m.quote !== undefined ? !!m.quote : !!quote_first }))
+          // Phones run a cached copy of the app for a shift after a deploy, so
+          // this per-machine tick still arrives from the counter. It is folded
+          // into the slip-wide flag below rather than honoured per machine.
+          quote: !!(m && m.quote) }))
     .filter((m) => m.desc);
   if (machineList.length === 0) {
     const e = new Error("At least one machine is required.");
     e.status = 400; throw e;
   }
 
+  // A quotation is agreed for the job, not for one machine in it - so it is a
+  // property of the slip. An older app that ticked it per machine still counts:
+  // if any machine was ticked, the customer asked for a quote.
+  const wantsQuote = !!quote_first || machineList.some((m) => m.quote);
+
+  // Opposites, and the form clears one when the other is ticked. Belt and
+  // braces here, because an old or hand-rolled client could send both and
+  // "service everything but do not service anything" is not a request.
+  const checkService = !!check_service && !repair_only;
+
   const insertSlip = db.prepare(
-    `INSERT INTO service_slips (slip_number, company, debtor_code, contact_name, contact_number, whatsapp_number, check_service, quote_first, notes, status)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'OPEN')`
+    `INSERT INTO service_slips (slip_number, company, debtor_code, contact_name, contact_number, whatsapp_number, check_service, repair_only, quote_first, notes, status)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'OPEN')`
   );
   const insertMachine = db.prepare(
     "INSERT INTO slip_machines (slip_id, machine_desc, serial_no, remarks, state) VALUES (?, ?, ?, ?, ?)"
@@ -234,10 +245,15 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
     db.prepare("UPDATE counters SET value = value + 1 WHERE name = 'slip_number'").run();
     const { value } = db.prepare("SELECT value FROM counters WHERE name = 'slip_number'").get();
     const slipNumber = String(value).padStart(5, "0");
-    const info = insertSlip.run(slipNumber, String(company).trim(), String(debtor_code || "").trim(), contact_name, contact_number, whatsapp_number, check_service ? 1 : 0, machineList.some((m) => m.quote) ? 1 : 0, notes);
+    const info = insertSlip.run(slipNumber, String(company).trim(), String(debtor_code || "").trim(), contact_name, contact_number, whatsapp_number, checkService ? 1 : 0, repair_only ? 1 : 0, wantsQuote ? 1 : 0, notes);
     const slipId = info.lastInsertRowid;
+    // Every machine starts RECEIVED, even when the customer asked for a quote.
+    // Marking them AWAITING_QUOTE here used to put the slip on Sales' Need to
+    // Quote list the moment it was written - before a technician had opened
+    // anything, with no parts and no labour to quote. A machine reaches that
+    // list when a technician sends it, which is when there is a figure to give.
     for (const m of machineList) {
-      insertMachine.run(slipId, m.desc, m.serial, m.remarks, m.quote ? "AWAITING_QUOTE" : "RECEIVED");
+      insertMachine.run(slipId, m.desc, m.serial, m.remarks, "RECEIVED");
     }
     if (sig) {
       // Written inside the same transaction as the slip, so a signature can

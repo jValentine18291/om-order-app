@@ -115,7 +115,11 @@ db.exec(`
     contact_name   TEXT,
     contact_number TEXT,
     whatsapp_number TEXT DEFAULT '',
+    -- What the customer asked for at the counter. All three are printed on
+    -- the slip and shown to the technician; none of them constrain what the
+    -- app allows. check_service and repair_only are opposites.
     check_service   INTEGER DEFAULT 0,
+    repair_only     INTEGER DEFAULT 0,
     quote_first     INTEGER DEFAULT 0,
     notes          TEXT,
     status         TEXT    NOT NULL DEFAULT 'OPEN',  -- OPEN | CALL_CUSTOMER | CLOSED
@@ -511,6 +515,13 @@ try {
   if (!cols.some((c) => c.name === "quote_first")) {
     db.exec("ALTER TABLE service_slips ADD COLUMN quote_first INTEGER DEFAULT 0");
     console.log("[db] migrated: added quote_first to service_slips");
+  }
+  // "Repair only" - fix what is broken, do not service the machine. The
+  // counterpart to check_service, and like it, an instruction printed for the
+  // technician rather than a rule the app enforces.
+  if (!cols.some((c) => c.name === "repair_only")) {
+    db.exec("ALTER TABLE service_slips ADD COLUMN repair_only INTEGER DEFAULT 0");
+    console.log("[db] migrated: added repair_only to service_slips");
   }
 } catch (e) {
   console.error("[db] request-flags migration check failed:", e.message);
