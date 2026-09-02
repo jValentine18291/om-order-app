@@ -133,5 +133,14 @@
   "category": "Chipper Shredder",
   "figures": 51,
   "parts": 1356
+ },
+ {
+  "id": "ebz5100",
+  "name": "Zenoah EBZ5100 Backpack Blower",
+  "short": "EBZ5100",
+  "brand": "Zenoah",
+  "category": "Blower",
+  "figures": 5,
+  "parts": 174
  }
 ]

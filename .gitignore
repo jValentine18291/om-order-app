@@ -48,3 +48,8 @@ backend/vapid.json
 backend/drive-key.json
 backend/*-service-account*.json
 backend/*credentials*.json
+
+# Full-resolution sheets the IPL importer downloads from the Husqvarna portal.
+# A working cache so a re-run does not re-fetch: the repo keeps the 1240px
+# versions the app actually serves, not these.
+tools/.ipl-cache/

@@ -21,10 +21,18 @@ frontend/ipl/<id>.json plus one PNG per sheet, and the index.json row, matching
 the format the earlier books already use so the app needs no changes.
 
 THE COORDINATE SPACE
-Boxes are pixel coordinates in a 1240x1754 page. Most exported images are
-already that size; a few come at double resolution, and those are scaled down so
-one space serves both. Hotspots are stored as the box's CENTRE, as a percentage
-of the image, which is what the app draws.
+Boxes are pixel coordinates in the exported sheet's OWN pixel space, so the page
+has to be read from the image rather than assumed. The SR3100's sheets happened
+to come at 1240x1754 and this script used to hard-code that; the EBZ5100's come
+at 1573x2205, and against the old fixed page a fifth of its hotspots landed in
+the blank margins - some off the sheet entirely.
+
+Reading the size from the image is also resolution-proof: a sheet exported at
+double size gives the same percentages, because both the boxes and the page
+double together.
+
+Hotspots are stored as the box's CENTRE, as a percentage of the image, which is
+what the app draws.
 """
 
 import argparse, csv, io, json, os, sys, urllib.request
@@ -33,8 +41,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 IPL_DIR = os.path.join(REPO, "frontend", "ipl")
 
-# The page the portal lays its coordinates out on.
-PAGE_W, PAGE_H = 1240, 1754
+# What the app serves. The coordinate page is read per sheet from the export.
+OUT_W = 1240
 
 
 def read_rows(path):
@@ -47,12 +55,16 @@ def read_rows(path):
     return [r for r in rows if (r.get("Article Number") or "").strip()]
 
 
-def hotspots_for(coord_text, ref):
-    """Each box becomes one hotspot at its centre.
+def hotspots_for(coord_text, ref, page_w, page_h):
+    """Each box becomes one hotspot at its centre, as a percentage of the sheet.
 
     A part bolted on in four places has four boxes, comma-separated, and each
     one is a place a technician might tap - so all of them are kept rather than
-    only the first."""
+    only the first.
+
+    page_w/page_h are the exported sheet's own pixel size. Pass the wrong page
+    and every hotspot drifts, which is a thing you have to look at a diagram to
+    notice - so main() checks the results land on the sheet."""
     out = []
     for box in (coord_text or "").split(","):
         nums = [n.strip() for n in box.split(";")]
@@ -64,8 +76,8 @@ def hotspots_for(coord_text, ref):
             continue
         out.append({
             "key": ref,
-            "x": round((x1 + x2) / 2 / PAGE_W * 100, 3),
-            "y": round((y1 + y2) / 2 / PAGE_H * 100, 3),
+            "x": round((x1 + x2) / 2 / page_w * 100, 3),
+            "y": round((y1 + y2) / 2 / page_h * 100, 3),
             # Read from the export rather than recognised from a picture, so
             # there is no confidence to report - it is simply right.
             "conf": 100,
@@ -85,15 +97,24 @@ def fetch(url, cache_dir, index):
     return path
 
 
+def page_size(path):
+    """The pixel space the portal measured this sheet's boxes in."""
+    from PIL import Image
+    with Image.open(path) as im:
+        return im.size
+
+
 def write_image(src, dest):
     """Match the house format: 1240px wide, indexed colour, small enough that a
-    workshop phone loads it over the office wifi without waiting."""
+    workshop phone loads it over the office wifi without waiting.
+
+    Resizing here does not disturb the hotspots: they are percentages."""
     from PIL import Image
     im = Image.open(src)
     im.load()
-    if im.size[0] != PAGE_W:
-        h = round(im.size[1] * PAGE_W / im.size[0])
-        im = im.convert("L").resize((PAGE_W, h), Image.LANCZOS)
+    if im.size[0] != OUT_W:
+        h = round(im.size[1] * OUT_W / im.size[0])
+        im = im.convert("L").resize((OUT_W, h), Image.LANCZOS)
     if im.mode not in ("P", "L"):
         im = im.convert("L")
     im.save(dest, optimize=True)
@@ -146,6 +167,12 @@ def main():
         sheet_no, sheet_of = seen_sheet[name], per_name[name]
         image_name = f"{a.id}-fig{i}.png"
 
+        # Fetched first: the boxes cannot be turned into percentages until we
+        # know the page they were drawn on. Cached, so a dry run is cheap and
+        # still checks the hotspots.
+        src = fetch(img_url, a.cache, cache_index[img_url])
+        page_w, page_h = page_size(src)
+
         parts, spots = [], []
         for r in group:
             ref = (r["Ref"] or "").strip()
@@ -160,19 +187,29 @@ def main():
                 "remarks": (r.get("Comment") or "").strip(),
                 "search": "".join(ch for ch in code.upper() if ch.isalnum()),
             })
-            spots.extend(hotspots_for(r.get("Coordinates"), ref))
+            spots.extend(hotspots_for(r.get("Coordinates"), ref, page_w, page_h))
+
+        label = f"Fig.{fig_no[name]} {name}"
+        if sheet_of > 1:
+            label += f" ({sheet_no} of {sheet_of})"
 
         if not spots:
             no_spots.append(name if sheet_of == 1 else f"{name} ({sheet_no} of {sheet_of})")
         total_parts += len(parts)
         total_spots += len(spots)
 
-        label = f"Fig.{fig_no[name]} {name}"
-        if sheet_of > 1:
-            label += f" ({sheet_no} of {sheet_of})"
+        # A hotspot off the sheet means the page was read wrong, and the rest
+        # of them are quietly wrong too - they just happen to still be on the
+        # paper. Worth stopping for.
+        off = [h for h in spots if not (0 <= h["x"] <= 100 and 0 <= h["y"] <= 100)]
+        if off:
+            sys.exit(
+                f"{label}: {len(off)} of {len(spots)} hotspots fall outside the "
+                f"{page_w}x{page_h} sheet (worst {max(max(h['x'], h['y']) for h in off):.1f}%). "
+                "Nothing written."
+            )
 
         if not a.dry_run:
-            src = fetch(img_url, a.cache, cache_index[img_url])
             write_image(src, os.path.join(IPL_DIR, image_name))
 
         figures.append({
