@@ -205,5 +205,14 @@
   "category": "Pole Hedge Trimmer",
   "figures": 16,
   "parts": 197
+ },
+ {
+  "id": "hus395xp",
+  "name": "Husqvarna 395XP",
+  "short": "395XP",
+  "brand": "Husqvarna",
+  "category": "Chainsaw",
+  "figures": 16,
+  "parts": 338
  }
 ]

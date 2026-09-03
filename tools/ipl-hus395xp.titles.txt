@@ -1,0 +1,36 @@
+# Titles as printed on the 395XP's own drawings, read off the sheets.
+# Most head themselves "395, 395 EPA / <title>" beside a section letter.
+#
+# THE CARBURETTORS ARE THE REASON THIS FILE EXISTS
+# The portal files both carburettor sheets as "CARBURETOR", so the app showed
+# "CARBURETOR (1 of 2)" and "(2 of 2)" with no way to tell them apart. The
+# drawings name them, and they are different carburettors on different saws:
+#
+#     395 EPA  ->  Walbro WJ115
+#     395      ->  Walbro WJ119
+#
+# They share 36 part numbers of 41 and 39, so most of a rebuild kit is common -
+# but the few that differ include the carburettor itself, which is the
+# expensive one to get wrong. The tab now says which saw and which carb.
+#
+# Sheet 13 is also fuller on the drawing than in the portal: the portal calls
+# it HEATED HANDLES, the sheet covers the heated carburettor thermostat too.
+#
+# The rest are wording - the ampersands.
+# One line per sheet, in the order --dry-run lists them.
+CHAIN BRAKE & CLUTCH COVER
+CLUTCH & OIL PUMP
+CYLINDER COVER
+MUFFLER
+CARBURETOR & AIR FILTER
+CYLINDER PISTON
+CRANKSHAFT
+CRANKCASE
+FUEL TANK
+STARTER
+HANDLE
+IGNITION SYSTEM
+HEATED HANDLES / HEATED CARB. THERM.
+CARBURETOR (Walbro WJ115 · 395 EPA)
+CARBURETOR (Walbro WJ119 · 395)
+ACCESSORIES
