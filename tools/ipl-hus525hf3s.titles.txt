@@ -1,0 +1,26 @@
+# Titles as printed on the 525HF3S's own drawings, read off the sheets.
+# Each heads itself "525HF3S / <title>" beside its section letter; SHORT BLOCK
+# carries no letter.
+#
+# All the differences from the portal are wording - CUTTING EQUIPMENT/CUTTING
+# SYSTEM, GEARS/GEAR, COVER/COVERS, the ampersands, and CRANKCASE and
+# CRANKSHAFT which the sheets set as two words.
+#
+# No market variants and no carburettor variants in this book.
+#
+# One line per sheet, in the order --dry-run lists them.
+SHORT BLOCK
+CUTTING SYSTEM
+GEAR
+SHAFT
+THROTTLE CONTROLS
+COVERS
+CARBURETOR & AIRFILTER
+STARTER
+FUEL TANK
+IGNITION & CLUTCH
+CYLINDER PISTON & MUFFLER
+CRANK CASE
+CRANK SHAFT
+CARBURETOR
+ACCESSORIES

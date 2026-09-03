@@ -232,5 +232,14 @@
   "category": "Pole Saw",
   "figures": 14,
   "parts": 280
+ },
+ {
+  "id": "hus525hf3s",
+  "name": "Husqvarna 525HF3S",
+  "short": "525HF3S",
+  "brand": "Husqvarna",
+  "category": "Pole Hedge Trimmer",
+  "figures": 15,
+  "parts": 217
  }
 ]
