@@ -27,6 +27,15 @@
   "parts": 249
  },
  {
+  "id": "hus395xp",
+  "name": "Husqvarna 395XP",
+  "short": "395XP",
+  "brand": "Husqvarna",
+  "category": "Chainsaw",
+  "figures": 16,
+  "parts": 338
+ },
+ {
   "id": "hus525bx",
   "name": "Husqvarna 525BX Blower",
   "short": "525BX",
@@ -34,6 +43,51 @@
   "category": "Blower",
   "figures": 11,
   "parts": 112
+ },
+ {
+  "id": "hus525he4",
+  "name": "Husqvarna 525HE4",
+  "short": "525HE4",
+  "brand": "Husqvarna",
+  "category": "Pole Hedge Trimmer",
+  "figures": 16,
+  "parts": 197
+ },
+ {
+  "id": "hus525hf3s",
+  "name": "Husqvarna 525HF3S",
+  "short": "525HF3S",
+  "brand": "Husqvarna",
+  "category": "Pole Hedge Trimmer",
+  "figures": 15,
+  "parts": 217
+ },
+ {
+  "id": "hus525pt5s",
+  "name": "Husqvarna 525PT5S",
+  "short": "525PT5S",
+  "brand": "Husqvarna",
+  "category": "Pole Saw",
+  "figures": 14,
+  "parts": 280
+ },
+ {
+  "id": "hus531rb",
+  "name": "Husqvarna 531RB",
+  "short": "531RB",
+  "brand": "Husqvarna",
+  "category": "Brushcutter",
+  "figures": 25,
+  "parts": 266
+ },
+ {
+  "id": "hus532rbs",
+  "name": "Husqvarna 532RBS",
+  "short": "532RBS",
+  "brand": "Husqvarna",
+  "category": "Brushcutter",
+  "figures": 2,
+  "parts": 199
  },
  {
   "id": "am450x",
@@ -81,6 +135,15 @@
   "parts": 157
  },
  {
+  "id": "ebz3000rh",
+  "name": "Zenoah EBZ3000RH",
+  "short": "EBZ3000RH",
+  "brand": "Zenoah",
+  "category": "Blower",
+  "figures": 4,
+  "parts": 165
+ },
+ {
   "id": "ebz5100",
   "name": "Zenoah EBZ5100 Backpack Blower",
   "short": "EBZ5100",
@@ -126,6 +189,15 @@
   "parts": 253
  },
  {
+  "id": "gz2800t",
+  "name": "Zenoah GZ2800T",
+  "short": "GZ2800T",
+  "brand": "Zenoah",
+  "category": "Chainsaw",
+  "figures": 12,
+  "parts": 215
+ },
+ {
   "id": "hb2302",
   "name": "Zenoah HB2302",
   "short": "HB2302",
@@ -153,6 +225,15 @@
   "parts": 158
  },
  {
+  "id": "md431",
+  "name": "Zenoah MD431A / MD431D / MD431M",
+  "short": "MD431A / MD431D / MD431M",
+  "brand": "Zenoah",
+  "category": "Mist Blower",
+  "figures": 6,
+  "parts": 252
+ },
+ {
   "id": "pht750_1200_1500",
   "name": "Zenoah PHT750 / PHT1200 / PHT1500",
   "short": "PHT750 / PHT1200 / PHT1500",
@@ -169,77 +250,5 @@
   "category": "Chipper Shredder",
   "figures": 51,
   "parts": 1356
- },
- {
-  "id": "ebz3000rh",
-  "name": "Zenoah EBZ3000RH",
-  "short": "EBZ3000RH",
-  "brand": "Zenoah",
-  "category": "Blower",
-  "figures": 4,
-  "parts": 165
- },
- {
-  "id": "hus532rbs",
-  "name": "Husqvarna 532RBS",
-  "short": "532RBS",
-  "brand": "Husqvarna",
-  "category": "Brushcutter",
-  "figures": 2,
-  "parts": 199
- },
- {
-  "id": "hus531rb",
-  "name": "Husqvarna 531RB",
-  "short": "531RB",
-  "brand": "Husqvarna",
-  "category": "Brushcutter",
-  "figures": 25,
-  "parts": 266
- },
- {
-  "id": "hus525he4",
-  "name": "Husqvarna 525HE4",
-  "short": "525HE4",
-  "brand": "Husqvarna",
-  "category": "Pole Hedge Trimmer",
-  "figures": 16,
-  "parts": 197
- },
- {
-  "id": "hus395xp",
-  "name": "Husqvarna 395XP",
-  "short": "395XP",
-  "brand": "Husqvarna",
-  "category": "Chainsaw",
-  "figures": 16,
-  "parts": 338
- },
- {
-  "id": "gz2800t",
-  "name": "Zenoah GZ2800T",
-  "short": "GZ2800T",
-  "brand": "Zenoah",
-  "category": "Chainsaw",
-  "figures": 12,
-  "parts": 215
- },
- {
-  "id": "hus525pt5s",
-  "name": "Husqvarna 525PT5S",
-  "short": "525PT5S",
-  "brand": "Husqvarna",
-  "category": "Pole Saw",
-  "figures": 14,
-  "parts": 280
- },
- {
-  "id": "hus525hf3s",
-  "name": "Husqvarna 525HF3S",
-  "short": "525HF3S",
-  "brand": "Husqvarna",
-  "category": "Pole Hedge Trimmer",
-  "figures": 15,
-  "parts": 217
  }
 ]

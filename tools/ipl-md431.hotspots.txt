@@ -1,0 +1,49 @@
+# MD431 — callouts the scan reader got wrong, and the ones it could not read.
+#
+#   <figure> add|drop <key> <x%> <y%>
+#
+# Everything here was found by drawing each hotspot with the key it claims and
+# reading that against the number printed underneath, figure by figure, then
+# measuring the corrections against a 1% grid.
+
+# ---- FIRST-DIGIT MISREADS ---------------------------------------------------
+# The reader takes the first digit of a two-digit callout and files the hotspot
+# under that key. The part that owns the callout is then left with none, and
+# another part gains one it never had - so tapping the right place on the
+# diagram opens the wrong part, quietly.
+#
+# Confidence does not catch this: the "51" below was read as a 5 at confidence
+# 87. Only comparing the label against the printed number finds them.
+3 drop 2  20.9 65.1
+3 add  22 21.4 65.0        # printed 22, read as 2
+4 drop 5  19.8 81.0
+4 add  51 20.9 80.9        # printed 51, read as 5 - at confidence 87
+
+# ---- HOTSPOTS ON NOTHING ----------------------------------------------------
+# Both of these sat where no callout is printed. The Fig.4 one is on the
+# drawing's "14", which this book prints but never lists in the parts table -
+# so there is no part it could belong to. The Fig.3 one is on a slot in the
+# guard plate with no number anywhere near it.
+3 drop 4 37.9 73.3
+4 drop 4 70.6 68.8
+
+# ---- CALLOUTS THE READER COULD NOT SEE --------------------------------------
+# 40 is printed as "40A" and "40B" - two spark plug options against one table
+# row - so the hotspot goes between the two labels.
+1 add 40 63.2 33.0
+
+# The metering spring, printed as a bare 8 on a busy carburettor sheet.
+2 add 8 47.2 48.5
+
+3 add 18 42.0 83.3
+
+# The hanger, drawn once and labelled for both variants: 19-1A is MD431A and
+# MD431D, 19-1B is MD431M.
+3 add 19-1A 81.5 64.9
+3 add 19-1B 81.5 66.1
+
+4 add 18 26.1 54.2
+
+# Fig.5 prints "18 - 20" as a RANGE over one item, not three callouts, so 19
+# has no label of its own. It goes on the same range mark, between 18 and 20.
+5 add 19 18.5 64.9
