@@ -407,6 +407,13 @@
         <button class="status-btn status-btn-quoted" id="os-mark-quoted">Mark as Quoted</button>
         <button class="status-btn status-btn-noquote" id="os-no-quote">No quote needed</button>
       </div>
+
+      <!-- The workshop still keeps a paper slip alongside the app, and copying
+           part numbers onto it by hand is where they get mistyped. -->
+      <button class="btn-secondary" id="sd-print" type="button" style="width:100%; margin-top:10px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>
+        Print for the paper slip
+      </button>
       <div class="summary-card" style="margin-top:8px;">
         <div class="left">
           <strong id="os-slip-badge">&mdash;</strong>
@@ -464,6 +471,26 @@
   </div>
 
   <!-- Choose which machines go onto this Sales Order -->
+  <!-- Which machines to print. Mirrors the Sales Order picker rather than
+       inventing a second way to choose machines. -->
+  <div class="modal-overlay" id="pr-modal" style="display:none">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div>
+          <strong>Print for the paper slip</strong>
+          <div class="mm-sub" id="pr-sub"></div>
+        </div>
+        <button class="modal-x" id="pr-close" type="button" aria-label="Close">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <p class="nsm-hint">Pick the machines to print. Parts, labour and totals are included.</p>
+        <div id="pr-list"></div>
+        <div class="scan-hint" id="pr-status" style="justify-content:flex-start;min-height:20px"></div>
+        <button class="btn-primary" id="pr-go" type="button" style="width:100%">Make the printout</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="conv-modal" style="display:none">
     <div class="modal-sheet">
       <div class="modal-head">

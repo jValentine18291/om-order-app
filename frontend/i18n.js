@@ -253,6 +253,14 @@
     "Quote first": "先报价",
     "Recently looked up": "最近查看",
     // The diesel shortcut on Bulk Order.
+    // Printing the work onto the paper slip the workshop still keeps.
+    "Print for the paper slip": "打印贴到纸质服务单",
+    "Pick the machines to print. Parts, labour and totals are included.": "选择要打印的机器，包含零件、工时和金额。",
+    "Make the printout": "生成打印件",
+    "Nothing recorded yet": "尚未录入",
+    "Preparing…": "准备中…",
+    "Pick at least one machine.": "请至少选择一台机器。",
+    "Could not make the printout": "无法生成打印件",
     "Order Diesel": "订购柴油",
     "Tap again to send": "再按一次发送",
     "Sending…": "发送中…",

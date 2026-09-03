@@ -619,6 +619,8 @@ async function submitNewService() {
         contact_name: $("ns-contact-name").value.trim(),
         contact_number: $("ns-contact-number").value.trim(),
         whatsapp_number: $("ns-whatsapp").value.trim(),
+        // Whoever is signed in on this phone took the machine in.
+        created_by: userName(),
         check_service: $("ns-check-service").checked,
         repair_only: $("ns-repair-only").checked,
         quote_first: $("ns-quote-first").checked,
@@ -1548,18 +1550,21 @@ async function shareSlipPdf(slipIn) {
     toast("Couldn't build PDF: " + e.message, "err");
     return;
   }
-  const filename = `ServiceSlip_${slip.slip_number}.pdf`;
-  const file = new File([blob], filename, { type: "application/pdf" });
+  await deliverPdf(blob, `ServiceSlip_${slip.slip_number}.pdf`, `Service Slip ${slip.slip_number}`);
+}
 
-  // Native file share (mobile): includes WhatsApp, Mail, AirDrop, etc.
+// Getting a PDF off the phone. The share sheet where the browser has one -
+// that is what puts it in front of a printer, or WhatsApp, or mail - and a
+// plain download everywhere else. Extracted so the workshop printout and the
+// customer's slip cannot drift apart in how they are handed over.
+async function deliverPdf(blob, filename, title) {
+  const file = new File([blob], filename, { type: "application/pdf" });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
-      await navigator.share({ files: [file], title: `Service Slip ${slip.slip_number}` });
+      await navigator.share({ files: [file], title });
       return;
-    } catch (_) { /* user cancelled or share failed — fall through to download */ }
+    } catch (_) { /* cancelled, or the share failed - fall through to download */ }
   }
-
-  // Fallback: trigger a download (desktop, or browsers without file share).
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url; a.download = filename;
@@ -2479,6 +2484,184 @@ function openConvertPicker() {
   document.body.style.overflow = "hidden";
 }
 
+// ---- Printing for the paper slip -------------------------------------------
+// The workshop runs the app and a paper service slip side by side, and the
+// paper copy is where the parts get written out by hand. That is where a
+// 848F6B12C0 turns into a 848F6B12CO. This prints what the app already knows
+// so it can be cut out and stuck on.
+//
+// A5 rather than A4: it is close to the paper slip's own size, cuts down to a
+// strip without a lot of waste, and prints on A4 without anyone changing a
+// setting. Sized for sticking on, not for filing.
+function openPrintPicker() {
+  const slip = session.slip;
+  if (!slip || !slip.machines || !slip.machines.length) return;
+  $("pr-sub").textContent = `Slip ${slip.slip_number} · ${slip.company}`;
+  $("pr-status").innerHTML = "";
+  $("pr-list").innerHTML = slip.machines.map((m) => {
+    const parts = m.parts || [];
+    const labour = Number(m.labour_charge) || 0;
+    let total = labour;
+    for (const p of parts) total += p.unit_price * p.quantity;
+    const bits = [];
+    bits.push(`${parts.length} part${parts.length === 1 ? "" : "s"}`);
+    if (labour > 0) bits.push(`labour ${money(labour)}`);
+    // A machine nobody has touched prints as an empty box, which is worth
+    // saying before they tick it rather than after they have printed it.
+    const worked = parts.length > 0 || labour > 0 || String(m.repair_comment || "").trim();
+    return `
+      <label class="conv-row">
+        <input type="checkbox" value="${m.id}" ${worked ? "checked" : ""}>
+        <span class="conv-main">
+          <span class="conv-name">${escapeHtml(m.machine_desc)}</span>
+          ${m.serial_no ? `<span class="conv-serial">S/N ${escapeHtml(m.serial_no)}</span>` : ""}
+          <span class="conv-sub">${worked ? escapeHtml(bits.join(" · ") + " · " + money(total)) : "Nothing recorded yet"}</span>
+        </span>
+      </label>`;
+  }).join("");
+  $("pr-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function closePrintPicker() {
+  $("pr-modal").style.display = "none";
+  document.body.style.overflow = "";
+}
+
+function buildMachinePrintPdf(slip, machines) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: "pt", format: "a5" });
+  const LEFT = 30, RIGHT = 390, W = RIGHT - LEFT, BOTTOM = 565;
+  const INK = 26, MUTED = 110, RULE = 205;
+  let y = 34;
+
+  const need = (h) => { if (y + h > BOTTOM) { doc.addPage(); y = 34; } };
+  const rule = () => { doc.setDrawColor(RULE); doc.setLineWidth(0.6); doc.line(LEFT, y, RIGHT, y); y += 9; };
+
+  // Header: enough to identify the slip when it is stuck on the paper one.
+  doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.setTextColor(INK);
+  doc.text(`Slip ${slip.slip_number}`, LEFT, y);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(MUTED);
+  doc.text(formatDate(slip.created_at) || "", RIGHT, y, { align: "right" });
+  y += 14;
+  doc.setFontSize(10); doc.setTextColor(INK);
+  doc.text(doc.splitTextToSize(slip.company || "", W), LEFT, y);
+  y += 14;
+  rule();
+
+  let grand = 0;
+  for (const m of machines) {
+    const parts = m.parts || [];
+    const labour = Number(m.labour_charge) || 0;
+    let total = labour;
+    for (const p of parts) total += p.unit_price * p.quantity;
+    grand += total;
+
+    need(46);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(INK);
+    doc.text(doc.splitTextToSize(m.machine_desc || "", W), LEFT, y);
+    y += 13;
+    if (m.serial_no) {
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(MUTED);
+      doc.text(`S/N ${m.serial_no}`, LEFT, y); y += 11;
+    }
+
+    if (parts.length) {
+      // Columns: code, description, qty, amount. The unit price is left out on
+      // purpose - the line total is what gets checked against the invoice, and
+      // A5 has no room for a column nobody reads.
+      const CODE = LEFT, DESC = LEFT + 92, QTY = RIGHT - 96, AMT = RIGHT;
+      doc.setFont("helvetica", "bold"); doc.setFontSize(7.4); doc.setTextColor(MUTED);
+      doc.text("PART", CODE, y); doc.text("DESCRIPTION", DESC, y);
+      doc.text("QTY", QTY, y, { align: "right" }); doc.text("AMOUNT", AMT, y, { align: "right" });
+      // Rule under the heading, then clear air before the first row. Drawn
+      // after advancing it landed inside the first line's ascenders and struck
+      // through the part number - the one thing on here that must be legible.
+      y += 4;
+      doc.setDrawColor(RULE); doc.setLineWidth(0.5); doc.line(LEFT, y, RIGHT, y);
+      y += 10;
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8.6); doc.setTextColor(INK);
+      for (const p of parts) {
+        const desc = doc.splitTextToSize(p.description || "", QTY - DESC - 12);
+        const h = Math.max(11, desc.length * 10);
+        need(h + 4);
+        doc.text(String(p.item_code || ""), CODE, y);
+        doc.text(desc, DESC, y);
+        doc.text(String(p.quantity), QTY, y, { align: "right" });
+        doc.text(money(p.unit_price * p.quantity), AMT, y, { align: "right" });
+        y += h;
+      }
+    }
+    if (labour > 0) {
+      need(13);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8.6); doc.setTextColor(INK);
+      doc.text("Labour", LEFT, y);
+      doc.text(money(labour), RIGHT, y, { align: "right" });
+      y += 12;
+    }
+    if (String(m.repair_comment || "").trim()) {
+      const note = doc.splitTextToSize(m.repair_comment.trim(), W);
+      need(note.length * 9 + 6);
+      doc.setFontSize(8); doc.setTextColor(MUTED);
+      doc.text(note, LEFT, y); y += note.length * 9 + 2;
+    }
+    if (!parts.length && labour <= 0) {
+      need(13);
+      doc.setFontSize(8.6); doc.setTextColor(MUTED);
+      doc.text("No parts or labour recorded.", LEFT, y); y += 12;
+    }
+
+    need(16);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(9.4); doc.setTextColor(INK);
+    doc.text("Machine total", LEFT, y);
+    doc.text(money(total), RIGHT, y, { align: "right" });
+    y += 12;
+    rule();
+  }
+
+  // Only worth a grand total when there is more than one machine on the sheet.
+  if (machines.length > 1) {
+    need(20);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(INK);
+    doc.text(`Total — ${machines.length} machines`, LEFT, y);
+    doc.text(money(grand), RIGHT, y, { align: "right" });
+    y += 16;
+  }
+
+  doc.setFont("helvetica", "normal"); doc.setFontSize(7); doc.setTextColor(MUTED);
+  doc.text("Printed from OM Service · workshop copy", LEFT, BOTTOM + 14);
+  return doc.output("blob");
+}
+
+async function makeMachinePrintout() {
+  const chosen = [...document.querySelectorAll("#pr-list input:checked")].map((c) => Number(c.value));
+  if (!chosen.length) {
+    $("pr-status").innerHTML = statusErr("Pick at least one machine.");
+    return;
+  }
+  $("pr-go").disabled = true;
+  $("pr-status").innerHTML = statusInfo("Preparing…");
+  try {
+    // Whatever is typed but unsaved on the open machine belongs on the paper
+    // too, or the printout is behind the screen it was made from.
+    await saveCurrentComment();
+    const slip = await api(`/api/slips/${encodeURIComponent(session.slipNumber)}`);
+    session.slip = slip;
+    const machines = slip.machines.filter((m) => chosen.includes(m.id));
+    const blob = buildMachinePrintPdf(slip, machines);
+    // Same delivery as the customer slip: the phone's own share sheet where it
+    // exists, so it can go straight to a printer or to whoever has one, and a
+    // plain download everywhere else.
+    await deliverPdf(blob, `Slip-${slip.slip_number}-workshop.pdf`,
+                     `Slip ${slip.slip_number} — workshop copy`);
+    closePrintPicker();
+    $("pr-status").innerHTML = "";
+  } catch (e) {
+    $("pr-status").innerHTML = statusErr(e.message || "Could not make the printout");
+  }
+  $("pr-go").disabled = false;
+}
+
 function closeConvertPicker() {
   $("conv-modal").style.display = "none";
   document.body.style.overflow = "";
@@ -2740,7 +2923,8 @@ function renderSlipDetail(slip) {
       <div class="vs-head">
         <div>
           <div class="vs-company">${escapeHtml(slip.company)}</div>
-          <div class="vs-sub">Slip ${escapeHtml(slip.slip_number)} · Created ${escapeHtml(formatDate(slip.created_at))}</div>
+          <div class="vs-sub">Slip ${escapeHtml(slip.slip_number)} · Created ${escapeHtml(formatDate(slip.created_at))}${
+            slip.created_by ? ` · Registered by ${escapeHtml(slip.created_by)}` : ""}</div>
         </div>
         <span class="vs-status vs-${escapeAttr(slip.status)}">${escapeHtml(STATUS_LABEL[slip.status] || slip.status)}</span>
       </div>
@@ -5249,6 +5433,9 @@ $("ns-whatsapp-same").addEventListener("change", (e) => {
 
 // Open Service: technician select (inside the machine popup) + SO button
 $("os-tech").addEventListener("change", (e) => onTechChosen(e.target.value));
+$("sd-print").addEventListener("click", openPrintPicker);
+$("pr-go").addEventListener("click", makeMachinePrintout);
+$("pr-close").addEventListener("click", closePrintPicker);
 $("os-create-so").addEventListener("click", openConvertPicker);
 $("conv-go").addEventListener("click", createSalesOrder);
 $("conv-close").addEventListener("click", closeConvertPicker);

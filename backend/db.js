@@ -129,6 +129,9 @@ db.exec(`
     drive_file_id  TEXT    DEFAULT '',
     drive_link     TEXT    DEFAULT '',
     closing_ref    TEXT,                       -- DO/CS/INV number entered at close
+    -- Who took the machine in. Slips written before this existed have '',
+    -- which the app shows as nothing rather than guessing at a name.
+    created_by     TEXT    DEFAULT '',
     created_at     TEXT    DEFAULT (datetime('now')),
     closed_at      TEXT
   );
@@ -522,6 +525,10 @@ try {
   if (!cols.some((c) => c.name === "repair_only")) {
     db.exec("ALTER TABLE service_slips ADD COLUMN repair_only INTEGER DEFAULT 0");
     console.log("[db] migrated: added repair_only to service_slips");
+  }
+  if (!cols.some((c) => c.name === "created_by")) {
+    db.exec("ALTER TABLE service_slips ADD COLUMN created_by TEXT DEFAULT ''");
+    console.log("[db] migrated: added created_by to service_slips");
   }
 } catch (e) {
   console.error("[db] request-flags migration check failed:", e.message);
