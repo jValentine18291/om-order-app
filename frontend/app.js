@@ -2567,13 +2567,16 @@ function buildMachinePrintPdf(slip, machines) {
     }
 
     if (parts.length) {
-      // Columns: code, description, qty, amount. The unit price is left out on
-      // purpose - the line total is what gets checked against the invoice, and
-      // A5 has no room for a column nobody reads.
-      const CODE = LEFT, DESC = LEFT + 92, QTY = RIGHT - 96, AMT = RIGHT;
+      // Part number, description, quantity, cost per item, line amount - the
+      // five John asked for. Quantity is not on his list but stays: without it
+      // "SCREW $0.90" against a $9.90 line does not reconcile, and reconciling
+      // against the invoice is what the sheet is for.
+      const CODE = LEFT, DESC = LEFT + 88, QTY = RIGHT - 122, UNIT = RIGHT - 62, AMT = RIGHT;
       doc.setFont("helvetica", "bold"); doc.setFontSize(7.4); doc.setTextColor(MUTED);
       doc.text("PART", CODE, y); doc.text("DESCRIPTION", DESC, y);
-      doc.text("QTY", QTY, y, { align: "right" }); doc.text("AMOUNT", AMT, y, { align: "right" });
+      doc.text("QTY", QTY, y, { align: "right" });
+      doc.text("UNIT", UNIT, y, { align: "right" });
+      doc.text("AMOUNT", AMT, y, { align: "right" });
       // Rule under the heading, then clear air before the first row. Drawn
       // after advancing it landed inside the first line's ascenders and struck
       // through the part number - the one thing on here that must be legible.
@@ -2582,12 +2585,13 @@ function buildMachinePrintPdf(slip, machines) {
       y += 10;
       doc.setFont("helvetica", "normal"); doc.setFontSize(8.6); doc.setTextColor(INK);
       for (const p of parts) {
-        const desc = doc.splitTextToSize(p.description || "", QTY - DESC - 12);
+        const desc = doc.splitTextToSize(p.description || "", QTY - DESC - 10);
         const h = Math.max(11, desc.length * 10);
         need(h + 4);
         doc.text(String(p.item_code || ""), CODE, y);
         doc.text(desc, DESC, y);
         doc.text(String(p.quantity), QTY, y, { align: "right" });
+        doc.text(money(p.unit_price), UNIT, y, { align: "right" });
         doc.text(money(p.unit_price * p.quantity), AMT, y, { align: "right" });
         y += h;
       }
