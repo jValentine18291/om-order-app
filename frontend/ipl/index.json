@@ -214,5 +214,14 @@
   "category": "Chainsaw",
   "figures": 16,
   "parts": 338
+ },
+ {
+  "id": "gz2800t",
+  "name": "Zenoah GZ2800T",
+  "short": "GZ2800T",
+  "brand": "Zenoah",
+  "category": "Chainsaw",
+  "figures": 12,
+  "parts": 215
  }
 ]

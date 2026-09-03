@@ -1,0 +1,30 @@
+# GZ2800T sheet titles.
+#
+# This book's drawings are printed in Japanese - シリンダ・ピストン, キャブレタ,
+# ハウジング - so unlike the other Zenoah books there is no English on the sheet
+# to copy. The portal's English names are used, and only the two that are
+# actually wrong are changed. A "-" means "keep what the portal says".
+#
+# 4  CARBURATOR is a typo in the portal. The sheet is the carburettor itself
+#    (gaskets, diaphragms, metering lever); Fig.5 is how it mounts with the air
+#    filter, which is why both mention it.
+#
+# 12 ACCESSORIES undersells it badly. The Japanese title reads
+#    ガイドバー・ソーチェン・付属品・別売品 - guide bar, saw chain, accessories,
+#    optional parts - and the sheet does hold the bars and chains: four bar
+#    numbers, two saw chains, a bar cover and a protector. Nobody hunting a
+#    guide bar or a chain would open a tab called "Accessories".
+#
+# One line per sheet, in the order --dry-run lists them.
+-
+-
+-
+CARBURETOR
+-
+-
+-
+-
+-
+-
+-
+GUIDE BAR, SAW CHAIN AND ACCESSORIES
