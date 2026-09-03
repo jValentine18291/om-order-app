@@ -1,0 +1,27 @@
+# Titles as printed on the 525PT5S's own drawings, read off the sheets.
+# Each heads itself "525PT5S / <title>" beside its section letter; ACCESSORIES,
+# SHORT BLOCK and SHAFT carry no letter.
+#
+# The differences from the portal are only wording - the ampersands, and the
+# commas in the cylinder sheet. Kept so the tabs read as the sheet in front of
+# the technician does.
+#
+# Sheet 10 is the one that decides what this machine is: SAW HEAD, with an oil
+# tank, an oil pump and a sprocket. See the note in the commit - it is a pole
+# saw, not a pole hedge trimmer.
+#
+# One line per sheet, in the order --dry-run lists them.
+ACCESSORIES
+CYLINDER PISTON & MUFFLER
+CRANKSHAFT
+CARBURETOR
+FUEL TANK
+THROTTLE CONTROLS
+STARTER
+COVER
+IGNITION SYSTEM & CLUTCH
+SAW HEAD
+CARBURETOR & AIR FILTER
+CRANKCASE
+SHORT BLOCK
+SHAFT

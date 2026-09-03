@@ -223,5 +223,14 @@
   "category": "Chainsaw",
   "figures": 12,
   "parts": 215
+ },
+ {
+  "id": "hus525pt5s",
+  "name": "Husqvarna 525PT5S",
+  "short": "525PT5S",
+  "brand": "Husqvarna",
+  "category": "Pole Saw",
+  "figures": 14,
+  "parts": 280
  }
 ]
