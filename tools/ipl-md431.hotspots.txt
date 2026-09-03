@@ -20,17 +20,29 @@
 4 add  51 20.9 80.9        # printed 51, read as 5 - at confidence 87
 
 # ---- HOTSPOTS ON NOTHING ----------------------------------------------------
-# Both of these sat where no callout is printed. The Fig.4 one is on the
-# drawing's "14", which this book prints but never lists in the parts table -
-# so there is no part it could belong to. The Fig.3 one is on a slot in the
-# guard plate with no number anywhere near it.
+# These sat where no callout is printed. Two are on the drawing's "14" - a
+# number this book prints but never lists, so there is no part it could belong
+# to - and on a slot in a guard plate. The other three are on small round drawn
+# components: a casting boss, an o-ring and a washer, which the reader took for
+# digits.
+#
+# Those last three were found by John tapping the diagram, after the first pass
+# had already been checked figure by figure. A round shape that is not a digit
+# is the one thing reading the labels against the printed numbers does not
+# catch, because there is no printed number there to disagree with. Confidence
+# is no guide either: the washer read at 66.
 3 drop 4 37.9 73.3
 4 drop 4 70.6 68.8
+1 drop 2 17.7 48.6         # a casting boss, left of item 30
+4 drop 7 62.3 51.7         # an o-ring, below item 32
+4 drop 9 42.5 76.6         # a washer, bottom left of item 49
 
 # ---- CALLOUTS THE READER COULD NOT SEE --------------------------------------
-# 40 is printed as "40A" and "40B" - two spark plug options against one table
-# row - so the hotspot goes between the two labels.
-1 add 40 63.2 33.0
+# 40 is printed as "40A" and "40B" - two labels against one table row. A single
+# hotspot between them meant tapping either label was a near miss, so each gets
+# its own and both open the same spark plug.
+1 add 40 63.2 32.3
+1 add 40 63.2 33.6
 
 # The metering spring, printed as a bare 8 on a busy carburettor sheet.
 2 add 8 47.2 48.5
