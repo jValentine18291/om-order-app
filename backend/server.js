@@ -659,9 +659,13 @@ app.post("/api/part-prices", async (req, res) => {
 // back from the same query that performs the write - plus an exact item code,
 // one column on one row, and a permanent log of what it used to be.
 //
-// Admin only. As with prices, that is an accident guard rather than security:
-// the app has no logins, so the role comes from the browser. It stops a
-// technician changing a shelf by mistake, which is what it is for.
+// Purchaser and Admin. As with prices, that is an accident guard rather than
+// security: the app has no logins, so the role comes from the browser. It stops
+// a technician changing a shelf by mistake, which is what it is for.
+//
+// The Purchaser is the person actually putting stock on the shelf, so she is
+// the one who knows where it went - needing an admin to record that is how a
+// location ends up stale, which costs more than the guard saves.
 app.post("/api/part-location", async (req, res) => {
   const { logLocationEvent } = require("./priceLog");
   const { item_code, shelf, who = "", role = "" } = req.body || {};
@@ -679,9 +683,9 @@ app.post("/api/part-location", async (req, res) => {
     // Who is asking comes first: it is the cheapest check, it needs no database,
     // and "Only Admin can change a location" is the honest answer to give a
     // technician - "AutoCount is not enabled" would send them to the wrong place.
-    if (String(role || "").toLowerCase() !== "admin") {
-      stamp("REFUSED - not an admin");
-      return res.status(403).json({ error: "Only Admin can change a part's location." });
+    if (!["purchaser", "admin"].includes(String(role || "").toLowerCase())) {
+      stamp("REFUSED - not a purchaser or admin");
+      return res.status(403).json({ error: "Only Purchaser or Admin can change a part's location." });
     }
     if (!String(who || "").trim()) {
       return res.status(400).json({ error: "Missing initials, so the change could not be traced." });

@@ -4659,12 +4659,19 @@ $("note-delete").addEventListener("click", () => {
 // ---- Location row, shared by both stock cards -------------------------------
 // Find Part and the IPL part sheet render the same card. The row lives here so
 // the Change button cannot end up on one and not the other.
+// Purchaser and Admin. The shelf is the Purchaser's job - she is the one
+// putting the stock away, so she is the one who knows where it went, and
+// having to find an admin to record it is how a location goes stale.
+// Technicians and Sales still only read it.
+function canChangeLocation() {
+  return ["purchaser", "admin"].includes(getRole());
+}
+
 function shelfRowHtml(p) {
-  const admin = getRole() === "admin";
   return `<div class="fp-row">
       <span class="fp-lbl">Location / Shelf</span>
       <span class="fp-val">${p.shelf ? escapeHtml(p.shelf) : "—"}${
-        admin ? `<button type="button" class="fp-shelf-edit" data-shelf-edit>Change</button>` : ""
+        canChangeLocation() ? `<button type="button" class="fp-shelf-edit" data-shelf-edit>Change</button>` : ""
       }</span>
     </div>`;
 }
@@ -4676,7 +4683,7 @@ function wireShelfEdit(container, part, onSaved) {
   if (btn) btn.addEventListener("click", () => openLocationModal(part, onSaved));
 }
 
-// ---- Change location (Admin only) -------------------------------------------
+// ---- Change location (Purchaser and Admin) ----------------------------------
 // This WRITES to AutoCount and overwrites what is there - a location is meant
 // to change, so unlike a price there is no "already set" guard to fall back on.
 // The confirmation step is the guard: the current value and the new one are put
