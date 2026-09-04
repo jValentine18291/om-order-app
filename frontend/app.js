@@ -6195,6 +6195,12 @@ function selectIplKey(key, fromDiagram) {
     if (matches.length === 1) openIplPart(matches[0].i);
     else if (matches.length > 1) {
       toast(`${matches.length} versions of ${key} — pick one from the list`, "ok");
+    } else {
+      // A number the drawing prints that its own parts table skips - Zenoah's
+      // MD431 does this with 56 and 14. Tapping it used to do nothing, and
+      // nothing is indistinguishable from a broken app. Better to say the book
+      // is short a row than to leave someone tapping the same number twice.
+      toast(`${key} is on the drawing but not listed in this book`, "err");
     }
   }
 }

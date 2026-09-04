@@ -392,6 +392,9 @@
     [/^Order (\d+) × (.+)$/, "申请 $1 × $2"],
     [/^(.+) · requested by (.+)$/, "$1 · 申请人：$2"],
     [/^Nothing matches “(.+)”$/, "没有符合“$1”的型号"],
+    // A callout the drawing prints and the book's own parts table skips.
+    [/^(.+) is on the drawing but not listed in this book$/,
+      "图上有 $1，但本手册未列出此零件"],
 
     // Counts and summaries
     [/^(\d+) machines?$/, "$1 台机器"],

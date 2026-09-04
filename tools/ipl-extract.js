@@ -426,6 +426,19 @@ function applyHotspotOverrides(figures) {
       }
       fig.hotspots.push({ key, x, y, byHand: true });
       added++;
+    } else if (verb === "unlisted") {
+      // A number the drawing prints and the parts table skips. The app says so
+      // when it is tapped; without a hotspot the tap does nothing at all, and
+      // silence reads as a broken app rather than an incomplete book.
+      //
+      // Deliberately NOT spelled "add": that verb's check on the parts list is
+      // what stops a mistyped key becoming a hotspot that leads nowhere, and
+      // this must not be the loophole around it.
+      if (fig.parts.some((pt) => pt.key === key)) {
+        throw new Error(`${path.basename(file)}: figure ${figNo} DOES list ${key} — use add — "${line}"`);
+      }
+      fig.hotspots.push({ key, x, y, byHand: true, unlisted: true });
+      added++;
     } else if (verb === "drop") {
       // Nearest hotspot for that key, and it has to be close: a drop aimed at
       // a callout that has since moved should fail rather than delete a
@@ -444,7 +457,7 @@ function applyHotspotOverrides(figures) {
       fig.hotspots.splice(best, 1);
       dropped++;
     } else {
-      throw new Error(`${path.basename(file)}: expected add or drop — "${line}"`);
+      throw new Error(`${path.basename(file)}: expected add, unlisted or drop — "${line}"`);
     }
   }
   for (const f of figures) f.hotspots.sort((a, b) => a.key.length - b.key.length || a.key.localeCompare(b.key));

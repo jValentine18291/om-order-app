@@ -56,6 +56,19 @@
 
 4 add 18 26.1 54.2
 
+# ---- PRINTED ON THE DRAWING, MISSING FROM THE TABLE -------------------------
+# Two numbers this book draws and never lists. Checked against the printed
+# pages rendered at 300dpi, not the PDF's text layer: page 3 runs 53, 54, 55,
+# 57A, 57B, and page 9 runs 12, 13, 15, 16 - the rows simply are not there.
+#
+# So there is no part for these to open, and they are not "add". They exist so
+# that tapping the number says the book is short a row, instead of the tap
+# doing nothing and looking like a fault in the app.
+#
+# Both were found by John tapping the diagram.
+1 unlisted 56 80.5 64.9        # above left of item 54, on the gasket
+4 unlisted 14 52.1 35.9        # left of item 10, on the o-ring
+
 # Fig.5 prints "18 - 20" as a RANGE over one item, not three callouts, so 19
 # has no label of its own. It goes on the same range mark, between 18 and 20.
 5 add 19 18.5 64.9
