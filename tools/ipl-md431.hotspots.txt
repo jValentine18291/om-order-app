@@ -1,6 +1,20 @@
 # MD431 — callouts the scan reader got wrong, and the ones it could not read.
 #
-#   <figure> add|drop <key> <x%> <y%>
+#   <figure> add|drop|unlisted <key> <x%> <y%>
+#
+# TO RE-IMPORT THIS BOOK, exactly this — the brand belongs INSIDE the name, and
+# POPPLER_BIN and TESSERACT_BIN both have to be set or the OCR silently reads
+# nothing and every figure comes back with no hotspots at all:
+#
+#   POPPLER_BIN=".../poppler/Library/bin" TESSERACT_BIN=".../tesseract" \
+#     node tools/ipl-extract.js "<the PDF>" md431 \
+#       "Zenoah MD431A / MD431D / MD431M" "Mist Blower"
+#
+# Leave "Zenoah" off and the brand column becomes "MD431A" and the short name
+# "/ MD431D / MD431M", because the first word of the name is what the picker
+# takes for the brand. Everything else regenerates identically — checked on
+# 4 Sep 2026 by re-running the whole book and diffing: every hotspot and every
+# part matched, and only that one name line differed.
 #
 # Everything here was found by drawing each hotspot with the key it claims and
 # reading that against the number printed underneath, figure by figure, then
