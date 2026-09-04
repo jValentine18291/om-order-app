@@ -180,7 +180,15 @@ db.exec(`
     description    TEXT    NOT NULL,
     uom            TEXT    DEFAULT 'UNIT',
     unit_price     REAL    DEFAULT 0,
+    -- Declared INTEGER, but SQLite keeps a fraction as-is rather than losing
+    -- it, and the PulsFOG tubes need that: they are cut from a roll, so a
+    -- repair uses 0.265 of a stock unit, not 1 of anything.
     quantity       INTEGER NOT NULL DEFAULT 1,
+    -- Which variant of the item this line is, where one item code covers
+    -- several. Only the fogger tubes use it so far: Z00126.03 is four
+    -- different tube types at four different prices, and without this the
+    -- merge below would fold them into one wrong line.
+    variant        TEXT    DEFAULT '',
     technician     TEXT,                        -- WJ / XL / KM / R
     free_text      INTEGER DEFAULT 0,           -- 1 = staff name this line themselves
     created_at     TEXT    DEFAULT (datetime('now')),
@@ -532,6 +540,19 @@ try {
   }
 } catch (e) {
   console.error("[db] request-flags migration check failed:", e.message);
+}
+
+// Which variant of an item a part line is - the PulsFOG tube type. Existing
+// lines get '', which is what every non-tube part uses too, so the merge
+// behaves exactly as it did before for everything already recorded.
+try {
+  const cols = db.prepare("PRAGMA table_info(machine_parts)").all();
+  if (!cols.some((c) => c.name === "variant")) {
+    db.exec("ALTER TABLE machine_parts ADD COLUMN variant TEXT DEFAULT ''");
+    console.log("[db] migrated: added variant to machine_parts");
+  }
+} catch (e) {
+  console.error("[db] machine_parts variant migration check failed:", e.message);
 }
 
 // Migration: rename legacy CALL_CUSTOMER status to ALL_REPAIRED (status model v2).

@@ -282,6 +282,14 @@
     "Parts on this machine": "本机器的零件",
     "Scan or type a part to add it to this machine.": "扫描或输入零件编号，添加到本机器。",
     "No parts yet": "暂无零件",
+    // ---- Fogger tubes ----
+    // Cut to length from a roll, so the technician picks a type and a number of
+    // pieces and the app works out the fraction of a roll.
+    "Fogger tubes": "喷雾机喉管",
+    "Cut from a roll — tap one, then say how many pieces": "从整卷剪裁 — 点选一款，再输入数量",
+    "How many pieces?": "需要多少条？",
+    "Or type a number": "或输入数量",
+    "Add to machine": "加入机器",
     "Labour Charge": "人工费",
     "(technician time, on top of parts)": "（技术员工时，另加于零件）",
     "Repair comment": "维修说明",
@@ -374,6 +382,16 @@
     [new RegExp("^(\\d+) machines? · " + DATE + "$"),
       function (_, n, d, m, y) { return n + " 台机器 · " + cnDate(d, m, y); }],
 
+    // "Tube 142" has to be settled BEFORE the filter-chip pattern below. That
+    // one matches any "<Word> <number>", finds no dictionary entry for "Tube"
+    // and hands the text back unchanged - and translate() stops at the first
+    // pattern that MATCHES, not the first that changes anything. Sitting after
+    // it, this never ran.
+    //
+    // Tube types only, never "Tube (.+)": that turned the customer "Tube Test
+    // Co" into "喉管 Test Co" on the slip list.
+    [/^Tube (\d{2,4}[a-z]?|S\d{2,4})$/, "喉管 $1"],
+
     // ---- IPL ----
     // These carry a machine type inside them, so the type is looked up in DICT
     // rather than spelled out again in a pattern per category. A type that is
@@ -392,6 +410,14 @@
     [/^Order (\d+) × (.+)$/, "申请 $1 × $2"],
     [/^(.+) · requested by (.+)$/, "$1 · 申请人：$2"],
     [/^Nothing matches “(.+)”$/, "没有符合“$1”的型号"],
+
+    // ---- Fogger tubes ----
+    // The tube type, the item code and the money are carried through as they
+    // are - they are what the technician matches against the roll in his hand.
+    [/^(.+) · (\$[\d.,]+) a piece$/, "$1 · 每条 $2"],
+    [/^(\d+) pcs? · ([\d.]+) of a roll · (\$[\d.,]+)$/, "$1 条 · 整卷的 $2 · $3"],
+    [/^(\d+) pcs? · ([\d.]+) of a roll$/, "$1 条 · 整卷的 $2"],
+    [/^Added tube (.+) × (\d+) — tap Save when done$/, "已加入喉管 $1 × $2 — 完成后请点保存"],
     // A callout the drawing prints and the book's own parts table skips.
     [/^(.+) is on the drawing but not listed in this book$/,
       "图上有 $1，但本手册未列出此零件"],

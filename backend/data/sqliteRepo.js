@@ -366,24 +366,33 @@ function getSlipSignature(slipNumber) {
 }
 
 // Add a scanned part to a specific machine (or bump qty if same part+technician).
-function addPartToMachine(machineId, { item_code, description, uom = "UNIT", unit_price = 0, quantity = 1, technician = "", free_text } = {}) {
+//
+// variant tells two lines apart that share an item code. It exists for the
+// PulsFOG tubes, where Z00126.03 is four tube types at four different prices:
+// merging 222 into 311 because both are Z00126.03 would quietly produce a
+// figure that is neither. Everything else passes '' and merges as before.
+function addPartToMachine(machineId, { item_code, description, uom = "UNIT", unit_price = 0, quantity = 1, technician = "", free_text, variant = "" } = {}) {
   const machine = db.prepare("SELECT * FROM slip_machines WHERE id = ?").get(machineId);
   if (!machine) { const e = new Error("Machine not found on any slip."); e.status = 404; throw e; }
   if (!item_code) { const e = new Error("item_code is required."); e.status = 400; throw e; }
 
   // If the same part was already scanned for this machine by the same tech, bump qty.
+  // Same variant too: a second cut of tube 142 adds to the first, but tube 311
+  // off the same roll starts a line of its own.
+  const variantKey = String(variant || "");
   const existing = db.prepare(
-    "SELECT * FROM machine_parts WHERE machine_id = ? AND item_code = ? AND technician = ?"
-  ).get(machineId, item_code, technician);
+    "SELECT * FROM machine_parts WHERE machine_id = ? AND item_code = ? AND technician = ? AND IFNULL(variant, '') = ?"
+  ).get(machineId, item_code, technician, variantKey);
 
   if (existing) {
     db.prepare("UPDATE machine_parts SET quantity = quantity + ? WHERE id = ?")
       .run(Number(quantity) || 1, existing.id);
   } else {
     db.prepare(
-      `INSERT INTO machine_parts (machine_id, item_code, description, uom, unit_price, quantity, technician, free_text)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO machine_parts (machine_id, item_code, description, uom, unit_price, quantity, technician, variant, free_text)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(machineId, item_code, description || item_code, uom, Number(unit_price) || 0, Number(quantity) || 1, technician,
+          variantKey,
           // The caller has seen the CATALOGUE description; by the time the row
           // is written, the staff-typed name has replaced it, so the fact
           // cannot be worked out here. Trust the flag, and still check the

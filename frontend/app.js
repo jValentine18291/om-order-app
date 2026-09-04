@@ -1708,6 +1708,8 @@ function openMachineModal(machineId) {
   $("os-entry").style.display = "none";
   const m = currentMachine();
   $("mm-title").textContent = m ? m.machine_desc : "Machine";
+  // Which machine this is decides whether the tube buttons belong here at all.
+  try { renderTubePicker(); } catch (_) {}
   $("mm-sub").textContent = `Slip ${session.slipNumber} · ${session.slip.company}`;
   const mmr = $("mm-remarks");
   if (m && m.remarks) { mmr.textContent = `“${m.remarks}”`; mmr.style.display = "block"; }
@@ -1775,6 +1777,9 @@ async function commitPendingParts() {
         item_code: p.item_code, description: p.description, uom: p.uom,
         unit_price: p.unit_price, quantity: p.quantity, technician: p.technician,
         free_text: !!p.free_text,
+        // Which tube type this line is. Without it the server would merge two
+        // tubes cut from the same roll into one line at one price.
+        variant: p.variant || "",
       }),
     });
     session.pendingParts.shift();
@@ -2011,6 +2016,175 @@ async function editPartDescription(partId, current) {
   }
 }
 
+// ---- The tube picker -------------------------------------------------------
+// Shown only on a machine that looks like a fogger. The model is free text
+// typed at the counter, so looksLikeFogger() is deliberately generous - see
+// fogger-tubes.js for why erring towards showing it is the safer mistake.
+let tubePending = null;      // { tube, pieces } while the piece prompt is open
+
+function renderTubePicker() {
+  const box = $("tube-pick");
+  if (!box || !window.FOGGER_TUBES) return;
+  const m = currentMachine();
+  if (!m || !window.FOGGER_TUBES.looksLikeFogger(m.machine_desc)) {
+    box.style.display = "none";
+    return;
+  }
+  // A price typed wrong here reaches a customer's invoice with nothing in
+  // between to question it, so the table checks itself against the second
+  // figure the sheet prints. Say so loudly rather than pricing a job on it.
+  const bad = window.FOGGER_TUBES.check();
+  if (bad.length) {
+    box.style.display = "";
+    $("tube-btns").innerHTML =
+      `<div class="tube-frac" style="grid-column:1/-1">Tube table looks wrong — ${escapeHtml(bad.join("; "))}. Tell the office before using these.</div>`;
+    return;
+  }
+  box.style.display = "";
+  $("tube-btns").innerHTML = window.FOGGER_TUBES.list.map((t) => `
+    <button type="button" class="tube-btn" data-tube="${escapeAttr(t.type)}">
+      ${escapeHtml(t.type)}
+      <span class="tube-each">${money(t.each)}</span>
+    </button>`).join("");
+}
+
+function openTubeQty(type) {
+  const t = window.FOGGER_TUBES && window.FOGGER_TUBES.byType(type);
+  if (!t) return;
+  tubePending = { tube: t, pieces: 1 };
+  $("tube-qty-title").textContent = `Tube ${t.type}`;
+  $("tube-qty-sub").textContent = `${t.code} · ${money(t.each)} a piece`;
+  $("tube-qty-status").innerHTML = "";
+  $("tube-qty-other").value = "";
+  renderTubeQtyButtons();
+  $("tube-qty-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function renderTubeQtyButtons() {
+  $("tube-qty-btns").innerHTML = [1, 2, 3].map((n) => `
+    <button type="button" class="tube-qty-btn${tubePending && tubePending.pieces === n ? " on" : ""}" data-tubeqty="${n}">${n}</button>`).join("");
+  if (tubePending) {
+    const t = tubePending.tube;
+    const n = tubePending.pieces;
+    $("tube-qty-status").innerHTML = statusInfo(
+      `${n} pc${n === 1 ? "" : "s"} · ${Number((n * t.unitQty).toFixed(4))} of a roll · ${money(n * t.unitQty * t.unitPrice)}`
+    );
+  }
+}
+
+function closeTubeQty() {
+  $("tube-qty-modal").style.display = "none";
+  document.body.style.overflow = "";
+  tubePending = null;
+}
+
+// Add the chosen tube to the machine.
+//
+// The item code is RESOLVED against AutoCount rather than written from the
+// table. The table is a workshop sheet, not the stock ledger, and a code taken
+// from it on trust would end up on a Sales Order that nobody notices is wrong
+// until it is in AutoCount. If the code will not resolve, say so and add
+// nothing - the technician can still type the part in the normal way.
+async function addTubeToMachine() {
+  if (!tubePending) return;
+  const { tube, pieces } = tubePending;
+  const btn = $("tube-qty-add");
+  btn.disabled = true;
+  $("tube-qty-status").innerHTML = statusInfo("Checking the item code…");
+  try {
+    const item = await lookupItem(tube.code);
+    if (!item || !item.item_code) throw new Error("not found");
+    session.pendingParts.push({
+      item_code: item.item_code,
+      description: `PULSFOG TUBE ${tube.type}`,
+      uom: item.uom || "UNIT",
+      // The sheet's roll price, not AutoCount's: one item code covers several
+      // tube types at several prices, so AutoCount has no single figure that
+      // could be right for all of them.
+      unit_price: tube.unitPrice,
+      quantity: Number((pieces * tube.unitQty).toFixed(4)),
+      variant: tube.type,
+      technician: session.technician,
+      free_text: false,
+    });
+    closeTubeQty();
+    toast(`Added tube ${tube.type} × ${pieces} — tap Save when done`, "ok");
+    renderMachineParts();
+    updateSlipFooter();
+  } catch (e) {
+    $("tube-qty-status").innerHTML = statusErr(
+      `Could not find ${tube.code} in AutoCount. Add it by typing the part instead, and tell the office the code on the tube sheet may have changed.`
+    );
+  }
+  btn.disabled = false;
+}
+
+$("tube-btns").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-tube]");
+  if (b) openTubeQty(b.dataset.tube);
+});
+$("tube-qty-btns").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-tubeqty]");
+  if (!b || !tubePending) return;
+  tubePending.pieces = Number(b.dataset.tubeqty);
+  $("tube-qty-other").value = "";
+  renderTubeQtyButtons();
+});
+$("tube-qty-other").addEventListener("input", (e) => {
+  if (!tubePending) return;
+  const n = parseInt(e.target.value, 10);
+  if (Number.isFinite(n) && n > 0 && n < 100) {
+    tubePending.pieces = n;
+    renderTubeQtyButtons();
+    // renderTubeQtyButtons clears the highlight for anything but 1-3, which is
+    // what we want, but it must not steal the box the tech is typing in.
+    $("tube-qty-other").value = String(n);
+    $("tube-qty-other").focus();
+  }
+});
+$("tube-qty-close").addEventListener("click", closeTubeQty);
+$("tube-qty-add").addEventListener("click", addTubeToMachine);
+
+// ---- PulsFOG tubes ---------------------------------------------------------
+// These are cut to length from a roll, so one repair uses a fraction of a
+// stock unit - 0.265 of a roll for a piece of tube 142, not "1 tube". The
+// workshop was working that out from a paper table, which is the kind of sum
+// that goes wrong at four o'clock on a Friday.
+//
+// The line is stored the way the stock actually moves: quantity is the roll
+// fraction and the price is the roll price, so AutoCount deducts the right
+// amount. The PIECE COUNT IS NEVER STORED - it is worked back out from the
+// quantity wherever it is shown. That way topping a line up from two pieces to
+// three cannot leave a "x 2 pcs" caption behind, disagreeing with the number
+// next to it.
+function tubeFor(part) {
+  if (!part || !window.FOGGER_TUBES) return null;
+  const type = String(part.variant || "");
+  return type ? window.FOGGER_TUBES.byType(type) : null;
+}
+
+// Pieces, from the fraction. Rounded because 3 x 0.075 is 0.22499999999999998
+// in binary floating point, and a technician should not be shown "2 pcs"
+// because of that.
+function tubePieces(part) {
+  const t = tubeFor(part);
+  if (!t || !(t.unitQty > 0)) return null;
+  return Math.max(1, Math.round((Number(part.quantity) || 0) / t.unitQty));
+}
+
+// What the quantity column should read, and what sits under the description.
+function tubeQtyDisplay(part) {
+  const t = tubeFor(part);
+  if (!t) return null;
+  const pcs = tubePieces(part);
+  return {
+    pieces: pcs,
+    // Trailing zeros trimmed: 0.53, not 0.5300000000000001 and not 0.530.
+    frac: `${pcs} pc${pcs === 1 ? "" : "s"} · ${Number((pcs * t.unitQty).toFixed(4))} of a roll`,
+  };
+}
+
 function renderMachineParts() {
   const wrap = $("machine-parts");
   const machine = currentMachine();
@@ -2032,6 +2206,7 @@ function renderMachineParts() {
                   : ""
               }</div>
               <div class="sku mono">${escapeHtml(p.item_code)} · ${escapeHtml(p.technician)}</div>
+              ${tubeQtyDisplay(p) ? `<div class="tube-frac">${escapeHtml(tubeQtyDisplay(p).frac)}</div>` : ""}
             </div>
             <div class="price-col">
               <span class="price-edit">$<input type="number" step="0.01" min="0" value="${Number(p.unit_price).toFixed(2)}" data-pprice="${i}" inputmode="decimal" aria-label="Unit price" /></span>
@@ -2041,7 +2216,7 @@ function renderMachineParts() {
           <div class="foot">
             <div class="qty">
               <button data-pdec="${i}" aria-label="Decrease">−</button>
-              <input type="number" min="1" value="${p.quantity}" data-pqty="${i}" inputmode="numeric" aria-label="Quantity" />
+              <input type="number" min="1" value="${tubeQtyDisplay(p) ? tubeQtyDisplay(p).pieces : p.quantity}" data-pqty="${i}" inputmode="numeric" aria-label="Quantity" />
               <button data-pinc="${i}" aria-label="Increase">+</button>
             </div>
             <div class="amt-wrap">
@@ -2078,6 +2253,7 @@ function renderMachineParts() {
               : ""
           }</div>
           <div class="sku mono">${escapeHtml(p.item_code)} · ${escapeHtml(p.technician || "")}</div>
+          ${tubeQtyDisplay(p) ? `<div class="tube-frac">${escapeHtml(tubeQtyDisplay(p).frac)}</div>` : ""}
           ${noPrice ? `<div class="no-price-tag">No price — enter one</div>` : ""}
         </div>
         <div class="price-col">
@@ -2088,7 +2264,7 @@ function renderMachineParts() {
       <div class="foot">
         <div class="qty">
           <button data-dec="${p.id}" aria-label="Decrease">−</button>
-          <input type="number" min="1" value="${p.quantity}" data-qty="${p.id}" inputmode="numeric" aria-label="Quantity" />
+          <input type="number" min="1" value="${tubeQtyDisplay(p) ? tubeQtyDisplay(p).pieces : p.quantity}" data-qty="${p.id}" inputmode="numeric" aria-label="Quantity" />
           <button data-inc="${p.id}" aria-label="Increase">+</button>
         </div>
         <div class="amt-wrap">
@@ -5508,9 +5684,12 @@ $("machine-parts").addEventListener("click", (e) => {
     const i = Number(el.dataset.pdel ?? el.dataset.pinc ?? el.dataset.pdec);
     const p = session.pendingParts[i];
     if (!p) return;
+    const step = tubeFor(p) ? tubeFor(p).unitQty : 1;
     if (pdel) session.pendingParts.splice(i, 1);
-    else if (pinc) p.quantity += 1;
-    else if (pdec) p.quantity = Math.max(1, p.quantity - 1);
+    // Rounded to four places because repeatedly adding 0.075 in binary floating
+    // point drifts, and the drift would end up in the quantity AutoCount sees.
+    else if (pinc) p.quantity = Number((p.quantity + step).toFixed(4));
+    else if (pdec) p.quantity = Number(Math.max(step, p.quantity - step).toFixed(4));
     renderMachineParts();
     updateSlipFooter();
     return;
@@ -5545,12 +5724,21 @@ $("machine-parts").addEventListener("click", (e) => {
     const id = Number(inc.dataset.inc);
     const m = currentMachine();
     const p = m && m.parts.find((x) => x.id === id);
-    if (p) setPartQty(id, p.quantity + 1);
+    if (p) {
+      const step = tubeFor(p) ? tubeFor(p).unitQty : 1;
+      setPartQty(id, Number((p.quantity + step).toFixed(4)));
+    }
   } else if (dec) {
     const id = Number(dec.dataset.dec);
     const m = currentMachine();
     const p = m && m.parts.find((x) => x.id === id);
-    if (p) setPartQty(id, Math.max(0, p.quantity - 1));
+    if (p) {
+      // A tube's floor is one piece, not zero: stepping down to 0.265 and then
+      // to 0 would pass through a quantity that is not a whole cut of anything.
+      // Removing the line is what the bin is for.
+      const step = tubeFor(p) ? tubeFor(p).unitQty : 1;
+      setPartQty(id, Number(Math.max(tubeFor(p) ? step : 0, p.quantity - step).toFixed(4)));
+    }
   }
 });
 // Tapping a price to correct it should not mean deleting "0.00" a character at
@@ -5571,13 +5759,26 @@ if (labourField) labourField.addEventListener("focus", selectOnFocus);
 $("machine-parts").addEventListener("change", (e) => {
   if (e.target.dataset.pqty !== undefined) {
     const p = session.pendingParts[Number(e.target.dataset.pqty)];
-    if (p) { p.quantity = Math.max(1, parseInt(e.target.value, 10) || 1); renderMachineParts(); updateSlipFooter(); }
+    // parseInt is right for a boxed part and wrong for a tube: the box holds
+    // pieces, and the quantity stored is the fraction of a roll they come to.
+    // Without this a 0.53 typed back in would snap to 1 - a whole roll.
+    if (p) {
+      const t = tubeFor(p);
+      const n = Math.max(1, parseInt(e.target.value, 10) || 1);
+      p.quantity = t ? Number((n * t.unitQty).toFixed(4)) : n;
+      renderMachineParts();
+      updateSlipFooter();
+    }
   } else if (e.target.dataset.pprice !== undefined) {
     const p = session.pendingParts[Number(e.target.dataset.pprice)];
     if (p) { p.unit_price = Math.max(0, parseFloat(e.target.value) || 0); renderMachineParts(); updateSlipFooter(); }
   } else if (e.target.dataset.qty) {
-    const q = Math.max(0, parseInt(e.target.value, 10) || 0);
-    setPartQty(Number(e.target.dataset.qty), q);
+    const id = Number(e.target.dataset.qty);
+    const m = currentMachine();
+    const saved = m && m.parts.find((x) => x.id === id);
+    const t = saved ? tubeFor(saved) : null;
+    const n = Math.max(0, parseInt(e.target.value, 10) || 0);
+    setPartQty(id, t ? Number((Math.max(1, n) * t.unitQty).toFixed(4)) : n);
   } else if (e.target.dataset.price) {
     const p = Math.max(0, parseFloat(e.target.value) || 0);
     setPartPrice(Number(e.target.dataset.price), p);

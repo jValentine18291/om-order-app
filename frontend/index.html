@@ -491,6 +491,31 @@
     </div>
   </div>
 
+  <!-- How many pieces of the chosen tube. Buttons for the usual counts, and a
+       box for the day it is four. -->
+  <div class="modal-overlay" id="tube-qty-modal" style="display:none">
+    <div class="modal-sheet modal-sheet-narrow">
+      <div class="modal-head">
+        <div>
+          <strong id="tube-qty-title">Tube</strong>
+          <div class="mm-sub" id="tube-qty-sub"></div>
+        </div>
+        <button class="modal-x" id="tube-qty-close" type="button" aria-label="Close">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <p class="nsm-hint">How many pieces?</p>
+        <div class="tube-qty-btns" id="tube-qty-btns"></div>
+        <div class="field" style="margin-top:12px;">
+          <label for="tube-qty-other">Or type a number</label>
+          <input id="tube-qty-other" type="number" min="1" max="99" step="1" inputmode="numeric"
+                 autocomplete="off" placeholder="e.g. 4" />
+        </div>
+        <div class="scan-hint" id="tube-qty-status" style="justify-content:flex-start;min-height:20px"></div>
+        <button class="btn-primary" id="tube-qty-add" type="button" style="width:100%">Add to machine</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="conv-modal" style="display:none">
     <div class="modal-sheet">
       <div class="modal-head">
@@ -677,6 +702,17 @@
       <div class="decision-banner" id="mm-decision" style="display:none"></div>
 
       <div id="os-entry" style="display:none">
+
+        <!-- Fogger tubes are cut to length from a roll, so they cannot be
+             scanned like a boxed part and the quantity is never a whole one.
+             Shown only when the machine looks like a fogger. -->
+        <div class="tube-pick" id="tube-pick" style="display:none">
+          <div class="tube-pick-head">
+            <strong>Fogger tubes</strong>
+            <span>Cut from a roll — tap one, then say how many pieces</span>
+          </div>
+          <div class="tube-btns" id="tube-btns"></div>
+        </div>
 
         <div class="toggle" id="mode-toggle">
           <button data-mode="qr">
@@ -917,6 +953,9 @@
   </div>
 
   <div class="toast" id="toast"><span class="ic" id="toast-ic"></span><span id="toast-msg"></span></div>
+  <!-- The tube table the workshop prices cuts from. Before app.js, which reads
+       it. Edit fogger-tubes.js when a price changes. -->
+  <script src="./fogger-tubes.js"></script>
   <script src="./app.js"></script>
   <!-- Chinese interface for the Technician role. Loads last so it can translate
        whatever app.js has already put on screen, then watches for the rest. -->
