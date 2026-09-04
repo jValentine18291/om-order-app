@@ -1,10 +1,16 @@
 // Who to share the Google Sheet (or Drive folder) with.
 //
-//   node tools/show-drive-account.js
+//   cd /d C:\om-order-app
+//   node tools\show-drive-account.js
 //
-// RUN THIS ON THE SERVER. The service account key only exists there, and this
-// reads the address out of it so nobody has to go digging in the Google
-// console.
+// RUN THIS ON THE SERVER, FROM THE APP FOLDER. The service account key only
+// exists there, and this reads the address out of it so nobody has to go
+// digging in the Google console.
+//
+// If the service settings cannot be read for any reason, the key file can be
+// given directly instead:
+//
+//   node tools\show-drive-account.js C:\om-order-app\backend\drive-key.json
 //
 // The address is an identity, not a credential - it is what you type into
 // Google's "Share" box. The private key sitting beside it in the same file is
@@ -15,6 +21,10 @@ const path = require("path");
 // to be told where the key is. serviceEnv reads the same NSSM settings the app
 // does, when it can.
 try { require(path.resolve(__dirname, "..", "backend", "serviceEnv.js")); } catch (_) { /* optional */ }
+
+// An explicit path wins over the service settings, so this still works on a
+// machine where the registry cannot be read.
+if (process.argv[2]) process.env.DRIVE_KEY_FILE = process.argv[2];
 
 const sheets = require(path.resolve(__dirname, "..", "backend", "sheets.js"));
 
