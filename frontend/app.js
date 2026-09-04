@@ -489,6 +489,31 @@ function renderNsMachines() {
     }));
 }
 
+// What a machine is called, and the row that offers it.
+//
+// The SHORT NAME is what gets recorded, so it is what the slip, the printed
+// copy and the Sales Order all end up saying - see machine-names.js. The full
+// AutoCount description stays on screen underneath it, because the short name
+// is for reading a list quickly and the long one is for being sure it is the
+// right machine before committing to it.
+function machineShortName(r) {
+  return (window.MACHINE_NAMES && window.MACHINE_NAMES.shortNameFor(r.item_code, r.description))
+    || r.description || r.item_code;
+}
+
+function machineOptionHtml(r) {
+  const short = machineShortName(r);
+  // Only worth repeating the description when it says something the short name
+  // does not, which for a machine with no override it usually does.
+  const full = r.description && r.description !== short ? r.description : "";
+  return `<button type="button" class="company-option" data-code="${escapeAttr(r.item_code)}" data-desc="${escapeAttr(short)}">
+      <span class="fp-opt-desc">${escapeHtml(short)}${
+        r.desc2 ? ` <span class="fp-opt-model">· ${escapeHtml(r.desc2)}</span>` : ""}</span>
+      <span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>
+      ${full ? `<span class="ns-opt-full">${escapeHtml(full)}</span>` : ""}
+    </button>`;
+}
+
 // ---- Picking the machine from the catalogue ---------------------------------
 // Machine units in AutoCount carry a U-prefixed item code (UHUQ, UZEN, UPUL);
 // spares do not, which is what keeps this list to machines.
@@ -532,11 +557,7 @@ function wireModelSearch() {
         // design, and "no matching machines" reads like a refusal when the
         // machine simply is not one of ours.
         if (!list.length) { box.innerHTML = ""; return; }
-        box.innerHTML = list.map((r) =>
-          `<button type="button" class="company-option" data-code="${escapeAttr(r.item_code)}" data-desc="${escapeAttr(r.description)}">
-             <span class="fp-opt-desc">${escapeHtml(r.description)}${r.desc2 ? ` <span class="fp-opt-model">· ${escapeHtml(r.desc2)}</span>` : ""}</span>
-             <span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>
-           </button>`).join("");
+        box.innerHTML = list.map(machineOptionHtml).join("");
         box.querySelectorAll(".company-option").forEach((btn) =>
           btn.addEventListener("click", () => {
             input.value = btn.dataset.desc;
@@ -3592,11 +3613,7 @@ $("vse-machines").addEventListener("input", (e) => {
       const data = await api(`/api/machine-search?q=${encodeURIComponent(q)}`);
       const list = data.results || [];
       if (!list.length) { box.innerHTML = ""; return; }
-      box.innerHTML = list.map((r) =>
-        `<button type="button" class="company-option" data-code="${escapeAttr(r.item_code)}" data-desc="${escapeAttr(r.description)}">
-           <span class="fp-opt-desc">${escapeHtml(r.description)}${r.desc2 ? ` <span class="fp-opt-model">· ${escapeHtml(r.desc2)}</span>` : ""}</span>
-           <span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>
-         </button>`).join("");
+      box.innerHTML = list.map(machineOptionHtml).join("");
     } catch (_) { box.innerHTML = ""; }
   }, 250);
 });
