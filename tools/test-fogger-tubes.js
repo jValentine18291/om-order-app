@@ -79,6 +79,23 @@ for (const [machine, want, why] of [
   [{ machine_desc: "K10SP" }, true, "no code field at all"],
 ]) check(`${why}`, T.isFogger(machine), want);
 
+console.log("\n-- and it survives the machine being given a SHORT name --");
+// Machines picked from the catalogue are now recorded under a short name -
+// "K10SP", or whatever machine-names.js says - rather than AutoCount's full
+// description. Detection reads the CODE first and never the wording, so it is
+// unaffected by that, and would be unaffected even by a name with nothing
+// fogger-ish left in it at all.
+for (const [machine, want, why] of [
+  [{ machine_code: "UPUL K10SP", machine_desc: "K10SP" }, true, "the default short name"],
+  [{ machine_code: "UPUL K10SP", machine_desc: "K-10 (Petrol)" }, true, "an overridden short name"],
+  // The case that would have broken had detection been left reading the
+  // wording: a fogger whose short name says nothing about fog at all.
+  [{ machine_code: "UPUL SOMETHING", machine_desc: "Unit 4" }, true, "a name with no clue in it"],
+  // And the other direction still holds: a short name is not a licence to
+  // guess. A Husqvarna is a Husqvarna whatever it ends up called.
+  [{ machine_code: "UHUQ 525HF3S", machine_desc: "525HF3S" }, false, "a trimmer's short name"],
+]) check(`${why}`, T.isFogger(machine), want);
+
 // ---- the fraction survives the round trip ----------------------------------
 const SIG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
 const slip = data.slips.createSlip({
