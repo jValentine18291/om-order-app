@@ -4375,6 +4375,31 @@ $("fp-scan").addEventListener("click", () => {
 });
 $("fp-scan-stop").addEventListener("click", stopFindScan);
 
+// One row for every list that offers a part to pick: Find Part, the search in
+// the machine screen, and the shelf listing. They were three copies of the
+// same markup, which is how the balance ended up on one of them and not the
+// others - the same trap shelfRowHtml exists to avoid.
+//
+// bal_qty may be absent (an older phone's cached copy of the app talking to a
+// new server is fine; a new page talking to an old server is what happens
+// mid-deploy). Missing is not zero, and showing a confident "0" for "I don't
+// know" would send someone to a shelf for nothing.
+function partOptionHtml(p, { extraClass = "" } = {}) {
+  const known = p.bal_qty !== undefined && p.bal_qty !== null;
+  const n = Number(p.bal_qty) || 0;
+  const qty = Number.isInteger(n) ? String(n) : n.toFixed(2);
+  const sub = p.shelf ? `${escapeHtml(p.shelf)} · ${escapeHtml(p.item_code)}` : escapeHtml(p.item_code);
+  return `<button type="button" class="company-option fp-opt-row ${extraClass}" data-code="${escapeAttr(p.item_code)}">
+      <span class="fp-opt-main">
+        <span class="fp-opt-desc">${escapeHtml(p.description)}${
+          p.desc2 ? ` <span class="fp-opt-model">· ${escapeHtml(p.desc2)}</span>` : ""}</span>
+        <span class="fp-opt-code mono">${sub}</span>
+      </span>
+      ${known ? `<span class="fp-opt-qty ${n > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${escapeHtml(qty)}${
+        p.uom ? `<span class="fp-opt-uom">${escapeHtml(p.uom)}</span>` : ""}</span>` : ""}
+    </button>`;
+}
+
 // ---- Find Part: by part, or by where it lives -------------------------------
 // "What is this part" and "what is on this shelf" get asked by the same people
 // minutes apart, so they share one box and one results list. The mode decides
@@ -4421,21 +4446,9 @@ async function runLocationSearch(q) {
     const more = data.total > shown
       ? `<div class="fp-loc-count">Showing ${shown} of ${data.total} — narrow the location to see the rest</div>`
       : `<div class="fp-loc-count">${data.total} part${data.total === 1 ? "" : "s"} here</div>`;
-    box.innerHTML = more + list.map((p) => {
-      // Same rendering as the stock card's own figure: whole numbers stay
-      // whole, and a fractional balance - a cut length of tube, say - keeps
-      // its two places rather than being rounded into a lie.
-      const n = Number(p.bal_qty) || 0;
-      const qty = Number.isInteger(n) ? String(n) : n.toFixed(2);
-      return `<button type="button" class="company-option fp-loc-row" data-code="${escapeAttr(p.item_code)}">
-         <span class="fp-loc-main">
-           <span class="fp-opt-desc">${escapeHtml(p.description)}</span>
-           <span class="fp-opt-code mono">${escapeHtml(p.shelf)} · ${escapeHtml(p.item_code)}</span>
-         </span>
-         <span class="fp-loc-qty ${n > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${escapeHtml(qty)}${
-           p.uom ? `<span class="fp-loc-uom">${escapeHtml(p.uom)}</span>` : ""}</span>
-       </button>`;
-    }).join("");
+    // fp-loc-row is only a marker for the taller list: a shelf is read down,
+    // a search result is glanced at.
+    box.innerHTML = more + list.map((p) => partOptionHtml(p, { extraClass: "fp-loc-row" })).join("");
     box.querySelectorAll(".company-option").forEach((btn) =>
       btn.addEventListener("click", () => showPartStock(btn.dataset.code)));
   } catch (_) {
@@ -4465,12 +4478,7 @@ $("fp-q").addEventListener("input", () => {
         box.innerHTML = `<div class="fp-empty">No matching parts</div>`;
         return;
       }
-      box.innerHTML = list.map((p) =>
-        `<button type="button" class="company-option" data-code="${escapeAttr(p.item_code)}">
-           <span class="fp-opt-desc">${escapeHtml(p.description)}${p.desc2 ? ` <span class="fp-opt-model">· ${escapeHtml(p.desc2)}</span>` : ""}</span>
-           <span class="fp-opt-code mono">${escapeHtml(p.item_code)}</span>
-         </button>`
-      ).join("");
+      box.innerHTML = list.map((p) => partOptionHtml(p)).join("");
       box.querySelectorAll(".company-option").forEach((btn) =>
         btn.addEventListener("click", () => showPartStock(btn.dataset.code))
       );
@@ -5940,12 +5948,7 @@ $("code-input").addEventListener("input", () => {
         box.innerHTML = `<div class="fp-empty">No matching parts</div>`;
         return;
       }
-      box.innerHTML = list.map((p) =>
-        `<button type="button" class="company-option" data-code="${escapeAttr(p.item_code)}">
-           <span class="fp-opt-desc">${escapeHtml(p.description)}${p.desc2 ? ` <span class="fp-opt-model">· ${escapeHtml(p.desc2)}</span>` : ""}</span>
-           <span class="fp-opt-code mono">${escapeHtml(p.item_code)}</span>
-         </button>`
-      ).join("");
+      box.innerHTML = list.map((p) => partOptionHtml(p)).join("");
       box.querySelectorAll(".company-option").forEach((btn) =>
         btn.addEventListener("click", () => {
           addByCode(btn.dataset.code);

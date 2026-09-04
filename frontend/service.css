@@ -2270,17 +2270,17 @@ select {
 /* A shelf row: what the part is on the left, how many on the right. The count
    is the thing being checked against the shelf, so it gets its own column
    rather than being buried in the line underneath. */
-.fp-loc-row { display: flex; align-items: center; gap: 12px; }
-.fp-loc-main { flex: 1; min-width: 0; }
-.fp-loc-main .fp-opt-desc { overflow-wrap: anywhere; }
-.fp-loc-qty {
+.fp-opt-row { display: flex; align-items: center; gap: 12px; }
+.fp-opt-main { flex: 1; min-width: 0; }
+.fp-opt-main .fp-opt-desc { overflow-wrap: anywhere; }
+.fp-opt-qty {
   flex: 0 0 auto;
   text-align: right;
   font-weight: 700;
   font-size: 1rem;
   line-height: 1.1;
 }
-.fp-loc-qty .fp-loc-uom {
+.fp-opt-qty .fp-opt-uom {
   display: block;
   font-weight: 500;
   font-size: .68rem;

@@ -396,11 +396,16 @@ async function searchParts(q, limit = 15) {
            OR REPLACE(UPPER(i.ItemCode), ' ', '') LIKE '%' + @n${idx} + '%' )`;
   });
 
+  // The balance joins on i.ItemCode exactly - see getStockBalances for why
+  // that is safe here and why normalizing would not be: these codes come out
+  // of Item, not off somebody's keyboard.
   const rows = await query(
     `SELECT TOP ${cap}
             i.ItemCode,
             COALESCE(NULLIF(i.Description, ''), NULLIF(i.Desc2, ''), i.ItemCode) AS Descr,
-            NULLIF(i.Desc2, '') AS Desc2
+            NULLIF(i.Desc2, '') AS Desc2,
+            i.BaseUOM,
+            (SELECT SUM(s.Qty) FROM StockDTL s WHERE s.ItemCode = i.ItemCode) AS BalQty
        FROM Item i
       WHERE i.IsActive = 'T'
         AND ${conditions.join("\n        AND ")}
@@ -411,6 +416,8 @@ async function searchParts(q, limit = 15) {
     item_code: r.ItemCode,
     description: r.Descr,
     desc2: r.Desc2 && r.Desc2 !== r.Descr ? r.Desc2 : "",
+    uom: r.BaseUOM || "",
+    bal_qty: r.BalQty === null || r.BalQty === undefined ? 0 : Number(r.BalQty),
   }));
 }
 
