@@ -69,6 +69,14 @@ const QUOTE_NOTIFY_ROLES = ["sales", "purchaser", "admin"];
 // Orders are the purchaser's job; admins cover for her when she is away, and
 // there is exactly one of her. Sales are the ones asking, so not them.
 const ORDER_NOTIFY_ROLES = ["purchaser", "admin"];
+// A slip becoming a Sales Order is the counter's cue to invoice it. The
+// technician who just converted it is on the other side of that handover, so
+// not them - and they cannot receive it anyway, since only Open Service has
+// the button and that is a technician's screen.
+//
+// Same list as the quote one, and deliberately its own constant: they answer
+// different questions and either could change without the other.
+const SO_NOTIFY_ROLES = ["sales", "purchaser", "admin"];
 
 const push = require("./push");
 const pushDb = require("./db");
@@ -1359,6 +1367,20 @@ app.post("/api/slips/:slip/order", async (req, res) => {
     // got there.
     const finalSo = (autocount && autocount.so_number) || result.so_number;
     res.status(201).json({ ...result, so_number: finalSo, price_sync: priceSync, autocount });
+
+    // Tell the counter. Until now a slip became an order in the workshop and
+    // sales found out by looking; the whole point of an order waiting is that
+    // nothing should wait because nobody knew.
+    //
+    // AFTER the response and never awaited: the order is committed by this
+    // point, and a push that fails must not turn a successful conversion into
+    // an error on a technician's phone. push.notify does not throw, and the
+    // catch is here for the getSlip beside it.
+    (async () => {
+      const { salesOrderMessage } = require("./notifyText");
+      const slip = await data.slips.getSlip(req.params.slip);
+      await push.notify(pushDb, SO_NOTIFY_ROLES, salesOrderMessage(slip, result, finalSo));
+    })().catch((e) => console.error("[push] sales order notify failed:", e.message));
   } catch (err) {
     if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
     console.error("[POST /api/slips/:slip/order]", err);
