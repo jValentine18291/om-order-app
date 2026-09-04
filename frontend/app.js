@@ -4889,6 +4889,10 @@ $("loc-submit").addEventListener("click", async () => {
         shelf,
         who: initialsFor(me),
         role: getRole(),
+        // For the log sheet. The server could look it up again, but it is on
+        // screen here already and a second AutoCount round trip to write an
+        // audit row would be paid on every change.
+        description: locPart.description || "",
         source: $("ipl-modal").style.display === "flex" ? "IPL" : "Find Part",
       }),
     });

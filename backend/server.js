@@ -668,16 +668,34 @@ app.post("/api/part-prices", async (req, res) => {
 // location ends up stale, which costs more than the guard saves.
 app.post("/api/part-location", async (req, res) => {
   const { logLocationEvent } = require("./priceLog");
-  const { item_code, shelf, who = "", role = "" } = req.body || {};
-  const stamp = (outcome, extra = {}) =>
+  const sheets = require("./sheets");
+  const { item_code, shelf, who = "", role = "", description = "" } = req.body || {};
+  const stamp = (outcome, extra = {}) => {
+    const source = (req.body || {}).source || "Find Part";
+    const itemCode = extra.item_code || item_code;
+    const oldShelf = extra.old_shelf === undefined ? null : extra.old_shelf;
+    const newShelf = extra.new_shelf || shelf;
     logLocationEvent({
-      source: (req.body || {}).source || "Find Part",
-      itemCode: extra.item_code || item_code,
-      oldShelf: extra.old_shelf === undefined ? null : extra.old_shelf,
-      newShelf: extra.new_shelf || shelf,
+      source, itemCode, oldShelf, newShelf,
       who: `${who || "?"} (${role || "?"})`,
       outcome,
     });
+    // The Sheet is a copy for the people who cannot open the log file on this
+    // server. It must never decide whether a location change succeeds, so this
+    // is deliberately not awaited and a failure is written back into the log
+    // rather than thrown - a Sheet quietly missing rows would be worse than
+    // one that is obviously behind.
+    sheets
+      .appendLocationChange({ itemCode, description, oldShelf, newShelf, who, role, outcome, source })
+      .catch((e) => {
+        logLocationEvent({
+          source, itemCode, oldShelf, newShelf,
+          who: `${who || "?"} (${role || "?"})`,
+          outcome: `SHEET NOT UPDATED - ${e.message}`,
+        });
+        console.error("[sheets] location row not appended:", e.message);
+      });
+  };
 
   try {
     // Who is asking comes first: it is the cheapest check, it needs no database,
