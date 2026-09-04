@@ -594,6 +594,10 @@ select {
 .vs-IN_PROGRESS, .sr-IN_PROGRESS { background: #E6F1FB; color: #185FA5; }
 .vs-NEED_QUOTE, .sr-NEED_QUOTE { background: #FDF0E0; color: #A85B00; }
 .vs-QUOTED, .sr-QUOTED { background: #F0EAFB; color: #5B3FA8; }
+/* Repaired shares the green of All Repaired: to anyone reading the list they
+   mean the same thing - the workshop has finished - and the difference is only
+   whether any of it has reached an order yet. */
+.vs-REPAIRED, .sr-REPAIRED,
 .vs-ALL_REPAIRED, .sr-ALL_REPAIRED, .vs-CALL_CUSTOMER, .sr-CALL_CUSTOMER,
 .vs-CONVERTED, .sr-CONVERTED { background: #E7F5EC; color: #1B7A42; }
 /* .vs-CLOSED / .sr-CLOSED keep their existing styling */
@@ -1095,6 +1099,7 @@ select {
 .slip-card:has(.vs-IN_PROGRESS),  .slip-result:has(.sr-IN_PROGRESS)  { border-left-color: #185FA5; }
 .slip-card:has(.vs-NEED_QUOTE),   .slip-result:has(.sr-NEED_QUOTE)   { border-left-color: #A85B00; }
 .slip-card:has(.vs-QUOTED),       .slip-result:has(.sr-QUOTED)       { border-left-color: #5B3FA8; }
+.slip-card:has(.vs-REPAIRED),     .slip-result:has(.sr-REPAIRED)     { border-left-color: #1B7A42; }
 .slip-card:has(.vs-ALL_REPAIRED), .slip-result:has(.sr-ALL_REPAIRED) { border-left-color: #1B7A42; }
 .slip-card:has(.vs-CALL_CUSTOMER),.slip-result:has(.sr-CALL_CUSTOMER){ border-left-color: #1B7A42; }
 .slip-card:has(.vs-CLOSED),       .slip-result:has(.sr-CLOSED)       { border-left-color: var(--ink-faint); }
@@ -2228,3 +2233,13 @@ select {
 .vse-m-code { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 26px; }
 .vse-m-code .btn-quiet { padding: 2px 8px; font-size: 12px; }
 .vse-m-nocode { font-size: 12px; color: var(--ink-faint, #78868c); }
+
+
+/* The pill on a machine that the technician has finished with. */
+.machine-quote.mq-repaired, .mq-repaired { background: #E7F5EC; color: #1B7A42; }
+
+
+/* The price block on the Find Part stock card. The IPL sheet's own rules do
+   the work inside it; this only gives it the same separation from the rows
+   above that the note block below it has. */
+.fp-price { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line, #e3e6e8); }

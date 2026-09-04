@@ -909,7 +909,7 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
 // eight places and derived in others, so a slip could disagree with the
 // machines on it and nobody could say which was right.
 const MACHINE_STATES = new Set([
-  "RECEIVED", "AWAITING_QUOTE", "QUOTED", "TO_REPAIR", "CONDEMNED",
+  "RECEIVED", "AWAITING_QUOTE", "QUOTED", "TO_REPAIR", "REPAIRED", "CONDEMNED",
 ]);
 const DISPOSALS = new Set(["", "COLLECTED", "DISPOSED"]);
 
@@ -954,6 +954,13 @@ function deriveSlipStatus(slipId) {
     next = "CONVERTED";                                // everything dealt with
   } else if (any((m) => m.converted_at) ) {
     next = "ALL_REPAIRED";                             // some billed, some not
+  } else if (ms.every((m) => m.state === "REPAIRED" || machineSettled(m))) {
+    // The workshop is finished and nothing has been billed yet. Its own status
+    // rather than ALL_REPAIRED, which means "some of it is already on an
+    // order" and is filtered out of the technicians' working list - a slip
+    // that vanished the moment the last machine was ticked would leave a
+    // mis-tick with no way back.
+    next = "REPAIRED";
   } else if (any((m) => m.state !== "RECEIVED") || slipHasWork(slipId)) {
     next = "IN_PROGRESS";
   } else {

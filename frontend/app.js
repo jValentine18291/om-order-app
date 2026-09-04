@@ -387,6 +387,9 @@ const STATUS_LABEL = {
   IN_PROGRESS: "In Progress",
   NEED_QUOTE: "Need to Quote",
   QUOTED: "Waiting on Customer",
+  // The workshop is done and nothing is billed yet. ALL_REPAIRED means the
+  // same thing plus "some of it is already on an order".
+  REPAIRED: "Repaired",
   ALL_REPAIRED: "All Repaired",
   CALL_CUSTOMER: "All Repaired", // legacy name, shown as the new label
   CONVERTED: "All Repaired",
@@ -400,6 +403,7 @@ const MACHINE_STATE = {
   AWAITING_QUOTE: { label: "Waiting to quote",   cls: "mq-need"    },
   QUOTED:         { label: "Waiting on customer",cls: "mq-done"    },
   TO_REPAIR:      { label: "Repair confirmed",   cls: "mq-repair"  },
+  REPAIRED:       { label: "Repaired",           cls: "mq-repaired"},
   CONDEMNED:      { label: "Condemned",          cls: "mq-condemn" },
 };
 const DISPOSAL_LABEL = { COLLECTED: "Customer collected it", DISPOSED: "Disposed of" };
@@ -2491,6 +2495,15 @@ function renderMachineQuoteRow() {
   } else if (m.state === "TO_REPAIR") {
     text = `<span class="machine-quote mq-repair">Repair confirmed</span> Carry on with the repair.`;
     actions = [["AWAITING_QUOTE", "Send for quoting", "btn-secondary"]];
+    if (canMarkRepaired()) actions.unshift(["REPAIRED", "Mark as repaired", "btn-secondary"]);
+  } else if (m.state === "REPAIRED") {
+    text = `<span class="machine-quote mq-repaired">Repaired</span> Finished — waiting for Sales to invoice it.`;
+    // Always reversible, and by anyone who could tick it. A tick that could not
+    // be taken back would be a machine stuck as finished on a slip that has
+    // left nobody able to say otherwise.
+    actions = canMarkRepaired()
+      ? [["TO_REPAIR", "Not finished after all", "btn-secondary"]]
+      : [];
   } else if (m.state === "CONDEMNED") {
     const d = DISPOSAL_LABEL[m.disposal];
     text = `<span class="machine-quote mq-condemn">Condemned</span> <span>${escapeHtml(
@@ -2499,6 +2512,8 @@ function renderMachineQuoteRow() {
   } else {
     text = "This machine has not been sent for quoting.";
     actions = [["AWAITING_QUOTE", "Send this machine for quoting", "btn-secondary"]];
+    // A machine nobody needed to quote for is repaired straight from here.
+    if (canMarkRepaired()) actions.unshift(["REPAIRED", "Mark as repaired", "btn-secondary"]);
   }
 
   state.innerHTML = text;
@@ -4390,14 +4405,27 @@ async function showPartStock(code) {
       <div class="fp-row"><span class="fp-lbl">Description</span><span class="fp-val">${escapeHtml(p.description)}</span></div>
       ${fitsRowHtml(p)}
       ${shelfRowHtml(p)}
-      <div class="fp-row"><span class="fp-lbl">Bal. Qty</span><span class="fp-val fp-qty ${qty > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${qtyStr}${p.uom ? " " + escapeHtml(p.uom) : ""}</span></div>`;
+      <div class="fp-row"><span class="fp-lbl">Bal. Qty</span><span class="fp-val fp-qty ${qty > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${qtyStr}${p.uom ? " " + escapeHtml(p.uom) : ""}</span></div>
+      <div class="fp-price" id="fp-part-price"></div>`;
     $("fp-order-more").style.display = "block";
+    // Prices stay hidden until asked for, the same as on the IPL sheet. Unlike
+    // there, the item code is already exact - Find Part resolved it - so there
+    // is nothing to disambiguate before the button can be offered.
+    iplPriceState = { code: p.item_code, itemCode: p.item_code };
+    renderIplPriceButton(p.item_code, $("fp-part-price"));
     wireShelfEdit(detail, p, (shelf) => { p.shelf = shelf; showPartStock(p.item_code); });
     wireFits(detail);
     renderPartNote(detail, p, () => showPartStock(p.item_code));
   } catch (e) {
     detail.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Lookup failed")}</div>`;
   }
+}
+
+// Whether a machine is finished is the technician's call - they did the work.
+// Sales and Admin can tick it too, so a missed tick at six o'clock does not
+// have to wait for the technician to come back in the morning.
+function canMarkRepaired() {
+  return ["tech", "sales", "admin"].includes(getRole());
 }
 
 // Sales take the call, so Sales record the answer. Purchaser and Admin share
@@ -6880,8 +6908,10 @@ let iplPriceState = { code: "" };
 // prices on the slip screens, but these values feed customer quotes.
 const CAN_SET_PRICE = ["sales", "purchaser", "admin"];
 
-function renderIplPriceButton(itemCode) {
-  const box = $("ipl-part-price");
+// box is passed in because two cards render this now - the IPL part sheet and
+// the Find Part stock card. Only one is ever on screen at a time, which is why
+// the price state below can stay a single value.
+function renderIplPriceButton(itemCode, box = $("ipl-part-price")) {
   if (!itemCode) {
     // More than one AutoCount item can carry the same diagram number, so there
     // is nothing honest to show a price for until one has been picked above.
@@ -6890,11 +6920,10 @@ function renderIplPriceButton(itemCode) {
   }
   box.innerHTML =
     `<button type="button" class="ipl-price-btn" id="ipl-check-price">Check Price</button>`;
-  $("ipl-check-price").addEventListener("click", loadIplPrices);
+  box.querySelector("#ipl-check-price").addEventListener("click", () => loadIplPrices(box));
 }
 
-async function loadIplPrices() {
-  const box = $("ipl-part-price");
+async function loadIplPrices(box = $("ipl-part-price")) {
   box.innerHTML = `<div class="fp-loading">Checking price…</div>`;
   try {
     const p = await api(`/api/part-prices/${encodeURIComponent(iplPriceState.code)}`);

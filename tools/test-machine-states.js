@@ -136,6 +136,55 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
   check("billed machine left alone", slip.machines[0].state, "TO_REPAIR");
   check("the other one moved", slip.machines[1].state, "AWAITING_QUOTE");
 
+  // ---- Repaired: the workshop saying it is finished --------------------------
+  // Before this, the only completion signal was a machine being BILLED, so a
+  // slip where everything was fixed and waiting to be invoiced still read
+  // "In Progress" and Sales could not see the workshop was done.
+  slip = await data.slips.createSlip({
+    company: "TEST REPAIRED", contact_name: "C", contact_number: "7",
+    machines: [{ desc: "R1" }, { desc: "R2" }], signature: sig,
+  });
+  const n4 = slip.slip_number;
+  const [r1, r2] = slip.machines.map((m) => m.id);
+
+  slip = await data.slips.setMachineState(n4, r1, "REPAIRED", "WJ");
+  check("one machine repaired, one not: still in progress", slip.status, "IN_PROGRESS");
+  slip = await data.slips.setMachineState(n4, r2, "REPAIRED", "WJ");
+  check("both repaired: the slip says Repaired", slip.status, "REPAIRED");
+
+  // A quote outranks it. Sales have to act, and a slip that reads "Repaired"
+  // while a machine waits on a price is how the customer never gets rung.
+  slip = await data.slips.setMachineState(n4, r2, "AWAITING_QUOTE", "WJ");
+  check("one sent for quoting: quoting wins", slip.status, "NEED_QUOTE");
+  slip = await data.slips.setMachineState(n4, r2, "REPAIRED", "WJ");
+  check("and back to Repaired once it is settled", slip.status, "REPAIRED");
+
+  // Reversible: a mis-tick must not strand the slip.
+  slip = await data.slips.setMachineState(n4, r1, "TO_REPAIR", "WJ");
+  check("un-ticking one drops it back", slip.status, "IN_PROGRESS");
+  slip = await data.slips.setMachineState(n4, r1, "REPAIRED", "WJ");
+
+  // Billing one of them is the existing ALL_REPAIRED case, which must not have
+  // changed: that status means "some of it is already on an order".
+  await data.slips.setMachineLabour(r1, 50);
+  await data.slips.createSlipOrder(n4, [r1]);
+  slip = await data.slips.getSlip(n4);
+  check("once something is billed it is All Repaired again", slip.status, "ALL_REPAIRED");
+
+  // A condemned machine that is still in the building holds the slip open,
+  // however many of the others are ticked.
+  slip = await data.slips.createSlip({
+    company: "TEST REPAIRED 2", contact_name: "C", contact_number: "7",
+    machines: [{ desc: "R3" }, { desc: "R4" }], signature: sig,
+  });
+  const n5 = slip.slip_number;
+  const [r3, r4] = slip.machines.map((m) => m.id);
+  await data.slips.setMachineState(n5, r3, "REPAIRED", "WJ");
+  slip = await data.slips.setMachineState(n5, r4, "CONDEMNED", "WJ");
+  check("condemned and still here: not Repaired", slip.status, "IN_PROGRESS");
+  slip = await data.slips.setMachineDisposal(n5, r4, "COLLECTED", "John");
+  check("once it has left, the slip is Repaired", slip.status, "REPAIRED");
+
   console.log(failures ? `\n${failures} FAILED\n` : "\nall passed\n");
   process.exit(failures ? 1 : 0);
 })().catch((e) => { console.error("\nTHREW:", e); process.exit(1); });

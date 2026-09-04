@@ -334,6 +334,13 @@
     "Open": "待处理",
     "In Progress": "进行中",
     "All Repaired": "全部修好",
+    // The technician saying a machine is finished. "全部修好" is the whole
+    // slip; this is one machine, and the status a slip reaches when every
+    // machine on it has been ticked.
+    "Repaired": "已修好",
+    "Mark as repaired": "标记为已修好",
+    "Not finished after all": "还没修好",
+    "Finished — waiting for Sales to invoice it.": "已完成 — 等待销售开单。",
     "Closed": "已结单",
 
     // ---- Photo upload ----
