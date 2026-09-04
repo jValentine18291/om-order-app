@@ -811,9 +811,16 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
     if (!ownSet.has(id)) { const e = new Error("A machine in the edit does not belong to this slip."); e.status = 400; throw e; }
     const desc = String((m || {}).machine_desc || "").trim();
     if (!desc) { const e = new Error("A machine's description cannot be empty."); e.status = 400; throw e; }
+    // undefined means "the client did not send this field", which is NOT the
+    // same as "clear it". Phones run a cached copy of the app for a shift
+    // after a deploy, so an edit saved from an older one arrives with no
+    // machine_code at all - and wiping the catalogue item because of that
+    // would undo the very corrections this screen exists to make.
+    const rawCode = (m || {}).machine_code;
     return {
       id,
       desc,
+      code: rawCode === undefined ? undefined : String(rawCode || "").trim(),
       serial: String((m || {}).serial_no || "").trim(),
       remarks: String((m || {}).remarks || "").trim().slice(0, 500),
     };
@@ -858,6 +865,9 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
   const updMachine = db.prepare(
     "UPDATE slip_machines SET machine_desc = ?, serial_no = ?, remarks = ? WHERE id = ?"
   );
+  const updMachineWithCode = db.prepare(
+    "UPDATE slip_machines SET machine_desc = ?, serial_no = ?, remarks = ?, machine_code = ? WHERE id = ?"
+  );
   const tx = db.transaction(() => {
     updSlip.run(
       newCompany,
@@ -867,7 +877,10 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
       notes === undefined ? slip.notes : String(notes || "").trim(),
       slip.id
     );
-    for (const m of mEdits) updMachine.run(m.desc, m.serial, m.remarks, m.id);
+    for (const m of mEdits) {
+      if (m.code === undefined) updMachine.run(m.desc, m.serial, m.remarks, m.id);
+      else updMachineWithCode.run(m.desc, m.serial, m.remarks, m.code, m.id);
+    }
     // Only where the slip carries a signature. An unsigned slip - which the
     // app does not allow, but old data might - has nothing to be amended
     // against, and logging changes to it would say something untrue.

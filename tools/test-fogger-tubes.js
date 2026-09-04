@@ -100,6 +100,40 @@ check("the code is stored as sent", cm[0].machine_code, "UPUL K10SP");
 check("and a typed-in machine simply has none", cm[1].machine_code, "");
 check("which is enough to know the first is a fogger", cm.map((m) => T.isFogger(m)), [true, false]);
 
+console.log("\n-- correcting an older slip from Edit Slip --");
+// The slips written before the picker existed have no catalogue item, which is
+// why Edit Slip needed the same list. A fogger the app cannot recognise offers
+// no tubes, so this correction is the whole point of it.
+const legacyId = cm[1].id;
+check("before correcting, the app cannot tell what it is", T.isFogger(cm[1]), false);
+data.slips.updateSlipDetails(coded.slip_number, {
+  machines: [{ id: legacyId, machine_desc: "PULSFOG K-10-SP THERMAL FOGGER", machine_code: "UPUL K10SP" }],
+  who: "JT",
+});
+let after = data.slips.getSlip(coded.slip_number).machines.find((m) => m.id === legacyId);
+check("the code is set by the edit", after.machine_code, "UPUL K10SP");
+check("and now it is recognised", T.isFogger(after), true);
+
+// A phone runs a cached copy of the app for a shift after a deploy, so an edit
+// saved from the OLD version arrives with no machine_code field at all. That
+// must leave the code alone - undoing the correction just made would be the
+// worst kind of bug here, because nobody would see it happen.
+data.slips.updateSlipDetails(coded.slip_number, {
+  machines: [{ id: legacyId, machine_desc: "PULSFOG K-10-SP THERMAL FOGGER", serial_no: "C2" }],
+  who: "JT",
+});
+after = data.slips.getSlip(coded.slip_number).machines.find((m) => m.id === legacyId);
+check("an older phone's edit does not wipe it", after.machine_code, "UPUL K10SP");
+
+// Sending it empty on purpose is a different thing, and does clear it: the
+// machine turned out not to be the catalogue one after all.
+data.slips.updateSlipDetails(coded.slip_number, {
+  machines: [{ id: legacyId, machine_desc: "Some other machine entirely", machine_code: "" }],
+  who: "JT",
+});
+after = data.slips.getSlip(coded.slip_number).machines.find((m) => m.id === legacyId);
+check("but clearing it deliberately works", after.machine_code, "");
+
 const add = (type, pieces, tech = "WJ") => {
   const t = T.byType(type);
   return data.slips.addPartToMachine(machineId, {

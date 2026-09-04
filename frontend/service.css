@@ -2220,3 +2220,11 @@ select {
   font-size: 12px; color: #1f6f78;
 }
 .nsm-picked .btn-quiet { padding: 2px 8px; font-size: 12px; }
+
+
+/* The catalogue item on a slip being edited. Reads as a statement of fact when
+   set, and as an invitation when not - it is the field the older slips are
+   missing, and the one this screen exists to fill in. */
+.vse-m-code { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 26px; }
+.vse-m-code .btn-quiet { padding: 2px 8px; font-size: 12px; }
+.vse-m-nocode { font-size: 12px; color: var(--ink-faint, #78868c); }

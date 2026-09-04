@@ -3372,7 +3372,8 @@ let vseSlip = null;
 function vseOriginal() {
   const m = {};
   for (const x of (vseSlip.machines || [])) {
-    m[x.id] = { desc: x.machine_desc || "", serial: (x.serial_no || "").trim(), remarks: (x.remarks || "").trim() };
+    m[x.id] = { desc: x.machine_desc || "", code: x.machine_code || "",
+                serial: (x.serial_no || "").trim(), remarks: (x.remarks || "").trim() };
   }
   return {
     company: vseSlip.company || "",
@@ -3401,7 +3402,7 @@ function openSlipEdit(slip) {
   // the name field is being retyped. Retitling the card as someone types turns
   // the one fixed landmark on the screen into a moving one.
   $("vse-machines").innerHTML = machines.map((m, i) => `
-    <div class="vse-card vse-machine" data-machine="${m.id}">
+    <div class="vse-card vse-machine" data-machine="${m.id}" data-code="${escapeAttr(m.machine_code || "")}">
       <div class="vse-m-head">
         <span class="vse-m-num">${i + 1}</span>
         <span class="vse-m-name">${escapeHtml(m.machine_desc)}</span>
@@ -3411,6 +3412,15 @@ function openSlipEdit(slip) {
         <div class="field" data-f="desc">
           <div class="vse-lab"><label>Machine <span class="req">*</span></label></div>
           <input class="vse-m-desc" type="text" value="${escapeAttr(m.machine_desc)}" />
+          <div class="company-suggest vse-m-results"></div>
+        </div>
+        <!-- Which catalogue machine this is. Its own field rather than a note
+             under the name, so that setting it on a slip whose wording is
+             already right still counts as a change - otherwise Save would sit
+             greyed out on exactly the correction this screen is for. -->
+        <div class="field" data-f="code">
+          <div class="vse-lab"><label>Catalogue item</label></div>
+          <div class="vse-m-code"></div>
         </div>
         <div class="field" data-f="serial">
           <div class="vse-lab"><label>Serial No.</label></div>
@@ -3422,6 +3432,8 @@ function openSlipEdit(slip) {
         </div>
       </div>
     </div>`).join("");
+
+  vseRenderCodes();
 
   // Only a signed slip carries an amendment note, so only a signed slip says so.
   $("vse-signed").style.display = slip.has_signature ? "flex" : "none";
@@ -3494,6 +3506,7 @@ function vseMarkAll() {
     if (!was) return;
     const get = (sel) => card.querySelector(sel).value.trim();
     if (vseMark(card.querySelector('[data-f="desc"]'), was.desc, get(".vse-m-desc"))) n++;
+    if (vseMark(card.querySelector('[data-f="code"]'), was.code || "", card.dataset.code || "")) n++;
     if (vseMark(card.querySelector('[data-f="serial"]'), was.serial, get(".vse-m-serial"))) n++;
     if (vseMark(card.querySelector('[data-f="remarks"]'), was.remarks, get(".vse-m-remarks"))) n++;
   });
@@ -3506,6 +3519,75 @@ function vseMarkAll() {
                   : n === 1 ? "Save 1 change" : `Save ${n} changes`;
   return n;
 }
+
+// ---- Picking the catalogue machine while editing a slip ---------------------
+// Same list as the Add machine form. It is here because the slips written
+// before that existed are the ones with no catalogue item against them, and
+// they are exactly the ones the app cannot reason about - a fogger it cannot
+// recognise offers no tubes.
+//
+// The code lives on the card (data-code) rather than in a variable, because
+// there is one per machine and the cards are rebuilt on every open.
+function vseRenderCodes() {
+  document.querySelectorAll("#vse-machines .vse-machine").forEach((card) => {
+    const box = card.querySelector(".vse-m-code");
+    if (!box) return;
+    const code = card.dataset.code || "";
+    box.innerHTML = code
+      ? `<span class="mono">${escapeHtml(code)}</span>
+         <button type="button" class="btn-quiet vse-m-clear">Not this one</button>`
+      : `<span class="vse-m-nocode">Not from the catalogue — start typing the machine above to pick one</span>`;
+  });
+}
+
+let vseModelDebounce = null;
+$("vse-machines").addEventListener("input", (e) => {
+  const input = e.target.closest(".vse-m-desc");
+  if (!input) return;
+  const card = input.closest(".vse-machine");
+  const box = card.querySelector(".vse-m-results");
+  // Typed by hand means this is no longer the catalogue machine - the same
+  // rule as the Add machine form, for the same reason: what is on screen is
+  // what gets saved, so a code left behind it would be a lie about the machine.
+  card.dataset.code = "";
+  vseRenderCodes();
+  vseMarkAll();
+  clearTimeout(vseModelDebounce);
+  const q = input.value.trim();
+  if (q.length < 2) { box.innerHTML = ""; return; }
+  vseModelDebounce = setTimeout(async () => {
+    try {
+      const data = await api(`/api/machine-search?q=${encodeURIComponent(q)}`);
+      const list = data.results || [];
+      if (!list.length) { box.innerHTML = ""; return; }
+      box.innerHTML = list.map((r) =>
+        `<button type="button" class="company-option" data-code="${escapeAttr(r.item_code)}" data-desc="${escapeAttr(r.description)}">
+           <span class="fp-opt-desc">${escapeHtml(r.description)}${r.desc2 ? ` <span class="fp-opt-model">· ${escapeHtml(r.desc2)}</span>` : ""}</span>
+           <span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>
+         </button>`).join("");
+    } catch (_) { box.innerHTML = ""; }
+  }, 250);
+});
+
+$("vse-machines").addEventListener("click", (e) => {
+  const opt = e.target.closest(".company-option");
+  if (opt) {
+    const card = opt.closest(".vse-machine");
+    card.querySelector(".vse-m-desc").value = opt.dataset.desc;
+    card.dataset.code = opt.dataset.code;
+    card.querySelector(".vse-m-results").innerHTML = "";
+    vseRenderCodes();
+    vseMarkAll();
+    return;
+  }
+  const clear = e.target.closest(".vse-m-clear");
+  if (clear) {
+    const card = clear.closest(".vse-machine");
+    card.dataset.code = "";
+    vseRenderCodes();
+    vseMarkAll();
+  }
+});
 
 function closeSlipEdit() {
   $("vse-modal").style.display = "none";
@@ -3548,10 +3630,18 @@ function vseCollect() {
     const get = (sel) => card.querySelector(sel).value.trim();
     const desc = get(".vse-m-desc");
     if (!desc) { blank = true; return; }
-    payload.machines.push({ id, machine_desc: desc, serial_no: get(".vse-m-serial"), remarks: get(".vse-m-remarks") });
+    payload.machines.push({ id, machine_desc: desc, machine_code: card.dataset.code || "",
+                            serial_no: get(".vse-m-serial"), remarks: get(".vse-m-remarks") });
     if (!was) return;
     const rows = [];
     if (was.desc !== desc) rows.push({ label: "Machine", before: was.desc, after: desc });
+    // The catalogue item belongs in the review for the same reason it is
+    // counted on the Save button: setting it on a slip whose wording is
+    // already right is a real change, and the button's count and this list
+    // are meant to be the same number.
+    if ((was.code || "") !== (card.dataset.code || "")) {
+      rows.push({ label: "Catalogue item", before: was.code || "", after: card.dataset.code || "" });
+    }
     if (was.serial !== get(".vse-m-serial")) rows.push({ label: "Serial No.", before: was.serial, after: get(".vse-m-serial") });
     if (was.remarks !== get(".vse-m-remarks")) rows.push({ label: "Remarks", before: was.remarks, after: get(".vse-m-remarks") });
     // Named by what it was registered as, so the heading still matches the
