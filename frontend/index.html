@@ -155,8 +155,15 @@
         <p class="eyebrow">Parts</p>
         <h2>Find Part</h2>
       </div>
+      <!-- Two questions, one box. "What is this part" and "what is on this
+           shelf" are asked by the same people minutes apart, and a second
+           search field further down the screen would be missed. -->
+      <div class="toggle" id="fp-mode">
+        <button type="button" data-fpmode="part">Part</button>
+        <button type="button" data-fpmode="loc">Location</button>
+      </div>
       <div class="field">
-        <label for="fp-q">Search by description or part no.</label>
+        <label for="fp-q" id="fp-q-label">Search by description or part no.</label>
         <input id="fp-q" type="text" autocomplete="off" placeholder="e.g. clutch, carburetor, SZEN 140…" />
         <div class="company-suggest" id="fp-results"></div>
       </div>

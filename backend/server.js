@@ -786,6 +786,21 @@ app.get("/api/parts-search", async (req, res) => {
   }
 });
 
+// What is on a shelf. Read-only, and open to everyone: knowing where a part
+// lives is the whole point of recording it, and a technician looking for one
+// is exactly who needs the answer.
+app.get("/api/parts-by-location", async (req, res) => {
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") return res.json({ total: 0, results: [] });
+    const acRepo = require("./data/autocountRepo");
+    res.json(await acRepo.partsByShelf(String(req.query.q || ""), 100));
+  } catch (err) {
+    console.error("[GET /api/parts-by-location]", err.message);
+    res.json({ total: 0, results: [], error: "Lookup failed." });
+  }
+});
+
 // The machine models themselves, for the box the counter types into when a
 // slip is registered. Returns nothing at all when AutoCount is not the item
 // source, which is the same shape as parts-search: the field stays free text,

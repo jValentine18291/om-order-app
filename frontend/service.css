@@ -2248,3 +2248,14 @@ select {
 /* Marking a machine finished, from View Slips. Green like the status it
    produces, so the button and the badge it leads to read as the same thing. */
 .decide-btn.decide-repaired { background: #E7F5EC; color: #1B7A42; border-color: #B7E0C6; }
+
+
+/* Find Part's two questions. The toggle reuses .toggle's own rules; this only
+   sets the width so it does not stretch across a desktop screen. */
+#fp-mode { margin-bottom: 12px; }
+/* How many parts a shelf holds, above the list of them. */
+.fp-loc-count {
+  padding: 6px 2px 8px;
+  font-size: 12px;
+  color: var(--ink-faint, #78868c);
+}

@@ -69,6 +69,10 @@
     // ---- Find Part ----
     "Parts": "零件",
     "Search by description or part no.": "按名称或零件编号搜索",
+    // Find Part asks two questions now: which part, or what is on a shelf.
+    "Part": "零件",
+    "Location": "位置",
+    "Search by location": "按位置搜索",
     "e.g. clutch, carburetor, SZEN 140…": "例如：clutch、carburetor、SZEN 140…",
     "Scan QR Code": "扫描二维码",
     "Point at a QR code": "对准二维码",
@@ -418,6 +422,13 @@
     [/^Order (\d+) × (.+)$/, "申请 $1 × $2"],
     [/^(.+) · requested by (.+)$/, "$1 · 申请人：$2"],
     [/^Nothing matches “(.+)”$/, "没有符合“$1”的型号"],
+
+    // ---- Find by location ----
+    // The shelf is carried through as typed - it is what is painted on the rack.
+    [/^Nothing recorded at (.+)$/, "$1 没有登记任何零件"],
+    [/^(\d+) parts? here$/, "此处有 $1 个零件"],
+    [/^Showing (\d+) of (\d+) — narrow the location to see the rest$/,
+      "显示 $2 中的 $1 个 — 请输入更具体的位置"],
 
     // ---- Fogger tubes ----
     // The tube type, the item code and the money are carried through as they

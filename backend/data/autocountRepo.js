@@ -456,6 +456,55 @@ async function searchMachines(q, limit = 15) {
 }
 module.exports.searchMachines = searchMachines;
 
+// What is on a shelf. The shelf lives on the item's BASE-UOM row, which is the
+// same row setPartShelf writes to - ask any other row and the answer would be
+// blank for most items.
+//
+// Matched as a PREFIX, not an exact string: typing "R4" should show the whole
+// of rack R4 rather than nothing, which is what you want when you are standing
+// in front of it. Spaces are stripped from both sides of the comparison for
+// the same reason setPartShelf collapses them - "R4 E1" and "R4E1" are one
+// place, however it was typed in.
+//
+// Returns the total as well as the page, because "50 parts" and "50 of 300"
+// mean very different things to someone checking a shelf against a list.
+async function partsByShelf(shelf, limit = 100) {
+  const norm = String(shelf || "").replace(/\s+/g, "").toUpperCase();
+  if (!norm) return { total: 0, results: [] };
+  const cap = Math.max(1, Math.min(200, Number(limit) || 100));
+
+  const where =
+    `WHERE i.IsActive = 'T'
+       AND u.Shelf IS NOT NULL
+       AND REPLACE(UPPER(u.Shelf), ' ', '') LIKE @norm + '%'`;
+  const from =
+    `FROM Item i
+     INNER JOIN ItemUOM u ON u.ItemCode = i.ItemCode AND u.UOM = i.BaseUOM`;
+
+  const counted = await query(`SELECT COUNT(*) AS n ${from} ${where}`, { norm });
+  const total = counted.length ? Number(counted[0].n) : 0;
+
+  const rows = await query(
+    `SELECT TOP ${cap}
+            i.ItemCode,
+            COALESCE(NULLIF(i.Description, ''), NULLIF(i.Desc2, ''), i.ItemCode) AS Descr,
+            u.Shelf
+       ${from}
+       ${where}
+      ORDER BY u.Shelf, Descr`,
+    { norm }
+  );
+  return {
+    total,
+    results: rows.map((r) => ({
+      item_code: r.ItemCode,
+      description: r.Descr,
+      shelf: r.Shelf || "",
+    })),
+  };
+}
+module.exports.partsByShelf = partsByShelf;
+
 // Full stock card for one part: code, description, shelf, balance qty.
 async function getPartStock(code) {
   const norm = String(code || "").replace(/\s+/g, "").toUpperCase();

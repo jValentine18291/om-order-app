@@ -4342,6 +4342,10 @@ function enterFindPart() {
   $("fp-scan-area").style.display = "none";
   $("fp-scan").style.display = "flex";
   showScreen("find");
+  // Always opens on the part search: it is the common question, and a screen
+  // that remembered the mode would have someone typing a part number into a
+  // box waiting for a shelf.
+  setFindMode("part");
   renderRecentParts();
   setTimeout(() => $("fp-q").focus(), 50);
 }
@@ -4371,6 +4375,64 @@ $("fp-scan").addEventListener("click", () => {
 });
 $("fp-scan-stop").addEventListener("click", stopFindScan);
 
+// ---- Find Part: by part, or by where it lives -------------------------------
+// "What is this part" and "what is on this shelf" get asked by the same people
+// minutes apart, so they share one box and one results list. The mode decides
+// which question is being asked; nothing else about the screen changes.
+let fpMode = "part";
+
+function setFindMode(mode) {
+  fpMode = mode === "loc" ? "loc" : "part";
+  const loc = fpMode === "loc";
+  $("fp-q-label").textContent = loc
+    ? "Search by location"
+    : "Search by description or part no.";
+  $("fp-q").placeholder = loc ? "e.g. R4E1" : "e.g. clutch, carburetor, SZEN 140…";
+  document.querySelectorAll("#fp-mode [data-fpmode]").forEach((b) =>
+    b.classList.toggle("on", b.dataset.fpmode === fpMode));
+  // The old question's answers are not answers to the new one.
+  $("fp-q").value = "";
+  $("fp-results").innerHTML = "";
+  $("fp-detail").style.display = "none";
+  $("fp-order-more").style.display = "none";
+  renderRecentParts();
+  $("fp-q").focus();
+}
+
+$("fp-mode").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-fpmode]");
+  if (b) setFindMode(b.dataset.fpmode);
+});
+
+// Everything on one shelf. A location holds many parts, so this lists them
+// rather than jumping to one, and says how many there are in total - "50
+// parts" and "50 of 300" mean very different things when you are checking a
+// shelf against what the app says should be on it.
+async function runLocationSearch(q) {
+  const box = $("fp-results");
+  try {
+    const data = await api(`/api/parts-by-location?q=${encodeURIComponent(q)}`);
+    const list = data.results || [];
+    if (!list.length) {
+      box.innerHTML = `<div class="fp-empty">Nothing recorded at ${escapeHtml(q)}</div>`;
+      return;
+    }
+    const shown = list.length;
+    const more = data.total > shown
+      ? `<div class="fp-loc-count">Showing ${shown} of ${data.total} — narrow the location to see the rest</div>`
+      : `<div class="fp-loc-count">${data.total} part${data.total === 1 ? "" : "s"} here</div>`;
+    box.innerHTML = more + list.map((p) =>
+      `<button type="button" class="company-option" data-code="${escapeAttr(p.item_code)}">
+         <span class="fp-opt-desc">${escapeHtml(p.description)}</span>
+         <span class="fp-opt-code mono">${escapeHtml(p.shelf)} · ${escapeHtml(p.item_code)}</span>
+       </button>`).join("");
+    box.querySelectorAll(".company-option").forEach((btn) =>
+      btn.addEventListener("click", () => showPartStock(btn.dataset.code)));
+  } catch (_) {
+    box.innerHTML = `<div class="fp-empty">Lookup failed</div>`;
+  }
+}
+
 let fpDebounce = null;
 $("fp-q").addEventListener("input", () => {
   clearTimeout(fpDebounce);
@@ -4378,9 +4440,14 @@ $("fp-q").addEventListener("input", () => {
   const box = $("fp-results");
   $("fp-detail").style.display = "none";
   $("fp-order-more").style.display = "none";
-  if (q.length < 2) { box.innerHTML = ""; renderRecentParts(); return; }
+  // Two characters before searching a description, because one letter matches
+  // half the catalogue. A location is different: a rack can be called "A", and
+  // asking what is on it is a fair question - the result is capped anyway.
+  const least = fpMode === "loc" ? 1 : 2;
+  if (q.length < least) { box.innerHTML = ""; renderRecentParts(); return; }
   $("fp-recent").style.display = "none";
   fpDebounce = setTimeout(async () => {
+    if (fpMode === "loc") return runLocationSearch(q);
     try {
       const data = await api(`/api/parts-search?q=${encodeURIComponent(q)}`);
       const list = data.results || [];
