@@ -340,6 +340,7 @@
     "Repaired": "已修好",
     "Mark as repaired": "标记为已修好",
     "Not finished after all": "还没修好",
+    "Marked as repaired": "已标记为修好",
     "Finished — waiting for Sales to invoice it.": "已完成 — 等待销售开单。",
     "Closed": "已结单",
 

@@ -2576,6 +2576,7 @@ async function moveMachine(btn, to) {
 const MOVE_TOAST = {
   AWAITING_QUOTE: "Sent for quoting",
   QUOTED: "Marked as quoted",
+  REPAIRED: "Marked as repaired",
   TO_REPAIR: "Repair confirmed",
   CONDEMNED: "Condemned — technician notified",
 };
@@ -3238,6 +3239,22 @@ function renderSlipDetail(slip) {
       : [];
       if (acts.length) {
         html += `<div class="decide-row" data-decide="${m.id}">${acts.map(([to, label, cls]) =>
+          `<button type="button" class="decide-btn ${cls}" data-state="${escapeAttr(to)}">${escapeHtml(label)}</button>`
+        ).join("")}</div>`;
+      }
+    }
+
+    // Finished with. Its own row rather than folded into the decisions above,
+    // for two reasons: a different set of people may tick it - the technician
+    // who did the work included - and it applies from RECEIVED, where Sales
+    // have no decision to make and the block above deliberately shows nothing.
+    if (canMarkRepaired() && live) {
+      const rep =
+        m.state === "REPAIRED"                                  ? [["TO_REPAIR", "Not finished after all", ""]]
+      : (m.state === "RECEIVED" || m.state === "TO_REPAIR")     ? [["REPAIRED", "Mark as repaired", "decide-repaired"]]
+      : [];                       // waiting on a quote or condemned: not yet
+      if (rep.length) {
+        html += `<div class="decide-row" data-decide="${m.id}">${rep.map(([to, label, cls]) =>
           `<button type="button" class="decide-btn ${cls}" data-state="${escapeAttr(to)}">${escapeHtml(label)}</button>`
         ).join("")}</div>`;
       }
@@ -4422,10 +4439,11 @@ async function showPartStock(code) {
 }
 
 // Whether a machine is finished is the technician's call - they did the work.
-// Sales and Admin can tick it too, so a missed tick at six o'clock does not
-// have to wait for the technician to come back in the morning.
+// Everyone else can tick it too, so a missed tick at six o'clock does not have
+// to wait for the technician to come back in the morning. Purchaser is in here
+// with Sales and Admin, the same as every other counter job in the app.
 function canMarkRepaired() {
-  return ["tech", "sales", "admin"].includes(getRole());
+  return ["tech", "sales", "purchaser", "admin"].includes(getRole());
 }
 
 // Sales take the call, so Sales record the answer. Purchaser and Admin share

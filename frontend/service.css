@@ -2243,3 +2243,8 @@ select {
    the work inside it; this only gives it the same separation from the rows
    above that the note block below it has. */
 .fp-price { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line, #e3e6e8); }
+
+
+/* Marking a machine finished, from View Slips. Green like the status it
+   produces, so the button and the badge it leads to read as the same thing. */
+.decide-btn.decide-repaired { background: #E7F5EC; color: #1B7A42; border-color: #B7E0C6; }
