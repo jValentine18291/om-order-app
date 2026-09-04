@@ -103,13 +103,14 @@ server.listen(0, async () => {
     await sheets.appendLocationChange({
       itemCode: "SZEN 848BE058B2", description: "GASKET, CYLINDER",
       oldShelf: "R4E1", newShelf: "R7B2",
-      who: "I", role: "purchaser", outcome: "updated in AutoCount", source: "Find Part", at,
+      who: "I", role: "purchaser", at,
     });
     check("header written once", seen.headerWrites, 1);
     check("the columns", sheetRows[0], sheets.LOCATION_COLUMNS);
+    check("eight of them, no Result and no Where from", sheets.LOCATION_COLUMNS.length, 8);
     check("the row", seen.appends[0].row, [
       "2026-09-04", "15:07:03", "SZEN 848BE058B2", "GASKET, CYLINDER",
-      "R4E1", "R7B2", "I", "purchaser", "updated in AutoCount", "Find Part",
+      "R4E1", "R7B2", "I", "purchaser",
     ]);
     check("sent as RAW so nothing is reinterpreted", seen.appends[0].raw, true);
     check("and as an insert, not an overwrite", seen.appends[0].insertRows, true);
@@ -124,7 +125,7 @@ server.listen(0, async () => {
     await sheets.appendLocationChange({
       itemCode: "SHUQ 5372641-01", description: "SPARK PLUG",
       oldShelf: null, newShelf: "A1",
-      who: "KS", role: "admin", outcome: "updated in AutoCount", source: "IPL", at,
+      who: "KS", role: "admin", at,
     });
     check("still written only that once", seen.headerWrites, 1);
     check("row one untouched", sheetRows[0], before);
@@ -132,14 +133,12 @@ server.listen(0, async () => {
     // which could as easily mean "nobody filled this in".
     check("no previous location reads as (none)", seen.appends[1].row[4], "(none)");
 
-    console.log("\n-- a refused attempt is recorded too --");
-    // The point of an audit sheet is the attempts as much as the successes.
-    await sheets.appendLocationChange({
-      itemCode: "SZEN 848BE058B2", description: "GASKET, CYLINDER",
-      oldShelf: "R7B2", newShelf: "ZZZ",
-      who: "WJ", role: "tech", outcome: "REFUSED - not a purchaser or admin", source: "Find Part", at,
-    });
-    check("the outcome column carries it", seen.appends[2].row[8], "REFUSED - not a purchaser or admin");
+    console.log("\n-- nothing here says whether a change succeeded --");
+    // Which is exactly why the caller only ever sends the ones that did. A
+    // refused attempt written here would be indistinguishable from a part that
+    // really moved, so the guard lives in server.js and this is the reminder.
+    check("no column could carry an outcome", sheets.LOCATION_COLUMNS.filter(
+      (c) => /result|outcome|status|source|where/i.test(c)), []);
 
     console.log("\n-- one token for all of it --");
     check("signed once, reused", seen.tokenRequests, 1);

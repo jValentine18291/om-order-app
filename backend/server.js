@@ -680,22 +680,38 @@ app.post("/api/part-location", async (req, res) => {
       who: `${who || "?"} (${role || "?"})`,
       outcome,
     });
-    // The Sheet is a copy for the people who cannot open the log file on this
-    // server. It must never decide whether a location change succeeds, so this
-    // is deliberately not awaited and a failure is written back into the log
-    // rather than thrown - a Sheet quietly missing rows would be worse than
-    // one that is obviously behind.
+  };
+
+  // The Sheet gets only the moves that actually happened. It has no column
+  // saying otherwise, so a refused or no-change attempt sitting in it would
+  // read as a part that had moved when it had not. Everything else - the
+  // refusals, the attempts on items AutoCount no longer has - stays in
+  // location-updates.log, which is still the full record.
+  //
+  // Not awaited, and a failure is written back into the log rather than
+  // thrown: this must never decide whether a location change succeeds. A sheet
+  // that is obviously behind beats one quietly missing rows, and both beat a
+  // change that fails because Google was down.
+  const toSheet = (r) =>
     sheets
-      .appendLocationChange({ itemCode, description, oldShelf, newShelf, who, role, outcome, source })
+      .appendLocationChange({
+        itemCode: r.item_code || item_code,
+        description,
+        oldShelf: r.old_shelf === undefined ? null : r.old_shelf,
+        newShelf: r.new_shelf || shelf,
+        who, role,
+      })
       .catch((e) => {
         logLocationEvent({
-          source, itemCode, oldShelf, newShelf,
+          source: (req.body || {}).source || "Find Part",
+          itemCode: r.item_code || item_code,
+          oldShelf: r.old_shelf === undefined ? null : r.old_shelf,
+          newShelf: r.new_shelf || shelf,
           who: `${who || "?"} (${role || "?"})`,
           outcome: `SHEET NOT UPDATED - ${e.message}`,
         });
         console.error("[sheets] location row not appended:", e.message);
       });
-  };
 
   try {
     // Who is asking comes first: it is the cheapest check, it needs no database,
@@ -730,6 +746,7 @@ app.post("/api/part-location", async (req, res) => {
     if (r.status !== "updated") {
       return res.status(409).json({ error: messages[r.status] || "Nothing was changed.", status: r.status });
     }
+    toSheet(r);
     res.json({ ...r, message: messages.updated });
   } catch (err) {
     stamp(`FAILED - ${err.message}`);

@@ -137,9 +137,15 @@ async function api(path, { method = "GET", body } = {}) {
 
 // The columns, in order. Kept here so the header row and every appended row
 // cannot disagree about what goes where.
+//
+// There is deliberately no "Result" column, and so ONLY CHANGES THAT ACTUALLY
+// HAPPENED are written here - see the caller. A sheet that also held refused
+// and no-change attempts, with nothing to tell them apart, would show an
+// attempt that was blocked as though the part had moved. Those are still in
+// location-updates.log on the server, which remains the full record.
 const LOCATION_COLUMNS = [
   "Date", "Time", "Part No.", "Description",
-  "Previous location", "New location", "Changed by", "Role", "Result", "Where from",
+  "Previous location", "New location", "Changed by", "Role",
 ];
 
 // Written once, and only into a sheet whose first row is empty. A sheet that
@@ -148,7 +154,7 @@ const LOCATION_COLUMNS = [
 // destroying the thing this is meant to preserve.
 async function ensureHeader() {
   const { locationSheetId, tab } = config();
-  const range = encodeURIComponent(`${tab}!A1:J1`);
+  const range = encodeURIComponent(`${tab}!A1:H1`);
   const got = await api(`/v4/spreadsheets/${encodeURIComponent(locationSheetId)}/values/${range}`);
   const first = (got.values && got.values[0]) || [];
   if (first.length) return false;
@@ -188,8 +194,6 @@ async function appendLocationChange(entry) {
     entry.newShelf || "",
     entry.who || "",
     entry.role || "",
-    entry.outcome || "",
-    entry.source || "",
   ];
 
   await api(
