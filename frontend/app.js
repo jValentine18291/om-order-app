@@ -4421,11 +4421,21 @@ async function runLocationSearch(q) {
     const more = data.total > shown
       ? `<div class="fp-loc-count">Showing ${shown} of ${data.total} — narrow the location to see the rest</div>`
       : `<div class="fp-loc-count">${data.total} part${data.total === 1 ? "" : "s"} here</div>`;
-    box.innerHTML = more + list.map((p) =>
-      `<button type="button" class="company-option" data-code="${escapeAttr(p.item_code)}">
-         <span class="fp-opt-desc">${escapeHtml(p.description)}</span>
-         <span class="fp-opt-code mono">${escapeHtml(p.shelf)} · ${escapeHtml(p.item_code)}</span>
-       </button>`).join("");
+    box.innerHTML = more + list.map((p) => {
+      // Same rendering as the stock card's own figure: whole numbers stay
+      // whole, and a fractional balance - a cut length of tube, say - keeps
+      // its two places rather than being rounded into a lie.
+      const n = Number(p.bal_qty) || 0;
+      const qty = Number.isInteger(n) ? String(n) : n.toFixed(2);
+      return `<button type="button" class="company-option fp-loc-row" data-code="${escapeAttr(p.item_code)}">
+         <span class="fp-loc-main">
+           <span class="fp-opt-desc">${escapeHtml(p.description)}</span>
+           <span class="fp-opt-code mono">${escapeHtml(p.shelf)} · ${escapeHtml(p.item_code)}</span>
+         </span>
+         <span class="fp-loc-qty ${n > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${escapeHtml(qty)}${
+           p.uom ? `<span class="fp-loc-uom">${escapeHtml(p.uom)}</span>` : ""}</span>
+       </button>`;
+    }).join("");
     box.querySelectorAll(".company-option").forEach((btn) =>
       btn.addEventListener("click", () => showPartStock(btn.dataset.code)));
   } catch (_) {

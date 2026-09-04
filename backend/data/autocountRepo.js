@@ -484,11 +484,19 @@ async function partsByShelf(shelf, limit = 100) {
   const counted = await query(`SELECT COUNT(*) AS n ${from} ${where}`, { norm });
   const total = counted.length ? Number(counted[0].n) : 0;
 
+  // The balance is matched on the item code EXACTLY, not normalized. The same
+  // rule getStockBalances follows and for the same reason: these codes come
+  // straight out of Item rather than from someone typing, so the comparison is
+  // indexable. Normalizing here - as getPartStock has to, for a typed code -
+  // would turn one query into a full scan of the stock-movement table for
+  // every row on the shelf.
   const rows = await query(
     `SELECT TOP ${cap}
             i.ItemCode,
             COALESCE(NULLIF(i.Description, ''), NULLIF(i.Desc2, ''), i.ItemCode) AS Descr,
-            u.Shelf
+            u.Shelf,
+            i.BaseUOM,
+            (SELECT SUM(s.Qty) FROM StockDTL s WHERE s.ItemCode = i.ItemCode) AS BalQty
        ${from}
        ${where}
       ORDER BY u.Shelf, Descr`,
@@ -500,6 +508,10 @@ async function partsByShelf(shelf, limit = 100) {
       item_code: r.ItemCode,
       description: r.Descr,
       shelf: r.Shelf || "",
+      uom: r.BaseUOM || "",
+      // No stock movements at all reads as zero, which is what it means on a
+      // shelf: nothing there.
+      bal_qty: r.BalQty === null || r.BalQty === undefined ? 0 : Number(r.BalQty),
     })),
   };
 }
