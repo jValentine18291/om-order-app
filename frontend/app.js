@@ -2835,6 +2835,18 @@ function buildMachinePrintPdf(slip, machines) {
   doc.setFontSize(10); doc.setTextColor(INK);
   doc.text(doc.splitTextToSize(slip.company || "", W), LEFT, y);
   y += 14;
+  // The slip's notes. This printout gets stuck onto the paper service slip,
+  // and the note is where the paper slip's own number is written down - so
+  // without it the strip cannot be matched back to the slip it belongs to,
+  // which is the whole reason it is printed.
+  const notes = String(slip.notes || "").trim();
+  if (notes) {
+    doc.setFontSize(9); doc.setTextColor(INK);
+    const lines = doc.splitTextToSize(notes, W);
+    need(lines.length * 11 + 6);
+    doc.text(lines, LEFT, y);
+    y += lines.length * 11 + 2;
+  }
   rule();
 
   let grand = 0;

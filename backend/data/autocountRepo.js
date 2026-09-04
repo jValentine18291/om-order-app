@@ -381,13 +381,23 @@ module.exports.searchDebtors = searchDebtors;
 // Description, Desc2 (AutoCount's 2nd description line, typically the machine
 // model e.g. "BK3410"), or the item code. So "BK3410 Recoil" finds an item
 // with Description "Recoil Assy 2-58" and Desc2 "BK3410".
+//
+// A CODE BEATS A MENTION. Typing "A8" puts the A8 item at the top rather than
+// somewhere down a list of parts whose descriptions happen to contain those
+// characters - which is what a technician typing a code they already know
+// means by it. Exact code first, then codes starting with it, then everything
+// else by description.
+//
+// The ordering is done in SQL and not afterwards, because only the top rows
+// come back: re-sorting them here would tidy a page the right answer had
+// already fallen off the bottom of.
 async function searchParts(q, limit = 15) {
   const term = String(q || "").trim();
   if (!term) return [];
   const cap = Math.max(1, Math.min(20, Number(limit) || 15));
 
   const words = term.split(/\s+/).slice(0, 6); // sane cap on word count
-  const params = {};
+  const params = { exact: term.replace(/\s+/g, "").toUpperCase() };
   const conditions = words.map((w, idx) => {
     params[`w${idx}`] = w;
     params[`n${idx}`] = w.replace(/\s+/g, "").toUpperCase();
@@ -409,7 +419,12 @@ async function searchParts(q, limit = 15) {
        FROM Item i
       WHERE i.IsActive = 'T'
         AND ${conditions.join("\n        AND ")}
-      ORDER BY Descr`,
+      ORDER BY CASE
+                 WHEN REPLACE(UPPER(i.ItemCode), ' ', '') = @exact THEN 0
+                 WHEN REPLACE(UPPER(i.ItemCode), ' ', '') LIKE @exact + '%' THEN 1
+                 ELSE 2
+               END,
+               Descr`,
     params
   );
   return rows.map((r) => ({
