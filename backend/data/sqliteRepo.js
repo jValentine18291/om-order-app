@@ -194,6 +194,10 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
     .map((m) => (typeof m === "string"
       ? { desc: m.trim(), serial: "", remarks: "" }
       : { desc: String((m && m.desc) || "").trim(),
+          // The AutoCount item, when one was chosen from the list. Trimmed and
+          // kept as sent: it is written, not searched, so it must be the exact
+          // code the catalogue holds.
+          code: String((m && m.machine_code) || "").trim(),
           serial: String((m && m.serial) || "").trim(),
           remarks: String((m && m.remarks) || "").trim().slice(0, 500),
           // Phones run a cached copy of the app for a shift after a deploy, so
@@ -221,7 +225,7 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'OPEN')`
   );
   const insertMachine = db.prepare(
-    "INSERT INTO slip_machines (slip_id, machine_desc, serial_no, remarks, state) VALUES (?, ?, ?, ?, ?)"
+    "INSERT INTO slip_machines (slip_id, machine_desc, machine_code, serial_no, remarks, state) VALUES (?, ?, ?, ?, ?, ?)"
   );
   const insertSignature = db.prepare(
     "INSERT INTO slip_signatures (slip_id, image, signed_content) VALUES (?, ?, ?)"
@@ -253,7 +257,7 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
     // anything, with no parts and no labour to quote. A machine reaches that
     // list when a technician sends it, which is when there is a figure to give.
     for (const m of machineList) {
-      insertMachine.run(slipId, m.desc, m.serial, m.remarks, "RECEIVED");
+      insertMachine.run(slipId, m.desc, m.code, m.serial, m.remarks, "RECEIVED");
     }
     if (sig) {
       // Written inside the same transaction as the slip, so a signature can

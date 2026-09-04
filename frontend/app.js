@@ -485,10 +485,78 @@ function renderNsMachines() {
     }));
 }
 
+// ---- Picking the machine from the catalogue ---------------------------------
+// Machine units in AutoCount carry a U-prefixed item code (UHUQ, UZEN, UPUL);
+// spares do not, which is what keeps this list to machines.
+//
+// The code is REMEMBERED as well as the wording. That is what lets the app know
+// a machine is a fogger rather than guessing it from however the counter
+// happened to word it - and it is why typing over the box has to drop the pick:
+// the text on screen is what gets recorded, so a stale code behind it would be
+// a machine claiming to be something it is not.
+let nsmPickedCode = "";      // the AutoCount item behind the typed model, if any
+
+function setPickedModel(code) {
+  nsmPickedCode = String(code || "");
+  const row = $("nsm-model-picked");
+  if (!row) return;
+  if (nsmPickedCode) {
+    $("nsm-model-code").textContent = nsmPickedCode;
+    row.style.display = "flex";
+  } else {
+    row.style.display = "none";
+  }
+}
+
+let nsmModelDebounce = null;
+function wireModelSearch() {
+  const input = $("nsm-model");
+  const box = $("nsm-model-results");
+  if (!input || !box) return;
+
+  input.addEventListener("input", () => {
+    // Anything typed by hand means this is no longer the catalogue machine.
+    setPickedModel("");
+    clearTimeout(nsmModelDebounce);
+    const q = input.value.trim();
+    if (q.length < 2) { box.innerHTML = ""; return; }
+    nsmModelDebounce = setTimeout(async () => {
+      try {
+        const data = await api(`/api/machine-search?q=${encodeURIComponent(q)}`);
+        const list = data.results || [];
+        // No message when there is nothing: the field takes free text by
+        // design, and "no matching machines" reads like a refusal when the
+        // machine simply is not one of ours.
+        if (!list.length) { box.innerHTML = ""; return; }
+        box.innerHTML = list.map((r) =>
+          `<button type="button" class="company-option" data-code="${escapeAttr(r.item_code)}" data-desc="${escapeAttr(r.description)}">
+             <span class="fp-opt-desc">${escapeHtml(r.description)}${r.desc2 ? ` <span class="fp-opt-model">· ${escapeHtml(r.desc2)}</span>` : ""}</span>
+             <span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>
+           </button>`).join("");
+        box.querySelectorAll(".company-option").forEach((btn) =>
+          btn.addEventListener("click", () => {
+            input.value = btn.dataset.desc;
+            setPickedModel(btn.dataset.code);
+            box.innerHTML = "";
+          })
+        );
+      } catch (_) { box.innerHTML = ""; }
+    }, 250);
+  });
+
+  $("nsm-model-clear").addEventListener("click", () => {
+    setPickedModel("");
+    $("nsm-model").focus();
+  });
+}
+wireModelSearch();
+
 function openMachineForm(index = -1) {
   nsEditIndex = index;
   const m = index >= 0 ? nsMachines[index]
-          : { model: "", qty: 1, serial: "", remarks: "" };
+          : { model: "", qty: 1, serial: "", remarks: "", code: "" };
+  $("nsm-model-results").innerHTML = "";
+  setPickedModel(m.code || "");
   $("nsm-title").textContent = index >= 0 ? "Edit machine" : "Add machine";
   $("nsm-add").textContent = index >= 0 ? "Save" : "Add";
   $("nsm-model").value = m.model;
@@ -506,6 +574,8 @@ function closeMachineForm() {
   $("nsm-modal").style.display = "none";
   document.body.style.overflow = "";
   nsEditIndex = -1;
+  $("nsm-model-results").innerHTML = "";
+  setPickedModel("");
 }
 
 // Above one unit the serial box covers all of them, so say so rather than
@@ -532,6 +602,9 @@ function commitMachineForm() {
   if (!Number.isFinite(qty) || qty < 1) qty = 1;
   const entry = {
     model, qty,
+    // Only set when the model was chosen from the list and not typed over
+    // since - see setPickedModel.
+    code: nsmPickedCode,
     serial: $("nsm-serial").value.trim(),
     remarks: $("nsm-remarks").value.trim(),
   };
@@ -584,10 +657,12 @@ async function submitNewService() {
   const machines = [];
   for (const m of nsMachines) {
     if (m.qty === 1) {
-      machines.push({ desc: m.model, serial: m.serial, remarks: m.remarks || "" });
+      machines.push({ desc: m.model, machine_code: m.code || "", serial: m.serial, remarks: m.remarks || "" });
     } else {
       for (let n = 1; n <= m.qty; n++) {
-        machines.push({ desc: `${m.model} - ${n}/${m.qty}`, serial: m.serial, remarks: m.remarks || "" });
+        // Several of the same machine are the same catalogue item, so they all
+        // carry the same code; only the "- 1/3" in the wording tells them apart.
+        machines.push({ desc: `${m.model} - ${n}/${m.qty}`, machine_code: m.code || "", serial: m.serial, remarks: m.remarks || "" });
       }
     }
   }
@@ -2026,7 +2101,7 @@ function renderTubePicker() {
   const box = $("tube-pick");
   if (!box || !window.FOGGER_TUBES) return;
   const m = currentMachine();
-  if (!m || !window.FOGGER_TUBES.looksLikeFogger(m.machine_desc)) {
+  if (!m || !window.FOGGER_TUBES.isFogger(m)) {
     box.style.display = "none";
     return;
   }

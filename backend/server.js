@@ -782,6 +782,24 @@ app.get("/api/parts-search", async (req, res) => {
   }
 });
 
+// The machine models themselves, for the box the counter types into when a
+// slip is registered. Returns nothing at all when AutoCount is not the item
+// source, which is the same shape as parts-search: the field stays free text,
+// so a machine that is not ours - or a lookup that cannot be reached - never
+// stops a slip being written.
+app.get("/api/machine-search", async (req, res) => {
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") return res.json({ results: [] });
+    const acRepo = require("./data/autocountRepo");
+    const results = await acRepo.searchMachines(String(req.query.q || ""), 15);
+    res.json({ results });
+  } catch (err) {
+    console.error("[GET /api/machine-search]", err.message);
+    res.json({ results: [] });
+  }
+});
+
 // Every part that fits one machine, from the item's second description line.
 // Separate from parts-search because that matches the code and description too:
 // searching "365" there returns anything with 365 in a part number, while this

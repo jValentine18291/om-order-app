@@ -85,6 +85,21 @@
     return s.indexOf("FOG") !== -1 || s.indexOf("K10") !== -1;
   }
 
+  // Every PulsFOG is a fogger, and a machine picked from the catalogue carries
+  // its item code - so for those there is nothing to guess at. Machines typed
+  // in by hand have no code, and fall back to reading the wording.
+  function isFogger(machine) {
+    if (!machine) return false;
+    var code = String(machine.machine_code || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (code.indexOf("UPUL") === 0) return true;
+    // A code that IS present and is not PulsFOG settles it the other way: the
+    // catalogue is better evidence than the wording, and this is what stops a
+    // machine called something like "Husqvarna 525 fogging attachment" from
+    // offering tubes that do not fit it.
+    if (code) return false;
+    return looksLikeFogger(machine.machine_desc);
+  }
+
   function tubeByType(type) {
     for (var i = 0; i < TUBES.length; i++) {
       if (TUBES[i].type === type) return TUBES[i];
@@ -96,6 +111,7 @@
     list: TUBES,
     byType: tubeByType,
     looksLikeFogger: looksLikeFogger,
+    isFogger: isFogger,
     check: checkTubeTable
   };
 })();

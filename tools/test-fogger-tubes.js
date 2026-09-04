@@ -65,6 +65,20 @@ for (const [desc, want] of [
   ["", false],
 ]) check(`"${desc}"`, T.looksLikeFogger(desc), want);
 
+console.log("\n-- the catalogue settles it when the machine was picked from it --");
+for (const [machine, want, why] of [
+  [{ machine_code: "UPUL K10SP", machine_desc: "PULSFOG K-10-SP" }, true, "a PulsFOG"],
+  [{ machine_code: "UPUL SOMETHING", machine_desc: "no clue from the wording" }, true, "any PulsFOG code"],
+  // The code is better evidence than the wording, and this is the case where
+  // the two disagree: a Husqvarna whose description happens to say "fogging".
+  [{ machine_code: "UHUQ 525LK", machine_desc: "Husqvarna 525 fogging attachment" }, false, "code beats wording"],
+  [{ machine_code: "UZEN G3800", machine_desc: "Zenoah G3800" }, false, "a chainsaw"],
+  // Typed by hand, so there is no code and the wording is all there is.
+  [{ machine_code: "", machine_desc: "PulsFOG K-10-SP" }, true, "typed, reads as a fogger"],
+  [{ machine_code: "", machine_desc: "Husqvarna 525LK Brushcutter" }, false, "typed, reads as a brushcutter"],
+  [{ machine_desc: "K10SP" }, true, "no code field at all"],
+]) check(`${why}`, T.isFogger(machine), want);
+
 // ---- the fraction survives the round trip ----------------------------------
 const SIG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
 const slip = data.slips.createSlip({
@@ -72,6 +86,19 @@ const slip = data.slips.createSlip({
   machines: [{ desc: "PulsFOG K-10-SP", serial: "F1" }],
 });
 const machineId = data.slips.getSlip(slip.slip_number).machines[0].id;
+
+console.log("\n-- the picked catalogue item is kept against the machine --");
+const coded = data.slips.createSlip({
+  company: "Catalogue Co", contact_name: "A", contact_number: "1", signature: SIG,
+  machines: [
+    { desc: "PULSFOG K-10-SP THERMAL FOGGER", machine_code: "UPUL K10SP", serial: "C1" },
+    { desc: "Some machine that was never ours", serial: "C2" },
+  ],
+});
+const cm = data.slips.getSlip(coded.slip_number).machines;
+check("the code is stored as sent", cm[0].machine_code, "UPUL K10SP");
+check("and a typed-in machine simply has none", cm[1].machine_code, "");
+check("which is enough to know the first is a fogger", cm.map((m) => T.isFogger(m)), [true, false]);
 
 const add = (type, pieces, tech = "WJ") => {
   const t = T.byType(type);

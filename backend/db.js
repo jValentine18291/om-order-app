@@ -555,6 +555,20 @@ try {
   console.error("[db] machine_parts variant migration check failed:", e.message);
 }
 
+// The AutoCount item this machine is, when it was picked from the catalogue
+// rather than typed. Machine units are the U-prefixed codes - UHUQ, UZEN,
+// UPUL. Blank for anything typed by hand, which stays perfectly valid: plenty
+// of machines through the workshop are not ours to begin with.
+try {
+  const cols = db.prepare("PRAGMA table_info(slip_machines)").all();
+  if (!cols.some((c) => c.name === "machine_code")) {
+    db.exec("ALTER TABLE slip_machines ADD COLUMN machine_code TEXT DEFAULT ''");
+    console.log("[db] migrated: added machine_code to slip_machines");
+  }
+} catch (e) {
+  console.error("[db] slip_machines machine_code migration check failed:", e.message);
+}
+
 // Migration: rename legacy CALL_CUSTOMER status to ALL_REPAIRED (status model v2).
 try {
   const n = db.prepare("UPDATE service_slips SET status = 'ALL_REPAIRED' WHERE status = 'CALL_CUSTOMER'").run();

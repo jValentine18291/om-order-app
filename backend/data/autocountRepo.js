@@ -414,6 +414,48 @@ async function searchParts(q, limit = 15) {
   }));
 }
 
+// The machines themselves, not their parts. Machine units are the U-prefixed
+// item codes - UHUQ, UZEN, UPUL and so on - which is what separates a unit
+// from the thousands of spares that would otherwise drown the list.
+//
+// Same word-by-word matching as searchParts: every word typed has to appear
+// somewhere, so "husq 525" finds the 525 Husqvarnas without the order of the
+// words mattering.
+async function searchMachines(q, limit = 15) {
+  const term = String(q || "").trim();
+  if (!term) return [];
+  const cap = Math.max(1, Math.min(20, Number(limit) || 15));
+
+  const words = term.split(/\s+/).slice(0, 6);
+  const params = {};
+  const conditions = words.map((w, idx) => {
+    params[`w${idx}`] = w;
+    params[`n${idx}`] = w.replace(/\s+/g, "").toUpperCase();
+    return `( i.Description LIKE '%' + @w${idx} + '%'
+           OR i.Desc2 LIKE '%' + @w${idx} + '%'
+           OR REPLACE(UPPER(i.ItemCode), ' ', '') LIKE '%' + @n${idx} + '%' )`;
+  });
+
+  const rows = await query(
+    `SELECT TOP ${cap}
+            i.ItemCode,
+            COALESCE(NULLIF(i.Description, ''), NULLIF(i.Desc2, ''), i.ItemCode) AS Descr,
+            NULLIF(i.Desc2, '') AS Desc2
+       FROM Item i
+      WHERE i.IsActive = 'T'
+        AND UPPER(i.ItemCode) LIKE 'U%'
+        AND ${conditions.join("\n        AND ")}
+      ORDER BY Descr`,
+    params
+  );
+  return rows.map((r) => ({
+    item_code: r.ItemCode,
+    description: r.Descr,
+    desc2: r.Desc2 && r.Desc2 !== r.Descr ? r.Desc2 : "",
+  }));
+}
+module.exports.searchMachines = searchMachines;
+
 // Full stock card for one part: code, description, shelf, balance qty.
 async function getPartStock(code) {
   const norm = String(code || "").replace(/\s+/g, "").toUpperCase();

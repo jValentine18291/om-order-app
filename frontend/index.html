@@ -618,6 +618,14 @@
         <div class="field">
           <label for="nsm-model">Model No. <span class="req">*</span></label>
           <input id="nsm-model" type="text" autocomplete="off" placeholder="e.g. Husqvarna 525LK Brushcutter" />
+          <!-- Suggestions from AutoCount, and the item that was picked. Typing
+               over the box drops the pick: what is on screen is then what gets
+               recorded, which is the whole point of still allowing free text. -->
+          <div class="company-suggest" id="nsm-model-results"></div>
+          <div class="nsm-picked" id="nsm-model-picked" style="display:none">
+            <span class="mono" id="nsm-model-code"></span>
+            <button type="button" class="btn-quiet" id="nsm-model-clear">Not this one</button>
+          </div>
         </div>
         <div class="field">
           <label for="nsm-qty">Qty <span class="req">*</span></label>
