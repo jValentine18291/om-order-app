@@ -81,11 +81,17 @@
 
 /* Ensure all text-like inputs in a field render at the same full-width size.
    The base stylesheet styles input[type="text"]; type="tel" was missing it,
-   so it rendered smaller. This covers tel/text/email/number consistently. */
+   so it rendered smaller. This covers tel/text/email/number/date consistently.
+
+   type="date" fell through the same gap, and the two ETA fields on the
+   shipment form came out as the browser's own date control: a narrow box with
+   the day/month/year segments in the system font at whatever size the phone
+   felt like, next to fields twice their height. */
 .field input[type="text"],
 .field input[type="tel"],
 .field input[type="email"],
-.field input[type="number"] {
+.field input[type="number"],
+.field input[type="date"] {
   width: 100%;
   padding: 13px 14px;
   font: inherit;
@@ -95,6 +101,21 @@
   background: #fff;
   color: var(--ink);
   box-sizing: border-box;
+}
+
+/* What a date needs on top of that. iOS will not stretch a date input to the
+   width it is given without appearance:none, and shrink-wraps it vertically
+   around the segments unless it is told a height; Safari sits the segments on
+   the top edge without an explicit line-height. */
+.field input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 50px;
+  line-height: normal;
+}
+/* The little calendar button, at a size worth aiming a thumb at. */
+.field input[type="date"]::-webkit-calendar-picker-indicator {
+  width: 22px; height: 22px; cursor: pointer; opacity: 0.6;
 }
 
 /* ---- Select dropdowns ---- */
