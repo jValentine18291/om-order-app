@@ -2380,6 +2380,14 @@ input.spk-qty{width:84px;flex:0 0 auto;text-align:right;
 #she-lines .po-line .remove svg{width:18px;height:18px}
 #she-lines .po-line .remove:active{background:var(--red,#c5402f);color:#fff}
 
+/* "2 already on this one". Red and bold because it is the one part of that
+   line that is about you rather than about the order: this line is already on
+   the shipment you are building, and the box beside it holds YOUR figure, not
+   a suggestion. Typing over it without noticing is the mistake worth
+   preventing. The rest of the line stays quiet - "10 outstanding" is not a
+   warning about anything. */
+.spk-on-this{color:var(--red,#c5402f);font-weight:700}
+
 /* Putting the filtered-out lines back. A quiet link, not a button competing
    with "Add to shipment". */
 .spk-showall{

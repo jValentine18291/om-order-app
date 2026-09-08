@@ -5233,7 +5233,7 @@ function renderPickerLines() {
           <span class="po-line-code mono">${escapeHtml(it.item_code)}</span>
           <span class="po-line-code">${trimNum(it.outstanding)} outstanding${
             it.allocated > 0 ? ` · ${trimNum(it.allocated)} on another shipment` : ""}${
-            onThis ? ` · ${trimNum(onThis.qty)} already on this one` : ""}</span>
+            onThis ? ` · <b class="spk-on-this">${trimNum(onThis.qty)} already on this one</b>` : ""}</span>
         </span>
         <input class="spk-qty" type="number" min="0" step="any" inputmode="decimal"
                data-line="${i}" value="${onThis ? trimNum(onThis.qty) : (left > 0 ? trimNum(left) : "")}"

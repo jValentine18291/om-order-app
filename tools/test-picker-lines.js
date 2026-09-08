@@ -73,7 +73,8 @@ sandbox.spkShowAll = false;
 sandbox.renderPickerLines();
 check("it is there", offered().includes(0), true);
 check("showing what is on it", filled()[0], "2");
-check("and says so", /already on this one/.test(html), true);
+check("and says so, in the colour that means look at me",
+  /<b class="spk-on-this">2 already on this one<\/b>/.test(html), true);
 
 console.log("\n-- one already on this shipment, and fully claimed elsewhere too --");
 sandbox.spkPo.items[0].allocated = 2;
