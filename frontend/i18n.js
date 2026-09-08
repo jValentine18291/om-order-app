@@ -69,6 +69,32 @@
     // ---- Find Part ----
     "Parts": "零件",
     "Search by description or part no.": "按名称或零件编号搜索",
+    // ---- Purchase orders ----
+    // Read by everyone; only the Purchaser can change anything here.
+    "Purchase Orders": "采购订单",
+    "← Purchase Orders": "← 采购订单",
+    "What is on order and where it is": "已订购的货品及其状态",
+    "Purchasing": "采购",
+    "Purchase order": "采购订单",
+    "Still open": "未完成",
+    "All": "全部",
+    "Search": "搜索",
+    "Supplier": "供应商",
+    "Raised": "开单日期",
+    "Lines": "项目数",
+    "Outstanding": "未到货",
+    "Its lines": "订单项目",
+    "Status": "状态",
+    "Not ordered yet": "尚未下单",
+    "Ordered": "已下单",
+    "Sent to supplier": "已发给供应商",
+    "Only the Purchaser can change this.": "只有采购员可以更改。",
+    "Reading AutoCount…": "正在读取 AutoCount…",
+    "No purchase orders": "没有采购订单",
+    "No purchase orders match": "没有符合的采购订单",
+    "Outstanding / ordered, read from AutoCount.": "未到货 / 已订购，数据来自 AutoCount。",
+    "all received": "全部已收到",
+    "Purchase orders cannot be read from AutoCount on this server.": "此服务器无法从 AutoCount 读取采购订单。",
     // Find Part asks two questions now: which part, or what is on a shelf.
     "Part": "零件",
     "Location": "位置",
@@ -422,6 +448,13 @@
     [/^Order (\d+) × (.+)$/, "申请 $1 × $2"],
     [/^(.+) · requested by (.+)$/, "$1 · 申请人：$2"],
     [/^Nothing matches “(.+)”$/, "没有符合“$1”的型号"],
+
+    // ---- Purchase orders ----
+    // Built at runtime, so patterns rather than dictionary entries. The counts
+    // and the dates are carried through as they are.
+    [/^(\d+) lines?$/, "$1 项"],
+    [/^([\d.]+) outstanding$/, "未到货 $1"],
+    [/^Last changed by (.+) · (.+)$/, "最后修改：$1 · $2"],
 
     // ---- Find by location ----
     // The shelf is carried through as typed - it is what is painted on the rack.

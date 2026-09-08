@@ -57,7 +57,7 @@
            depending on which screen you were on. -->
       <div class="topbar-actions">
         <button class="pill lang-toggle" id="lang-toggle" data-no-i18n style="display:none"></button>
-        <button class="pill back-chip" id="top-back" style="display:none">&larr; Slips</button>
+        <button class="pill back-chip" id="top-back" style="display:none"><span id="top-back-txt">&larr; Slips</span></button>
         <button class="pill home-link" id="home-link" style="display:none">Home</button>
       </div>
     </header>
@@ -139,6 +139,14 @@
           </span>
           <span class="home-txt"><strong>Bulk Order</strong><small>Request several parts at once</small></span>
         </button>
+        <button class="home-btn home-buy" data-go="po">
+          <span class="home-ic">
+            <!-- A ship. What is being tracked is goods on their way here, and
+                 nothing else on this screen means that. -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17a3 3 0 0 0 3 1.8 3 3 0 0 0 3-1.8 3 3 0 0 0 3 1.8 3 3 0 0 0 3-1.8 3 3 0 0 0 3 1.8A3 3 0 0 0 21 17"/><path d="M5 14V8l7-3 7 3v6"/><path d="M12 5V3"/></svg>
+          </span>
+          <span class="home-txt"><strong>Purchase Orders</strong><small>What is on order and where it is</small></span>
+        </button>
         <button class="home-btn home-buy" data-go="requests">
           <span class="home-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
@@ -147,6 +155,37 @@
         </button>
       </div>
       <button class="switch-role" id="switch-role">Switch role</button>
+    </section>
+
+    <!-- ============ SCREEN: PURCHASE ORDERS ============ -->
+    <!-- The order itself is AutoCount's and is only read. The app adds one
+         fact it cannot know: whether Iris has actually sent it. -->
+    <section id="screen-po" class="screen">
+      <div class="section-head">
+        <p class="eyebrow">Purchasing</p>
+        <h2>Purchase Orders</h2>
+      </div>
+      <div class="toggle" id="po-scope" style="margin-bottom:12px">
+        <button type="button" data-poscope="open">Still open</button>
+        <button type="button" data-poscope="all">All</button>
+      </div>
+      <div class="field">
+        <label for="po-q">Search</label>
+        <input id="po-q" type="text" autocomplete="off" placeholder="PO number or supplier…" />
+      </div>
+      <div id="po-list"></div>
+    </section>
+
+    <!-- ============ SCREEN: ONE PURCHASE ORDER ============ -->
+    <section id="screen-po-detail" class="screen">
+      <div class="section-head">
+        <p class="eyebrow">Purchase order</p>
+        <h2 id="pod-no">—</h2>
+      </div>
+      <div class="fp-card" id="pod-head"></div>
+      <div id="pod-track" style="margin-top:12px"></div>
+      <div class="section-head" style="margin-top:16px"><p class="eyebrow">Its lines</p></div>
+      <div id="pod-lines"></div>
     </section>
 
     <!-- ============ SCREEN: FIND PART ============ -->

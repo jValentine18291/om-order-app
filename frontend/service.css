@@ -2298,3 +2298,36 @@ select {
   color: var(--ink-faint, #78868c);
   overflow-wrap: anywhere;
 }
+
+
+/* ---- Purchase orders ------------------------------------------------------ */
+.po-card{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--line,#e3e6e8);
+  border-left-width:4px;border-radius:11px;padding:11px 12px;margin-bottom:9px;font:inherit;cursor:pointer}
+.po-card:active{background:var(--primary-tint,#eef7f8)}
+.po-card.po-NOT_ORDERED{border-left-color:#8f9ba2}
+.po-card.po-ORDERED{border-left-color:#5B3FA8}
+.po-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.po-top strong{font-size:14px;font-variant-numeric:tabular-nums}
+.po-sup{color:var(--ink-2,#45525a);font-size:13px;margin:2px 0 0}
+.po-sub{color:var(--ink-faint,#78868c);font-size:11.5px;margin-top:6px}
+.po-pill{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.po-p-NOT_ORDERED{background:#eef1f3;color:#45525a}
+.po-p-ORDERED{background:#F0EAFB;color:#5B3FA8}
+
+.po-track{background:#eef7f8;border:1px solid #cfe3e6;border-radius:11px;padding:12px}
+.po-track .fp-row{border-color:#cfe3e6}
+.po-who{font-size:11px;color:var(--ink-faint,#78868c);margin-top:9px;padding-top:9px;border-top:1px dashed #cfe3e6}
+.po-readonly{font-size:11.5px;color:var(--ink-faint,#78868c);text-align:center;margin-top:10px;
+  padding:9px;border:1px dashed #cfe3e6;border-radius:9px}
+
+.lines-box{border:1px solid var(--line,#e3e6e8);border-radius:10px;overflow:hidden;background:#fff}
+.po-line{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:9px 11px;border-bottom:1px solid var(--line,#e3e6e8);font-size:12.5px}
+.po-line:last-child{border-bottom:0}
+.po-line-main{flex:1;min-width:0}
+.po-line-desc{display:block;overflow-wrap:anywhere}
+.po-line-code{display:block;font-size:11px;color:var(--ink-faint,#78868c);margin-top:2px}
+.po-line-qty{flex:0 0 auto;text-align:right;font-weight:700;font-size:15px;line-height:1.1;
+  font-variant-numeric:tabular-nums}
+.po-line-of{display:block;font-weight:500;font-size:10.5px;color:var(--ink-faint,#78868c)}
+.po-foot{font-size:11px;color:var(--ink-faint,#78868c);margin:7px 2px 0}

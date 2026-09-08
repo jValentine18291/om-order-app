@@ -829,6 +829,76 @@ app.get("/api/parts-search", async (req, res) => {
   }
 });
 
+// ---- Purchase orders --------------------------------------------------------
+// The ORDER is AutoCount's and is only ever read. What the app adds is the one
+// thing AutoCount cannot know: whether Iris has actually emailed the PO to the
+// supplier. She raises it there, consolidates it, and sends it herself, and
+// nothing about that email reaches the accounts.
+//
+// Everyone reads. Only the Purchaser and Admin write - the same accident guard
+// as part locations, and for the same reason: the role comes from the browser,
+// so it stops the wrong person ticking something by mistake rather than
+// stopping somebody determined.
+const PO_WRITE_ROLES = ["purchaser", "admin"];
+
+app.get("/api/purchase-orders", async (req, res) => {
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") return res.json({ supported: false, orders: [] });
+    const acRepo = require("./data/autocountRepo");
+    const orders = await acRepo.listPurchaseOrders({ scope: String(req.query.scope || "open") });
+    // null means the PO tables are not the shape this expects. Saying so is
+    // the honest answer; an empty list would read as "no purchase orders",
+    // which is a different problem with a different fix.
+    if (!orders) return res.json({ supported: false, orders: [] });
+
+    const tracking = data.purchaseOrders.tracking(orders.map((o) => o.doc_no));
+    res.json({
+      supported: true,
+      orders: orders.map((o) => {
+        const t = tracking.get(o.doc_no);
+        return { ...o, status: (t && t.status) || "NOT_ORDERED",
+                 ordered_at: (t && t.ordered_at) || "",
+                 updated_by: (t && t.updated_by) || "" };
+      }),
+    });
+  } catch (err) {
+    console.error("[GET /api/purchase-orders]", err.message);
+    res.json({ supported: false, orders: [], error: "Could not read purchase orders." });
+  }
+});
+
+app.get("/api/purchase-orders/:docNo", async (req, res) => {
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") return res.json({ supported: false });
+    const acRepo = require("./data/autocountRepo");
+    const po = await acRepo.getPurchaseOrder(req.params.docNo);
+    if (!po) return res.json({ supported: false });
+    if (!po.found) return res.status(404).json({ error: "No such purchase order in AutoCount." });
+    const t = data.purchaseOrders.status(po.doc_no);
+    res.json({ supported: true, ...po, status: t.status, ordered_at: t.ordered_at || "",
+               updated_by: t.updated_by || "", updated_at: t.updated_at || "" });
+  } catch (err) {
+    console.error("[GET /api/purchase-orders/:docNo]", err.message);
+    res.status(500).json({ error: "Could not read that purchase order." });
+  }
+});
+
+app.patch("/api/purchase-orders/:docNo", (req, res) => {
+  try {
+    const { status, who = "", role = "" } = req.body || {};
+    if (!PO_WRITE_ROLES.includes(String(role || "").toLowerCase())) {
+      return res.status(403).json({ error: "Only Purchaser or Admin can change a purchase order." });
+    }
+    res.json(data.purchaseOrders.setStatus(req.params.docNo, status, who));
+  } catch (err) {
+    if (err.status === 400) return res.status(400).json({ error: err.message });
+    console.error("[PATCH /api/purchase-orders/:docNo]", err.message);
+    res.status(500).json({ error: "Could not save that." });
+  }
+});
+
 // What is on a shelf. Read-only, and open to everyone: knowing where a part
 // lives is the whole point of recording it, and a technician looking for one
 // is exactly who needs the answer.

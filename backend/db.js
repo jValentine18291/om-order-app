@@ -688,6 +688,24 @@ try {
 // AutoCount - no write-back, no permissions to worry about, and it travels
 // with the nightly backup like everything else in this file.
 db.exec(`
+  -- Whether a Purchase Order has actually been SENT to the supplier.
+  --
+  -- AutoCount has no idea: Iris raises the PO there, consolidates it, and then
+  -- emails it herself, and nothing about that email reaches the accounts. So
+  -- the one fact nobody else holds is kept here, against AutoCount's own
+  -- document number.
+  --
+  -- A PO with no row here is "not ordered yet". That way the table only ever
+  -- holds the ones something has happened to, and a PO raised in AutoCount
+  -- this afternoon needs nothing doing to appear correctly.
+  CREATE TABLE IF NOT EXISTS po_tracking (
+    doc_no     TEXT PRIMARY KEY,        -- AutoCount's PO number, exactly
+    status     TEXT NOT NULL DEFAULT 'NOT_ORDERED',
+    ordered_at TEXT,                    -- when Iris said she had sent it
+    updated_by TEXT DEFAULT '',
+    updated_at TEXT DEFAULT (datetime('now','localtime'))
+  );
+
   CREATE TABLE IF NOT EXISTS part_notes (
     item_code  TEXT PRIMARY KEY,        -- exact AutoCount ItemCode
     note       TEXT NOT NULL,

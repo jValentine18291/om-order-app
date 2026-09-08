@@ -895,6 +895,61 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
   return getSlip(slipNumber);
 }
 
+// ---- Purchase orders: the part AutoCount does not know ----------------------
+// Only one fact so far - whether the PO has been sent to the supplier. The
+// order itself, its lines and quantities are AutoCount's and are never copied
+// here: two copies of the same list is two lists that disagree.
+const PO_STATUSES = new Set(["NOT_ORDERED", "ORDERED"]);
+
+// Absent means NOT_ORDERED. A PO raised in AutoCount an hour ago has no row
+// here and reads correctly anyway, which is what stops this table needing to
+// be kept in step with theirs.
+function poTracking(docNos) {
+  const list = [...new Set((docNos || []).map((d) => String(d || "").trim()).filter(Boolean))];
+  const out = new Map();
+  for (let i = 0; i < list.length; i += 200) {
+    const chunk = list.slice(i, i + 200);
+    const rows = db.prepare(
+      `SELECT * FROM po_tracking WHERE doc_no IN (${chunk.map(() => "?").join(",")})`
+    ).all(...chunk);
+    for (const r of rows) out.set(r.doc_no, r);
+  }
+  return out;
+}
+
+function poStatus(docNo) {
+  const row = db.prepare("SELECT * FROM po_tracking WHERE doc_no = ?").get(String(docNo || "").trim());
+  return row || { doc_no: String(docNo || "").trim(), status: "NOT_ORDERED", ordered_at: null,
+                  updated_by: "", updated_at: null };
+}
+
+function setPoStatus(docNo, status, who = "") {
+  const no = String(docNo || "").trim();
+  if (!no) { const e = new Error("Which purchase order?"); e.status = 400; throw e; }
+  const st = String(status || "").toUpperCase();
+  if (!PO_STATUSES.has(st)) { const e = new Error("Invalid purchase order status."); e.status = 400; throw e; }
+  if (!String(who || "").trim()) {
+    const e = new Error("Missing initials, so the change could not be traced."); e.status = 400; throw e;
+  }
+  // The date it was SENT is worth keeping even if the status is later put
+  // back: "when did we order this" is asked of a PO long after anyone
+  // remembers, and re-ticking it should not invent a new date.
+  const existing = db.prepare("SELECT ordered_at FROM po_tracking WHERE doc_no = ?").get(no);
+  const orderedAt = st === "ORDERED"
+    ? (existing && existing.ordered_at) || new Date().toISOString().slice(0, 10)
+    : (existing && existing.ordered_at) || null;
+  db.prepare(
+    `INSERT INTO po_tracking (doc_no, status, ordered_at, updated_by, updated_at)
+     VALUES (?, ?, ?, ?, datetime('now','localtime'))
+     ON CONFLICT(doc_no) DO UPDATE SET
+       status = excluded.status,
+       ordered_at = excluded.ordered_at,
+       updated_by = excluded.updated_by,
+       updated_at = excluded.updated_at`
+  ).run(no, st, orderedAt, String(who).trim());
+  return poStatus(no);
+}
+
 // ---- Where a machine is, and what that makes the slip -----------------------
 //
 // John's workflow, drawn out:
@@ -1051,6 +1106,7 @@ function techniciansForMachine(machineId) {
 }
 
 const slips = {
+  poTracking, poStatus, setPoStatus, PO_STATUSES,
   createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, setMachineState, setAllMachineStates, setMachineDisposal, deriveSlipStatus, techniciansForMachine, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 

@@ -61,7 +61,9 @@ function formatDate(ts) {
 }
 
 // ---- Screen navigation -----------------------------------------------------
-const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip", "purchase", "quote", "ipl", "bulk"];
+// "purchase" is the part-requests list (Orders); "po" and "po-detail" are the
+// supplier purchase orders. Different things, named apart on purpose.
+const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip", "purchase", "quote", "ipl", "bulk", "po", "po-detail"];
 
 // ---- Who is using this phone ------------------------------------------------
 // Staff pick their name once per phone; the choice is remembered and decides
@@ -215,13 +217,15 @@ $("lang-toggle").addEventListener("click", () => {
 function applyRoleToHome() {
   const role = getRole();
   // Which home functions each account sees (per John's mapping, 28 Jul 2026):
+  // "po" is on every list: what is on order and when it lands is the answer to
+  // a question anyone in the building gets asked. Only Iris can change it.
   const ROLE_FUNCTIONS = {
-    sales: ["new", "close", "view", "find", "ipl", "quote", "bulk"],
-    tech: ["open", "view", "find", "ipl"],
+    sales: ["new", "close", "view", "find", "ipl", "quote", "bulk", "po"],
+    tech: ["open", "view", "find", "ipl", "po"],
     // Purchaser is Sales plus the orders list, so it inherits the
     // IPLs too rather than being a separate shorter list.
-    purchaser: ["new", "close", "view", "find", "ipl", "quote", "bulk", "requests"],
-    admin: ["new", "open", "close", "view", "find", "ipl", "quote", "bulk", "requests"],
+    purchaser: ["new", "close", "view", "find", "ipl", "quote", "bulk", "requests", "po"],
+    admin: ["new", "open", "close", "view", "find", "ipl", "quote", "bulk", "requests", "po"],
   };
   // An unknown group shows nothing rather than defaulting to Sales - silently
   // handing out someone else's functions is worse than an empty screen.
@@ -272,7 +276,12 @@ function showScreen(name) {
   // Home link visible everywhere except home/role
   $("home-link").style.display = (name === "home" || name === "role") ? "none" : "inline-flex";
   // And the way back one step, on the only screen that has one.
-  $("top-back").style.display = name === "slip" ? "inline-flex" : "none";
+  // One step back, on the screens that have somewhere to go: the slip screen
+  // returns to its list, and one purchase order returns to the list of them.
+  // The label says WHICH list - "← Slips" on a purchase order was simply wrong.
+  const back = name === "slip" ? "← Slips" : name === "po-detail" ? "← Purchase Orders" : "";
+  $("top-back").style.display = back ? "inline-flex" : "none";
+  if (back) $("top-back-txt").textContent = back;
   // The pad is sized when its popup opens, not here — it measures zero while
   // the popup is closed, whatever screen is showing.
   // Leaving the working context: hide the machine modal and stop any camera.
@@ -1726,7 +1735,13 @@ function renderSlipList() {
   );
 }
 $("os-search").addEventListener("input", renderSlipList);
-$("top-back").addEventListener("click", enterOpenService);
+// One button, two screens: it goes back to whichever list the current screen
+// came from. Hard-wired to Open Service, it took a purchase order back to
+// the workshop's slip list.
+$("top-back").addEventListener("click", () => {
+  if ($("screen-po-detail").classList.contains("active")) enterPurchaseOrders();
+  else enterOpenService();
+});
 
 async function onSlipChosen(slipNumber) {
   if (!slipNumber) return;
@@ -4301,6 +4316,7 @@ document.querySelectorAll(".home-btn").forEach((b) =>
     else if (go === "requests") { enterPurchaser(); }
     else if (go === "bulk") { enterBulkOrder(); }
     else if (go === "ipl") { enterIpl(); }
+    else if (go === "po") { enterPurchaseOrders(); }
   })
 );
 $("home-link").addEventListener("click", goHome);
@@ -4842,6 +4858,161 @@ function wireShelfEdit(container, part, onSaved) {
   const btn = container.querySelector("[data-shelf-edit]");
   if (btn) btn.addEventListener("click", () => openLocationModal(part, onSaved));
 }
+
+// ---- Purchase orders --------------------------------------------------------
+// AutoCount owns the order. The app adds the one thing it cannot know - whether
+// Iris has actually emailed the PO to the supplier - and shows the two together
+// so nobody has to hold half the answer in their head.
+//
+// Everyone reads; only the Purchaser and Admin tick. Same accident guard as
+// part locations, and the route refuses regardless of what this shows.
+const PO_STATUS_LABEL = { NOT_ORDERED: "Not ordered yet", ORDERED: "Ordered" };
+
+function canSetPoStatus() {
+  return ["purchaser", "admin"].includes(getRole());
+}
+
+let poScope = "open";
+let poOrders = [];
+
+async function enterPurchaseOrders() {
+  showScreen("po");
+  $("po-q").value = "";
+  setPoScope(poScope);
+}
+
+function setPoScope(scope) {
+  poScope = scope === "all" ? "all" : "open";
+  document.querySelectorAll("#po-scope [data-poscope]").forEach((b) =>
+    b.classList.toggle("on", b.dataset.poscope === poScope));
+  loadPurchaseOrders();
+}
+
+async function loadPurchaseOrders() {
+  const box = $("po-list");
+  box.innerHTML = `<div class="fp-loading">Reading AutoCount…</div>`;
+  try {
+    const data = await api(`/api/purchase-orders?scope=${poScope}`);
+    if (!data.supported) {
+      // Said plainly rather than as an empty list: "no purchase orders" and
+      // "this server cannot read them" want completely different things doing.
+      box.innerHTML = `<div class="fp-empty">Purchase orders cannot be read from AutoCount on this server.</div>`;
+      poOrders = [];
+      return;
+    }
+    poOrders = data.orders || [];
+    renderPurchaseOrders();
+  } catch (e) {
+    box.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Could not load purchase orders")}</div>`;
+  }
+}
+
+function renderPurchaseOrders() {
+  const q = ($("po-q").value || "").trim().toLowerCase();
+  const list = poOrders.filter((o) =>
+    !q || o.doc_no.toLowerCase().includes(q) || (o.supplier || "").toLowerCase().includes(q));
+  const box = $("po-list");
+  if (!list.length) {
+    box.innerHTML = `<div class="fp-empty">${q ? "No purchase orders match" : "No purchase orders"}</div>`;
+    return;
+  }
+  box.innerHTML = list.map((o) => `
+    <button type="button" class="po-card po-${escapeAttr(o.status)}" data-po="${escapeAttr(o.doc_no)}">
+      <div class="po-top">
+        <strong>${escapeHtml(o.doc_no)}</strong>
+        <span class="po-pill po-p-${escapeAttr(o.status)}">${escapeHtml(PO_STATUS_LABEL[o.status] || o.status)}</span>
+      </div>
+      <div class="po-sup">${escapeHtml(o.supplier || "—")}</div>
+      <div class="po-sub"><span>${o.lines} line${o.lines === 1 ? "" : "s"}</span>${
+        o.date ? ` · <span>${escapeHtml(formatDate(o.date))}</span>` : ""} · <span>${
+        o.outstanding_qty > 0 ? `${trimNum(o.outstanding_qty)} outstanding` : "all received"}</span></div>
+    </button>`).join("");
+  box.querySelectorAll(".po-card").forEach((b) =>
+    b.addEventListener("click", () => openPurchaseOrder(b.dataset.po)));
+}
+
+// Quantities are whole most of the time and fractional for the cut goods, and
+// "40.00" reads worse than "40" on a list somebody is scanning.
+function trimNum(n) {
+  const v = Number(n) || 0;
+  return Number.isInteger(v) ? String(v) : v.toFixed(2);
+}
+
+async function openPurchaseOrder(docNo) {
+  showScreen("po-detail");
+  $("pod-no").textContent = docNo;
+  $("pod-head").innerHTML = `<div class="fp-loading">Reading AutoCount…</div>`;
+  $("pod-track").innerHTML = "";
+  $("pod-lines").innerHTML = "";
+  try {
+    const po = await api(`/api/purchase-orders/${encodeURIComponent(docNo)}`);
+    if (!po.supported) {
+      $("pod-head").innerHTML = `<div class="fp-empty">Purchase orders cannot be read from AutoCount on this server.</div>`;
+      return;
+    }
+    renderPurchaseOrder(po);
+  } catch (e) {
+    $("pod-head").innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Could not load it")}</div>`;
+  }
+}
+
+function renderPurchaseOrder(po) {
+  $("pod-head").innerHTML = `
+    <div class="fp-row"><span class="fp-lbl">Supplier</span><span class="fp-val">${escapeHtml(po.supplier || "—")}</span></div>
+    ${po.date ? `<div class="fp-row"><span class="fp-lbl">Raised</span><span class="fp-val">${escapeHtml(formatDate(po.date))}</span></div>` : ""}
+    <div class="fp-row"><span class="fp-lbl">Lines</span><span class="fp-val">${po.lines}</span></div>
+    <div class="fp-row"><span class="fp-lbl">Outstanding</span><span class="fp-val">${trimNum(po.outstanding_qty)} / ${trimNum(po.ordered_qty)}</span></div>
+    ${po.cancelled ? `<div class="fp-row"><span class="fp-lbl">Cancelled</span><span class="fp-val">in AutoCount</span></div>` : ""}`;
+
+  const label = PO_STATUS_LABEL[po.status] || po.status;
+  const next = po.status === "ORDERED" ? "NOT_ORDERED" : "ORDERED";
+  $("pod-track").innerHTML = `
+    <div class="po-track">
+      <div class="fp-row"><span class="fp-lbl">Status</span>
+        <span class="fp-val"><span class="po-pill po-p-${escapeAttr(po.status)}">${escapeHtml(label)}</span></span></div>
+      ${po.ordered_at ? `<div class="fp-row"><span class="fp-lbl">Sent to supplier</span><span class="fp-val">${escapeHtml(formatDate(po.ordered_at))}</span></div>` : ""}
+      ${po.updated_by ? `<div class="po-who">Last changed by ${escapeHtml(po.updated_by)}${po.updated_at ? " · " + escapeHtml(po.updated_at) : ""}</div>` : ""}
+      ${canSetPoStatus()
+        ? `<button type="button" class="btn-primary" id="pod-toggle" style="width:100%;margin-top:10px">${
+            po.status === "ORDERED" ? "Not ordered after all" : "Mark as ordered"}</button>`
+        : `<div class="po-readonly">Only the Purchaser can change this.</div>`}
+    </div>`;
+  const btn = $("pod-toggle");
+  if (btn) btn.addEventListener("click", () => setPurchaseOrderStatus(po.doc_no, next, btn));
+
+  $("pod-lines").innerHTML = `<div class="lines-box">` + (po.items || []).map((it) => `
+    <div class="po-line">
+      <span class="po-line-main">
+        <span class="po-line-desc">${escapeHtml(it.description)}</span>
+        <span class="po-line-code mono">${escapeHtml(it.item_code)}</span>
+      </span>
+      <span class="po-line-qty">${trimNum(it.outstanding)}<span class="po-line-of">/ ${trimNum(it.qty)}${
+        it.uom ? " " + escapeHtml(it.uom) : ""}</span></span>
+    </div>`).join("") + `</div>
+    <p class="po-foot">Outstanding / ordered, read from AutoCount.</p>`;
+}
+
+async function setPurchaseOrderStatus(docNo, status, btn) {
+  btn.disabled = true;
+  try {
+    await api(`/api/purchase-orders/${encodeURIComponent(docNo)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status, who: initialsFor(getUser()), role: getRole() }),
+    });
+    toast(status === "ORDERED" ? "Marked as ordered" : "Put back to not ordered", "ok");
+    await openPurchaseOrder(docNo);
+  } catch (e) {
+    toast(e.message, "err");
+    btn.disabled = false;
+  }
+}
+
+$("po-scope").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-poscope]");
+  if (b) setPoScope(b.dataset.poscope);
+});
+$("po-q").addEventListener("input", () => renderPurchaseOrders());
 
 // ---- Change location (Purchaser and Admin) ----------------------------------
 // This WRITES to AutoCount and overwrites what is there - a location is meant

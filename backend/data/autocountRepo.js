@@ -647,6 +647,14 @@ async function purchaseOrderShape() {
       outstanding, transferred,
       cancelled: has(master, "Cancelled"),
       docDate: has(master, "DocDate"),
+      // For the Purchase Orders screen. All optional: a column that is not
+      // there simply does not appear, rather than taking the whole screen down
+      // with it. AutoCount names the supplier differently by version, so both
+      // the readable name and the code are looked for.
+      creditorName: has(master, "CompanyName") || has(master, "CreditorName"),
+      creditorCode: has(master, "CreditorCode") || has(master, "SupplierCode"),
+      dtlDesc: has(detail, "Description") || has(detail, "Desc"),
+      dtlUom: has(detail, "UOM"),
     };
   } catch (e) {
     console.error("[purchase orders] could not read the schema:", e.message);
@@ -654,6 +662,126 @@ async function purchaseOrderShape() {
   }
   return poShape;
 }
+
+// The Purchase Orders themselves, for the screen that tracks them.
+//
+// Read-only, like everything else here. AutoCount owns what was ordered; the
+// app keeps only what AutoCount has nowhere to put - whether Iris has actually
+// sent the PO, and later which shipment each line is on.
+//
+// "open" means something is still outstanding on it. A PO whose every line has
+// been received has nothing left to track and would only bury the ones that
+// do; "all" is there for looking one up after the fact.
+function poQtyExpr(shape) {
+  return shape.outstanding
+    ? `d.[${shape.outstanding}]`
+    : shape.transferred
+      ? `(d.[${shape.dtlQty}] - ISNULL(d.[${shape.transferred}], 0))`
+      : `d.[${shape.dtlQty}]`;
+}
+
+async function listPurchaseOrders({ scope = "open", limit = 200 } = {}) {
+  const shape = await purchaseOrderShape();
+  if (!shape) return null;
+  const cap = Math.max(1, Math.min(500, Number(limit) || 200));
+  const qty = poQtyExpr(shape);
+  const notCancelled = shape.cancelled ? `AND m.[${shape.cancelled}] = 'F'` : "";
+  // HAVING rather than WHERE: outstanding is a per-line figure and the
+  // question is about the whole order.
+  const openOnly = scope === "all" ? "" : `HAVING SUM(${qty}) > 0`;
+
+  const rows = await query(
+    `SELECT TOP ${cap}
+            m.[${shape.mNo}] AS DocNo,
+            ${shape.docDate ? `m.[${shape.docDate}]` : "NULL"} AS DocDate,
+            ${shape.creditorName ? `m.[${shape.creditorName}]` : "NULL"} AS Supplier,
+            ${shape.creditorCode ? `m.[${shape.creditorCode}]` : "NULL"} AS SupplierCode,
+            COUNT(*) AS Lines,
+            SUM(d.[${shape.dtlQty}]) AS Ordered,
+            SUM(${qty}) AS Outstanding
+       FROM PO m
+       JOIN PODtl d ON m.[${shape.mDoc}] = d.[${shape.dtlDoc}]
+      WHERE 1 = 1 ${notCancelled}
+      GROUP BY m.[${shape.mNo}]${shape.docDate ? `, m.[${shape.docDate}]` : ""}${
+        shape.creditorName ? `, m.[${shape.creditorName}]` : ""}${
+        shape.creditorCode ? `, m.[${shape.creditorCode}]` : ""}
+      ${openOnly}
+      ORDER BY ${shape.docDate ? `m.[${shape.docDate}] DESC, ` : ""}m.[${shape.mNo}] DESC`
+  );
+  return rows.map(mapPoRow);
+}
+
+function mapPoRow(r) {
+  return {
+    doc_no: String(r.DocNo || "").trim(),
+    date: r.DocDate ? String(r.DocDate).slice(0, 10) : "",
+    supplier: (r.Supplier && String(r.Supplier).trim()) || (r.SupplierCode && String(r.SupplierCode).trim()) || "",
+    supplier_code: (r.SupplierCode && String(r.SupplierCode).trim()) || "",
+    lines: Number(r.Lines) || 0,
+    ordered_qty: Number(r.Ordered) || 0,
+    outstanding_qty: Number(r.Outstanding) || 0,
+  };
+}
+
+// One PO with its lines. Returns null when the tables are not the shape this
+// expects, and undefined-ish {} when there is simply no such PO - the caller
+// tells those apart so it can say "AutoCount is not set up" rather than "no
+// such order", which send someone to two very different places.
+async function getPurchaseOrder(docNo) {
+  const shape = await purchaseOrderShape();
+  if (!shape) return null;
+  const no = String(docNo || "").trim();
+  if (!no) return { found: false };
+  const qty = poQtyExpr(shape);
+
+  const head = await query(
+    `SELECT TOP 1
+            m.[${shape.mNo}] AS DocNo,
+            ${shape.docDate ? `m.[${shape.docDate}]` : "NULL"} AS DocDate,
+            ${shape.creditorName ? `m.[${shape.creditorName}]` : "NULL"} AS Supplier,
+            ${shape.creditorCode ? `m.[${shape.creditorCode}]` : "NULL"} AS SupplierCode,
+            ${shape.cancelled ? `m.[${shape.cancelled}]` : "'F'"} AS Cancelled
+       FROM PO m
+      WHERE m.[${shape.mNo}] = @no`,
+    { no }
+  );
+  if (!head.length) return { found: false };
+
+  const lines = await query(
+    `SELECT d.[${shape.dtlItem}] AS ItemCode,
+            ${shape.dtlDesc ? `d.[${shape.dtlDesc}]` : "NULL"} AS Descr,
+            ${shape.dtlUom ? `d.[${shape.dtlUom}]` : "NULL"} AS Uom,
+            d.[${shape.dtlQty}] AS Qty,
+            ${qty} AS Outstanding
+       FROM PODtl d
+       JOIN PO m ON m.[${shape.mDoc}] = d.[${shape.dtlDoc}]
+      WHERE m.[${shape.mNo}] = @no
+      ORDER BY d.[${shape.dtlItem}]`,
+    { no }
+  );
+
+  const h = head[0];
+  return {
+    found: true,
+    ...mapPoRow({
+      DocNo: h.DocNo, DocDate: h.DocDate, Supplier: h.Supplier, SupplierCode: h.SupplierCode,
+      Lines: lines.length,
+      Ordered: lines.reduce((n, l) => n + (Number(l.Qty) || 0), 0),
+      Outstanding: lines.reduce((n, l) => n + (Number(l.Outstanding) || 0), 0),
+    }),
+    cancelled: String(h.Cancelled || "F").toUpperCase() === "T",
+    items: lines.map((l) => ({
+      item_code: String(l.ItemCode || "").trim(),
+      description: (l.Descr && String(l.Descr).trim()) || String(l.ItemCode || "").trim(),
+      uom: (l.Uom && String(l.Uom).trim()) || "",
+      qty: Number(l.Qty) || 0,
+      outstanding: Number(l.Outstanding) || 0,
+    })),
+  };
+}
+
+module.exports.listPurchaseOrders = listPurchaseOrders;
+module.exports.getPurchaseOrder = getPurchaseOrder;
 
 // Outstanding quantity per item code, plus the PO numbers it sits on.
 // Returns a Map, or null when Purchase Orders cannot be read.
