@@ -655,6 +655,16 @@ async function purchaseOrderShape() {
       creditorCode: has(master, "CreditorCode") || has(master, "SupplierCode"),
       dtlDesc: has(detail, "Description") || has(detail, "Desc"),
       dtlUom: has(detail, "UOM"),
+      // The order the lines are IN. AutoCount keeps its own sequence, and that
+      // is the order the PO was entered and printed in - which is the order
+      // anyone checking a screen against the paper copy expects.
+      //
+      // Seq first, because it is the one that follows a line if the order is
+      // rearranged afterwards. DtlKey last: it is the row's identity rather
+      // than its position, so it only agrees with the printed order while
+      // nobody has reordered anything - still far better than alphabetical.
+      dtlSeq: has(detail, "Seq") || has(detail, "LineNo") || has(detail, "Numbering")
+              || has(detail, "RowNo") || has(detail, "DtlKey"),
     };
   } catch (e) {
     console.error("[purchase orders] could not read the schema:", e.message);
@@ -765,8 +775,12 @@ async function getPurchaseOrder(docNo) {
   );
   if (!head.length) return { found: false };
 
+  // Falls back to the item code only when there is no sequence column at all -
+  // some order beats none, and it is at least stable between two loads.
+  const lineOrder = shape.dtlSeq ? `d.[${shape.dtlSeq}]` : `d.[${shape.dtlItem}]`;
   const lines = await query(
-    `SELECT d.[${shape.dtlItem}] AS ItemCode,
+    `SELECT ${shape.dtlSeq ? `d.[${shape.dtlSeq}]` : "NULL"} AS Seq,
+            d.[${shape.dtlItem}] AS ItemCode,
             ${shape.dtlDesc ? `d.[${shape.dtlDesc}]` : "NULL"} AS Descr,
             ${shape.dtlUom ? `d.[${shape.dtlUom}]` : "NULL"} AS Uom,
             d.[${shape.dtlQty}] AS Qty,
@@ -775,7 +789,7 @@ async function getPurchaseOrder(docNo) {
        JOIN PO m ON m.[${shape.mDoc}] = d.[${shape.dtlDoc}]
       WHERE m.[${shape.mNo}] = @no
         AND ${poRealLine(shape)}
-      ORDER BY d.[${shape.dtlItem}]`,
+      ORDER BY ${lineOrder}`,
     { no }
   );
 
@@ -790,6 +804,11 @@ async function getPurchaseOrder(docNo) {
     }),
     cancelled: String(h.Cancelled || "F").toUpperCase() === "T",
     items: lines.map((l) => ({
+      // Carried through because a PO can hold the same item twice - a part
+      // ordered on two lines at two prices is a real thing - so the item code
+      // alone does not identify a line. Stage 2 needs to point a shipment at
+      // ONE of them.
+      seq: l.Seq === null || l.Seq === undefined ? null : Number(l.Seq),
       item_code: String(l.ItemCode || "").trim(),
       description: (l.Descr && String(l.Descr).trim()) || String(l.ItemCode || "").trim(),
       uom: (l.Uom && String(l.Uom).trim()) || "",
@@ -799,6 +818,10 @@ async function getPurchaseOrder(docNo) {
   };
 }
 
+// Exported for tools/show-po-shape.js, which prints what was discovered so a
+// wrong guess about a column name is one command to find rather than
+// something noticed weeks later on a screen that looks subtly wrong.
+module.exports.purchaseOrderShape = purchaseOrderShape;
 module.exports.listPurchaseOrders = listPurchaseOrders;
 module.exports.getPurchaseOrder = getPurchaseOrder;
 
