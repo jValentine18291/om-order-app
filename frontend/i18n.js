@@ -76,6 +76,9 @@
     "Singapore": "新加坡",
     "Shipments": "货运",
     "All suppliers": "所有供应商",
+    "Everything on this order is already on a shipment": "此订单的货品已全部安排货运",
+    "Hide lines already on a shipment": "隐藏已安排货运的项目",
+    "Nothing on it yet": "尚未添加货品",
     "← Shipments": "← 货运",
     "What is on its way, and when it lands": "在途货物及到货日期",
     "Shipment · supplier invoice": "货运 · 供应商发票",
@@ -456,6 +459,9 @@
     // Tube types only, never "Tube (.+)": that turned the customer "Tube Test
     // Co" into "喉管 Test Co" on the slip list.
     [/^Tube (\d{2,4}[a-z]?|S\d{2,4})$/, "喉管 $1"],
+
+    // The picker offering back the lines it filtered out.
+    [/^Show (\d+) lines? already on a shipment$/, "显示已安排货运的 $1 个项目"],
 
     // ---- IPL ----
     // These carry a machine type inside them, so the type is looked up in DICT

@@ -881,7 +881,10 @@ app.get("/api/purchase-orders/:docNo", async (req, res) => {
     // outstanding figure rather than subtracted from it: the two are different
     // facts - what the supplier still owes, and what has been claimed for a
     // container - and quietly netting them off would hide whichever is wrong.
-    const allocated = data.shipments.allocatedByPo([po.doc_no]);
+    //
+    // exclude_shipment is sent by the form that is editing a shipment, so that
+    // shipment's own lines do not come back looking like somebody else's claim.
+    const allocated = data.shipments.allocatedByPo([po.doc_no], req.query.exclude_shipment);
     res.json({
       supported: true, ...po,
       items: (po.items || []).map((it) => ({

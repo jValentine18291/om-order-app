@@ -1045,10 +1045,17 @@ function getShipment(id) {
 // AutoCount's own outstanding figure drops to match, so counting them here as
 // well would subtract them twice - and a cancelled shipment never carried
 // anything.
-function allocatedByPo(docNos) {
+//
+// exceptShipmentId leaves one shipment out of the sum. That is for the screen
+// that is editing that very shipment: its own lines are in front of you on the
+// form, and counting them here as well would make a line you put on yourself
+// look like a line somebody else had already claimed.
+function allocatedByPo(docNos, exceptShipmentId) {
   const list = [...new Set((docNos || []).map((d) => String(d || "").trim()).filter(Boolean))];
   const out = new Map();
   if (!list.length) return out;
+  const except = Number(exceptShipmentId);
+  const skip = Number.isFinite(except) && except > 0;
   for (let i = 0; i < list.length; i += 200) {
     const chunk = list.slice(i, i + 200);
     const rows = db.prepare(
@@ -1057,8 +1064,9 @@ function allocatedByPo(docNos) {
          JOIN shipments s ON s.id = l.shipment_id
         WHERE l.po_no IN (${chunk.map(() => "?").join(",")})
           AND s.status IN (${SHIPMENT_LIVE.map(() => "?").join(",")})
+          ${skip ? "AND s.id <> ?" : ""}
         GROUP BY l.po_no, l.po_seq, l.item_code`
-    ).all(...chunk, ...SHIPMENT_LIVE);
+    ).all(...chunk, ...SHIPMENT_LIVE, ...(skip ? [except] : []));
     for (const r of rows) {
       // Keyed on the LINE, not the item: the same part can sit on two lines of
       // one PO and they are allocated separately.

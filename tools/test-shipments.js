@@ -166,6 +166,26 @@ const sealAlloc = sh.allocatedByPo(["PO-2608-009"]);
 check("the two seals stay apart",
   [sealAlloc.get("PO-2608-009#1"), sealAlloc.get("PO-2608-009#2")], [10, 2]);
 
+console.log("\n-- the shipment being edited is left out of the sum --");
+// The picker hides a PO line that is already fully spoken for. Iris opening
+// her OWN shipment to correct a quantity must still see the line, so the
+// shipment being edited does not count against itself.
+const mine = sh.create({
+  invoice_no: "INV-EDIT", status: "SHIPPED", destination: "EUNOS",
+  lines: [line("PO-EDIT", 1, "A", 6, "GASKET")],
+}, "I");
+sh.create({
+  invoice_no: "INV-OTHER", status: "SHIPPED", destination: "EUNOS",
+  lines: [line("PO-EDIT", 1, "A", 2, "GASKET")],
+}, "I");
+check("everyone's, added up", sh.allocatedByPo(["PO-EDIT"]).get("PO-EDIT#1"), 8);
+check("everyone else's, editing mine",
+  sh.allocatedByPo(["PO-EDIT"], mine.id).get("PO-EDIT#1"), 2);
+check("a shipment id that is not a number changes nothing",
+  sh.allocatedByPo(["PO-EDIT"], "").get("PO-EDIT#1"), 8);
+check("nor does one for a shipment that does not exist",
+  sh.allocatedByPo(["PO-EDIT"], 99999).get("PO-EDIT#1"), 8);
+
 console.log("\n-- a line with no quantity is not on the shipment --");
 // The picker's way of saying "not this one", rather than a zero to store.
 const picked = sh.create({

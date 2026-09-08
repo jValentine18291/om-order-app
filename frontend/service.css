@@ -2366,4 +2366,25 @@ input.spk-qty{width:84px;flex:0 0 auto;text-align:right;
   border:1.5px solid var(--border-2,#d7dee1);border-radius:8px;
   padding:0 10px;height:40px;font:inherit;font-size:15px;
   font-variant-numeric:tabular-nums}
-#she-lines .po-line .remove{flex:0 0 auto;margin-left:8px}
+/* The button that takes a line off. styles.css dresses this up under
+   ".line .remove" and a shipment line is a ".po-line", so it was falling
+   through to the browser's own button chrome: a grey rectangle with an
+   unsized icon in it, which reads as "a box" rather than "delete this".
+   Red, and the trash icon at a size you can see, says what it does. */
+#she-lines .po-line .remove{
+  flex:0 0 auto;margin-left:8px;padding:0;cursor:pointer;
+  width:38px;height:38px;border-radius:10px;display:grid;place-items:center;
+  background:var(--red-tint,#fae8e5);color:var(--red,#c5402f);
+  border:1px solid rgba(197,64,47,.25);
+}
+#she-lines .po-line .remove svg{width:18px;height:18px}
+#she-lines .po-line .remove:active{background:var(--red,#c5402f);color:#fff}
+
+/* Putting the filtered-out lines back. A quiet link, not a button competing
+   with "Add to shipment". */
+.spk-showall{
+  display:block;width:100%;margin-top:10px;padding:9px 0;
+  background:none;border:none;cursor:pointer;
+  font:inherit;font-size:12.5px;font-weight:600;
+  color:var(--primary,#0a7f86);text-decoration:underline;
+}

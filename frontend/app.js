@@ -5132,6 +5132,9 @@ async function saveShipment() {
 // ---- picking the lines --------------------------------------------------------
 let spkOrders = [];
 let spkPo = null;
+// Lines already spoken for are left out. This puts them back, for the day a
+// supplier ships more than was ordered.
+let spkShowAll = false;
 
 async function openLinePicker() {
   $("spk-sub").textContent = shipDraft.invoice_no || "New shipment";
@@ -5186,41 +5189,83 @@ async function openPickerLines(docNo) {
   $("spk-po-step").style.display = "none";
   $("spk-line-step").style.display = "";
   $("spk-lines").innerHTML = `<div class="fp-loading">Reading AutoCount…</div>`;
+  spkShowAll = false;
   try {
-    spkPo = await api(`/api/purchase-orders/${encodeURIComponent(docNo)}`);
+    // The shipment being edited is left out of the "already on a shipment"
+    // figure: its own lines are on the form behind this modal, and counting
+    // them here would make Iris's own work look like somebody else's.
+    const ex = shipDraft && shipDraft.id ? `?exclude_shipment=${encodeURIComponent(shipDraft.id)}` : "";
+    spkPo = await api(`/api/purchase-orders/${encodeURIComponent(docNo)}${ex}`);
     $("spk-sub").textContent = `${docNo} · ${spkPo.supplier || ""}`;
-    // What is left to put on a ship: outstanding, less whatever is already
-    // claimed by another shipment that has not arrived. Shown as a suggestion
-    // in the box, not enforced - a supplier who ships more than was ordered is
-    // a thing that happens, and the app refusing to record it would help
-    // nobody.
-    $("spk-lines").innerHTML = `<div class="lines-box">` + (spkPo.items || []).map((it, i) => {
-      const left = Math.max(0, (Number(it.outstanding) || 0) - (Number(it.allocated) || 0));
-      return `
+    renderPickerLines();
+  } catch (e) {
+    $("spk-lines").innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Could not load")}</div>`;
+  }
+}
+
+// What is left of a PO line to put on a ship: what the supplier still owes,
+// less whatever another shipment has already claimed. A line with nothing left
+// is not offered - going back into a half-shipped order should show what is
+// still to come, not the whole order again with the shipped half to be picked
+// out by hand.
+//
+// Two things keep that from hiding something needed. A line already on THIS
+// shipment always shows, filled in with what is on it, so it can be corrected.
+// And "show every line" puts the rest back, because a supplier who ships more
+// than was ordered is a thing that happens and the app refusing to record it
+// would help nobody.
+function renderPickerLines() {
+  const rows = (spkPo.items || []).map((it, i) => {
+    const onThis = shipDraft
+      ? shipDraft.lines.find((l) => l.po_no === spkPo.doc_no && l.po_seq === it.seq)
+      : null;
+    const left = Math.max(0, (Number(it.outstanding) || 0) - (Number(it.allocated) || 0));
+    return { it, i, onThis, left };
+  });
+  const show = spkShowAll ? rows : rows.filter((r) => r.left > 0 || r.onThis);
+  const hidden = rows.length - show.length;
+
+  const list = show.length
+    ? `<div class="lines-box">` + show.map(({ it, i, onThis, left }) => `
       <div class="po-line">
         <span class="po-line-main">
           <span class="po-line-desc">${escapeHtml(it.description)}</span>
           <span class="po-line-code mono">${escapeHtml(it.item_code)}</span>
           <span class="po-line-code">${trimNum(it.outstanding)} outstanding${
-            it.allocated > 0 ? ` · ${trimNum(it.allocated)} on another shipment` : ""}</span>
+            it.allocated > 0 ? ` · ${trimNum(it.allocated)} on another shipment` : ""}${
+            onThis ? ` · ${trimNum(onThis.qty)} already on this one` : ""}</span>
         </span>
         <input class="spk-qty" type="number" min="0" step="any" inputmode="decimal"
-               data-line="${i}" value="${left > 0 ? trimNum(left) : ""}" placeholder="0" />
-      </div>`;
-    }).join("") + `</div>`;
-  } catch (e) {
-    $("spk-lines").innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Could not load")}</div>`;
-  }
+               data-line="${i}" value="${onThis ? trimNum(onThis.qty) : (left > 0 ? trimNum(left) : "")}"
+               placeholder="0" />
+      </div>`).join("") + `</div>`
+    : `<div class="fp-empty">Everything on this order is already on a shipment</div>`;
+
+  $("spk-lines").innerHTML = list + (hidden > 0
+    ? `<button type="button" class="spk-showall" id="spk-showall">Show ${hidden} line${
+        hidden === 1 ? "" : "s"} already on a shipment</button>`
+    : (spkShowAll && rows.length
+        ? `<button type="button" class="spk-showall" id="spk-showall">Hide lines already on a shipment</button>`
+        : ""));
+  const t = $("spk-showall");
+  if (t) t.addEventListener("click", () => { spkShowAll = !spkShowAll; renderPickerLines(); });
 }
 
 function addPickedLines() {
   if (!spkPo) return;
   let added = 0;
   document.querySelectorAll("#spk-lines .spk-qty").forEach((input) => {
-    const qty = Number(input.value);
-    if (!Number.isFinite(qty) || qty <= 0) return;
     const it = spkPo.items[Number(input.dataset.line)];
     if (!it) return;
+    const qty = Number(input.value);
+    // Emptying the box on a line that is on the shipment takes it off. Only
+    // for lines the picker actually showed: one it filtered out was never
+    // offered, and reading its absence as "remove" would delete work.
+    if (!Number.isFinite(qty) || qty <= 0) {
+      const at = shipDraft.lines.findIndex((l) => l.po_no === spkPo.doc_no && l.po_seq === it.seq);
+      if (at >= 0) shipDraft.lines.splice(at, 1);
+      return;
+    }
     // Same PO line twice means one line with more on it, not two rows saying
     // half each.
     const existing = shipDraft.lines.find((l) => l.po_no === spkPo.doc_no && l.po_seq === it.seq);
