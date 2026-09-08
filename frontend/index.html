@@ -139,6 +139,13 @@
           </span>
           <span class="home-txt"><strong>Bulk Order</strong><small>Request several parts at once</small></span>
         </button>
+        <button class="home-btn home-buy" data-go="ship">
+          <span class="home-ic">
+            <!-- A container. The shipment is the box of goods, not the paperwork. -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="12" rx="1"/><path d="M6 7v12M10 7v12M14 7v12M18 7v12"/></svg>
+          </span>
+          <span class="home-txt"><strong>Shipments</strong><small>What is on its way, and when it lands</small></span>
+        </button>
         <button class="home-btn home-buy" data-go="po">
           <span class="home-ic">
             <!-- A ship. What is being tracked is goods on their way here, and
@@ -156,6 +163,126 @@
       </div>
       <button class="switch-role" id="switch-role">Switch role</button>
     </section>
+
+    <!-- ============ SCREEN: SHIPMENTS ============ -->
+    <!-- The thing that travels and has a date. Everyone reads it; only the
+         Purchaser can change one. -->
+    <section id="screen-ship" class="screen">
+      <div class="section-head">
+        <p class="eyebrow">Purchasing</p>
+        <h2>Shipments</h2>
+      </div>
+      <div class="toggle" id="ship-scope" style="margin-bottom:12px">
+        <button type="button" data-shipscope="live">On the way</button>
+        <button type="button" data-shipscope="all">All</button>
+      </div>
+      <div class="field">
+        <label for="ship-q">Search</label>
+        <input id="ship-q" type="text" autocomplete="off" placeholder="Invoice, BL or container…" />
+      </div>
+      <div id="ship-list"></div>
+      <button class="btn-primary" id="ship-new" style="display:none;width:100%;margin-top:12px">
+        New shipment
+      </button>
+    </section>
+
+    <!-- ============ SCREEN: ONE SHIPMENT ============ -->
+    <section id="screen-ship-detail" class="screen">
+      <div class="section-head">
+        <p class="eyebrow">Shipment · supplier invoice</p>
+        <h2 id="shd-no">—</h2>
+      </div>
+      <div class="fp-card" id="shd-head"></div>
+      <div id="shd-track" style="margin-top:12px"></div>
+      <div class="section-head" style="margin-top:16px"><p class="eyebrow">What is on it</p></div>
+      <div id="shd-lines"></div>
+    </section>
+
+    <!-- ============ SCREEN: EDIT A SHIPMENT ============ -->
+    <section id="screen-ship-edit" class="screen">
+      <div class="section-head">
+        <p class="eyebrow" id="she-eyebrow">New shipment</p>
+        <h2 id="she-title">New shipment</h2>
+      </div>
+      <div class="field">
+        <label for="she-invoice">Supplier invoice no. <span class="req">*</span></label>
+        <input id="she-invoice" type="text" autocomplete="off" placeholder="e.g. INV-88377" />
+      </div>
+      <div class="field">
+        <label for="she-bl">BL number <span class="hint-inline">(sea freight)</span></label>
+        <input id="she-bl" type="text" autocomplete="off" placeholder="e.g. ONEY2210447" />
+      </div>
+      <div class="field">
+        <label for="she-container">Container no. <span class="hint-inline">(optional)</span></label>
+        <input id="she-container" type="text" autocomplete="off" placeholder="e.g. TCNU9930118" />
+      </div>
+      <div class="field">
+        <label for="she-status">Status</label>
+        <select id="she-status">
+          <option value="SHIPPED">Shipped</option>
+          <option value="ARRIVED_SG">Arrived Singapore</option>
+          <option value="RECEIVED">Received</option>
+          <option value="CANCELLED">Cancelled</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="she-eta-sg">ETA Singapore</label>
+        <input id="she-eta-sg" type="date" />
+      </div>
+      <div class="field">
+        <label>Destination</label>
+        <div class="toggle" id="she-dest">
+          <button type="button" data-dest="JOO_SENG">Joo Seng</button>
+          <button type="button" data-dest="EUNOS">Eunos</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="she-eta-dest">ETA destination</label>
+        <input id="she-eta-dest" type="date" />
+      </div>
+      <div class="field">
+        <label for="she-notes">Note <span class="hint-inline">(optional)</span></label>
+        <textarea id="she-notes" rows="2" placeholder="e.g. held at customs, docs resent"></textarea>
+      </div>
+
+      <div class="section-head" style="margin-top:6px"><p class="eyebrow">What is on it</p></div>
+      <div id="she-lines"></div>
+      <button class="btn-secondary" id="she-add" style="width:100%;margin-top:10px">
+        Add lines from a purchase order
+      </button>
+      <div class="scan-hint" id="she-status-msg" style="justify-content:flex-start;min-height:20px"></div>
+      <button class="btn-primary" id="she-save" style="width:100%">Save shipment</button>
+      <button class="btn-secondary" id="she-cancel" style="width:100%;margin-top:8px">Cancel</button>
+    </section>
+
+    <!-- Choosing which PO lines go on board. A PO at a time: a shipment is
+         built from a handful of orders, and one flat list of every open line
+         in the building would be unusable. -->
+    <div class="modal-overlay" id="ship-pick-modal" style="display:none">
+      <div class="modal-sheet">
+        <div class="modal-head">
+          <div>
+            <strong id="spk-title">Add lines</strong>
+            <div class="mm-sub" id="spk-sub"></div>
+          </div>
+          <button class="modal-x" id="spk-close" type="button" aria-label="Close">&#10005;</button>
+        </div>
+        <div class="modal-body">
+          <div id="spk-po-step">
+            <p class="nsm-hint">Which purchase order?</p>
+            <input id="spk-q" type="text" autocomplete="off" placeholder="PO number or supplier…"
+                   style="width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:9px;margin-bottom:10px" />
+            <div id="spk-po-list"></div>
+          </div>
+          <div id="spk-line-step" style="display:none">
+            <p class="nsm-hint">How many of each are on this shipment?</p>
+            <div id="spk-lines"></div>
+            <button class="btn-primary" id="spk-add" type="button" style="width:100%;margin-top:10px">Add to shipment</button>
+            <button class="btn-secondary" id="spk-back" type="button" style="width:100%;margin-top:8px">Pick another order</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- ============ SCREEN: PURCHASE ORDERS ============ -->
     <!-- The order itself is AutoCount's and is only read. The app adds one

@@ -82,6 +82,16 @@ module.exports = {
     status: (...a) => sqliteRepo.slips.poStatus(...a),
     setStatus: (...a) => sqliteRepo.slips.setPoStatus(...a),
   },
+  // Shipments are entirely the app's own - AutoCount knows nothing about a
+  // container or an ETA - so always the SQLite repo.
+  shipments: {
+    list: (...a) => sqliteRepo.slips.listShipments(...a),
+    get: (...a) => sqliteRepo.slips.getShipment(...a),
+    create: (...a) => sqliteRepo.slips.createShipment(...a),
+    update: (...a) => sqliteRepo.slips.updateShipment(...a),
+    allocatedByPo: (...a) => sqliteRepo.slips.allocatedByPo(...a),
+    forPo: (...a) => sqliteRepo.slips.shipmentsForPo(...a),
+  },
   notes: {
     getPartNote: (...a) => sqliteRepo.partNotes.getPartNote(...a),
     getPartNotes: (...a) => sqliteRepo.partNotes.getPartNotes(...a),

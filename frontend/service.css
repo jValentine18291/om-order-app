@@ -2331,3 +2331,30 @@ select {
   font-variant-numeric:tabular-nums}
 .po-line-of{display:block;font-weight:500;font-size:10.5px;color:var(--ink-faint,#78868c)}
 .po-foot{font-size:11px;color:var(--ink-faint,#78868c);margin:7px 2px 0}
+
+
+/* ---- Shipments ------------------------------------------------------------ */
+.hint-inline{font-weight:400;color:var(--ink-faint,#78868c)}
+.po-card.ship-SHIPPED{border-left-color:#185FA5}
+.po-card.ship-ARRIVED_SG{border-left-color:#A85B00}
+.po-card.ship-RECEIVED{border-left-color:#1B7A42}
+.po-card.ship-CANCELLED{border-left-color:#B3261E}
+.ship-p-SHIPPED{background:#E6F1FB;color:#185FA5}
+.ship-p-ARRIVED_SG{background:#FDF0E0;color:#A85B00}
+.ship-p-RECEIVED{background:#E7F5EC;color:#1B7A42}
+.ship-p-CANCELLED{background:#FBEAEA;color:#B3261E}
+
+/* The two dates, side by side: the pair is the question people open this to
+   answer, and reading them apart would mean reading the card twice. */
+.ship-eta{display:flex;gap:18px;margin-top:8px;padding-top:8px;
+  border-top:1px dashed var(--line,#e3e6e8);font-size:11.5px}
+.ship-eta i{display:block;font-style:normal;color:var(--ink-faint,#78868c)}
+.ship-eta b{display:block;font-size:12.5px;font-variant-numeric:tabular-nums}
+.ship-note{margin-top:9px;padding-top:9px;border-top:1px dashed #cfe3e6;
+  font-size:12px;color:var(--ink-2,#45525a)}
+
+/* The quantity going on board, per PO line. */
+.spk-qty{width:76px;flex:0 0 auto;text-align:right;border:1px solid var(--line,#e3e6e8);
+  border-radius:8px;padding:7px 9px;font:inherit;font-size:13px;
+  font-variant-numeric:tabular-nums}
+#she-lines .po-line .remove{flex:0 0 auto;margin-left:8px}

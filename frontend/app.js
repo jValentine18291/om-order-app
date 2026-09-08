@@ -63,7 +63,7 @@ function formatDate(ts) {
 // ---- Screen navigation -----------------------------------------------------
 // "purchase" is the part-requests list (Orders); "po" and "po-detail" are the
 // supplier purchase orders. Different things, named apart on purpose.
-const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip", "purchase", "quote", "ipl", "bulk", "po", "po-detail"];
+const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip", "purchase", "quote", "ipl", "bulk", "po", "po-detail", "ship", "ship-detail", "ship-edit"];
 
 // ---- Who is using this phone ------------------------------------------------
 // Staff pick their name once per phone; the choice is remembered and decides
@@ -220,12 +220,12 @@ function applyRoleToHome() {
   // "po" is on every list: what is on order and when it lands is the answer to
   // a question anyone in the building gets asked. Only Iris can change it.
   const ROLE_FUNCTIONS = {
-    sales: ["new", "close", "view", "find", "ipl", "quote", "bulk", "po"],
-    tech: ["open", "view", "find", "ipl", "po"],
+    sales: ["new", "close", "view", "find", "ipl", "quote", "bulk", "po", "ship"],
+    tech: ["open", "view", "find", "ipl", "po", "ship"],
     // Purchaser is Sales plus the orders list, so it inherits the
     // IPLs too rather than being a separate shorter list.
-    purchaser: ["new", "close", "view", "find", "ipl", "quote", "bulk", "requests", "po"],
-    admin: ["new", "open", "close", "view", "find", "ipl", "quote", "bulk", "requests", "po"],
+    purchaser: ["new", "close", "view", "find", "ipl", "quote", "bulk", "requests", "po", "ship"],
+    admin: ["new", "open", "close", "view", "find", "ipl", "quote", "bulk", "requests", "po", "ship"],
   };
   // An unknown group shows nothing rather than defaulting to Sales - silently
   // handing out someone else's functions is worse than an empty screen.
@@ -279,7 +279,10 @@ function showScreen(name) {
   // One step back, on the screens that have somewhere to go: the slip screen
   // returns to its list, and one purchase order returns to the list of them.
   // The label says WHICH list - "← Slips" on a purchase order was simply wrong.
-  const back = name === "slip" ? "← Slips" : name === "po-detail" ? "← Purchase Orders" : "";
+  const back = name === "slip" ? "← Slips"
+             : name === "po-detail" ? "← Purchase Orders"
+             : name === "ship-detail" ? "← Shipments"
+             : "";
   $("top-back").style.display = back ? "inline-flex" : "none";
   if (back) $("top-back-txt").textContent = back;
   // The pad is sized when its popup opens, not here — it measures zero while
@@ -1740,6 +1743,7 @@ $("os-search").addEventListener("input", renderSlipList);
 // the workshop's slip list.
 $("top-back").addEventListener("click", () => {
   if ($("screen-po-detail").classList.contains("active")) enterPurchaseOrders();
+  else if ($("screen-ship-detail").classList.contains("active")) enterShipments();
   else enterOpenService();
 });
 
@@ -4317,6 +4321,7 @@ document.querySelectorAll(".home-btn").forEach((b) =>
     else if (go === "bulk") { enterBulkOrder(); }
     else if (go === "ipl") { enterIpl(); }
     else if (go === "po") { enterPurchaseOrders(); }
+    else if (go === "ship") { enterShipments(); }
   })
 );
 $("home-link").addEventListener("click", goHome);
@@ -4858,6 +4863,340 @@ function wireShelfEdit(container, part, onSaved) {
   const btn = container.querySelector("[data-shelf-edit]");
   if (btn) btn.addEventListener("click", () => openLocationModal(part, onSaved));
 }
+
+// ---- Shipments --------------------------------------------------------------
+// The thing that travels and has a date. A shipment carries lines off several
+// POs, and a PO's lines can be split across shipments, which is why the ETA
+// hangs here and not on the order.
+const SHIP_STATUS_LABEL = {
+  SHIPPED: "Shipped", ARRIVED_SG: "Arrived Singapore",
+  RECEIVED: "Received", CANCELLED: "Cancelled",
+};
+const DEST_LABEL = { JOO_SENG: "Joo Seng", EUNOS: "Eunos", "": "—" };
+
+let shipScope = "live";
+let shipList = [];
+// The shipment being built or edited, held here until Saved so that backing
+// out of the picker changes nothing.
+let shipDraft = null;
+
+function canEditShipments() {
+  return ["purchaser", "admin"].includes(getRole());
+}
+
+function enterShipments() {
+  showScreen("ship");
+  $("ship-q").value = "";
+  $("ship-new").style.display = canEditShipments() ? "block" : "none";
+  setShipScope(shipScope);
+}
+
+function setShipScope(scope) {
+  shipScope = scope === "all" ? "all" : "live";
+  document.querySelectorAll("#ship-scope [data-shipscope]").forEach((b) =>
+    b.classList.toggle("on", b.dataset.shipscope === shipScope));
+  loadShipments();
+}
+
+async function loadShipments() {
+  const box = $("ship-list");
+  box.innerHTML = `<div class="fp-loading">Loading…</div>`;
+  try {
+    const d = await api(`/api/shipments?scope=${shipScope}`);
+    shipList = d.shipments || [];
+    renderShipments();
+  } catch (e) {
+    box.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Could not load shipments")}</div>`;
+  }
+}
+
+function renderShipments() {
+  const q = ($("ship-q").value || "").trim().toLowerCase();
+  const list = shipList.filter((x) => !q ||
+    x.invoice_no.toLowerCase().includes(q) ||
+    (x.bl_no || "").toLowerCase().includes(q) ||
+    (x.container_no || "").toLowerCase().includes(q));
+  const box = $("ship-list");
+  if (!list.length) {
+    box.innerHTML = `<div class="fp-empty">${q ? "Nothing matches" : "No shipments"}</div>`;
+    return;
+  }
+  box.innerHTML = list.map((x) => `
+    <button type="button" class="po-card ship-${escapeAttr(x.status)}" data-ship="${x.id}">
+      <div class="po-top">
+        <strong>${escapeHtml(x.invoice_no)}</strong>
+        <span class="po-pill ship-p-${escapeAttr(x.status)}">${escapeHtml(SHIP_STATUS_LABEL[x.status] || x.status)}</span>
+      </div>
+      <div class="po-sup"><span>${x.purchase_orders} PO${x.purchase_orders === 1 ? "" : "s"}</span> · <span>${x.lines} line${x.lines === 1 ? "" : "s"}</span></div>
+      ${x.bl_no || x.container_no ? `<div class="po-sub mono">${escapeHtml([x.bl_no, x.container_no].filter(Boolean).join(" · "))}</div>` : ""}
+      <div class="ship-eta">
+        <span><i>Singapore</i><b>${x.eta_sg ? escapeHtml(formatDate(x.eta_sg)) : "—"}</b></span>
+        <span><i>${escapeHtml(DEST_LABEL[x.destination] || "Destination")}</i><b>${x.eta_dest ? escapeHtml(formatDate(x.eta_dest)) : "—"}</b></span>
+      </div>
+    </button>`).join("");
+  box.querySelectorAll("[data-ship]").forEach((b) =>
+    b.addEventListener("click", () => openShipment(Number(b.dataset.ship))));
+}
+
+async function openShipment(id) {
+  showScreen("ship-detail");
+  $("shd-no").textContent = "—";
+  $("shd-head").innerHTML = `<div class="fp-loading">Loading…</div>`;
+  $("shd-track").innerHTML = "";
+  $("shd-lines").innerHTML = "";
+  try {
+    const x = await api(`/api/shipments/${id}`);
+    renderShipment(x);
+  } catch (e) {
+    $("shd-head").innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Could not load it")}</div>`;
+  }
+}
+
+function renderShipment(x) {
+  $("shd-no").textContent = x.invoice_no;
+  $("shd-head").innerHTML = `
+    ${x.bl_no ? `<div class="fp-row"><span class="fp-lbl">BL number</span><span class="fp-val mono">${escapeHtml(x.bl_no)}</span></div>` : ""}
+    ${x.container_no ? `<div class="fp-row"><span class="fp-lbl">Container</span><span class="fp-val mono">${escapeHtml(x.container_no)}</span></div>` : ""}
+    <div class="fp-row"><span class="fp-lbl">Purchase orders</span><span class="fp-val">${
+      escapeHtml([...new Set((x.lines || []).map((l) => l.po_no))].join(", ") || "—")}</span></div>`;
+
+  $("shd-track").innerHTML = `
+    <div class="po-track">
+      <div class="fp-row"><span class="fp-lbl">Status</span>
+        <span class="fp-val"><span class="po-pill ship-p-${escapeAttr(x.status)}">${
+          escapeHtml(SHIP_STATUS_LABEL[x.status] || x.status)}</span></span></div>
+      <div class="fp-row"><span class="fp-lbl">ETA Singapore</span><span class="fp-val">${
+        x.eta_sg ? escapeHtml(formatDate(x.eta_sg)) : "—"}</span></div>
+      <div class="fp-row"><span class="fp-lbl">Destination</span><span class="fp-val">${
+        escapeHtml(DEST_LABEL[x.destination] || "—")}</span></div>
+      <div class="fp-row"><span class="fp-lbl">ETA destination</span><span class="fp-val">${
+        x.eta_dest ? escapeHtml(formatDate(x.eta_dest)) : "—"}</span></div>
+      ${x.notes ? `<div class="ship-note">${escapeHtml(x.notes)}</div>` : ""}
+      ${x.updated_by ? `<div class="po-who">Last changed by ${escapeHtml(x.updated_by)}${
+        x.updated_at ? " · " + escapeHtml(x.updated_at) : ""}</div>` : ""}
+      ${canEditShipments()
+        ? `<button type="button" class="btn-primary" id="shd-edit" style="width:100%;margin-top:10px">Update this shipment</button>`
+        : `<div class="po-readonly">Only the Purchaser can change this.</div>`}
+    </div>`;
+  const btn = $("shd-edit");
+  if (btn) btn.addEventListener("click", () => editShipment(x));
+
+  $("shd-lines").innerHTML = `<div class="lines-box">` + (x.lines || []).map((l) => `
+    <div class="po-line">
+      <span class="po-line-main">
+        <span class="po-line-desc">${escapeHtml(l.description || l.item_code)}</span>
+        <span class="po-line-code mono">${escapeHtml(l.item_code)} · ${escapeHtml(l.po_no)}</span>
+      </span>
+      <span class="po-line-qty">${trimNum(l.qty)}${l.uom ? `<span class="po-line-of">${escapeHtml(l.uom)}</span>` : ""}</span>
+    </div>`).join("") + `</div>`;
+}
+
+// ---- building one ------------------------------------------------------------
+function editShipment(existing) {
+  shipDraft = existing
+    ? { ...existing, lines: (existing.lines || []).map((l) => ({ ...l })) }
+    : { id: null, invoice_no: "", bl_no: "", container_no: "", status: "SHIPPED",
+        destination: "", eta_sg: "", eta_dest: "", notes: "", lines: [] };
+  showScreen("ship-edit");
+  $("she-eyebrow").textContent = shipDraft.id ? "Shipment" : "New shipment";
+  $("she-title").textContent = shipDraft.id ? shipDraft.invoice_no : "New shipment";
+  $("she-invoice").value = shipDraft.invoice_no;
+  $("she-bl").value = shipDraft.bl_no || "";
+  $("she-container").value = shipDraft.container_no || "";
+  $("she-status").value = shipDraft.status;
+  $("she-eta-sg").value = shipDraft.eta_sg || "";
+  $("she-eta-dest").value = shipDraft.eta_dest || "";
+  $("she-notes").value = shipDraft.notes || "";
+  $("she-status-msg").innerHTML = "";
+  renderDestToggle();
+  renderDraftLines();
+}
+
+function renderDestToggle() {
+  document.querySelectorAll("#she-dest [data-dest]").forEach((b) =>
+    b.classList.toggle("on", b.dataset.dest === shipDraft.destination));
+}
+
+function renderDraftLines() {
+  const box = $("she-lines");
+  if (!shipDraft.lines.length) {
+    box.innerHTML = `<div class="fp-empty">Nothing on it yet</div>`;
+    return;
+  }
+  box.innerHTML = `<div class="lines-box">` + shipDraft.lines.map((l, i) => `
+    <div class="po-line">
+      <span class="po-line-main">
+        <span class="po-line-desc">${escapeHtml(l.description || l.item_code)}</span>
+        <span class="po-line-code mono">${escapeHtml(l.item_code)} · ${escapeHtml(l.po_no)}</span>
+      </span>
+      <span class="po-line-qty">${trimNum(l.qty)}</span>
+      <button type="button" class="remove" data-dropline="${i}" aria-label="Remove">${TRASH}</button>
+    </div>`).join("") + `</div>`;
+  box.querySelectorAll("[data-dropline]").forEach((b) =>
+    b.addEventListener("click", () => {
+      shipDraft.lines.splice(Number(b.dataset.dropline), 1);
+      renderDraftLines();
+    }));
+}
+
+async function saveShipment() {
+  const msg = $("she-status-msg");
+  shipDraft.invoice_no = $("she-invoice").value.trim();
+  shipDraft.bl_no = $("she-bl").value.trim();
+  shipDraft.container_no = $("she-container").value.trim();
+  shipDraft.status = $("she-status").value;
+  shipDraft.eta_sg = $("she-eta-sg").value;
+  shipDraft.eta_dest = $("she-eta-dest").value;
+  shipDraft.notes = $("she-notes").value.trim();
+
+  const body = { ...shipDraft, who: initialsFor(getUser()), role: getRole() };
+  $("she-save").disabled = true;
+  msg.innerHTML = statusInfo("Saving…");
+  try {
+    const saved = shipDraft.id
+      ? await api(`/api/shipments/${shipDraft.id}`, {
+          method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+      : await api("/api/shipments", {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    toast("Shipment saved", "ok");
+    shipDraft = null;
+    openShipment(saved.id);
+  } catch (e) {
+    msg.innerHTML = statusErr(e.message || "Could not save it");
+  }
+  $("she-save").disabled = false;
+}
+
+// ---- picking the lines --------------------------------------------------------
+let spkOrders = [];
+let spkPo = null;
+
+async function openLinePicker() {
+  $("spk-sub").textContent = shipDraft.invoice_no || "New shipment";
+  $("spk-po-step").style.display = "";
+  $("spk-line-step").style.display = "none";
+  $("spk-q").value = "";
+  $("ship-pick-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+  const box = $("spk-po-list");
+  box.innerHTML = `<div class="fp-loading">Reading AutoCount…</div>`;
+  try {
+    const d = await api("/api/purchase-orders?scope=open");
+    if (!d.supported) {
+      box.innerHTML = `<div class="fp-empty">Purchase orders cannot be read from AutoCount on this server.</div>`;
+      return;
+    }
+    spkOrders = d.orders || [];
+    renderPickerOrders();
+  } catch (e) {
+    box.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Could not load")}</div>`;
+  }
+}
+
+function renderPickerOrders() {
+  const q = ($("spk-q").value || "").trim().toLowerCase();
+  const list = spkOrders.filter((o) => !q ||
+    o.doc_no.toLowerCase().includes(q) || (o.supplier || "").toLowerCase().includes(q));
+  const box = $("spk-po-list");
+  box.innerHTML = list.length
+    ? list.map((o) => `
+        <button type="button" class="company-option" data-pickpo="${escapeAttr(o.doc_no)}">
+          <span class="fp-opt-desc">${escapeHtml(o.doc_no)} · ${escapeHtml(o.supplier || "—")}</span>
+          <span class="fp-opt-code">${o.lines} line${o.lines === 1 ? "" : "s"} · ${trimNum(o.outstanding_qty)} outstanding</span>
+        </button>`).join("")
+    : `<div class="fp-empty">No purchase orders match</div>`;
+  box.querySelectorAll("[data-pickpo]").forEach((b) =>
+    b.addEventListener("click", () => openPickerLines(b.dataset.pickpo)));
+}
+
+async function openPickerLines(docNo) {
+  $("spk-po-step").style.display = "none";
+  $("spk-line-step").style.display = "";
+  $("spk-lines").innerHTML = `<div class="fp-loading">Reading AutoCount…</div>`;
+  try {
+    spkPo = await api(`/api/purchase-orders/${encodeURIComponent(docNo)}`);
+    $("spk-sub").textContent = `${docNo} · ${spkPo.supplier || ""}`;
+    // What is left to put on a ship: outstanding, less whatever is already
+    // claimed by another shipment that has not arrived. Shown as a suggestion
+    // in the box, not enforced - a supplier who ships more than was ordered is
+    // a thing that happens, and the app refusing to record it would help
+    // nobody.
+    $("spk-lines").innerHTML = `<div class="lines-box">` + (spkPo.items || []).map((it, i) => {
+      const left = Math.max(0, (Number(it.outstanding) || 0) - (Number(it.allocated) || 0));
+      return `
+      <div class="po-line">
+        <span class="po-line-main">
+          <span class="po-line-desc">${escapeHtml(it.description)}</span>
+          <span class="po-line-code mono">${escapeHtml(it.item_code)}</span>
+          <span class="po-line-code">${trimNum(it.outstanding)} outstanding${
+            it.allocated > 0 ? ` · ${trimNum(it.allocated)} on another shipment` : ""}</span>
+        </span>
+        <input class="spk-qty" type="number" min="0" step="any" inputmode="decimal"
+               data-line="${i}" value="${left > 0 ? trimNum(left) : ""}" placeholder="0" />
+      </div>`;
+    }).join("") + `</div>`;
+  } catch (e) {
+    $("spk-lines").innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Could not load")}</div>`;
+  }
+}
+
+function addPickedLines() {
+  if (!spkPo) return;
+  let added = 0;
+  document.querySelectorAll("#spk-lines .spk-qty").forEach((input) => {
+    const qty = Number(input.value);
+    if (!Number.isFinite(qty) || qty <= 0) return;
+    const it = spkPo.items[Number(input.dataset.line)];
+    if (!it) return;
+    // Same PO line twice means one line with more on it, not two rows saying
+    // half each.
+    const existing = shipDraft.lines.find((l) => l.po_no === spkPo.doc_no && l.po_seq === it.seq);
+    if (existing) existing.qty = qty;
+    else shipDraft.lines.push({
+      po_no: spkPo.doc_no, po_seq: it.seq, item_code: it.item_code,
+      description: it.description, uom: it.uom, qty,
+    });
+    added++;
+  });
+  closeLinePicker();
+  renderDraftLines();
+  if (added) toast(`${added} line${added === 1 ? "" : "s"} added`, "ok");
+}
+
+function closeLinePicker() {
+  $("ship-pick-modal").style.display = "none";
+  document.body.style.overflow = "";
+  spkPo = null;
+}
+
+$("ship-scope").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-shipscope]");
+  if (b) setShipScope(b.dataset.shipscope);
+});
+$("ship-q").addEventListener("input", () => renderShipments());
+$("ship-new").addEventListener("click", () => editShipment(null));
+$("she-dest").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-dest]");
+  if (!b || !shipDraft) return;
+  // Tapping the chosen one again clears it: a destination not decided yet is a
+  // real state, and there is nowhere else to say so.
+  shipDraft.destination = shipDraft.destination === b.dataset.dest ? "" : b.dataset.dest;
+  renderDestToggle();
+});
+$("she-add").addEventListener("click", openLinePicker);
+$("she-save").addEventListener("click", saveShipment);
+$("she-cancel").addEventListener("click", () => {
+  const id = shipDraft && shipDraft.id;
+  shipDraft = null;
+  if (id) openShipment(id); else enterShipments();
+});
+$("spk-close").addEventListener("click", closeLinePicker);
+$("spk-back").addEventListener("click", () => {
+  $("spk-po-step").style.display = "";
+  $("spk-line-step").style.display = "none";
+});
+$("spk-add").addEventListener("click", addPickedLines);
+$("spk-q").addEventListener("input", () => renderPickerOrders());
 
 // ---- Purchase orders --------------------------------------------------------
 // AutoCount owns the order. The app adds the one thing it cannot know - whether

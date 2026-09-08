@@ -706,6 +706,60 @@ db.exec(`
     updated_at TEXT DEFAULT (datetime('now','localtime'))
   );
 
+  -- A shipment: the thing that actually travels, and the only thing with a
+  -- date on it.
+  --
+  -- Goods do not arrive by purchase order. One shipment carries parts of
+  -- several POs, and one PO arrives across several shipments, so hanging an
+  -- ETA on a PO would be hanging it on the wrong noun. Everything about where
+  -- goods are lives here; the PO keeps only whether it was sent.
+  --
+  -- Known by the SUPPLIER'S INVOICE NUMBER, which is what people say out loud.
+  -- It is not the key, though: two suppliers can both send an INV-001, and a
+  -- mistyped one has to be correctable without orphaning the lines already
+  -- attached to it. Hence an id nobody ever sees.
+  CREATE TABLE IF NOT EXISTS shipments (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    invoice_no   TEXT NOT NULL,
+    bl_no        TEXT DEFAULT '',       -- sea freight; air has none
+    container_no TEXT DEFAULT '',
+    status       TEXT NOT NULL DEFAULT 'SHIPPED',
+    destination  TEXT DEFAULT '',       -- JOO_SENG | EUNOS, never both
+    eta_sg       TEXT,                  -- yyyy-mm-dd, or null when not known yet
+    eta_dest     TEXT,
+    notes        TEXT DEFAULT '',
+    created_by   TEXT DEFAULT '',
+    created_at   TEXT DEFAULT (datetime('now','localtime')),
+    updated_by   TEXT DEFAULT '',
+    updated_at   TEXT DEFAULT (datetime('now','localtime'))
+  );
+
+  -- Which PO lines are on board, and how many of each.
+  --
+  -- po_seq is AutoCount's own line sequence and is what makes this precise: a
+  -- PO can carry the same item twice, at two prices, and "40 of SZEN 848BE058B2
+  -- from PO-0418" would not say which.
+  --
+  -- The item code and description are copied rather than looked up each time.
+  -- That is deliberate: this is a record of what was PUT ON A SHIP, and it has
+  -- to still read correctly years later when the PO line has been received,
+  -- the description reworded, or the item retired from the catalogue.
+  CREATE TABLE IF NOT EXISTS shipment_lines (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    shipment_id INTEGER NOT NULL,
+    po_no       TEXT NOT NULL,
+    po_seq      INTEGER,
+    item_code   TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    uom         TEXT DEFAULT '',
+    qty         REAL NOT NULL,
+    FOREIGN KEY (shipment_id) REFERENCES shipments(id) ON DELETE CASCADE
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_shipment_lines_shipment ON shipment_lines(shipment_id);
+  -- The question asked on every PO screen: what of this order is on a ship?
+  CREATE INDEX IF NOT EXISTS idx_shipment_lines_po ON shipment_lines(po_no);
+
   CREATE TABLE IF NOT EXISTS part_notes (
     item_code  TEXT PRIMARY KEY,        -- exact AutoCount ItemCode
     note       TEXT NOT NULL,

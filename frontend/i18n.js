@@ -71,6 +71,32 @@
     "Search by description or part no.": "按名称或零件编号搜索",
     // ---- Purchase orders ----
     // Read by everyone; only the Purchaser can change anything here.
+    // ---- Shipments ----
+    // The leg of the journey, on the card where both dates sit side by side.
+    "Singapore": "新加坡",
+    "Shipments": "货运",
+    "← Shipments": "← 货运",
+    "What is on its way, and when it lands": "在途货物及到货日期",
+    "Shipment · supplier invoice": "货运 · 供应商发票",
+    "On the way": "在途",
+    "Invoice, BL or container…": "发票、提单或货柜号…",
+    "BL number": "提单号",
+    "Container": "货柜号",
+    "Purchase orders": "采购订单",
+    "ETA Singapore": "预计到新加坡",
+    "Destination": "目的地",
+    "ETA destination": "预计到目的地",
+    "Joo Seng": "Joo Seng",
+    "Eunos": "Eunos",
+    "Shipped": "已发货",
+    "Arrived Singapore": "已到新加坡",
+    "Received": "已收货",
+    "Cancelled": "已取消",
+    "What is on it": "货物明细",
+    "No shipments": "没有货运记录",
+    "Nothing matches": "没有符合的记录",
+    "New shipment": "新增货运",
+    "Update this shipment": "更新此货运",
     "Purchase Orders": "采购订单",
     "← Purchase Orders": "← 采购订单",
     "What is on order and where it is": "已订购的货品及其状态",
@@ -453,6 +479,7 @@
     // Built at runtime, so patterns rather than dictionary entries. The counts
     // and the dates are carried through as they are.
     [/^(\d+) lines?$/, "$1 项"],
+    [/^(\d+) POs?$/, "$1 张采购订单"],
     [/^([\d.]+) outstanding$/, "未到货 $1"],
     [/^Last changed by (.+) · (.+)$/, "最后修改：$1 · $2"],
 

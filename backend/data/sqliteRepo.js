@@ -950,6 +950,226 @@ function setPoStatus(docNo, status, who = "") {
   return poStatus(no);
 }
 
+// ---- Shipments --------------------------------------------------------------
+// Goods do not arrive by purchase order, so the tracking hangs here.
+//
+// A shipment is entirely the app's: AutoCount knows nothing about a container
+// or an ETA. What it borrows from AutoCount is only the identity of the lines
+// on board - the PO number and AutoCount's own line sequence.
+const SHIPMENT_STATUSES = new Set(["SHIPPED", "ARRIVED_SG", "RECEIVED", "CANCELLED"]);
+const DESTINATIONS = new Set(["", "JOO_SENG", "EUNOS"]);
+
+// A shipment is finished with when its goods are in, or it never sailed.
+// Anything else is still worth watching, and that is what the default list
+// shows.
+const SHIPMENT_LIVE = ["SHIPPED", "ARRIVED_SG"];
+
+function shipmentRow(r) {
+  if (!r) return null;
+  return {
+    id: r.id,
+    invoice_no: r.invoice_no,
+    bl_no: r.bl_no || "",
+    container_no: r.container_no || "",
+    status: r.status,
+    destination: r.destination || "",
+    eta_sg: r.eta_sg || "",
+    eta_dest: r.eta_dest || "",
+    notes: r.notes || "",
+    created_by: r.created_by || "",
+    created_at: r.created_at || "",
+    updated_by: r.updated_by || "",
+    updated_at: r.updated_at || "",
+  };
+}
+
+// A date, or nothing. Anything that is not a plain yyyy-mm-dd is refused
+// rather than stored: a date this cannot read is a date no screen can sort by,
+// and it would sit there looking fine.
+function cleanDate(v, label) {
+  const d = String(v == null ? "" : v).trim();
+  if (!d) return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+    const e = new Error(`${label} must be a date.`); e.status = 400; throw e;
+  }
+  return d;
+}
+
+function listShipments({ scope = "live" } = {}) {
+  const rows = scope === "all"
+    ? db.prepare("SELECT * FROM shipments ORDER BY id DESC").all()
+    : db.prepare(
+        `SELECT * FROM shipments
+          WHERE status IN (${SHIPMENT_LIVE.map(() => "?").join(",")})
+          -- Soonest first: the list is read to find out what lands next, and a
+          -- shipment with no ETA yet has not been promised anything, so it
+          -- waits at the bottom rather than jumping the queue.
+          ORDER BY CASE WHEN IFNULL(eta_sg, '') = '' THEN 1 ELSE 0 END, eta_sg, id DESC`
+      ).all(...SHIPMENT_LIVE);
+  const counts = db.prepare(
+    `SELECT shipment_id, COUNT(*) AS lines, COUNT(DISTINCT po_no) AS pos
+       FROM shipment_lines GROUP BY shipment_id`
+  ).all();
+  const byId = new Map(counts.map((c) => [c.shipment_id, c]));
+  return rows.map((r) => {
+    const c = byId.get(r.id) || { lines: 0, pos: 0 };
+    return { ...shipmentRow(r), lines: c.lines, purchase_orders: c.pos };
+  });
+}
+
+function getShipment(id) {
+  const row = db.prepare("SELECT * FROM shipments WHERE id = ?").get(Number(id));
+  if (!row) return null;
+  const lines = db.prepare(
+    "SELECT * FROM shipment_lines WHERE shipment_id = ? ORDER BY po_no, po_seq, id"
+  ).all(row.id);
+  return {
+    ...shipmentRow(row),
+    lines: lines.map((l) => ({
+      id: l.id, po_no: l.po_no, po_seq: l.po_seq,
+      item_code: l.item_code, description: l.description || "",
+      uom: l.uom || "", qty: Number(l.qty) || 0,
+    })),
+  };
+}
+
+// What is already spoken for, per PO line, across the shipments that have not
+// arrived yet.
+//
+// RECEIVED and CANCELLED are excluded on purpose. Once goods are received
+// AutoCount's own outstanding figure drops to match, so counting them here as
+// well would subtract them twice - and a cancelled shipment never carried
+// anything.
+function allocatedByPo(docNos) {
+  const list = [...new Set((docNos || []).map((d) => String(d || "").trim()).filter(Boolean))];
+  const out = new Map();
+  if (!list.length) return out;
+  for (let i = 0; i < list.length; i += 200) {
+    const chunk = list.slice(i, i + 200);
+    const rows = db.prepare(
+      `SELECT l.po_no, l.po_seq, l.item_code, SUM(l.qty) AS qty
+         FROM shipment_lines l
+         JOIN shipments s ON s.id = l.shipment_id
+        WHERE l.po_no IN (${chunk.map(() => "?").join(",")})
+          AND s.status IN (${SHIPMENT_LIVE.map(() => "?").join(",")})
+        GROUP BY l.po_no, l.po_seq, l.item_code`
+    ).all(...chunk, ...SHIPMENT_LIVE);
+    for (const r of rows) {
+      // Keyed on the LINE, not the item: the same part can sit on two lines of
+      // one PO and they are allocated separately.
+      out.set(`${r.po_no}#${r.po_seq == null ? "" : r.po_seq}`, Number(r.qty) || 0);
+    }
+  }
+  return out;
+}
+
+// Which shipments a PO's goods are on, for the PO screen.
+function shipmentsForPo(docNo) {
+  return db.prepare(
+    `SELECT DISTINCT s.id, s.invoice_no, s.status, s.destination, s.eta_sg, s.eta_dest
+       FROM shipment_lines l
+       JOIN shipments s ON s.id = l.shipment_id
+      WHERE l.po_no = ?
+      ORDER BY s.id DESC`
+  ).all(String(docNo || "").trim());
+}
+
+function normaliseShipment(input = {}) {
+  const invoice = String(input.invoice_no || "").trim();
+  if (!invoice) { const e = new Error("A shipment needs its supplier invoice number."); e.status = 400; throw e; }
+  const status = String(input.status || "SHIPPED").toUpperCase();
+  if (!SHIPMENT_STATUSES.has(status)) { const e = new Error("Invalid shipment status."); e.status = 400; throw e; }
+  const destination = String(input.destination || "").toUpperCase();
+  if (!DESTINATIONS.has(destination)) { const e = new Error("A shipment goes to Joo Seng or Eunos."); e.status = 400; throw e; }
+  return {
+    invoice_no: invoice.slice(0, 60),
+    bl_no: String(input.bl_no || "").trim().slice(0, 60),
+    container_no: String(input.container_no || "").trim().slice(0, 60),
+    status,
+    destination,
+    eta_sg: cleanDate(input.eta_sg, "ETA Singapore"),
+    eta_dest: cleanDate(input.eta_dest, "ETA destination"),
+    notes: String(input.notes || "").trim().slice(0, 500),
+  };
+}
+
+// The lines going on board. A line with no quantity is not on the shipment -
+// it is the picker's way of saying "not this one" - so it is dropped rather
+// than stored as a zero.
+function normaliseLines(lines) {
+  const out = [];
+  for (const l of (Array.isArray(lines) ? lines : [])) {
+    const qty = Number((l || {}).qty);
+    if (!Number.isFinite(qty) || qty <= 0) continue;
+    const po = String((l || {}).po_no || "").trim();
+    const code = String((l || {}).item_code || "").trim();
+    if (!po || !code) {
+      const e = new Error("Every line needs a purchase order and an item."); e.status = 400; throw e;
+    }
+    const seq = (l || {}).po_seq;
+    out.push({
+      po_no: po,
+      po_seq: seq === null || seq === undefined || seq === "" ? null : Number(seq),
+      item_code: code,
+      description: String((l || {}).description || "").trim().slice(0, 200),
+      uom: String((l || {}).uom || "").trim().slice(0, 20),
+      qty,
+    });
+  }
+  return out;
+}
+
+function writeLines(shipmentId, lines) {
+  db.prepare("DELETE FROM shipment_lines WHERE shipment_id = ?").run(shipmentId);
+  const ins = db.prepare(
+    `INSERT INTO shipment_lines (shipment_id, po_no, po_seq, item_code, description, uom, qty)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`
+  );
+  for (const l of lines) ins.run(shipmentId, l.po_no, l.po_seq, l.item_code, l.description, l.uom, l.qty);
+}
+
+function createShipment(input = {}, who = "") {
+  if (!String(who || "").trim()) { const e = new Error("Missing initials, so the change could not be traced."); e.status = 400; throw e; }
+  const v = normaliseShipment(input);
+  const lines = normaliseLines(input.lines);
+  if (!lines.length) { const e = new Error("A shipment needs at least one line on it."); e.status = 400; throw e; }
+  const tx = db.transaction(() => {
+    const r = db.prepare(
+      `INSERT INTO shipments (invoice_no, bl_no, container_no, status, destination,
+                              eta_sg, eta_dest, notes, created_by, updated_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(v.invoice_no, v.bl_no, v.container_no, v.status, v.destination,
+          v.eta_sg, v.eta_dest, v.notes, String(who).trim(), String(who).trim());
+    writeLines(r.lastInsertRowid, lines);
+    return r.lastInsertRowid;
+  });
+  return getShipment(tx());
+}
+
+// Lines are only replaced when the caller actually sends them. An update that
+// is just "it has arrived" must not empty the shipment, and a phone running a
+// cached copy of the app is exactly the caller that would send no lines.
+function updateShipment(id, input = {}, who = "") {
+  const row = db.prepare("SELECT * FROM shipments WHERE id = ?").get(Number(id));
+  if (!row) { const e = new Error("Shipment not found."); e.status = 404; throw e; }
+  if (!String(who || "").trim()) { const e = new Error("Missing initials, so the change could not be traced."); e.status = 400; throw e; }
+  const v = normaliseShipment({ ...shipmentRow(row), ...input });
+  const lines = input.lines === undefined ? null : normaliseLines(input.lines);
+  if (lines && !lines.length) { const e = new Error("A shipment needs at least one line on it."); e.status = 400; throw e; }
+  const tx = db.transaction(() => {
+    db.prepare(
+      `UPDATE shipments SET invoice_no = ?, bl_no = ?, container_no = ?, status = ?,
+                            destination = ?, eta_sg = ?, eta_dest = ?, notes = ?,
+                            updated_by = ?, updated_at = datetime('now','localtime')
+        WHERE id = ?`
+    ).run(v.invoice_no, v.bl_no, v.container_no, v.status, v.destination,
+          v.eta_sg, v.eta_dest, v.notes, String(who).trim(), row.id);
+    if (lines) writeLines(row.id, lines);
+  });
+  tx();
+  return getShipment(row.id);
+}
+
 // ---- Where a machine is, and what that makes the slip -----------------------
 //
 // John's workflow, drawn out:
@@ -1107,6 +1327,8 @@ function techniciansForMachine(machineId) {
 
 const slips = {
   poTracking, poStatus, setPoStatus, PO_STATUSES,
+  listShipments, getShipment, createShipment, updateShipment,
+  allocatedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
   createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, setMachineState, setAllMachineStates, setMachineDisposal, deriveSlipStatus, techniciansForMachine, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 

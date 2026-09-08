@@ -877,8 +877,21 @@ app.get("/api/purchase-orders/:docNo", async (req, res) => {
     if (!po) return res.json({ supported: false });
     if (!po.found) return res.status(404).json({ error: "No such purchase order in AutoCount." });
     const t = data.purchaseOrders.status(po.doc_no);
-    res.json({ supported: true, ...po, status: t.status, ordered_at: t.ordered_at || "",
-               updated_by: t.updated_by || "", updated_at: t.updated_at || "" });
+    // What of this order is already on a shipment, per LINE. Shown beside the
+    // outstanding figure rather than subtracted from it: the two are different
+    // facts - what the supplier still owes, and what has been claimed for a
+    // container - and quietly netting them off would hide whichever is wrong.
+    const allocated = data.shipments.allocatedByPo([po.doc_no]);
+    res.json({
+      supported: true, ...po,
+      items: (po.items || []).map((it) => ({
+        ...it,
+        allocated: allocated.get(`${po.doc_no}#${it.seq == null ? "" : it.seq}`) || 0,
+      })),
+      shipments: data.shipments.forPo(po.doc_no),
+      status: t.status, ordered_at: t.ordered_at || "",
+      updated_by: t.updated_by || "", updated_at: t.updated_at || "",
+    });
   } catch (err) {
     console.error("[GET /api/purchase-orders/:docNo]", err.message);
     res.status(500).json({ error: "Could not read that purchase order." });
@@ -896,6 +909,58 @@ app.patch("/api/purchase-orders/:docNo", (req, res) => {
     if (err.status === 400) return res.status(400).json({ error: err.message });
     console.error("[PATCH /api/purchase-orders/:docNo]", err.message);
     res.status(500).json({ error: "Could not save that." });
+  }
+});
+
+// ---- Shipments --------------------------------------------------------------
+// Entirely the app's own: AutoCount knows nothing about a container or an ETA.
+// Everyone reads - "when does my part get here" is asked all over the building
+// - and only the Purchaser and Admin write.
+app.get("/api/shipments", (req, res) => {
+  try {
+    res.json({ shipments: data.shipments.list({ scope: String(req.query.scope || "live") }) });
+  } catch (err) {
+    console.error("[GET /api/shipments]", err.message);
+    res.status(500).json({ error: "Could not load shipments." });
+  }
+});
+
+app.get("/api/shipments/:id", (req, res) => {
+  try {
+    const shipment = data.shipments.get(req.params.id);
+    if (!shipment) return res.status(404).json({ error: "No such shipment." });
+    res.json(shipment);
+  } catch (err) {
+    console.error("[GET /api/shipments/:id]", err.message);
+    res.status(500).json({ error: "Could not load that shipment." });
+  }
+});
+
+app.post("/api/shipments", (req, res) => {
+  try {
+    const { who = "", role = "" } = req.body || {};
+    if (!PO_WRITE_ROLES.includes(String(role || "").toLowerCase())) {
+      return res.status(403).json({ error: "Only Purchaser or Admin can create a shipment." });
+    }
+    res.status(201).json(data.shipments.create(req.body || {}, who));
+  } catch (err) {
+    if (err.status === 400) return res.status(400).json({ error: err.message });
+    console.error("[POST /api/shipments]", err.message);
+    res.status(500).json({ error: "Could not save that shipment." });
+  }
+});
+
+app.patch("/api/shipments/:id", (req, res) => {
+  try {
+    const { who = "", role = "" } = req.body || {};
+    if (!PO_WRITE_ROLES.includes(String(role || "").toLowerCase())) {
+      return res.status(403).json({ error: "Only Purchaser or Admin can change a shipment." });
+    }
+    res.json(data.shipments.update(req.params.id, req.body || {}, who));
+  } catch (err) {
+    if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
+    console.error("[PATCH /api/shipments/:id]", err.message);
+    res.status(500).json({ error: "Could not save that shipment." });
   }
 });
 
