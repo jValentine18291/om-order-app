@@ -138,6 +138,34 @@ refuse("a date nothing could sort by",
 refuse("a change nobody signed",
   () => sh.create({ invoice_no: "INV-X", lines: [line("PO-1", 1, "X", 1)] }, "  "), /Missing initials/);
 
+console.log("\n-- the real shape of a shipment --");
+// John's own example: fractions of five lines off two different POs, including
+// two different seals that must not be confused with each other.
+const real = sh.create({
+  invoice_no: "INV-90211", bl_no: "ONEY2214880", status: "SHIPPED", destination: "JOO_SENG",
+  eta_sg: "2026-09-24", eta_dest: "2026-09-27",
+  lines: [
+    { po_no: "PO-2609-016", po_seq: 1, item_code: "SHUQ 577317601", description: "JOINT", qty: 1, po_qty: 2 },
+    { po_no: "PO-2609-016", po_seq: 2, item_code: "SHUQ 505180901", description: "HOSE", qty: 3, po_qty: 3 },
+    { po_no: "PO-2609-016", po_seq: 3, item_code: "SHUQ 576594201", description: "REEL", qty: 8, po_qty: 10 },
+    { po_no: "PO-2608-009", po_seq: 1, item_code: "SHUQ 531147157", description: "SEAL", qty: 10, po_qty: 10 },
+    { po_no: "PO-2608-009", po_seq: 2, item_code: "SHUQ 531147158", description: "SEAL", qty: 2, po_qty: 5 },
+  ],
+}, "I");
+// The fraction is how a shipment line is described out loud, so it has to
+// survive being written down: the denominator is copied, not looked up, and
+// still reads correctly once the PO has been received and its own outstanding
+// figure has gone to zero.
+const asWritten = (l) => `${l.qty}/${l.po_qty}`;
+check("reads back the way it was described",
+  real.lines.map(asWritten), ["10/10", "2/5", "1/2", "3/3", "8/10"]);
+check("five lines, two orders", [real.lines.length, new Set(real.lines.map((l) => l.po_no)).size], [5, 2]);
+// Two seals, two item codes, two PO lines. Neither the code nor the
+// description alone would keep them apart if the sequence were dropped.
+const sealAlloc = sh.allocatedByPo(["PO-2608-009"]);
+check("the two seals stay apart",
+  [sealAlloc.get("PO-2608-009#1"), sealAlloc.get("PO-2608-009#2")], [10, 2]);
+
 console.log("\n-- a line with no quantity is not on the shipment --");
 // The picker's way of saying "not this one", rather than a zero to store.
 const picked = sh.create({

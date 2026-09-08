@@ -1029,6 +1029,9 @@ function getShipment(id) {
       id: l.id, po_no: l.po_no, po_seq: l.po_seq,
       item_code: l.item_code, description: l.description || "",
       uom: l.uom || "", qty: Number(l.qty) || 0,
+      // Null on lines written before this was kept; the screen then shows the
+      // plain figure rather than a fraction over nothing.
+      po_qty: l.po_qty === null || l.po_qty === undefined ? null : Number(l.po_qty),
     })),
   };
 }
@@ -1107,6 +1110,7 @@ function normaliseLines(lines) {
       const e = new Error("Every line needs a purchase order and an item."); e.status = 400; throw e;
     }
     const seq = (l || {}).po_seq;
+    const poQty = Number((l || {}).po_qty);
     out.push({
       po_no: po,
       po_seq: seq === null || seq === undefined || seq === "" ? null : Number(seq),
@@ -1114,6 +1118,7 @@ function normaliseLines(lines) {
       description: String((l || {}).description || "").trim().slice(0, 200),
       uom: String((l || {}).uom || "").trim().slice(0, 20),
       qty,
+      po_qty: Number.isFinite(poQty) && poQty > 0 ? poQty : null,
     });
   }
   return out;
@@ -1122,10 +1127,12 @@ function normaliseLines(lines) {
 function writeLines(shipmentId, lines) {
   db.prepare("DELETE FROM shipment_lines WHERE shipment_id = ?").run(shipmentId);
   const ins = db.prepare(
-    `INSERT INTO shipment_lines (shipment_id, po_no, po_seq, item_code, description, uom, qty)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO shipment_lines (shipment_id, po_no, po_seq, item_code, description, uom, qty, po_qty)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
   );
-  for (const l of lines) ins.run(shipmentId, l.po_no, l.po_seq, l.item_code, l.description, l.uom, l.qty);
+  for (const l of lines) {
+    ins.run(shipmentId, l.po_no, l.po_seq, l.item_code, l.description, l.uom, l.qty, l.po_qty);
+  }
 }
 
 function createShipment(input = {}, who = "") {

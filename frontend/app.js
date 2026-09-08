@@ -4987,8 +4987,17 @@ function renderShipment(x) {
         <span class="po-line-desc">${escapeHtml(l.description || l.item_code)}</span>
         <span class="po-line-code mono">${escapeHtml(l.item_code)} · ${escapeHtml(l.po_no)}</span>
       </span>
-      <span class="po-line-qty">${trimNum(l.qty)}${l.uom ? `<span class="po-line-of">${escapeHtml(l.uom)}</span>` : ""}</span>
+      <span class="po-line-qty">${escapeHtml(shipQty(l))}${l.uom ? `<span class="po-line-of">${escapeHtml(l.uom)}</span>` : ""}</span>
     </div>`).join("") + `</div>`;
+}
+
+// "1/2": one of the two that PO line ordered. The fraction is how a shipment
+// line is described out loud, so it is how it reads on screen - and a line
+// carrying the whole of its PO line says so too, because "3/3" and "3" answer
+// different questions.
+function shipQty(l) {
+  const qty = trimNum(l.qty);
+  return l.po_qty ? `${qty}/${trimNum(l.po_qty)}` : qty;
 }
 
 // ---- building one ------------------------------------------------------------
@@ -5029,7 +5038,7 @@ function renderDraftLines() {
         <span class="po-line-desc">${escapeHtml(l.description || l.item_code)}</span>
         <span class="po-line-code mono">${escapeHtml(l.item_code)} · ${escapeHtml(l.po_no)}</span>
       </span>
-      <span class="po-line-qty">${trimNum(l.qty)}</span>
+      <span class="po-line-qty">${escapeHtml(shipQty(l))}</span>
       <button type="button" class="remove" data-dropline="${i}" aria-label="Remove">${TRASH}</button>
     </div>`).join("") + `</div>`;
   box.querySelectorAll("[data-dropline]").forEach((b) =>
@@ -5151,10 +5160,14 @@ function addPickedLines() {
     // Same PO line twice means one line with more on it, not two rows saying
     // half each.
     const existing = shipDraft.lines.find((l) => l.po_no === spkPo.doc_no && l.po_seq === it.seq);
-    if (existing) existing.qty = qty;
+    if (existing) { existing.qty = qty; existing.po_qty = it.qty; }
     else shipDraft.lines.push({
       po_no: spkPo.doc_no, po_seq: it.seq, item_code: it.item_code,
       description: it.description, uom: it.uom, qty,
+      // What the PO line ordered, so the shipment line can read "1/2" for the
+      // rest of its life - long after the PO has been received and its own
+      // outstanding figure has gone to zero.
+      po_qty: it.qty,
     });
     added++;
   });

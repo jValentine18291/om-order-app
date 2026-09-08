@@ -542,6 +542,18 @@ try {
   console.error("[db] request-flags migration check failed:", e.message);
 }
 
+// The ordered quantity behind a shipment line, so it can read "1/2". Lines
+// written before this simply have none and show the plain figure.
+try {
+  const cols = db.prepare("PRAGMA table_info(shipment_lines)").all();
+  if (cols.length && !cols.some((c) => c.name === "po_qty")) {
+    db.exec("ALTER TABLE shipment_lines ADD COLUMN po_qty REAL");
+    console.log("[db] migrated: added po_qty to shipment_lines");
+  }
+} catch (e) {
+  console.error("[db] shipment_lines po_qty migration check failed:", e.message);
+}
+
 // Which variant of an item a part line is - the PulsFOG tube type. Existing
 // lines get '', which is what every non-tube part uses too, so the merge
 // behaves exactly as it did before for everything already recorded.
@@ -752,7 +764,12 @@ db.exec(`
     item_code   TEXT NOT NULL,
     description TEXT DEFAULT '',
     uom         TEXT DEFAULT '',
-    qty         REAL NOT NULL,
+    qty         REAL NOT NULL,          -- how many are on THIS shipment
+    -- How many that PO line ordered, so the line can read "1/2" - one of the
+    -- two ordered. Copied for the same reason as the description: the PO line
+    -- will be received and its outstanding figure will fall to nothing, and
+    -- this record still has to say what was on the ship.
+    po_qty      REAL,
     FOREIGN KEY (shipment_id) REFERENCES shipments(id) ON DELETE CASCADE
   );
 
