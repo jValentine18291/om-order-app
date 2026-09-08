@@ -680,6 +680,24 @@ function poQtyExpr(shape) {
       : `d.[${shape.dtlQty}]`;
 }
 
+// A line that is really a line.
+//
+// AutoCount lets a PO carry spacer rows for layout - no item, nothing written,
+// no quantity. They are formatting, not goods, and they have to be dropped in
+// BOTH the listing and the detail or the list says "9 lines" over a screen
+// showing seven. Hence one expression, used by both.
+//
+// Deliberately generous about what to KEEP: a row survives if it has an item
+// code, OR a description, OR any quantity at all. Only a row with none of the
+// three is dropped. Hiding a real line is far worse than showing a blank one -
+// a part nobody can see is a part nobody orders.
+function poRealLine(shape) {
+  const parts = [`LTRIM(RTRIM(ISNULL(d.[${shape.dtlItem}], ''))) <> ''`];
+  if (shape.dtlDesc) parts.push(`LTRIM(RTRIM(ISNULL(CAST(d.[${shape.dtlDesc}] AS NVARCHAR(MAX)), ''))) <> ''`);
+  parts.push(`ISNULL(d.[${shape.dtlQty}], 0) <> 0`);
+  return `(${parts.join(" OR ")})`;
+}
+
 async function listPurchaseOrders({ scope = "open", limit = 200 } = {}) {
   const shape = await purchaseOrderShape();
   if (!shape) return null;
@@ -701,7 +719,7 @@ async function listPurchaseOrders({ scope = "open", limit = 200 } = {}) {
             SUM(${qty}) AS Outstanding
        FROM PO m
        JOIN PODtl d ON m.[${shape.mDoc}] = d.[${shape.dtlDoc}]
-      WHERE 1 = 1 ${notCancelled}
+      WHERE ${poRealLine(shape)} ${notCancelled}
       GROUP BY m.[${shape.mNo}]${shape.docDate ? `, m.[${shape.docDate}]` : ""}${
         shape.creditorName ? `, m.[${shape.creditorName}]` : ""}${
         shape.creditorCode ? `, m.[${shape.creditorCode}]` : ""}
@@ -756,6 +774,7 @@ async function getPurchaseOrder(docNo) {
        FROM PODtl d
        JOIN PO m ON m.[${shape.mDoc}] = d.[${shape.dtlDoc}]
       WHERE m.[${shape.mNo}] = @no
+        AND ${poRealLine(shape)}
       ORDER BY d.[${shape.dtlItem}]`,
     { no }
   );
