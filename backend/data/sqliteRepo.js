@@ -969,6 +969,8 @@ function shipmentRow(r) {
   return {
     id: r.id,
     invoice_no: r.invoice_no,
+    supplier_code: r.supplier_code || "",
+    supplier_name: r.supplier_name || "",
     bl_no: r.bl_no || "",
     container_no: r.container_no || "",
     status: r.status,
@@ -1086,6 +1088,8 @@ function normaliseShipment(input = {}) {
   if (!DESTINATIONS.has(destination)) { const e = new Error("A shipment goes to Joo Seng or Eunos."); e.status = 400; throw e; }
   return {
     invoice_no: invoice.slice(0, 60),
+    supplier_code: String(input.supplier_code || "").trim().slice(0, 40),
+    supplier_name: String(input.supplier_name || "").trim().slice(0, 120),
     bl_no: String(input.bl_no || "").trim().slice(0, 60),
     container_no: String(input.container_no || "").trim().slice(0, 60),
     status,
@@ -1142,11 +1146,12 @@ function createShipment(input = {}, who = "") {
   if (!lines.length) { const e = new Error("A shipment needs at least one line on it."); e.status = 400; throw e; }
   const tx = db.transaction(() => {
     const r = db.prepare(
-      `INSERT INTO shipments (invoice_no, bl_no, container_no, status, destination,
-                              eta_sg, eta_dest, notes, created_by, updated_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(v.invoice_no, v.bl_no, v.container_no, v.status, v.destination,
-          v.eta_sg, v.eta_dest, v.notes, String(who).trim(), String(who).trim());
+      `INSERT INTO shipments (invoice_no, supplier_code, supplier_name, bl_no, container_no,
+                              status, destination, eta_sg, eta_dest, notes, created_by, updated_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(v.invoice_no, v.supplier_code, v.supplier_name, v.bl_no, v.container_no,
+          v.status, v.destination, v.eta_sg, v.eta_dest, v.notes,
+          String(who).trim(), String(who).trim());
     writeLines(r.lastInsertRowid, lines);
     return r.lastInsertRowid;
   });
@@ -1165,12 +1170,14 @@ function updateShipment(id, input = {}, who = "") {
   if (lines && !lines.length) { const e = new Error("A shipment needs at least one line on it."); e.status = 400; throw e; }
   const tx = db.transaction(() => {
     db.prepare(
-      `UPDATE shipments SET invoice_no = ?, bl_no = ?, container_no = ?, status = ?,
+      `UPDATE shipments SET invoice_no = ?, supplier_code = ?, supplier_name = ?,
+                            bl_no = ?, container_no = ?, status = ?,
                             destination = ?, eta_sg = ?, eta_dest = ?, notes = ?,
                             updated_by = ?, updated_at = datetime('now','localtime')
         WHERE id = ?`
-    ).run(v.invoice_no, v.bl_no, v.container_no, v.status, v.destination,
-          v.eta_sg, v.eta_dest, v.notes, String(who).trim(), row.id);
+    ).run(v.invoice_no, v.supplier_code, v.supplier_name, v.bl_no, v.container_no,
+          v.status, v.destination, v.eta_sg, v.eta_dest, v.notes,
+          String(who).trim(), row.id);
     if (lines) writeLines(row.id, lines);
   });
   tx();

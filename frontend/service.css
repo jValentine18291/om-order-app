@@ -2325,7 +2325,11 @@ select {
   padding:9px 11px;border-bottom:1px solid var(--line,#e3e6e8);font-size:12.5px}
 .po-line:last-child{border-bottom:0}
 .po-line-main{flex:1;min-width:0}
-.po-line-desc{display:block;overflow-wrap:anywhere}
+/* break-word, not anywhere: "anywhere" counts every letter as a wrap
+   opportunity when the browser works out the smallest this box could be, so
+   anything that squeezes the row can collapse it to one character per line.
+   break-word wraps long words without volunteering to be one letter wide. */
+.po-line-desc{display:block;overflow-wrap:break-word}
 .po-line-code{display:block;font-size:11px;color:var(--ink-faint,#78868c);margin-top:2px}
 .po-line-qty{flex:0 0 auto;text-align:right;font-weight:700;font-size:15px;line-height:1.1;
   font-variant-numeric:tabular-nums}
@@ -2354,7 +2358,12 @@ select {
   font-size:12px;color:var(--ink-2,#45525a)}
 
 /* The quantity going on board, per PO line. */
-.spk-qty{width:76px;flex:0 0 auto;text-align:right;border:1px solid var(--line,#e3e6e8);
-  border-radius:8px;padding:7px 9px;font:inherit;font-size:13px;
+/* input.spk-qty, not .spk-qty: styles.css sets input[type=number]{width:100%}
+   at specificity 0,1,1 and a bare class is 0,1,0, so the box took the whole
+   row and squeezed the description into a one-letter column. Matching that
+   specificity and loading later is what wins it back. */
+input.spk-qty{width:84px;flex:0 0 auto;text-align:right;
+  border:1.5px solid var(--border-2,#d7dee1);border-radius:8px;
+  padding:0 10px;height:40px;font:inherit;font-size:15px;
   font-variant-numeric:tabular-nums}
 #she-lines .po-line .remove{flex:0 0 auto;margin-left:8px}

@@ -4927,7 +4927,8 @@ function renderShipments() {
         <strong>${escapeHtml(x.invoice_no)}</strong>
         <span class="po-pill ship-p-${escapeAttr(x.status)}">${escapeHtml(SHIP_STATUS_LABEL[x.status] || x.status)}</span>
       </div>
-      <div class="po-sup"><span>${x.purchase_orders} PO${x.purchase_orders === 1 ? "" : "s"}</span> · <span>${x.lines} line${x.lines === 1 ? "" : "s"}</span></div>
+      ${x.supplier_name ? `<div class="po-sup">${escapeHtml(x.supplier_name)}</div>` : ""}
+      <div class="po-sub"><span>${x.purchase_orders} PO${x.purchase_orders === 1 ? "" : "s"}</span> · <span>${x.lines} line${x.lines === 1 ? "" : "s"}</span></div>
       ${x.bl_no || x.container_no ? `<div class="po-sub mono">${escapeHtml([x.bl_no, x.container_no].filter(Boolean).join(" · "))}</div>` : ""}
       <div class="ship-eta">
         <span><i>Singapore</i><b>${x.eta_sg ? escapeHtml(formatDate(x.eta_sg)) : "—"}</b></span>
@@ -4955,6 +4956,7 @@ async function openShipment(id) {
 function renderShipment(x) {
   $("shd-no").textContent = x.invoice_no;
   $("shd-head").innerHTML = `
+    ${x.supplier_name ? `<div class="fp-row"><span class="fp-lbl">Supplier</span><span class="fp-val">${escapeHtml(x.supplier_name)}</span></div>` : ""}
     ${x.bl_no ? `<div class="fp-row"><span class="fp-lbl">BL number</span><span class="fp-val mono">${escapeHtml(x.bl_no)}</span></div>` : ""}
     ${x.container_no ? `<div class="fp-row"><span class="fp-lbl">Container</span><span class="fp-val mono">${escapeHtml(x.container_no)}</span></div>` : ""}
     <div class="fp-row"><span class="fp-lbl">Purchase orders</span><span class="fp-val">${
@@ -5004,7 +5006,8 @@ function shipQty(l) {
 function editShipment(existing) {
   shipDraft = existing
     ? { ...existing, lines: (existing.lines || []).map((l) => ({ ...l })) }
-    : { id: null, invoice_no: "", bl_no: "", container_no: "", status: "SHIPPED",
+    : { id: null, invoice_no: "", supplier_code: "", supplier_name: "",
+        bl_no: "", container_no: "", status: "SHIPPED",
         destination: "", eta_sg: "", eta_dest: "", notes: "", lines: [] };
   showScreen("ship-edit");
   $("she-eyebrow").textContent = shipDraft.id ? "Shipment" : "New shipment";
@@ -5019,6 +5022,53 @@ function editShipment(existing) {
   $("she-status-msg").innerHTML = "";
   renderDestToggle();
   renderDraftLines();
+  loadSuppliers();
+}
+
+// The suppliers worth offering are the ones with something still on order.
+//
+// Deliberately built from the OPEN PURCHASE ORDERS rather than the whole
+// creditor list: a supplier with nothing outstanding cannot be on a shipment,
+// and offering them only leads to picking a name and finding an empty list of
+// orders behind it. One call answers both this and the picker.
+async function loadSuppliers() {
+  const sel = $("she-supplier");
+  sel.innerHTML = `<option value="">Loading…</option>`;
+  try {
+    const d = await api("/api/purchase-orders?scope=open");
+    if (!d.supported) {
+      sel.innerHTML = `<option value="">AutoCount is not readable here</option>`;
+      spkOrders = [];
+      return;
+    }
+    spkOrders = d.orders || [];
+    const seen = new Map();
+    for (const o of spkOrders) {
+      const key = o.supplier_code || o.supplier;
+      if (key && !seen.has(key)) seen.set(key, o.supplier || o.supplier_code);
+    }
+    const options = [...seen.entries()].sort((a, b) => String(a[1]).localeCompare(String(b[1])));
+    sel.innerHTML = `<option value="">All suppliers</option>` + options.map(([code, name]) =>
+      `<option value="${escapeAttr(code)}"${code === shipDraft.supplier_code ? " selected" : ""}>${escapeHtml(name)}</option>`
+    ).join("");
+    renderSupplierHint();
+  } catch (e) {
+    sel.innerHTML = `<option value="">Could not load suppliers</option>`;
+  }
+}
+
+// A shipment is one invoice from one supplier, so lines already on it from
+// somebody else are worth pointing out rather than silently filtering away.
+function renderSupplierHint() {
+  const hint = $("she-supplier-hint");
+  if (!hint || !shipDraft) return;
+  const others = [...new Set(shipDraft.lines
+    .map((l) => l.po_no)
+    .map((po) => (spkOrders.find((o) => o.doc_no === po) || {}).supplier_code)
+    .filter((c) => c && c !== shipDraft.supplier_code))];
+  if (!shipDraft.supplier_code || !others.length) { hint.style.display = "none"; return; }
+  hint.textContent = "Some lines on this shipment came from another supplier's order.";
+  hint.style.display = "block";
 }
 
 function renderDestToggle() {
@@ -5050,6 +5100,9 @@ function renderDraftLines() {
 
 async function saveShipment() {
   const msg = $("she-status-msg");
+  const sel = $("she-supplier");
+  shipDraft.supplier_code = sel.value;
+  shipDraft.supplier_name = sel.value ? sel.options[sel.selectedIndex].textContent : "";
   shipDraft.invoice_no = $("she-invoice").value.trim();
   shipDraft.bl_no = $("she-bl").value.trim();
   shipDraft.container_no = $("she-container").value.trim();
@@ -5088,6 +5141,9 @@ async function openLinePicker() {
   $("ship-pick-modal").style.display = "flex";
   document.body.style.overflow = "hidden";
   const box = $("spk-po-list");
+  // Already fetched when the form opened, for the supplier list. Re-read only
+  // if that call failed, so opening the picker twice is not two round trips.
+  if (spkOrders.length) { renderPickerOrders(); return; }
   box.innerHTML = `<div class="fp-loading">Reading AutoCount…</div>`;
   try {
     const d = await api("/api/purchase-orders?scope=open");
@@ -5104,8 +5160,14 @@ async function openLinePicker() {
 
 function renderPickerOrders() {
   const q = ($("spk-q").value || "").trim().toLowerCase();
-  const list = spkOrders.filter((o) => !q ||
-    o.doc_no.toLowerCase().includes(q) || (o.supplier || "").toLowerCase().includes(q));
+  // Narrowed to the chosen supplier. With none chosen the list is everything,
+  // which is what it was before and is still the right answer for a purchaser
+  // who would rather search than choose.
+  const supplier = (shipDraft && shipDraft.supplier_code) || "";
+  const list = spkOrders
+    .filter((o) => !supplier || o.supplier_code === supplier)
+    .filter((o) => !q ||
+      o.doc_no.toLowerCase().includes(q) || (o.supplier || "").toLowerCase().includes(q));
   const box = $("spk-po-list");
   box.innerHTML = list.length
     ? list.map((o) => `
@@ -5113,7 +5175,9 @@ function renderPickerOrders() {
           <span class="fp-opt-desc">${escapeHtml(o.doc_no)} · ${escapeHtml(o.supplier || "—")}</span>
           <span class="fp-opt-code">${o.lines} line${o.lines === 1 ? "" : "s"} · ${trimNum(o.outstanding_qty)} outstanding</span>
         </button>`).join("")
-    : `<div class="fp-empty">No purchase orders match</div>`;
+    : `<div class="fp-empty">${supplier && !q
+        ? "Nothing still on order from this supplier"
+        : "No purchase orders match"}</div>`;
   box.querySelectorAll("[data-pickpo]").forEach((b) =>
     b.addEventListener("click", () => openPickerLines(b.dataset.pickpo)));
 }
@@ -5195,6 +5259,13 @@ $("she-dest").addEventListener("click", (e) => {
   // real state, and there is nowhere else to say so.
   shipDraft.destination = shipDraft.destination === b.dataset.dest ? "" : b.dataset.dest;
   renderDestToggle();
+});
+$("she-supplier").addEventListener("change", () => {
+  if (!shipDraft) return;
+  const sel = $("she-supplier");
+  shipDraft.supplier_code = sel.value;
+  shipDraft.supplier_name = sel.value ? sel.options[sel.selectedIndex].textContent : "";
+  renderSupplierHint();
 });
 $("she-add").addEventListener("click", openLinePicker);
 $("she-save").addEventListener("click", saveShipment);

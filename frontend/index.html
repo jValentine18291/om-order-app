@@ -204,6 +204,14 @@
         <p class="eyebrow" id="she-eyebrow">New shipment</p>
         <h2 id="she-title">New shipment</h2>
       </div>
+      <!-- The supplier first: a shipment is one invoice from one supplier, and
+           choosing them turns every open PO in the building into the handful
+           that could be on this container. -->
+      <div class="field">
+        <label for="she-supplier">Supplier</label>
+        <select id="she-supplier"><option value="">Loading…</option></select>
+        <div class="vse-was" id="she-supplier-hint" style="display:none"></div>
+      </div>
       <div class="field">
         <label for="she-invoice">Supplier invoice no. <span class="req">*</span></label>
         <input id="she-invoice" type="text" autocomplete="off" placeholder="e.g. INV-88377" />

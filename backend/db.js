@@ -542,6 +542,18 @@ try {
   console.error("[db] request-flags migration check failed:", e.message);
 }
 
+// Who a shipment is from. Shipments entered before this simply have none.
+try {
+  const cols = db.prepare("PRAGMA table_info(shipments)").all();
+  if (cols.length && !cols.some((c) => c.name === "supplier_code")) {
+    db.exec("ALTER TABLE shipments ADD COLUMN supplier_code TEXT DEFAULT ''");
+    db.exec("ALTER TABLE shipments ADD COLUMN supplier_name TEXT DEFAULT ''");
+    console.log("[db] migrated: added supplier to shipments");
+  }
+} catch (e) {
+  console.error("[db] shipments supplier migration check failed:", e.message);
+}
+
 // The ordered quantity behind a shipment line, so it can read "1/2". Lines
 // written before this simply have none and show the plain figure.
 try {
@@ -733,6 +745,12 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS shipments (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     invoice_no   TEXT NOT NULL,
+    -- Who it is from. A shipment is one invoice from one supplier, so this is
+    -- what narrows the purchase orders down when the lines are picked. Both
+    -- the code and the readable name are kept: the code is what matches a PO,
+    -- the name is what anyone reading the screen recognises.
+    supplier_code TEXT DEFAULT '',
+    supplier_name TEXT DEFAULT '',
     bl_no        TEXT DEFAULT '',       -- sea freight; air has none
     container_no TEXT DEFAULT '',
     status       TEXT NOT NULL DEFAULT 'SHIPPED',

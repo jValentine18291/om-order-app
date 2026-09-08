@@ -75,6 +75,7 @@
     // The leg of the journey, on the card where both dates sit side by side.
     "Singapore": "新加坡",
     "Shipments": "货运",
+    "All suppliers": "所有供应商",
     "← Shipments": "← 货运",
     "What is on its way, and when it lands": "在途货物及到货日期",
     "Shipment · supplier invoice": "货运 · 供应商发票",
