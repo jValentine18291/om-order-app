@@ -2071,7 +2071,8 @@ async function loadMachineFit() {
   if (fitFor && fitFor.machineId === m.id) return;
   // The brand off the machine's own code, until the catalogue has been read
   // and can supply one for a machine that was typed in by hand.
-  fitFor = { machineId: m.id, brand: MachineIpl.brandPrefixFor(m), iplId: "", doc: null };
+  fitFor = { machineId: m.id, brand: MachineIpl.brandPrefixFor(m), iplId: "",
+             doc: null, models: MachineIpl.modelWordsFor(m) };
 
   try {
     if (!ipl.models) ipl.models = await api("./ipl/index.json");
@@ -2096,6 +2097,9 @@ function fitQuery(term) {
   if (!fitFor) return "";
   const parts = [];
   if (fitFor.brand) parts.push(`brand=${encodeURIComponent(fitFor.brand)}`);
+  if ((fitFor.models || []).length) {
+    parts.push(`models=${encodeURIComponent(fitFor.models.join(","))}`);
+  }
   const prefer = fitFor.doc ? MachineIpl.preferredNumbers(fitFor.doc, term) : [];
   if (prefer.length) parts.push(`prefer=${encodeURIComponent(prefer.join(","))}`);
   return parts.length ? "&" + parts.join("&") : "";

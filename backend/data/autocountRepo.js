@@ -441,6 +441,26 @@ function buildPartsSearchSql(q, limit = 15, fit = {}) {
     return `${CODE} LIKE '%' + @pf${idx} OR ${CODE} LIKE '%' + @pf${idx} + 'R'`;
   });
 
+  // The model written on the machine, against the model AutoCount records for
+  // the part in Desc2. This is the best of the three: it covers most of the
+  // catalogue and it is maintained by the workshop.
+  //
+  // Desc2 names more than one model often enough to matter - "365, 372XP",
+  // "160ZR/ZF" - so it is cut into its models and each is compared whole.
+  // Commas, slashes, ampersands AND spaces all separate, which is what lets
+  // "725DT Kubota Engine" answer to "725DT". The extra words that leaves
+  // behind ("KUBOTA", "ENGINE") can never match, because a model word has to
+  // carry a digit to be sent at all.
+  const D2 = `',' + REPLACE(REPLACE(REPLACE(REPLACE(UPPER(ISNULL(i.Desc2, '')),
+              '/', ','), '&', ','), ' ', ','), ',,', ',') + ','`;
+  const models = [...new Set((fit.models || [])
+    .map((m) => String(m || "").toUpperCase().replace(/[^A-Z0-9.\-]/g, ""))
+    .filter((m) => m.length >= 3))].slice(0, 8);
+  const modelTests = models.map((m, idx) => {
+    params[`md${idx}`] = m;
+    return `${D2} LIKE '%,' + @md${idx} + ',%'`;
+  });
+
   const brand = String(fit.brand || "").toUpperCase().replace(/[^A-Z]/g, "");
   if (brand) params.brand = brand;
 
@@ -456,8 +476,9 @@ function buildPartsSearchSql(q, limit = 15, fit = {}) {
   //
   // In the SELECT list a constant is ordinary and stays, so every row still
   // comes back carrying its rank.
+  const own = [...preferTests, ...modelTests];
   const whens = [
-    preferTests.length ? `WHEN ${preferTests.join(" OR ")} THEN 0` : "",
+    own.length ? `WHEN ${own.join(" OR ")} THEN 0` : "",
     brand ? `WHEN ${CODE} LIKE @brand + '%' THEN 1` : "",
   ].filter(Boolean);
   const fitRank = whens.length ? `CASE ${whens.join(" ")} ELSE 2 END` : "2";

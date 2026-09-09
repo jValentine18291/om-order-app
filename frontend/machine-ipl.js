@@ -138,14 +138,69 @@
       // not this machine's, however the model reads.
       if (brand && !brandNamed) continue;
       for (const key of modelKeys(entry)) {
-        const hit = words.has(key) || (key.length >= 4 && hay.includes(key));
-        if (!hit) continue;
+        // Three ways a machine can name a book, and the length of what
+        // actually matched is what a longer, more specific match is judged on.
+        //
+        //   the whole word      "365" in "Husqvarna 365 Chainsaw"
+        //   inside the text     "BK3410FL" within the code "UZEN BK3410FL51"
+        //   the start of it     "BK3410" written on the slip, against the book
+        //                       "BK3410FL". Staff write the model short - the
+        //                       hose variant does not matter to a repair - and
+        //                       the book is named after the fuller model, so
+        //                       without this the short form finds no book.
+        let hitLen = 0;
+        if (words.has(key)) hitLen = key.length;
+        else if (key.length >= 4 && hay.includes(key)) hitLen = key.length;
+        else {
+          for (const w of words) {
+            // Only a word long enough to be nobody else's may claim a book by
+            // its opening: "525" starts four different books, "BK3410" one.
+            //
+            // And only one carrying a digit. Without that the brand word wins
+            // it: one of the keys is the book's full name, "ZENOAH BK3410FL /
+            // FL-S", and every Zenoah machine starts with "ZENOAH" - so any
+            // Zenoah at all would have claimed the first Zenoah book in the
+            // list. Every model number has a digit in it; no brand does.
+            if (w.length >= STANDS_ALONE && /[0-9]/.test(w) &&
+                key.startsWith(w) && w.length > hitLen) hitLen = w.length;
+          }
+        }
+        if (!hitLen) continue;
         // With no brand to go on, only a name that stands alone counts.
-        if (!brandNamed && key.length < STANDS_ALONE) continue;
-        if (key.length > bestLen) { best = entry.id; bestLen = key.length; }
+        if (!brandNamed && hitLen < STANDS_ALONE) continue;
+        if (hitLen > bestLen) { best = entry.id; bestLen = hitLen; }
       }
     }
     return best;
+  }
+
+  // The model numbers written on the machine, for matching against Desc2.
+  //
+  // AutoCount's Desc2 says which model a part is for - "BK3410", "K10SP",
+  // "365, 372XP" - across 82% of the catalogue, which is far more than the 28
+  // models with a parts book. It is kept by the people who know, as part of
+  // ordinary work, so it is the best answer available to "does this part fit
+  // this machine".
+  //
+  // What comes back is every word of the machine that could BE a model. A word
+  // qualifies by carrying a digit, which is what separates "BK3410" and
+  // "525BX" from "BRUSHCUTTER", "ZENOAH" and "THICK". Measured against 185
+  // parts of the real catalogue: 129 distinct models named in Desc2, and not
+  // one of them collides with an ordinary word from a machine description.
+  //
+  // So a technician's slip can read "BK3410", or "BK3410 Backpack Brushcutter",
+  // or "BK3410 (thick hose)" - the model only has to stand as its own word.
+  // What does NOT work is gluing a suffix on: "BK3410FL51" is a different word
+  // from "BK3410" and matches nothing.
+  function modelWordsFor(machine, cap = 8) {
+    const out = [];
+    for (const w of wordsOf(machine)) {
+      if (w.length < 3 || w.length > 24) continue;
+      if (!/[0-9]/.test(w)) continue;
+      if (!out.includes(w)) out.push(w);
+      if (out.length >= cap) break;
+    }
+    return out;
   }
 
   // Everything the search needs to know about the machine in front of you:
@@ -158,7 +213,7 @@
     const entry = (index || []).find((e) => e.id === iplId);
     const brand = brandPrefixFor(machine) ||
                   (entry ? brandPrefixForBrandName(entry.brand) : "");
-    return { iplId, brand };
+    return { iplId, brand, models: modelWordsFor(machine) };
   }
 
   // The part numbers in this book that the technician's search term matches.
@@ -192,5 +247,6 @@
   }
 
   return { fitFor, brandPrefixFor, brandPrefixForBrandName, matchIplModel,
-           preferredNumbers, modelKeys, codePrefix, BRAND_BY_PREFIX, STANDS_ALONE };
+           preferredNumbers, modelWordsFor, modelKeys, codePrefix,
+           BRAND_BY_PREFIX, STANDS_ALONE };
 });

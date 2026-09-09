@@ -75,7 +75,13 @@ console.log("\n-- typed in by hand, with no code at all --");
 const typed = machine("", "BK3410FL51 Brushcutter");
 check("it still finds the book", match(typed), "bk3410fl");
 check("and the brand comes off the book, not the machine",
-  M.fitFor(typed, INDEX), { iplId: "bk3410fl", brand: "SZEN" });
+  M.fitFor(typed, INDEX), { iplId: "bk3410fl", brand: "SZEN", models: ["BK3410FL51"] });
+// The model word it sends is the one that was written, suffix and all - which
+// matches nothing in Desc2. Writing "BK3410" is what makes that half work,
+// and the book carries this machine in the meantime.
+check("written properly, it sends the model AutoCount records",
+  M.fitFor(machine("", "BK3410 Backpack Brushcutter"), INDEX),
+  { iplId: "bk3410fl", brand: "SZEN", models: ["BK3410"] });
 // The carburettor John named. The book writes it "T1151-81001" and AutoCount
 // holds it "SZEN T115181001"; squashing is what lets the two meet.
 const bk = JSON.parse(fs.readFileSync(

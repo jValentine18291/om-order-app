@@ -832,6 +832,7 @@ app.get("/api/parts-search", async (req, res) => {
     const results = await acRepo.searchParts(String(req.query.q || ""), 15, {
       brand: String(req.query.brand || ""),
       prefer: String(req.query.prefer || "").split(",").filter(Boolean),
+      models: String(req.query.models || "").split(",").filter(Boolean),
     });
     res.json({ results });
   } catch (err) {

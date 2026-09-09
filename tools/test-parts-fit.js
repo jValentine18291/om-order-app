@@ -150,6 +150,69 @@ const captureSql = async (q, limit, fit) => buildPartsSearchSql(q, limit, fit) |
     both.filter((r) => r.fit === 0).map((r) => r.ItemCode).sort(),
     ["M1912GC 522664401R", "SHUQ 522664401"]);
 
+  console.log("\n-- the model AutoCount records against the part --");
+  // Desc2 says which model a part is for, across 82% of the catalogue. These
+  // are the real shapes it comes in, copied off the live database searching
+  // "BK3410": plain, comma-separated, and a model with words after it.
+  const d2 = new DatabaseSync(":memory:");
+  d2.exec(`CREATE TABLE Item (ItemCode TEXT, Description TEXT, Desc2 TEXT)`);
+  const d2rows = [
+    ["SZEN T115181001", "Carburetor Assy 2-73", "BK3410"],
+    ["M0812GC SGR-3080", "2T Cutting Blade (Rhinomec)", "BK3410"],
+    ["M1618GC T115486110R", "9.5mm Black/Grey Fuel Hose", "BK3410, TL33"],
+    ["M0619GC AZR HOSE", "AZR HOSE 20 BAR TYPE 25mm", "BK3410 TK HOSE"],
+    ["SZEN 455081000", "Carb Assy 2-67", "BK4310"],
+    ["SHUQ 503701502", "Clutch Assy", "365, 372XP"],
+    ["SHUQ 999999999", "Something", "3650"],
+    ["SBNS 391065", "Carburetor", ""],
+    ["SPUL K10SP G00294", "Air non-return valve", "K10SP"],
+  ];
+  const insd2 = d2.prepare("INSERT INTO Item VALUES (?, ?, ?)");
+  for (const r of d2rows) insd2.run(...r);
+
+  // The same expression the query builds, transcribed. SQLite has REPLACE and
+  // UPPER too, so the tokenising is checked rather than described.
+  const D2 = `',' || REPLACE(REPLACE(REPLACE(REPLACE(UPPER(IFNULL(Desc2,'')),'/',','),'&',','),' ',','),',,',',') || ','`;
+  const byModel = (models) => d2.prepare(
+    `SELECT ItemCode FROM Item WHERE ` +
+    models.map(() => `${D2} LIKE '%,'||?||',%'`).join(" OR ") + ` ORDER BY ItemCode`
+  ).all(...models).map((r) => r.ItemCode);
+
+  check("a plain model matches",
+    byModel(["BK4310"]), ["SZEN 455081000"]);
+  // All four BK3410 shapes, including the two aftermarket parts a parts book
+  // would never have listed - which is the whole reason Desc2 beats the book.
+  check("plain, comma-separated and model-plus-words all match",
+    byModel(["BK3410"]),
+    ["M0619GC AZR HOSE", "M0812GC SGR-3080", "M1618GC T115486110R", "SZEN T115181001"]);
+  check("the thick-hose variant is still a BK3410",
+    byModel(["BK3410"]).includes("M0619GC AZR HOSE"), true);
+  check("the second model in a pair matches too", byModel(["TL33"]),
+    ["M1618GC T115486110R"]);
+  check("and so does one in the middle of a list", byModel(["372XP"]), ["SHUQ 503701502"]);
+  check("a fogger finds its own", byModel(["K10SP"]), ["SPUL K10SP G00294"]);
+
+  // The reason models are matched whole and never as a prefix.
+  check("3650 is not 365", byModel(["3650"]), ["SHUQ 999999999"]);
+  check("nor is 365 a 3650", byModel(["365"]), ["SHUQ 503701502"]);
+  check("a part with no model recorded matches nothing",
+    byModel(["BK3410", "K10SP", "365"]).includes("SBNS 391065"), false);
+
+  console.log("\n-- what a machine sends as its model --");
+  // Only words carrying a digit are sent, which is what keeps the words staff
+  // write around the model from ever matching one.
+  const MI = require(path.resolve(__dirname, "..", "frontend", "machine-ipl.js"));
+  const words = (desc) => MI.modelWordsFor({ machine_code: "", machine_desc: desc });
+  check("the model alone", words("BK3410"), ["BK3410"]);
+  check("the model with words around it", words("BK3410 Backpack Brushcutter"), ["BK3410"]);
+  check("the model in brackets", words("BK3410 (thick hose)"), ["BK3410"]);
+  check("a fogger", words("K10SP Thermal Fogger"), ["K10SP"]);
+  check("nothing that is only words", words("Old red mower"), []);
+  // The case that started this: a suffix glued on is a different word, and
+  // matches nothing. That is what the staff instruction is for.
+  check("a suffix glued on is not the model", words("BK3410FL51 Brushcutter"), ["BK3410FL51"]);
+  check("and it finds no parts", byModel(words("BK3410FL51 Brushcutter")), []);
+
   console.log("\n-- with no machine, nothing is reordered --");
   const none = search();
   check("everything ranks the same", [...new Set(none.map((r) => r.fit))], [2]);
