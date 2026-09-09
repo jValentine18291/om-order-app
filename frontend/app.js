@@ -1788,6 +1788,32 @@ async function onSlipChosen(slipNumber) {
 }
 
 // The slip-detail screen: header card, machines as buttons, status actions.
+// The Sales Order numbers raised for a slip, off the machines themselves.
+//
+// A slip can have SEVERAL: it is converted a machine at a time, so a customer
+// collecting two now and two later gets two orders. All of them are shown -
+// naming one would be picking a favourite, and the second is exactly the one
+// somebody is hunting for.
+//
+// The number here is always the current one. When an order is pushed to
+// AutoCount and comes back with AutoCount's own document number, the rename
+// carries the machines with it, so this never shows a number that has been
+// superseded.
+function slipSoNumbers(slip) {
+  return [...new Set((slip.machines || [])
+    .map((m) => String(m.so_number || "").trim())
+    .filter(Boolean))];
+}
+
+// The line that carries them, for the top of either slip screen. Empty until
+// there is an order, so a slip still being worked on gains no clutter.
+function slipSoLine(slip) {
+  const sos = slipSoNumbers(slip);
+  if (!sos.length) return "";
+  return `<div class="vs-so">${sos.length === 1 ? "Sales Order" : "Sales Orders"} ${
+    sos.map((n) => `<strong>${escapeHtml(n)}</strong>`).join(", ")}</div>`;
+}
+
 function renderSlipScreen() {
   const slip = session.slip;
   if (!slip) return;
@@ -1806,6 +1832,7 @@ function renderSlipScreen() {
         </div>
         <span class="vs-status vs-${escapeAttr(slip.status)}" id="os-status-badge">${escapeHtml(STATUS_LABEL[slip.status] || slip.status)}</span>
       </div>
+      ${slipSoLine(slip)}
       ${meta.length ? `<div class="vs-sub">${meta.join(" · ")}</div>` : ""}
       ${slip.notes ? `<div class="vs-notes">${escapeHtml(slip.notes)}</div>` : ""}
     </div>
@@ -3759,6 +3786,7 @@ function renderSlipDetail(slip) {
         </div>
         <span class="vs-status vs-${escapeAttr(slip.status)}">${escapeHtml(STATUS_LABEL[slip.status] || slip.status)}</span>
       </div>
+      ${slipSoLine(slip)}
       ${meta.length ? `<div class="vs-sub">${meta.join(" · ")}</div>` : ""}
       ${(slip.amendments || []).length ? `<div class="vs-amended"><b>Changed after the customer signed</b>${
         slip.amendments.map((a) => `<div>${escapeHtml(a.field)}: &ldquo;${escapeHtml(a.before || "—")}&rdquo; &rarr; &ldquo;${escapeHtml(a.after || "—")}&rdquo;${

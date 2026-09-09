@@ -636,6 +636,16 @@ select {
   background: #E7F1F2; color: #0a6b72; white-space: nowrap;
 }
 
+/* The Sales Order number, at the top of a slip on both screens. Teal and
+   boxed rather than another grey sub-line: it is the thing people come to this
+   screen to copy, and it has to be findable without reading the card. */
+.vs-so {
+  display: inline-block; margin-top: 8px; padding: 4px 10px; border-radius: 8px;
+  background: var(--primary-tint, #E7F1F2); color: var(--primary, #0a7f86);
+  font-size: 12.5px; font-weight: 600;
+}
+.vs-so strong { font-weight: 800; letter-spacing: .2px; }
+
 /* Status badge in the Open Service footer */
 #os-status-badge { display: inline-block; margin-left: 8px; }
 #os-status-badge:empty { display: none; }

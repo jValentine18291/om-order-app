@@ -409,6 +409,9 @@
     // slip; this is one machine, and the status a slip reaches when every
     // machine on it has been ticked.
     "Repaired": "已修好",
+    // The Sales Order number, at the top of a slip.
+    "Sales Order": "销售单",
+    "Sales Orders": "销售单",
     // The customer says the repair costs too much. Technicians can record
     // it themselves now, so it needs to read in Chinese too.
     "Too expensive — condemn": "维修费过高 — 报废",
