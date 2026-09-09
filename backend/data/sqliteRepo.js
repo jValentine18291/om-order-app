@@ -1051,9 +1051,27 @@ function getShipment(id) {
 // form, and counting them here as well would make a line you put on yourself
 // look like a line somebody else had already claimed.
 function allocatedByPo(docNos, exceptShipmentId) {
+  return sumShipmentLines(docNos, SHIPMENT_LIVE, exceptShipmentId);
+}
+
+// What a shipment says has ARRIVED, per PO line.
+//
+// Iris marks a container received the day it reaches the workshop; the stock
+// is keyed into AutoCount afterwards, sometimes days afterwards. In between,
+// AutoCount still shows the whole line outstanding and the shipment has left
+// the in-transit figure - so without this the goods sitting on the floor read
+// as never having been ordered.
+//
+// This is a physical observation by the person who took delivery, and the
+// status uses it as one, alongside AutoCount's.
+function receivedByPo(docNos) {
+  return sumShipmentLines(docNos, ["RECEIVED"], null);
+}
+
+function sumShipmentLines(docNos, statuses, exceptShipmentId) {
   const list = [...new Set((docNos || []).map((d) => String(d || "").trim()).filter(Boolean))];
   const out = new Map();
-  if (!list.length) return out;
+  if (!list.length || !statuses.length) return out;
   const except = Number(exceptShipmentId);
   const skip = Number.isFinite(except) && except > 0;
   for (let i = 0; i < list.length; i += 200) {
@@ -1063,10 +1081,10 @@ function allocatedByPo(docNos, exceptShipmentId) {
          FROM shipment_lines l
          JOIN shipments s ON s.id = l.shipment_id
         WHERE l.po_no IN (${chunk.map(() => "?").join(",")})
-          AND s.status IN (${SHIPMENT_LIVE.map(() => "?").join(",")})
+          AND s.status IN (${statuses.map(() => "?").join(",")})
           ${skip ? "AND s.id <> ?" : ""}
         GROUP BY l.po_no, l.po_seq, l.item_code`
-    ).all(...chunk, ...SHIPMENT_LIVE, ...(skip ? [except] : []));
+    ).all(...chunk, ...statuses, ...(skip ? [except] : []));
     for (const r of rows) {
       // Keyed on the LINE, not the item: the same part can sit on two lines of
       // one PO and they are allocated separately.
@@ -1350,7 +1368,7 @@ function techniciansForMachine(machineId) {
 const slips = {
   poTracking, poStatus, setPoStatus, PO_STATUSES,
   listShipments, getShipment, createShipment, updateShipment,
-  allocatedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
+  allocatedByPo, receivedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
   createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, setMachineState, setAllMachineStates, setMachineDisposal, deriveSlipStatus, techniciansForMachine, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 

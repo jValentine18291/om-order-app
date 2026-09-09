@@ -78,6 +78,12 @@ const ORDER_NOTIFY_ROLES = ["purchaser", "admin"];
 // different questions and either could change without the other.
 const SO_NOTIFY_ROLES = ["sales", "purchaser", "admin"];
 
+// A shipment moving is news for whoever is waiting on the parts: sales have
+// customers asking, technicians have machines on the floor waiting for them.
+// Iris is on it too - she made the change, but she also has a phone that is
+// not the one she made it on.
+const SHIPMENT_NOTIFY_ROLES = ["sales", "tech", "purchaser", "admin"];
+
 const push = require("./push");
 const pushDb = require("./db");
 push.init(pushDb);
@@ -841,6 +847,13 @@ app.get("/api/parts-search", async (req, res) => {
 // stopping somebody determined.
 const PO_WRITE_ROLES = ["purchaser", "admin"];
 
+// What a notification says, kept apart from the sending of it so a test can
+// read it without a push service. See backend/notifyText.js.
+const notifyText = require("./notifyText");
+
+// Where an order has got to, worked out rather than stored. See backend/poStatus.js.
+const poStatus = require("./poStatus");
+
 app.get("/api/purchase-orders", async (req, res) => {
   try {
     const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
@@ -852,12 +865,42 @@ app.get("/api/purchase-orders", async (req, res) => {
     // which is a different problem with a different fix.
     if (!orders) return res.json({ supported: false, orders: [] });
 
-    const tracking = data.purchaseOrders.tracking(orders.map((o) => o.doc_no));
+    const docNos = orders.map((o) => o.doc_no);
+    const tracking = data.purchaseOrders.tracking(docNos);
+
+    // Where each order has got to, worked out from AutoCount's outstanding and
+    // the app's shipments rather than typed in by anybody. Per LINE, then
+    // rolled up: an order's totals would let one over-shipped line cover for
+    // another line nobody has touched.
+    //
+    // If either read fails the cards still come back, showing Iris's tick and
+    // nothing more. A listing that loads is worth more than a status.
+    let lines = [];
+    try { lines = (await acRepo.listPurchaseOrderLines(docNos)) || []; }
+    catch (e) { console.error("[GET /api/purchase-orders] line read:", e.message); }
+    const byDoc = new Map();
+    for (const l of lines) {
+      if (!byDoc.has(l.doc_no)) byDoc.set(l.doc_no, []);
+      byDoc.get(l.doc_no).push(l);
+    }
+    const allocated = data.shipments.allocatedByPo(docNos);
+    // What Iris has signed for but AutoCount may not have been told about yet.
+    const delivered = data.shipments.receivedByPo(docNos);
+
     res.json({
       supported: true,
       orders: orders.map((o) => {
         const t = tracking.get(o.doc_no);
-        return { ...o, status: (t && t.status) || "NOT_ORDERED",
+        const tracked = (t && t.status) || "NOT_ORDERED";
+        const d = poStatus.derive({
+          docNo: o.doc_no, lines: byDoc.get(o.doc_no) || [], allocated, delivered, tracked,
+        });
+        return { ...o, status: tracked,
+                 // "status" stays Iris's tick, because that is the one thing
+                 // she sets and the one thing the PATCH route changes. Where
+                 // the order has actually got to is its own field, so the two
+                 // can never be mistaken for each other.
+                 progress: d.status, progress_label: d.label, progress_counts: d.counts,
                  ordered_at: (t && t.ordered_at) || "",
                  updated_by: (t && t.updated_by) || "" };
       }),
@@ -885,11 +928,27 @@ app.get("/api/purchase-orders/:docNo", async (req, res) => {
     // exclude_shipment is sent by the form that is editing a shipment, so that
     // shipment's own lines do not come back looking like somebody else's claim.
     const allocated = data.shipments.allocatedByPo([po.doc_no], req.query.exclude_shipment);
+    // Per-line progress, and the order's own. Worked out from the SAME
+    // allocation the lines are shown with, so the chip on a line and the chip
+    // at the top of the screen cannot tell two different stories.
+    //
+    // Note this uses the allocation with exclude_shipment applied when the
+    // picker asked for it. That is right: the picker wants to know what is
+    // claimed by OTHER shipments, and the status it draws beside a line should
+    // answer the same question the box beside it does.
+    const progress = poStatus.derive({
+      docNo: po.doc_no, lines: po.items || [], allocated, tracked: t.status,
+      delivered: data.shipments.receivedByPo([po.doc_no]),
+    });
+    const lineStatus = new Map(progress.lines.map((l, i) => [i, l.status]));
     res.json({
       supported: true, ...po,
-      items: (po.items || []).map((it) => ({
+      progress: progress.status, progress_label: progress.label,
+      progress_counts: progress.counts,
+      items: (po.items || []).map((it, i) => ({
         ...it,
         allocated: allocated.get(`${po.doc_no}#${it.seq == null ? "" : it.seq}`) || 0,
+        progress: lineStatus.get(i),
       })),
       shipments: data.shipments.forPo(po.doc_no),
       status: t.status, ordered_at: t.ordered_at || "",
@@ -959,7 +1018,21 @@ app.patch("/api/shipments/:id", (req, res) => {
     if (!PO_WRITE_ROLES.includes(String(role || "").toLowerCase())) {
       return res.status(403).json({ error: "Only Purchaser or Admin can change a shipment." });
     }
-    res.json(data.shipments.update(req.params.id, req.body || {}, who));
+    // Read BEFORE the update: "Shipped becomes Arrived Singapore" is the thing
+    // worth telling people, and after the write the previous status is gone.
+    const before = data.shipments.get(req.params.id);
+    const updated = data.shipments.update(req.params.id, req.body || {}, who);
+
+    // Only on a real move. Correcting a container number is not news, and a
+    // notification that fires on every save is one people turn off.
+    if (before && before.status !== updated.status) {
+      const msg = notifyText.shipmentStatusMessage(updated, before.status);
+      // Not awaited, and it cannot throw: the status change is the thing that
+      // matters, and telling people is a courtesy on top of it.
+      push.notify(pushDb, SHIPMENT_NOTIFY_ROLES, msg)
+        .catch((e) => console.error("[shipment notify]", e.message));
+    }
+    res.json(updated);
   } catch (err) {
     if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
     console.error("[PATCH /api/shipments/:id]", err.message);
@@ -1515,7 +1588,7 @@ app.post("/api/slips/:slip/order", async (req, res) => {
     // an error on a technician's phone. push.notify does not throw, and the
     // catch is here for the getSlip beside it.
     (async () => {
-      const { salesOrderMessage } = require("./notifyText");
+      const { salesOrderMessage } = notifyText;
       const slip = await data.slips.getSlip(req.params.slip);
       await push.notify(pushDb, SO_NOTIFY_ROLES, salesOrderMessage(slip, result, finalSo));
     })().catch((e) => console.error("[push] sales order notify failed:", e.message));

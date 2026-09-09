@@ -117,12 +117,20 @@
     "Status": "状态",
     "Not ordered yet": "尚未下单",
     "Ordered": "已下单",
+    // Where the order has got to, worked out rather than typed in.
+    "Progress": "进度",
+    "Partially shipped": "部分已发货",
+    "Partially received": "部分已收货",
+    "some received": "部分已收货",
+    "Sent to supplier?": "已发给供应商？",
     "Sent to supplier": "已发给供应商",
     "Only the Purchaser can change this.": "只有采购员可以更改。",
     "Reading AutoCount…": "正在读取 AutoCount…",
     "No purchase orders": "没有采购订单",
     "No purchase orders match": "没有符合的采购订单",
     "Outstanding / ordered, read from AutoCount.": "未到货 / 已订购，数据来自 AutoCount。",
+    "Outstanding / ordered, read from AutoCount. Where a line has got to is worked out from that and its shipments.":
+      "未到货 / 已订购，数据来自 AutoCount。每个项目的进度由此及其货运记录推算得出。",
     "all received": "全部已收到",
     "Purchase orders cannot be read from AutoCount on this server.": "此服务器无法从 AutoCount 读取采购订单。",
     // Find Part asks two questions now: which part, or what is on a shelf.
@@ -488,6 +496,9 @@
     [/^(\d+) lines?$/, "$1 项"],
     [/^(\d+) POs?$/, "$1 张采购订单"],
     [/^([\d.]+) outstanding$/, "未到货 $1"],
+    // How far along an order is, under its card.
+    [/^(\d+) of (\d+) lines? received$/, "$2 项中 $1 项已收货"],
+    [/^(\d+) of (\d+) lines? on a shipment$/, "$2 项中 $1 项已安排货运"],
     [/^Last changed by (.+) · (.+)$/, "最后修改：$1 · $2"],
 
     // ---- Find by location ----

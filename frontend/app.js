@@ -5334,7 +5334,38 @@ $("spk-q").addEventListener("input", () => renderPickerOrders());
 //
 // Everyone reads; only the Purchaser and Admin tick. Same accident guard as
 // part locations, and the route refuses regardless of what this shows.
+// Iris's own tick - the one fact on this screen that somebody sets.
 const PO_STATUS_LABEL = { NOT_ORDERED: "Not ordered yet", ORDERED: "Ordered" };
+
+// Where the order has actually got to. Nobody types these: the server works
+// them out from AutoCount's outstanding, the app's shipments and the tick
+// above, every time the screen is read. See backend/poStatus.js.
+const PO_PROGRESS_LABEL = {
+  NOT_ORDERED: "Not ordered yet",
+  ORDERED: "Ordered",
+  PART_SHIPPED: "Partially shipped",
+  SHIPPED: "Shipped",
+  PART_RECEIVED: "Partially received",
+  RECEIVED: "Received",
+};
+
+// The line under a card, in the words somebody would use out loud. Only worth
+// saying where a count adds something: "Shipped" already means every line, and
+// "3 of 8 lines" under it would be noise.
+function poProgressDetail(o) {
+  const c = o.progress_counts || {};
+  const n = Number(c.total) || 0;
+  if (!n) return "";
+  if (o.progress === "PART_RECEIVED") {
+    const inHand = (Number(c.received) || 0);
+    return inHand ? `${inHand} of ${n} line${n === 1 ? "" : "s"} received` : "some received";
+  }
+  if (o.progress === "PART_SHIPPED") {
+    const gone = (Number(c.shipped) || 0) + (Number(c.part_shipped) || 0);
+    return `${gone} of ${n} line${n === 1 ? "" : "s"} on a shipment`;
+  }
+  return "";
+}
 
 function canSetPoStatus() {
   return ["purchaser", "admin"].includes(getRole());
@@ -5385,15 +5416,17 @@ function renderPurchaseOrders() {
     return;
   }
   box.innerHTML = list.map((o) => `
-    <button type="button" class="po-card po-${escapeAttr(o.status)}" data-po="${escapeAttr(o.doc_no)}">
+    <button type="button" class="po-card po-${escapeAttr(o.progress || o.status)}" data-po="${escapeAttr(o.doc_no)}">
       <div class="po-top">
         <strong>${escapeHtml(o.doc_no)}</strong>
-        <span class="po-pill po-p-${escapeAttr(o.status)}">${escapeHtml(PO_STATUS_LABEL[o.status] || o.status)}</span>
+        <span class="po-pill po-p-${escapeAttr(o.progress || o.status)}">${
+          escapeHtml(PO_PROGRESS_LABEL[o.progress] || PO_STATUS_LABEL[o.status] || o.status)}</span>
       </div>
       <div class="po-sup">${escapeHtml(o.supplier || "—")}</div>
       <div class="po-sub"><span>${o.lines} line${o.lines === 1 ? "" : "s"}</span>${
         o.date ? ` · <span>${escapeHtml(formatDate(o.date))}</span>` : ""} · <span>${
-        o.outstanding_qty > 0 ? `${trimNum(o.outstanding_qty)} outstanding` : "all received"}</span></div>
+        o.outstanding_qty > 0 ? `${trimNum(o.outstanding_qty)} outstanding` : "all received"}</span>${
+        poProgressDetail(o) ? ` · <span>${escapeHtml(poProgressDetail(o))}</span>` : ""}</div>
     </button>`).join("");
   box.querySelectorAll(".po-card").forEach((b) =>
     b.addEventListener("click", () => openPurchaseOrder(b.dataset.po)));
@@ -5434,9 +5467,14 @@ function renderPurchaseOrder(po) {
 
   const label = PO_STATUS_LABEL[po.status] || po.status;
   const next = po.status === "ORDERED" ? "NOT_ORDERED" : "ORDERED";
+  const detail = poProgressDetail(po);
   $("pod-track").innerHTML = `
     <div class="po-track">
-      <div class="fp-row"><span class="fp-lbl">Status</span>
+      ${po.progress ? `<div class="fp-row"><span class="fp-lbl">Progress</span>
+        <span class="fp-val"><span class="po-pill po-p-${escapeAttr(po.progress)}">${
+          escapeHtml(PO_PROGRESS_LABEL[po.progress] || po.progress)}</span></span></div>
+        ${detail ? `<div class="po-who">${escapeHtml(detail)}</div>` : ""}` : ""}
+      <div class="fp-row"><span class="fp-lbl">Sent to supplier?</span>
         <span class="fp-val"><span class="po-pill po-p-${escapeAttr(po.status)}">${escapeHtml(label)}</span></span></div>
       ${po.ordered_at ? `<div class="fp-row"><span class="fp-lbl">Sent to supplier</span><span class="fp-val">${escapeHtml(formatDate(po.ordered_at))}</span></div>` : ""}
       ${po.updated_by ? `<div class="po-who">Last changed by ${escapeHtml(po.updated_by)}${po.updated_at ? " · " + escapeHtml(po.updated_at) : ""}</div>` : ""}
@@ -5453,11 +5491,13 @@ function renderPurchaseOrder(po) {
       <span class="po-line-main">
         <span class="po-line-desc">${escapeHtml(it.description)}</span>
         <span class="po-line-code mono">${escapeHtml(it.item_code)}</span>
+        ${it.progress ? `<span class="po-pill po-p-${escapeAttr(it.progress)} po-line-pill">${
+          escapeHtml(PO_PROGRESS_LABEL[it.progress] || it.progress)}</span>` : ""}
       </span>
       <span class="po-line-qty">${trimNum(it.outstanding)}<span class="po-line-of">/ ${trimNum(it.qty)}${
         it.uom ? " " + escapeHtml(it.uom) : ""}</span></span>
     </div>`).join("") + `</div>
-    <p class="po-foot">Outstanding / ordered, read from AutoCount.</p>`;
+    <p class="po-foot">Outstanding / ordered, read from AutoCount. Where a line has got to is worked out from that and its shipments.</p>`;
 }
 
 async function setPurchaseOrderStatus(docNo, status, btn) {

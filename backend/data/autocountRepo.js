@@ -751,6 +751,53 @@ function mapPoRow(r) {
   };
 }
 
+// The lines of MANY purchase orders at once, quantity only.
+//
+// For the listing screen, which shows a status per order that is worked out
+// per LINE. Doing that from the order's totals instead would be cheaper and
+// wrong: one line over-shipped would cover for another line nobody has
+// touched, and the card would read "Shipped" over an order still sitting on
+// somebody's desk.
+//
+// Same FROM and same blank-line filter as the listing itself, so the two
+// cannot disagree about which rows are real.
+async function listPurchaseOrderLines(docNos) {
+  const shape = await purchaseOrderShape();
+  if (!shape) return null;
+  const list = [...new Set((docNos || []).map((d) => String(d || "").trim()).filter(Boolean))];
+  if (!list.length) return [];
+  const qty = poQtyExpr(shape);
+  const out = [];
+  // Named parameters rather than an inlined list: these are document numbers
+  // read back out of AutoCount, but they arrive here through an HTTP query
+  // string and are not going into SQL by concatenation on that account.
+  for (let i = 0; i < list.length; i += 100) {
+    const chunk = list.slice(i, i + 100);
+    const params = {};
+    const marks = chunk.map((no, n) => { params[`p${n}`] = no; return `@p${n}`; }).join(",");
+    const rows = await query(
+      `SELECT m.[${shape.mNo}] AS DocNo,
+              ${shape.dtlSeq ? `d.[${shape.dtlSeq}]` : "NULL"} AS Seq,
+              d.[${shape.dtlQty}] AS Qty,
+              ${qty} AS Outstanding
+         FROM PODtl d
+         JOIN PO m ON m.[${shape.mDoc}] = d.[${shape.dtlDoc}]
+        WHERE m.[${shape.mNo}] IN (${marks})
+          AND ${poRealLine(shape)}`,
+      params
+    );
+    for (const r of rows) {
+      out.push({
+        doc_no: String(r.DocNo || "").trim(),
+        seq: r.Seq === null || r.Seq === undefined ? null : Number(r.Seq),
+        qty: Number(r.Qty) || 0,
+        outstanding: Number(r.Outstanding) || 0,
+      });
+    }
+  }
+  return out;
+}
+
 // One PO with its lines. Returns null when the tables are not the shape this
 // expects, and undefined-ish {} when there is simply no such PO - the caller
 // tells those apart so it can say "AutoCount is not set up" rather than "no
@@ -823,6 +870,7 @@ async function getPurchaseOrder(docNo) {
 // something noticed weeks later on a screen that looks subtly wrong.
 module.exports.purchaseOrderShape = purchaseOrderShape;
 module.exports.listPurchaseOrders = listPurchaseOrders;
+module.exports.listPurchaseOrderLines = listPurchaseOrderLines;
 module.exports.getPurchaseOrder = getPurchaseOrder;
 
 // Outstanding quantity per item code, plus the PO numbers it sits on.

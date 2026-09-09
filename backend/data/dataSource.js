@@ -90,6 +90,7 @@ module.exports = {
     create: (...a) => sqliteRepo.slips.createShipment(...a),
     update: (...a) => sqliteRepo.slips.updateShipment(...a),
     allocatedByPo: (...a) => sqliteRepo.slips.allocatedByPo(...a),
+    receivedByPo: (...a) => sqliteRepo.slips.receivedByPo(...a),
     forPo: (...a) => sqliteRepo.slips.shipmentsForPo(...a),
   },
   notes: {

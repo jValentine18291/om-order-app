@@ -2325,8 +2325,17 @@ select {
 .po-card{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--line,#e3e6e8);
   border-left-width:4px;border-radius:11px;padding:11px 12px;margin-bottom:9px;font:inherit;cursor:pointer}
 .po-card:active{background:var(--primary-tint,#eef7f8)}
+/* The card's stripe and its pill both follow where the order has GOT to, not
+   Iris's tick, so a list can be read down the left edge: grey nothing done,
+   purple sent, blue moving, green in. The shipment screen already uses blue
+   for sailing and green for landed, and a purchase order arriving is the same
+   event seen from the other end - so it is the same two colours. */
 .po-card.po-NOT_ORDERED{border-left-color:#8f9ba2}
 .po-card.po-ORDERED{border-left-color:#5B3FA8}
+.po-card.po-PART_SHIPPED{border-left-color:#6E9BC5}
+.po-card.po-SHIPPED{border-left-color:#185FA5}
+.po-card.po-PART_RECEIVED{border-left-color:#6FAE88}
+.po-card.po-RECEIVED{border-left-color:#1B7A42}
 .po-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 .po-top strong{font-size:14px;font-variant-numeric:tabular-nums}
 .po-sup{color:var(--ink-2,#45525a);font-size:13px;margin:2px 0 0}
@@ -2334,6 +2343,15 @@ select {
 .po-pill{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap}
 .po-p-NOT_ORDERED{background:#eef1f3;color:#45525a}
 .po-p-ORDERED{background:#F0EAFB;color:#5B3FA8}
+.po-p-PART_SHIPPED{background:#EAF2FA;color:#3B6E9E}
+.po-p-SHIPPED{background:#E6F1FB;color:#185FA5}
+.po-p-PART_RECEIVED{background:#EAF5EE;color:#3D7A55}
+.po-p-RECEIVED{background:#E7F5EC;color:#1B7A42}
+
+/* The chip under a line's part number. Sits on its own row rather than beside
+   the quantity: the quantity column is already narrow, and a phone would break
+   "Partially received" one word per line inside it. */
+.po-line-pill{align-self:flex-start;margin-top:5px}
 
 .po-track{background:#eef7f8;border:1px solid #cfe3e6;border-radius:11px;padding:12px}
 .po-track .fp-row{border-color:#cfe3e6}
