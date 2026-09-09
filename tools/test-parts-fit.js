@@ -35,9 +35,20 @@ const captureSql = async (q, limit, fit) => buildPartsSearchSql(q, limit, fit) |
     console.log(`  (could not capture SQL: ${c && c.error}) - the SQLite part below still runs`);
   } else {
     check("machine units are excluded", /NOT LIKE 'U%'/.test(sql), true);
-    // The one that would break every search on the app's busiest screen.
-    check("no CASE without a WHEN when there is no machine",
-      /CASE\s+ELSE/.test(sql), false);
+
+    // The two shapes that have actually taken this query down, both only
+    // reachable with NO machine - which is every search on Find Part.
+    //
+    // "CASE ELSE 2 END" is not SQL at all. And a bare number in the ORDER BY
+    // list is not the constant it looks like: SQL Server either refuses it or
+    // reads it as a column position. This one shipped, and because the route
+    // turns a failed query into an empty result, it looked exactly like a
+    // search that found nothing.
+    check("no CASE without a WHEN", /CASE\s+ELSE/.test(sql), false);
+    const orderTerms = (t) => t.split("ORDER BY")[1].split(/,(?![^()]*\))/)
+      .map((x) => x.replace(/\s+/g, " ").trim());
+    check("and nothing in ORDER BY is a bare number",
+      orderTerms(sql).filter((t) => /^\d+$/.test(t)), []);
     check("every parameter it names is one it supplies",
       (sql.match(/@[a-zA-Z]\w*/g) || []).every((p) => p.slice(1) in (c.params || {})), true);
 
@@ -51,6 +62,21 @@ const captureSql = async (q, limit, fit) => buildPartsSearchSql(q, limit, fit) |
     // brand arriving with punctuation in it should not reach the query at all.
     c = await captureSql("x", 15, { brand: "SZEN'; DROP TABLE Item; --" });
     check("a brand is letters or it is nothing", c.params.brand, "SZENDROPTABLEItem".toUpperCase());
+
+    // Every shape the four combinations of machine context can produce, held
+    // to the same two rules. The one that broke was reachable only by the
+    // combination nothing was checking.
+    for (const [label, fit] of [
+      ["no machine", {}],
+      ["brand only", { brand: "SZEN" }],
+      ["book only", { prefer: ["848CE037A0"] }],
+      ["both", { brand: "SZEN", prefer: ["848CE037A0"] }],
+    ]) {
+      const t = (await captureSql("carb", 15, fit)).sql;
+      check(`${label}: no bare number in ORDER BY`,
+        orderTerms(t).filter((x) => /^\d+$/.test(x)), []);
+      check(`${label}: no CASE without a WHEN`, /CASE\s+ELSE/.test(t), false);
+    }
   }
 
   // ---- 2. the ranking, over real codes ---------------------------------------

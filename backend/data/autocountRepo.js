@@ -444,14 +444,25 @@ function buildPartsSearchSql(q, limit = 15, fit = {}) {
   const brand = String(fit.brand || "").toUpperCase().replace(/[^A-Z]/g, "");
   if (brand) params.brand = brand;
 
-  // A plain 2 when there is no machine to fit to - Find Part, or the popup
-  // before a machine is picked. "CASE ELSE 2 END" with no WHEN is not SQL, and
-  // that is every search on the app's busiest screen.
+  // With no machine to fit to - Find Part, or the popup before a machine is
+  // picked - there is nothing to rank by, and the rank has to disappear from
+  // the ORDER BY rather than become a constant.
+  //
+  // "ORDER BY 2" is not the constant 2 to SQL Server. It is either rejected
+  // outright or read as "sort by the second column", and neither is what was
+  // meant. It shipped once and took Find Part down with it: the route turns a
+  // failed query into an empty result, so a broken search looks exactly like a
+  // search that found nothing.
+  //
+  // In the SELECT list a constant is ordinary and stays, so every row still
+  // comes back carrying its rank.
   const whens = [
     preferTests.length ? `WHEN ${preferTests.join(" OR ")} THEN 0` : "",
     brand ? `WHEN ${CODE} LIKE @brand + '%' THEN 1` : "",
   ].filter(Boolean);
   const fitRank = whens.length ? `CASE ${whens.join(" ")} ELSE 2 END` : "2";
+  const fitOrder = whens.length ? `${fitRank},
+               ` : "";
 
   // The balance joins on i.ItemCode exactly - see getStockBalances for why
   // that is safe here and why normalizing would not be: these codes come out
@@ -468,8 +479,7 @@ function buildPartsSearchSql(q, limit = 15, fit = {}) {
       WHERE i.IsActive = 'T'
         AND UPPER(i.ItemCode) NOT LIKE 'U%'
         AND ${conditions.join("\n        AND ")}
-      ORDER BY ${fitRank},
-               CASE
+      ORDER BY ${fitOrder}CASE
                  WHEN REPLACE(UPPER(i.ItemCode), ' ', '') = @exact THEN 0
                  WHEN REPLACE(UPPER(i.ItemCode), ' ', '') LIKE @exact + '%' THEN 1
                  ELSE 2
