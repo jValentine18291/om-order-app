@@ -1298,6 +1298,19 @@ async function notifyStateChange(slip, machineId, before, state) {
         }`,
         slip: slip.slip_number,
       });
+      return;
+    }
+
+    // Condemned from anywhere else - which now includes a technician doing it
+    // at the bench when the customer balks at the price. Sales are the ones who
+    // have to act on it: the machine still has to leave the building, and it
+    // will not be on the invoice they were expecting to raise.
+    if (state === "CONDEMNED" && before !== "CONDEMNED") {
+      await push.notify(pushDb, QUOTE_NOTIFY_ROLES, {
+        title: `Condemned: ${desc}`,
+        body: `${slip.slip_number} · ${slip.company} · not being repaired - it still has to leave the workshop`,
+        slip: slip.slip_number,
+      });
     }
   } catch (e) {
     console.error("[push] notify failed:", e.message);

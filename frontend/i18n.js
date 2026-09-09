@@ -407,6 +407,9 @@
     // slip; this is one machine, and the status a slip reaches when every
     // machine on it has been ticked.
     "Repaired": "已修好",
+    // The customer says the repair costs too much. Technicians can record
+    // it themselves now, so it needs to read in Chinese too.
+    "Too expensive — condemn": "维修费过高 — 报废",
     // The end of a slip: order raised here, keyed into AutoCount by sales,
     // then collected and paid for.
     "SO Created": "已开销售单",

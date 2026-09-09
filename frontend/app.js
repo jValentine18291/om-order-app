@@ -2576,8 +2576,7 @@ function renderMachineQuoteRow() {
   } else if (m.state === "QUOTED") {
     text = `<span class="machine-quote mq-done">Waiting on customer</span> Quoted; waiting for their answer.`;
     actions = decide
-      ? [["TO_REPAIR", "They said go ahead", "btn-secondary"],
-         ["CONDEMNED", "They said no — condemn", "btn-secondary"]]
+      ? [["TO_REPAIR", "They said go ahead", "btn-secondary"]]
       : [["AWAITING_QUOTE", "Send for quoting again", "btn-secondary"]];
   } else if (m.state === "TO_REPAIR") {
     text = `<span class="machine-quote mq-repair">Repair confirmed</span> Carry on with the repair.`;
@@ -2601,6 +2600,13 @@ function renderMachineQuoteRow() {
     actions = [["AWAITING_QUOTE", "Send this machine for quoting", "btn-secondary"]];
     // A machine nobody needed to quote for is repaired straight from here.
     if (canMarkRepaired()) actions.unshift(["REPAIRED", "Mark as repaired", "btn-secondary"]);
+  }
+
+  // Too expensive to repair, said on the phone or at the bench. Added last so
+  // it sits at the bottom, away from the buttons that carry the job forward,
+  // and coloured so it is never the one tapped by mistake.
+  if (canCondemn() && CONDEMNABLE.includes(m.state)) {
+    actions = actions.concat([["CONDEMNED", "Too expensive — condemn", "btn-secondary btn-condemn"]]);
   }
 
   state.innerHTML = text;
@@ -2628,8 +2634,9 @@ async function moveMachine(btn, to) {
   if (!m || !session.slipNumber) return;
 
   // Anything scanned but not yet saved would otherwise be missing from the very
-  // quote this is asking for.
-  if (to === "AWAITING_QUOTE" && session.pendingParts.length) {
+  // quote this is asking for - and from the record of what a condemned machine
+  // was going to cost, which is the reason it was condemned.
+  if ((to === "AWAITING_QUOTE" || to === "CONDEMNED") && session.pendingParts.length) {
     try {
       await commitPendingParts();
       await saveCurrentLabour();
@@ -2637,7 +2644,8 @@ async function moveMachine(btn, to) {
     } catch (e) { toast(e.message, "err"); return; }
   }
   if (to === "CONDEMNED" && !confirm(
-    "Condemn this machine?\n\nThe technicians who worked on it will be told to stop."
+    "Condemn this machine?\n\nThe customer is not paying to have it repaired. "
+    + "Work on it stops, and you will be asked whether they collect it or we dispose of it."
   )) return;
 
   btn.disabled = true;
@@ -3661,21 +3669,32 @@ function renderSlipDetail(slip) {
     // Sales quote the machine, ring the customer, and come back with one of two
     // answers. Each step is offered only from where the machine actually is,
     // and the step already taken stays on screen so it can be corrected.
+    //
+    // Two different permissions, so they are asked separately. Quoting is
+    // sales' job and a technician opening this screen should not be offered
+    // it. Condemning is not: the customer says the repair costs too much to
+    // whoever happens to be on the phone or at the bench.
     const live = slip.status !== "CLOSED" && !m.converted_at;
+    let acts = [];
     if (canDecide() && live && m.state !== "RECEIVED") {
-      const acts =
+      acts =
         m.state === "AWAITING_QUOTE" ? [["QUOTED", "Mark as Quoted", "decide-quoted"],
                                         ["TO_REPAIR", "No quote needed", ""]]
-      : m.state === "QUOTED"         ? [["TO_REPAIR", "Confirm Repair", "decide-repair"],
-                                        ["CONDEMNED", "Condemn", "decide-condemn"]]
+      : m.state === "QUOTED"         ? [["TO_REPAIR", "Confirm Repair", "decide-repair"]]
       : m.state === "TO_REPAIR"      ? [["AWAITING_QUOTE", "Send for quoting", ""]]
       : m.state === "CONDEMNED"      ? [["TO_REPAIR", "Repair it after all", "decide-repair"]]
       : [];
-      if (acts.length) {
-        html += `<div class="decide-row" data-decide="${m.id}">${acts.map(([to, label, cls]) =>
-          `<button type="button" class="decide-btn ${cls}" data-state="${escapeAttr(to)}">${escapeHtml(label)}</button>`
-        ).join("")}</div>`;
-      }
+    }
+    // Offered from wherever the machine has got to, including one nobody has
+    // touched yet - the guard above keeps quoting off a Received machine, and
+    // that has nothing to do with whether the customer wants it back.
+    if (canCondemn() && live && CONDEMNABLE.includes(m.state)) {
+      acts = acts.concat([["CONDEMNED", "Too expensive — condemn", "decide-condemn"]]);
+    }
+    if (acts.length) {
+      html += `<div class="decide-row" data-decide="${m.id}">${acts.map(([to, label, cls]) =>
+        `<button type="button" class="decide-btn ${cls}" data-state="${escapeAttr(to)}">${escapeHtml(label)}</button>`
+      ).join("")}</div>`;
     }
 
     // Finished with. Its own row rather than folded into the decisions above,
@@ -4972,6 +4991,20 @@ function canMarkRepaired() {
 function canDecide() {
   return ["sales", "purchaser", "admin"].includes(getRole());
 }
+
+// Condemning is not a sales decision the way quoting is. The customer says the
+// repair costs too much, and whoever is holding the phone or standing at the
+// bench when they say it should be able to record it - otherwise it waits for
+// somebody else to be free, and in the meantime a technician carries on
+// working on a machine nobody is going to pay for.
+function canCondemn() {
+  return ["tech", "sales", "purchaser", "admin"].includes(getRole());
+}
+
+// The states a machine can be condemned FROM. Everything except a machine
+// already condemned, and one already repaired - the work on that is done and
+// spent, and "not finished after all" is the way back if it was a mistake.
+const CONDEMNABLE = ["RECEIVED", "AWAITING_QUOTE", "QUOTED", "TO_REPAIR"];
 
 // ---- A note kept against a part --------------------------------------------
 // Chiefly supersessions - "replaced by X". The knowledge lives in people's

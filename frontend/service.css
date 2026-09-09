@@ -2044,6 +2044,11 @@ select {
   border: 1px solid var(--border); background: var(--surface);
   font-size: .9rem; font-weight: 700; cursor: pointer;
 }
+/* Condemning is the one button on the machine popup that ends the job rather
+   than moving it along, so it does not look like its neighbours. */
+.btn-condemn { color: #A32020; border-color: #e6b0b0; }
+.btn-condemn:active { background: #FBE9E9; }
+
 .decide-repair  { color: #1B7A42; border-color: #9ed4b4; }
 .decide-condemn { color: #A32020; border-color: #e6b0b0; }
 .decide-quoted  { color: #8A4B00; border-color: #e8c99b; }
