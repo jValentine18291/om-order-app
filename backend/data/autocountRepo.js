@@ -391,9 +391,28 @@ module.exports.searchDebtors = searchDebtors;
 // The ordering is done in SQL and not afterwards, because only the top rows
 // come back: re-sorting them here would tidy a page the right answer had
 // already fallen off the bottom of.
-async function searchParts(q, limit = 15) {
+// `fit` is what the technician is standing in front of, when there is one:
+//
+//   fit.prefer  part numbers out of this machine's own parts book
+//   fit.brand   the brand's parts prefix, "SHUQ" for a Husqvarna machine
+//
+// Both only reorder. Nothing is dropped for failing to match, because the
+// search box is how a technician adds anything at all - oil, A8 SPARE PARTS,
+// a part that cross-fits from another model - and a part sorted low is still
+// found where a part filtered out is not.
+//
+// The ordering happens before TOP, so a machine's own parts are in the fifteen
+// that come back rather than sorted within them. That is the whole point:
+// ranking after the fact could not rescue a part the cap had already cut.
+// The query, built apart from the running of it.
+//
+// Separated so a test can read the SQL without a SQL Server to send it to -
+// this is the one query in the app whose text is assembled from what the
+// caller passed, and the failures it can have (a CASE with no WHEN, a
+// parameter named but never supplied) are failures of the TEXT.
+function buildPartsSearchSql(q, limit = 15, fit = {}) {
   const term = String(q || "").trim();
-  if (!term) return [];
+  if (!term) return null;
   const cap = Math.max(1, Math.min(20, Number(limit) || 15));
 
   const words = term.split(/\s+/).slice(0, 6); // sane cap on word count
@@ -406,33 +425,72 @@ async function searchParts(q, limit = 15) {
            OR REPLACE(UPPER(i.ItemCode), ' ', '') LIKE '%' + @n${idx} + '%' )`;
   });
 
+  // Spaces AND dashes, because neither is written consistently: the book has
+  // "590 53 64-02" and AutoCount has its own idea of where the spaces go.
+  const CODE = `REPLACE(REPLACE(UPPER(i.ItemCode), ' ', ''), '-', '')`;
+
+  // A machine's own part, allowing for the aftermarket equivalents the
+  // catalogue carries beside the genuine ones - "M1912GC 522664401R" is the
+  // same part as "SHUQ 522664401" and a technician fitting one is fitting the
+  // other. Loose here is right: this only decides what sorts first.
+  const prefer = [...new Set((fit.prefer || [])
+    .map((n) => String(n || "").toUpperCase().replace(/[^A-Z0-9]/g, ""))
+    .filter(Boolean))].slice(0, 25);
+  const preferTests = prefer.map((n, idx) => {
+    params[`pf${idx}`] = n;
+    return `${CODE} LIKE '%' + @pf${idx} OR ${CODE} LIKE '%' + @pf${idx} + 'R'`;
+  });
+
+  const brand = String(fit.brand || "").toUpperCase().replace(/[^A-Z]/g, "");
+  if (brand) params.brand = brand;
+
+  // A plain 2 when there is no machine to fit to - Find Part, or the popup
+  // before a machine is picked. "CASE ELSE 2 END" with no WHEN is not SQL, and
+  // that is every search on the app's busiest screen.
+  const whens = [
+    preferTests.length ? `WHEN ${preferTests.join(" OR ")} THEN 0` : "",
+    brand ? `WHEN ${CODE} LIKE @brand + '%' THEN 1` : "",
+  ].filter(Boolean);
+  const fitRank = whens.length ? `CASE ${whens.join(" ")} ELSE 2 END` : "2";
+
   // The balance joins on i.ItemCode exactly - see getStockBalances for why
   // that is safe here and why normalizing would not be: these codes come out
   // of Item, not off somebody's keyboard.
-  const rows = await query(
+  const sql =
     `SELECT TOP ${cap}
             i.ItemCode,
             COALESCE(NULLIF(i.Description, ''), NULLIF(i.Desc2, ''), i.ItemCode) AS Descr,
             NULLIF(i.Desc2, '') AS Desc2,
             i.BaseUOM,
-            (SELECT SUM(s.Qty) FROM StockDTL s WHERE s.ItemCode = i.ItemCode) AS BalQty
+            (SELECT SUM(s.Qty) FROM StockDTL s WHERE s.ItemCode = i.ItemCode) AS BalQty,
+            ${fitRank} AS FitRank
        FROM Item i
       WHERE i.IsActive = 'T'
+        AND UPPER(i.ItemCode) NOT LIKE 'U%'
         AND ${conditions.join("\n        AND ")}
-      ORDER BY CASE
+      ORDER BY ${fitRank},
+               CASE
                  WHEN REPLACE(UPPER(i.ItemCode), ' ', '') = @exact THEN 0
                  WHEN REPLACE(UPPER(i.ItemCode), ' ', '') LIKE @exact + '%' THEN 1
                  ELSE 2
                END,
-               Descr`,
-    params
-  );
+               Descr`;
+  return { sql, params };
+}
+
+async function searchParts(q, limit = 15, fit = {}) {
+  const built = buildPartsSearchSql(q, limit, fit);
+  if (!built) return [];
+  const rows = await query(built.sql, built.params);
   return rows.map((r) => ({
     item_code: r.ItemCode,
     description: r.Descr,
     desc2: r.Desc2 && r.Desc2 !== r.Descr ? r.Desc2 : "",
     uom: r.BaseUOM || "",
     bal_qty: r.BalQty === null || r.BalQty === undefined ? 0 : Number(r.BalQty),
+    // 0 this machine's own part, 1 same brand, 2 everything else. The screen
+    // marks 0 so a technician can see WHY it is at the top.
+    fit: Number(r.FitRank),
   }));
 }
 
@@ -465,6 +523,9 @@ async function searchMachines(q, limit = 15) {
             NULLIF(i.Desc2, '') AS Desc2
        FROM Item i
       WHERE i.IsActive = 'T'
+        -- Machine units. searchParts takes exactly what this leaves, so
+        -- between them the two cover the catalogue with no overlap and no gap:
+        -- a whole brushcutter is never offered as a spare part for one.
         AND UPPER(i.ItemCode) LIKE 'U%'
         AND ${conditions.join("\n        AND ")}
       ORDER BY Descr`,
@@ -869,6 +930,7 @@ async function getPurchaseOrder(docNo) {
 // wrong guess about a column name is one command to find rather than
 // something noticed weeks later on a screen that looks subtly wrong.
 module.exports.purchaseOrderShape = purchaseOrderShape;
+module.exports.buildPartsSearchSql = buildPartsSearchSql;
 module.exports.listPurchaseOrders = listPurchaseOrders;
 module.exports.listPurchaseOrderLines = listPurchaseOrderLines;
 module.exports.getPurchaseOrder = getPurchaseOrder;

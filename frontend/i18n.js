@@ -149,6 +149,8 @@
     "Description": "名称",
     "Location / Shelf": "位置 / 货架",
     "Bal. Qty": "库存数量",
+    // On a search result: this part is in the machine's own parts book.
+    "This machine": "本机适用",
     "Current Qty": "现有数量",
     "Qty Requested": "申请数量",
     "Looking up stock…": "正在查询库存…",

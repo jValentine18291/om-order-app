@@ -2029,6 +2029,9 @@ function maybeShowEntry() {
   const ready = session.slipNumber && session.machineId && session.technician;
   $("os-entry").style.display = ready ? "block" : "none";
   if (ready) {
+    // Not awaited: the search is usable immediately and simply stops
+    // reordering until the book has landed.
+    loadMachineFit();
     setMode(currentMode || "qr");
     renderContext();
     renderMachineParts();
@@ -2050,6 +2053,48 @@ function renderContext() {
   if (tech) bits.push(`<span>Tech</span> ${escapeHtml(tech)}`);
   if (created) bits.push(`<span>Received</span> ${escapeHtml(created)}`);
   $("mm-who").innerHTML = bits.join(" · ");
+}
+
+// ---- The machine the search is being made from -----------------------------
+// A technician on a Zenoah brushcutter typing "clutch" was getting Husqvarna
+// clutches mixed in with Zenoah ones. This works out what to tell the search
+// so the machine's own parts sort to the top. See frontend/machine-ipl.js.
+//
+// Nothing is hidden by it and nothing depends on it: if the book will not load
+// or the machine matches none, the search is exactly what it was before.
+let fitDocs = {};        // parts books already fetched, by model id
+let fitFor = null;       // { machineId, brand, iplId, doc }
+
+async function loadMachineFit() {
+  const m = currentMachine();
+  if (!m) { fitFor = null; return; }
+  if (fitFor && fitFor.machineId === m.id) return;
+  fitFor = { machineId: m.id, brand: MachineIpl.brandPrefixFor(m), iplId: "", doc: null };
+
+  try {
+    if (!ipl.models) ipl.models = await api("./ipl/index.json");
+    const id = MachineIpl.matchIplModel(m, ipl.models || []);
+    if (!id) return;
+    fitFor.iplId = id;
+    if (!fitDocs[id]) fitDocs[id] = await api(`./ipl/${encodeURIComponent(id)}.json`);
+    // Re-read: the technician may have moved to another machine while this
+    // was in flight, and writing the wrong book onto the new one would float
+    // the wrong parts - the one thing this must never do.
+    if (fitFor && fitFor.machineId === m.id) fitFor.doc = fitDocs[id];
+  } catch (_) {
+    // A book that will not load is not worth a message. The search still works.
+  }
+}
+
+// The query string for a search made from this machine. Empty when there is no
+// machine, which is what Find Part passes.
+function fitQuery(term) {
+  if (!fitFor) return "";
+  const parts = [];
+  if (fitFor.brand) parts.push(`brand=${encodeURIComponent(fitFor.brand)}`);
+  const prefer = fitFor.doc ? MachineIpl.preferredNumbers(fitFor.doc, term) : [];
+  if (prefer.length) parts.push(`prefer=${encodeURIComponent(prefer.join(","))}`);
+  return parts.length ? "&" + parts.join("&") : "";
 }
 
 // The scanned-part entry point. Parts are held as PENDING (not yet saved) and
@@ -4859,10 +4904,14 @@ function partOptionHtml(p, { extraClass = "" } = {}) {
   const n = Number(p.bal_qty) || 0;
   const qty = Number.isInteger(n) ? String(n) : n.toFixed(2);
   const sub = p.shelf ? `${escapeHtml(p.shelf)} · ${escapeHtml(p.item_code)}` : escapeHtml(p.item_code);
+  // fit 0 means this part is in the machine's own parts book. Marked rather
+  // than merely sorted first, so a technician can see WHY it is at the top -
+  // an order with no reason given is one nobody trusts.
+  const mine = p.fit === 0 ? `<span class="fp-opt-fit">This machine</span>` : "";
   return `<button type="button" class="company-option fp-opt-row ${extraClass}" data-code="${escapeAttr(p.item_code)}">
       <span class="fp-opt-main">
         <span class="fp-opt-desc">${escapeHtml(p.description)}${
-          p.desc2 ? ` <span class="fp-opt-model">· ${escapeHtml(p.desc2)}</span>` : ""}</span>
+          p.desc2 ? ` <span class="fp-opt-model">· ${escapeHtml(p.desc2)}</span>` : ""}${mine}</span>
         <span class="fp-opt-code mono">${sub}</span>
       </span>
       ${known ? `<span class="fp-opt-qty ${n > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${escapeHtml(qty)}${
@@ -7088,7 +7137,7 @@ $("code-input").addEventListener("input", () => {
   if (q.length < 2) { box.innerHTML = ""; return; }
   codeDebounce = setTimeout(async () => {
     try {
-      const data = await api(`/api/parts-search?q=${encodeURIComponent(q)}`);
+      const data = await api(`/api/parts-search?q=${encodeURIComponent(q)}${fitQuery(q)}`);
       const list = data.results || [];
       if (!list.length) {
         box.innerHTML = `<div class="fp-empty">No matching parts</div>`;

@@ -827,7 +827,12 @@ app.get("/api/parts-search", async (req, res) => {
     const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
     if (itemsSource !== "autocount") return res.json({ results: [] });
     const acRepo = require("./data/autocountRepo");
-    const results = await acRepo.searchParts(String(req.query.q || ""), 15);
+    // What the technician is working on, so their machine's own parts sort
+    // first. Both are hints and neither filters anything out - see searchParts.
+    const results = await acRepo.searchParts(String(req.query.q || ""), 15, {
+      brand: String(req.query.brand || ""),
+      prefer: String(req.query.prefer || "").split(",").filter(Boolean),
+    });
     res.json({ results });
   } catch (err) {
     console.error("[GET /api/parts-search]", err.message);
