@@ -54,6 +54,15 @@
     UPER: "Peruzzo", UVIC: "Victa", URAY: "Rayco", UHCN: "Husqvarna Construction",
   };
 
+  // The parts prefix for a brand NAME, for machines that were typed in by hand
+  // and have no code of their own. Once the book is known the brand is known,
+  // so a hand-typed "BK3410FL51 Brushcutter" still floats SZEN parts under its
+  // own carburettor.
+  function brandPrefixForBrandName(name) {
+    const hit = Object.keys(BRAND_BY_PREFIX).find((k) => BRAND_BY_PREFIX[k] === name);
+    return hit ? "S" + hit.slice(1) : "";
+  }
+
   function norm(s) {
     return String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
   }
@@ -95,17 +104,26 @@
     );
   }
 
+  // A model name long enough to stand on its own without the brand to back it
+  // up. "BK3410FL" is nobody else's; "365" is a number that turns up in all
+  // sorts of text, which is the one the brand check exists to protect.
+  const STANDS_ALONE = 5;
+
   // The book for this machine, or "".
   //
-  // Both halves have to agree: the brand, and the model name appearing in what
-  // the machine is called. Requiring the brand is what makes this safe to run
-  // on every machine - "365" turns up inside plenty of descriptions, and
-  // without the brand check a Zenoah with 36.5cc on its label would be handed
-  // a Husqvarna chainsaw's parts list.
+  // Where the machine came out of AutoCount its code names the brand, and the
+  // brand has to agree - a Zenoah with 36.5cc on its label must not be handed
+  // a Husqvarna 365 chainsaw's parts list.
   //
-  // The longest match wins: "525HF3S" and "525HE4" both contain neither the
-  // other, but a shorter key that IS contained in a longer one would otherwise
-  // win by luck of ordering.
+  // Where it was typed in by hand there is no code and often no brand word
+  // either: slip 00024 came in as "BK3410FL51 Brushcutter", which says nothing
+  // about Zenoah. So the model name is allowed to stand on its own, as long as
+  // it is long enough to be nobody else's. That is what the length rule is
+  // for, and it is why "365" alone is still not enough.
+  //
+  // The longest match wins: "525HF3S" and "525HE4" contain neither the other,
+  // but a shorter key that IS inside a longer one would otherwise win by luck
+  // of ordering.
   function matchIplModel(machine, index) {
     const m = machine || {};
     const brand = BRAND_BY_PREFIX[codePrefix(m.machine_code)] || "";
@@ -115,19 +133,32 @@
     const words = wordsOf(m);
     let best = "", bestLen = 0;
     for (const entry of index || []) {
-      // A machine with no code at all was typed in by hand. Its description
-      // still names the brand often enough to be worth trying, so the brand is
-      // checked against the words rather than refused outright.
-      const brandOk = brand
-        ? entry.brand === brand
-        : hay.includes(norm(entry.brand));
-      if (!brandOk) continue;
+      const brandNamed = brand ? entry.brand === brand : hay.includes(norm(entry.brand));
+      // A code that names a brand is authoritative: another brand's book is
+      // not this machine's, however the model reads.
+      if (brand && !brandNamed) continue;
       for (const key of modelKeys(entry)) {
         const hit = words.has(key) || (key.length >= 4 && hay.includes(key));
-        if (hit && key.length > bestLen) { best = entry.id; bestLen = key.length; }
+        if (!hit) continue;
+        // With no brand to go on, only a name that stands alone counts.
+        if (!brandNamed && key.length < STANDS_ALONE) continue;
+        if (key.length > bestLen) { best = entry.id; bestLen = key.length; }
       }
     }
     return best;
+  }
+
+  // Everything the search needs to know about the machine in front of you:
+  // which book, and which brand's parts to float when the book has nothing.
+  //
+  // The brand comes off the machine's own code where there is one, and off the
+  // matched book where there is not - so a hand-typed machine gets both.
+  function fitFor(machine, index) {
+    const iplId = matchIplModel(machine, index);
+    const entry = (index || []).find((e) => e.id === iplId);
+    const brand = brandPrefixFor(machine) ||
+                  (entry ? brandPrefixForBrandName(entry.brand) : "");
+    return { iplId, brand };
   }
 
   // The part numbers in this book that the technician's search term matches.
@@ -160,5 +191,6 @@
     return out;
   }
 
-  return { brandPrefixFor, matchIplModel, preferredNumbers, modelKeys, codePrefix, BRAND_BY_PREFIX };
+  return { fitFor, brandPrefixFor, brandPrefixForBrandName, matchIplModel,
+           preferredNumbers, modelKeys, codePrefix, BRAND_BY_PREFIX, STANDS_ALONE };
 });

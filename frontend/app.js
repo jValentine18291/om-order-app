@@ -2069,11 +2069,15 @@ async function loadMachineFit() {
   const m = currentMachine();
   if (!m) { fitFor = null; return; }
   if (fitFor && fitFor.machineId === m.id) return;
+  // The brand off the machine's own code, until the catalogue has been read
+  // and can supply one for a machine that was typed in by hand.
   fitFor = { machineId: m.id, brand: MachineIpl.brandPrefixFor(m), iplId: "", doc: null };
 
   try {
     if (!ipl.models) ipl.models = await api("./ipl/index.json");
-    const id = MachineIpl.matchIplModel(m, ipl.models || []);
+    const fit = MachineIpl.fitFor(m, ipl.models || []);
+    if (fitFor && fitFor.machineId === m.id) fitFor.brand = fit.brand;
+    const id = fit.iplId;
     if (!id) return;
     fitFor.iplId = id;
     if (!fitDocs[id]) fitDocs[id] = await api(`./ipl/${encodeURIComponent(id)}.json`);

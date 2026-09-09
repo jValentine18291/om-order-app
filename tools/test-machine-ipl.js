@@ -68,6 +68,39 @@ check("but 3650 is not 365",
 check("nor is a length in millimetres",
   match(machine("UHUQ OTHER", "Husqvarna hose 365mm")), "");
 
+console.log("\n-- typed in by hand, with no code at all --");
+// Slip 00024, exactly as it was written: no AutoCount code, and nothing in
+// the words that says Zenoah. The model name has to carry it alone, which is
+// what the length rule allows - "BK3410FL" is nobody else's.
+const typed = machine("", "BK3410FL51 Brushcutter");
+check("it still finds the book", match(typed), "bk3410fl");
+check("and the brand comes off the book, not the machine",
+  M.fitFor(typed, INDEX), { iplId: "bk3410fl", brand: "SZEN" });
+// The carburettor John named. The book writes it "T1151-81001" and AutoCount
+// holds it "SZEN T115181001"; squashing is what lets the two meet.
+const bk = JSON.parse(fs.readFileSync(
+  path.resolve(__dirname, "..", "frontend", "ipl", "bk3410fl.json"), "utf8"));
+check("searching carburetor asks for that exact part",
+  M.preferredNumbers(bk, "carburetor"), ["T115181001"]);
+
+// The relaxation is only for machines with no code. A code that names a brand
+// is still the last word: another brand's book is not this machine's.
+check("a coded Husqvarna cannot match a Zenoah book",
+  match(machine("UHUQ SOMETHING", "Husqvarna BK3410FL51 mislabelled")), "");
+// And a name too short to stand alone still needs its brand.
+check("365 alone, with no brand anywhere, is not enough",
+  match(machine("", "365 chainsaw")), "");
+check("but with the brand it is",
+  match(machine("", "Husqvarna 365 chainsaw")), "hus365");
+// The property, over every short key in the catalogue rather than the one or
+// two worth naming: a name too short to stand alone never matches on its own.
+// "365" and "FLS" are both that short, and neither may carry a match by itself.
+const shortKeys = [...new Set(INDEX.flatMap((e) => M.modelKeys(e))
+  .filter((k) => k.length < M.STANDS_ALONE))];
+check("there are some, and they are the ones expected", shortKeys.sort(), ["365", "FLS"]);
+check("and not one of them matches without a brand to back it",
+  shortKeys.filter((k) => match(machine("", `${k} machine`))), []);
+
 console.log("\n-- machines with no book, and no code --");
 check("a Ferris has no book loaded yet",
   match(machine("UFER IS700Z", "FERRIS IS700Z Zero-Turn Mower")), "");
