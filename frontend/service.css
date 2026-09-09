@@ -621,6 +621,10 @@ select {
 .vs-REPAIRED, .sr-REPAIRED,
 .vs-ALL_REPAIRED, .sr-ALL_REPAIRED, .vs-CALL_CUSTOMER, .sr-CALL_CUSTOMER,
 .vs-CONVERTED, .sr-CONVERTED { background: #E7F5EC; color: #1B7A42; }
+/* Invoiced is the last step before the customer walks in, and the only one
+   where somebody has to do something about a person rather than a machine -
+   so it gets a colour of its own rather than a third shade of green. */
+.vs-INVOICED, .sr-INVOICED { background: #FDF0E0; color: #A85B00; }
 /* .vs-CLOSED / .sr-CLOSED keep their existing styling */
 
 /* Status badge in the Open Service footer */
@@ -1123,6 +1127,7 @@ select {
 .slip-card:has(.vs-REPAIRED),     .slip-result:has(.sr-REPAIRED)     { border-left-color: #1B7A42; }
 .slip-card:has(.vs-ALL_REPAIRED), .slip-result:has(.sr-ALL_REPAIRED) { border-left-color: #1B7A42; }
 .slip-card:has(.vs-CALL_CUSTOMER),.slip-result:has(.sr-CALL_CUSTOMER){ border-left-color: #1B7A42; }
+.slip-card:has(.vs-INVOICED),     .slip-result:has(.sr-INVOICED)     { border-left-color: #A85B00; }
 .slip-card:has(.vs-CLOSED),       .slip-result:has(.sr-CLOSED)       { border-left-color: var(--ink-faint); }
 
 /* Slip numbers and dates line up column-wise */

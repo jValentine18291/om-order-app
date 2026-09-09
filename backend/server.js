@@ -1640,10 +1640,24 @@ app.get("/api/slips/:slip/order", async (req, res) => {
   }
 });
 
+// Sales have keyed the Sales Order into AutoCount and got a DO/INV/CS number
+// back. Its own step, before closing: only once this has happened does anyone
+// ring the customer to come and collect.
+app.post("/api/slips/:slip/invoiced", async (req, res) => {
+  try {
+    const { closing_ref, who = "" } = req.body || {};
+    res.json(await data.slips.setSlipInvoiced(req.params.slip, closing_ref, who));
+  } catch (err) {
+    if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/slips/:slip/invoiced]", err);
+    res.status(500).json({ error: "Could not record that invoice." });
+  }
+});
+
 app.post("/api/slips/:slip/close", async (req, res) => {
   try {
-    const { closing_ref } = req.body || {};
-    const slip = await data.slips.closeSlip(req.params.slip, closing_ref);
+    const { closing_ref, who = "" } = req.body || {};
+    const slip = await data.slips.closeSlip(req.params.slip, closing_ref, who);
     res.json(slip);
   } catch (err) {
     if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });

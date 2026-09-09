@@ -58,6 +58,7 @@
     "Open Service": "处理服务单",
     "Close Service": "结束服务单",
     "Record DO/CS/INV and close": "记录 DO/CS/INV 并结单",
+    "Record the invoice, then collection": "先登记发票，再确认取货",
     "View Slips": "查看服务单",
     "Look up any service slip": "查询任何服务单",
     "Find Part": "查找零件",
@@ -406,6 +407,15 @@
     // slip; this is one machine, and the status a slip reaches when every
     // machine on it has been ticked.
     "Repaired": "已修好",
+    // The end of a slip: order raised here, keyed into AutoCount by sales,
+    // then collected and paid for.
+    "SO Created": "已开销售单",
+    "Invoice Created": "已开发票",
+    "Collected & Closed": "已取货结单",
+    "Finish a service slip": "完结服务单",
+    "Record DO/CS/INV number": "登记 DO/CS/INV 号码",
+    "Correct the number": "修正号码",
+    "Pick a slip first.": "请先选择服务单。",
     // Pressing Save on a machine is what marks it repaired.
     "Saved · marked as Repaired": "已保存 · 已标记为已修好",
     "Repair details PDF": "维修明细 PDF",

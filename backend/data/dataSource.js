@@ -73,6 +73,7 @@ module.exports = {
     setOrderAutocountError: (...a) => dataRepo.slips.setOrderAutocountError(...a),
     ordersAwaitingAutoCount: (...a) => dataRepo.slips.ordersAwaitingAutoCount(...a),
     setSlipDrive: (...a) => dataRepo.slips.setSlipDrive(...a),
+    setSlipInvoiced: (...a) => dataRepo.slips.setSlipInvoiced(...a),
     closeSlip: (...a) => dataRepo.slips.closeSlip(...a),
   },
   // Purchase orders. The ORDER comes from AutoCount; this is only the app's

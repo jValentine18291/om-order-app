@@ -282,14 +282,14 @@ function listSlips(statusFilter = "active") {
     rows = db.prepare("SELECT * FROM service_slips WHERE status = 'OPEN' ORDER BY slip_number").all();
   } else if (statusFilter === "working") {
     // Open Service scope: still being worked on (not repaired, not closed)
-    rows = db.prepare("SELECT * FROM service_slips WHERE status NOT IN ('ALL_REPAIRED', 'CONVERTED', 'CLOSED') ORDER BY slip_number").all();
+    rows = db.prepare("SELECT * FROM service_slips WHERE status NOT IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'CLOSED') ORDER BY slip_number").all();
   } else if (statusFilter === "need_quote") {
     // What the technicians have handed back for pricing. Oldest first: the one
     // waiting longest is the one the customer has been waiting on.
     rows = db.prepare("SELECT * FROM service_slips WHERE status = 'NEED_QUOTE' ORDER BY slip_number").all();
   } else if (statusFilter === "repaired" || statusFilter === "call_customer") {
     rows = db.prepare(`SELECT * FROM service_slips WHERE (
-       status IN ('ALL_REPAIRED', 'CONVERTED')
+       status IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED')
        OR (
          -- Everything on it is either billed or condemned: nothing left to do
          -- in the workshop, even if a condemned machine still has to be
@@ -701,30 +701,94 @@ function setSlipDrive(slipNumber, fileId, link) {
 }
 
 // Close a slip: record the DO/CS/INV reference, set status CLOSED.
-function closeSlip(slipNumber, closingRef) {
+// A condemned machine is not billed, so nothing else would ever ask about it -
+// and it is sitting in the workshop taking up space. The end of the slip is
+// the last moment anyone looks, so it is where an answer is insisted on.
+function strandedCondemned(slipId) {
+  return db.prepare(
+    `SELECT machine_desc FROM slip_machines
+      WHERE slip_id = ? AND state = 'CONDEMNED' AND TRIM(IFNULL(disposal, '')) = ''`
+  ).all(slipId).map((m) => m.machine_desc);
+}
+
+// Step one of two: sales have keyed the Sales Order into AutoCount as a
+// DO/INV/CS, and this records the number it came back with.
+//
+// Nothing in this app can see that happen - AutoCount is where the document is
+// created - so this is a person saying it did. Only after this does anyone
+// ring the customer to come and collect, which is why it is its own step and
+// not folded into closing.
+function setSlipInvoiced(slipNumber, ref, who = "") {
   const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
   if (slip.status === "CLOSED") { const e = new Error("Slip is already closed."); e.status = 400; throw e; }
-  if (!closingRef || !String(closingRef).trim()) {
-    const e = new Error("A DO/CS/INV reference is required to close."); e.status = 400; throw e;
+  if (!ref || !String(ref).trim()) {
+    const e = new Error("A DO/CS/INV number is required."); e.status = 400; throw e;
   }
-  // A condemned machine is not billed, so nothing else would ever ask about it
-  // - and it is sitting in the workshop. Closing the slip is the last moment
-  // anyone looks, so it is the right place to insist on an answer.
-  const stranded = db.prepare(
-    `SELECT machine_desc FROM slip_machines
-      WHERE slip_id = ? AND state = 'CONDEMNED' AND TRIM(IFNULL(disposal, '')) = ''`
-  ).all(slip.id);
+  // Nothing to invoice until something is on a Sales Order.
+  //
+  // Asked of the MACHINES, not of the slip's status. They are not the same
+  // question: a slip carrying a condemned machine nobody has accounted for
+  // reads IN_PROGRESS however much of it has been billed, and refusing the
+  // invoice on that basis would stop sales recording something that really
+  // happened. The condemned machine is still insisted on - at closing, where
+  // it is about to be forgotten rather than merely unfinished.
+  const onOrder = db.prepare(
+    `SELECT COUNT(*) AS n FROM slip_machines
+      WHERE slip_id = ? AND TRIM(IFNULL(converted_at, '')) != ''`
+  ).get(slip.id).n;
+  if (!onOrder) {
+    const e = new Error(
+      "Create the Sales Order first - there is nothing on an order to invoice yet."
+    );
+    e.status = 400; throw e;
+  }
+  db.prepare(
+    `UPDATE service_slips
+        SET status = 'INVOICED', closing_ref = ?, invoiced_by = ?,
+            invoiced_at = datetime('now','localtime')
+      WHERE id = ?`
+  ).run(String(ref).trim(), String(who || "").trim(), slip.id);
+  return getSlip(slipNumber);
+}
+
+// Step two: the customer has been, collected the machines and paid.
+//
+// The DO/CS/INV number was recorded at the step above and is not asked for
+// again - passing one here only corrects it, for the case where sales notice
+// the wrong number after the fact.
+function closeSlip(slipNumber, closingRef, who = "") {
+  const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
+  if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
+  if (slip.status === "CLOSED") { const e = new Error("Slip is already closed."); e.status = 400; throw e; }
+
+  // The order John asked for: SO created, then invoiced, then collected. A slip
+  // that skipped the middle step has work nobody has billed for, and closing
+  // it is how that gets forgotten. Checked before the number, so there is one
+  // message for one situation rather than two that nearly agree.
+  if (slip.status !== "INVOICED") {
+    const e = new Error(
+      "Record the DO/CS/INV number first - a slip is only collected after it has been invoiced."
+    );
+    e.status = 400; throw e;
+  }
+  const ref = String(closingRef || slip.closing_ref || "").trim();
+  if (!ref) {
+    const e = new Error("Record the DO/CS/INV number first."); e.status = 400; throw e;
+  }
+  const stranded = strandedCondemned(slip.id);
   if (stranded.length) {
     const e = new Error(
-      `Condemned but not yet accounted for: ${stranded.map((m) => m.machine_desc).join(", ")}. ` +
+      `Condemned but not yet accounted for: ${stranded.join(", ")}. ` +
       "Record whether the customer collected it or we disposed of it."
     );
     e.status = 400; throw e;
   }
   db.prepare(
-    "UPDATE service_slips SET status = 'CLOSED', closing_ref = ?, closed_at = datetime('now') WHERE id = ?"
-  ).run(String(closingRef).trim(), slip.id);
+    `UPDATE service_slips
+        SET status = 'CLOSED', closing_ref = ?, closed_by = ?, closed_at = datetime('now')
+      WHERE id = ?`
+  ).run(ref, String(who || "").trim(), slip.id);
   return getSlip(slipNumber);
 }
 
@@ -749,9 +813,9 @@ function searchSlips(query = "", scope = "all", limit = 20) {
   let sql, params;
   const scopeClause =
     scope === "active" ? "status != 'CLOSED'" :
-    scope === "working" ? "status NOT IN ('ALL_REPAIRED', 'CONVERTED', 'CLOSED')" :
+    scope === "working" ? "status NOT IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'CLOSED')" :
     scope === "repaired" ? `(
-       status IN ('ALL_REPAIRED', 'CONVERTED')
+       status IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED')
        OR (
          -- Everything on it is either billed or condemned: nothing left to do
          -- in the workshop, even if a condemned machine still has to be
@@ -1246,9 +1310,17 @@ function machineSettled(m) {
 }
 
 // THE one place a slip's status comes from.
+// The two statuses a PERSON sets, at the end of the slip's life. Everything
+// before them is worked out from the machines; these are not, because nothing
+// in this app can see AutoCount's invoice or the customer's car.
+const MANUAL_SLIP_STATUSES = new Set(["INVOICED", "CLOSED"]);
+
 function deriveSlipStatus(slipId) {
   const slip = db.prepare("SELECT * FROM service_slips WHERE id = ?").get(slipId);
-  if (!slip || slip.status === "CLOSED") return;      // closing is deliberate
+  // Both of these are deliberate acts by sales, and a later edit to a machine
+  // must not quietly undo one. A slip that has been invoiced stays invoiced
+  // even if somebody corrects a part on it afterwards.
+  if (!slip || MANUAL_SLIP_STATUSES.has(slip.status)) return;
   const ms = db.prepare("SELECT * FROM slip_machines WHERE slip_id = ?").all(slipId);
   if (!ms.length) return;
 
@@ -1425,7 +1497,7 @@ const slips = {
   poTracking, poStatus, setPoStatus, PO_STATUSES,
   listShipments, getShipment, createShipment, updateShipment,
   allocatedByPo, receivedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
-  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, setMachineState, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, setMachineState, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };

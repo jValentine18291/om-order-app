@@ -402,10 +402,18 @@ const STATUS_LABEL = {
   // The workshop is done and nothing is billed yet. ALL_REPAIRED means the
   // same thing plus "some of it is already on an order".
   REPAIRED: "Repaired",
+  // Some machines on a Sales Order, some not. Still "All Repaired" because
+  // that is what the workshop has done; what is left is a sales job.
   ALL_REPAIRED: "All Repaired",
   CALL_CUSTOMER: "All Repaired", // legacy name, shown as the new label
-  CONVERTED: "All Repaired",
-  CLOSED: "Closed",
+  // The end of a slip's life, in the three steps sales actually work through:
+  // the order is raised here, keyed into AutoCount as a DO/INV/CS by hand, and
+  // only then is the customer called to come and collect. The last two are set
+  // by a person - nothing here can see AutoCount's invoice or the customer's
+  // car - which is why they are their own statuses rather than guesses.
+  CONVERTED: "SO Created",
+  INVOICED: "Invoice Created",
+  CLOSED: "Collected & Closed",
 };
 
 // Where a machine is. A slip's own status is worked out from these, so this is
@@ -3356,12 +3364,15 @@ async function createSalesOrder() {
 // ============================================================================
 let closeSearch = null;
 let csPickedSlip = null; // currently selected slip number in Close Service
+let csSlip = null;       // and the slip itself, for deciding which step it is on
 async function enterCloseService() {
   showScreen("close");
   $("cs-context").style.display = "none";
   $("cs-ref").value = "";
   $("cs-status").innerHTML = "";
   csPickedSlip = null;
+  csSlip = null;
+  renderCloseStep();
 
   if (!closeSearch) {
     closeSearch = setupSlipSearch({
@@ -3374,9 +3385,16 @@ async function enterCloseService() {
 
 async function onCloseSlipChosen(slipNumber) {
   csPickedSlip = slipNumber || null;
+  csSlip = null;
+  renderCloseStep();
   if (!slipNumber) { $("cs-context").style.display = "none"; return; }
   try {
     const slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
+    csSlip = slip;
+    // The number recorded at the invoice step, so closing does not ask for it
+    // again and correcting it starts from what is there.
+    $("cs-ref").value = slip.closing_ref || "";
+    renderCloseStep();
     $("cs-context").style.display = "block";
     // A condemned machine still in the workshop stops the slip closing. Say so
     // here, on the screen where someone is about to try, rather than only
@@ -3388,6 +3406,8 @@ async function onCloseSlipChosen(slipNumber) {
       `<div><strong>${escapeHtml(slip.company)}</strong> · Slip ${escapeHtml(slip.slip_number)}</div>` +
       `<div class="sub">Status: ${escapeHtml(STATUS_LABEL[slip.status] || slip.status)} · ${slip.machines.length} machine(s)</div>` +
       (formatDate(slip.created_at) ? `<div class="sub">Created: ${escapeHtml(formatDate(slip.created_at))}</div>` : "") +
+      (slip.closing_ref ? `<div class="sub">DO/CS/INV: <strong>${escapeHtml(slip.closing_ref)}</strong>${
+        slip.invoiced_by ? ` · recorded by ${escapeHtml(slip.invoiced_by)}` : ""}</div>` : "") +
       (stranded.length ? `<div class="cs-blocked"><b>Cannot close yet</b>${
         escapeHtml(stranded.map((m) => m.machine_desc).join(", "))} ${
         stranded.length === 1
@@ -3399,11 +3419,46 @@ async function onCloseSlipChosen(slipNumber) {
   }
 }
 
-async function submitClose() {
+// Which of the two steps this slip is on. Invoiced slips are past the number
+// and waiting on the customer, so the box is out of the way and the button
+// says what is actually about to happen.
+function renderCloseStep() {
+  const invoiced = !!csSlip && csSlip.status === "INVOICED";
+  $("cs-ref-field").style.display = invoiced ? "none" : "";
+  $("cs-reinvoice").style.display = invoiced ? "" : "none";
+  $("cs-submit").textContent = invoiced ? "Collected & Closed" : "Record DO/CS/INV number";
+}
+
+// Step one: the number AutoCount gave back.
+async function submitInvoiced() {
   const slipNumber = csPickedSlip;
   const ref = $("cs-ref").value.trim();
-  if (!slipNumber) { $("cs-status").innerHTML = statusErr("Pick a slip to close."); return; }
+  if (!slipNumber) { $("cs-status").innerHTML = statusErr("Pick a slip first."); return; }
   if (!ref) { $("cs-status").innerHTML = statusErr("Enter the DO/CS/INV number."); return; }
+
+  $("cs-submit").disabled = true;
+  $("cs-status").innerHTML = statusInfo("Saving…");
+  try {
+    csSlip = await api(`/api/slips/${encodeURIComponent(slipNumber)}/invoiced`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ closing_ref: ref, who: initialsFor(getUser()) }),
+    });
+    renderCloseStep();
+    await onCloseSlipChosen(slipNumber);
+    toast(`Slip ${slipNumber} invoiced`, "ok");
+    $("cs-status").innerHTML = statusOk(`Recorded ${ref}. Close it once the customer has collected.`);
+  } catch (e) {
+    $("cs-status").innerHTML = statusErr(e.message);
+  } finally {
+    $("cs-submit").disabled = false;
+  }
+}
+
+// Step two: they came, they collected, they paid.
+async function submitClose() {
+  const slipNumber = csPickedSlip;
+  if (!slipNumber) { $("cs-status").innerHTML = statusErr("Pick a slip to close."); return; }
 
   $("cs-submit").disabled = true;
   $("cs-status").innerHTML = statusInfo("Closing…");
@@ -3411,7 +3466,7 @@ async function submitClose() {
     await api(`/api/slips/${encodeURIComponent(slipNumber)}/close`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ closing_ref: ref }),
+      body: JSON.stringify({ who: initialsFor(getUser()) }),
     });
     toast(`Slip ${slipNumber} closed`, "ok");
     $("cs-status").innerHTML = statusOk(`Closed ${slipNumber}. Returning home…`);
@@ -3421,6 +3476,15 @@ async function submitClose() {
   } finally {
     $("cs-submit").disabled = false;
   }
+}
+
+// Correcting a number already recorded: put the box back, without unwinding
+// the slip.
+function reopenRefField() {
+  $("cs-ref-field").style.display = "";
+  $("cs-ref").focus();
+  $("cs-submit").textContent = "Record DO/CS/INV number";
+  $("cs-submit").dataset.force = "invoice";
 }
 
 // ============================================================================
@@ -3556,6 +3620,7 @@ function renderSlipDetail(slip) {
       }</div>` : ""}
       ${requestBadgesHtml(slip, "vs")}
       ${slip.notes ? `<div class="vs-notes">${escapeHtml(slip.notes)}</div>` : ""}
+      ${slip.status === "INVOICED" && slip.closing_ref ? `<div class="vs-sub">Invoiced with: <strong>${escapeHtml(slip.closing_ref)}</strong>${slip.invoiced_at ? " on " + escapeHtml(formatDate(slip.invoiced_at)) : ""}</div>` : ""}
       ${slip.status === "CLOSED" && slip.closing_ref ? `<div class="vs-sub">Closed with: <strong>${escapeHtml(slip.closing_ref)}</strong>${slip.closed_at ? " on " + escapeHtml(formatDate(slip.closed_at)) : ""}</div>` : ""}
       ${renderVsStatusActions(slip)}
     </div>`;
@@ -7096,7 +7161,15 @@ $("machine-parts").addEventListener("change", (e) => {
 });
 
 // Close Service: slip selection via search component
-$("cs-submit").addEventListener("click", submitClose);
+$("cs-submit").addEventListener("click", () => {
+  // Invoiced and not in the middle of correcting the number: the button closes
+  // the slip. Everything else records the number.
+  const invoiced = !!csSlip && csSlip.status === "INVOICED";
+  if (invoiced && $("cs-submit").dataset.force !== "invoice") return submitClose();
+  delete $("cs-submit").dataset.force;
+  return submitInvoiced();
+});
+$("cs-reinvoice").addEventListener("click", reopenRefField);
 
 // View Slips: slip selection via search component
 

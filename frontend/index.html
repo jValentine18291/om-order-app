@@ -102,7 +102,7 @@
           <span class="home-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
           </span>
-          <span class="home-txt"><strong>Close Service</strong><small>Record DO/CS/INV and close</small></span>
+          <span class="home-txt"><strong>Close Service</strong><small>Record the invoice, then collection</small></span>
         </button>
         <button class="home-btn home-all" data-go="view">
           <span class="home-ic">
@@ -617,8 +617,8 @@
     <section id="screen-close" class="screen">
       <div class="section-head">
         <p class="eyebrow">Close service</p>
-        <h2>Close a service slip</h2>
-        <p class="lede">Record the DO/CS/INV reference once the customer has paid.</p>
+        <h2>Finish a service slip</h2>
+        <p class="lede">Record the DO/CS/INV once it is keyed into AutoCount, then close it when the customer has collected and paid.</p>
       </div>
       <div class="field">
         <label for="cs-search">Service slip <span class="req">*</span></label>
@@ -626,11 +626,15 @@
         <div class="slip-results" id="cs-results"></div>
       </div>
       <div class="slip-context" id="cs-context" style="display:none"></div>
-      <div class="field">
+      <div class="field" id="cs-ref-field">
         <label for="cs-ref">DO / CS / INV number <span class="req">*</span></label>
         <input id="cs-ref" type="text" autocomplete="off" placeholder="e.g. DO-2604-016" />
       </div>
-      <button class="btn-primary" id="cs-submit" style="width:100%">Close service slip</button>
+      <!-- One button, and which one it is depends on where the slip has got
+           to. The step already taken stays reachable underneath so a mistyped
+           number can be corrected without unwinding anything. -->
+      <button class="btn-primary" id="cs-submit" style="width:100%">Record DO/CS/INV number</button>
+      <button class="btn-secondary" id="cs-reinvoice" type="button" style="width:100%;margin-top:8px;display:none">Correct the number</button>
       <div class="scan-hint" id="cs-status" style="justify-content:flex-start;min-height:20px;margin-top:8px;"></div>
     </section>
 

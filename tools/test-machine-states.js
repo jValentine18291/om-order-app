@@ -76,17 +76,24 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
   // Not "All Repaired": the condemned one is still sitting in the workshop.
   check("one billed, one condemned and still here", slip.status, "IN_PROGRESS");
 
-  // Closing is refused while nobody has said where the condemned one went.
+  // Sales key the order into AutoCount and record what came back. Allowed even
+  // now: the condemned machine is not on that invoice, and refusing would stop
+  // them recording something that really happened.
+  slip = await data.slips.setSlipInvoiced(no, "DO-1234", "KS");
+  check("invoiced", slip.status, "INVOICED");
+
+  // Closing is still refused while nobody has said where the condemned one
+  // went. It is the last moment anyone looks at the slip.
   let err = "";
-  try { await data.slips.closeSlip(no, "DO-1234"); } catch (e) { err = e.message; }
+  try { await data.slips.closeSlip(no, "", "KS"); } catch (e) { err = e.message; }
   check("closing blocked", /Condemned but not yet accounted for/.test(err), true);
   console.log(`        ↳ "${err}"`);
 
   // The customer collects it. Now everything is accounted for.
   slip = await data.slips.setMachineDisposal(no, saw.id, "COLLECTED", "John");
   check("disposal recorded", slip.machines[0].disposal, "COLLECTED");
-  check("nothing outstanding", slip.status, "CONVERTED");
-  slip = await data.slips.closeSlip(no, "DO-1234");
+  check("nothing outstanding", slip.status, "INVOICED");
+  slip = await data.slips.closeSlip(no, "", "KS");
   check("closes", slip.status, "CLOSED");
 
   // A closed slip is a finished record.

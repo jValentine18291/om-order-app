@@ -128,7 +128,7 @@ db.exec(`
     -- a link already given to a customer pointing at the current document.
     drive_file_id  TEXT    DEFAULT '',
     drive_link     TEXT    DEFAULT '',
-    closing_ref    TEXT,                       -- DO/CS/INV number entered at close
+    closing_ref    TEXT,                       -- DO/CS/INV number, recorded at the invoice step
     -- Who took the machine in. Slips written before this existed have '',
     -- which the app shows as nothing rather than guessing at a name.
     created_by     TEXT    DEFAULT '',
@@ -540,6 +540,28 @@ try {
   }
 } catch (e) {
   console.error("[db] request-flags migration check failed:", e.message);
+}
+
+// When sales recorded the DO/CS/INV against a slip, and who did.
+//
+// The slip's own lifecycle now has a step between "on a sales order" and
+// "collected": sales convert the SO to a DO/INV/CS in AutoCount, and only
+// after that does anyone ring the customer to come and collect. The reference
+// itself still lives in closing_ref - it is the same number, recorded earlier
+// than it used to be, and two columns for one number is two that disagree.
+try {
+  const cols = db.prepare("PRAGMA table_info(service_slips)").all();
+  if (cols.length && !cols.some((c) => c.name === "invoiced_at")) {
+    db.exec("ALTER TABLE service_slips ADD COLUMN invoiced_at TEXT");
+    db.exec("ALTER TABLE service_slips ADD COLUMN invoiced_by TEXT DEFAULT ''");
+    console.log("[db] migrated: added invoiced_at/invoiced_by to service_slips");
+  }
+  if (cols.length && !cols.some((c) => c.name === "closed_by")) {
+    db.exec("ALTER TABLE service_slips ADD COLUMN closed_by TEXT DEFAULT ''");
+    console.log("[db] migrated: added closed_by to service_slips");
+  }
+} catch (e) {
+  console.error("[db] service_slips invoice migration check failed:", e.message);
 }
 
 // Who a shipment is from. Shipments entered before this simply have none.
