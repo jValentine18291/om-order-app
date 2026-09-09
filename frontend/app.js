@@ -339,6 +339,9 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick }) {
   const input = $(inputId);
   const results = $(resultsId);
   let debounce = null;
+  // Which row is selected, kept here rather than only as a class on the
+  // button, so it survives the list being drawn again.
+  let picked = "";
 
   async function runSearch() {
     const q = input.value.trim();
@@ -366,15 +369,17 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick }) {
       ).join("") +
       (data.hasMore ? `<div class="slip-result-more">Keep typing to narrow results…</div>` : "");
 
-    results.querySelectorAll(".slip-result").forEach((btn) =>
+    results.querySelectorAll(".slip-result").forEach((btn) => {
+      if (btn.dataset.slip === picked) btn.classList.add("picked");
       btn.addEventListener("click", () => {
         const num = btn.dataset.slip;
         // Mark selection visually
         results.querySelectorAll(".slip-result").forEach((b) => b.classList.remove("picked"));
         btn.classList.add("picked");
+        picked = num;
         onPick(num);
-      })
-    );
+      });
+    });
   }
 
   // Debounced typing
@@ -383,12 +388,22 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick }) {
     debounce = setTimeout(runSearch, 250);
   });
 
-  // Expose a reset that clears + shows recent slips
   return {
+    // Clears what was typed and shows recent slips.
     reset() {
+      picked = "";
       input.value = "";
       results.innerHTML = `<div class="slip-result-empty">Loading…</div>`;
       runSearch();
+    },
+    // Read the list again WITHOUT clearing the search or the selection.
+    //
+    // For after something on this screen has changed a slip's status. Without
+    // it the row keeps the status it had when it was drawn, which reads as the
+    // change not having happened - the row is the first thing anyone looks at,
+    // and it is the one thing that was never refreshed.
+    async refresh() {
+      await runSearch();
     },
   };
 }
@@ -3446,6 +3461,8 @@ async function submitInvoiced() {
     });
     renderCloseStep();
     await onCloseSlipChosen(slipNumber);
+    // The row in the list above still says SO Created until it is read again.
+    if (closeSearch) await closeSearch.refresh();
     toast(`Slip ${slipNumber} invoiced`, "ok");
     $("cs-status").innerHTML = statusOk(`Recorded ${ref}. Close it once the customer has collected.`);
   } catch (e) {
@@ -3582,6 +3599,8 @@ function wireVsStatusActions(slipNumber) {
             : state === "QUOTED" ? "Marked as quoted"
             : "Continuing without quote", "ok");
         onViewSlipChosen(slipNumber); // re-render with the new status
+        // And the row in the list above, which otherwise keeps the old status.
+        if (viewSearch) viewSearch.refresh();
         refreshQuoteCount();
       } catch (e) {
         toast(e.message, "err");
@@ -3778,6 +3797,7 @@ function wireDecideButtons(wrap, slipNumber) {
         });
         toast(MOVE_TOAST[state] || "Saved", "ok");
         onViewSlipChosen(slipNumber);
+        if (viewSearch) viewSearch.refresh();
         refreshQuoteCount();
       } catch (e) {
         toast(e.message || "Could not save that", "err");
@@ -3800,6 +3820,7 @@ function wireDecideButtons(wrap, slipNumber) {
         });
         toast(DISPOSAL_LABEL[disposal], "ok");
         onViewSlipChosen(slipNumber);
+        if (viewSearch) viewSearch.refresh();
       } catch (e) {
         toast(e.message || "Could not save that", "err");
         row.querySelectorAll("button").forEach((b) => { b.disabled = false; });
