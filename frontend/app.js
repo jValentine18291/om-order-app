@@ -709,22 +709,31 @@ async function submitNewService() {
 
   // Expand each machine row by its quantity. A row with qty >= 2 becomes
   // separate entries suffixed " - n/total" (e.g. "BK3410 - 1/2", "BK3410 - 2/2").
-  // A row with qty 1 stays as-is ("BK3410"). Each entry becomes its own machine.
   // A quantity above one becomes that many separate machines on the slip, so
   // each can be repaired, commented on and priced independently. The serial
   // typed once is carried onto all of them - John's call: staff can list
   // several numbers in the one box when it matters.
+  //
+  // Several of the same machine are the same catalogue item and carry the same
+  // code; only the number in the wording tells them apart.
   const machines = [];
   for (const m of nsMachines) {
-    if (m.qty === 1) {
+    for (let n = 0; n < m.qty; n++) {
       machines.push({ desc: m.model, machine_code: m.code || "", serial: m.serial, remarks: m.remarks || "" });
-    } else {
-      for (let n = 1; n <= m.qty; n++) {
-        // Several of the same machine are the same catalogue item, so they all
-        // carry the same code; only the "- 1/3" in the wording tells them apart.
-        machines.push({ desc: `${m.model} - ${n}/${m.qty}`, machine_code: m.code || "", serial: m.serial, remarks: m.remarks || "" });
-      }
     }
+  }
+
+  // Number them across the WHOLE slip, not within each model.
+  //
+  // It used to count each model's own group, so a slip of four BK3410s and one
+  // HBZ260 read "1/4 2/4 3/4 4/4" and then "HBZ260" with no number at all -
+  // and "3/4" on the workshop floor said nothing about which of five machines
+  // was in front of you. Counting the slip gives 1/5 through 5/5, which is
+  // what the Sales Order has always used and what people say out loud.
+  //
+  // A slip with one machine gets nothing: "- 1/1" is noise.
+  if (machines.length > 1) {
+    machines.forEach((mm, i) => { mm.desc = `${mm.desc} - ${i + 1}/${machines.length}`; });
   }
 
   if (!company) { $("ns-status").innerHTML = statusErr("Company is required."); return; }
