@@ -406,6 +406,10 @@
     // slip; this is one machine, and the status a slip reaches when every
     // machine on it has been ticked.
     "Repaired": "已修好",
+    // Pressing Save on a machine is what marks it repaired.
+    "Saved · marked as Repaired": "已保存 · 已标记为已修好",
+    "Repair details PDF": "维修明细 PDF",
+    "No machines are marked Repaired yet": "尚无机器被标记为已修好",
     "Mark as repaired": "标记为已修好",
     "Not finished after all": "还没修好",
     "Marked as repaired": "已标记为修好",

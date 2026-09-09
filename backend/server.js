@@ -1221,6 +1221,25 @@ app.patch("/api/machines/:machineId/comment", async (req, res) => {
 });
 
 // Labour charge for one machine (technician time, billed on top of parts).
+// Save, on the technician's machine popup. The parts, labour and note have
+// already gone up through the routes around this one; this is the last step,
+// and it is what moves the machine to Repaired.
+//
+// A route of its own rather than a side effect of saving a part: a part is
+// scanned in the middle of a job, and marking the machine finished then would
+// be wrong. Pressing Save is the moment the technician says they are done.
+app.post("/api/machines/:machineId/finish", async (req, res) => {
+  try {
+    const machineId = Number(req.params.machineId);
+    const { who = "" } = req.body || {};
+    res.json(await data.slips.finishRepair(machineId, who));
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/machines/:machineId/finish]", err);
+    res.status(500).json({ error: "Could not finish that machine." });
+  }
+});
+
 app.patch("/api/machines/:machineId/labour", async (req, res) => {
   try {
     const machineId = Number(req.params.machineId);

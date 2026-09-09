@@ -1315,6 +1315,62 @@ function setMachineState(slipNumber, machineId, state, who = "") {
   return getSlip(slipNumber);
 }
 
+// A technician has pressed Save on a machine. If that machine was simply being
+// worked on, it is now repaired.
+//
+// The states this WILL move: RECEIVED (came in, nobody has decided anything)
+// and TO_REPAIR (the customer said go ahead). Those are the two that mean "in
+// the workshop, being worked on", and finishing them is what Save means.
+//
+// The states it deliberately leaves alone, because moving them would lose a
+// fact somebody else is waiting on:
+//
+//   AWAITING_QUOTE  sales have to ring the customer. Marking it repaired takes
+//                   the slip off their Need to Quote list and nobody rings.
+//   QUOTED          the customer has not said yes yet. Work may be recorded
+//                   against it - a technician stripping it down to price the
+//                   job - and that is not the same as the job being done.
+//   CONDEMNED       the machine is beyond repair. Saving a note on it does not
+//                   change that.
+//   REPAIRED        already there.
+//
+// And it will not move a machine with NOTHING recorded on it. Opening a
+// machine, pressing Save and walking away is not a repair, and a machine
+// marked repaired with no parts, no labour and no note is a machine nobody
+// can account for later.
+//
+// Returns { slip, moved } - moved says whether to tell the technician
+// anything, since Save is pressed far more often than a machine is finished.
+const AUTO_REPAIR_FROM = new Set(["RECEIVED", "TO_REPAIR"]);
+
+function finishRepair(machineId, who = "") {
+  const machine = db.prepare("SELECT * FROM slip_machines WHERE id = ?").get(machineId);
+  if (!machine) { const e = new Error("Machine not found."); e.status = 404; throw e; }
+  const slip = db.prepare("SELECT * FROM service_slips WHERE id = ?").get(machine.slip_id);
+  if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
+
+  const blocked =
+    slip.status === "CLOSED" ||
+    !!String(machine.converted_at || "").trim() ||
+    !AUTO_REPAIR_FROM.has(machine.state) ||
+    !machineHasWork(machine.id);
+  if (blocked) return { slip: getSlip(slip.slip_number), moved: false };
+
+  return { slip: setMachineState(slip.slip_number, machine.id, "REPAIRED", who), moved: true };
+}
+
+// Something to show for the visit: a part, a labour charge, or a note. Same
+// three things slipHasWork asks about, for one machine.
+function machineHasWork(machineId) {
+  return db.prepare(
+    `SELECT COUNT(*) AS n FROM slip_machines m
+      WHERE m.id = ?
+        AND (IFNULL(m.labour_charge, 0) > 0
+             OR TRIM(IFNULL(m.repair_comment, '')) != ''
+             OR EXISTS (SELECT 1 FROM machine_parts p WHERE p.machine_id = m.id))`
+  ).get(machineId).n > 0;
+}
+
 // Every machine at once - "quote all of them", "none of these need quoting".
 function setAllMachineStates(slipNumber, state, who = "") {
   const st = String(state || "").toUpperCase();
@@ -1369,7 +1425,7 @@ const slips = {
   poTracking, poStatus, setPoStatus, PO_STATUSES,
   listShipments, getShipment, createShipment, updateShipment,
   allocatedByPo, receivedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
-  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, setMachineState, setAllMachineStates, setMachineDisposal, deriveSlipStatus, techniciansForMachine, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, setMachineState, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };

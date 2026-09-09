@@ -788,6 +788,16 @@ function showSlipCreated(slip) {
   });
 }
 
+// The company block that heads every customer-facing PDF. One copy of it,
+// because an address that drifts between two documents we send out is worse
+// than no address on either.
+const OM_ADDRESS_LINES = [
+  "9 Kaki Bukit Rd 1, #01-03, Eunos Technolink, Singapore 415938",
+  "Tel (65) 6743 4039   \u00b7   Fax (65) 6748 2031",
+  "sales@omprotools.com.sg   \u00b7   www.gardenequipment.com.sg",
+  "GST M2-0009392-5   \u00b7   Co. Reg. 196800629G",
+];
+
 // ---- Service slip PDF ------------------------------------------------------
 // The only part of OM Service a customer ever sees, so it is also where the
 // terms live. Laid out at A4 in Helvetica (the only face jsPDF has built in).
@@ -996,14 +1006,8 @@ function buildSlipPdf(slip) {
   }
 
   doc.setFontSize(6.9); doc.setFont("helvetica", "normal"); setText(105);
-  const addr = [
-    "9 Kaki Bukit Rd 1, #01-03, Eunos Technolink, Singapore 415938",
-    "Tel (65) 6743 4039   ·   Fax (65) 6748 2031",
-    "sales@omprotools.com.sg   ·   www.gardenequipment.com.sg",
-    "GST M2-0009392-5   ·   Co. Reg. 196800629G",
-  ];
   let ay = y + 11;
-  addr.forEach((line) => { doc.text(line, RIGHT, ay, { align: "right" }); ay += 9.2; });
+  OM_ADDRESS_LINES.forEach((line) => { doc.text(line, RIGHT, ay, { align: "right" }); ay += 9.2; });
   headBottom = Math.max(headBottom, ay - 5);
 
   y = headBottom + 10;
@@ -1862,7 +1866,27 @@ async function closeMachineModal(save) {
       await commitPendingParts();
       await saveCurrentLabour();
       await saveCurrentComment();
-      toast("Saved", "ok");
+      // Save is the technician saying they are done with this machine, so it
+      // is what marks it Repaired. The server decides whether it actually
+      // moves - a machine sales are still ringing about, or one with nothing
+      // recorded on it, stays where it is. See finishRepair in sqliteRepo.js.
+      let moved = false;
+      try {
+        const r = await api(`/api/machines/${session.machineId}/finish`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ who: initialsFor(getUser()) }),
+        });
+        moved = !!(r && r.moved);
+      } catch (e) {
+        // The work IS saved by this point. Failing the whole Save over the
+        // tick would send the technician back to a screen whose parts are
+        // already on the server, and they would scan them again.
+        toast("Saved, but couldn't mark it repaired: " + e.message, "err");
+        $("mm-save").disabled = false;
+        return;
+      }
+      toast(moved ? "Saved · marked as Repaired" : "Saved", "ok");
     } catch (e) {
       toast(e.message, "err");
       $("mm-save").disabled = false;
@@ -2956,6 +2980,278 @@ function buildMachinePrintPdf(slip, machines) {
   return doc.output("blob");
 }
 
+// ---- Repair details, for the customer --------------------------------------
+// What was done to their machines, priced, on our letterhead - the sheet sales
+// send out to get a repair approved.
+//
+// ONLY machines marked Repaired. That is the point of it: a machine still on
+// the bench has nothing settled to quote, and putting a half-finished figure
+// in front of a customer is how a price gets argued about later.
+//
+// It is not an invoice and does not pretend to be. No GST is worked out here
+// and no document number is issued - AutoCount does both, and a second set of
+// numbers from a different system is the kind of thing that ends up on a
+// customer's desk next to the real one.
+function repairedMachines(slip) {
+  return (slip.machines || []).filter((m) => m.state === "REPAIRED");
+}
+
+function buildRepairWorkPdf(slip) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+  const LEFT = 48, RIGHT = 547, W = RIGHT - LEFT, BOTTOM = 760;
+  const TEAL = [13, 116, 122];
+  const BORDER = [219, 225, 227];
+  const INK = 26, MUTED = 110;
+  let y = 46;
+
+  const setDraw = (c) => Array.isArray(c) ? doc.setDrawColor(c[0], c[1], c[2]) : doc.setDrawColor(c);
+  const setFill = (c) => Array.isArray(c) ? doc.setFillColor(c[0], c[1], c[2]) : doc.setFillColor(c);
+  const setText = (c) => Array.isArray(c) ? doc.setTextColor(c[0], c[1], c[2]) : doc.setTextColor(c);
+  // Returns whether it broke, so a caller drawing a table can put its heading
+  // back at the top of the new page.
+  const need = (h) => { if (y + h <= BOTTOM) return false; doc.addPage(); y = 54; return true; };
+
+  // ---- Letterhead ----
+  const MARK = 46;
+  let headBottom = y + MARK;
+  try { doc.addImage(OM_MARK, "PNG", LEFT, y, MARK, MARK); } catch (_) { /* text below */ }
+  try {
+    const nameW = 208, nameH = nameW / OM_NAMEBLOCK_RATIO;
+    doc.addImage(OM_NAMEBLOCK, "PNG", LEFT + MARK + 13, y + (MARK - nameH) / 2, nameW, nameH);
+  } catch (_) {
+    doc.setFontSize(15); doc.setFont("helvetica", "bold"); setText(INK);
+    doc.text("Outboard & Marine Pte Ltd", LEFT + MARK + 13, y + 28);
+  }
+  doc.setFontSize(6.9); doc.setFont("helvetica", "normal"); setText(105);
+  let ay = y + 11;
+  OM_ADDRESS_LINES.forEach((line) => { doc.text(line, RIGHT, ay, { align: "right" }); ay += 9.2; });
+  headBottom = Math.max(headBottom, ay - 5);
+
+  y = headBottom + 10;
+  setDraw(TEAL); doc.setLineWidth(1.8);
+  doc.line(LEFT, y, RIGHT, y);
+  y += 30;
+
+  // ---- Title + slip number ----
+  const BOX_W = 158, BOX_H = 58, BAND_H = 19;
+  doc.setFontSize(25); doc.setFont("helvetica", "bold"); setText(TEAL);
+  doc.text("Repair Details", LEFT, y + 6);
+  doc.setFontSize(9.2); doc.setFont("helvetica", "normal"); setText(120);
+  doc.text("Work carried out on your equipment", LEFT, y + 21);
+
+  const boxX = RIGHT - BOX_W, boxY = y - 15;
+  setFill(TEAL);
+  doc.roundedRect(boxX, boxY, BOX_W, BAND_H + 6, 4, 4, "F");
+  setFill(255); setDraw(TEAL); doc.setLineWidth(1.1);
+  doc.rect(boxX, boxY + BAND_H, BOX_W, BOX_H - BAND_H, "FD");
+  doc.setFontSize(7.4); doc.setFont("helvetica", "bold"); setText(255);
+  doc.setCharSpace(1.6);
+  doc.text("SLIP NO.", boxX + BOX_W / 2, boxY + 13.5, { align: "center" });
+  doc.setCharSpace(0);
+  doc.setFontSize(23); setText(INK);
+  doc.text(String(slip.slip_number || ""), boxX + BOX_W / 2, boxY + BOX_H - 11, { align: "center" });
+  y = boxY + BOX_H + 24;
+
+  // ---- Who it is for ----
+  //
+  // The cells are weighted rather than equal, and the value shrinks to fit
+  // rather than being cut at the first wrapped line. A customer reading their
+  // own name chopped in half on a document we sent them is a bad first
+  // impression, and company names here run long: "SembCorp Marine Facilities
+  // Pte Ltd" does not fit a quarter of the page at 11pt.
+  const META_H = 56;
+  setDraw(BORDER); setFill(252); doc.setLineWidth(0.8);
+  doc.roundedRect(LEFT, y, W, META_H, 5, 5, "FD");
+  const meta = [
+    ["DATE RECEIVED", formatDate(slip.created_at) || "\u2014", 1],
+    ["COMPANY", slip.company || "\u2014", 2.1],
+    ["CONTACT", slip.contact_name || "\u2014", 1.25],
+    ["CONTACT NO.", slip.contact_number || "\u2014", 1],
+  ];
+  const weight = meta.reduce((n, m) => n + m[2], 0);
+  let cx = LEFT;
+  meta.forEach(([label, value, wgt], i) => {
+    const cellW = (W * wgt) / weight;
+    if (i) { setDraw(BORDER); doc.setLineWidth(0.7); doc.line(cx, y + 10, cx, y + META_H - 10); }
+    doc.setFontSize(6.6); doc.setFont("helvetica", "bold"); setText(140);
+    doc.setCharSpace(1.1);
+    doc.text(label, cx + 14, y + 22);
+    doc.setCharSpace(0);
+
+    // Shrink to fit, then wrap to two lines if even the smallest size is not
+    // enough. Only the last resort loses anything, and by then the name is
+    // longer than anything on a Singapore company register.
+    const text = String(value);
+    const room = cellW - 24;
+    doc.setFont("helvetica", "bold");
+    let size = 11;
+    doc.setFontSize(size);
+    while (size > 7.6 && doc.getTextWidth(text) > room) { size -= 0.3; doc.setFontSize(size); }
+    setText(INK);
+    if (doc.getTextWidth(text) <= room) {
+      doc.text(text, cx + 14, y + 43);
+    } else {
+      const lines = doc.splitTextToSize(text, room).slice(0, 2);
+      doc.text(lines, cx + 14, y + 37);
+    }
+    cx += cellW;
+  });
+  y += META_H + 26;
+
+  // ---- One block per machine ----
+  const machines = repairedMachines(slip);
+  const CODE = LEFT + 10, DESC = LEFT + 108, QTY = RIGHT - 150, UNIT = RIGHT - 78, AMT = RIGHT - 10;
+  const partsHead = () => {
+    setFill(TEAL); doc.rect(LEFT, y, W, 18, "F");
+    doc.setFontSize(6.8); doc.setFont("helvetica", "bold"); setText(255);
+    doc.setCharSpace(1.1);
+    doc.text("PART NO.", CODE, y + 12);
+    doc.text("DESCRIPTION", DESC, y + 12);
+    doc.text("QTY", QTY, y + 12, { align: "right" });
+    doc.text("UNIT PRICE", UNIT, y + 12, { align: "right" });
+    doc.text("AMOUNT", AMT, y + 12, { align: "right" });
+    doc.setCharSpace(0);
+    y += 18;
+  };
+
+  // The equipment-total bar, the total band and the GST note, together: what
+  // has to stay with the last machine.
+  const TOTAL_BLOCK = 34 + 44 + 30;
+
+  let grand = 0;
+  machines.forEach((m, idx) => {
+    const parts = m.parts || [];
+    const labour = Number(m.labour_charge) || 0;
+    let total = labour;
+    for (const p of parts) total += p.unit_price * p.quantity;
+    grand += total;
+
+    // Keep the machine's name with at least the first row under it. A heading
+    // alone at the foot of a page reads as an empty section.
+    //
+    // The LAST machine reserves room for the total band as well, or a sheet
+    // that fits comfortably on one page spills a second one carrying nothing
+    // but "TOTAL" and a footnote - which is what a customer notices first.
+    const last = idx === machines.length - 1;
+    need(last ? 64 + TOTAL_BLOCK : 64);
+    doc.setFontSize(6.6); doc.setFont("helvetica", "bold"); setText(TEAL);
+    doc.setCharSpace(1.2);
+    doc.text(`EQUIPMENT ${idx + 1} OF ${machines.length}`, LEFT, y);
+    doc.setCharSpace(0);
+    y += 14;
+    doc.setFontSize(12.5); doc.setFont("helvetica", "bold"); setText(INK);
+    const name = doc.splitTextToSize(m.machine_desc || "", W - 120);
+    doc.text(name, LEFT, y);
+    if (m.serial_no) {
+      doc.setFontSize(8.6); doc.setFont("helvetica", "normal"); setText(MUTED);
+      doc.text(`S/N ${m.serial_no}`, RIGHT, y, { align: "right" });
+    }
+    y += name.length * 14 + 4;
+
+    // What was done, in the technician's own words. First, because it is the
+    // part a customer reads - the parts list underneath is the evidence for it.
+    const note = String(m.repair_comment || "").trim();
+    if (note) {
+      const lines = doc.splitTextToSize(note, W - 20);
+      need(lines.length * 11 + 14);
+      setFill(248); setDraw(BORDER); doc.setLineWidth(0.7);
+      doc.roundedRect(LEFT, y, W, lines.length * 11 + 12, 4, 4, "FD");
+      doc.setFontSize(9); doc.setFont("helvetica", "normal"); setText(INK);
+      doc.text(lines, LEFT + 10, y + 15);
+      y += lines.length * 11 + 20;
+    }
+
+    if (parts.length) {
+      need(40);
+      partsHead();
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8.8);
+      parts.forEach((p, i) => {
+        const desc = doc.splitTextToSize(p.description || "", QTY - DESC - 14);
+        const h = Math.max(15, desc.length * 10.5 + 5);
+        if (need(h)) partsHead();
+        if (i % 2) { setFill(249); doc.rect(LEFT, y, W, h, "F"); }
+        setText(INK);
+        doc.text(String(p.item_code || ""), CODE, y + 11);
+        doc.text(desc, DESC, y + 11);
+        doc.text(String(p.quantity), QTY, y + 11, { align: "right" });
+        doc.text(money(p.unit_price), UNIT, y + 11, { align: "right" });
+        doc.text(money(p.unit_price * p.quantity), AMT, y + 11, { align: "right" });
+        y += h;
+      });
+      setDraw(BORDER); doc.setLineWidth(0.7); doc.line(LEFT, y, RIGHT, y);
+      y += 4;
+    }
+
+    if (labour > 0) {
+      need(16);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8.8); setText(INK);
+      doc.text("Workshop labour", CODE, y + 11);
+      doc.text(money(labour), AMT, y + 11, { align: "right" });
+      y += 16;
+    }
+    if (!parts.length && labour <= 0 && !note) {
+      need(16);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8.8); setText(MUTED);
+      doc.text("No parts or labour charged.", CODE, y + 11);
+      y += 16;
+    }
+
+    need(24);
+    setFill(246); doc.rect(LEFT, y, W, 20, "F");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(9.6); setText(INK);
+    doc.text("Equipment total", CODE, y + 13.5);
+    doc.text(money(total), AMT, y + 13.5, { align: "right" });
+    y += 34;
+  });
+
+  // ---- Total ----
+  need(46);
+  setFill(TEAL); doc.roundedRect(LEFT, y, W, 34, 4, 4, "F");
+  doc.setFont("helvetica", "bold"); doc.setFontSize(11); setText(255);
+  doc.text(`TOTAL \u2014 ${machines.length} item${machines.length === 1 ? "" : "s"}`, LEFT + 14, y + 22);
+  doc.setFontSize(14);
+  doc.text(money(grand), RIGHT - 14, y + 23, { align: "right" });
+  y += 44;
+
+  need(30);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(8); setText(MUTED);
+  doc.text(doc.splitTextToSize(
+    "All prices are in Singapore Dollars and exclude GST. This is a summary of "
+    + "repair work carried out and is not a tax invoice.", W), LEFT, y);
+
+  // ---- Footer, on every page ----
+  const pages = doc.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i);
+    setDraw(BORDER); doc.setLineWidth(0.7);
+    doc.line(LEFT, BOTTOM + 12, RIGHT, BOTTOM + 12);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7); setText(MUTED);
+    doc.text(`Service Slip ${slip.slip_number} \u00b7 Outboard & Marine Pte Ltd`, LEFT, BOTTOM + 24);
+    doc.text(`Page ${i} of ${pages}`, RIGHT, BOTTOM + 24, { align: "right" });
+  }
+  return doc.output("blob");
+}
+
+async function shareRepairWorkPdf(slipNumber) {
+  try {
+    // Re-read rather than using what is on screen: a technician may have
+    // finished another machine since this screen was opened, and the sheet
+    // going to the customer should be the current one.
+    const slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
+    if (!repairedMachines(slip).length) {
+      toast("No machines are marked Repaired yet", "err");
+      return;
+    }
+    const blob = buildRepairWorkPdf(slip);
+    await deliverPdf(blob, `RepairDetails_${slip.slip_number}.pdf`,
+                     `Repair Details ${slip.slip_number}`);
+  } catch (e) {
+    toast("Couldn't build the repair details: " + e.message, "err");
+  }
+}
+
 async function makeMachinePrintout() {
   const chosen = [...document.querySelectorAll("#pr-list input:checked")].map((c) => Number(c.value));
   if (!chosen.length) {
@@ -3157,6 +3453,8 @@ async function onViewSlipChosen(slipNumber) {
     // Rebuilt from the stored slip, so a re-issued copy matches the original.
     const share = document.getElementById("vs-share");
     if (share) share.addEventListener("click", () => shareSlipPdf(slip));
+    const repairBtn = document.getElementById("vs-repair-pdf");
+    if (repairBtn) repairBtn.addEventListener("click", () => shareRepairWorkPdf(slip.slip_number));
     wireContactActions(wrap, slip);
     if (share) {
       whatsappStatus().then((wa) => {
@@ -3378,6 +3676,8 @@ function renderSlipDetail(slip) {
   html += `
     ${contactActionHtml(slip)}
     <button class="btn-primary" id="vs-share" type="button" style="margin-top:10px;">Share PDF</button>${
+      repairedMachines(slip).length
+        ? `<button class="btn-secondary" id="vs-repair-pdf" style="margin-top:10px;width:100%;">Repair details PDF</button>` : ""}${
       canDecide() && slip.status !== "CLOSED"
         ? `<button class="btn-secondary" id="vs-edit" style="margin-top:10px;width:100%;">Edit slip</button>` : ""}`;
 

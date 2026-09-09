@@ -62,6 +62,7 @@ module.exports = {
     updateSlipDetails: (...a) => dataRepo.slips.updateSlipDetails(...a),
     setMachineState: (...a) => dataRepo.slips.setMachineState(...a),
     setAllMachineStates: (...a) => dataRepo.slips.setAllMachineStates(...a),
+    finishRepair: (...a) => dataRepo.slips.finishRepair(...a),
     setMachineDisposal: (...a) => dataRepo.slips.setMachineDisposal(...a),
     techniciansForMachine: (...a) => dataRepo.slips.techniciansForMachine(...a),
     createSlipOrder: (...a) => dataRepo.slips.createSlipOrder(...a),
