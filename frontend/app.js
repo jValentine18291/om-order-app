@@ -3074,25 +3074,52 @@ function buildMachinePrintPdf(slip, machines) {
 }
 
 // ---- Repair details, for the customer --------------------------------------
-// What was done to their machines, priced, on our letterhead - the sheet sales
-// send out to get a repair approved.
+// What has been done to their machines, or what we propose doing, priced, on
+// our letterhead. The sheet sales send out to get a repair approved.
 //
-// ONLY machines marked Repaired. That is the point of it: a machine still on
-// the bench has nothing settled to quote, and putting a half-finished figure
-// in front of a customer is how a price gets argued about later.
+// It started as repaired machines only. That was backwards: the sheet is most
+// wanted BEFORE the work, on a machine waiting for the customer to say yes -
+// which is a machine that has been stripped, assessed and priced, and is
+// nowhere near "Repaired". Any machine with something to show is on it now.
+//
+// What is left off is a machine with nothing recorded at all: no parts, no
+// labour, no note, not condemned. There is nothing to say about it, and an
+// empty block on a customer's sheet reads as an oversight.
+//
+// Every block carries where its machine stands, because one sheet can hold a
+// machine that is finished, one waiting on the customer's word and one that is
+// not worth repairing - and a customer must never have to guess which is
+// which. That is also what keeps the sheet honest now it is no longer only
+// about work already done.
 //
 // It is not an invoice and does not pretend to be. No GST is worked out here
 // and no document number is issued - AutoCount does both, and a second set of
 // numbers from a different system is the kind of thing that ends up on a
 // customer's desk next to the real one.
-function repairedMachines(slip) {
-  return (slip.machines || []).filter((m) => m.state === "REPAIRED");
+function quotableMachines(slip) {
+  return (slip.machines || []).filter((m) =>
+    m.state === "CONDEMNED" ||
+    (m.parts || []).length > 0 ||
+    Number(m.labour_charge) > 0 ||
+    String(m.repair_comment || "").trim()
+  );
 }
+
+// Where a machine stands, in words a customer reads rather than ours.
+const PDF_MACHINE_STATE = {
+  RECEIVED: "Assessed \u2014 quotation below",
+  AWAITING_QUOTE: "Quotation below \u2014 awaiting your approval",
+  QUOTED: "Quotation below \u2014 awaiting your approval",
+  TO_REPAIR: "Approved \u2014 repair in progress",
+  REPAIRED: "Repair completed",
+  CONDEMNED: "Not repaired \u2014 beyond economical repair",
+};
 
 function buildRepairWorkPdf(slip) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: "pt", format: "a4" });
 
+  const machines = quotableMachines(slip);
   const LEFT = 48, RIGHT = 547, W = RIGHT - LEFT, BOTTOM = 760;
   const TEAL = [13, 116, 122];
   const BORDER = [219, 225, 227];
@@ -3132,7 +3159,15 @@ function buildRepairWorkPdf(slip) {
   doc.setFontSize(25); doc.setFont("helvetica", "bold"); setText(TEAL);
   doc.text("Repair Details", LEFT, y + 6);
   doc.setFontSize(9.2); doc.setFont("helvetica", "normal"); setText(120);
-  doc.text("Work carried out on your equipment", LEFT, y + 21);
+  // The line under the title tells the customer what is being asked of them,
+  // which is a different thing on a quotation than on a finished repair.
+  const waiting = machines.some((m) => m.state !== "REPAIRED" && m.state !== "CONDEMNED");
+  const done = machines.some((m) => m.state === "REPAIRED");
+  doc.text(
+    waiting && done ? "Work carried out, and work proposed for your approval"
+    : waiting ? "Proposed repairs \u2014 please confirm before we proceed"
+    : "Work carried out on your equipment",
+    LEFT, y + 21);
 
   const boxX = RIGHT - BOX_W, boxY = y - 15;
   setFill(TEAL);
@@ -3194,7 +3229,6 @@ function buildRepairWorkPdf(slip) {
   y += META_H + 26;
 
   // ---- One block per machine ----
-  const machines = repairedMachines(slip);
   const CODE = LEFT + 10, DESC = LEFT + 108, QTY = RIGHT - 150, UNIT = RIGHT - 78, AMT = RIGHT - 10;
   const partsHead = () => {
     setFill(TEAL); doc.rect(LEFT, y, W, 18, "F");
@@ -3215,8 +3249,17 @@ function buildRepairWorkPdf(slip) {
 
   let grand = 0;
   machines.forEach((m, idx) => {
-    const parts = m.parts || [];
-    const labour = Number(m.labour_charge) || 0;
+    // A condemned machine is charged for nothing here, exactly as it is on the
+    // Sales Order. It may well have parts and labour scanned against it - it
+    // was stripped and priced before anyone decided against repairing it - and
+    // none of that was fitted or spent.
+    //
+    // The two documents have to agree. Sales send this sheet, then raise the
+    // order; a customer who reads $140 on one and nothing on the other has
+    // been told two different things about the same machine.
+    const condemned = m.state === "CONDEMNED";
+    const parts = condemned ? [] : (m.parts || []);
+    const labour = condemned ? 0 : Number(m.labour_charge) || 0;
     let total = labour;
     for (const p of parts) total += p.unit_price * p.quantity;
     grand += total;
@@ -3228,7 +3271,7 @@ function buildRepairWorkPdf(slip) {
     // that fits comfortably on one page spills a second one carrying nothing
     // but "TOTAL" and a footnote - which is what a customer notices first.
     const last = idx === machines.length - 1;
-    need(last ? 64 + TOTAL_BLOCK : 64);
+    need(last ? 81 + TOTAL_BLOCK : 81);
     doc.setFontSize(6.6); doc.setFont("helvetica", "bold"); setText(TEAL);
     doc.setCharSpace(1.2);
     doc.text(`EQUIPMENT ${idx + 1} OF ${machines.length}`, LEFT, y);
@@ -3241,7 +3284,20 @@ function buildRepairWorkPdf(slip) {
       doc.setFontSize(8.6); doc.setFont("helvetica", "normal"); setText(MUTED);
       doc.text(`S/N ${m.serial_no}`, RIGHT, y, { align: "right" });
     }
-    y += name.length * 14 + 4;
+    y += name.length * 14 + 2;
+
+    // Where this one stands. Never left out: a sheet carrying a finished
+    // repair beside one nobody has approved yet has to say so on both, or the
+    // customer reads the whole thing as one or the other.
+    const stateLine = PDF_MACHINE_STATE[m.state] || "";
+    if (stateLine) {
+      doc.setFontSize(8.4); doc.setFont("helvetica", "bold");
+      setText(m.state === "CONDEMNED" ? [163, 32, 32]
+            : m.state === "REPAIRED" ? [27, 122, 66] : [168, 91, 0]);
+      doc.text(stateLine, LEFT, y + 9);
+      y += 15;
+    }
+    y += 2;
 
     // What was done, in the technician's own words. First, because it is the
     // part a customer reads - the parts list underneath is the evidence for it.
@@ -3312,7 +3368,8 @@ function buildRepairWorkPdf(slip) {
   doc.setFont("helvetica", "normal"); doc.setFontSize(8); setText(MUTED);
   doc.text(doc.splitTextToSize(
     "All prices are in Singapore Dollars and exclude GST. This is a summary of "
-    + "repair work carried out and is not a tax invoice.", W), LEFT, y);
+    + "repair work and is not a tax invoice. Items shown as awaiting approval "
+    + "have not been carried out.", W), LEFT, y);
 
   // ---- Footer, on every page ----
   const pages = doc.getNumberOfPages();
@@ -3333,8 +3390,8 @@ async function shareRepairWorkPdf(slipNumber) {
     // finished another machine since this screen was opened, and the sheet
     // going to the customer should be the current one.
     const slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
-    if (!repairedMachines(slip).length) {
-      toast("No machines are marked Repaired yet", "err");
+    if (!quotableMachines(slip).length) {
+      toast("Nothing recorded on this slip yet", "err");
       return;
     }
     const blob = buildRepairWorkPdf(slip);
@@ -3841,7 +3898,7 @@ function renderSlipDetail(slip) {
   html += `
     ${contactActionHtml(slip)}
     <button class="btn-primary" id="vs-share" type="button" style="margin-top:10px;">Share PDF</button>${
-      repairedMachines(slip).length
+      quotableMachines(slip).length
         ? `<button class="btn-secondary" id="vs-repair-pdf" style="margin-top:10px;width:100%;">Repair details PDF</button>` : ""}${
       canDecide() && slip.status !== "CLOSED"
         ? `<button class="btn-secondary" id="vs-edit" style="margin-top:10px;width:100%;">Edit slip</button>` : ""}`;
