@@ -2506,7 +2506,10 @@ function updateSlipFooter() {
   // Billable when there is anything to charge for — parts OR labour. A slip
   // that is pure labour ("cleaned the carburettor, no parts") is legitimate.
   const st = session.slip.status;
-  const billable = slipParts > 0 || slipTotal > 0;
+  // A slip whose only unconverted machines are condemned still has an order to
+  // raise: they leave the building on it, at nothing.
+  const anyCondemned = (session.slip.machines || []).some((m) => m.state === "CONDEMNED" && !m.converted_at);
+  const billable = slipParts > 0 || slipTotal > 0 || anyCondemned;
   // A slip converted machine by machine sits at ALL_REPAIRED between orders, so
   // that status must not disable the button any more - only a slip whose every
   // machine is already on an order, or one that is closed.
@@ -2826,12 +2829,18 @@ function openConvertPicker() {
     const done = !!m.converted_at;
     const parts = (m.parts || []).length;
     const labour = Number(m.labour_charge) || 0;
-    const billable = parts > 0 || labour > 0 || String(m.repair_comment || "").trim();
+    // A condemned machine goes on the order at nothing - the customer is
+    // collecting it, and it needs paperwork like anything else leaving the
+    // building. Nothing was recorded on it and nothing has to be.
+    const condemned = m.state === "CONDEMNED";
+    const billable = condemned || parts > 0 || labour > 0 || String(m.repair_comment || "").trim();
     const sub = done
       ? `On ${escapeHtml(m.so_number || "a Sales Order")}`
-      : billable
-        ? `${parts} part${parts === 1 ? "" : "s"}${labour > 0 ? " · labour " + money(labour) : ""}`
-        : "No work recorded yet";
+      : condemned
+        ? "Condemned — goes on at no charge"
+        : billable
+          ? `${parts} part${parts === 1 ? "" : "s"}${labour > 0 ? " · labour " + money(labour) : ""}`
+          : "No work recorded yet";
     return `
       <label class="conv-row${done ? " conv-done" : ""}${!done && !billable ? " conv-blocked" : ""}">
         <input type="checkbox" value="${m.id}" ${done || !billable ? "disabled" : "checked"}>
@@ -4218,7 +4227,13 @@ function renderSalesOrder(order) {
         <span class="so-desc">${escapeHtml(l.description || "")}</span>
         <span class="so-qty">${l.quantity ? escapeHtml(String(l.quantity)) : ""}</span>
         <span class="so-price">${l.quantity ? money(l.unit_price) : ""}</span>
-        <span class="so-amt">${l.line_amount ? money(l.line_amount) : ""}</span>
+        <span class="so-amt">${
+          // A SubTotal of nothing says "$0.00", not nothing. A condemned
+          // machine's block is meant to total zero, and a blank there reads
+          // as a figure that failed to load - which is the one thing someone
+          // keying it into AutoCount must not have to wonder about.
+          l.line_amount || String(l.description || "") === "SubTotal" ? money(l.line_amount || 0) : ""
+        }</span>
       </div>`;
   }
 

@@ -475,6 +475,12 @@ function setPartDescription(partId, description) {
 const LABOUR_ITEM_CODE = "A1 SVR LANDSCAPE";
 const LABOUR_DESCRIPTION = "Being repair & replacement of part :-";
 
+// A condemned machine still goes on the order. The customer is collecting it
+// along with the repaired ones, and a machine that leaves the building with no
+// paperwork is one nobody can account for afterwards - so it gets its usual
+// block, at nothing, saying why.
+const CONDEMNED_NOTE = "*Condemned - beyond repair";
+
 function createSlipOrder(slipNumber, machineIds) {
   const slip = getSlip(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
@@ -501,7 +507,12 @@ function createSlipOrder(slipNumber, machineIds) {
 
   // Refuse a machine with no work recorded at all, naming it - an empty block
   // in AutoCount is worse than a clear refusal here.
+  //
+  // Condemned machines are exempt. Being condemned IS the fact the block
+  // records, and it is often the whole of it: a machine written off on sight
+  // has no parts, no labour and nothing anyone typed.
   const untouched = wanted
+    .filter((m) => m.state !== "CONDEMNED")
     .filter((m) => (m.parts || []).length === 0 && !String(m.repair_comment || "").trim() && !(Number(m.labour_charge) > 0))
     .map((m) => m.machine_desc);
   if (untouched.length) {
@@ -528,8 +539,14 @@ function createSlipOrder(slipNumber, machineIds) {
   const total = all.length;
 
   wanted.forEach((m, n) => {
-    const labour = Number(m.labour_charge) || 0;
-    const parts = m.parts || [];
+    // A condemned machine is charged for nothing, whatever was scanned against
+    // it before the customer said no. Its parts were never fitted and its
+    // labour was never spent, so neither is billed and neither is listed -
+    // a priced line on a block that has to total nothing is a line somebody
+    // will one day add up.
+    const condemned = m.state === "CONDEMNED";
+    const labour = condemned ? 0 : Number(m.labour_charge) || 0;
+    const parts = condemned ? [] : (m.parts || []);
 
     lines.push({
       item_code: LABOUR_ITEM_CODE,
@@ -567,8 +584,12 @@ function createSlipOrder(slipNumber, machineIds) {
       machineTotal += p.unit_price * p.quantity;
     }
 
+    // What the technician wrote, then - for a condemned machine - why it is
+    // here at nothing. Both, because the technician's line says what was wrong
+    // with it and this one says what was decided about it.
     const comment = String(m.repair_comment || "").trim();
     if (comment) lines.push({ note: true, description: `*${comment}` });
+    if (condemned) lines.push({ note: true, description: CONDEMNED_NOTE });
 
     lines.push({ note: true, description: "SubTotal", line_amount: machineTotal });
     // Blank row between machines, as the keyed block has.
