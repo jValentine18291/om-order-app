@@ -639,7 +639,22 @@
       <!-- One button, and which one it is depends on where the slip has got
            to. The step already taken stays reachable underneath so a mistyped
            number can be corrected without unwinding anything. -->
+      <!-- Closing is the last thing that happens to a slip and there is no way
+           back from it, so it is asked for twice: what is about to close is
+           spelled out, and the button that does it is a different button in a
+           different place from the one that was tapped to get here. -->
+      <div id="cs-confirm" style="display:none">
+        <div class="loc-confirm-box">
+          <div class="loc-confirm-line"><span>Slip</span><b id="cs-c-slip"></b></div>
+          <div class="loc-confirm-line"><span>Customer</span><b id="cs-c-company"></b></div>
+          <div class="loc-confirm-line"><span>Machines</span><b id="cs-c-machines"></b></div>
+          <div class="loc-confirm-line"><span>Invoiced with</span><b id="cs-c-ref"></b></div>
+        </div>
+        <p class="loc-warn">Closing is final. The slip leaves every list, and its parts can no longer be changed.</p>
+      </div>
+
       <button class="btn-primary" id="cs-submit" style="width:100%">Record DO/CS/INV number</button>
+      <button class="btn-secondary" id="cs-cancel-close" type="button" style="width:100%;margin-top:8px;display:none">Not yet — go back</button>
       <button class="btn-secondary" id="cs-reinvoice" type="button" style="width:100%;margin-top:8px;display:none">Correct the number</button>
       <div class="scan-hint" id="cs-status" style="justify-content:flex-start;min-height:20px;margin-top:8px;"></div>
     </section>

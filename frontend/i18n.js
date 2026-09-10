@@ -424,6 +424,17 @@
     "Finish a service slip": "完结服务单",
     "Record DO/CS/INV number": "登记 DO/CS/INV 号码",
     "Correct the number": "修正号码",
+    // Closing is asked for twice, so both the question and the way out of it
+    // have to read properly.
+    "Yes, close this slip": "是的，结单",
+    "Not yet — go back": "还没有 — 返回",
+    "Closing is final. The slip leaves every list, and its parts can no longer be changed.":
+      "结单后无法撤销。此单将从所有列表中移除，零件也不能再更改。",
+    "Slip": "服务单",
+    "Customer": "客户",
+    "Machines": "机器",
+    "Invoiced with": "开单号码",
+    "Pick a slip to close.": "请选择要结单的服务单。",
     "Pick a slip first.": "请先选择服务单。",
     // Pressing Save on a machine is what marks it repaired.
     "Saved · marked as Repaired": "已保存 · 已标记为已修好",

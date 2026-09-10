@@ -3626,6 +3626,7 @@ async function createSalesOrder() {
 let closeSearch = null;
 let csPickedSlip = null; // currently selected slip number in Close Service
 let csSlip = null;       // and the slip itself, for deciding which step it is on
+let csConfirming = false; // showing "are you sure" rather than the ordinary step
 async function enterCloseService() {
   showScreen("close");
   $("cs-context").style.display = "none";
@@ -3633,6 +3634,7 @@ async function enterCloseService() {
   $("cs-status").innerHTML = "";
   csPickedSlip = null;
   csSlip = null;
+  csConfirming = false;
   renderCloseStep();
 
   if (!closeSearch) {
@@ -3647,6 +3649,9 @@ async function enterCloseService() {
 async function onCloseSlipChosen(slipNumber) {
   csPickedSlip = slipNumber || null;
   csSlip = null;
+  // Picking a different slip drops any half-asked confirmation with it, so a
+  // Close primed for one slip can never be answered against another.
+  csConfirming = false;
   renderCloseStep();
   if (!slipNumber) { $("cs-context").style.display = "none"; return; }
   try {
@@ -3696,6 +3701,13 @@ function renderCloseStep() {
   const awaiting = csAwaiting();
   const needsNumber = !csSlip ? true : awaiting.length > 0;
   const forced = $("cs-submit").dataset.force === "invoice";
+
+  // Asking the second time is a state of its own, so that leaving this screen,
+  // picking another slip or correcting a number all drop out of it rather than
+  // leaving a primed Close button behind.
+  if (csConfirming) { renderCloseConfirm(); return; }
+  $("cs-confirm").style.display = "none";
+  $("cs-cancel-close").style.display = "none";
 
   $("cs-ref-field").style.display = needsNumber || forced ? "" : "none";
   $("cs-reinvoice").style.display = !needsNumber ? "" : "none";
@@ -3751,6 +3763,46 @@ async function submitInvoiced() {
 }
 
 // Step two: they came, they collected, they paid.
+//
+// Asked twice. Closing is the end of a slip - it drops off every list, its
+// parts stop being editable, and nothing in the app undoes it - and until now
+// one tap on a button that had just changed its own label did it. The label
+// change is the whole hazard: the tap that records the DO number and the tap
+// that closes the slip land in the same place a moment apart.
+function renderCloseConfirm() {
+  const orders = ((csSlip && csSlip.orders) || []).filter((o) => o.so_number);
+  const refs = [...new Set(orders.map((o) => o.closing_ref).filter(Boolean))];
+  const machines = (csSlip && csSlip.machines) || [];
+  $("cs-c-slip").textContent = csPickedSlip || "—";
+  $("cs-c-company").textContent = (csSlip && csSlip.company) || "—";
+  $("cs-c-machines").textContent =
+    `${machines.length} machine${machines.length === 1 ? "" : "s"}`;
+  // Every document, not just the last one recorded: a slip collected in two
+  // goes has two, and seeing only one of them is how somebody closes a slip
+  // whose second batch they have forgotten about.
+  $("cs-c-ref").textContent = refs.length ? refs.join(", ") : "—";
+
+  $("cs-confirm").style.display = "";
+  $("cs-ref-field").style.display = "none";
+  $("cs-so-field").style.display = "none";
+  $("cs-reinvoice").style.display = "none";
+  $("cs-cancel-close").style.display = "";
+  $("cs-submit").textContent = "Yes, close this slip";
+}
+
+function askToClose() {
+  if (!csPickedSlip) { $("cs-status").innerHTML = statusErr("Pick a slip to close."); return; }
+  csConfirming = true;
+  $("cs-status").innerHTML = "";
+  renderCloseConfirm();
+}
+
+function cancelClose() {
+  csConfirming = false;
+  $("cs-status").innerHTML = "";
+  renderCloseStep();
+}
+
 async function submitClose() {
   const slipNumber = csPickedSlip;
   if (!slipNumber) { $("cs-status").innerHTML = statusErr("Pick a slip to close."); return; }
@@ -3763,10 +3815,16 @@ async function submitClose() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ who: initialsFor(getUser()) }),
     });
+    csConfirming = false;
     toast(`Slip ${slipNumber} closed`, "ok");
     $("cs-status").innerHTML = statusOk(`Closed ${slipNumber}. Returning home…`);
     setTimeout(goHome, 1400);
   } catch (e) {
+    // Refused - a machine still on the bench, a Sales Order with no document.
+    // Back to the ordinary step, so the reason is read rather than tapped past
+    // with a button still sitting there saying "Yes, close this slip".
+    csConfirming = false;
+    renderCloseStep();
     $("cs-status").innerHTML = statusErr(e.message);
   } finally {
     $("cs-submit").disabled = false;
@@ -3777,6 +3835,7 @@ async function submitClose() {
 // the slip.
 function reopenRefField() {
   $("cs-submit").dataset.force = "invoice";
+  csConfirming = false;
   renderCloseStep();
   const orders = ((csSlip && csSlip.orders) || []).filter((o) => o.so_number);
   // Start from what that order already has, so a correction is an edit rather
@@ -7511,12 +7570,15 @@ $("machine-parts").addEventListener("change", (e) => {
 
 // Close Service: slip selection via search component
 $("cs-submit").addEventListener("click", () => {
+  // Already asked, and this is the answer.
+  if (csConfirming) return submitClose();
   // Invoiced and not in the middle of correcting the number: the button closes
-  // the slip. Everything else records the number.
+  // the slip - after asking. Everything else records the number.
   const done = !!csSlip && csAwaiting().length === 0;
-  if (done && $("cs-submit").dataset.force !== "invoice") return submitClose();
+  if (done && $("cs-submit").dataset.force !== "invoice") return askToClose();
   return submitInvoiced();
 });
+$("cs-cancel-close").addEventListener("click", cancelClose);
 $("cs-reinvoice").addEventListener("click", reopenRefField);
 $("cs-so").addEventListener("change", () => {
   const o = ((csSlip && csSlip.orders) || []).find((x) => x.so_number === $("cs-so").value);
