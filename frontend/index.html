@@ -900,6 +900,12 @@
            everything else because it decides whether to carry on at all. -->
       <div class="decision-banner" id="mm-decision" style="display:none"></div>
 
+      <!-- This machine has already been billed. Correcting it here is allowed
+           and is often the right thing to do, but the Sales Order keeps the
+           lines it was raised with - so say plainly that AutoCount will not
+           follow, rather than letting someone think it has. -->
+      <div class="decision-banner" id="mm-billed" style="display:none"></div>
+
       <div id="os-entry" style="display:none">
 
         <!-- Fogger tubes are cut to length from a roll, so they cannot be

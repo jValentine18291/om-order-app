@@ -2087,6 +2087,9 @@ select {
 /* Quoted, and waiting on the customer. Amber, like "waiting to quote", because
    it is the same kind of fact: nobody in the workshop can do anything yet. */
 .decision-quoted { background: #FFF1DC; border-color: #C97A00; color: #7a4a00; }
+/* Already on a Sales Order. Not a warning about the machine - a warning about
+   what this screen can and cannot change - so it is quieter than condemned. */
+.decision-billed { background: #EEF2F7; border-color: #4A6785; color: #2c3e50; }
 
 /* Where a condemned machine went. It reads as a question because that is what
    it is - the slip will not close until it is answered. */

@@ -428,6 +428,12 @@
     // Pressing Save on a machine is what marks it repaired.
     "Saved · marked as Repaired": "已保存 · 已标记为已修好",
     "Repair details PDF": "维修明细 PDF",
+    // Back to the bench from View Slips, for a slip the workshop's own list no
+    // longer shows.
+    "Edit parts & repairs": "修改零件与维修",
+    "Already billed": "已开单",
+    "Changes here correct the slip only — the Sales Order keeps what it was raised with. Correct AutoCount as well if the customer's figure is wrong.":
+      "这里的修改只更新服务单 — 销售订单仍保留开单时的内容。若客户的金额有误，请同时在 AutoCount 更正。",
     "No machines are marked Repaired yet": "尚无机器被标记为已修好",
     "Mark as repaired": "标记为已修好",
     "Not finished after all": "还没修好",
@@ -535,6 +541,12 @@
     // The tube type, the item code and the money are carried through as they
     // are - they are what the technician matches against the roll in his hand.
     [/^(.+) · (\$[\d.,]+) a piece$/, "$1 · 每条 $2"],
+    // A machine already on a Sales Order, and the slip the server refuses to
+    // let anyone change. Both name a number, so both are patterns.
+    [/^Already billed on (.+)$/, "已开单 · $1"],
+    [/^Slip (.+) is closed\. Its parts can no longer be changed\.$/,
+      "服务单 $1 已结单，零件不能再更改。"],
+
     // A tube quantity that is not a whole number of cut pieces. Anchored and
     // ahead of the two ordinary ones below, which it does not resemble - but
     // translate() stops at the first pattern that MATCHES, so order is the

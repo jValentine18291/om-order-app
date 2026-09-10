@@ -416,10 +416,37 @@ function getSlipSignature(slipNumber) {
 // PulsFOG tubes, where Z00126.03 is four tube types at four different prices:
 // merging 222 into 311 because both are Z00126.03 would quietly produce a
 // figure that is neither. Everything else passes '' and merges as before.
+// A closed slip is finished with. Parts on it have been billed, collected and
+// paid for, and a line changed afterwards would put the app's record at odds
+// with the invoice the customer holds, with nothing to show it had happened.
+//
+// Everything short of closed IS editable, including a machine already on a
+// Sales Order - that order keeps the lines it was raised with, so correcting
+// the slip cannot alter what was billed. The screen says so when it matters.
+function assertSlipEditable(slipId) {
+  const row = db.prepare("SELECT slip_number, status FROM service_slips WHERE id = ?").get(slipId);
+  if (row && row.status === "CLOSED") {
+    const e = new Error(`Slip ${row.slip_number} is closed. Its parts can no longer be changed.`);
+    e.status = 409; throw e;
+  }
+}
+
+// The same question asked from a part line rather than a machine.
+function slipIdForPart(partId) {
+  const row = db.prepare(
+    `SELECT m.slip_id AS slip_id FROM machine_parts p
+       JOIN slip_machines m ON m.id = p.machine_id
+      WHERE p.id = ?`
+  ).get(partId);
+  if (!row) { const e = new Error("Part not found."); e.status = 404; throw e; }
+  return row.slip_id;
+}
+
 function addPartToMachine(machineId, { item_code, description, uom = "UNIT", unit_price = 0, quantity = 1, technician = "", free_text, variant = "" } = {}) {
   const machine = db.prepare("SELECT * FROM slip_machines WHERE id = ?").get(machineId);
   if (!machine) { const e = new Error("Machine not found on any slip."); e.status = 404; throw e; }
   if (!item_code) { const e = new Error("item_code is required."); e.status = 400; throw e; }
+  assertSlipEditable(machine.slip_id);
 
   // If the same part was already scanned for this machine by the same tech, bump qty.
   // Same variant too: a second cut of tube 142 adds to the first, but tube 311
@@ -452,6 +479,7 @@ function addPartToMachine(machineId, { item_code, description, uom = "UNIT", uni
 function setPartQuantity(partId, quantity) {
   const q = Number(quantity);
   if (!Number.isFinite(q) || q < 0) { const e = new Error("Invalid quantity."); e.status = 400; throw e; }
+  assertSlipEditable(slipIdForPart(partId));
   if (q === 0) {
     db.prepare("DELETE FROM machine_parts WHERE id = ?").run(partId);
     return { removed: true };
@@ -467,6 +495,7 @@ function setPartPrice(partId, price) {
   if (!Number.isFinite(p) || p < 0) { const e = new Error("Invalid price."); e.status = 400; throw e; }
   const row = db.prepare("SELECT id FROM machine_parts WHERE id = ?").get(partId);
   if (!row) { const e = new Error("Part not found."); e.status = 404; throw e; }
+  assertSlipEditable(slipIdForPart(partId));
   db.prepare("UPDATE machine_parts SET unit_price = ? WHERE id = ?").run(p, partId);
   return { ok: true, unit_price: p };
 }
@@ -491,6 +520,7 @@ function isFreeTextPart(itemCode, description = "") {
 function setPartDescription(partId, description) {
   const row = db.prepare("SELECT id, item_code, description, free_text FROM machine_parts WHERE id = ?").get(partId);
   if (!row) { const e = new Error("Part not found."); e.status = 404; throw e; }
+  assertSlipEditable(slipIdForPart(partId));
   // The recorded answer first. Re-deriving it would fail the SECOND edit: by
   // then the description has been replaced with the real part name and no
   // longer looks like a placeholder. Older rows have no flag, so fall back.
@@ -695,6 +725,7 @@ function createSlipOrder(slipNumber, machineIds) {
 function setMachineLabour(machineId, amount) {
   const machine = db.prepare("SELECT * FROM slip_machines WHERE id = ?").get(machineId);
   if (!machine) { const e = new Error("Machine not found."); e.status = 404; throw e; }
+  assertSlipEditable(machine.slip_id);
   let value = Number(amount);
   if (!Number.isFinite(value) || value < 0) value = 0;
   value = Math.round(value * 100) / 100;
@@ -967,6 +998,7 @@ function closeSlip(slipNumber, closingRef, who = "") {
 function setMachineComment(machineId, comment) {
   const machine = db.prepare("SELECT * FROM slip_machines WHERE id = ?").get(machineId);
   if (!machine) { const e = new Error("Machine not found."); e.status = 404; throw e; }
+  assertSlipEditable(machine.slip_id);
   db.prepare("UPDATE slip_machines SET repair_comment = ? WHERE id = ?")
     .run(String(comment == null ? "" : comment), machineId);
   deriveSlipStatus(machine.slip_id);

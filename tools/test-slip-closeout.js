@@ -151,6 +151,56 @@ const seen = async (scope, no) =>
   slip = await data.slips.setSlipInvoiced(noD, "INV-88", "KS");
   check("and an invoice can be recorded against it", slip.status, "INVOICED");
 
+  console.log("\n-- a slip stays correctable right up to the moment it closes --");
+  // View Slips can now hand any slip that is not closed back to the workshop
+  // screen, so a part scanned onto the wrong machine can be taken off again.
+  // What that must not reach is a CLOSED slip: those parts have been billed,
+  // collected and paid for, and a line changed afterwards puts this app at
+  // odds with the invoice the customer holds, with nothing to show it moved.
+  let s = await build("TEST STILL EDITABLE", ["Brushcutter 545RX"]);
+  const noE = s.slip_number, mE = s.machines[0].id;
+  await data.slips.setMachineLabour(mE, 30);
+  await data.slips.addPartToMachine(mE, {
+    item_code: "SZEN 848BE058B2", description: "GASKET", unit_price: 4.5, quantity: 1, technician: "WJ",
+  });
+  // Billed, and still correctable - this is the case the technicians asked for.
+  await data.slips.finishRepair(mE, "WJ");
+  await data.slips.createSlipOrder(noE, [mE], "KS");
+  let ps = (await data.slips.getSlip(noE)).machines[0].parts;
+  check("a billed machine still takes a correction", ps.length, 1);
+  await data.slips.addPartToMachine(mE, {
+    item_code: "SZEN 165151220", description: "Clutch Spring", unit_price: 2.5, quantity: 1, technician: "WJ",
+  });
+  ps = (await data.slips.getSlip(noE)).machines[0].parts;
+  check("  the part goes on", ps.length, 2);
+  await data.slips.setPartQuantity(ps[1].id, 0);
+  ps = (await data.slips.getSlip(noE)).machines[0].parts;
+  check("  and comes off again", ps.length, 1);
+
+  // The order it was raised with is untouched by any of that, which is why
+  // correcting a billed machine is safe and why the screen says AutoCount will
+  // not follow.
+  const soLines = (await data.slips.getSlipOrder(noE)).lines.filter((l) => l.item_code === "SZEN 848BE058B2");
+  check("the Sales Order keeps what it was raised with", soLines.length, 1);
+
+  // Now close it, and the same three edits are refused.
+  await data.slips.setSlipInvoiced(noE, "INV-77", "KS");
+  await data.slips.closeSlip(noE, "INV-77", "KS");
+  check("closed", (await data.slips.getSlip(noE)).status, "CLOSED");
+  await refuse("a closed slip takes no new part",
+    () => data.slips.addPartToMachine(mE, {
+      item_code: "SZEN 140051111", description: "Shoe Clutch", unit_price: 9.5, quantity: 1, technician: "WJ",
+    }), /closed/);
+  await refuse("  none removed",
+    () => data.slips.setPartQuantity(ps[0].id, 0), /closed/);
+  await refuse("  no price changed",
+    () => data.slips.setPartPrice(ps[0].id, 99), /closed/);
+  await refuse("  no labour changed",
+    () => data.slips.setMachineLabour(mE, 999), /closed/);
+  await refuse("  and no comment written",
+    () => data.slips.setMachineComment(mE, "after the fact"), /closed/);
+  check("so nothing on it moved", (await data.slips.getSlip(noE)).machines[0].parts.length, 1);
+
   console.log("\n-- closing twice --");
   await refuse("says so rather than moving the date",
     () => data.slips.closeSlip(noC, "", "KS"), /already closed/);

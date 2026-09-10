@@ -1744,6 +1744,7 @@ async function enterOpenService() {
   else { const r = $("push-row-tech"); if (r) r.style.display = "none"; }
   session.slipNumber = null; session.slip = null; session.machineId = null;
   session.technician = ""; session.pendingParts = [];
+  slipScreenFrom = "open";
   $("os-slip-list").innerHTML = `<div class="fp-loading">Loading slips…</div>`;
   try {
     session.allSlips = await api(`/api/slips?status=working`);
@@ -1787,15 +1788,28 @@ $("os-search").addEventListener("input", renderSlipList);
 $("top-back").addEventListener("click", () => {
   if ($("screen-po-detail").classList.contains("active")) enterPurchaseOrders();
   else if ($("screen-ship-detail").classList.contains("active")) enterShipments();
+  // A slip opened from View Slips goes back to View Slips. Sending it to the
+  // workshop's list instead would often be a dead end - the slip that most
+  // needs correcting is usually one that list no longer shows.
+  else if (slipScreenFrom === "view" && session.slipNumber) {
+    const no = session.slipNumber;
+    showScreen("view");
+    onViewSlipChosen(no);
+    if (viewSearch) viewSearch.refresh();
+  }
   else enterOpenService();
 });
 
-async function onSlipChosen(slipNumber) {
+// Which list the slip screen was opened from, so the back button goes there.
+let slipScreenFrom = "open";
+
+async function onSlipChosen(slipNumber, from = "open") {
   if (!slipNumber) return;
   try {
     session.slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
     session.slipNumber = slipNumber;
     session.machineId = null;
+    slipScreenFrom = from;
     showScreen("slip");
     renderSlipScreen();
   } catch (e) {
@@ -1925,6 +1939,7 @@ function openMachineModal(machineId) {
   renderMachineParts();
   renderMachineQuoteRow();
   renderMachineDecisionBanner();
+  renderMachineBilledBanner();
   updateSlipFooter();
   $("machine-modal").style.display = "flex";
   document.body.style.overflow = "hidden";
@@ -2683,6 +2698,28 @@ function renderMachineDecisionBanner() {
     box.innerHTML = `<b>Do not repair — condemned</b>The customer does not want this machine repaired. Stop work on it.
        <span class="decision-who">${d ? escapeHtml(d) + " · " : ""}Decided by${who}${when}</span>`;
   }
+  box.style.display = "block";
+}
+
+// A machine that has already been put on a Sales Order.
+//
+// Correcting one is allowed - a part scanned onto the wrong machine is worth
+// putting right whenever it is noticed, and the slip is what anyone reads a
+// year later. But the order keeps the lines it was raised with, so nothing
+// typed here reaches AutoCount or the customer's invoice. Somebody has to
+// change that by hand, and the only way they will know is if this says so.
+function renderMachineBilledBanner() {
+  const box = $("mm-billed");
+  if (!box) return;
+  const m = currentMachine();
+  if (!m || !String(m.converted_at || "").trim()) {
+    box.style.display = "none"; box.innerHTML = ""; return;
+  }
+  const so = String(m.so_number || "").trim();
+  box.className = "decision-banner decision-billed";
+  box.innerHTML = `<b>Already billed${so ? ` on ${escapeHtml(so)}` : ""}</b>` +
+    `Changes here correct the slip only — the Sales Order keeps what it was raised with. ` +
+    `Correct AutoCount as well if the customer's figure is wrong.`;
   box.style.display = "block";
 }
 
@@ -3776,6 +3813,8 @@ async function onViewSlipChosen(slipNumber) {
     wireDecideButtons(wrap, slipNumber);
     const editBtn = document.getElementById("vs-edit");
     if (editBtn) editBtn.addEventListener("click", () => openSlipEdit(slip));
+    const repairBtn2 = document.getElementById("vs-repair");
+    if (repairBtn2) repairBtn2.addEventListener("click", () => onSlipChosen(slip.slip_number, "view"));
     // Rebuilt from the stored slip, so a re-issued copy matches the original.
     const share = document.getElementById("vs-share");
     if (share) share.addEventListener("click", () => shareSlipPdf(slip));
@@ -4019,6 +4058,14 @@ function renderSlipDetail(slip) {
     <button class="btn-primary" id="vs-share" type="button" style="margin-top:10px;">Share PDF</button>${
       quotableMachines(slip).length
         ? `<button class="btn-secondary" id="vs-repair-pdf" style="margin-top:10px;width:100%;">Repair details PDF</button>` : ""}${
+      // The way back to the bench for a slip the workshop's own list no longer
+      // shows - which is most of the ones anybody comes here to correct. Same
+      // screen the technicians already use, not a second parts editor, so a
+      // part removed from here behaves exactly as one removed from Open
+      // Service. A closed slip is finished with and the server refuses it, so
+      // it is not offered.
+      slip.status !== "CLOSED"
+        ? `<button class="btn-secondary" id="vs-repair" style="margin-top:10px;width:100%;">Edit parts &amp; repairs</button>` : ""}${
       canDecide() && slip.status !== "CLOSED"
         ? `<button class="btn-secondary" id="vs-edit" style="margin-top:10px;width:100%;">Edit slip</button>` : ""}`;
 
