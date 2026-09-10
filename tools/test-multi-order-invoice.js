@@ -110,6 +110,73 @@ const refs = (slip) => (slip.orders || []).map((o) => `${o.so_number}=${o.closin
   check("and then it closes", half.status, "CLOSED");
   check("with both numbers still on it", refs(half).map((r) => r.split("=")[1]), ["DO-A", "DO-B"]);
 
+  console.log("\n-- slip 00007: billed, condemned, and one still on the bench --");
+  // Its real shape, off the live server: four machines on one Sales Order (two
+  // of them condemned with nobody having signed them off) and a fifth nobody
+  // has started. It read "In Progress", so sales could not find it in Close
+  // Service to record the document for the order they had already raised.
+  let s7 = await data.slips.createSlip({
+    company: "TEST SLIP 00007 SHAPE", contact_name: "A", contact_number: "1",
+    machines: [
+      { desc: "Zenoah BK3410 - 1/5", serial: "1", remarks: "" },
+      { desc: "Zenoah BK3410 - 2/5", serial: "2", remarks: "" },
+      { desc: "Zenoah BK3410 - 3/5", serial: "3", remarks: "" },
+      { desc: "Zenoah BK3410 - 4/5", serial: "4", remarks: "" },
+      { desc: "Zenoah HBZ260EZ - 5/5", serial: "5", remarks: "" },
+    ],
+    signature: sig,
+  });
+  const no7 = s7.slip_number, m7 = s7.machines.map((m) => m.id);
+  for (const id of m7.slice(0, 4)) await data.slips.setMachineLabour(id, 40);
+  for (const id of m7.slice(2, 4)) await data.slips.finishRepair(id, "WJ");
+  await data.slips.setMachineState(no7, m7[0], "CONDEMNED", "KS");
+  await data.slips.setMachineState(no7, m7[1], "CONDEMNED", "KS");
+  await data.slips.createSlipOrder(no7, m7.slice(0, 4), "KS");
+
+  s7 = await data.slips.getSlip(no7);
+  check("it says what is true of it", s7.status, "PART_SO");
+  const onSales = (await data.slips.listSlips("repaired")).some((x) => x.slip_number === no7);
+  const onTechs = (await data.slips.listSlips("working")).some((x) => x.slip_number === no7);
+  check("sales can find it, to invoice the order already raised", onSales, true);
+  check("and the technicians keep it, because a machine is still theirs", onTechs, true);
+  // Sales record the document for the batch that HAS gone out - the thing they
+  // could not reach before, because the slip was not on their list.
+  s7 = await data.slips.setSlipInvoiced(no7, "DO-2609-0007", "KS");
+  check("the order they raised now has its document",
+    s7.orders.map((o) => o.closing_ref), ["DO-2609-0007"]);
+
+  // And none of this lets the slip finish early. Two things are outstanding -
+  // the condemned pair nobody has signed off, and the fifth machine nobody has
+  // billed - and closing names whichever it reaches first.
+  await refuse("it still will not close",
+    () => data.slips.closeSlip(no7, "", "KS"),
+    /Condemned but not yet accounted for|Not on a Sales Order yet/);
+
+  console.log("\n-- and once the workshop finishes, it is All Repaired --");
+  // The other half of the split. Checked on a slip nobody has invoiced, since
+  // INVOICED is a person's word and is never recomputed over.
+  let s8 = await data.slips.createSlip({
+    company: "TEST WORKSHOP DONE", contact_name: "A", contact_number: "1",
+    machines: [{ desc: "M1", serial: "1", remarks: "" }, { desc: "M2", serial: "2", remarks: "" }],
+    signature: sig,
+  });
+  const no8 = s8.slip_number, m8 = s8.machines.map((m) => m.id);
+  for (const id of m8) await data.slips.setMachineLabour(id, 20);
+  await data.slips.finishRepair(m8[0], "WJ");
+  await data.slips.createSlipOrder(no8, [m8[0]], "KS");
+  s8 = await data.slips.getSlip(no8);
+  check("one billed, one still on the bench", s8.status, "PART_SO");
+  check("so the technicians keep it",
+    (await data.slips.listSlips("working")).some((x) => x.slip_number === no8), true);
+
+  await data.slips.finishRepair(m8[1], "WJ");
+  s8 = await data.slips.getSlip(no8);
+  check("workshop finished, still part-way onto an order", s8.status, "ALL_REPAIRED");
+  check("and off the technicians' list",
+    (await data.slips.listSlips("working")).some((x) => x.slip_number === no8), false);
+  check("but still on the sales list",
+    (await data.slips.listSlips("repaired")).some((x) => x.slip_number === no8), true);
+
   console.log("\n-- correcting one does not touch the other --");
   slip = await data.slips.setSlipInvoiced(no, "DO-2609-0102", "KS", so1.so_number);
   check("only the batch named changes", refs(slip),

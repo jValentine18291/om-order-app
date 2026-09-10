@@ -417,6 +417,7 @@
     "Too expensive — condemn": "维修费过高 — 报废",
     // The end of a slip: order raised here, keyed into AutoCount by sales,
     // then collected and paid for.
+    "Partial SO": "部分开单",
     "SO Created": "已开销售单",
     "Invoice Created": "已开发票",
     "Collected & Closed": "已取货结单",

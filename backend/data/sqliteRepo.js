@@ -282,6 +282,8 @@ function listSlips(statusFilter = "active") {
     rows = db.prepare("SELECT * FROM service_slips WHERE status = 'OPEN' ORDER BY slip_number").all();
   } else if (statusFilter === "working") {
     // Open Service scope: still being worked on (not repaired, not closed)
+    // PART_SO is deliberately NOT excluded: some of the slip is billed, but a
+    // machine is still on the bench and it is still the workshop's.
     rows = db.prepare("SELECT * FROM service_slips WHERE status NOT IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'CLOSED') ORDER BY slip_number").all();
   } else if (statusFilter === "need_quote") {
     // What the technicians have handed back for pricing. Oldest first: the one
@@ -289,7 +291,7 @@ function listSlips(statusFilter = "active") {
     rows = db.prepare("SELECT * FROM service_slips WHERE status = 'NEED_QUOTE' ORDER BY slip_number").all();
   } else if (statusFilter === "repaired" || statusFilter === "call_customer") {
     rows = db.prepare(`SELECT * FROM service_slips WHERE (
-       status IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED')
+       status IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'PART_SO')
        OR (
          -- Everything on it is either billed or condemned: nothing left to do
          -- in the workshop, even if a condemned machine still has to be
@@ -914,7 +916,7 @@ function searchSlips(query = "", scope = "all", limit = 20) {
     scope === "active" ? "status != 'CLOSED'" :
     scope === "working" ? "status NOT IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'CLOSED')" :
     scope === "repaired" ? `(
-       status IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED')
+       status IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'PART_SO')
        OR (
          -- Everything on it is either billed or condemned: nothing left to do
          -- in the workshop, even if a condemned machine still has to be
@@ -1431,15 +1433,32 @@ function deriveSlipStatus(slipId) {
     next = "NEED_QUOTE";
   } else if (any((m) => m.state === "QUOTED")) {
     next = "QUOTED";                                   // waiting on the customer
-  } else if (any((m) => m.state === "CONDEMNED" && !String(m.disposal || "").trim())) {
-    // A condemned machine nobody has accounted for is still in the workshop and
-    // still someone's job, whatever has been billed around it. Calling that
-    // slip "All Repaired" is how it gets forgotten about.
-    next = "IN_PROGRESS";
   } else if (ms.every(machineSettled)) {
     next = "CONVERTED";                                // everything dealt with
-  } else if (any((m) => m.converted_at) ) {
-    next = "ALL_REPAIRED";                             // some billed, some not
+  } else if (any((m) => m.converted_at)) {
+    // Some of it is on a Sales Order. Which of the two this is depends on
+    // whether the workshop still has something to do:
+    //
+    //   All Repaired   every machine is finished or gone, and some are billed.
+    //                  Nothing left for a technician; sales are mid-way through
+    //                  raising the orders.
+    //   Partial SO     a machine is still on the bench. Technicians keep the
+    //                  slip on their list, and sales can still find it to
+    //                  record the document for the batch that HAS gone out.
+    //
+    // Both of these sit ABOVE the condemned check below. Slip 00007 is why: it
+    // had four machines on an order and two condemned ones nobody had signed
+    // off, so it read "In Progress" and sales could not find it to invoice the
+    // order they had already raised. A condemned machine still in the building
+    // is not forgotten by this - closing refuses until it is accounted for.
+    next = ms.every((m) => m.state === "REPAIRED" || machineSettled(m))
+      ? "ALL_REPAIRED"
+      : "PART_SO";
+  } else if (any((m) => m.state === "CONDEMNED" && !String(m.disposal || "").trim())) {
+    // A condemned machine nobody has accounted for is still in the workshop and
+    // still someone's job. With nothing billed there is no order to chase, so
+    // the honest answer is that work is outstanding.
+    next = "IN_PROGRESS";
   } else if (ms.every((m) => m.state === "REPAIRED" || machineSettled(m))) {
     // The workshop is finished and nothing has been billed yet. Its own status
     // rather than ALL_REPAIRED, which means "some of it is already on an
@@ -1598,6 +1617,42 @@ const slips = {
   allocatedByPo, receivedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
   createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, setMachineState, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
+
+// ---- One-off: read the status of every open slip again ---------------------
+//
+// "Partial SO" is new, and a slip only re-derives its status when something on
+// it changes. Without this, slip 00007 would go on saying "In Progress" until
+// somebody touched a machine on it, and sales still could not find it to
+// invoice the order they had already raised.
+//
+// Here rather than in db.js, which is where it was first written: db.js is
+// required BY this file, so requiring this file back from there hands it a
+// half-built module and the call quietly does nothing. Node says so - "
+// Accessing non-existent property 'slips' of module exports inside circular
+// dependency" - and it is the kind of warning that scrolls past. It ran, it
+// changed nothing, and the slip stayed lost.
+//
+// Guarded on there being no PART_SO row yet, so it happens once. CLOSED and
+// INVOICED are never recomputed: those are a person's word about something
+// outside this app.
+try {
+  const already = db.prepare("SELECT 1 FROM service_slips WHERE status = 'PART_SO' LIMIT 1").get();
+  if (!already) {
+    const open = db.prepare(
+      "SELECT id FROM service_slips WHERE status NOT IN ('CLOSED', 'INVOICED')"
+    ).all();
+    let moved = 0;
+    for (const r of open) {
+      const before = db.prepare("SELECT status FROM service_slips WHERE id = ?").get(r.id).status;
+      deriveSlipStatus(r.id);
+      const after = db.prepare("SELECT status FROM service_slips WHERE id = ?").get(r.id).status;
+      if (before !== after) moved++;
+    }
+    if (moved) console.log(`[db] re-read the status of ${moved} open slip(s)`);
+  }
+} catch (e) {
+  console.error("[db] slip status re-read failed:", e.message);
+}
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };
 

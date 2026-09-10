@@ -621,6 +621,10 @@ select {
 .vs-REPAIRED, .sr-REPAIRED,
 .vs-ALL_REPAIRED, .sr-ALL_REPAIRED, .vs-CALL_CUSTOMER, .sr-CALL_CUSTOMER,
 .vs-CONVERTED, .sr-CONVERTED { background: #E7F5EC; color: #1B7A42; }
+/* Partial SO: part of it is billed and part is still on the bench, so it is
+   half a workshop state and half a sales one. Teal - the app's own colour -
+   rather than borrowing the green of finished or the blue of in progress. */
+.vs-PART_SO, .sr-PART_SO { background: #E7F1F2; color: #0a6b72; }
 /* Invoiced is the last step before the customer walks in, and the only one
    where somebody has to do something about a person rather than a machine -
    so it gets a colour of its own rather than a third shade of green. */
@@ -1151,6 +1155,7 @@ select {
 .slip-card:has(.vs-REPAIRED),     .slip-result:has(.sr-REPAIRED)     { border-left-color: #1B7A42; }
 .slip-card:has(.vs-ALL_REPAIRED), .slip-result:has(.sr-ALL_REPAIRED) { border-left-color: #1B7A42; }
 .slip-card:has(.vs-CALL_CUSTOMER),.slip-result:has(.sr-CALL_CUSTOMER){ border-left-color: #1B7A42; }
+.slip-card:has(.vs-PART_SO),      .slip-result:has(.sr-PART_SO)      { border-left-color: #0a7f86; }
 .slip-card:has(.vs-INVOICED),     .slip-result:has(.sr-INVOICED)     { border-left-color: #A85B00; }
 .slip-card:has(.vs-CLOSED),       .slip-result:has(.sr-CLOSED)       { border-left-color: var(--ink-faint); }
 

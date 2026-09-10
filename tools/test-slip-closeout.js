@@ -126,7 +126,10 @@ const seen = async (scope, no) =>
   // the machines whether anything is on an order rather than asking the slip's
   // status.
   slip = await data.slips.getSlip(noC);
-  check("the condemned machine holds the slip open", slip.status, "IN_PROGRESS");
+  // Part of it is billed, so the slip says Partial SO rather than In Progress.
+  // Either way it is not finished, and the invoice step asks the MACHINES
+  // whether anything is on an order rather than reading the status.
+  check("the condemned machine holds the slip open", slip.status, "PART_SO");
   slip = await data.slips.setSlipInvoiced(noC, "INV-77", "KS");
   check("and the rest can still be invoiced", slip.status, "INVOICED");
   await refuse("but it cannot be closed with a machine still in the workshop",

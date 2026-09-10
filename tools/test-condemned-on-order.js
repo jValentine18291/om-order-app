@@ -115,11 +115,17 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
 
   console.log("\n-- and it is still in the workshop until somebody says otherwise --");
   slip = await data.slips.getSlip(no);
-  check("a condemned machine on an order has still not left the building", slip.status, "IN_PROGRESS");
+  check("a condemned machine on an order has still not left the building", slip.status, "PART_SO");
   await data.slips.setMachineDisposal(no, mower.id, "COLLECTED", "KS");
   await data.slips.setMachineDisposal(no, combi.id, "COLLECTED", "KS");
   slip = await data.slips.getSlip(no);
-  check("once they go with the customer, the slip is part-converted", slip.status, "ALL_REPAIRED");
+  // Still Partial SO, not All Repaired: the fifth machine has never been
+  // touched. It used to read All Repaired here, which took the slip off the
+  // technicians' list while a machine was still on their bench - the exact
+  // way a machine gets forgotten.
+  check("the fifth machine keeps it part-way", slip.status, "PART_SO");
+  check("so the technicians still have it",
+    (await data.slips.listSlips("working")).some((x) => x.slip_number === no), true);
 
   console.log("\n-- the block, as it would be keyed --\n");
   for (const l of L) {

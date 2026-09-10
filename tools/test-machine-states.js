@@ -74,7 +74,11 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
   await data.slips.createSlipOrder(no, [blower.id]);
   slip = await data.slips.getSlip(no);
   // Not "All Repaired": the condemned one is still sitting in the workshop.
-  check("one billed, one condemned and still here", slip.status, "IN_PROGRESS");
+  // "Partial SO" rather than "In Progress" - some of it IS on a Sales Order,
+  // and saying so is what lets sales find it to record that order's document.
+  // The condemned machine is not forgotten: closing still refuses until
+  // somebody says where it went, which is checked below.
+  check("one billed, one condemned and still here", slip.status, "PART_SO");
 
   // Sales key the order into AutoCount and record what came back. Allowed even
   // now: the condemned machine is not on that invoice, and refusing would stop

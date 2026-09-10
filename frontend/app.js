@@ -417,9 +417,16 @@ const STATUS_LABEL = {
   // The workshop is done and nothing is billed yet. ALL_REPAIRED means the
   // same thing plus "some of it is already on an order".
   REPAIRED: "Repaired",
-  // Some machines on a Sales Order, some not. Still "All Repaired" because
-  // that is what the workshop has done; what is left is a sales job.
+  // Two ways a slip can be part-way onto a Sales Order, and they mean
+  // different things to different people.
+  //
+  //   All Repaired  the workshop is finished; sales are mid-way through
+  //                 raising the orders. Nothing left for a technician.
+  //   Partial SO    some of it is billed and a machine is STILL ON THE BENCH.
+  //                 Technicians keep it; sales can still find it to record the
+  //                 document for the batch that has gone out.
   ALL_REPAIRED: "All Repaired",
+  PART_SO: "Partial SO",
   CALL_CUSTOMER: "All Repaired", // legacy name, shown as the new label
   // The end of a slip's life, in the three steps sales actually work through:
   // the order is raised here, keyed into AutoCount as a DO/INV/CS by hand, and
