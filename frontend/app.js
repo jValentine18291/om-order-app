@@ -8042,7 +8042,20 @@ async function openIplPart(index) {
   document.body.style.overflow = "hidden";
 
   try {
-    const data = await api(`/api/parts-search?q=${encodeURIComponent(part.search)}`);
+    // The book's number first, then the maker's own if that finds nothing.
+    //
+    // A parts book is written by whoever assembled the machine and AutoCount
+    // is stocked by whoever buys the parts, and the two do not always agree on
+    // what a part is called. The trimmer-head books are the clear case: none
+    // of the Husqvarna article numbers sampled were in the catalogue, and half
+    // were there under the Kawasaki number printed beside them.
+    //
+    // Second only, never first: where the article number does resolve it is
+    // the right answer, and this must not change what 27 working books do.
+    let data = await api(`/api/parts-search?q=${encodeURIComponent(part.search)}`);
+    if (!(data.results || []).length && part.search_alt && part.search_alt !== part.search) {
+      data = await api(`/api/parts-search?q=${encodeURIComponent(part.search_alt)}`);
+    }
     const list = data.results || [];
     if (!list.length) {
       $("ipl-part-stock").innerHTML =

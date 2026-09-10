@@ -252,6 +252,15 @@
   "parts": 149
  },
  {
+  "id": "shtza",
+  "name": "Zenoah SHTZ-A Trimmer Head",
+  "short": "SHTZ-A",
+  "brand": "Zenoah",
+  "category": "Trimmer Head",
+  "figures": 1,
+  "parts": 68
+ },
+ {
   "id": "sr3100",
   "name": "Zenoah SR3100 Chipper Shredder",
   "short": "SR3100",

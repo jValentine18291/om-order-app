@@ -160,6 +160,17 @@ async function main() {
         qty: String(r[iQty] || "").trim(),
         remarks: String(r[iCom] || "").trim(),
         search: searchCode(article),
+        // The maker's OWN number, off the front of the Comment column.
+        //
+        // Husqvarna's article number is not always what AutoCount holds. On
+        // the two trimmer-head books, none of the sampled article numbers were
+        // in the catalogue and half were there under the Kawasaki number that
+        // sits in Comment - "848A2J66B1,L600" is the blade AutoCount calls
+        // "SZEN 848A2J66B1". Without this, tapping those parts finds nothing.
+        //
+        // Only used when the article number finds nothing, so no existing book
+        // changes behaviour.
+        search_alt: searchCode(String(r[iCom] || "").split(",")[0]),
       });
       // A part called out twice gets a hotspot per box, both selecting the row.
       //
