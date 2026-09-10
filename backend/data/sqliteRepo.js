@@ -516,6 +516,24 @@ function setPartDescription(partId, description) {
 const LABOUR_ITEM_CODE = "A1 SVR LANDSCAPE";
 const LABOUR_DESCRIPTION = "Being repair & replacement of part :-";
 
+// Foggers are billed under a different service item. They are pest-management
+// equipment, not landscaping equipment, and the two are accounted for
+// separately in AutoCount - so a PulsFOG opens its block with A2 and its own
+// wording. Only that machine's block: a slip holding a fogger and a
+// brushcutter gets A2 over one and A1 over the other.
+const PEST_ITEM_CODE = "A2 SVR PEST MGT EQUIPT";
+const PEST_DESCRIPTION = "Being repair & replacement of part for pest management equipment.";
+
+// Which of the two a machine takes. The rule for "is this a fogger" is the one
+// the app already uses for the tube buttons, imported rather than rewritten -
+// see the note at the foot of fogger-tubes.js.
+const FOGGER = require(require("path").join(__dirname, "..", "..", "frontend", "fogger-tubes.js"));
+function serviceItemFor(machine) {
+  return FOGGER.isFogger(machine)
+    ? { item_code: PEST_ITEM_CODE, description: PEST_DESCRIPTION }
+    : { item_code: LABOUR_ITEM_CODE, description: LABOUR_DESCRIPTION };
+}
+
 // A condemned machine still goes on the order. The customer is collecting it
 // along with the repaired ones, and a machine that leaves the building with no
 // paperwork is one nobody can account for afterwards - so it gets its usual
@@ -574,8 +592,10 @@ function createSlipOrder(slipNumber, machineIds) {
   // and the customer's contact on the last line. The un-coded rows are note
   // lines: no price, no quantity, no effect on the order total.
   //
-  // The A1 line opens EVERY block, including at 0.00. In AutoCount it marks
-  // where a machine's parts begin, so a block without it cannot be read.
+  // A service line opens EVERY block, including at 0.00. In AutoCount it marks
+  // where a machine's parts begin, so a block without it cannot be read. Which
+  // service item it is depends on the machine - A1 for landscaping equipment,
+  // A2 for a fogger - see serviceItemFor().
   const lines = [];
   const total = all.length;
 
@@ -589,9 +609,10 @@ function createSlipOrder(slipNumber, machineIds) {
     const labour = condemned ? 0 : Number(m.labour_charge) || 0;
     const parts = condemned ? [] : (m.parts || []);
 
+    const svc = serviceItemFor(m);
     lines.push({
-      item_code: LABOUR_ITEM_CODE,
-      description: LABOUR_DESCRIPTION,
+      item_code: svc.item_code,
+      description: svc.description,
       uom: "NOS",
       unit_price: labour,
       quantity: 1,
@@ -862,11 +883,25 @@ function closeSlip(slipNumber, closingRef, who = "") {
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
   if (slip.status === "CLOSED") { const e = new Error("Slip is already closed."); e.status = 400; throw e; }
 
-  // The order John asked for: SO created, then invoiced, then collected. A slip
-  // that skipped the middle step has work nobody has billed for, and closing
-  // it is how that gets forgotten. Checked before the number, so there is one
-  // message for one situation rather than two that nearly agree.
-  if (slip.status !== "INVOICED") {
+  // Has anything on this slip been billed at all?
+  //
+  // Almost always yes, and then the order John asked for applies: SO created,
+  // then invoiced, then collected. A slip that skipped the middle step has work
+  // nobody has billed for, and closing it is how that gets forgotten.
+  //
+  // But a slip CAN reach the end with no order on it: every machine condemned,
+  // nothing to charge for, the customer takes them away or we dispose of them.
+  // Demanding an invoice number for a slip nobody ever billed leaves it open
+  // for good with no way out, so the invoice steps are asked for only when
+  // there is an invoice to ask about. What still has to hold either way is the
+  // check further down - every machine billed, or condemned and accounted for.
+  const orderCount = db.prepare(
+    "SELECT COUNT(*) AS n FROM orders WHERE notes = ?"
+  ).get(`S/S: ${slipNumber}`).n;
+
+  // Checked before the number, so there is one message for one situation
+  // rather than two that nearly agree.
+  if (orderCount && slip.status !== "INVOICED") {
     const e = new Error(
       "Record the DO/CS/INV number first - a slip is only collected after it has been invoiced."
     );
@@ -891,7 +926,7 @@ function closeSlip(slipNumber, closingRef, who = "") {
   }
 
   const ref = String(closingRef || slip.closing_ref || "").trim();
-  if (!ref) {
+  if (!ref && orderCount) {
     const e = new Error("Record the DO/CS/INV number first."); e.status = 400; throw e;
   }
   const stranded = strandedCondemned(slip.id);

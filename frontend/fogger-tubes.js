@@ -107,11 +107,19 @@
     return null;
   }
 
-  window.FOGGER_TUBES = {
+  var API = {
     list: TUBES,
     byType: tubeByType,
     looksLikeFogger: looksLikeFogger,
     isFogger: isFogger,
     check: checkTubeTable
   };
+
+  if (typeof window !== "undefined") window.FOGGER_TUBES = API;
+
+  // The Sales Order asks the same question on the SERVER - a fogger's block
+  // opens with the pest-management service item, not the landscape one - and a
+  // second copy of isFogger() would drift the first time the wording changed.
+  // So this browser file is also a Node module. Nothing in it touches the DOM.
+  if (typeof module !== "undefined" && module.exports) module.exports = API;
 })();

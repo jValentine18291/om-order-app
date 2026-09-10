@@ -220,5 +220,67 @@ parts = data.slips.addPartToMachine(machineId, {
 check("and the same part again still merges as it always did", gaskets().length, 1);
 check("with the quantity added up", gaskets()[0].quantity, 2);
 
+console.log("\n-- a part scanned in the ordinary way never lands on a tube line --");
+// The other half of slip 00023. A tube line is a FRACTION of a roll, and four
+// tube types share Z00126.03 - so a part typed or scanned in under that code
+// carries no tube type and must start its own line. Merging it onto the tube's
+// would take 0.075 to 1.075, at the tube's price, and leave what the
+// technician actually scanned nowhere on the slip.
+const foggerB = data.slips.createSlip({
+  company: "Scan Co", contact_name: "A", contact_number: "1", signature: SIG,
+  machines: [{ desc: "PulsFOG K-10-SP", machine_code: "UPUL K10SP", serial: "S1" }],
+});
+const mB = data.slips.getSlip(foggerB.slip_number).machines[0].id;
+data.slips.addPartToMachine(mB, {
+  item_code: "SPUL KACC Z00126.03", description: "PULSFOG TUBE 311", uom: "MTR",
+  unit_price: 26.6, quantity: 0.075, variant: "311", technician: "XL",
+});
+let pB = data.slips.addPartToMachine(mB, {
+  item_code: "SPUL KACC Z00126.03", description: "Hose, per metre", uom: "MTR",
+  unit_price: 26.6, quantity: 1, technician: "XL",
+});
+check("two lines, not one", pB.length, 2);
+check("the tube is still one piece", pB.find((x) => x.variant === "311").quantity, 0.075);
+check("and the scanned part is a whole one", pB.find((x) => !x.variant).quantity, 1);
+
+console.log("\n-- a fogger's block opens with A2, not A1 --");
+// Foggers are pest-management equipment and are accounted for separately from
+// landscaping equipment in AutoCount, so the service item that opens the block
+// differs. It is decided PER MACHINE: a slip holding both gets one of each.
+const mixed = data.slips.createSlip({
+  company: "Mixed Co", contact_name: "A", contact_number: "1", signature: SIG,
+  machines: [
+    { desc: "PULSFOG K-10-SP THERMAL FOGGER", machine_code: "UPUL K10SP", serial: "M1" },
+    { desc: "BK3410 Brushcutter", machine_code: "UZEN BK3410", serial: "M2" },
+    // No code and nothing fogger-ish in the wording: the landscape item.
+    { desc: "Hand-typed something", serial: "M3" },
+  ],
+});
+const mm = data.slips.getSlip(mixed.slip_number).machines;
+for (const m of mm) data.slips.setMachineLabour(m.id, 50);
+data.slips.createSlipOrder(mixed.slip_number, mm.map((m) => m.id), "KS");
+const openers = (data.slips.getSlipOrder(mixed.slip_number).lines || [])
+  .filter((l) => /^A\d+\s+SVR/i.test(String(l.item_code || "")))
+  .map((l) => l.item_code);
+check("one opener per machine, the fogger's first",
+  openers,
+  ["A2 SVR PEST MGT EQUIPT", "A1 SVR LANDSCAPE", "A1 SVR LANDSCAPE"]);
+const a2 = (data.slips.getSlipOrder(mixed.slip_number).lines || [])
+  .find((l) => l.item_code === "A2 SVR PEST MGT EQUIPT");
+check("with the pest-management wording",
+  a2.description, "Being repair & replacement of part for pest management equipment.");
+check("and the labour still on it", a2.unit_price, 50);
+
+// The guard that refuses an order written before the block format existed used
+// to look for "A1 SVR" by name, which would have refused every fogger order
+// the moment this changed. It tests the shape of the code now.
+const shape = (code) => /^A\d+\s+SVR\b/i.test(code);
+check("both service items read as block openers",
+  ["A1 SVR LANDSCAPE", "A2 SVR PEST MGT EQUIPT", "A12 SVR AUTOMOWER"].map(shape),
+  [true, true, true]);
+check("and an ordinary part does not",
+  ["SPUL KACC Z00126.03", "A5 SPARE PARTS x", "MISC"].map(shape),
+  [false, false, false]);
+
 console.log(failures ? `\n${failures} FAILED\n` : "\nall passed\n");
 process.exit(failures ? 1 : 0);

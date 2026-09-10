@@ -47,7 +47,9 @@ const make = async (company, descs) => data.slips.createSlip({
   await data.slips.setMachineState(s.slip_number, s.machines[1].id, "CONDEMNED", "IR");
   check("blocked by a condemned machine is offered", await offered(s.slip_number), true);
   s = await data.slips.getSlip(s.slip_number);
-  check("  and its status is honest", s.status, "IN_PROGRESS");
+  // Partial SO, not In Progress: one of the two IS on an order, and saying so
+  // is what lets sales find it to record that order's document.
+  check("  and its status is honest", s.status, "PART_SO");
 
   // C: one billed, one still being repaired. This has ALWAYS been offered for
   // closing - ALL_REPAIRED has meant "partly converted" since long before this
@@ -59,6 +61,10 @@ const make = async (company, descs) => data.slips.createSlip({
   check("  and a machine on it is untouched", (await data.slips.getSlip(s.slip_number)).machines[1].state, "RECEIVED");
 
   // D: a slip whose only machine was condemned, nothing billed at all.
+  //
+  // This is the one slip that reaches the end with NO order on it - there was
+  // nothing to charge for. Closing must not ask it for an invoice number it
+  // can never have, or the slip stays open for good with no way out.
   s = await make("D CONDEMNED ONLY", ["M1"]);
   await data.slips.setMachineState(s.slip_number, s.machines[0].id, "CONDEMNED", "IR");
   check("condemned-only slip is offered", await offered(s.slip_number), true);
@@ -66,6 +72,24 @@ const make = async (company, descs) => data.slips.createSlip({
   s = await data.slips.closeSlip(s.slip_number, "CS-1");
   check("  and closes once accounted for", s.status, "CLOSED");
   check("closed slips are not offered", await offered(s.slip_number), false);
+
+  // Same again with no reference typed at all, which is the honest version of
+  // it: there is no document, so there is no number to record.
+  s = await make("E CONDEMNED ONLY, NO REF", ["M1"]);
+  await data.slips.setMachineState(s.slip_number, s.machines[0].id, "CONDEMNED", "IR");
+  await data.slips.setMachineDisposal(s.slip_number, s.machines[0].id, "DISPOSED", "JT");
+  s = await data.slips.closeSlip(s.slip_number, "");
+  check("an unbilled slip closes with no document number", s.status, "CLOSED");
+
+  // But the moment something IS billed, both steps come back.
+  s = await make("F BILLED, NOT INVOICED", ["M1"]);
+  await data.slips.setMachineLabour(s.machines[0].id, 50);
+  await data.slips.createSlipOrder(s.slip_number, [s.machines[0].id]);
+  let refused = "";
+  try { await data.slips.closeSlip(s.slip_number, ""); }
+  catch (e) { refused = e.message; }
+  check("a billed slip still has to be invoiced first",
+    /invoiced/i.test(refused), true);
 
   console.log(bad ? `\n${bad} FAILED\n` : "\nall passed\n");
   process.exit(bad ? 1 : 0);

@@ -247,12 +247,16 @@ async function buildRows({ slipNumber, debtorCode, contactName, contactNumber, s
   // A1 opener, no machine heading, no SubTotal. Writing that into AutoCount
   // would produce a document nobody could read back to a machine, so refuse it
   // rather than quietly write a worse version of the right thing.
-  const hasOpener = lines.some((l) => String(l.item_code || "").toUpperCase().startsWith("A1 SVR"));
+  //
+  // The opener is one of AutoCount's A-series service items, and WHICH one
+  // depends on the machine - A1 for landscaping equipment, A2 for a fogger.
+  // So the test is the shape of the code, not one particular code.
+  const hasOpener = lines.some((l) => /^A\d+\s+SVR\b/i.test(String(l.item_code || "")));
   const hasHeading = lines.some((l) => !l.item_code && /S\/S:/.test(String(l.description || "")));
   if (!hasOpener || !hasHeading) {
     const e = new Error(
       "This order predates the AutoCount block format - it has no " +
-      (hasOpener ? "" : "A1 SVR LANDSCAPE opening line") +
+      (hasOpener ? "" : "A1/A2 SVR opening line") +
       (!hasOpener && !hasHeading ? " and no " : "") +
       (hasHeading ? "" : "machine heading") +
       ". Convert the slip again to produce a current order."

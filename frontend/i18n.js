@@ -535,6 +535,12 @@
     // The tube type, the item code and the money are carried through as they
     // are - they are what the technician matches against the roll in his hand.
     [/^(.+) · (\$[\d.,]+) a piece$/, "$1 · 每条 $2"],
+    // A tube quantity that is not a whole number of cut pieces. Anchored and
+    // ahead of the two ordinary ones below, which it does not resemble - but
+    // translate() stops at the first pattern that MATCHES, so order is the
+    // thing to get right here rather than to reason about later.
+    [/^([\d.]+) of a roll — that is not a whole number of pieces\. Set the pieces again\.$/,
+      "整卷的 $1 — 这不是完整的条数。请重新设定条数。"],
     [/^(\d+) pcs? · ([\d.]+) of a roll · (\$[\d.,]+)$/, "$1 条 · 整卷的 $2 · $3"],
     [/^(\d+) pcs? · ([\d.]+) of a roll$/, "$1 条 · 整卷的 $2"],
     [/^Added tube (.+) × (\d+) — tap Save when done$/, "已加入喉管 $1 × $2 — 完成后请点保存"],

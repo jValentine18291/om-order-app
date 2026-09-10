@@ -2173,8 +2173,20 @@ async function addByCode(code) {
   try {
     const item = await lookupItem(code);
     // Same part already pending for this tech? Just bump its quantity.
+    //
+    // NOT a tube line, though. Four PulsFOG tube types share item code
+    // Z00126.03, and a tube line is a FRACTION of a roll - so a part typed or
+    // scanned in while tube 311 was sitting pending at 0.075 used to land on
+    // the tube's line and take it to 1.075, at the tube's price, with the part
+    // the technician actually scanned nowhere to be seen. That is slip 00023.
+    //
+    // The server already refuses to merge across tube types; this is the same
+    // rule on the client, which the pending list never learned. A scanned part
+    // carries no tube type, so it merges only with a line that has none either.
     const existing = session.pendingParts.find(
-      (p) => p.item_code === item.item_code && p.technician === session.technician
+      (p) => p.item_code === item.item_code
+        && p.technician === session.technician
+        && !(p.variant || "")
     );
 
     // A part that has been superseded is worth knowing about while it is still
@@ -2453,8 +2465,22 @@ function tubeQtyDisplay(part) {
   const t = tubeFor(part);
   if (!t) return null;
   const pcs = tubePieces(part);
+  // A tube line is always some whole number of cut pieces. If it is not, the
+  // quantity has been got at by something - on slip 00023 a scanned part
+  // landed on the tube's line and took 0.075 to 1.075 - and rounding it to
+  // "14 pcs" would hide exactly the thing worth seeing. Say the real number
+  // and say it is wrong; the price on this line is going to a customer.
+  const off = Math.abs((Number(part.quantity) || 0) - pcs * t.unitQty) > 0.0005;
+  if (off) {
+    return {
+      pieces: pcs,
+      wrong: true,
+      frac: `${Number((Number(part.quantity) || 0).toFixed(4))} of a roll — that is not a whole number of pieces. Set the pieces again.`,
+    };
+  }
   return {
     pieces: pcs,
+    wrong: false,
     // Trailing zeros trimmed: 0.53, not 0.5300000000000001 and not 0.530.
     frac: `${pcs} pc${pcs === 1 ? "" : "s"} · ${Number((pcs * t.unitQty).toFixed(4))} of a roll`,
   };
@@ -2481,7 +2507,7 @@ function renderMachineParts() {
                   : ""
               }</div>
               <div class="sku mono">${escapeHtml(p.item_code)} · ${escapeHtml(p.technician)}</div>
-              ${tubeQtyDisplay(p) ? `<div class="tube-frac">${escapeHtml(tubeQtyDisplay(p).frac)}</div>` : ""}
+              ${tubeQtyDisplay(p) ? `<div class="tube-frac${tubeQtyDisplay(p).wrong ? " tube-frac-bad" : ""}">${escapeHtml(tubeQtyDisplay(p).frac)}</div>` : ""}
             </div>
             <div class="price-col">
               <span class="price-edit">$<input type="number" step="0.01" min="0" value="${Number(p.unit_price).toFixed(2)}" data-pprice="${i}" inputmode="decimal" aria-label="Unit price" /></span>
@@ -2528,7 +2554,7 @@ function renderMachineParts() {
               : ""
           }</div>
           <div class="sku mono">${escapeHtml(p.item_code)} · ${escapeHtml(p.technician || "")}</div>
-          ${tubeQtyDisplay(p) ? `<div class="tube-frac">${escapeHtml(tubeQtyDisplay(p).frac)}</div>` : ""}
+          ${tubeQtyDisplay(p) ? `<div class="tube-frac${tubeQtyDisplay(p).wrong ? " tube-frac-bad" : ""}">${escapeHtml(tubeQtyDisplay(p).frac)}</div>` : ""}
           ${noPrice ? `<div class="no-price-tag">No price — enter one</div>` : ""}
         </div>
         <div class="price-col">

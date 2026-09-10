@@ -2274,6 +2274,9 @@ select {
 /* The fraction of a roll a line works out to. Worth showing: it is the number
    that reaches AutoCount, and it is not one anybody would guess. */
 .line .tube-frac { font-size: 11px; color: var(--ink-faint, #78868c); }
+/* A tube quantity that is not a whole number of pieces. Loud on purpose: it
+   is a price heading for an invoice, and it is quiet enough to miss. */
+.line .tube-frac-bad { color: #c0392b; font-weight: 700; }
 
 
 /* The catalogue machine behind a typed model, when one was chosen. Quiet: it
