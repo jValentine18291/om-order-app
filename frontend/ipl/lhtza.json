@@ -1,0 +1,970 @@
+{
+ "id": "lhtza",
+ "name": "Zenoah LHTZ-A Trimmer Head",
+ "source": "LHTZ-A IPL.csv",
+ "figures": [
+  {
+   "id": "1",
+   "number": 1,
+   "title": "MAINFRAME",
+   "label": "MAINFRAME",
+   "sheet": 1,
+   "sheets": 1,
+   "image": "lhtza-fig1.png",
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 34.194,
+     "y": 20.268
+    },
+    {
+     "key": "2",
+     "x": 37.379,
+     "y": 19.071
+    },
+    {
+     "key": "3",
+     "x": 39.395,
+     "y": 18.529
+    },
+    {
+     "key": "4",
+     "x": 42.419,
+     "y": 17.474
+    },
+    {
+     "key": "5",
+     "x": 45.282,
+     "y": 22.32
+    },
+    {
+     "key": "6",
+     "x": 25.645,
+     "y": 24.002
+    },
+    {
+     "key": "7",
+     "x": 33.71,
+     "y": 24.886
+    },
+    {
+     "key": "8",
+     "x": 25.645,
+     "y": 26.425
+    },
+    {
+     "key": "9",
+     "x": 25.444,
+     "y": 27.908
+    },
+    {
+     "key": "10",
+     "x": 25.363,
+     "y": 29.333
+    },
+    {
+     "key": "11",
+     "x": 25.202,
+     "y": 30.758
+    },
+    {
+     "key": "12",
+     "x": 25.363,
+     "y": 32.44
+    },
+    {
+     "key": "13",
+     "x": 58.105,
+     "y": 22.862
+    },
+    {
+     "key": "13",
+     "x": 35.766,
+     "y": 36.944
+    },
+    {
+     "key": "13",
+     "x": 24.718,
+     "y": 41.448
+    },
+    {
+     "key": "14",
+     "x": 51.089,
+     "y": 32.07
+    },
+    {
+     "key": "15",
+     "x": 52.944,
+     "y": 31.414
+    },
+    {
+     "key": "16",
+     "x": 55.121,
+     "y": 30.644
+    },
+    {
+     "key": "17",
+     "x": 54.274,
+     "y": 22.748
+    },
+    {
+     "key": "18",
+     "x": 60.323,
+     "y": 23.29
+    },
+    {
+     "key": "19",
+     "x": 62.863,
+     "y": 22.634
+    },
+    {
+     "key": "20",
+     "x": 46.21,
+     "y": 24.116
+    },
+    {
+     "key": "21",
+     "x": 48.387,
+     "y": 28.022
+    },
+    {
+     "key": "22",
+     "x": 62.702,
+     "y": 26.596
+    },
+    {
+     "key": "23",
+     "x": 65.363,
+     "y": 27.566
+    },
+    {
+     "key": "24",
+     "x": 67.702,
+     "y": 28.392
+    },
+    {
+     "key": "25",
+     "x": 70.565,
+     "y": 29.333
+    },
+    {
+     "key": "28",
+     "x": 75.444,
+     "y": 31.357
+    },
+    {
+     "key": "29",
+     "x": 77.621,
+     "y": 31.956
+    },
+    {
+     "key": "30",
+     "x": 79.637,
+     "y": 32.725
+    },
+    {
+     "key": "31",
+     "x": 41.008,
+     "y": 29.048
+    },
+    {
+     "key": "32",
+     "x": 46.008,
+     "y": 40.336
+    },
+    {
+     "key": "33",
+     "x": 48.911,
+     "y": 38.968
+    },
+    {
+     "key": "34",
+     "x": 50.766,
+     "y": 38.255
+    },
+    {
+     "key": "35",
+     "x": 52.419,
+     "y": 37.771
+    },
+    {
+     "key": "36",
+     "x": 55.605,
+     "y": 36.631
+    },
+    {
+     "key": "37",
+     "x": 21.008,
+     "y": 38.968
+    },
+    {
+     "key": "38",
+     "x": 23.185,
+     "y": 38.255
+    },
+    {
+     "key": "39",
+     "x": 25.04,
+     "y": 37.657
+    },
+    {
+     "key": "40",
+     "x": 32.258,
+     "y": 34.863
+    },
+    {
+     "key": "41",
+     "x": 34.274,
+     "y": 33.979
+    },
+    {
+     "key": "42",
+     "x": 41.331,
+     "y": 40.45
+    },
+    {
+     "key": "43",
+     "x": 38.306,
+     "y": 37.429
+    },
+    {
+     "key": "44",
+     "x": 40.323,
+     "y": 38.312
+    },
+    {
+     "key": "44",
+     "x": 42.339,
+     "y": 44.783
+    },
+    {
+     "key": "44",
+     "x": 48.226,
+     "y": 47.149
+    },
+    {
+     "key": "44",
+     "x": 54.274,
+     "y": 49.23
+    },
+    {
+     "key": "45",
+     "x": 25.685,
+     "y": 44.555
+    },
+    {
+     "key": "46",
+     "x": 25.524,
+     "y": 46.209
+    },
+    {
+     "key": "47",
+     "x": 26.411,
+     "y": 53.107
+    },
+    {
+     "key": "48",
+     "x": 35.766,
+     "y": 61.174
+    },
+    {
+     "key": "49",
+     "x": 17.984,
+     "y": 45.61
+    },
+    {
+     "key": "50",
+     "x": 28.427,
+     "y": 42.474
+    },
+    {
+     "key": "51",
+     "x": 23.508,
+     "y": 55.587
+    },
+    {
+     "key": "52",
+     "x": 23.508,
+     "y": 58.865
+    },
+    {
+     "key": "53",
+     "x": 23.508,
+     "y": 61.174
+    },
+    {
+     "key": "54",
+     "x": 23.508,
+     "y": 64.025
+    },
+    {
+     "key": "55",
+     "x": 21.653,
+     "y": 66.99
+    },
+    {
+     "key": "60",
+     "x": 22.016,
+     "y": 49.287
+    },
+    {
+     "key": "61",
+     "x": 25.685,
+     "y": 47.976
+    },
+    {
+     "key": "61",
+     "x": 25.685,
+     "y": 50.969
+    },
+    {
+     "key": "62",
+     "x": 55.766,
+     "y": 51.083
+    },
+    {
+     "key": "63",
+     "x": 32.944,
+     "y": 47.976
+    },
+    {
+     "key": "64",
+     "x": 41.976,
+     "y": 60.177
+    },
+    {
+     "key": "64",
+     "x": 48.589,
+     "y": 62.486
+    },
+    {
+     "key": "64",
+     "x": 54.637,
+     "y": 64.51
+    },
+    {
+     "key": "65",
+     "x": 37.782,
+     "y": 56.414
+    },
+    {
+     "key": "65",
+     "x": 43.024,
+     "y": 58.438
+    },
+    {
+     "key": "65",
+     "x": 48.75,
+     "y": 61.06
+    },
+    {
+     "key": "65",
+     "x": 54.798,
+     "y": 62.885
+    },
+    {
+     "key": "66",
+     "x": 37.298,
+     "y": 57.839
+    },
+    {
+     "key": "67",
+     "x": 63.024,
+     "y": 67.93
+    },
+    {
+     "key": "68",
+     "x": 64.879,
+     "y": 70.325
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "515684001",
+     "sub": false,
+     "description": "LEVER",
+     "qty": "1",
+     "remarks": "659813110-10",
+     "search": "515684001"
+    },
+    {
+     "key": "2",
+     "part_number": "510488001",
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "029020615,S",
+     "search": "510488001"
+    },
+    {
+     "key": "3",
+     "part_number": "515698601",
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "678213650,6x15x2.0",
+     "search": "515698601"
+    },
+    {
+     "key": "4",
+     "part_number": "515696701",
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "678213141",
+     "search": "515696701"
+    },
+    {
+     "key": "5",
+     "part_number": "516066601",
+     "sub": false,
+     "description": "BOLT",
+     "qty": "2",
+     "remarks": "0101080612,M6x12-H/S",
+     "search": "516066601"
+    },
+    {
+     "key": "6",
+     "part_number": "582059601",
+     "sub": false,
+     "description": "SEAL",
+     "qty": "1",
+     "remarks": "OCG051004910,LHTZ-A",
+     "search": "582059601"
+    },
+    {
+     "key": "7",
+     "part_number": "510474901",
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "026310408,M4x8-CS/S",
+     "search": "510474901"
+    },
+    {
+     "key": "8",
+     "part_number": "515684501",
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "659813320",
+     "search": "515684501"
+    },
+    {
+     "key": "9",
+     "part_number": "515684601",
+     "sub": false,
+     "description": "RING",
+     "qty": "1",
+     "remarks": "659813330,ETW6",
+     "search": "515684601"
+    },
+    {
+     "key": "10",
+     "part_number": "515697301",
+     "sub": false,
+     "description": "GEAR",
+     "qty": "1",
+     "remarks": "678213340",
+     "search": "515697301"
+    },
+    {
+     "key": "11",
+     "part_number": "516125501",
+     "sub": false,
+     "description": "SNAP RING",
+     "qty": "1",
+     "remarks": "0406502612,FOR 26 HOLE",
+     "search": "516125501"
+    },
+    {
+     "key": "12",
+     "part_number": "516131201",
+     "sub": false,
+     "description": "BEARING",
+     "qty": "1",
+     "remarks": "0600406000,6000 2RS",
+     "search": "516131201"
+    },
+    {
+     "key": "13",
+     "part_number": "505171501",
+     "sub": false,
+     "description": "FITTING",
+     "qty": "3",
+     "remarks": "319913350",
+     "search": "505171501"
+    },
+    {
+     "key": "14",
+     "part_number": "515685801",
+     "sub": false,
+     "description": "O-RING",
+     "qty": "1",
+     "remarks": "659813620,P41",
+     "search": "515685801"
+    },
+    {
+     "key": "15",
+     "part_number": "516125501",
+     "sub": false,
+     "description": "SNAP RING",
+     "qty": "1",
+     "remarks": "0406502612,FOR 26 HOLE",
+     "search": "516125501"
+    },
+    {
+     "key": "16",
+     "part_number": "516131201",
+     "sub": false,
+     "description": "BEARING",
+     "qty": "1",
+     "remarks": "0600406000,6000 2RS",
+     "search": "516131201"
+    },
+    {
+     "key": "17",
+     "part_number": "521536201",
+     "sub": false,
+     "description": "CASE B",
+     "qty": "1",
+     "remarks": "848A2Z61A1",
+     "search": "521536201"
+    },
+    {
+     "key": "18",
+     "part_number": "515698601",
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "678213650,6x15x2.0",
+     "search": "515698601"
+    },
+    {
+     "key": "19",
+     "part_number": "516066601",
+     "sub": false,
+     "description": "BOLT",
+     "qty": "1",
+     "remarks": "0101080612,M6x12-H/S",
+     "search": "516066601"
+    },
+    {
+     "key": "20",
+     "part_number": "516070401",
+     "sub": false,
+     "description": "BOLT",
+     "qty": "1",
+     "remarks": "0125230512,M5x12-HS",
+     "search": "516070401"
+    },
+    {
+     "key": "21",
+     "part_number": "514234801",
+     "sub": false,
+     "description": "BOLT",
+     "qty": "1",
+     "remarks": "335021320,M5x30-HS/PS",
+     "search": "514234801"
+    },
+    {
+     "key": "22",
+     "part_number": "584131901",
+     "sub": false,
+     "description": "JOINT",
+     "qty": "1",
+     "remarks": "OCTP1A049000,7T/M7",
+     "search": "584131901"
+    },
+    {
+     "key": "23",
+     "part_number": "515686101",
+     "sub": false,
+     "description": "GEARSHAFT(B)",
+     "qty": "1",
+     "remarks": "659813820",
+     "search": "515686101"
+    },
+    {
+     "key": "24",
+     "part_number": "584723501",
+     "sub": false,
+     "description": "BEARING",
+     "qty": "2",
+     "remarks": "OCK354069000,6900 2RS",
+     "search": "584723501"
+    },
+    {
+     "key": "25",
+     "part_number": "516125301",
+     "sub": false,
+     "description": "SNAP RING",
+     "qty": "1",
+     "remarks": "0406502212,FOR 22 HOLE",
+     "search": "516125301"
+    },
+    {
+     "key": "26",
+     "part_number": "515699101",
+     "sub": false,
+     "description": "GEAR",
+     "qty": "1",
+     "remarks": "678213850",
+     "search": "515699101"
+    },
+    {
+     "key": "27",
+     "part_number": "515684601",
+     "sub": false,
+     "description": "RING",
+     "qty": "1",
+     "remarks": "659813330,ETW6",
+     "search": "515684601"
+    },
+    {
+     "key": "28",
+     "part_number": "515686401",
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "659813860",
+     "search": "515686401"
+    },
+    {
+     "key": "29",
+     "part_number": "515686701",
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "659813871",
+     "search": "515686701"
+    },
+    {
+     "key": "30",
+     "part_number": "510475001",
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "026310410,M4x10-CS/S",
+     "search": "510475001"
+    },
+    {
+     "key": "31",
+     "part_number": "521830201",
+     "sub": false,
+     "description": "SHAFT KIT",
+     "qty": "1",
+     "remarks": "T400806010",
+     "search": "521830201"
+    },
+    {
+     "key": "32",
+     "part_number": "521830401",
+     "sub": false,
+     "description": "GEAR",
+     "qty": "1",
+     "remarks": "T400813630",
+     "search": "521830401"
+    },
+    {
+     "key": "33",
+     "part_number": "521830501",
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "T400813650",
+     "search": "521830501"
+    },
+    {
+     "key": "34",
+     "part_number": "521830601",
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "T400813660",
+     "search": "521830601"
+    },
+    {
+     "key": "35",
+     "part_number": "521830701",
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "T400813670",
+     "search": "521830701"
+    },
+    {
+     "key": "36",
+     "part_number": "521830801",
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "T400813680",
+     "search": "521830801"
+    },
+    {
+     "key": "37",
+     "part_number": "510486101",
+     "sub": false,
+     "description": "NUT",
+     "qty": "1",
+     "remarks": "028010605,M6-H",
+     "search": "510486101"
+    },
+    {
+     "key": "38",
+     "part_number": "510488001",
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "029020615,S",
+     "search": "510488001"
+    },
+    {
+     "key": "39",
+     "part_number": "515698601",
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "678213650,6x15x2.0",
+     "search": "515698601"
+    },
+    {
+     "key": "40",
+     "part_number": "515684901",
+     "sub": false,
+     "description": "BEARING",
+     "qty": "1",
+     "remarks": "659813430,608 2RS",
+     "search": "515684901"
+    },
+    {
+     "key": "41",
+     "part_number": "516125301",
+     "sub": false,
+     "description": "SNAP RING",
+     "qty": "1",
+     "remarks": "0406502212,FOR 22 HOLE",
+     "search": "516125301"
+    },
+    {
+     "key": "42",
+     "part_number": "515698501",
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "678213550",
+     "search": "515698501"
+    },
+    {
+     "key": "43",
+     "part_number": "505182601",
+     "sub": false,
+     "description": "NUT",
+     "qty": "2",
+     "remarks": "8488645000,M5-HF",
+     "search": "505182601"
+    },
+    {
+     "key": "44",
+     "part_number": "515232101",
+     "sub": false,
+     "description": "NUT",
+     "qty": "4",
+     "remarks": "388011790,M6-HU",
+     "search": "515232101"
+    },
+    {
+     "key": "45",
+     "part_number": "515697401",
+     "sub": false,
+     "description": "CRANKSHAFT",
+     "qty": "1",
+     "remarks": "678213370",
+     "search": "515697401"
+    },
+    {
+     "key": "46",
+     "part_number": "516124801",
+     "sub": false,
+     "description": "SNAP RING",
+     "qty": "1",
+     "remarks": "0406402815,FOR 28 AXIS",
+     "search": "516124801"
+    },
+    {
+     "key": "47",
+     "part_number": "516130201",
+     "sub": false,
+     "description": "BEARING",
+     "qty": "1",
+     "remarks": "0600200608,608 ZZ",
+     "search": "516130201"
+    },
+    {
+     "key": "48",
+     "part_number": "515698201",
+     "sub": false,
+     "description": "FELT",
+     "qty": "1",
+     "remarks": "678213460",
+     "search": "515698201"
+    },
+    {
+     "key": "49",
+     "part_number": "587862802",
+     "sub": false,
+     "description": "CASE",
+     "qty": "1",
+     "remarks": "",
+     "search": "587862802"
+    },
+    {
+     "key": "50",
+     "part_number": "515697101",
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "678213220",
+     "search": "515697101"
+    },
+    {
+     "key": "51",
+     "part_number": "515698301",
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "678213470",
+     "search": "515698301"
+    },
+    {
+     "key": "52",
+     "part_number": "594038901",
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "015019-",
+     "search": "594038901"
+    },
+    {
+     "key": "53",
+     "part_number": "515698001",
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "678213441,-942683",
+     "search": "515698001"
+    },
+    {
+     "key": "53",
+     "part_number": "587874501",
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "942684-",
+     "search": "587874501"
+    },
+    {
+     "key": "54",
+     "part_number": "584729701",
+     "sub": false,
+     "description": "BOLT",
+     "qty": "4",
+     "remarks": "OCK078040154,M4x16-HS/PS-NL",
+     "search": "584729701"
+    },
+    {
+     "key": "55",
+     "part_number": "515700301",
+     "sub": false,
+     "description": "PLATE SLEIGH",
+     "qty": "1",
+     "remarks": "678313480",
+     "search": "515700301"
+    },
+    {
+     "key": "60",
+     "part_number": "515699701",
+     "sub": false,
+     "description": "BLADE SET",
+     "qty": "1",
+     "remarks": "678313400",
+     "search": "515699701"
+    },
+    {
+     "key": "61",
+     "part_number": "515699901",
+     "sub": false,
+     "description": "UPP-LOW-BLADE",
+     "qty": "2",
+     "remarks": "678313411,L400 t2.0, 4 LONG HOLES",
+     "search": "515699901"
+    },
+    {
+     "key": "62",
+     "part_number": "515698401",
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "678213540",
+     "search": "515698401"
+    },
+    {
+     "key": "63",
+     "part_number": "584781201",
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "OCK031050201,M5x20-CD-NL",
+     "search": "584781201"
+    },
+    {
+     "key": "64",
+     "part_number": "515685201",
+     "sub": false,
+     "description": "SCREW",
+     "qty": "3",
+     "remarks": "659813510,L17",
+     "search": "515685201"
+    },
+    {
+     "key": "65",
+     "part_number": "515232001",
+     "sub": false,
+     "description": "WASHER",
+     "qty": "4",
+     "remarks": "388011780",
+     "search": "515232001"
+    },
+    {
+     "key": "66",
+     "part_number": "515236701",
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "388411750-10,L19",
+     "search": "515236701"
+    },
+    {
+     "key": "67",
+     "part_number": "515686801",
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "659813890",
+     "search": "515686801"
+    },
+    {
+     "key": "68",
+     "part_number": "586288101",
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "OCA028200019,L440",
+     "search": "586288101"
+    }
+   ]
+  }
+ ]
+}

@@ -107,6 +107,27 @@ check("there are some, and they are the ones expected", shortKeys.sort(), ["365"
 check("and not one of them matches without a brand to back it",
   shortKeys.filter((k) => match(machine("", `${k} machine`))), []);
 
+console.log("\n-- a model with no digit in it --");
+// The LHTZ-A trimmer head. AutoCount records it in Desc2 as "LHTZ-A", which
+// splits into "LHTZ" and "A" - neither carries a digit, so the rule that keeps
+// BRUSHCUTTER and ZENOAH from matching would have kept this out too, and the
+// machine's own parts would not have floated.
+//
+// The matched book's name is allowed through instead. It is not a guess: the
+// book has already been matched to the machine.
+const trimmer = machine("", "LHTZ-A Trimmer Head");
+check("the book is found", match(trimmer), "lhtza");
+check("and its name is sent as the model",
+  M.fitFor(trimmer, INDEX), { iplId: "lhtza", brand: "SZEN", models: ["LHTZA"] });
+check("written bare, the same", M.fitFor(machine("", "LHTZ-A"), INDEX).models, ["LHTZA"]);
+// Only when the book names ONE model - "BK3410FL / FL-S" mashed together is a
+// model nobody has written down, and BK3410 reaches Desc2 by the digit rule.
+check("a book naming two models does not send a mashed-up name",
+  M.fitFor(machine("", "ZENOAH BK3410 Backpack Brushcutter"), INDEX).models, ["BK3410"]);
+// The guard is still there for words off a slip with no book behind them.
+check("an ordinary word still names nothing",
+  M.modelWordsFor(machine("", "Backpack Brushcutter Thick Hose")), []);
+
 console.log("\n-- machines with no book, and no code --");
 check("a Ferris has no book loaded yet",
   match(machine("UFER IS700Z", "FERRIS IS700Z Zero-Turn Mower")), "");

@@ -450,11 +450,16 @@ function buildPartsSearchSql(q, limit = 15, fit = {}) {
   // Commas, slashes, ampersands AND spaces all separate, which is what lets
   // "725DT Kubota Engine" answer to "725DT". The extra words that leaves
   // behind ("KUBOTA", "ENGINE") can never match, because a model word has to
-  // carry a digit to be sent at all.
-  const D2 = `',' + REPLACE(REPLACE(REPLACE(REPLACE(UPPER(ISNULL(i.Desc2, '')),
-              '/', ','), '&', ','), ' ', ','), ',,', ',') + ','`;
+  // carry a digit or come from a matched parts book to be sent at all.
+  //
+  // Hyphens are REMOVED rather than treated as a separator: they sit inside a
+  // model name, not between two of them. AutoCount holds the trimmer head as
+  // "LHTZ-A", and splitting there would leave "LHTZ" and "A" - two fragments
+  // that name nothing.
+  const D2 = `',' + REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(UPPER(ISNULL(i.Desc2, '')),
+              '-', ''), '/', ','), '&', ','), ' ', ','), ',,', ',') + ','`;
   const models = [...new Set((fit.models || [])
-    .map((m) => String(m || "").toUpperCase().replace(/[^A-Z0-9.\-]/g, ""))
+    .map((m) => String(m || "").toUpperCase().replace(/[^A-Z0-9.]/g, ""))
     .filter((m) => m.length >= 3))].slice(0, 8);
   const modelTests = models.map((m, idx) => {
     params[`md${idx}`] = m;

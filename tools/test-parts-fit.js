@@ -166,13 +166,16 @@ const captureSql = async (q, limit, fit) => buildPartsSearchSql(q, limit, fit) |
     ["SHUQ 999999999", "Something", "3650"],
     ["SBNS 391065", "Carburetor", ""],
     ["SPUL K10SP G00294", "Air non-return valve", "K10SP"],
+    ["SZEN 587862802", "Case", "LHTZ-A"],
   ];
   const insd2 = d2.prepare("INSERT INTO Item VALUES (?, ?, ?)");
   for (const r of d2rows) insd2.run(...r);
 
   // The same expression the query builds, transcribed. SQLite has REPLACE and
   // UPPER too, so the tokenising is checked rather than described.
-  const D2 = `',' || REPLACE(REPLACE(REPLACE(REPLACE(UPPER(IFNULL(Desc2,'')),'/',','),'&',','),' ',','),',,',',') || ','`;
+  // Hyphens removed, not split on: they sit inside a model name rather than
+  // between two of them. "LHTZ-A" is one model, not "LHTZ" and "A".
+  const D2 = `',' || REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(UPPER(IFNULL(Desc2,'')),'-',''),'/',','),'&',','),' ',','),',,',',') || ','`;
   const byModel = (models) => d2.prepare(
     `SELECT ItemCode FROM Item WHERE ` +
     models.map(() => `${D2} LIKE '%,'||?||',%'`).join(" OR ") + ` ORDER BY ItemCode`
@@ -191,6 +194,8 @@ const captureSql = async (q, limit, fit) => buildPartsSearchSql(q, limit, fit) |
     ["M1618GC T115486110R"]);
   check("and so does one in the middle of a list", byModel(["372XP"]), ["SHUQ 503701502"]);
   check("a fogger finds its own", byModel(["K10SP"]), ["SPUL K10SP G00294"]);
+  // A model whose name carries a hyphen. Both sides drop it, so they meet.
+  check("a hyphenated model matches", byModel(["LHTZA"]), ["SZEN 587862802"]);
 
   // The reason models are matched whole and never as a prefix.
   check("3650 is not 365", byModel(["3650"]), ["SHUQ 999999999"]);

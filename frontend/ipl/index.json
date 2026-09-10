@@ -225,6 +225,15 @@
   "parts": 158
  },
  {
+  "id": "lhtza",
+  "name": "Zenoah LHTZ-A Trimmer Head",
+  "short": "LHTZ-A",
+  "brand": "Zenoah",
+  "category": "Trimmer Head",
+  "figures": 1,
+  "parts": 65
+ },
+ {
   "id": "md431",
   "name": "Zenoah MD431A / MD431D / MD431M",
   "short": "MD431A / MD431D / MD431M",

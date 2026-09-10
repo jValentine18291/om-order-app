@@ -213,7 +213,27 @@
     const entry = (index || []).find((e) => e.id === iplId);
     const brand = brandPrefixFor(machine) ||
                   (entry ? brandPrefixForBrandName(entry.brand) : "");
-    return { iplId, brand, models: modelWordsFor(machine) };
+
+    // The matched book's own name is a model too, and it gets past the rule
+    // that a model word must carry a digit.
+    //
+    // That rule keeps BRUSHCUTTER and ZENOAH from matching anything, and it is
+    // right for words read off a slip. But some models have no digit at all:
+    // the LHTZ-A trimmer head is "LHTZ-A" in AutoCount's Desc2 and splits into
+    // "LHTZ" and "A", neither of which qualifies - so its own parts would not
+    // float even though AutoCount says which they are.
+    //
+    // Taking it from the book is safe where guessing is not: the book has
+    // already been matched to this machine, so its name is not a guess about
+    // what the machine is.
+    //
+    // Only when the book names ONE model. "BK3410FL / FL-S" mashed together is
+    // a model nobody has ever written down, and its real name reaches Desc2
+    // through the digit rule anyway.
+    const models = modelWordsFor(machine);
+    const one = entry && !String(entry.short || "").includes("/") ? norm(entry.short) : "";
+    if (one.length >= 3 && !models.includes(one)) models.unshift(one);
+    return { iplId, brand, models };
   }
 
   // The part numbers in this book that the technician's search term matches.
