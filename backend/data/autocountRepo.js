@@ -469,6 +469,30 @@ function buildPartsSearchSql(q, limit = 15, fit = {}) {
   const brand = String(fit.brand || "").toUpperCase().replace(/[^A-Z]/g, "");
   if (brand) params.brand = brand;
 
+  // The A-series service items - A6 "Change engine oil", A7 "Warehouse
+  // Service", A8 "Spare Parts Of Equipment" and the rest of them.
+  //
+  // These are not parts of any machine, so fitting has nothing to say about
+  // them, and yet the fit ranking was burying them: on a Zenoah brushcutter,
+  // typing "A8" put three Zenoah codes that merely CONTAIN "A8" above A8
+  // SPARE PARTS itself, and "A7" put two above A7 SVR WAREHOUSE. A technician
+  // typing that has named the item exactly, so it goes first.
+  //
+  // Only when the TERM names one. "A" on its own does not - the digit is
+  // required - and neither does "oil", so searching by description still
+  // ranks by fit exactly as it did. Everything else about the order is
+  // unchanged; this only inserts a rank above the machine's own parts, for a
+  // search that could not have been meant for them.
+  // Set only when it is used: an unused placeholder is harmless, but a
+  // parameter with no placeholder is the kind of mismatch this query has been
+  // taken down by before.
+  // The FIRST word, so "A7 warehouse" still names A7 - the whole term with the
+  // spaces taken out would be "A7WAREHOUSE", which is not the start of any
+  // code and would quietly promote nothing.
+  const acode = String(words[0] || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+  const servicePrefix = /^A\d/.test(acode);
+  if (servicePrefix) params.acode = acode;
+
   // With no machine to fit to - Find Part, or the popup before a machine is
   // picked - there is nothing to rank by, and the rank has to disappear from
   // the ORDER BY rather than become a constant.
@@ -483,6 +507,8 @@ function buildPartsSearchSql(q, limit = 15, fit = {}) {
   // comes back carrying its rank.
   const own = [...preferTests, ...modelTests];
   const whens = [
+    // Above the machine's own parts, and only for a term that named it.
+    servicePrefix ? `WHEN ${CODE} LIKE @acode + '%' THEN -1` : "",
     own.length ? `WHEN ${own.join(" OR ")} THEN 0` : "",
     brand ? `WHEN ${CODE} LIKE @brand + '%' THEN 1` : "",
   ].filter(Boolean);

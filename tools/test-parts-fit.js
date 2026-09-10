@@ -77,6 +77,33 @@ const captureSql = async (q, limit, fit) => buildPartsSearchSql(q, limit, fit) |
         orderTerms(t).filter((x) => /^\d+$/.test(x)), []);
       check(`${label}: no CASE without a WHEN`, /CASE\s+ELSE/.test(t), false);
     }
+
+    // The A-series service items. Typing one names it exactly, and it is not
+    // a part of any machine, so it goes above the fit ranking rather than
+    // under it. Same four combinations, because the term is what decides.
+    for (const [label, fit] of [
+      ["no machine", {}],
+      ["brand only", { brand: "SZEN" }],
+      ["book only", { prefer: ["848CE037A0"] }],
+      ["both", { brand: "SZEN", prefer: ["848CE037A0"] }],
+    ]) {
+      const t = await captureSql("A8", 15, fit);
+      check(`A8, ${label}: promoted above the fit ranking`, /THEN -1/.test(t.sql), true);
+      check(`A8, ${label}: on the code the technician typed`, t.params.acode, "A8");
+      check(`A8, ${label}: still no bare number in ORDER BY`,
+        orderTerms(t.sql).filter((x) => /^\d+$/.test(x)), []);
+      check(`A8, ${label}: every parameter it names is one it supplies`,
+        (t.sql.match(/@[a-zA-Z]\w*/g) || []).every((x) => x.slice(1) in (t.params || {})), true);
+    }
+
+    // And only for a term that named one. A description that happens to
+    // mention oil must not drag the service item over the machine's parts,
+    // and "A" on its own names nothing.
+    for (const term of ["carb", "oil", "engine oil", "A", "SZEN 848"]) {
+      const t = await captureSql(term, 15, { brand: "SZEN", prefer: ["848CE037A0"] });
+      check(`"${term}" does not promote a service item`, /THEN -1/.test(t.sql), false);
+      check(`"${term}" supplies no acode`, "acode" in (t.params || {}), false);
+    }
   }
 
   // ---- 2. the ranking, over real codes ---------------------------------------
@@ -149,6 +176,70 @@ const captureSql = async (q, limit, fit) => buildPartsSearchSql(q, limit, fit) |
   check("genuine and equivalent both rank as this machine's",
     both.filter((r) => r.fit === 0).map((r) => r.ItemCode).sort(),
     ["M1912GC 522664401R", "SHUQ 522664401"]);
+
+  console.log("\n-- the A-series service items --");
+  // What the technician actually sees. These are the real answers AutoCount
+  // gives to "A6", "A7" and "A8", in the order it gave them BEFORE this
+  // change - with a BK3410 in front of the technician, "A8" put three Zenoah
+  // codes above A8 SPARE PARTS, because they contain "A8" somewhere in the
+  // code and they are the right brand.
+  const sv = new DatabaseSync(":memory:");
+  sv.exec(`CREATE TABLE Item (ItemCode TEXT, Description TEXT)`);
+  const svRows = [
+    ["A6 SVR ENGINE OIL", "Change engine oil"],
+    ["M1205SP A68", "Bando V-Belt A68"],
+    ["SZEN 848L0A65G0", "Handle 2-28"],
+    ["A7 SVR WAREHOUSE", "Warehouse Service"],
+    ["SZEN SKS90SA73R", "Belt (Bando SA73)"],
+    ["SZEN 848E0A7123", "Coil Assy"],
+    ["A8 SPARE PARTS", "Spare Parts Of Equipment"],
+    ["M1205SP A88", "Bando V-Belt A88"],
+    ["SZEN 848E0A8102", "Carburetor-A (WYL-190) #4-8"],
+    ["SZEN 848E0A83F0", "Element #5-37"],
+    ["SZEN 644013002R", "Gearcase Assy 24X7 (A8)"],
+  ];
+  const inssv = sv.prepare("INSERT INTO Item VALUES (?, ?)");
+  for (const r of svRows) inssv.run(...r);
+
+  // The same rules as the query, transcribed: the service promotion, then the
+  // machine's own part, then its brand.
+  function svSearch(term, { brand = "", prefer = [] } = {}) {
+    const acode = term.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+    const whens = [];
+    const params = [];
+    if (/^A\d/.test(acode)) { whens.push(`WHEN ${CODE} LIKE ?||'%' THEN -1`); params.push(acode); }
+    if (prefer.length) {
+      whens.push(`WHEN ${prefer.map(() => `${CODE} LIKE '%'||?`).join(" OR ")} THEN 0`);
+      for (const n of prefer) params.push(n);
+    }
+    if (brand) { whens.push(`WHEN ${CODE} LIKE ?||'%' THEN 1`); params.push(brand); }
+    const rank = whens.length ? `CASE ${whens.join(" ")} ELSE 2 END` : "2";
+    const like = `%${acode}%`;
+    return sv.prepare(
+      `SELECT ItemCode, ${rank} AS fit FROM Item
+        WHERE UPPER(ItemCode) NOT LIKE 'U%'
+          AND (UPPER(Description) LIKE ? OR ${CODE} LIKE ?)
+        ORDER BY ${rank}, Description`
+      // Placeholders bind in the order they appear in the text: the rank in
+      // the SELECT, the two in the WHERE, then the rank again in ORDER BY.
+    ).all(...params, like, like, ...params);
+  }
+
+  const onZenoah = { brand: "SZEN", prefer: ["848CE037A0"] };
+  check("A6 comes first on a Zenoah", svSearch("A6", onZenoah)[0].ItemCode, "A6 SVR ENGINE OIL");
+  check("A7 comes first on a Zenoah", svSearch("A7", onZenoah)[0].ItemCode, "A7 SVR WAREHOUSE");
+  check("A8 comes first on a Zenoah", svSearch("A8", onZenoah)[0].ItemCode, "A8 SPARE PARTS");
+
+  // Nothing is hidden by it - the Zenoah codes that contain "A8" are still
+  // there, just underneath, and still ahead of the other brands.
+  const a8 = svSearch("A8", onZenoah);
+  check("the rest are still listed", a8.length, 5);
+  check("with the machine's brand next",
+    a8.slice(1, 4).every((r) => r.ItemCode.startsWith("SZEN")), true);
+
+  // With no machine at all it is unchanged from what it always did, because
+  // the service item was already winning on the exact-code rule there.
+  check("A8 first with no machine either", svSearch("A8")[0].ItemCode, "A8 SPARE PARTS");
 
   console.log("\n-- the model AutoCount records against the part --");
   // Desc2 says which model a part is for, across 82% of the catalogue. These

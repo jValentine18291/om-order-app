@@ -836,8 +836,16 @@ app.get("/api/parts-search", async (req, res) => {
     });
     res.json({ results });
   } catch (err) {
+    // Say that it BROKE, rather than answering with an empty list.
+    //
+    // An empty list is a real answer to a real question, and a failed query
+    // returning one is indistinguishable from a part the catalogue does not
+    // hold. That is how a malformed ORDER BY stayed up long enough to take
+    // Find Part out for a working day: every screen said "No matching parts",
+    // which is exactly what they say when there are none. Every caller of
+    // this route is inside a try/catch and toasts the message.
     console.error("[GET /api/parts-search]", err.message);
-    res.json({ results: [] });
+    res.status(500).json({ results: [], error: `Part search failed: ${err.message}` });
   }
 });
 
