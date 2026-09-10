@@ -275,6 +275,41 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
   return getSlip(slipNumber);
 }
 
+// What the technicians' list is, said in SQL.
+//
+// A slip belongs to the workshop while any machine on it still needs the
+// workshop - and that is a question about the MACHINES, not about the slip's
+// status. The status is one word trying to describe five machines at different
+// stages, and every time it has been used to answer this, a machine has gone
+// missing:
+//
+//   ALL_REPAIRED  hid a slip whose fifth machine had never been touched
+//   PART_SO       the same again, until it was split out
+//   INVOICED      slip 00007. Sales recorded the document for the FIRST batch,
+//                 the whole slip went to "Invoice Created", and the HBZ260EZ
+//                 still on the bench went with it.
+//
+// So the status filter stays - it is what keeps finished slips off the list -
+// but a slip is pulled back regardless if it holds a machine that is neither
+// billed nor done with. Only ever adds; nothing that used to show stops.
+//
+// REPAIRED and CONDEMNED machines are not workshop work: one is finished and
+// the other is waiting on somebody to say where it went. A slip of nothing but
+// those keeps whatever its status decides, which is the behaviour that lets a
+// technician un-tick a machine they marked repaired by mistake.
+const WORKING_SCOPE = `(
+  status != 'CLOSED'
+  AND (
+    status NOT IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED')
+    OR EXISTS (
+      SELECT 1 FROM slip_machines m
+       WHERE m.slip_id = service_slips.id
+         AND TRIM(IFNULL(m.converted_at, '')) = ''
+         AND m.state NOT IN ('REPAIRED', 'CONDEMNED')
+    )
+  )
+)`;
+
 // List slips filtered by status group. 'active' = everything not CLOSED.
 function listSlips(statusFilter = "active") {
   let rows;
@@ -282,9 +317,9 @@ function listSlips(statusFilter = "active") {
     rows = db.prepare("SELECT * FROM service_slips WHERE status = 'OPEN' ORDER BY slip_number").all();
   } else if (statusFilter === "working") {
     // Open Service scope: still being worked on (not repaired, not closed)
-    // PART_SO is deliberately NOT excluded: some of the slip is billed, but a
-    // machine is still on the bench and it is still the workshop's.
-    rows = db.prepare("SELECT * FROM service_slips WHERE status NOT IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'CLOSED') ORDER BY slip_number").all();
+    rows = db.prepare(
+      `SELECT * FROM service_slips WHERE ${WORKING_SCOPE} ORDER BY slip_number`
+    ).all();
   } else if (statusFilter === "need_quote") {
     // What the technicians have handed back for pricing. Oldest first: the one
     // waiting longest is the one the customer has been waiting on.
@@ -914,7 +949,7 @@ function searchSlips(query = "", scope = "all", limit = 20) {
   let sql, params;
   const scopeClause =
     scope === "active" ? "status != 'CLOSED'" :
-    scope === "working" ? "status NOT IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'CLOSED')" :
+    scope === "working" ? WORKING_SCOPE :
     scope === "repaired" ? `(
        status IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'PART_SO')
        OR (

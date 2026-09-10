@@ -177,6 +177,51 @@ const refs = (slip) => (slip.orders || []).map((o) => `${o.so_number}=${o.closin
   check("but still on the sales list",
     (await data.slips.listSlips("repaired")).some((x) => x.slip_number === no8), true);
 
+  console.log("\n-- who can still see the slip, at every stage --");
+  // The rule that has broken three times: a slip belongs to the workshop while
+  // any machine on it still needs the workshop, and that is a question about
+  // the MACHINES. Filtering the technicians' list by the slip's STATUS lost a
+  // machine three separate ways - ALL_REPAIRED, then PART_SO, then INVOICED,
+  // which is slip 00007: sales recorded the document for the first batch, the
+  // whole slip went to "Invoice Created", and the machine still on the bench
+  // went with it.
+  const seen = async (no, scope) =>
+    (await data.slips.listSlips(scope)).some((x) => x.slip_number === no);
+  const who = async (no) => [await seen(no, "working"), await seen(no, "repaired")];
+
+  // 00007 as it stands: four billed (two of them condemned), one on the bench,
+  // and the first order already invoiced.
+  check("invoiced, one machine still on the bench: BOTH still see it",
+    await who(no7), [true, true]);
+
+  // Nothing has been taken away by that. Every other stage is unchanged.
+  const mk = async (label, n) => data.slips.createSlip({
+    company: label, contact_name: "A", contact_number: "1",
+    machines: Array.from({ length: n }, (_, i) => ({ desc: `M${i + 1}`, serial: String(i), remarks: "" })),
+    signature: sig,
+  });
+
+  let v = await mk("VIS ALL REPAIRED NONE BILLED", 2);
+  for (const m of v.machines) { await data.slips.setMachineLabour(m.id, 10); await data.slips.finishRepair(m.id, "WJ"); }
+  // A technician can still un-tick a machine they finished by mistake.
+  check("every machine repaired, nothing billed: technicians keep it",
+    await who(v.slip_number), [true, false]);
+
+  v = await mk("VIS WORKSHOP DONE HALF BILLED", 2);
+  for (const m of v.machines) { await data.slips.setMachineLabour(m.id, 10); await data.slips.finishRepair(m.id, "WJ"); }
+  await data.slips.createSlipOrder(v.slip_number, [v.machines[0].id], "KS");
+  check("workshop finished, half billed: sales only",
+    await who(v.slip_number), [false, true]);
+
+  v = await mk("VIS FULLY DONE", 1);
+  await data.slips.setMachineLabour(v.machines[0].id, 10);
+  await data.slips.finishRepair(v.machines[0].id, "WJ");
+  const vso = await data.slips.createSlipOrder(v.slip_number, [v.machines[0].id], "KS");
+  check("everything billed: sales only", await who(v.slip_number), [false, true]);
+  await data.slips.setSlipInvoiced(v.slip_number, "DO-V", "KS", vso.so_number);
+  await data.slips.closeSlip(v.slip_number, "", "KS");
+  check("closed: nobody", await who(v.slip_number), [false, false]);
+
   console.log("\n-- correcting one does not touch the other --");
   slip = await data.slips.setSlipInvoiced(no, "DO-2609-0102", "KS", so1.so_number);
   check("only the batch named changes", refs(slip),
