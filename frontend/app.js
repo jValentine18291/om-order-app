@@ -1817,6 +1817,19 @@ function slipSoNumbers(slip) {
 // The line that carries them, for the top of either slip screen. Empty until
 // there is an order, so a slip still being worked on gains no clutter.
 function slipSoLine(slip) {
+  // Each order with the DO/CS/INV recorded against it, because that pairing is
+  // the thing anyone comes to this screen to read: which batch went out on
+  // which document. An order with no number yet says so rather than going
+  // quiet - that is the one somebody still has to act on.
+  const orders = (slip.orders || []).filter((o) => o.so_number);
+  if (orders.length) {
+    return `<div class="vs-so">${orders.length === 1 ? "Sales Order" : "Sales Orders"} ${
+      orders.map((o) => `<strong>${escapeHtml(o.so_number)}</strong>${
+        o.closing_ref ? ` <span class="vs-so-ref">${escapeHtml(o.closing_ref)}</span>`
+                      : ` <span class="vs-so-wait">not invoiced</span>`}`).join(" &nbsp;·&nbsp; ")}</div>`;
+  }
+  // A slip written before orders carried their own numbers still shows what it
+  // has: the machines know which order they went on.
   const sos = slipSoNumbers(slip);
   if (!sos.length) return "";
   return `<div class="vs-so">${sos.length === 1 ? "Sales Order" : "Sales Orders"} ${
@@ -3584,8 +3597,10 @@ async function onCloseSlipChosen(slipNumber) {
       `<div><strong>${escapeHtml(slip.company)}</strong> · Slip ${escapeHtml(slip.slip_number)}</div>` +
       `<div class="sub">Status: ${escapeHtml(STATUS_LABEL[slip.status] || slip.status)} · ${slip.machines.length} machine(s)</div>` +
       (formatDate(slip.created_at) ? `<div class="sub">Created: ${escapeHtml(formatDate(slip.created_at))}</div>` : "") +
-      (slip.closing_ref ? `<div class="sub">DO/CS/INV: <strong>${escapeHtml(slip.closing_ref)}</strong>${
-        slip.invoiced_by ? ` · recorded by ${escapeHtml(slip.invoiced_by)}` : ""}</div>` : "") +
+      ((slip.orders || []).filter((o) => o.so_number).map((o) =>
+        `<div class="sub">${escapeHtml(o.so_number)}: ${o.closing_ref
+          ? `<strong>${escapeHtml(o.closing_ref)}</strong>${o.invoiced_by ? ` · ${escapeHtml(o.invoiced_by)}` : ""}`
+          : `<em>no DO/CS/INV yet</em>`}</div>`).join("")) +
       (stranded.length ? `<div class="cs-blocked"><b>Cannot close yet</b>${
         escapeHtml(stranded.map((m) => m.machine_desc).join(", "))} ${
         stranded.length === 1
@@ -3597,14 +3612,36 @@ async function onCloseSlipChosen(slipNumber) {
   }
 }
 
-// Which of the two steps this slip is on. Invoiced slips are past the number
-// and waiting on the customer, so the box is out of the way and the button
-// says what is actually about to happen.
+// The Sales Orders on this slip that still have no DO/CS/INV against them.
+function csAwaiting() {
+  return ((csSlip && csSlip.orders) || []).filter((o) => o.so_number && !o.closing_ref);
+}
+
+// Which of the steps this slip is on.
+//
+// A slip converted in two goes has two orders and two documents, so the number
+// box stays until EVERY order has one - and the picker beside it says which
+// batch is being recorded. Only then does the button offer to close the slip.
 function renderCloseStep() {
-  const invoiced = !!csSlip && csSlip.status === "INVOICED";
-  $("cs-ref-field").style.display = invoiced ? "none" : "";
-  $("cs-reinvoice").style.display = invoiced ? "" : "none";
-  $("cs-submit").textContent = invoiced ? "Collected & Closed" : "Record DO/CS/INV number";
+  const awaiting = csAwaiting();
+  const needsNumber = !csSlip ? true : awaiting.length > 0;
+  const forced = $("cs-submit").dataset.force === "invoice";
+
+  $("cs-ref-field").style.display = needsNumber || forced ? "" : "none";
+  $("cs-reinvoice").style.display = !needsNumber ? "" : "none";
+  $("cs-submit").textContent = needsNumber || forced
+    ? "Record DO/CS/INV number" : "Collected & Closed";
+
+  // The picker only where there is a choice to make.
+  const orders = ((csSlip && csSlip.orders) || []).filter((o) => o.so_number);
+  const choose = orders.length > 1 && (needsNumber || forced);
+  $("cs-so-field").style.display = choose ? "" : "none";
+  if (choose) {
+    const pick = forced ? orders : awaiting;
+    $("cs-so").innerHTML = pick.map((o) =>
+      `<option value="${escapeAttr(o.so_number)}">${escapeHtml(o.so_number)}${
+        o.closing_ref ? ` — ${escapeHtml(o.closing_ref)}` : ""}</option>`).join("");
+  }
 }
 
 // Step one: the number AutoCount gave back.
@@ -3620,14 +3657,22 @@ async function submitInvoiced() {
     csSlip = await api(`/api/slips/${encodeURIComponent(slipNumber)}/invoiced`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ closing_ref: ref, who: initialsFor(getUser()) }),
+      body: JSON.stringify({
+        closing_ref: ref,
+        who: initialsFor(getUser()),
+        // Empty on a slip with one order, where the server needs no telling.
+        so_number: $("cs-so-field").style.display === "none" ? "" : $("cs-so").value,
+      }),
     });
-    renderCloseStep();
+    delete $("cs-submit").dataset.force;
     await onCloseSlipChosen(slipNumber);
     // The row in the list above still says SO Created until it is read again.
     if (closeSearch) await closeSearch.refresh();
     toast(`Slip ${slipNumber} invoiced`, "ok");
-    $("cs-status").innerHTML = statusOk(`Recorded ${ref}. Close it once the customer has collected.`);
+    const left = csAwaiting().length;
+    $("cs-status").innerHTML = statusOk(left
+      ? `Recorded ${ref}. ${left} more Sales Order${left === 1 ? "" : "s"} still to invoice.`
+      : `Recorded ${ref}. Close it once the customer has collected.`);
   } catch (e) {
     $("cs-status").innerHTML = statusErr(e.message);
   } finally {
@@ -3661,10 +3706,14 @@ async function submitClose() {
 // Correcting a number already recorded: put the box back, without unwinding
 // the slip.
 function reopenRefField() {
-  $("cs-ref-field").style.display = "";
-  $("cs-ref").focus();
-  $("cs-submit").textContent = "Record DO/CS/INV number";
   $("cs-submit").dataset.force = "invoice";
+  renderCloseStep();
+  const orders = ((csSlip && csSlip.orders) || []).filter((o) => o.so_number);
+  // Start from what that order already has, so a correction is an edit rather
+  // than a retype.
+  const chosen = orders.find((o) => o.so_number === $("cs-so").value) || orders[0];
+  $("cs-ref").value = (chosen && chosen.closing_ref) || csSlip.closing_ref || "";
+  $("cs-ref").focus();
 }
 
 // ============================================================================
@@ -7384,12 +7433,15 @@ $("machine-parts").addEventListener("change", (e) => {
 $("cs-submit").addEventListener("click", () => {
   // Invoiced and not in the middle of correcting the number: the button closes
   // the slip. Everything else records the number.
-  const invoiced = !!csSlip && csSlip.status === "INVOICED";
-  if (invoiced && $("cs-submit").dataset.force !== "invoice") return submitClose();
-  delete $("cs-submit").dataset.force;
+  const done = !!csSlip && csAwaiting().length === 0;
+  if (done && $("cs-submit").dataset.force !== "invoice") return submitClose();
   return submitInvoiced();
 });
 $("cs-reinvoice").addEventListener("click", reopenRefField);
+$("cs-so").addEventListener("change", () => {
+  const o = ((csSlip && csSlip.orders) || []).find((x) => x.so_number === $("cs-so").value);
+  $("cs-ref").value = (o && o.closing_ref) || "";
+});
 
 // View Slips: slip selection via search component
 

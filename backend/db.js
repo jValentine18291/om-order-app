@@ -542,6 +542,50 @@ try {
   console.error("[db] request-flags migration check failed:", e.message);
 }
 
+// The DO/CS/INV number now belongs to the SALES ORDER, not the slip.
+//
+// A slip is converted a machine at a time, so it can carry several orders -
+// the customer collects two machines now and two next week - and each order
+// becomes its own document in AutoCount. One field on the slip could only hold
+// one of them, and recording the second silently overwrote the first.
+//
+// Existing slips are carried across: where a slip has exactly one order, its
+// number moves onto that order, so nothing recorded before today is lost. The
+// slip keeps its own column for those and for slips whose orders cannot be
+// told apart.
+try {
+  const cols = db.prepare("PRAGMA table_info(orders)").all();
+  if (cols.length && !cols.some((c) => c.name === "closing_ref")) {
+    db.exec("ALTER TABLE orders ADD COLUMN closing_ref TEXT DEFAULT ''");
+    db.exec("ALTER TABLE orders ADD COLUMN invoiced_at TEXT");
+    db.exec("ALTER TABLE orders ADD COLUMN invoiced_by TEXT DEFAULT ''");
+    console.log("[db] migrated: added closing_ref/invoiced_at/invoiced_by to orders");
+
+    // Move what is already recorded onto the one order it can only have meant.
+    //
+    // Only when the slip columns it reads are there. On a fresh database this
+    // block runs before the migration that adds them, and there is nothing to
+    // carry across anyway - it is the servers with history that need it.
+    const slipCols = db.prepare("PRAGMA table_info(service_slips)").all().map((c) => c.name);
+    const moved = !slipCols.includes("invoiced_at") ? { changes: 0 } : db.prepare(
+      `UPDATE orders SET
+         closing_ref = (SELECT s.closing_ref FROM service_slips s
+                         WHERE 'S/S: ' || s.slip_number = orders.notes),
+         invoiced_at = (SELECT s.invoiced_at FROM service_slips s
+                         WHERE 'S/S: ' || s.slip_number = orders.notes),
+         invoiced_by = (SELECT s.invoiced_by FROM service_slips s
+                         WHERE 'S/S: ' || s.slip_number = orders.notes)
+       WHERE EXISTS (SELECT 1 FROM service_slips s
+                      WHERE 'S/S: ' || s.slip_number = orders.notes
+                        AND TRIM(IFNULL(s.closing_ref, '')) != '')
+         AND (SELECT COUNT(*) FROM orders o2 WHERE o2.notes = orders.notes) = 1`
+    ).run();
+    if (moved.changes) console.log(`[db] migrated: ${moved.changes} invoice reference(s) moved onto their Sales Order`);
+  }
+} catch (e) {
+  console.error("[db] orders invoice migration check failed:", e.message);
+}
+
 // When sales recorded the DO/CS/INV against a slip, and who did.
 //
 // The slip's own lifecycle now has a step between "on a sales order" and

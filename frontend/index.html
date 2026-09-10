@@ -626,6 +626,12 @@
         <div class="slip-results" id="cs-results"></div>
       </div>
       <div class="slip-context" id="cs-context" style="display:none"></div>
+      <!-- Which batch the number is for. Hidden on a slip with one Sales
+           Order, where there is nothing to choose. -->
+      <div class="field" id="cs-so-field" style="display:none">
+        <label for="cs-so">Which Sales Order <span class="req">*</span></label>
+        <select id="cs-so"></select>
+      </div>
       <div class="field" id="cs-ref-field">
         <label for="cs-ref">DO / CS / INV number <span class="req">*</span></label>
         <input id="cs-ref" type="text" autocomplete="off" placeholder="e.g. DO-2604-016" />

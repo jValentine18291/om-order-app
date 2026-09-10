@@ -349,6 +349,10 @@ function getSlip(slipNumber, includeSignature = false) {
   slip.has_signature = !!db.prepare(
     "SELECT 1 FROM slip_signatures WHERE slip_id = ?"
   ).get(slip.id);
+  // The Sales Orders raised for it and the DO/CS/INV recorded against each.
+  // Carried with the slip because every screen that shows one shows the other:
+  // "SO-2026-00001 -> DO-2609-0101" is one fact, not two.
+  slip.orders = slipOrderRefs(slip.slip_number);
   if (includeSignature) {
     const sig = db.prepare("SELECT image FROM slip_signatures WHERE slip_id = ?").get(slip.id);
     slip.signature = sig ? sig.image : "";
@@ -651,6 +655,22 @@ function getSlipOrder(slipNumber) {
   return row ? getOrder(row.so_number) : null;
 }
 
+// The Sales Orders on a slip, with the DO/CS/INV recorded against each - what
+// the screens need to show "SO-2026-00001 -> DO-2609-0101" without reading
+// every order in full.
+function slipOrderRefs(slipNumber) {
+  return db.prepare(
+    `SELECT so_number, autocount_doc_no, closing_ref, invoiced_at, invoiced_by
+       FROM orders WHERE notes = ? ORDER BY id`
+  ).all(`S/S: ${slipNumber}`).map((o) => ({
+    so_number: o.so_number,
+    autocount_doc_no: o.autocount_doc_no || "",
+    closing_ref: o.closing_ref || "",
+    invoiced_at: o.invoiced_at || "",
+    invoiced_by: o.invoiced_by || "",
+  }));
+}
+
 // Every Sales Order raised for a slip, oldest first. A slip converted a machine
 // at a time has several, and without this the earlier ones become unreachable.
 function getSlipOrders(slipNumber) {
@@ -739,37 +759,59 @@ function strandedCondemned(slipId) {
 // created - so this is a person saying it did. Only after this does anyone
 // ring the customer to come and collect, which is why it is its own step and
 // not folded into closing.
-function setSlipInvoiced(slipNumber, ref, who = "") {
+function setSlipInvoiced(slipNumber, ref, who = "", soNumber = "") {
   const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
   if (slip.status === "CLOSED") { const e = new Error("Slip is already closed."); e.status = 400; throw e; }
   if (!ref || !String(ref).trim()) {
     const e = new Error("A DO/CS/INV number is required."); e.status = 400; throw e;
   }
-  // Nothing to invoice until something is on a Sales Order.
+  // Which order this number belongs to.
   //
-  // Asked of the MACHINES, not of the slip's status. They are not the same
-  // question: a slip carrying a condemned machine nobody has accounted for
-  // reads IN_PROGRESS however much of it has been billed, and refusing the
-  // invoice on that basis would stop sales recording something that really
-  // happened. The condemned machine is still insisted on - at closing, where
-  // it is about to be forgotten rather than merely unfinished.
-  const onOrder = db.prepare(
-    `SELECT COUNT(*) AS n FROM slip_machines
-      WHERE slip_id = ? AND TRIM(IFNULL(converted_at, '')) != ''`
-  ).get(slip.id).n;
-  if (!onOrder) {
+  // Named by the caller where there is a choice; where the slip has only one
+  // order there is nothing to choose and the screen need not ask.
+  const orders = db.prepare(
+    "SELECT * FROM orders WHERE notes = ? ORDER BY id"
+  ).all(`S/S: ${slipNumber}`);
+  if (!orders.length) {
+    const e = new Error("Create the Sales Order first - there is nothing on an order to invoice yet.");
+    e.status = 400; throw e;
+  }
+  const wanted = String(soNumber || "").trim();
+  const order = wanted
+    ? orders.find((o) => o.so_number === wanted)
+    : (orders.length === 1 ? orders[0] : null);
+  if (wanted && !order) {
+    const e = new Error(`${wanted} is not a Sales Order on this slip.`); e.status = 400; throw e;
+  }
+  if (!order) {
     const e = new Error(
-      "Create the Sales Order first - there is nothing on an order to invoice yet."
+      `This slip has ${orders.length} Sales Orders - say which one this number is for.`
     );
     e.status = 400; throw e;
   }
-  db.prepare(
-    `UPDATE service_slips
-        SET status = 'INVOICED', closing_ref = ?, invoiced_by = ?,
-            invoiced_at = datetime('now','localtime')
-      WHERE id = ?`
-  ).run(String(ref).trim(), String(who || "").trim(), slip.id);
+
+  const tx = db.transaction(() => {
+    db.prepare(
+      `UPDATE orders SET closing_ref = ?, invoiced_by = ?,
+                        invoiced_at = datetime('now','localtime')
+        WHERE id = ?`
+    ).run(String(ref).trim(), String(who || "").trim(), order.id);
+
+    // The slip says Invoice Created as soon as ONE order has its number - the
+    // customer is being called about that batch - and the count on screen says
+    // how far along it is. Closing is what insists on all of them.
+    //
+    // The slip's own closing_ref keeps the most recent, so every screen and
+    // document that reads one number still reads a true one.
+    db.prepare(
+      `UPDATE service_slips
+          SET status = 'INVOICED', closing_ref = ?, invoiced_by = ?,
+              invoiced_at = datetime('now','localtime')
+        WHERE id = ?`
+    ).run(String(ref).trim(), String(who || "").trim(), slip.id);
+  });
+  tx();
   return getSlip(slipNumber);
 }
 
@@ -793,6 +835,24 @@ function closeSlip(slipNumber, closingRef, who = "") {
     );
     e.status = 400; throw e;
   }
+  // EVERY order, not just the last one recorded.
+  //
+  // The slip reads Invoice Created as soon as one batch has its number, which
+  // is right - somebody is ringing that customer. Closing is the step that has
+  // to be sure nothing was left behind, and a slip converted in two goes with
+  // only the first invoiced is exactly the case this catches.
+  const missing = db.prepare(
+    `SELECT so_number FROM orders
+      WHERE notes = ? AND TRIM(IFNULL(closing_ref, '')) = ''
+      ORDER BY id`
+  ).all(`S/S: ${slipNumber}`).map((o) => o.so_number);
+  if (missing.length) {
+    const e = new Error(
+      `No DO/CS/INV recorded for ${missing.join(", ")}. Record it before closing the slip.`
+    );
+    e.status = 400; throw e;
+  }
+
   const ref = String(closingRef || slip.closing_ref || "").trim();
   if (!ref) {
     const e = new Error("Record the DO/CS/INV number first."); e.status = 400; throw e;
@@ -802,6 +862,24 @@ function closeSlip(slipNumber, closingRef, who = "") {
     const e = new Error(
       `Condemned but not yet accounted for: ${stranded.join(", ")}. ` +
       "Record whether the customer collected it or we disposed of it."
+    );
+    e.status = 400; throw e;
+  }
+
+  // And nothing still sitting on the bench.
+  //
+  // Found by walking a half-collected slip: two machines of three billed and
+  // invoiced, and the slip closed - taking the third with it, unbilled, off
+  // every list anyone looks at. Closing is the last moment anybody reads a
+  // slip, so it is where every machine has to be accounted for: billed, or
+  // condemned and gone.
+  const unfinished = db.prepare(
+    "SELECT machine_desc, state, disposal, converted_at FROM slip_machines WHERE slip_id = ?"
+  ).all(slip.id).filter((m) => !machineSettled(m)).map((m) => m.machine_desc);
+  if (unfinished.length) {
+    const e = new Error(
+      `Not on a Sales Order yet: ${unfinished.join(", ")}. ` +
+      "Every machine has to be billed or accounted for before the slip closes."
     );
     e.status = 400; throw e;
   }
@@ -1518,7 +1596,7 @@ const slips = {
   poTracking, poStatus, setPoStatus, PO_STATUSES,
   listShipments, getShipment, createShipment, updateShipment,
   allocatedByPo, receivedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
-  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, setMachineState, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, setMachineState, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 
 module.exports = { findItem, listItems, createOrder, getOrder, slips };

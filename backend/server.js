@@ -1664,8 +1664,11 @@ app.get("/api/slips/:slip/order", async (req, res) => {
 // ring the customer to come and collect.
 app.post("/api/slips/:slip/invoiced", async (req, res) => {
   try {
-    const { closing_ref, who = "" } = req.body || {};
-    res.json(await data.slips.setSlipInvoiced(req.params.slip, closing_ref, who));
+    // so_number says which order the number is for. A slip with one order
+    // does not need it; a slip with two does, and the repo refuses without it
+    // rather than guessing which batch the customer was invoiced for.
+    const { closing_ref, who = "", so_number = "" } = req.body || {};
+    res.json(await data.slips.setSlipInvoiced(req.params.slip, closing_ref, who, so_number));
   } catch (err) {
     if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
     console.error("[POST /api/slips/:slip/invoiced]", err);

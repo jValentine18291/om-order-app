@@ -645,6 +645,11 @@ select {
   font-size: 12.5px; font-weight: 600;
 }
 .vs-so strong { font-weight: 800; letter-spacing: .2px; }
+/* The document each order went out on, and the ones still waiting for one.
+   Quieter than the order number itself: the SO is what people search by, the
+   DO is what they read off it. */
+.vs-so-ref { font-weight: 700; opacity: .85; }
+.vs-so-wait { font-weight: 600; font-style: italic; opacity: .65; }
 
 /* Status badge in the Open Service footer */
 #os-status-badge { display: inline-block; margin-left: 8px; }
