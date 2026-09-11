@@ -5209,6 +5209,26 @@ function partOptionHtml(p, { extraClass = "" } = {}) {
     </button>`;
 }
 
+// A number that matches no spare part may still be something AutoCount holds:
+// a whole MACHINE. Machine units - the U-prefixed codes - are kept out of the
+// parts search on purpose, because a search for "525" that returns eleven
+// 525-something machines above the parts is useless at a bench.
+//
+// The cost of that only shows when nothing else matches. "970750501" is the
+// Husqvarna FS7000 DL floor saw; typed into Find Part it returned "No matching
+// parts", which reads as "we do not have it" when the truth is "that is not a
+// part". So when the parts search comes back empty, and only then, the
+// machines are asked as well. It can never push a part down the list: there
+// are no parts to push.
+async function machineMatches(q) {
+  try {
+    const d = await api(`/api/machine-search?q=${encodeURIComponent(q)}`);
+    return (d.results || []).slice(0, 5);
+  } catch (_) {
+    return [];                   // the ordinary "nothing found" still stands
+  }
+}
+
 // ---- Find Part: by part, or by where it lives -------------------------------
 // "What is this part" and "what is on this shelf" get asked by the same people
 // minutes apart, so they share one box and one results list. The mode decides
@@ -5284,7 +5304,21 @@ $("fp-q").addEventListener("input", () => {
       const data = await api(`/api/parts-search?q=${encodeURIComponent(q)}`);
       const list = data.results || [];
       if (!list.length) {
-        box.innerHTML = `<div class="fp-empty">No matching parts</div>`;
+        // Find Part is a stock lookup, and a machine has stock, a price and a
+        // location like anything else - so here it is offered, and opens the
+        // same card. This is the screen where asking about one is a fair
+        // question.
+        const machines = await machineMatches(q);
+        if (!machines.length) {
+          box.innerHTML = `<div class="fp-empty">No matching parts</div>`;
+          return;
+        }
+        box.innerHTML =
+          `<div class="fp-machine-note">Not a spare part — this is a machine:</div>` +
+          machines.map((m) => partOptionHtml(m, { extraClass: "fp-loc-row" })).join("");
+        box.querySelectorAll(".company-option").forEach((btn) =>
+          btn.addEventListener("click", () => showPartStock(btn.dataset.code))
+        );
         return;
       }
       box.innerHTML = list.map((p) => partOptionHtml(p)).join("");
@@ -7460,7 +7494,19 @@ $("code-input").addEventListener("input", () => {
       const data = await api(`/api/parts-search?q=${encodeURIComponent(q)}${fitQuery(q)}`);
       const list = data.results || [];
       if (!list.length) {
-        box.innerHTML = `<div class="fp-empty">No matching parts</div>`;
+        // Named rather than offered. A machine is not something that can be
+        // fitted to a machine, so there is nothing to tap - but leaving the
+        // technician with "No matching parts" tells them the catalogue has
+        // never heard of a number they are holding, which is not true.
+        const machines = await machineMatches(q);
+        box.innerHTML = machines.length
+          ? `<div class="fp-machine-note">Not a spare part — this is a machine:</div>` +
+            machines.map((m) => `
+              <div class="fp-machine-row">
+                <span class="fp-opt-desc">${escapeHtml(m.description)}</span>
+                <span class="fp-opt-code mono">${escapeHtml(m.item_code)}</span>
+              </div>`).join("")
+          : `<div class="fp-empty">No matching parts</div>`;
         return;
       }
       box.innerHTML = list.map((p) => partOptionHtml(p)).join("");

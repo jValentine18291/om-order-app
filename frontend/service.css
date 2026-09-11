@@ -573,6 +573,22 @@ select {
   font-size: .9rem;
   color: var(--ink-faint);
 }
+/* What came back when the number turned out to name a machine rather than a
+   spare part. Said plainly rather than left as "No matching parts", which
+   reads as "we do not have it". */
+.fp-machine-note {
+  padding: 10px 14px 6px;
+  font-size: .86rem;
+  color: var(--ink-soft, #55616a);
+}
+/* On the repair screen the machine is named but not offered - nothing to tap,
+   because a machine cannot be fitted to a machine. */
+.fp-machine-row {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 8px 14px 12px;
+  font-size: .9rem;
+}
+.fp-machine-row .fp-opt-code { font-size: .8rem; color: var(--ink-faint); }
 .fp-card {
   margin-top: 14px;
   background: #fff;

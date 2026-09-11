@@ -168,6 +168,9 @@
     "Qty Requested": "申请数量",
     "Looking up stock…": "正在查询库存…",
     "No matching parts": "没有符合的零件",
+    // The number turned out to name a whole machine. Said plainly, because
+    // "no matching parts" reads as "we do not stock it".
+    "Not a spare part — this is a machine:": "这不是零件 — 这是一台机器：",
     "Search failed": "搜索失败",
     "Lookup failed": "查询失败",
     "Unit price": "单价",
