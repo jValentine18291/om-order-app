@@ -95,13 +95,12 @@
     "Eunos": "Eunos",
     "Shipped": "已发货",
     "Arrived Singapore": "已到新加坡",
-    // NOTE: this one never applies. "Received" is written again in the machine
-    // section below as 收件, and a repeated key takes its LAST value - so every
-    // "Received" in the app renders as 收件. It is left here because that is
-    // the right word for a shipment, and because deleting it would hide the
-    // clash rather than explain it. Anything that must read 已收货 says
-    // "Goods received" instead.
-    "Received": "已收货",
+    // "Received" is NOT written here, though a shipment that has arrived is
+    // exactly 已收货. The word is spoken for: a machine received at the
+    // counter is also "Received", further down, and it is 收件 - and a key
+    // written twice takes its last value in silence, so one of the two
+    // meanings would have been wrong wherever it appeared. Goods arriving say
+    // "Goods received" instead, which has its own entry and its own word.
     "Cancelled": "已取消",
     "What is on it": "货物明细",
     "No shipments": "没有货运记录",
@@ -398,7 +397,9 @@
     "Closed with:": "结单编号：",
     "Share slip (PDF)": "分享服务单（PDF）",
     "View Sales Order": "查看销售订单",
-    "Sales Order": "销售订单",
+    // "Sales Order" itself is written once, further down, as 销售单 - it used
+    // to be here as well with a different word, and only the later of the two
+    // ever applied. One key, one answer.
     "Order total": "订单总额",
     "Item Code": "货品编号",
     "Qty": "数量",
@@ -479,7 +480,148 @@
     "Order not found": "找不到订单",
     "Missing code": "缺少零件编号",
     "AutoCount is not enabled.": "AutoCount 未启用。",
-    "Failed to load requests": "加载申请失败"
+    "Failed to load requests": "加载申请失败",
+
+    // ========================================================================
+    // THE OFFICE SCREENS
+    // ========================================================================
+    // Everything above was written for the technicians, because the Chinese
+    // interface was theirs alone. The switch belongs to everybody now, and a
+    // colleague who taps it on the sales desk lands on New Service - which was
+    // 22% translated, so it looked broken rather than bilingual.
+    //
+    // Terms follow the ones already established above: 服务单 a service slip,
+    // 零件 a part, 机器 a machine, 采购单 a purchase order, 货运 a shipment.
+    // The document names AutoCount prints - DO, CS, INV, SO - stay as they
+    // are, because that is what is written on the paperwork being held.
+
+    // ---- Home ----
+    "Bulk Order": "批量申请",
+    "Request several parts at once": "一次申请多个零件",
+    "Orders": "订单",
+    "Part orders and their status": "零件订单及其状态",
+    "Repairs waiting to be priced": "等待报价的维修",
+    "Common requests": "常用申请",
+    "Who is using this phone?": "谁在使用这台手机？",
+    // The role badge. "Sales Staff" already has an entry; this is the short
+    // form the badge uses.
+    "Sales": "销售",
+
+    // ---- New service slip ----
+    "New service": "新服务单",
+    "Register a service slip": "登记服务单",
+    "Register service slip": "登记服务单",
+    "Enter the customer's details and the machines brought in.": "请输入客户资料与送修的机器。",
+    "Company": "公司",
+    "Contact name": "联络人",
+    "Contact number": "联络电话",
+    "WhatsApp number": "WhatsApp 号码",
+    "(for sending the slip)": "（用于发送服务单）",
+    "Same as contact number": "与联络电话相同",
+    "Notes": "备注",
+    "(optional, for the whole order)": "（可选，适用于整张单）",
+    "Add machine": "添加机器",
+    "Model No.": "型号",
+    "Serial No.": "机身号码",
+    "(if applicable)": "（如有）",
+    "(optional — what the customer reported)": "（可选 — 客户反映的问题）",
+    "Customer signature": "客户签名",
+    "(hand the phone to the customer)": "（请把手机交给客户）",
+    "Sign here": "在此签名",
+    "Clear": "清除",
+    "By signing, the customer accepts the terms printed on the slip.":
+      "客户签名即表示接受服务单上所列条款。",
+
+    // ---- Close service ----
+    "Close service": "结单",
+    "Record the DO/CS/INV once it is keyed into AutoCount, then close it when the customer has collected and paid.":
+      "在 AutoCount 键入 DO/CS/INV 后先登记号码，待客户取货付款后再结单。",
+    "Which Sales Order": "哪一张销售单",
+    "DO / CS / INV number": "DO / CS / INV 号码",
+
+    // ---- View slips, and editing one ----
+    "Edit slip": "修改服务单",
+    "Save changes": "保存修改",
+    "Review changes": "确认修改",
+    "Cancel": "取消",
+    "The customer signed this slip. Anything you change here is recorded on it.":
+      "客户已签署此服务单。在此所做的任何修改都会记录在单上。",
+    "Open the parts diagram": "打开零件图",
+    "Open in Find Part": "在查找零件中打开",
+
+    // ---- The Sales Order ----
+    "Convert to Sales Order": "转为销售单",
+    "Pick the machines to put on this order. The slip only becomes Converted once every machine has been on one.":
+      "请选择要开单的机器。所有机器都开单后，服务单才会转为已开单。",
+    "Key these rows into AutoCount in this order": "请按此顺序将以下各行键入 AutoCount",
+    "Pick another order": "选择另一张订单",
+
+    // ---- Quoting ----
+    "Tell me when one arrives": "有新的就通知我",
+    "Notify this device as soon as a technician finishes a repair": "技术员完成维修后立即通知这台设备",
+    "The technician is shown this, and sends the machine for quoting once they know the cost.":
+      "技术员会看到这项说明，知道费用后便会送去报价。",
+    "Not this one": "不是这个",
+
+    // ---- Ordering parts ----
+    "Add a part": "添加零件",
+    "Submit order": "提交订单",
+    "Need to Order": "需要订购",
+    "What is this part?": "这是什么零件？",
+    "This code is a placeholder, so the purchaser needs the name.":
+      "此编号只是代用编号，采购员需要知道零件名称。",
+
+    // ---- A note kept against a part ----
+    "Part note": "零件备注",
+    "(what replaced it, or anything worth knowing)": "（替代品，或其他值得记录的事）",
+    "Save note": "保存备注",
+    "Remove the note": "删除备注",
+    "Everyone who looks this part up will see this, including the technicians.":
+      "所有查询此零件的人都会看到，包括技术员。",
+
+    // ---- Where a part lives ----
+    "Change location": "更改存放位置",
+    "New location": "新位置",
+    "Now": "目前",
+    "Change to": "改为",
+    "Continue": "继续",
+    "This writes straight into AutoCount and replaces the current location.":
+      "此操作会直接写入 AutoCount，并覆盖目前的位置。",
+
+    // ---- Purchase orders and shipments ----
+    "Which purchase order?": "哪一张采购单？",
+    "Add lines": "添加项目",
+    "Add lines from a purchase order": "从采购单添加项目",
+    "Add to shipment": "加入货运",
+    "How many of each are on this shipment?": "这批货运各有多少？",
+    "Save shipment": "保存货运",
+    "Supplier invoice no.": "供应商发票号码",
+    "Container no.": "货柜号码",
+    "(sea freight)": "（海运）",
+
+    // ---- Placeholders ----
+    "Search by description or part no.…": "输入名称或零件编号…",
+    "PO number or supplier…": "采购单号码或供应商…",
+    "Anything the technician should know…": "技术员需要知道的事…",
+    "e.g. Mr Tan": "例如：陈先生",
+    "e.g. Tan Landscaping": "例如：陈园艺",
+    "e.g. Husqvarna 525LK Brushcutter": "例如：Husqvarna 525LK 割草机",
+    "e.g. Won't start, chain keeps slipping": "例如：无法启动，链条打滑",
+    "e.g. DO-2604-016": "例如：DO-2604-016",
+    "e.g. Stock-up for December": "例如：十二月备货",
+    "e.g. Indent: crankshaft seal": "例如：订货：曲轴油封",
+    "e.g. Superseded — order SZEN 848BE058B2R instead": "例如：已停产 — 请改订 SZEN 848BE058B2R",
+    "e.g. INV-88377": "例如：INV-88377",
+    "e.g. ONEY2210447": "例如：ONEY2210447",
+    "e.g. TCNU9930118": "例如：TCNU9930118",
+    "e.g. held at customs, docs resent": "例如：卡在海关，已重发文件",
+    // The ones that are only a number still carry "e.g.", which is the part a
+    // Chinese reader trips over.
+    "e.g. 9123 4567": "例如：9123 4567",
+    "e.g. +65 9123 4567": "例如：+65 9123 4567",
+    "e.g. 20231100123": "例如：20231100123",
+    "e.g. 4": "例如：4",
+    "e.g. 5": "例如：5"
   };
 
   // app.js renders dates as "18 Aug 2026" (formatDate). Rewrite them the way a
@@ -754,15 +896,26 @@
     try { return localStorage.getItem(ROLE_KEY) === "tech"; } catch (e) { return false; }
   }
 
-  // Technicians default to Chinese, but the topbar toggle can switch a phone
-  // to English ("om_lang" = "en"). The layer installs at page load, so the
-  // toggle in app.js flips this key and reloads — same pattern as role changes.
-  function wantsEnglish() {
-    try { return localStorage.getItem("om_lang") === "en"; } catch (e) { return false; }
+  // Which language the app is in. The one place that decides.
+  //
+  // The switch was the technicians' alone and Chinese came with the role.
+  // Anyone can flip it now, so a stored choice decides and the role supplies
+  // only the DEFAULT - Chinese for a technician, as it always was, English for
+  // everybody else, as it always was. Nobody's app changes language because of
+  // this change; it changes when somebody taps the switch.
+  //
+  // The layer installs at page load, so the toggle writes this key and
+  // reloads, the same pattern as switching roles.
+  function language() {
+    var v = null;
+    try { v = localStorage.getItem("om_lang"); } catch (e) { v = null; }
+    if (v === "zh") return "zh";
+    if (v === "en") return "en";
+    return isTech() ? "zh" : "en";
   }
 
   function boot() {
-    if (!isTech() || wantsEnglish()) return;
+    if (language() !== "zh") return;
     enabled = true;
     document.documentElement.lang = "zh-Hans-SG";
     apply(document.body);
@@ -782,6 +935,10 @@
 
   window.OM_I18N = {
     isEnabled: function () { return enabled; },
+    // What the topbar switch reads to label itself, and what it flips. Asked
+    // rather than worked out again in app.js, so the two can never disagree
+    // about which language the app is in.
+    language: language,
     refresh: function () { apply(document.body); },
     dict: DICT
   };

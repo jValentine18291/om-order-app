@@ -192,25 +192,32 @@ function chooseUser(id) {
   applyRoleToHome();
   showScreen("home");
 }
-// Technician-only language toggle in the topbar. The preference lives in
-// localStorage ("om_lang"); i18n.js reads it at page load, so flipping it
-// reloads — the same pattern as switching roles. The label always shows the
-// language you would switch TO, in that language.
+// The language switch in the topbar. Everyone's, not the technicians' alone -
+// the office asked for it, and there was never a reason it should not be.
+//
+// What it does NOT do is move anybody: a technician still opens in Chinese and
+// everybody else still opens in English, because that is the default when
+// nothing has been chosen. It only means the choice can now be made.
+//
+// The preference lives in localStorage ("om_lang"); i18n.js installs at page
+// load, so flipping it reloads - the same pattern as switching roles. Which
+// language the app is IN is i18n.js's answer, not a second copy of the rule
+// here. The label always shows the language you would switch TO, in that
+// language.
+function currentLang() {
+  return window.OM_I18N ? OM_I18N.language() : "en";
+}
 function updateLangToggle() {
   const btn = $("lang-toggle");
   if (!btn) return;
-  const isTech = getRole() === "tech";
-  btn.style.display = isTech ? "inline-flex" : "none";
-  if (!isTech) return;
-  const inEnglish = localStorage.getItem("om_lang") === "en";
-  btn.textContent = inEnglish ? "中文" : "English";
+  btn.style.display = "inline-flex";
+  btn.textContent = currentLang() === "zh" ? "English" : "中文";
   // Both topbar pills carry margin-left:auto; with two visible, flexbox would
   // split them apart. The toggle takes the auto margin, Home sits beside it.
   $("home-link").style.marginLeft = "10px";
 }
 $("lang-toggle").addEventListener("click", () => {
-  const inEnglish = localStorage.getItem("om_lang") === "en";
-  localStorage.setItem("om_lang", inEnglish ? "zh" : "en");
+  localStorage.setItem("om_lang", currentLang() === "zh" ? "en" : "zh");
   location.reload();
 });
 
@@ -7668,6 +7675,9 @@ $("cs-so").addEventListener("change", () => {
 // it lands on the picker and chooses one - once.
 if (getUser()) { applyRoleToHome(); showScreen("home"); }
 else { renderStaffPicker(); showScreen("role"); }
+// On the picker too, where nobody has a role yet. That is the first screen a
+// new phone shows, and it is a reasonable place to want the switch.
+updateLangToggle();
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./sw.js").catch(() => {});

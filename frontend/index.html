@@ -1181,9 +1181,13 @@
   <!-- Which parts belong to the machine being worked on, so they sort first in
        the technician's search. -->
   <script src="./machine-ipl.js"></script>
-  <script src="./app.js"></script>
-  <!-- Chinese interface for the Technician role. Loads last so it can translate
-       whatever app.js has already put on screen, then watches for the rest. -->
+  <!-- The Chinese interface. Loads BEFORE app.js, which it used to follow.
+       It translates nothing at parse time - it waits for the document either
+       way - so nothing is lost by moving it, and what is gained is that app.js
+       can ask it which language the app is in. That question now has one
+       answer in one place instead of the same rule written out twice and left
+       to drift; the topbar switch is the caller. -->
   <script src="./i18n.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
