@@ -53,3 +53,9 @@ backend/*credentials*.json
 # A working cache so a re-run does not re-fetch: the repo keeps the 1240px
 # versions the app actually serves, not these.
 tools/.ipl-cache/
+
+# IPL proof sheets: every hotspot drawn over its drawing, written by the
+# extractors with --proof so they can be looked at. They are how a book is
+# checked, not part of it - regenerate rather than store several megabytes of
+# line art twice.
+tools/*-proof.png

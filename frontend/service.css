@@ -2300,6 +2300,17 @@ select {
    is a price heading for an invoice, and it is quiet enough to miss. */
 .line .tube-frac-bad { color: #c0392b; font-weight: 700; }
 
+/* What the parts book says about one part - a serial break, a thread size, or
+   why it has no number of its own. The book's voice, not the app's, so it is
+   set apart from the stock figures underneath it. */
+.ipl-part-note {
+  margin: 10px 0 0; padding: 9px 12px;
+  background: var(--surface-2, #f6f9fa);
+  border-left: 3px solid var(--border);
+  border-radius: 6px;
+  font-size: .84rem; line-height: 1.45; color: var(--ink-soft, #55616a);
+}
+
 
 /* The catalogue machine behind a typed model, when one was chosen. Quiet: it
    confirms a thing that already happened rather than asking for attention. */

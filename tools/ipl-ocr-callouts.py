@@ -57,12 +57,31 @@ def tool(name):
 
 
 def render(pdf, page):
+    """One page as a PNG at DPI.
+
+    Poppler if it is there, PyMuPDF if it is not. Neither is universal on a
+    Windows workstation - this machine has Tesseract and PyMuPDF but no
+    poppler, and the book in hand could not be read at all until this fell
+    back. The two agree on what matters: same DPI, same page, greyscale,
+    origin top-left, so every measurement below is unaffected by which one
+    produced the image.
+    """
     out = os.path.join(tempfile.gettempdir(), f"ipl-ocr-{os.getpid()}")
-    subprocess.run(
-        [tool("pdftoppm"), "-png", "-r", str(DPI), "-f", str(page), "-l", str(page),
-         "-singlefile", pdf, out],
-        check=True, capture_output=True,
-    )
+    try:
+        subprocess.run(
+            [tool("pdftoppm"), "-png", "-r", str(DPI), "-f", str(page), "-l", str(page),
+             "-singlefile", pdf, out],
+            check=True, capture_output=True,
+        )
+        return out + ".png"
+    except (FileNotFoundError, OSError, subprocess.CalledProcessError):
+        pass
+    import pymupdf
+    doc = pymupdf.open(pdf)
+    # PyMuPDF pages are zero-based; poppler's -f/-l are one-based.
+    pix = doc[page - 1].get_pixmap(dpi=DPI, colorspace=pymupdf.csGRAY)
+    pix.save(out + ".png")
+    doc.close()
     return out + ".png"
 
 

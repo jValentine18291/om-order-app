@@ -8305,6 +8305,16 @@ async function openIplPart(index) {
   $("ipl-part-title").textContent = part.description || part.part_number;
   $("ipl-part-sub").textContent =
     `${ipl.figure.label || `Fig.${ipl.figure.number} ${ipl.figure.title}`} · Key ${part.key}`;
+  // The book's own note about this part. Every book has carried these and none
+  // of them reached the screen - including the one that answers the question a
+  // blank part number raises, which is what the EB6200's carburettor body and
+  // valve say: not sold separately, order the assembly.
+  const note = $("ipl-part-note");
+  if (note) {
+    const text = String(part.remarks || "").trim();
+    note.textContent = text;
+    note.style.display = text ? "block" : "none";
+  }
   $("ipl-part-stock").innerHTML = `<div class="fp-loading">Looking up stock…</div>`;
   // Prices are per part and hidden until asked for, so reset the panel rather
   // than leaving the previous part's figures showing.

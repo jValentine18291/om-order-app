@@ -42,8 +42,9 @@ function brandOf(name) {
 // model's own — a pole hedge trimmer is still filed under "Hedge Trimmer", and
 // the name carries that word. Longest first, so the pole variant wins.
 const NAME_SUFFIXES = [
-  "Pole Hedge Trimmer", "Robotic Mower", "Hedge Trimmer", "Brushcutter",
-  "Power Cutter", "Lawn Mower", "Chainsaw", "Outboard", "Blower", "Engine",
+  "Pole Hedge Trimmer", "Backpack Blower", "Robotic Mower", "Hedge Trimmer",
+  "Brushcutter", "Power Cutter", "Lawn Mower", "Chainsaw", "Outboard",
+  "Blower", "Engine",
 ];
 
 // A row in the picker sits under a brand heading and carries its category as a
@@ -57,12 +58,15 @@ function shortName(name, brand, category) {
   if (brand && low().startsWith(brand.toLowerCase())) {
     s = s.slice(brand.length).trim();
   }
-  for (const suffix of [category].concat(NAME_SUFFIXES)) {
-    if (suffix && low().endsWith(suffix.toLowerCase())) {
-      s = s.slice(0, s.length - suffix.length).trim();
-      break;
-    }
-  }
+  // Longest match wins, whichever list it came from. This used to try the
+  // model's own category first and stop there, which is fine until a name ends
+  // in a longer phrase that contains it: "Zenoah EB6200 Backpack Blower" had
+  // "Blower" taken off and came out as "EB6200 Backpack", where its shelf-mates
+  // read EBZ5100 and EBZ8500.
+  const suffix = [category].concat(NAME_SUFFIXES)
+    .filter((x) => x && low().endsWith(x.toLowerCase()))
+    .sort((a, b) => b.length - a.length)[0];
+  if (suffix) s = s.slice(0, s.length - suffix.length).trim();
   return s || String(name || "").trim();
 }
 

@@ -1,0 +1,38 @@
+# EB6200 — the callouts the reader would not place, put in by hand.
+# Positions read off frontend/ipl/eb6200-fig<N>.png against a 1% grid.
+#
+#   <figure> add|drop <key> <x%> <y%>
+#
+# The reader drops anything it cannot be sure of rather than guess, which is
+# the right way round: a hotspot on the wrong part sends a technician to order
+# the wrong thing, and no hotspot only sends them to the list underneath. So
+# these four are what is left after it has been careful, not what it got wrong.
+
+# Fig.1 — both are clearly printed two-digit callouts that the shape filters
+# turned down. 28 sits directly above the bearing it points at, its leader
+# running back into the digits; 31 stands between the washer and the bearing
+# with a long leader crossing other line work.
+1 add 28 67.1 37.0
+1 add 31 69.4 41.1
+
+# Fig.3 — a lone "1" at the far left edge, with its leader running away to the
+# boxed metering assembly, and the box's own dash-dot border a few millimetres
+# to its right. A single vertical stroke beside a dashed line is exactly what
+# the reader refuses to call a digit, and it is right to: on a page of line art
+# that rule is what keeps false "1"s off every other drawing.
+3 add 1 4.6 54.5
+
+# NOT PLACED, DELIBERATELY: Fig.2 key 11, "3407-16120 Screw".
+#
+# It is not printed on the drawing. What IS printed, pointing at the little
+# screw beside clamp 10, is a single "1" - checked at high magnification, one
+# glyph with clear white paper either side of it, at 67.9% / 38.7%. The volute
+# case, which is key 1, is already called out at the top right pointing at the
+# housing itself, so the sheet carries "1" twice and no "11" anywhere.
+#
+# A screw drawn next to a clamp, in a list that runs 10 Clamp, 11 Screw, 12
+# Tube, is almost certainly meant to be 11 - but "almost certainly" is how a
+# technician ends up ordering the wrong screw, and the app would be asserting
+# it rather than the book. The part is still in the list under the drawing.
+# Worth checking against a paper copy: if the printed book says 11, add
+#   2 add 11 67.9 38.7

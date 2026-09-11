@@ -135,6 +135,15 @@
   "parts": 157
  },
  {
+  "id": "eb6200",
+  "name": "Zenoah EB6200 Backpack Blower",
+  "short": "EB6200",
+  "brand": "Zenoah",
+  "category": "Blower",
+  "figures": 3,
+  "parts": 171
+ },
+ {
   "id": "ebz3000rh",
   "name": "Zenoah EBZ3000RH",
   "short": "EBZ3000RH",
@@ -151,6 +160,15 @@
   "category": "Blower",
   "figures": 5,
   "parts": 174
+ },
+ {
+  "id": "ebz8500",
+  "name": "Zenoah EBZ8500 Backpack Blower",
+  "short": "EBZ8500",
+  "brand": "Zenoah",
+  "category": "Blower",
+  "figures": 4,
+  "parts": 190
  },
  {
   "id": "ex2600ph",
@@ -268,14 +286,5 @@
   "category": "Chipper Shredder",
   "figures": 51,
   "parts": 1356
- },
- {
-  "id": "ebz8500",
-  "name": "Zenoah EBZ8500 Backpack Blower",
-  "short": "EBZ8500",
-  "brand": "Zenoah",
-  "category": "Blower",
-  "figures": 4,
-  "parts": 190
  }
 ]
