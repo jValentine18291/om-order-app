@@ -1947,6 +1947,9 @@ select {
 }
 .om-onorder b { display: block; font-size: .95rem; margin-bottom: 2px; }
 .om-onorder-none { background: var(--surface-2, #f6f9fa); border-left-color: var(--border); color: var(--ink-faint); }
+/* Where the order has got to. The one part of the line that is not a number,
+   so it reads as a phrase rather than disappearing into the quantities. */
+.om-onorder-st { font-weight: 700; }
 .pu-delete {
   flex: 0 0 auto; min-height: 40px; padding: 0 14px; border-radius: 999px;
   border: 1px solid #e6b0b0; background: var(--surface);

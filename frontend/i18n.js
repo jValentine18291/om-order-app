@@ -95,6 +95,12 @@
     "Eunos": "Eunos",
     "Shipped": "已发货",
     "Arrived Singapore": "已到新加坡",
+    // NOTE: this one never applies. "Received" is written again in the machine
+    // section below as 收件, and a repeated key takes its LAST value - so every
+    // "Received" in the app renders as 收件. It is left here because that is
+    // the right word for a shipment, and because deleting it would hide the
+    // clash rather than explain it. Anything that must read 已收货 says
+    // "Goods received" instead.
     "Received": "已收货",
     "Cancelled": "已取消",
     "What is on it": "货物明细",
@@ -123,6 +129,13 @@
     "Partially shipped": "部分已发货",
     "Partially received": "部分已收货",
     "some received": "部分已收货",
+    // A purchase order whose goods are in. NOT "Received": that word is
+    // already taken further down by a machine received at the counter (收件),
+    // and the last entry of a duplicated key is the one that wins - so the two
+    // meanings are kept as two different English phrases rather than one word
+    // that silently means whichever was written last.
+    "Goods received": "货已收到",
+    "Not on any Purchase Order at the moment.": "目前不在任何采购单上。",
     "Sent to supplier?": "已发给供应商？",
     "Sent to supplier": "已发给供应商",
     "Only the Purchaser can change this.": "只有采购员可以更改。",
@@ -552,6 +565,11 @@
     // The tube type, the item code and the money are carried through as they
     // are - they are what the technician matches against the roll in his hand.
     [/^(.+) · (\$[\d.,]+) a piece$/, "$1 · 每条 $2"],
+    // The heading of the "already on order" panel. It carries the quantity, so
+    // it is a pattern - and it was reaching the technicians in English, which
+    // is the one line in that panel saying there is anything to read at all.
+    [/^([\d.]+) already on order$/, "已订购 $1"],
+
     // A machine already on a Sales Order, and the slip the server refuses to
     // let anyone change. Both name a number, so both are patterns.
     [/^Already billed on (.+)$/, "已开单 · $1"],

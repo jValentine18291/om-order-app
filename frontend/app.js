@@ -6429,6 +6429,35 @@ function openOrderModal(part) {
 //
 // It never blocks: when AutoCount cannot answer, the row is hidden rather than
 // guessed at, and the popup behaves exactly as it did before.
+// Where that order has got to, in the words the Purchase Orders screen uses.
+//
+// One word differs deliberately. "Received" in this app already means a
+// machine received at the counter, and that is the meaning the technicians'
+// Chinese carries - 收件. On a purchase order it means the goods are in, which
+// is 已收货, and the two cannot both be "Received" in one dictionary. So a
+// purchase order says "Goods received" here, which is also clearer in a line
+// that is otherwise about quantities.
+//
+// It is worth showing at all only because it is REACHABLE: this panel lists
+// orders with something still outstanding, and a received order normally has
+// none. The exception is the window that matters most - Iris has signed for
+// the container and AutoCount has not been keyed yet, so the part is on the
+// shelf while the order still says it is owed.
+const ON_ORDER_STATUS = {
+  NOT_ORDERED: "Not ordered yet",
+  ORDERED: "Ordered",
+  PART_SHIPPED: "Partially shipped",
+  SHIPPED: "Shipped",
+  PART_RECEIVED: "Partially received",
+  RECEIVED: "Goods received",
+};
+
+// Older servers send no status at all, and then the line reads as it always
+// did rather than inventing one.
+function onOrderStatus(o) {
+  return ON_ORDER_STATUS[o.progress] || ON_ORDER_STATUS[o.status] || "";
+}
+
 async function renderOnOrder(itemCode) {
   const box = $("om-onorder");
   if (!box) return;
@@ -6446,7 +6475,8 @@ async function renderOnOrder(itemCode) {
     }
     const qty = Number.isInteger(r.qty) ? r.qty : Number(r.qty).toFixed(2);
     const list = (r.orders || [])
-      .map((o) => `${escapeHtml(o.doc_no)}${o.date ? ` (${escapeHtml(o.date)})` : ""} — ${o.qty}`)
+      .map((o) => `${escapeHtml(o.doc_no)}${o.date ? ` (${escapeHtml(o.date)})` : ""} — ${o.qty}${
+        onOrderStatus(o) ? ` · <span class="om-onorder-st">${escapeHtml(onOrderStatus(o))}</span>` : ""}`)
       .join("<br>");
     box.innerHTML = `<b>${qty} already on order</b>${list}`;
     box.style.display = "block";

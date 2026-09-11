@@ -149,4 +149,48 @@ function derive({ docNo, lines, allocated, delivered, tracked }) {
   };
 }
 
-module.exports = { derive, lineStatus, rollUp, LABELS, LINE_STATUSES };
+// Hang the answer on a list of orders.
+//
+// Two screens ask this now - the Purchase Orders list, and the "already on
+// order" panel a technician sees when they are about to ask for more of a
+// part - and they have to agree. Two copies of the same six lines would agree
+// until one of them was edited, so there is one copy and both call it.
+//
+//   orders     anything with a doc_no. Whatever else is on them is carried
+//              through untouched.
+//   tracking   Map of doc_no -> the app's row for it (Iris's tick).
+//   lines      AutoCount's PO lines for those orders, in one flat list. An
+//              empty list is a legitimate answer, not a failure: every order
+//              then falls back to the tick, which is what it said before any
+//              of this existed.
+//   allocated  Map of "doc#seq" -> qty on a shipment that has sailed.
+//   delivered  Map of "doc#seq" -> qty on a shipment Iris has signed for.
+//
+// "status" stays Iris's tick, because that is the one thing she sets and the
+// one thing the PATCH route changes. Where the order has actually got to is
+// its own field, so the two can never be mistaken for each other.
+function attach(orders, { tracking, lines, allocated, delivered } = {}) {
+  const byDoc = new Map();
+  for (const l of lines || []) {
+    if (!byDoc.has(l.doc_no)) byDoc.set(l.doc_no, []);
+    byDoc.get(l.doc_no).push(l);
+  }
+  return (orders || []).map((o) => {
+    const t = tracking && tracking.get ? tracking.get(o.doc_no) : null;
+    const tracked = (t && t.status) || "NOT_ORDERED";
+    const d = derive({
+      docNo: o.doc_no, lines: byDoc.get(o.doc_no) || [], allocated, delivered, tracked,
+    });
+    return {
+      ...o,
+      status: tracked,
+      progress: d.status,
+      progress_label: d.label,
+      progress_counts: d.counts,
+      ordered_at: (t && t.ordered_at) || "",
+      updated_by: (t && t.updated_by) || "",
+    };
+  });
+}
+
+module.exports = { derive, attach, lineStatus, rollUp, LABELS, LINE_STATUSES };

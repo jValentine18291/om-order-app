@@ -786,7 +786,37 @@ app.get("/api/part-on-order/:code", async (req, res) => {
     const map = await acRepo.getOnOrder([code]);
     if (!map) return res.json({ supported: false, qty: 0, orders: [] });
     const hit = map.get(code) || { qty: 0, orders: [] };
-    res.json({ supported: true, qty: hit.qty, orders: hit.orders });
+
+    // Where each of those orders has actually got to - the same answer the
+    // Purchase Orders screen gives, worked out the same way, so the two can
+    // never disagree. "On order" on its own is the question half-answered:
+    // raised last week and never sent is a different thing from on a container
+    // that docks on Tuesday, and it is the difference between waiting and
+    // chasing.
+    //
+    // Every part of this degrades on its own. A failed line read leaves Iris's
+    // tick showing and nothing more; the whole block failing leaves the panel
+    // exactly as it was before any of this existed.
+    const docNos = hit.orders.map((o) => o.doc_no).filter(Boolean);
+    let orders = hit.orders;
+    if (docNos.length) {
+      try {
+        let lines = [];
+        try { lines = (await acRepo.listPurchaseOrderLines(docNos)) || []; }
+        catch (e) { console.error("[GET /api/part-on-order] line read:", e.message); }
+        orders = poStatus.attach(hit.orders, {
+          tracking: data.purchaseOrders.tracking(docNos),
+          lines,
+          allocated: data.shipments.allocatedByPo(docNos),
+          delivered: data.shipments.receivedByPo(docNos),
+        });
+      } catch (e) {
+        console.error("[GET /api/part-on-order] status:", e.message);
+        orders = hit.orders;
+      }
+    }
+
+    res.json({ supported: true, qty: hit.qty, orders });
   } catch (err) {
     console.error("[GET /api/part-on-order]", err.message);
     // Never block an order over this: it is context, not permission.
@@ -892,32 +922,13 @@ app.get("/api/purchase-orders", async (req, res) => {
     let lines = [];
     try { lines = (await acRepo.listPurchaseOrderLines(docNos)) || []; }
     catch (e) { console.error("[GET /api/purchase-orders] line read:", e.message); }
-    const byDoc = new Map();
-    for (const l of lines) {
-      if (!byDoc.has(l.doc_no)) byDoc.set(l.doc_no, []);
-      byDoc.get(l.doc_no).push(l);
-    }
     const allocated = data.shipments.allocatedByPo(docNos);
     // What Iris has signed for but AutoCount may not have been told about yet.
     const delivered = data.shipments.receivedByPo(docNos);
 
     res.json({
       supported: true,
-      orders: orders.map((o) => {
-        const t = tracking.get(o.doc_no);
-        const tracked = (t && t.status) || "NOT_ORDERED";
-        const d = poStatus.derive({
-          docNo: o.doc_no, lines: byDoc.get(o.doc_no) || [], allocated, delivered, tracked,
-        });
-        return { ...o, status: tracked,
-                 // "status" stays Iris's tick, because that is the one thing
-                 // she sets and the one thing the PATCH route changes. Where
-                 // the order has actually got to is its own field, so the two
-                 // can never be mistaken for each other.
-                 progress: d.status, progress_label: d.label, progress_counts: d.counts,
-                 ordered_at: (t && t.ordered_at) || "",
-                 updated_by: (t && t.updated_by) || "" };
-      }),
+      orders: poStatus.attach(orders, { tracking, lines, allocated, delivered }),
     });
   } catch (err) {
     console.error("[GET /api/purchase-orders]", err.message);

@@ -94,27 +94,43 @@ data.purchaseOrders.setStatus("PO-C", "ORDERED", "I");
 // ---- the listing ------------------------------------------------------------
 // The route's own body, run here: requiring server.js would start a listener,
 // open AutoCount and bind a port, none of which this is about.
-async function listing() {
+//
+// The six lines that turn facts into a status are NOT copied out of the route
+// any more - poStatus.attach() is the function the route itself calls, so what
+// is checked below is the real one rather than a transcription of it that
+// would agree until somebody edited one of the two.
+async function gather() {
   const acRepo = require(acPath);
   const orders = await acRepo.listPurchaseOrders({ scope: "open" });
   const docNos = orders.map((o) => o.doc_no);
-  const tracking = data.purchaseOrders.tracking(docNos);
   let lines = [];
   try { lines = (await acRepo.listPurchaseOrderLines(docNos)) || []; } catch (e) { lines = []; }
-  const byDoc = new Map();
-  for (const l of lines) {
-    if (!byDoc.has(l.doc_no)) byDoc.set(l.doc_no, []);
-    byDoc.get(l.doc_no).push(l);
-  }
-  const allocated = data.shipments.allocatedByPo(docNos);
-  const delivered = data.shipments.receivedByPo(docNos);
-  return orders.map((o) => {
-    const t = tracking.get(o.doc_no);
-    const tracked = (t && t.status) || "NOT_ORDERED";
-    const d = poStatus.derive({
-      docNo: o.doc_no, lines: byDoc.get(o.doc_no) || [], allocated, delivered, tracked });
-    return { ...o, status: tracked, progress: d.status, progress_label: d.label, progress_counts: d.counts };
+  return { orders, docNos, lines };
+}
+
+async function listing() {
+  const { orders, docNos, lines } = await gather();
+  return poStatus.attach(orders, {
+    tracking: data.purchaseOrders.tracking(docNos),
+    lines,
+    allocated: data.shipments.allocatedByPo(docNos),
+    delivered: data.shipments.receivedByPo(docNos),
   });
+}
+
+// What the "already on order" panel asks for. Same orders, same function -
+// the point of the check is that a technician about to request more of a part
+// is told the same thing the Purchase Orders screen would tell Iris.
+async function onOrderPanel(docNo) {
+  const { orders, docNos, lines } = await gather();
+  const mine = orders.filter((o) => o.doc_no === docNo)
+    .map((o) => ({ doc_no: o.doc_no, date: o.date, qty: o.outstanding_qty }));
+  return poStatus.attach(mine, {
+    tracking: data.purchaseOrders.tracking(docNos),
+    lines,
+    allocated: data.shipments.allocatedByPo(docNos),
+    delivered: data.shipments.receivedByPo(docNos),
+  })[0];
 }
 
 (async () => {
@@ -191,6 +207,33 @@ async function listing() {
   // allocation, so they cannot tell two different stories.
   check("and with the figures shown beside them",
     po.items.map((it) => alloc.get(`PO-A#${it.seq}`) || 0), [2, 3, 0]);
+
+  console.log("\n-- and the panel a technician sees before ordering more --");
+  // The panel used to show only "PO-C - 5", which reads the same whether the
+  // order was raised this morning and forgotten or is sitting on a container
+  // that docks on Tuesday. Those are the difference between waiting and
+  // chasing, so it says which.
+  let panel = await onOrderPanel("PO-C");
+  check("the order the part is on", panel.doc_no, "PO-C");
+  check("carries where it has got to", panel.progress, "SHIPPED");
+  check("in the same words the Purchase Orders screen uses", panel.progress_label, "Shipped");
+  check("and Iris's own tick alongside it", panel.status, "ORDERED");
+
+  panel = await onOrderPanel("PO-A");
+  check("a part-shipped order says so", panel.progress, "PART_SHIPPED");
+  // Nothing the panel already had is disturbed by any of it.
+  check("the quantity is untouched", panel.qty, 18);
+  check("so is the date", panel.date, "2026-08-01");
+
+  // The failure that matters: AutoCount answers for the order but not for its
+  // lines. The panel must still say something true - Iris's tick - rather than
+  // claiming an order is shipped because nothing came back to say otherwise.
+  lineReadFails = true;
+  panel = await onOrderPanel("PO-C");
+  check("with no lines readable, it falls back to the tick", panel.progress, "ORDERED");
+  panel = await onOrderPanel("PO-A");
+  check("and an unticked order reads as not ordered", panel.progress, "NOT_ORDERED");
+  lineReadFails = false;
 
   console.log(failures ? `\n${failures} FAILED\n` : "\nall passed\n");
   process.exit(failures ? 1 : 0);
