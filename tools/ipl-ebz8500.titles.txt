@@ -1,0 +1,9 @@
+# Titles as printed on the EBZ8500's own drawings, read off the sheets.
+# The portal files these as FRAME / ENGINE / CARBURETOR DETAILS / THROTTLE
+# CONTROLS; the drawings say something else on every one of the four, and the
+# drawing is the page in front of the technician.
+# One line per sheet, in the order --dry-run lists them.
+BLOWER GROUP
+ENGINE GROUP
+CARBURETOR COMPONENTS
+LEVER SET
