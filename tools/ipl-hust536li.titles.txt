@@ -1,0 +1,40 @@
+# Titles as printed on the T536Li XP's own drawings, read off the sheets.
+#
+# THREE SHEETS ARE ALL FILED "ELECTRICAL"
+# The portal gives the same name to all three, so the app showed ELECTRICAL
+# (1 of 3), (2 of 3) and (3 of 3) with nothing to choose between them. The
+# drawings name them - and two of those three are BOTH "control unit gen 2",
+# telling apart only by serial number:
+#
+#   D1   ELECTRIC, CONTROL UNIT GEN 1
+#   D2   ELECTRIC, CONTROL UNIT GEN 2    UP TO S/N 20180600615
+#   D3   ELECTRIC, CONTROL UNIT GEN 2    FROM S/N 20180600615 -
+#
+# So the serial range is part of the title here, not a detail. Without it the
+# app would offer two identical buttons for two different control units, and
+# the wrong one is a part that does not fit a saw somebody has taken apart.
+#
+# THE ORDER IS THE BOOK'S, NOT THE EXPORT'S
+# The export lists them D2, A, B, C, D1, E, D3, which scatters the three
+# control-unit sheets across figures 1, 5 and 7. The book runs A, B, C, D1,
+# D2, D3, E, which is what the letters on the drawings say and what somebody
+# choosing between the three expects to find together. Hence --order below.
+#
+# TO RE-IMPORT THIS BOOK, exactly this - the order and the titles go together,
+# because the titles are positional and would otherwise land on the wrong
+# sheets:
+#
+#   python tools/ipl-import-csv.py --csv "T536Li XP IPL.csv" \
+#     --id hust536li --name "Husqvarna T536Li XP Chainsaw" \
+#     --short "T536Li XP" --brand Husqvarna --category Chainsaw \
+#     --order "2,3,4,5,1,7,6" --titles tools/ipl-hust536li.titles.txt
+#
+# One line per sheet, in the order --dry-run lists them AFTER --order.
+# "-" keeps the export's own name for that sheet.
+CRANK CASE
+CLUTCH
+CHAIN BRAKE
+ELECTRIC, CONTROL UNIT GEN 1
+ELECTRIC, CONTROL UNIT GEN 2 (up to s/n 20180600615)
+ELECTRIC, CONTROL UNIT GEN 2 (from s/n 20180600615)
+ACCESSORIES

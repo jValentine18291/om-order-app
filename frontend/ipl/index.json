@@ -295,5 +295,14 @@
   "category": "Chainsaw",
   "figures": 12,
   "parts": 214
+ },
+ {
+  "id": "hust536li",
+  "name": "Husqvarna T536Li XP Chainsaw",
+  "short": "T536Li XP",
+  "brand": "Husqvarna",
+  "category": "Chainsaw",
+  "figures": 7,
+  "parts": 98
  }
 ]

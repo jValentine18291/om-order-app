@@ -151,6 +151,9 @@ def main():
     ap.add_argument("--short", required=True, help="what AutoCount calls it, e.g. SR3100")
     ap.add_argument("--brand", required=True)
     ap.add_argument("--category", required=True)
+    ap.add_argument("--order", help="sheet order, as the positions --dry-run "
+                                    "printed, e.g. \"2,3,4,5,1,7,6\". Use when the "
+                                    "export does not list them the way the book runs.")
     ap.add_argument("--titles", help="text file of sheet titles, one per sheet, "
                                      "in the order --dry-run lists them")
     ap.add_argument("--cache", default=os.path.join(HERE, ".ipl-cache"))
@@ -173,6 +176,32 @@ def main():
             if r["IPL Name"] not in fig_no:
                 fig_no[r["IPL Name"]] = len(fig_no) + 1
         sheets[key].append(r)
+
+    # --order puts the sheets in the book's own order, given as the positions
+    # --dry-run printed.
+    #
+    # The export does not always list them the way the printed book runs. The
+    # T536Li XP is filed D2, A, B, C, D1, E, D3 - so its three control-unit
+    # sheets, which a technician picks between by serial number, arrive as
+    # figures 1, 5 and 7 with four unrelated sheets in among them. The book
+    # itself runs A, B, C, D1, D2, D3, E, which is the order somebody reading
+    # it expects and the order the letters on the drawings say.
+    #
+    # Applied HERE, before anything else reads `order`, so --titles lines up
+    # with the sheets as reordered - which is also why the two belong in one
+    # command rather than a reordered copy of somebody's CSV.
+    if a.order:
+        want = [int(x) for x in a.order.replace(",", " ").split()]
+        if sorted(want) != list(range(1, len(order) + 1)):
+            sys.exit(f"--order needs each of 1..{len(order)} exactly once, "
+                     f"got {a.order!r}. Run with --dry-run to list the sheets.")
+        order = [order[i - 1] for i in want]
+        # Figure numbers follow the new order, or Fig.1 would still be whatever
+        # the export happened to put first.
+        fig_no = {}
+        for name, _img in order:
+            if name not in fig_no:
+                fig_no[name] = len(fig_no) + 1
 
     per_name = {}
     for name, _img in order:

@@ -1,0 +1,1733 @@
+{
+ "id": "hust536li",
+ "name": "Husqvarna T536Li XP Chainsaw",
+ "source": "Husqvarna portal CSV export (T536Li XP IPL.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "CRANK CASE",
+   "image": "hust536li-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 55.98,
+     "y": 6.743,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 53.232,
+     "y": 11.243,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 49.96,
+     "y": 16.357,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 24.303,
+     "y": 11.314,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 56.263,
+     "y": 15.514,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 28.242,
+     "y": 19.486,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 12.222,
+     "y": 26.029,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 15.172,
+     "y": 27.643,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 18.242,
+     "y": 29.657,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 32.0,
+     "y": 55.343,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 40.788,
+     "y": 48.571,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 45.253,
+     "y": 50.586,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 66.101,
+     "y": 23.757,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 73.192,
+     "y": 22.157,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 77.859,
+     "y": 25.729,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 12.465,
+     "y": 33.671,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 10.303,
+     "y": 67.1,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 10.424,
+     "y": 49.057,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 14.343,
+     "y": 51.871,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 13.919,
+     "y": 68.971,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 21.717,
+     "y": 68.814,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 31.818,
+     "y": 65.957,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 31.818,
+     "y": 70.3,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 56.727,
+     "y": 41.714,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 54.384,
+     "y": 68.943,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 89.293,
+     "y": 54.671,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 84.687,
+     "y": 63.271,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 89.515,
+     "y": 65.571,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 69.596,
+     "y": 74.529,
+     "conf": 100
+    },
+    {
+     "key": "30",
+     "x": 22.424,
+     "y": 85.9,
+     "conf": 100
+    },
+    {
+     "key": "31",
+     "x": 36.727,
+     "y": 83.443,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "506495701",
+     "depth": 0,
+     "sub": false,
+     "description": "THROTTLE LOCKOUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "506495701"
+    },
+    {
+     "key": "2",
+     "part_number": "544099901",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "544099901"
+    },
+    {
+     "key": "3",
+     "part_number": "577312601",
+     "depth": 0,
+     "sub": false,
+     "description": "THROTTLE CONTROL",
+     "qty": "1",
+     "remarks": "",
+     "search": "577312601"
+    },
+    {
+     "key": "4",
+     "part_number": "576900901",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE INSERT",
+     "qty": "1",
+     "remarks": "",
+     "search": "576900901"
+    },
+    {
+     "key": "5",
+     "part_number": "576901201",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "576901201"
+    },
+    {
+     "key": "6",
+     "part_number": "581053802",
+     "depth": 0,
+     "sub": false,
+     "description": "CRANKCASE ASSY",
+     "qty": "1",
+     "remarks": "For keypad, please  refer to ELECTRICAL page in the IPL",
+     "search": "581053802"
+    },
+    {
+     "key": "8",
+     "part_number": "537403501",
+     "depth": 0,
+     "sub": false,
+     "description": "FILTER",
+     "qty": "1",
+     "remarks": "",
+     "search": "537403501"
+    },
+    {
+     "key": "9",
+     "part_number": "530026119",
+     "depth": 0,
+     "sub": false,
+     "description": "CHECK VALVE",
+     "qty": "1",
+     "remarks": "",
+     "search": "530026119"
+    },
+    {
+     "key": "10",
+     "part_number": "501623301",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING PIN",
+     "qty": "1",
+     "remarks": "",
+     "search": "501623301"
+    },
+    {
+     "key": "11",
+     "part_number": "598749201",
+     "depth": 0,
+     "sub": false,
+     "description": "OIL SCREEN",
+     "qty": "1",
+     "remarks": "",
+     "search": "598749201"
+    },
+    {
+     "key": "12",
+     "part_number": "576999701",
+     "depth": 0,
+     "sub": false,
+     "description": "STIFFENING PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "576999701"
+    },
+    {
+     "key": "13",
+     "part_number": "503875401",
+     "depth": 0,
+     "sub": false,
+     "description": "BAR BOLT",
+     "qty": "1",
+     "remarks": "",
+     "search": "503875401"
+    },
+    {
+     "key": "14",
+     "part_number": "522847901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCFM",
+     "qty": "1",
+     "remarks": "",
+     "search": "522847901"
+    },
+    {
+     "key": "15",
+     "part_number": "576381301",
+     "depth": 0,
+     "sub": false,
+     "description": "LOOP",
+     "qty": "1",
+     "remarks": "",
+     "search": "576381301"
+    },
+    {
+     "key": "16",
+     "part_number": "580860001",
+     "depth": 0,
+     "sub": false,
+     "description": "LOOP",
+     "qty": "1",
+     "remarks": "",
+     "search": "580860001"
+    },
+    {
+     "key": "17",
+     "part_number": "576901401",
+     "depth": 0,
+     "sub": false,
+     "description": "CHAIN GUIDE",
+     "qty": "1",
+     "remarks": "",
+     "search": "576901401"
+    },
+    {
+     "key": "18",
+     "part_number": "503217416",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCT",
+     "qty": "3",
+     "remarks": "",
+     "search": "503217416"
+    },
+    {
+     "key": "19",
+     "part_number": "577286601",
+     "depth": 0,
+     "sub": false,
+     "description": "SPIKE",
+     "qty": "1",
+     "remarks": "",
+     "search": "577286601"
+    },
+    {
+     "key": "20",
+     "part_number": "505288501",
+     "depth": 0,
+     "sub": false,
+     "description": "CHAIN CATCHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "505288501"
+    },
+    {
+     "key": "21",
+     "part_number": "522620001",
+     "depth": 0,
+     "sub": false,
+     "description": "TANK CAP ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "522620001"
+    },
+    {
+     "key": "22",
+     "part_number": "503578901",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER",
+     "qty": "1",
+     "remarks": "",
+     "search": "503578901"
+    },
+    {
+     "key": "23",
+     "part_number": "537215001",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "537215001"
+    },
+    {
+     "key": "24",
+     "part_number": "503216872",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCT",
+     "qty": "2",
+     "remarks": "",
+     "search": "503216872"
+    },
+    {
+     "key": "25",
+     "part_number": "576901002",
+     "depth": 0,
+     "sub": false,
+     "description": "CRANKCASE",
+     "qty": "1",
+     "remarks": "",
+     "search": "576901002"
+    },
+    {
+     "key": "26",
+     "part_number": "503216674",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCT",
+     "qty": "9",
+     "remarks": "",
+     "search": "503216674"
+    },
+    {
+     "key": "27",
+     "part_number": "585480001",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "585480001"
+    },
+    {
+     "key": "28",
+     "part_number": "577996601",
+     "depth": 0,
+     "sub": false,
+     "description": "PUSH BUTTON",
+     "qty": "1",
+     "remarks": "",
+     "search": "577996601"
+    },
+    {
+     "key": "29",
+     "part_number": "576901101",
+     "depth": 0,
+     "sub": false,
+     "description": "FRONT HANDLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "576901101"
+    },
+    {
+     "key": "30",
+     "part_number": "578229001",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "578229001"
+    },
+    {
+     "key": "31",
+     "part_number": "586249001",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "586249001"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 CRANK CASE"
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "CLUTCH",
+   "image": "hust536li-fig2.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 32.486,
+     "y": 27.155,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 39.288,
+     "y": 27.836,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 46.345,
+     "y": 30.83,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 53.878,
+     "y": 25.136,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 48.792,
+     "y": 46.053,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 39.86,
+     "y": 49.342,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 30.515,
+     "y": 44.986,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 46.98,
+     "y": 62.092,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 53.401,
+     "y": 61.23,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 65.544,
+     "y": 39.882,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "735311200",
+     "depth": 0,
+     "sub": false,
+     "description": "CIRCLIP",
+     "qty": "1",
+     "remarks": "",
+     "search": "735311200"
+    },
+    {
+     "key": "2",
+     "part_number": "577271501",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "577271501"
+    },
+    {
+     "key": "3",
+     "part_number": "577607601",
+     "depth": 0,
+     "sub": false,
+     "description": "SPUR SPROCKET",
+     "qty": "1",
+     "remarks": "3/8\" - 6T",
+     "search": "577607601"
+    },
+    {
+     "key": "3",
+     "part_number": "579534501",
+     "depth": 0,
+     "sub": false,
+     "description": "SPUR SPROCKET",
+     "qty": "1",
+     "remarks": "1/4\" - 8T",
+     "search": "579534501"
+    },
+    {
+     "key": "4",
+     "part_number": "540057901",
+     "depth": 0,
+     "sub": false,
+     "description": "PUMP PISTON",
+     "qty": "1",
+     "remarks": "",
+     "search": "540057901"
+    },
+    {
+     "key": "5",
+     "part_number": "537154801",
+     "depth": 0,
+     "sub": false,
+     "description": "PUMP CYLINDER",
+     "qty": "1",
+     "remarks": "",
+     "search": "537154801"
+    },
+    {
+     "key": "6",
+     "part_number": "577272501",
+     "depth": 0,
+     "sub": false,
+     "description": "OIL HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "577272501"
+    },
+    {
+     "key": "7",
+     "part_number": "579246901",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "579246901"
+    },
+    {
+     "key": "8",
+     "part_number": "503212813",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW CCRPANT",
+     "qty": "2",
+     "remarks": "",
+     "search": "503212813"
+    },
+    {
+     "key": "9",
+     "part_number": "580760601",
+     "depth": 0,
+     "sub": false,
+     "description": "DISTANCE",
+     "qty": "1",
+     "remarks": "Not needed with Clutch assy, 585 57 64-01",
+     "search": "580760601"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 CLUTCH"
+  },
+  {
+   "id": "3",
+   "number": "3",
+   "title": "CHAIN BRAKE",
+   "image": "hust536li-fig3.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 33.503,
+     "y": 24.229,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 30.07,
+     "y": 33.326,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 14.05,
+     "y": 45.985,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 45.105,
+     "y": 36.32,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 48.792,
+     "y": 38.113,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 55.944,
+     "y": 50.431,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 29.307,
+     "y": 53.925,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 32.74,
+     "y": 52.246,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 36.968,
+     "y": 52.836,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 39.288,
+     "y": 53.789,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 42.276,
+     "y": 55.24,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 42.308,
+     "y": 58.553,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 71.615,
+     "y": 15.812,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 80.229,
+     "y": 35.776,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 55.753,
+     "y": 25.25,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 71.774,
+     "y": 37.523,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 74.634,
+     "y": 44.442,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 65.766,
+     "y": 59.142,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 75.842,
+     "y": 65.631,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 83.28,
+     "y": 53.97,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 86.904,
+     "y": 69.397,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 16.879,
+     "y": 30.422,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 30.229,
+     "y": 79.015,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "576905603",
+     "depth": 0,
+     "sub": false,
+     "description": "CLUTCH COVER ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "576905603"
+    },
+    {
+     "key": "2",
+     "part_number": "576905701",
+     "depth": 0,
+     "sub": false,
+     "description": "CLUTCH COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "576905701"
+    },
+    {
+     "key": "3",
+     "part_number": "505197301",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "505197301"
+    },
+    {
+     "key": "4",
+     "part_number": "577722101",
+     "depth": 0,
+     "sub": false,
+     "description": "CHIP GUARD",
+     "qty": "1",
+     "remarks": "",
+     "search": "577722101"
+    },
+    {
+     "key": "5",
+     "part_number": "503217072",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW CCRPANT",
+     "qty": "3",
+     "remarks": "",
+     "search": "503217072"
+    },
+    {
+     "key": "6",
+     "part_number": "501454102",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "501454102"
+    },
+    {
+     "key": "7",
+     "part_number": "537397001",
+     "depth": 0,
+     "sub": false,
+     "description": "WORM SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "537397001"
+    },
+    {
+     "key": "8",
+     "part_number": "740480702",
+     "depth": 0,
+     "sub": false,
+     "description": "O-RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "740480702"
+    },
+    {
+     "key": "9",
+     "part_number": "503230063",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "503230063"
+    },
+    {
+     "key": "10",
+     "part_number": "599724101",
+     "depth": 0,
+     "sub": false,
+     "description": "WORM WHEEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "599724101"
+    },
+    {
+     "key": "11",
+     "part_number": "505214501",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "505214501"
+    },
+    {
+     "key": "12",
+     "part_number": "576903801",
+     "depth": 0,
+     "sub": false,
+     "description": "HAND GUARD",
+     "qty": "1",
+     "remarks": "",
+     "search": "576903801"
+    },
+    {
+     "key": "13",
+     "part_number": "503893001",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "503893001"
+    },
+    {
+     "key": "14",
+     "part_number": "577649801",
+     "depth": 0,
+     "sub": false,
+     "description": "TORSION SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "577649801"
+    },
+    {
+     "key": "15",
+     "part_number": "577549501",
+     "depth": 0,
+     "sub": false,
+     "description": "SHAFT ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "577549501"
+    },
+    {
+     "key": "16",
+     "part_number": "577272001",
+     "depth": 0,
+     "sub": false,
+     "description": "CATCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "577272001"
+    },
+    {
+     "key": "17",
+     "part_number": "576904601",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "576904601"
+    },
+    {
+     "key": "18",
+     "part_number": "577365601",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "577365601"
+    },
+    {
+     "key": "19",
+     "part_number": "503212813",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW CCRPANT",
+     "qty": "3",
+     "remarks": "",
+     "search": "503212813"
+    },
+    {
+     "key": "20",
+     "part_number": "578228901",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "578228901"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 CHAIN BRAKE"
+  },
+  {
+   "id": "4",
+   "number": "4",
+   "title": "ELECTRIC, CONTROL UNIT GEN 1",
+   "image": "hust536li-fig4.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 51.558,
+     "y": 17.287,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 27.591,
+     "y": 23.888,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 33.821,
+     "y": 37.908,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 81.405,
+     "y": 41.016,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 58.487,
+     "y": 63.793,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 60.966,
+     "y": 53.766,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 38.907,
+     "y": 58.802,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 52.988,
+     "y": 62.455,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 45.868,
+     "y": 71.733,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 68.786,
+     "y": 92.332,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 78.067,
+     "y": 88.975,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 27.813,
+     "y": 79.242,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "581690501",
+     "depth": 0,
+     "sub": false,
+     "description": "KEYPAD",
+     "qty": "1",
+     "remarks": "",
+     "search": "581690501"
+    },
+    {
+     "key": "2",
+     "part_number": "577033301",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "577033301"
+    },
+    {
+     "key": "3",
+     "part_number": "577827701",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "577827701"
+    },
+    {
+     "key": "4",
+     "part_number": "503212813",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW CCRPANT",
+     "qty": "5",
+     "remarks": "",
+     "search": "503212813"
+    },
+    {
+     "key": "5",
+     "part_number": "579597901",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "579597901"
+    },
+    {
+     "key": "6",
+     "part_number": "577585201",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "577585201"
+    },
+    {
+     "key": "7",
+     "part_number": "503202512",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "1",
+     "remarks": "",
+     "search": "503202512"
+    },
+    {
+     "key": "8",
+     "part_number": "529653301",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "529653301"
+    },
+    {
+     "key": "9",
+     "part_number": "581300901",
+     "depth": 0,
+     "sub": false,
+     "description": "FAN",
+     "qty": "1",
+     "remarks": "",
+     "search": "581300901"
+    },
+    {
+     "key": "10",
+     "part_number": "588176401",
+     "depth": 0,
+     "sub": false,
+     "description": "GREASE",
+     "qty": "1",
+     "remarks": "For application instruction, see SB-1500022",
+     "search": "588176401"
+    }
+   ],
+   "sheets": 3,
+   "sheet": 1,
+   "label": "Fig.4 ELECTRIC, CONTROL UNIT GEN 1"
+  },
+  {
+   "id": "5",
+   "number": "4",
+   "title": "ELECTRIC, CONTROL UNIT GEN 2 (up to s/n 20180600615)",
+   "image": "hust536li-fig5.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 11.348,
+     "y": 30.218,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 35.029,
+     "y": 12.84,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 36.872,
+     "y": 61.434,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 19.04,
+     "y": 39.746,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 72.854,
+     "y": 45.054,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 82.231,
+     "y": 55.513,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 36.809,
+     "y": 71.348,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 45.645,
+     "y": 68.33,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 69.104,
+     "y": 68.194,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 24.317,
+     "y": 79.288,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 31.786,
+     "y": 70.009,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 29.434,
+     "y": 88.748,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 50.286,
+     "y": 93.035,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 70.725,
+     "y": 49.75,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "593896101",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "593896101"
+    },
+    {
+     "key": "2",
+     "part_number": "578326901",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "578326901"
+    },
+    {
+     "key": "4",
+     "part_number": "586265201",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "586265201"
+    },
+    {
+     "key": "5",
+     "part_number": "577827701",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "577827701"
+    },
+    {
+     "key": "6",
+     "part_number": "587327201",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "587327201"
+    },
+    {
+     "key": "7",
+     "part_number": "503212813",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW CCRPANT",
+     "qty": "5",
+     "remarks": "",
+     "search": "503212813"
+    },
+    {
+     "key": "8",
+     "part_number": "588176401",
+     "depth": 0,
+     "sub": false,
+     "description": "GREASE",
+     "qty": "1",
+     "remarks": "For application instruction, see SB-1500022",
+     "search": "588176401"
+    },
+    {
+     "key": "9",
+     "part_number": "503202512",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "1",
+     "remarks": "",
+     "search": "503202512"
+    },
+    {
+     "key": "10",
+     "part_number": "577585201",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "577585201"
+    },
+    {
+     "key": "11",
+     "part_number": "529653301",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "529653301"
+    },
+    {
+     "key": "12",
+     "part_number": "581300901",
+     "depth": 0,
+     "sub": false,
+     "description": "FAN",
+     "qty": "1",
+     "remarks": "",
+     "search": "581300901"
+    },
+    {
+     "key": "13",
+     "part_number": "593813001",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "593813001"
+    }
+   ],
+   "sheets": 3,
+   "sheet": 2,
+   "label": "Fig.4 ELECTRIC, CONTROL UNIT GEN 2 (up to s/n 20180600615)"
+  },
+  {
+   "id": "6",
+   "number": "4",
+   "title": "ELECTRIC, CONTROL UNIT GEN 2 (from s/n 20180600615)",
+   "image": "hust536li-fig6.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 11.507,
+     "y": 21.189,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 19.93,
+     "y": 13.68,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 19.93,
+     "y": 27.291,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 42.721,
+     "y": 52.382,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 24.857,
+     "y": 30.694,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 78.703,
+     "y": 36.003,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 88.048,
+     "y": 46.461,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 36.618,
+     "y": 64.746,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 51.494,
+     "y": 59.301,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 24.126,
+     "y": 72.686,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 31.596,
+     "y": 63.407,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 47.489,
+     "y": 93.285,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 56.071,
+     "y": 89.927,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 73.586,
+     "y": 39.542,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "593896101",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "593896101"
+    },
+    {
+     "key": "2",
+     "part_number": "582050701",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "582050701"
+    },
+    {
+     "key": "3",
+     "part_number": "582713401",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "582713401"
+    },
+    {
+     "key": "4",
+     "part_number": "586265201",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "1",
+     "remarks": "Replacing 578 37 07-01. For application, see SB-1500022",
+     "search": "586265201"
+    },
+    {
+     "key": "5",
+     "part_number": "577827701",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "577827701"
+    },
+    {
+     "key": "6",
+     "part_number": "587327201",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "587327201"
+    },
+    {
+     "key": "7",
+     "part_number": "503212813",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW CCRPANT",
+     "qty": "5",
+     "remarks": "",
+     "search": "503212813"
+    },
+    {
+     "key": "9",
+     "part_number": "503202512",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "1",
+     "remarks": "",
+     "search": "503202512"
+    },
+    {
+     "key": "10",
+     "part_number": "577585201",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "577585201"
+    },
+    {
+     "key": "11",
+     "part_number": "529653301",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "529653301"
+    },
+    {
+     "key": "12",
+     "part_number": "581300901",
+     "depth": 0,
+     "sub": false,
+     "description": "FAN",
+     "qty": "1",
+     "remarks": "",
+     "search": "581300901"
+    },
+    {
+     "key": "13",
+     "part_number": "593813001",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "593813001"
+    }
+   ],
+   "sheets": 3,
+   "sheet": 3,
+   "label": "Fig.4 ELECTRIC, CONTROL UNIT GEN 2 (from s/n 20180600615)"
+  },
+  {
+   "id": "7",
+   "number": "5",
+   "title": "ACCESSORIES",
+   "image": "hust536li-fig7.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 50.223,
+     "y": 15.313,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 48.919,
+     "y": 37.908,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 31.405,
+     "y": 69.079,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 31.564,
+     "y": 73.367,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "501691701",
+     "depth": 0,
+     "sub": false,
+     "description": "COMBINATION WRENCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "501691701"
+    },
+    {
+     "key": "2",
+     "part_number": "583897101",
+     "depth": 0,
+     "sub": false,
+     "description": "DIAGNOSTIC TOOL KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "583897101"
+    },
+    {
+     "key": "3",
+     "part_number": "576952201",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "576952201"
+    },
+    {
+     "key": "4",
+     "part_number": "579621301",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "579621301"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.5 ACCESSORIES"
+  }
+ ]
+}
