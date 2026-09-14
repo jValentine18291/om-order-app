@@ -85,15 +85,23 @@ check("and its own price", parts.map((p) => p.unit_price).sort((a, b) => a - b),
 check("both under the one service code",
   [...new Set(parts.map((p) => p.item_code))], ["A7 SVR WAREHOUSE"]);
 
-console.log("\n-- the same job twice adds up --");
+console.log("\n-- the same job twice is two jobs --");
+// A7 is a free-text code, and these lines never stack: two welds on one
+// machine are two pieces of work, each with its own wording and its own price
+// if somebody changes one. Quantity on a line like this means "two of THIS
+// one", which only the person who named it can say.
 parts = add("WELD");
-check("still two lines", parts.length, 2);
-check("and the weld is now two of them",
-  parts.find((p) => p.variant === "WELD").quantity, 2);
+check("three lines now", parts.length, 3);
+check("two of them welds", parts.filter((p) => p.variant === "WELD").length, 2);
+check("each still one of itself",
+  parts.filter((p) => p.variant === "WELD").map((p) => p.quantity), [1, 1]);
+check("and the money is the same either way",
+  parts.filter((p) => p.variant === "WELD")
+       .reduce((n, p) => n + p.unit_price * p.quantity, 0), 60);
 
 console.log("\n-- the oil change is its own line --");
 parts = add("OIL");
-check("three lines", parts.length, 3);
+check("four lines", parts.length, 4);
 check("on the engine oil code",
   parts.find((p) => p.variant === "OIL").item_code, "A6 SVR ENGINE OIL");
 check("at nine dollars", parts.find((p) => p.variant === "OIL").unit_price, 9);
@@ -125,10 +133,11 @@ data.slips.finishRepair(mid, "WJ");
 data.slips.createSlipOrder(slip.slip_number, [mid], "KS");
 const lines = data.slips.getSlipOrder(slip.slip_number).lines;
 const a7 = lines.filter((l) => l.item_code === "A7 SVR WAREHOUSE");
-check("both A7 lines are on the order", a7.length, 2);
+check("every A7 line is on the order", a7.length, 3);
 check("saying which job each one is",
-  a7.map((l) => l.description).sort(), ["Service Carburetor & Labour", "Welding"]);
-check("at their own prices", a7.map((l) => l.unit_price).sort((a, b) => a - b), [0, 30]);
+  a7.map((l) => l.description).sort(),
+  ["Service Carburetor & Labour", "Welding", "Welding"]);
+check("at their own prices", a7.map((l) => l.unit_price).sort((a, b) => a - b), [0, 30, 30]);
 
 console.log(failures ? `\n${failures} FAILED\n` : "\nall passed\n");
 process.exit(failures ? 1 : 0);

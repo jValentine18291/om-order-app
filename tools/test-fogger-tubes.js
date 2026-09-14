@@ -208,6 +208,49 @@ for (const t of T.list) {
 }
 check("every tube, one to five pieces", wrong, []);
 
+console.log("\n-- two A8 lines are two things, not two of one --");
+// A5 to A8 and MISC are the codes the accounts use for whatever the catalogue
+// does not carry. What the line IS gets typed in by hand, so one machine can
+// carry several under the same code and they are different items - a bearing
+// nobody stocks and a bracket nobody stocks, both "A8 SPARE PARTS".
+//
+// Merged, they become one line with one description for two things, and the
+// description is editable, so renaming it afterwards relabels both. The second
+// item is not wrong on the slip; it is gone from it.
+const a8 = () => data.slips.getSlip(slip.slip_number).machines[0].parts
+  .filter((p) => p.item_code === "A8 SPARE PARTS");
+const addA8 = (desc) => data.slips.addPartToMachine(machineId, {
+  item_code: "A8 SPARE PARTS", description: desc, unit_price: 12, quantity: 1,
+  uom: "PC", technician: "WJ",
+});
+addA8("Indent: crankshaft seal");
+addA8("Indent: throttle bracket");
+check("two lines", a8().length, 2);
+check("each saying what it is",
+  a8().map((p) => p.description).sort(),
+  ["Indent: crankshaft seal", "Indent: throttle bracket"]);
+check("and one of each", a8().map((p) => p.quantity), [1, 1]);
+check("both marked as named by hand", a8().map((p) => p.free_text), [1, 1]);
+
+// Even the SAME wording twice stays two lines. Whether they are the same thing
+// is the technician's to say, and the stepper is how they say it.
+addA8("Indent: crankshaft seal");
+check("three lines", a8().length, 3);
+
+// A6 and A7 are the same family and behave the same way.
+data.slips.addPartToMachine(machineId, {
+  item_code: "A7 SVR WAREHOUSE", description: "Welding", unit_price: 30, quantity: 1,
+  uom: "NOS", technician: "WJ",
+});
+data.slips.addPartToMachine(machineId, {
+  item_code: "A7 SVR WAREHOUSE", description: "Straighten guard", unit_price: 25, quantity: 1,
+  uom: "NOS", technician: "WJ",
+});
+const a7 = data.slips.getSlip(slip.slip_number).machines[0].parts
+  .filter((p) => p.item_code === "A7 SVR WAREHOUSE");
+check("two A7 lines at two prices",
+  a7.map((p) => p.unit_price).sort((a, b) => a - b), [25, 30]);
+
 console.log("\n-- an ordinary part is unaffected --");
 parts = data.slips.addPartToMachine(machineId, {
   item_code: "SZEN 848BE058B2", description: "GASKET", unit_price: 4.5, quantity: 1, technician: "WJ",

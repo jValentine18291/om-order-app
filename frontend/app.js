@@ -2206,10 +2206,21 @@ async function addByCode(code) {
     // The server already refuses to merge across tube types; this is the same
     // rule on the client, which the pending list never learned. A scanned part
     // carries no tube type, so it merges only with a line that has none either.
+    //
+    // Nor a free-text line. A5 to A8 and MISC are the codes the accounts use
+    // for whatever the catalogue does not carry, and what the line IS gets
+    // typed in by hand - so a second A8 is a second thing, not more of the
+    // first. Merging asks for the name once and quietly files two items under
+    // it. The prompt below is the whole point of these codes, and this is what
+    // lets it be asked again.
     const existing = session.pendingParts.find(
       (p) => p.item_code === item.item_code
         && p.technician === session.technician
         && !(p.variant || "")
+        // The flag first: by now the typed name has replaced the catalogue
+        // description, so the rule alone would have nothing left to read on a
+        // line whose code is ordinary but whose description said MISC.
+        && !(p.free_text || isFreeTextPart(p.item_code, p.description))
     );
 
     // A part that has been superseded is worth knowing about while it is still

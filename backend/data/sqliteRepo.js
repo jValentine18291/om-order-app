@@ -451,8 +451,23 @@ function addPartToMachine(machineId, { item_code, description, uom = "UNIT", uni
   // If the same part was already scanned for this machine by the same tech, bump qty.
   // Same variant too: a second cut of tube 142 adds to the first, but tube 311
   // off the same roll starts a line of its own.
+  //
+  // EXCEPT a free-text line, which never merges with anything.
+  //
+  // A5 to A8 and MISC are not parts. They are the codes the accounts use for
+  // whatever the catalogue does not carry, and what the line IS gets typed in
+  // by hand - so two A8 lines on one machine are two different things that
+  // happen to share a code, the way two A7 lines are a weld and a carburettor
+  // service. Merging them produces one line, at one description, for two items
+  // - and since the description is editable, editing it afterwards then
+  // relabels both. The second thing is not wrong on the slip; it is gone from
+  // it.
+  //
+  // Quantity on such a line means "two of THIS one", which only the person who
+  // typed the name can say, so it is theirs to set with the stepper.
   const variantKey = String(variant || "");
-  const existing = db.prepare(
+  const freeText = !!(free_text || isFreeTextPart(item_code, description));
+  const existing = freeText ? null : db.prepare(
     "SELECT * FROM machine_parts WHERE machine_id = ? AND item_code = ? AND technician = ? AND IFNULL(variant, '') = ?"
   ).get(machineId, item_code, technician, variantKey);
 
@@ -469,7 +484,7 @@ function addPartToMachine(machineId, { item_code, description, uom = "UNIT", uni
           // is written, the staff-typed name has replaced it, so the fact
           // cannot be worked out here. Trust the flag, and still check the
           // code ourselves so an old client that sends nothing still works.
-          (free_text || isFreeTextPart(item_code, description)) ? 1 : 0);
+          freeText ? 1 : 0);
   }
   deriveSlipStatus(machine.slip_id);      // work recorded: OPEN -> IN_PROGRESS
   return db.prepare("SELECT * FROM machine_parts WHERE machine_id = ? ORDER BY id").all(machineId);
