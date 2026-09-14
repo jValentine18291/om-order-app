@@ -96,7 +96,10 @@
   "brand": "Husqvarna",
   "category": "Robotic Mower",
   "figures": 9,
-  "parts": 257
+  "parts": 257,
+  "aliases": [
+   "AM450X"
+  ]
  },
  {
   "id": "am550epos",
@@ -105,7 +108,11 @@
   "brand": "Husqvarna",
   "category": "Robotic Mower",
   "figures": 9,
-  "parts": 214
+  "parts": 214,
+  "aliases": [
+   "AM550",
+   "AM550 EPOS"
+  ]
  },
  {
   "id": "k10sp",
@@ -304,5 +311,19 @@
   "category": "Chainsaw",
   "figures": 7,
   "parts": 98
+ },
+ {
+  "id": "am535epos",
+  "name": "Husqvarna Automower 535 AWD EPOS",
+  "short": "Automower 535 AWD EPOS",
+  "brand": "Husqvarna",
+  "category": "Robotic Mower",
+  "figures": 9,
+  "parts": 173,
+  "aliases": [
+   "AM535AWD",
+   "535AWD EPOS",
+   "535AWD"
+  ]
  }
 ]

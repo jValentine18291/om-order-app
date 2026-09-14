@@ -84,12 +84,28 @@
   // Anything under 3 characters is dropped either way.
   function modelKeys(entry) {
     const out = [];
-    for (const raw of String((entry || {}).short || "").split("/")) {
+    const add = (raw) => {
       const k = norm(raw);
-      if (k.length >= 3) out.push(k);
-    }
+      if (k.length >= 3 && !out.includes(k)) out.push(k);
+    };
+    for (const raw of String((entry || {}).short || "").split("/")) add(raw);
+    // Other names the same machine goes by. The short name is what the picker
+    // SHOWS, and the two are not always the same thing: the Automowers read
+    // "Automower 535 AWD EPOS" on their drawings and in the picker, while
+    // AutoCount files that machine as "UHUQ AM535AWD" and describes it "535AWD
+    // EPOS Robotic Automower" - so a slip written from the catalogue, which is
+    // most of them, carried none of the words the short name is made of and
+    // matched no book at all. All three Automower books were unreachable that
+    // way, including from "AM450X", which is what the workshop wrote by hand.
+    //
+    // Putting those into `short` would work and would read as three machines
+    // in the picker, which is what "/" means there. This is one machine under
+    // three names, so it is its own field.
+    const aliases = (entry || {}).aliases;
+    for (const raw of Array.isArray(aliases) ? aliases
+                    : String(aliases || "").split(/[,/]/)) add(raw);
     const full = norm((entry || {}).name);
-    if (full.length >= 4 && !out.includes(full)) out.push(full);
+    if (full.length >= 4) add(full);
     return out;
   }
 

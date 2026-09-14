@@ -72,7 +72,7 @@ function shortName(name, brand, category) {
 
 // Replace this model's entry and rewrite the index, leaving every other model
 // exactly as it was.
-function writeIndex(outDir, model, sourcePath, categoryOverride, figureCount) {
+function writeIndex(outDir, model, sourcePath, categoryOverride, figureCount, aliases) {
   const brand = brandOf(model.name);
   const category = (categoryOverride || categoryFromPath(sourcePath) || "").trim();
   const entry = {
@@ -84,6 +84,12 @@ function writeIndex(outDir, model, sourcePath, categoryOverride, figureCount) {
     figures: figureCount,
     parts: (model.figures || []).reduce((n, f) => n + (f.parts ? f.parts.length : 0), 0),
   };
+  // Other names the same machine answers to, for matching only - the picker
+  // still shows `short`. Written only when there are some, so no existing row
+  // grows a field it does not need. See modelKeys() in machine-ipl.js.
+  const extra = (Array.isArray(aliases) ? aliases : String(aliases || "").split(","))
+    .map((s) => s.trim()).filter(Boolean);
+  if (extra.length) entry.aliases = extra;
 
   const indexPath = path.join(outDir, "index.json");
   let index = [];

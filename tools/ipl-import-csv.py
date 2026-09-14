@@ -151,6 +151,10 @@ def main():
     ap.add_argument("--short", required=True, help="what AutoCount calls it, e.g. SR3100")
     ap.add_argument("--brand", required=True)
     ap.add_argument("--category", required=True)
+    ap.add_argument("--aliases", help="other names this machine goes by, comma "
+                                      "separated - what AutoCount calls it, what "
+                                      "the workshop writes. Matching only; the "
+                                      "picker still shows --short.")
     ap.add_argument("--order", help="sheet order, as the positions --dry-run "
                                     "printed, e.g. \"2,3,4,5,1,7,6\". Use when the "
                                     "export does not list them the way the book runs.")
@@ -347,6 +351,12 @@ def main():
         "id": a.id, "name": a.name, "short": a.short, "brand": a.brand,
         "category": a.category, "figures": len(figures), "parts": total_parts,
     }
+    # Other names the same machine answers to, for MATCHING a slip to this book.
+    # The picker still shows `short`; see modelKeys() in machine-ipl.js for why
+    # the two are separate fields.
+    extra = [x.strip() for x in (a.aliases or "").split(",") if x.strip()]
+    if extra:
+        entry["aliases"] = extra
     index = [e for e in index if e.get("id") != a.id] + [entry]
     with io.open(index_path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(index, f, ensure_ascii=False, indent=1)

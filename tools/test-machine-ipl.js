@@ -123,6 +123,47 @@ check("with the brand as well, obviously",
 // 525HE4, 525HF3S, 525PT5S - and it is three characters, so it is still
 // refused, exactly as "365" is.
 check("525 on its own still claims nothing", match(machine("", "525 saw")), "");
+
+// ---- The names a machine actually arrives under ---------------------------
+//
+// A book is found by what is WRITTEN on the slip, and for the Automowers that
+// was never the name in the picker. AutoCount files one as "UHUQ AM535AWD" and
+// describes it "535AWD EPOS Robotic Automower"; the drawings and the picker say
+// "Automower 535 AWD EPOS"; the workshop wrote "AM450X" by hand on slip 00040.
+// Not one of those carries the words the short name is made of, so all three
+// Automower books matched nothing at all - no parts sorted for the machine in
+// hand, no diagram offered, on every robot that came in.
+//
+// `aliases` is where the other names go. The picker still shows `short`: one
+// machine under three names is not three machines, which is what "/" in the
+// short name means.
+check("the code AutoCount files it under",
+  match(machine("UHUQ AM535AWD 970745521", "HUSQVARNA 535AWD EPOS Robotic Automower")),
+  "am535epos");
+check("and the way AutoCount describes it",
+  match(machine("", "535AWD EPOS")), "am535epos");
+check("and the name on its own drawings",
+  match(machine("", "Automower 535 AWD EPOS")), "am535epos");
+check("the 550, whichever of its three catalogue entries came in",
+  [match(machine("UHUQ AM550 970800903", "HUSQVARNA AM550 EPOS Robotic Automower")),
+   match(machine("UHUQ AM550 970465312", "HUSQVARNA EPOS Robotic Automower 550"))],
+  ["am550epos", "am550epos"]);
+check("and the 450X, including the shorthand written by hand",
+  [match(machine("UHUQ AM450X 967853033", "Robotic Automower 450X")),
+   match(machine("", "AM450X"))],
+  ["am450x", "am450x"]);
+
+// An Automower we hold no book for must still match nothing - the aliases are
+// names, not a family.
+check("another Automower claims none of them",
+  [match(machine("UHUQ AM315 967623421", "Robotic Automower 315 (967646021)")),
+   match(machine("UHUQ AM435XAWD 967853321", "Robotic Automower 435X AWD  (SE Version)"))],
+  ["", ""]);
+
+// And the field is optional: every other book carries none.
+const withAliases = INDEX.filter((e) => e.aliases);
+check("only the machines that needed them have aliases",
+  withAliases.map((e) => e.id).sort(), ["am450x", "am535epos", "am550epos"]);
 // A machine whose name merely contains the digits, and which has no book here.
 check("and a 525iB battery blower is not a T525",
   match(machine("", "525iB Battery Blower - 1/2")), "");
