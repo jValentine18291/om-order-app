@@ -247,6 +247,18 @@ check("BK3410 bare still finds its own book", match(machine("", "BK3410")), "bk3
 check("and the workshop's own spelling of it",
   match(machine("", "BK3410FL51 Brushcutter")), "bk3410fl");
 
+console.log("\n-- one book, two machines, and three hedge trimmers beside it --");
+// The CHTZ book covers the 6000 and the 7500 together, and Zenoah files three
+// other hedge trimmers within a few characters of those names. The first
+// string is copied verbatim off a live slip.
+check("the CHTZ7500 as the workshop writes it",
+  match(machine("", "ZENOAH CHTZ7500 Double-sided Blade Hedge Trimmer 23.6cc /w Tools & Acc.")),
+  "chtz6000_7500");
+check("and the other machine in the same book",
+  match(machine("", "CHTZ6000")), "chtz6000_7500");
+check("the CHT220-60 keeps its own book", match(machine("", "CHT220-60")), "cht220_60");
+check("and so does the HT220-75", match(machine("", "HT220-75")), "ht220_75");
+
 console.log("\n-- callouts with a lowercase letter after the number --");
 // Zenoah separates two builds of one part with a letter: on these brushcutters
 // the drive shaft is 4a for the FL and 4b for the FL-S, both printed on the one

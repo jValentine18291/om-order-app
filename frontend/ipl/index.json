@@ -183,6 +183,15 @@
   "parts": 157
  },
  {
+  "id": "chtz6000_7500",
+  "name": "Zenoah CHTZ6000 / CHTZ7500 Hedge Trimmer",
+  "short": "CHTZ6000 / CHTZ7500",
+  "brand": "Zenoah",
+  "category": "Hedge Trimmer",
+  "figures": 5,
+  "parts": 170
+ },
+ {
   "id": "eb6200",
   "name": "Zenoah EB6200 Backpack Blower",
   "short": "EB6200",
@@ -264,6 +273,15 @@
   "parts": 215
  },
  {
+  "id": "gz3500t",
+  "name": "Zenoah GZ3500T Chainsaw",
+  "short": "GZ3500T",
+  "brand": "Zenoah",
+  "category": "Chainsaw",
+  "figures": 14,
+  "parts": 226
+ },
+ {
   "id": "hb2302",
   "name": "Zenoah HB2302",
   "short": "HB2302",
@@ -334,14 +352,5 @@
   "category": "Chipper Shredder",
   "figures": 51,
   "parts": 1356
- },
- {
-  "id": "gz3500t",
-  "name": "Zenoah GZ3500T Chainsaw",
-  "short": "GZ3500T",
-  "brand": "Zenoah",
-  "category": "Chainsaw",
-  "figures": 14,
-  "parts": 226
  }
 ]
