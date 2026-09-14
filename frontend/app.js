@@ -931,6 +931,17 @@ function pdfLabel(doc, text, x, y, { size = 6.6, space = 1.6, grey = 150, bold =
   doc.setCharSpace(0);
 }
 
+// A measurer for OM_PDF_FIT, in bold Helvetica, using jsPDF's own metrics.
+// It leaves the document on the size it last tried, so callers set the size
+// they are given back before drawing.
+function measureBold(doc) {
+  return (text, size) => {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(size);
+    return doc.getTextWidth(text);
+  };
+}
+
 // Build the service-slip PDF (jsPDF) and return a Blob.
 //
 // Layout: hierarchy carried by type size, weight and letterspacing rather than
@@ -1083,18 +1094,31 @@ function buildSlipPdf(slip) {
   y = boxY + BOX_H + 24;
 
   // ---- Meta card: four fields, each with an icon ----
+  //
+  // The cells are WEIGHTED rather than equal, and the value shrinks to fit
+  // rather than being cut at the first wrapped line - which is what this did,
+  // by taking [0] off splitTextToSize and dropping the rest in silence. A date
+  // and a phone number are short and always the same length; a company name is
+  // the long one, and it is the customer's own name on a document we send
+  // them. "SembCorp Marine Facilities Pte Ltd" does not fit a quarter of the
+  // page at 11pt, and arrived as "SembCorp Marine".
+  //
+  // Same weights and the same shrink as the repair-details sheet, so the two
+  // documents a customer receives put their name the same way.
   const META_H = 56;
   setDraw(BORDER); setFill(252); doc.setLineWidth(0.8);
   doc.roundedRect(LEFT, y, W, META_H, 5, 5, "FD");
   const meta = [
-    ["calendar", "DATE RECEIVED", formatDate(slip.created_at) || "—"],
-    ["building", "COMPANY", slip.company || "—"],
-    ["person", "CONTACT", slip.contact_name || "—"],
-    ["phone", "CONTACT NO.", slip.contact_number || "—"],
+    ["calendar", "DATE RECEIVED", formatDate(slip.created_at) || "—", 1],
+    ["building", "COMPANY", slip.company || "—", 2.1],
+    ["person", "CONTACT", slip.contact_name || "—", 1.25],
+    ["phone", "CONTACT NO.", slip.contact_number || "—", 1],
   ];
-  const cellW = W / 4;
-  meta.forEach(([ic, label, value], i) => {
-    const cx = LEFT + i * cellW;
+  const metaWeight = meta.reduce((n, m) => n + m[3], 0);
+  let mcx = LEFT;
+  meta.forEach(([ic, label, value, wgt], i) => {
+    const cellW = (W * wgt) / metaWeight;
+    const cx = mcx;
     if (i) {
       setDraw(BORDER); doc.setLineWidth(0.7);
       doc.line(cx, y + 10, cx, y + META_H - 10);
@@ -1104,8 +1128,17 @@ function buildSlipPdf(slip) {
     doc.setCharSpace(1.1);
     doc.text(label, cx + 31, y + 22);
     doc.setCharSpace(0);
-    doc.setFontSize(11); doc.setFont("helvetica", "bold"); setText(INK);
-    doc.text(doc.splitTextToSize(String(value), cellW - 28)[0] || "", cx + 14, y + 43);
+
+    // Shrink to fit, then wrap to two lines if even the smallest size is not
+    // enough. Only that last resort can lose anything, and by then the name is
+    // longer than anything on a Singapore company register. 28 not 24: this
+    // card has an icon in the cell. See pdf-fit.js.
+    doc.setFont("helvetica", "bold");
+    const fit = OM_PDF_FIT.fitCellText(value, cellW - 28, measureBold(doc));
+    doc.setFontSize(fit.size);
+    setText(INK);
+    doc.text(fit.lines, cx + 14, y + (fit.wrapped ? 37 : 43));
+    mcx += cellW;
   });
   y += META_H + 26;
 
@@ -3421,20 +3454,12 @@ function buildRepairWorkPdf(slip) {
 
     // Shrink to fit, then wrap to two lines if even the smallest size is not
     // enough. Only the last resort loses anything, and by then the name is
-    // longer than anything on a Singapore company register.
-    const text = String(value);
-    const room = cellW - 24;
+    // longer than anything on a Singapore company register. See pdf-fit.js.
     doc.setFont("helvetica", "bold");
-    let size = 11;
-    doc.setFontSize(size);
-    while (size > 7.6 && doc.getTextWidth(text) > room) { size -= 0.3; doc.setFontSize(size); }
+    const fit = OM_PDF_FIT.fitCellText(value, cellW - 24, measureBold(doc));
+    doc.setFontSize(fit.size);
     setText(INK);
-    if (doc.getTextWidth(text) <= room) {
-      doc.text(text, cx + 14, y + 43);
-    } else {
-      const lines = doc.splitTextToSize(text, room).slice(0, 2);
-      doc.text(lines, cx + 14, y + 37);
-    }
+    doc.text(fit.lines, cx + 14, y + (fit.wrapped ? 37 : 43));
     cx += cellW;
   });
   y += META_H + 26;
