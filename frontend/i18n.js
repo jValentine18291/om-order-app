@@ -377,7 +377,7 @@
     // ---- Common jobs ----
     // The heading and the price caption, but NOT the three job titles.
     //
-    // "Welding", "Engine Oil" and "Service Carburetor & Labour" are the
+    // "Welding", "Change Engine Oil" and "Service Carburetor & Labour" are the
     // DESCRIPTIONS of the lines those buttons add - the same text, stored on
     // the slip and keyed into AutoCount. This dictionary matches whole strings,
     // so an entry for "Welding" would rewrite the line as well as the button,

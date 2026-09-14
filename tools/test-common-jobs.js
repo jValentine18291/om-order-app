@@ -42,7 +42,7 @@ const J = global.window.OM_JOBS;
 console.log("\n-- the table itself --");
 check("it checks out", J.check(), []);
 check("three jobs, in the order they were asked for",
-  J.list.map((j) => j.title), ["Welding", "Engine Oil", "Service Carburetor & Labour"]);
+  J.list.map((j) => j.title), ["Welding", "Change Engine Oil", "Service Carburetor & Labour"]);
 check("at the prices given", J.list.map((j) => j.price), [30, 9, 0]);
 check("one of each", J.list.map((j) => j.qty), [1, 1, 1]);
 check("two of them share the warehouse service code",

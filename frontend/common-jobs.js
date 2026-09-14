@@ -34,7 +34,7 @@
     // id     title                          code                  qty  price
     { id: "WELD", title: "Welding",
       code: "A7 SVR WAREHOUSE",    qty: 1, price: 30.00 },
-    { id: "OIL",  title: "Engine Oil",
+    { id: "OIL",  title: "Change Engine Oil",
       code: "A6 SVR ENGINE OIL",   qty: 1, price: 9.00 },
     // Priced at nothing ON PURPOSE. It records that the carburettor was
     // serviced; the money for it goes in the machine's Labour Charge. So it is
