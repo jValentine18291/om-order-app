@@ -2266,6 +2266,16 @@ select {
 .tube-pick-head span { font-size: 12px; color: var(--ink-faint, #78868c); }
 .tube-btns { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
 @media (max-width: 420px) { .tube-btns { grid-template-columns: repeat(4, 1fr); } }
+/* Three buttons, not ten, and each carries a phrase rather than a tube number
+   - so they get a row of their own and room for the words to wrap. */
+.job-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.job-btn {
+  font-size: 13px; line-height: 1.25;
+  padding: 10px 6px 8px;
+  text-align: center;
+  justify-content: center;
+}
+@media (max-width: 420px) { .job-btn { font-size: 12px; } }
 .tube-btn {
   appearance: none;
   border: 1px solid #cfdadd;

@@ -373,6 +373,20 @@
     // pieces and the app works out the fraction of a roll.
     "Fogger tubes": "喷雾机喉管",
     "Cut from a roll — tap one, then say how many pieces": "从整卷剪裁 — 点选一款，再输入数量",
+
+    // ---- Common jobs ----
+    // The heading and the price caption, but NOT the three job titles.
+    //
+    // "Welding", "Engine Oil" and "Service Carburetor & Labour" are the
+    // DESCRIPTIONS of the lines those buttons add - the same text, stored on
+    // the slip and keyed into AutoCount. This dictionary matches whole strings,
+    // so an entry for "Welding" would rewrite the line as well as the button,
+    // and the Sales Order screen is where somebody reads a line off and types
+    // it in. That is the one rule this file is built on: what comes from the
+    // catalogue or goes back to it is never altered.
+    "Common jobs": "常用工序",
+    "Tap one to add it to this machine": "点选即可加入此机器",
+    "no charge": "不收费",
     "How many pieces?": "需要多少条？",
     "Or type a number": "或输入数量",
     "Add to machine": "加入机器",

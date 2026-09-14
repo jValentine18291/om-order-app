@@ -1933,6 +1933,7 @@ function openMachineModal(machineId) {
   $("mm-title").textContent = m ? m.machine_desc : "Machine";
   // Which machine this is decides whether the tube buttons belong here at all.
   try { renderTubePicker(); } catch (_) {}
+  try { renderJobPicker(); } catch (_) {}
   $("mm-sub").textContent = `Slip ${session.slipNumber} · ${session.slip.company}`;
   const mmr = $("mm-remarks");
   if (m && m.remarks) { mmr.textContent = `“${m.remarks}”`; mmr.style.display = "block"; }
@@ -2325,6 +2326,73 @@ async function editPartDescription(partId, current) {
   }
 }
 
+// ---- Common jobs -----------------------------------------------------------
+// Three buttons on every machine, whatever it is. See common-jobs.js, which is
+// the file to edit when a price changes.
+function renderJobPicker() {
+  const box = $("job-pick");
+  if (!box || !window.OM_JOBS) return;
+  // Every machine, so there is nothing to decide about which - only whether
+  // the table itself is sound. A price typed wrong here reaches a customer's
+  // invoice with nothing in between to question it.
+  const bad = window.OM_JOBS.check();
+  box.style.display = "";
+  if (bad.length) {
+    $("job-btns").innerHTML =
+      `<div class="tube-frac" style="grid-column:1/-1">Common jobs list looks wrong — ${
+        escapeHtml(bad.join("; "))}. Tell the office before using these.</div>`;
+    return;
+  }
+  $("job-btns").innerHTML = window.OM_JOBS.list.map((j) => `
+    <button type="button" class="tube-btn job-btn" data-job="${escapeAttr(j.id)}">
+      ${escapeHtml(j.title)}
+      <span class="tube-each">${j.price > 0 ? money(j.price) : "no charge"}</span>
+    </button>`).join("");
+}
+
+// Add one to the machine.
+//
+// The item code is RESOLVED against AutoCount rather than written from the
+// table, for the same reason the tubes are: a code taken on trust would end up
+// on a Sales Order that nobody notices is wrong until it is in the accounts.
+// If it will not resolve, say so and add nothing.
+async function addJobToMachine(id) {
+  const job = window.OM_JOBS && window.OM_JOBS.byId(id);
+  if (!job || !session.machineId) return;
+  const btn = document.querySelector(`[data-job="${CSS.escape(id)}"]`);
+  if (btn) btn.disabled = true;
+  try {
+    const item = await lookupItem(job.code);
+    if (!item || !item.item_code) throw new Error("not found");
+    session.pendingParts.push({
+      item_code: item.item_code,
+      // The job's own words, not AutoCount's - two of these share one code and
+      // "Warehouse Service" twice on an invoice says nothing. A6 to A8 are
+      // free-text codes, so this is the description the line is meant to have.
+      description: job.title,
+      uom: item.uom || "NOS",
+      unit_price: job.price,
+      quantity: job.qty,
+      // What keeps a $30 weld and a $0 carburettor service apart, both being
+      // A7. Same field the tubes use.
+      variant: job.id,
+      technician: session.technician,
+      free_text: true,
+    });
+    toast(`Added ${job.title} — tap Save when done`, "ok");
+    renderMachineParts();
+    updateSlipFooter();
+  } catch (e) {
+    toast(`Could not find ${job.code} in AutoCount. Tell the office.`, "err");
+  }
+  if (btn) btn.disabled = false;
+}
+
+$("job-btns").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-job]");
+  if (b) addJobToMachine(b.dataset.job);
+});
+
 // ---- The tube picker -------------------------------------------------------
 // Shown only on a machine that looks like a fogger. The model is free text
 // typed at the counter, so looksLikeFogger() is deliberately generous - see
@@ -2564,7 +2632,13 @@ function renderMachineParts() {
   }
 
   for (const p of parts) {
-    const noPrice = !(Number(p.unit_price) > 0);
+    // "No price" means nobody has filled one in. A job that costs nothing has
+    // a price, and it is nothing - the carburettor service is recorded on the
+    // slip and charged through the machine's Labour Charge - so flagging it
+    // red would be asking for something that is already answered, on every
+    // carburettor job there is.
+    const noPrice = !(Number(p.unit_price) > 0)
+      && !(window.OM_JOBS && window.OM_JOBS.zeroIsDeliberate(p));
     const el = document.createElement("div");
     el.className = "line" + (noPrice ? " no-price" : "");
     el.innerHTML = `

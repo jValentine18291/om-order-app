@@ -931,6 +931,18 @@
         <!-- Fogger tubes are cut to length from a roll, so they cannot be
              scanned like a boxed part and the quantity is never a whole one.
              Shown only when the machine looks like a fogger. -->
+        <!-- The three lines that go on any machine, whatever it is: a weld, an
+             oil change, a carburettor service. Typed onto slip after slip
+             before this existed. Above the tubes because they apply to every
+             machine and the tubes only to foggers. -->
+        <div class="tube-pick" id="job-pick" style="display:none">
+          <div class="tube-pick-head">
+            <strong>Common jobs</strong>
+            <span>Tap one to add it to this machine</span>
+          </div>
+          <div class="job-btns" id="job-btns"></div>
+        </div>
+
         <div class="tube-pick" id="tube-pick" style="display:none">
           <div class="tube-pick-head">
             <strong>Fogger tubes</strong>
@@ -1181,6 +1193,9 @@
   <!-- The tube table the workshop prices cuts from. Before app.js, which reads
        it. Edit fogger-tubes.js when a price changes. -->
   <script src="./fogger-tubes.js"></script>
+  <!-- The three jobs that go on any machine. Same rule: edit the file, bump
+       the cache in sw.js. -->
+  <script src="./common-jobs.js"></script>
   <!-- What machines are called on a slip. Edit machine-names.js to change one. -->
   <script src="./machine-names.js"></script>
   <!-- Which parts belong to the machine being worked on, so they sort first in

@@ -1,0 +1,134 @@
+// The three buttons that go on any machine: a weld, an oil change, a
+// carburettor service.
+//
+//   node tools/test-common-jobs.js C:/temp/scratch.db
+//
+// THE RULE THIS GUARDS
+// Welding and Service Carburetor are both "A7 SVR WAREHOUSE", at $30 and at
+// nothing. machine_parts merges on (machine, item_code, technician, variant),
+// so without a variant those two would collapse into one line at a figure that
+// is neither - the same trap the fogger tubes fell into, where four tube types
+// share Z00126.03. Each job carries its id as the variant, and this checks
+// that the two survive as two.
+const path = require("path");
+const fs = require("fs");
+
+const target = process.argv[2];
+const live = path.resolve(__dirname, "..", "backend", "om_orders.db");
+if (!target) {
+  console.error("Give a scratch database path, e.g. node " + path.basename(__filename) + " C:/temp/scratch.db");
+  process.exit(2);
+}
+if (path.resolve(target) === live) {
+  console.error("Refusing to run against the live database: " + live);
+  process.exit(2);
+}
+process.env.OM_DB_PATH = target;
+const data = require(path.resolve(__dirname, "..", "backend", "data", "dataSource.js"));
+
+let failures = 0;
+function check(what, got, want) {
+  const ok = JSON.stringify(got) === JSON.stringify(want);
+  if (!ok) failures++;
+  console.log(`${ok ? "  ok  " : " FAIL "} ${what}: ${JSON.stringify(got)}${ok ? "" : ` (expected ${JSON.stringify(want)})`}`);
+}
+
+// common-jobs.js is a browser file - an IIFE that hangs itself off window.
+// Give it a window and read it back, the same way fogger-tubes.js is tested.
+global.window = {};
+new Function(fs.readFileSync(path.resolve(__dirname, "..", "frontend", "common-jobs.js"), "utf8"))();
+const J = global.window.OM_JOBS;
+
+console.log("\n-- the table itself --");
+check("it checks out", J.check(), []);
+check("three jobs, in the order they were asked for",
+  J.list.map((j) => j.title), ["Welding", "Engine Oil", "Service Carburetor & Labour"]);
+check("at the prices given", J.list.map((j) => j.price), [30, 9, 0]);
+check("one of each", J.list.map((j) => j.qty), [1, 1, 1]);
+check("two of them share the warehouse service code",
+  J.list.filter((j) => j.code === "A7 SVR WAREHOUSE").map((j) => j.title),
+  ["Welding", "Service Carburetor & Labour"]);
+check("and every job has an id of its own",
+  new Set(J.list.map((j) => j.id)).size, J.list.length);
+
+// The ids are written to the same column the tube types use, so a collision
+// would make a weld look like a tube to everything that reads a line back.
+global.window.FOGGER_TUBES = undefined;
+new Function(fs.readFileSync(path.resolve(__dirname, "..", "frontend", "fogger-tubes.js"), "utf8"))();
+const tubeTypes = new Set(global.window.FOGGER_TUBES.list.map((t) => t.type));
+check("no job id is also a tube type",
+  J.list.map((j) => j.id).filter((id) => tubeTypes.has(id)), []);
+
+console.log("\n-- a weld and a carburettor service stay two lines --");
+const SIG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
+const slip = data.slips.createSlip({
+  company: "JOBS CO", contact_name: "A", contact_number: "1", signature: SIG,
+  machines: [{ desc: "BK3410 Brushcutter", serial: "J1", remarks: "" }],
+});
+const mid = data.slips.getSlip(slip.slip_number).machines[0].id;
+
+const add = (id, tech = "WJ") => {
+  const j = J.byId(id);
+  return data.slips.addPartToMachine(mid, {
+    item_code: j.code, description: j.title, uom: "NOS",
+    unit_price: j.price, quantity: j.qty, variant: j.id, technician: tech,
+    free_text: true,
+  });
+};
+
+let parts = add("WELD");
+parts = add("CARB");
+check("two lines, not one", parts.length, 2);
+check("each with its own wording",
+  parts.map((p) => p.description).sort(), ["Service Carburetor & Labour", "Welding"]);
+check("and its own price", parts.map((p) => p.unit_price).sort((a, b) => a - b), [0, 30]);
+check("both under the one service code",
+  [...new Set(parts.map((p) => p.item_code))], ["A7 SVR WAREHOUSE"]);
+
+console.log("\n-- the same job twice adds up --");
+parts = add("WELD");
+check("still two lines", parts.length, 2);
+check("and the weld is now two of them",
+  parts.find((p) => p.variant === "WELD").quantity, 2);
+
+console.log("\n-- the oil change is its own line --");
+parts = add("OIL");
+check("three lines", parts.length, 3);
+check("on the engine oil code",
+  parts.find((p) => p.variant === "OIL").item_code, "A6 SVR ENGINE OIL");
+check("at nine dollars", parts.find((p) => p.variant === "OIL").unit_price, 9);
+
+console.log("\n-- a price of nothing is an answer, not a gap --");
+// The screen flags a part with no price so somebody fills it in. The
+// carburettor service costs nothing on purpose - the money is in the machine's
+// Labour Charge - so it must not be flagged, or every carburettor job carries
+// a warning nobody can clear.
+const carb = parts.find((p) => p.variant === "CARB");
+check("the carburettor service is deliberately free", J.zeroIsDeliberate(carb), true);
+check("the weld is not", J.zeroIsDeliberate(parts.find((p) => p.variant === "WELD")), false);
+// Asked of the LINE, so it survives a save and reload rather than depending on
+// anything the screen still happens to be holding.
+const reloaded = data.slips.getSlip(slip.slip_number).machines[0].parts
+  .find((p) => p.variant === "CARB");
+check("and it still reads that way off the database", J.zeroIsDeliberate(reloaded), true);
+// A genuinely unpriced catalogue part must STILL be flagged.
+check("an ordinary part at zero is a gap",
+  J.zeroIsDeliberate({ item_code: "SZEN 848CE037A0", unit_price: 0, variant: "" }), false);
+// And an A7 line at zero that is not one of these jobs is a gap too: the guard
+// is the job, not the code.
+check("so is an A7 line nobody added from a button",
+  J.zeroIsDeliberate({ item_code: "A7 SVR WAREHOUSE", unit_price: 0, variant: "" }), false);
+
+console.log("\n-- what reaches the Sales Order --");
+data.slips.setMachineLabour(mid, 40);
+data.slips.finishRepair(mid, "WJ");
+data.slips.createSlipOrder(slip.slip_number, [mid], "KS");
+const lines = data.slips.getSlipOrder(slip.slip_number).lines;
+const a7 = lines.filter((l) => l.item_code === "A7 SVR WAREHOUSE");
+check("both A7 lines are on the order", a7.length, 2);
+check("saying which job each one is",
+  a7.map((l) => l.description).sort(), ["Service Carburetor & Labour", "Welding"]);
+check("at their own prices", a7.map((l) => l.unit_price).sort((a, b) => a - b), [0, 30]);
+
+console.log(failures ? `\n${failures} FAILED\n` : "\nall passed\n");
+process.exit(failures ? 1 : 0);
