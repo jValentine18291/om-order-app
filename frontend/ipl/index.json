@@ -334,5 +334,14 @@
   "category": "Chipper Shredder",
   "figures": 51,
   "parts": 1356
+ },
+ {
+  "id": "gz3500t",
+  "name": "Zenoah GZ3500T Chainsaw",
+  "short": "GZ3500T",
+  "brand": "Zenoah",
+  "category": "Chainsaw",
+  "figures": 14,
+  "parts": 226
  }
 ]
