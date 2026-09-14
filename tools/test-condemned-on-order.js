@@ -101,6 +101,45 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
   // the customer said no. None of it was fitted and none of it is billed.
   check("its parts are not on the order",
     L.some((l) => l.item_code === "SHUQ 505180901"), false);
+  console.log("\n-- the contact number, as it is read out --");
+  // 9847 4578, not 98474578. Only a bare eight digits, which is every
+  // Singapore number; anything else is left exactly as somebody typed it,
+  // because the point is to make the familiar shape readable rather than to
+  // reformat whatever turns up. No digit is ever added or dropped.
+  const contactOn = async (number) => {
+    const s = await data.slips.createSlip({
+      company: "PHONE " + number, contact_name: "Mr Tan", contact_number: number,
+      machines: [{ desc: "M1", serial: "1", remarks: "" }], signature: sig,
+    });
+    const id = s.machines[0].id;
+    await data.slips.setMachineLabour(id, 10);
+    await data.slips.createSlipOrder(s.slip_number, [id], "KS");
+    const ls = (await data.slips.getSlipOrder(s.slip_number)).lines;
+    return ls[ls.length - 1].description;
+  };
+  check("eight digits are split in the middle",
+    await contactOn("98474578"), "Mr Tan 9847 4578");
+  check("one already spaced is left alone",
+    await contactOn("9847 4578"), "Mr Tan 9847 4578");
+  check("a country code is left alone",
+    await contactOn("+65 9847 4578"), "Mr Tan +65 9847 4578");
+  check("an office line of seven digits is left alone",
+    await contactOn("6293456"), "Mr Tan 6293456");
+  check("and so is anything with words in it",
+    await contactOn("98474578 (Ali)"), "Mr Tan 98474578 (Ali)");
+
+  console.log("\n-- how the block ends --");
+  // The contact sits under a blank row, the same gap that separates one
+  // machine from the next. Without it the customer's name reads as another
+  // line of the last machine's block, which is where somebody keying this in
+  // puts it.
+  const tail = L.slice(-3).map((l) => [l.item_code || "", l.description]);
+  check("SubTotal, a blank row, then the contact",
+    [tail[0][1], tail[1][1], tail[2][1]],
+    ["SubTotal", "", "Rajesh Kumar 9123 4567"]);
+  check("and all three are note lines, priced at nothing",
+    tail.every((t) => t[0] === ""), true);
+
   const subTotals = L.filter((l) => l.description === "SubTotal").map((l) => l.line_amount);
   check("the two condemned blocks total nothing", subTotals, [98.5, 97.4, 0, 0]);
   const charged = L.filter((l) => l.item_code)

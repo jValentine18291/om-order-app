@@ -585,6 +585,18 @@ function serviceItemFor(machine) {
 // block, at nothing, saying why.
 const CONDEMNED_NOTE = "*Condemned - beyond repair";
 
+// A phone number the way it is read out: 9847 4578, not 98474578.
+//
+// Only a bare eight digits, which is every Singapore number. Anything else -
+// an office line with a country code, two numbers in one field, a note beside
+// it - is left exactly as somebody typed it, because the point is to make the
+// familiar shape readable, not to reformat whatever turns up. Digits are never
+// added or dropped either way.
+function phoneForOrder(raw) {
+  const s = String(raw == null ? "" : raw).trim();
+  return /^\d{8}$/.test(s) ? `${s.slice(0, 4)} ${s.slice(4)}` : s;
+}
+
 function createSlipOrder(slipNumber, machineIds) {
   const slip = getSlip(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
@@ -703,9 +715,15 @@ function createSlipOrder(slipNumber, machineIds) {
     if (n < wanted.length - 1) lines.push({ note: true, description: "" });
   });
 
-  // Customer contact, as the last line of the block.
-  const contact = [slip.contact_name, slip.contact_number].filter(Boolean).join(" ").trim();
-  if (contact) lines.push({ note: true, description: contact });
+  // Customer contact, as the last line of the block, with a blank row above it
+  // - the same gap that separates one machine from the next, so the contact
+  // does not read as another line of the last machine's block.
+  const contact = [slip.contact_name, phoneForOrder(slip.contact_number)]
+    .filter(Boolean).join(" ").trim();
+  if (contact) {
+    lines.push({ note: true, description: "" });
+    lines.push({ note: true, description: contact });
+  }
 
   const so = createOrder({ notes: `S/S: ${slip.slip_number}`, lines });
 
