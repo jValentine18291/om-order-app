@@ -104,6 +104,28 @@ check("but with the brand it is",
 const shortKeys = [...new Set(INDEX.flatMap((e) => M.modelKeys(e))
   .filter((k) => k.length < M.STANDS_ALONE))];
 check("there are some, and they are the ones expected", shortKeys.sort(), ["365", "FLS"]);
+
+// The T525, which is why the line sits at four rather than five.
+//
+// The workshop writes that saw bare - "T525", no brand word, no catalogue code
+// - on three machines across two slips. At five it matched no book, so a
+// technician working on one got no parts sorted for it and no diagram offered,
+// which is the whole job of this file.
+check("a bare T525 finds its own book", match(machine("", "T525")), "hust525");
+// And with the position suffix the app adds when several of one model come in
+// together, which is how two of those three are written.
+check("even numbered off as one of several",
+  match(machine("", "T525 - 2/5")), "hust525");
+check("with the brand as well, obviously",
+  match(machine("", "Husqvarna T525 chainsaw")), "hust525");
+
+// What four must NOT let through. "525" starts four different books - 525BX,
+// 525HE4, 525HF3S, 525PT5S - and it is three characters, so it is still
+// refused, exactly as "365" is.
+check("525 on its own still claims nothing", match(machine("", "525 saw")), "");
+// A machine whose name merely contains the digits, and which has no book here.
+check("and a 525iB battery blower is not a T525",
+  match(machine("", "525iB Battery Blower - 1/2")), "");
 check("and not one of them matches without a brand to back it",
   shortKeys.filter((k) => match(machine("", `${k} machine`))), []);
 

@@ -286,5 +286,14 @@
   "category": "Chipper Shredder",
   "figures": 51,
   "parts": 1356
+ },
+ {
+  "id": "hust525",
+  "name": "Husqvarna T525 Chainsaw",
+  "short": "T525",
+  "brand": "Husqvarna",
+  "category": "Chainsaw",
+  "figures": 12,
+  "parts": 214
  }
 ]

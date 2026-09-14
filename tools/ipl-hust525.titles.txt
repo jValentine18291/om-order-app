@@ -1,0 +1,30 @@
+# Titles as printed on the T525's own drawings, read off the sheets.
+#
+# Four of the twelve differ from the way the portal files them:
+#
+#   Fig.1   the portal says CYLINDER; the drawing says CYLINDER, PISTON &
+#           CRANKSHAFT, and it draws all three - a technician looking for the
+#           crankshaft would not think to open "CYLINDER".
+#   4,7,10  the portal spells out AND; the drawings use &.
+#
+# The drawing wins, because that is the page in front of them - and it is what
+# the 395XP already shows for the same sheets on a bigger saw: "CHAIN BRAKE &
+# CLUTCH COVER", "CLUTCH & OIL PUMP", "CARBURETOR & AIR FILTER".
+#
+# The sheets are lettered A to L on paper rather than numbered. The app labels
+# every book Fig.1, Fig.2 and so on, and they are in the same order, so the
+# letters are left off here the same way the 395XP leaves them off.
+#
+# One line per sheet, in the order --dry-run lists them. "-" keeps the CSV's.
+CYLINDER, PISTON & CRANKSHAFT
+CRANKCASE
+MUFFLER
+CARBURETOR & AIR FILTER
+CARBURETOR
+HOUSING
+CLUTCH & OIL PUMP
+IGNITION SYSTEM
+STARTER
+CHAIN BRAKE & CLUTCH COVER
+HANDLE
+ACCESSORIES

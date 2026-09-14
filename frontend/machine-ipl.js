@@ -107,7 +107,19 @@
   // A model name long enough to stand on its own without the brand to back it
   // up. "BK3410FL" is nobody else's; "365" is a number that turns up in all
   // sorts of text, which is the one the brand check exists to protect.
-  const STANDS_ALONE = 5;
+  //
+  // Four, not five, because of the T525. The workshop writes that saw as bare
+  // "T525" - three machines across two slips, no brand word, no catalogue code
+  // - and at five it matched no book at all, so the one thing this whole file
+  // exists to do did not happen for it.
+  //
+  // Four is still specific: T525 is the ONLY key of that length in the
+  // catalogue, and it is a letter and three digits. What the line protects
+  // against is unchanged, because the names that need protecting are shorter
+  // still - "365" and "FLS" are three, and both stay below it. Nor does this
+  // let "525" claim a book by its opening: 525 starts four different books and
+  // is three characters, so it is refused for the same reason it always was.
+  const STANDS_ALONE = 4;
 
   // The book for this machine, or "".
   //
