@@ -15,6 +15,18 @@
 1 add 28 67.1 37.0
 1 add 31 69.4 41.1
 
+# Fig.1 — the SECOND 29, between 27 and 31, pointing at the right-hand washer.
+# The sheet prints 29 twice; the reader found the left one only, and this book
+# was checked on "every key reached", which that satisfies. It is the wrong
+# question. A technician taps the number in front of them, and the one in front
+# of them did nothing - John's technicians found it, which is the checking of
+# last resort and not the one to rely on.
+#
+# tools/../scratchpad checked the other two figures the same way afterwards, by
+# reading every sheet whole and asking which printed numbers sit nowhere near a
+# hotspot of their own key. This was the only one.
+1 add 29 71.3 38.5
+
 # Fig.3 — a lone "1" at the far left edge, with its leader running away to the
 # boxed metering assembly, and the box's own dash-dot border a few millimetres
 # to its right. A single vertical stroke beside a dashed line is exactly what
