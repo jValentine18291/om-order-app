@@ -285,6 +285,17 @@ function readHeading(words) {
   return { number: m[1], title: m[2].trim() };
 }
 
+// What a callout number looks like. The letter suffix is how these books
+// separate two builds of the same part: the BK4310FL's drive shaft is key 4a
+// on the FL and 4b on the FL-S, and both are printed on the one drawing.
+//
+// It used to be [A-Z] only. Zenoah sets those suffixes in LOWERCASE, so every
+// one of them failed this test and never became a hotspot - six dead callouts
+// on the BK3410FL's DRIVE UNIT sheet, shipped, and the same six waiting in the
+// BK4310FL. Nothing is loosened by allowing the case: a token still has to
+// match a key printed in the parts table before it becomes a hotspot.
+const CALLOUT = /^\d+[A-Za-z]?$/;
+
 function parseFigure(page, keys) {
   const { width, height, words } = wordsForPage(page);
 
@@ -303,7 +314,7 @@ function parseFigure(page, keys) {
   const blocks = tableBlocks(words);
   const tableTop = blocks.length ? Math.min(...blocks.map((b) => b.yHeader)) - 8 : Infinity;
 
-  const headWords = words.filter((w) => w.y1 < 70 && !/^\d+[A-Z]?$/.test(w.text));
+  const headWords = words.filter((w) => w.y1 < 70 && !CALLOUT.test(w.text));
   const head = headWords.length && {
     x1: Math.min(...headWords.map((w) => w.x1)) - 10,
     x2: Math.max(...headWords.map((w) => w.x2)) + 10,
@@ -313,7 +324,7 @@ function parseFigure(page, keys) {
 
   const spots = [];
   for (const w of words) {
-    if (!/^\d+[A-Z]?$/.test(w.text)) continue;
+    if (!CALLOUT.test(w.text)) continue;
     if (inHeading(w) || w.y2 > height - 55) continue;   // heading / page number
     if (w.y1 >= tableTop) continue;                     // the parts table below
     if (!keys.has(w.text)) continue;                    // only real callouts
@@ -340,7 +351,7 @@ function sameDrawing(a, b) {
   const signature = (page) => {
     const { width, height, words } = wordsForPage(page);
     return words
-      .filter((w) => /^\d+[A-Z]?$/.test(w.text) && w.y2 < height - 55)
+      .filter((w) => CALLOUT.test(w.text) && w.y2 < height - 55)
       .map((w) => `${w.text}@${Math.round((w.x1 / width) * 200)},${Math.round((w.y1 / height) * 200)}`)
       .sort()
       .join(" ");

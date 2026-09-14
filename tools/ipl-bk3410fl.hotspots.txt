@@ -1,0 +1,19 @@
+# BK3410FL — one callout the book prints and its own parts table does not list.
+#
+#   <figure> add|unlisted|drop <key> <x%> <y%>
+#
+# Everything else on this book is placed by the reader from the PDF's own text
+# layer, exactly. No OCR was involved and nothing here is a guess about what a
+# number says - only about what the book left out.
+
+# Fig.1 — the DRIVE UNIT sheet prints a "10" pointing at the gearcase casting,
+# inside the dash-dot boundary that holds the gearcase assembly's sub-parts.
+# The table on page 3 runs 9, 11, 12 with no 10 at all; the rows either side
+# are on the normal 15.4pt pitch, so nothing was dropped in the reading - the
+# book itself skips it. (Checked against the printed page, not just the text.)
+#
+# Marked "unlisted" rather than "add" because there is no part 10 to point at.
+# Tapping it now says the book does not list this number, which is the truth.
+# Without a hotspot the tap does nothing, and a technician cannot tell a gap in
+# the book from an app that has stopped working.
+1 unlisted 10 21.0 39.9

@@ -235,6 +235,37 @@ const spaced = JSON.parse(fs.readFileSync(
 check("a part number written '590 53 64-02' comes back as 5905364 02 squashed",
   M.preferredNumbers(spaced, "clutch drum").includes("5905364" + "02"), true);
 
+console.log("\n-- the brushcutter the workshop writes without its suffix --");
+// Copied off live slips. They write the sibling BK3410 bare far more often
+// than they write BK3410FL, and the 4310 arrived the same week - so the two
+// must not reach for each other's book. A wrong book here would float another
+// model's parts to the top of the search, and a technician would fit them.
+check("BK4310 bare", match(machine("", "BK4310")), "bk4310fl");
+check("BK4310 with words round it",
+  match(machine("", "ZENOAH BK4310FL-S B.Pack Brushcutter 43cc /w Tools & Acc.")), "bk4310fl");
+check("BK3410 bare still finds its own book", match(machine("", "BK3410")), "bk3410fl");
+check("and the workshop's own spelling of it",
+  match(machine("", "BK3410FL51 Brushcutter")), "bk3410fl");
+
+console.log("\n-- callouts with a lowercase letter after the number --");
+// Zenoah separates two builds of one part with a letter: on these brushcutters
+// the drive shaft is 4a for the FL and 4b for the FL-S, both printed on the one
+// drawing. The reader's idea of a callout was uppercase-only, so every one of
+// these failed it and no hotspot was ever made. Six dead callouts on each book,
+// and the BK3410FL shipped with them - the number is printed on the sheet in
+// front of the technician and tapping it does nothing.
+//
+// Guarded on the shipped data, because the shipped data is what gets tapped.
+for (const id of ["bk3410fl", "bk4310fl"]) {
+  const book = JSON.parse(fs.readFileSync(
+    path.resolve(__dirname, "..", "frontend", "ipl", id + ".json"), "utf8"));
+  const fig1 = book.figures[0];
+  const spots = new Set(fig1.hotspots.map((h) => h.key));
+  const ab = fig1.parts.map((p) => p.key).filter((k) => /^[0-9]+[a-z]$/.test(k)).sort();
+  check(id + " Fig.1 has the a/b keys", ab, ["1a", "1b", "30a", "30b", "4a", "4b"]);
+  check(id + " every one of them can be tapped", ab.filter((k) => !spots.has(k)), []);
+}
+
 console.log("\n-- every book in the catalogue is reachable --");
 // Each model matched from its own name, so a book nobody can reach is caught
 // here rather than by a technician wondering why nothing floats.

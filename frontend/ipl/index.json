@@ -102,6 +102,20 @@
   ]
  },
  {
+  "id": "am535epos",
+  "name": "Husqvarna Automower 535 AWD EPOS",
+  "short": "Automower 535 AWD EPOS",
+  "brand": "Husqvarna",
+  "category": "Robotic Mower",
+  "figures": 9,
+  "parts": 173,
+  "aliases": [
+   "AM535AWD",
+   "535AWD EPOS",
+   "535AWD"
+  ]
+ },
+ {
   "id": "am550epos",
   "name": "Husqvarna Automower 550 EPOS",
   "short": "Automower 550 EPOS",
@@ -113,6 +127,24 @@
    "AM550",
    "AM550 EPOS"
   ]
+ },
+ {
+  "id": "hust525",
+  "name": "Husqvarna T525 Chainsaw",
+  "short": "T525",
+  "brand": "Husqvarna",
+  "category": "Chainsaw",
+  "figures": 12,
+  "parts": 214
+ },
+ {
+  "id": "hust536li",
+  "name": "Husqvarna T536Li XP Chainsaw",
+  "short": "T536Li XP",
+  "brand": "Husqvarna",
+  "category": "Chainsaw",
+  "figures": 7,
+  "parts": 98
  },
  {
   "id": "k10sp",
@@ -127,6 +159,15 @@
   "id": "bk3410fl",
   "name": "Zenoah BK3410FL / FL-S",
   "short": "BK3410FL / FL-S",
+  "brand": "Zenoah",
+  "category": "Brushcutter",
+  "figures": 5,
+  "parts": 198
+ },
+ {
+  "id": "bk4310fl",
+  "name": "Zenoah BK4310FL / FL-S",
+  "short": "BK4310FL / FL-S",
   "brand": "Zenoah",
   "category": "Brushcutter",
   "figures": 5,
@@ -293,37 +334,5 @@
   "category": "Chipper Shredder",
   "figures": 51,
   "parts": 1356
- },
- {
-  "id": "hust525",
-  "name": "Husqvarna T525 Chainsaw",
-  "short": "T525",
-  "brand": "Husqvarna",
-  "category": "Chainsaw",
-  "figures": 12,
-  "parts": 214
- },
- {
-  "id": "hust536li",
-  "name": "Husqvarna T536Li XP Chainsaw",
-  "short": "T536Li XP",
-  "brand": "Husqvarna",
-  "category": "Chainsaw",
-  "figures": 7,
-  "parts": 98
- },
- {
-  "id": "am535epos",
-  "name": "Husqvarna Automower 535 AWD EPOS",
-  "short": "Automower 535 AWD EPOS",
-  "brand": "Husqvarna",
-  "category": "Robotic Mower",
-  "figures": 9,
-  "parts": 173,
-  "aliases": [
-   "AM535AWD",
-   "535AWD EPOS",
-   "535AWD"
-  ]
  }
 ]

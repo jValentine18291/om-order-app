@@ -57,7 +57,12 @@ def main(model_id, out_dir):
                 on_ink += 1
             else:
                 problems.append(f"Fig.{fig['number']} key {s['key']} sits on blank paper")
-            if s["key"] not in keys:
+            # A hotspot marked "unlisted" is a number the drawing prints and the
+            # book's own table skips - put there on purpose, by hand, so the tap
+            # can say so instead of doing nothing. Not being in the parts table
+            # is the whole point of it, so it is not a problem here. Anything
+            # else missing from the table is.
+            if s["key"] not in keys and not s.get("unlisted"):
                 problems.append(f"Fig.{fig['number']} key {s['key']} is not in the parts table")
             colour = (220, 30, 30) if ink else (255, 140, 0)
             d.ellipse([x - 13, y - 13, x + 13, y + 13], outline=colour, width=3)
