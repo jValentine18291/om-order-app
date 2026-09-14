@@ -1222,6 +1222,11 @@ function buildSlipPdf(slip) {
 
   // ---- Notes ----
   if (slip.notes) {
+    // Measure at the size it is drawn at. Left unset, splitTextToSize wrapped
+    // against the 10pt bold the REQUESTED box leaves behind, so the same note
+    // broke into different lines here and on the repair-details sheet - two
+    // documents the same customer gets.
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9.4);
     const lines = doc.splitTextToSize(String(slip.notes), W - 32);
     need(lines.length * 12 + 46);
     sectionHead("NOTES", "clipboard");
@@ -3463,6 +3468,42 @@ function buildRepairWorkPdf(slip) {
     cx += cellW;
   });
   y += META_H + 26;
+
+  // ---- Notes ----
+  //
+  // The slip's own notes, on the sheet that goes out for quoting. The workshop
+  // writes the job's context in this field - "Site: 512 AMK", "Site: Temasek
+  // Hall (NUS)", "Site: East Coast Park" - and a quotation that does not say
+  // which site it is for is a quotation the customer has to ring up about.
+  //
+  // Printed whole, and not filtered. The customer's acknowledgement copy has
+  // carried this field in full since the slip PDF was written, so nothing
+  // reaches them here that has not already reached them once. Picking out the
+  // lines I judged "internal" would be the surprising change, not this one -
+  // and the field holds things I would have guessed wrong about either way.
+  //
+  // Above the equipment rather than under the total, because it is context for
+  // what follows, and because it stays on the first page there.
+  const slipNotes = String(slip.notes || "").trim();
+  if (slipNotes) {
+    // Measure at the size it is drawn at. splitTextToSize wraps against
+    // whatever font is current, so setting it afterwards wraps to the wrong
+    // width - narrower here, since the cell above leaves 11pt bold set.
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9.4);
+    const lines = doc.splitTextToSize(slipNotes, W - 32);
+    const boxH = 16 + lines.length * 12;
+    need(boxH + 24);
+    doc.setFontSize(6.6); doc.setFont("helvetica", "bold"); setText(TEAL);
+    doc.setCharSpace(1.2);
+    doc.text("NOTES", LEFT, y);
+    doc.setCharSpace(0);
+    y += 10;
+    setDraw(BORDER); setFill(252); doc.setLineWidth(0.8);
+    doc.roundedRect(LEFT, y, W, boxH, 5, 5, "FD");
+    doc.setFontSize(9.4); doc.setFont("helvetica", "normal"); setText(60);
+    doc.text(lines, LEFT + 16, y + 18);
+    y += boxH + 22;
+  }
 
   // ---- One block per machine ----
   const CODE = LEFT + 10, DESC = LEFT + 108, QTY = RIGHT - 150, UNIT = RIGHT - 78, AMT = RIGHT - 10;
