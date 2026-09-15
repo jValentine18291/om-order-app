@@ -636,23 +636,37 @@ function createSlipOrder(slipNumber, machineIds) {
     e.status = 400; throw e;
   }
 
-  // Build the block exactly as it is keyed into AutoCount, one block per
-  // machine:
-  //
-  //   A1 SVR LANDSCAPE  "Being repair & replacement of part :-"   qty 1, labour
-  //   (no code)         "525BX Handheld Blower, S/N: 2025280, S/S: 00042 (R) - 1/6"
-  //   <parts>
-  //   (no code)         "*Too much 2T Oil"          <- repair comment
-  //   (no code)         "SubTotal"                  <- machine total
-  //   (blank)
-  //
-  // and the customer's contact on the last line. The un-coded rows are note
-  // lines: no price, no quantity, no effect on the order total.
-  //
-  // A service line opens EVERY block, including at 0.00. In AutoCount it marks
-  // where a machine's parts begin, so a block without it cannot be read. Which
-  // service item it is depends on the machine - A1 for landscaping equipment,
-  // A2 for a fogger - see serviceItemFor().
+  const lines = slipBlockLines(slip, wanted, all);
+
+  const so = createOrder({ notes: `S/S: ${slip.slip_number}`, lines });
+
+  return finishSlipOrder(slip, wanted, so);
+}
+
+// The block, exactly as it is keyed into AutoCount, one per machine:
+//
+//   A1 SVR LANDSCAPE  "Being repair & replacement of part :-"   qty 1, labour
+//   (no code)         "525BX Handheld Blower, S/N: 2025280, S/S: 00042 (R) - 1/6"
+//   <parts>
+//   (no code)         "*Too much 2T Oil"          <- repair comment
+//   (no code)         "SubTotal"                  <- machine total
+//   (blank)
+//
+// and the customer's contact on the last line. The un-coded rows are note
+// lines: no price, no quantity, no effect on the order total.
+//
+// A service line opens EVERY block, including at 0.00. In AutoCount it marks
+// where a machine's parts begin, so a block without it cannot be read. Which
+// service item it is depends on the machine - A1 for landscaping equipment,
+// A2 for a fogger - see serviceItemFor().
+//
+// WHY THIS IS ITS OWN FUNCTION
+// Two documents are built from it: the Sales Order keyed into AutoCount, and
+// the Repair Quotation the customer is sent to approve. They have to agree
+// line for line and cent for cent - Sales send the quotation, then raise the
+// order, and a customer who reads $140 on one and $155 on the other has been
+// told two different things about the same repair. One builder, two readers.
+function slipBlockLines(slip, wanted, all) {
   const lines = [];
   const total = all.length;
 
@@ -725,8 +739,10 @@ function createSlipOrder(slipNumber, machineIds) {
     lines.push({ note: true, description: contact });
   }
 
-  const so = createOrder({ notes: `S/S: ${slip.slip_number}`, lines });
+  return lines;
+}
 
+function finishSlipOrder(slip, wanted, so) {
   // Record which machines this order covered, then move the slip on only when
   // every machine has been converted - a partly converted slip is still work
   // in progress as far as the sales desk is concerned.
@@ -765,6 +781,77 @@ function setMachineLabour(machineId, amount) {
   db.prepare("UPDATE slip_machines SET labour_charge = ? WHERE id = ?").run(value, machineId);
   deriveSlipStatus(machine.slip_id);
   return { ok: true, labour_charge: value };
+}
+
+// ---------------------------------------------------------------------------
+// The Repair Quotation sent to the customer for approval.
+//
+// The SAME lines the Sales Order is built from, priced the same way, with the
+// totals a quotation carries that an order does not: GST, and a date it stops
+// being good for. Nothing here writes; a quotation can be produced, re-read
+// and produced again without moving the slip on. Converting is still a
+// separate, deliberate act.
+//
+// GST is ADDED here. The Sales Order lines are exclusive of it - AutoCount adds
+// it on the order - so a quotation that showed only the line total would be
+// quoting the customer a figure they will not be charged.
+const GST_RATE = 0.09;
+const QUOTATION_VALID_DAYS = 30;
+
+function quotationForSlip(slipNumber, machineIds) {
+  const slip = getSlip(slipNumber);
+  if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
+
+  const all = slip.machines || [];
+  // Everything with work recorded against it, whether or not it has been
+  // converted. A quotation is a statement of what the repair costs, and it is
+  // often re-sent after part of the slip has already gone onto an order.
+  const wanted = Array.isArray(machineIds) && machineIds.length
+    ? all.filter((m) => machineIds.map(Number).includes(Number(m.id)))
+    : all.filter((m) =>
+        m.state === "CONDEMNED" ||
+        (m.parts || []).length > 0 ||
+        Number(m.labour_charge) > 0 ||
+        String(m.repair_comment || "").trim());
+
+  if (!wanted.length) {
+    const e = new Error("No work recorded on this slip yet.");
+    e.status = 400; throw e;
+  }
+
+  const lines = slipBlockLines(slip, wanted, all);
+
+  // Priced lines only. The note rows - the machine line, the technician's
+  // comment, SubTotal, the blank spacers, the contact - carry no money.
+  const subtotal = lines.reduce(
+    (n, l) => n + (l.note ? 0 : (Number(l.unit_price) || 0) * (Number(l.quantity) || 0)), 0);
+  const round2 = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
+  const gst = round2(round2(subtotal) * GST_RATE);
+
+  const created = new Date();
+  const until = new Date(created.getTime());
+  until.setDate(until.getDate() + QUOTATION_VALID_DAYS);
+  const iso = (d) => d.toISOString().slice(0, 10);
+
+  return {
+    slip_number: slip.slip_number,
+    // John's call: the quotation is identified by the slip it came from, so
+    // anyone holding either document can find the other.
+    quotation_no: `QT-${slip.slip_number}`,
+    date: iso(created),
+    valid_until: iso(until),
+    valid_days: QUOTATION_VALID_DAYS,
+    customer: slip.company || "",
+    debtor_code: slip.debtor_code || "",
+    contact_name: slip.contact_name || "",
+    contact_number: phoneForOrder(slip.contact_number),
+    lines,
+    subtotal: round2(subtotal),
+    gst_rate: GST_RATE,
+    gst: gst,
+    total: round2(round2(subtotal) + gst),
+    machines: wanted.map((m) => ({ id: m.id, machine_desc: m.machine_desc })),
+  };
 }
 
 // The Sales Order raised for a slip, or null. There is no so_number column on
@@ -1750,7 +1837,7 @@ const slips = {
   poTracking, poStatus, setPoStatus, PO_STATUSES,
   listShipments, getShipment, createShipment, updateShipment,
   allocatedByPo, receivedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
-  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, setMachineState, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, setMachineState, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 
 // ---- One-off: read the status of every open slip again ---------------------

@@ -369,6 +369,62 @@ async function searchDebtors(q, limit = 12) {
 }
 module.exports.searchDebtors = searchDebtors;
 
+// One customer in full, for the header of the Repair Quotation: the address to
+// send it to, and the phone, fax and email the quotation prints.
+//
+// WHY "SELECT *" AND NOT A COLUMN LIST
+// Every other query here names its columns, and this one deliberately does not.
+// AutoCount installations differ in what the Debtor table calls these fields -
+// Address1..4 against Address / Addr1, EmailAddress against Email, Phone1
+// against Tel1 - and a named column that does not exist does not return null,
+// it fails the whole query. That would take the quotation out entirely over a
+// line of the address. One row, read once per quotation, is worth the width.
+//
+// So: take the row, then look for the first name that is actually there.
+const DEBTOR_FIELDS = {
+  company: ["CompanyName", "Company", "Name"],
+  address1: ["Address1", "Addr1", "Address"],
+  address2: ["Address2", "Addr2"],
+  address3: ["Address3", "Addr3"],
+  address4: ["Address4", "Addr4"],
+  postcode: ["PostCode", "Postcode", "PostalCode", "ZipCode"],
+  phone: ["Phone1", "Tel1", "Phone", "Tel"],
+  fax: ["Fax1", "Fax", "FaxNo"],
+  email: ["EmailAddress", "Email", "EMail", "Email1"],
+  attention: ["Attention", "ContactPerson", "Contact"],
+};
+
+function pick(row, names) {
+  // Case-insensitively, because column casing varies between installations.
+  const keys = Object.keys(row);
+  for (const want of names) {
+    const hit = keys.find((k) => k.toLowerCase() === want.toLowerCase());
+    if (hit && row[hit] != null && String(row[hit]).trim()) return String(row[hit]).trim();
+  }
+  return "";
+}
+
+async function getDebtor(accNo) {
+  const acc = String(accNo || "").trim();
+  if (!acc) return null;
+  const rows = await query("SELECT TOP 1 * FROM Debtor WHERE AccNo = @acc", { acc });
+  if (!rows.length) return null;
+  const r = rows[0];
+  const out = { acc_no: acc };
+  for (const [key, names] of Object.entries(DEBTOR_FIELDS)) out[key] = pick(r, names);
+  // The address as it is printed: the lines that exist, in order, with the
+  // postcode joined onto the last one the way a Singapore address reads.
+  const lines = [out.address1, out.address2, out.address3, out.address4].filter(Boolean);
+  if (out.postcode) {
+    const last = lines.length ? lines[lines.length - 1] : "";
+    if (last && !last.includes(out.postcode)) lines[lines.length - 1] = `${last} ${out.postcode}`;
+    else if (!last) lines.push(out.postcode);
+  }
+  out.address_lines = lines;
+  return out;
+}
+module.exports.getDebtor = getDebtor;
+
 // ============================================================================
 // FIND PART — read-only part search + stock info for the Find Part screen.
 // Balance = SUM(StockDTL.Qty) per item (confirmed against live data: opening

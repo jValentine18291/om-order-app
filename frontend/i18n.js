@@ -469,7 +469,7 @@
     "Pick a slip first.": "请先选择服务单。",
     // Pressing Save on a machine is what marks it repaired.
     "Saved · marked as Repaired": "已保存 · 已标记为已修好",
-    "Repair details PDF": "维修明细 PDF",
+    "Send Quotation": "发送报价单",
     // Back to the bench from View Slips, for a slip the workshop's own list no
     // longer shows.
     "Edit parts & repairs": "修改零件与维修",

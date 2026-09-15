@@ -722,6 +722,40 @@
     </div>
   </div>
 
+  <!-- The two terms Sales choose before a Repair Quotation goes out. Asked
+       rather than assumed: they differ per customer, and both are printed on
+       the quotation the customer holds us to. -->
+  <div class="modal-overlay" id="quote-modal" style="display:none">
+    <div class="modal-sheet modal-sheet-narrow">
+      <div class="modal-head">
+        <div>
+          <strong>Send Quotation</strong>
+          <div class="mm-sub" id="quote-sub"></div>
+        </div>
+        <button class="modal-x" id="quote-close" type="button" aria-label="Close">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label for="quote-payment">Payment Term</label>
+          <select id="quote-payment">
+            <option value="30 Days">30 Days</option>
+            <option value="C.O.D">C.O.D</option>
+          </select>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label for="quote-delivery">Delivery Term</label>
+          <select id="quote-delivery">
+            <option value="Ex-Singapore">Ex-Singapore</option>
+            <option value="Export">Export</option>
+          </select>
+        </div>
+        <p class="nsm-hint" id="quote-validity" style="margin-top:12px;"></p>
+        <div class="scan-hint" id="quote-status" style="justify-content:flex-start;min-height:20px"></div>
+        <button class="btn-primary" id="quote-go" type="button" style="width:100%">Create quotation</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="conv-modal" style="display:none">
     <div class="modal-sheet">
       <div class="modal-head">

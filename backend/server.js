@@ -1678,6 +1678,34 @@ app.get("/api/slips/:slip/order", async (req, res) => {
   }
 });
 
+// Everything the Repair Quotation prints, built from the same lines the Sales
+// Order is built from. Read-only: asking for a quotation never moves the slip
+// on, so Sales can produce one, have it queried, and produce it again.
+//
+// The customer's address comes from AutoCount and is looked up here rather than
+// in the browser, so a catalogue that is down or a debtor whose columns differ
+// costs the quotation its address block and nothing more.
+app.get("/api/slips/:slip/quotation", async (req, res) => {
+  try {
+    const q = await data.slips.quotationForSlip(req.params.slip, undefined);
+    q.debtor = null;
+    if (q.debtor_code && (process.env.ITEMS_SOURCE || "sqlite").toLowerCase() === "autocount") {
+      try {
+        q.debtor = await require("./data/autocountRepo").getDebtor(q.debtor_code);
+      } catch (e) {
+        // Said, not swallowed: a quotation that silently loses the customer's
+        // address looks like the address was never there.
+        console.error("[GET /api/slips/:slip/quotation] debtor lookup:", e.message);
+        q.debtor_error = e.message;
+      }
+    }
+    res.json(q);
+  } catch (err) {
+    console.error("[GET /api/slips/:slip/quotation]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to build the quotation" });
+  }
+});
+
 // Sales have keyed the Sales Order into AutoCount and got a DO/INV/CS number
 // back. Its own step, before closing: only once this has happened does anyone
 // ring the customer to come and collect.

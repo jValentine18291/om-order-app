@@ -3355,328 +3355,356 @@ function quotableMachines(slip) {
 }
 
 // Where a machine stands, in words a customer reads rather than ours.
-const PDF_MACHINE_STATE = {
-  RECEIVED: "Assessed \u2014 quotation below",
-  AWAITING_QUOTE: "Quotation below \u2014 awaiting your approval",
-  QUOTED: "Quotation below \u2014 awaiting your approval",
-  TO_REPAIR: "Approved \u2014 repair in progress",
-  REPAIRED: "Repair completed",
-  CONDEMNED: "Not repaired \u2014 beyond economical repair",
-};
+// ---- Repair Quotation PDF --------------------------------------------------
+// What Sales send the customer to approve a repair.
+//
+// Laid out the way OM's AutoCount quotations are laid out, because that is the
+// document this customer already recognises from everything else they buy
+// here - same header, same seven columns, same wording, same terms block.
+//
+// It is built from the SAME lines the Sales Order is built from: the server
+// hands both back from slipBlockLines(), and /api/slips/:slip/quotation adds
+// only GST and a date it expires. Nothing is re-derived in the browser, so the
+// quotation the customer approves and the order raised afterwards cannot
+// disagree about what was quoted or what it came to.
+//
+// Two things in the template are deliberately NOT here, on John's instruction:
+// Delivery Lead-time, which does not apply to a repair, and Warranty.
 
-function buildRepairWorkPdf(slip) {
+const QUOTE_PAYMENT_TERMS = ["30 Days", "C.O.D"];
+const QUOTE_DELIVERY_TERMS = ["Ex-Singapore", "Export"];
+
+// Printed on every quotation, exactly as AutoCount prints it.
+const QUOTE_AFTER_SALES = [
+  // The template prints "≥ S$200.00". That character is not in the encoding
+  // jsPDF's built-in Helvetica uses, and a reader that cannot find the glyph
+  // renders the whole line wrong - it ran across the totals box. Same meaning,
+  // in words the font has.
+  "Free delivery within Singapore (For Total purchase value of S$200.00 Nett and above)",
+  "Free on-site technical handling & basic maintenance training upon request.",
+  "Ex-stock availability for main wear & tear spare parts for units supplied.",
+  "After-sales technical repairs & service available",
+];
+
+const QUOTE_INTRO =
+  "Thank you very much for your kind interest and enquiry on the below-mentioned products, we are "
+  + "pleased to submit our best quotation with attached detailed information for your kind perusal:";
+
+// 30/06/2026 - the way this document writes a date, which is not the way the
+// service slip writes one.
+function quoteDate(iso) {
+  const [y, m, d] = String(iso || "").split("-").map(Number);
+  if (!y || !m || !d) return "";
+  const p = (n) => String(n).padStart(2, "0");
+  return `${p(d)}/${p(m)}/${y}`;
+}
+
+// Money on this document has no dollar sign against it - the column heading
+// carries the S$ once, as the template does.
+const amt2 = (n) => (Number(n) || 0).toFixed(2);
+
+function buildRepairQuotationPdf(q, terms) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: "pt", format: "a4" });
 
-  const machines = quotableMachines(slip);
-  const LEFT = 48, RIGHT = 547, W = RIGHT - LEFT, BOTTOM = 760;
-  const TEAL = [13, 116, 122];
-  const BORDER = [219, 225, 227];
-  const INK = 26, MUTED = 110;
-  let y = 46;
+  const LEFT = 42, RIGHT = 553, W = RIGHT - LEFT;
+  const BOTTOM = 742;
+  const INK = 20, MUTED = 95;
+  const RULE = [120, 120, 120];
 
   const setDraw = (c) => Array.isArray(c) ? doc.setDrawColor(c[0], c[1], c[2]) : doc.setDrawColor(c);
   const setFill = (c) => Array.isArray(c) ? doc.setFillColor(c[0], c[1], c[2]) : doc.setFillColor(c);
   const setText = (c) => Array.isArray(c) ? doc.setTextColor(c[0], c[1], c[2]) : doc.setTextColor(c);
-  // Returns whether it broke, so a caller drawing a table can put its heading
-  // back at the top of the new page.
-  const need = (h) => { if (y + h <= BOTTOM) return false; doc.addPage(); y = 54; return true; };
 
-  // ---- Letterhead ----
-  const MARK = 46;
-  let headBottom = y + MARK;
-  try { doc.addImage(OM_MARK, "PNG", LEFT, y, MARK, MARK); } catch (_) { /* text below */ }
-  try {
-    const nameW = 208, nameH = nameW / OM_NAMEBLOCK_RATIO;
-    doc.addImage(OM_NAMEBLOCK, "PNG", LEFT + MARK + 13, y + (MARK - nameH) / 2, nameW, nameH);
-  } catch (_) {
-    doc.setFontSize(15); doc.setFont("helvetica", "bold"); setText(INK);
-    doc.text("Outboard & Marine Pte Ltd", LEFT + MARK + 13, y + 28);
-  }
-  doc.setFontSize(6.9); doc.setFont("helvetica", "normal"); setText(105);
-  let ay = y + 11;
-  OM_ADDRESS_LINES.forEach((line) => { doc.text(line, RIGHT, ay, { align: "right" }); ay += 9.2; });
-  headBottom = Math.max(headBottom, ay - 5);
+  // The seven columns. QTY, UNIT PRICE and AMOUNT are right-aligned on their
+  // x; ITEM, PART NO., DESCRIPTION and UOM start at theirs.
+  const ITEM_X = 46, PART_X = 78, DESC_X = 196;
+  const QTY_X = 398, UOM_X = 412, UNIT_X = 492, AMT_X = RIGHT;
+  const DESC_W = QTY_X - 10 - DESC_X;
+  // A note row has no quantity or price beside it, so its text may run on into
+  // the space those columns would have used. That is what keeps a machine line
+  // - model, serial, slip number, technician, position - on one line.
+  const NOTE_W = UNIT_X - 8 - DESC_X;
 
-  y = headBottom + 10;
-  setDraw(TEAL); doc.setLineWidth(1.8);
-  doc.line(LEFT, y, RIGHT, y);
-  y += 30;
+  const debtor = q.debtor || null;
+  const addressLines = (debtor && debtor.address_lines) || [];
 
-  // ---- Title + slip number ----
-  const BOX_W = 158, BOX_H = 58, BAND_H = 19;
-  doc.setFontSize(25); doc.setFont("helvetica", "bold"); setText(TEAL);
-  doc.text("Repair Details", LEFT, y + 6);
-  doc.setFontSize(9.2); doc.setFont("helvetica", "normal"); setText(120);
-  // The line under the title tells the customer what is being asked of them,
-  // which is a different thing on a quotation than on a finished repair.
-  const waiting = machines.some((m) => m.state !== "REPAIRED" && m.state !== "CONDEMNED");
-  const done = machines.some((m) => m.state === "REPAIRED");
-  doc.text(
-    waiting && done ? "Work carried out, and work proposed for your approval"
-    : waiting ? "Proposed repairs \u2014 please confirm before we proceed"
-    : "Work carried out on your equipment",
-    LEFT, y + 21);
+  // ---- The header, repeated on every page, exactly as the template repeats it
+  // Returns the y the table body starts at, which is the same on every page.
+  function drawHead() {
+    let y = 38;
+    const MARK = 34;
+    try { doc.addImage(OM_MARK, "PNG", LEFT, y, MARK, MARK); } catch (_) { /* text below */ }
+    try {
+      const nameW = 186, nameH = nameW / OM_NAMEBLOCK_RATIO;
+      doc.addImage(OM_NAMEBLOCK, "PNG", LEFT + MARK + 10, y + (MARK - nameH) / 2, nameW, nameH);
+    } catch (_) {
+      doc.setFontSize(13); doc.setFont("helvetica", "bold"); setText(INK);
+      doc.text("Outboard & Marine Pte Ltd", LEFT + MARK + 10, y + 22);
+    }
 
-  const boxX = RIGHT - BOX_W, boxY = y - 15;
-  setFill(TEAL);
-  doc.roundedRect(boxX, boxY, BOX_W, BAND_H + 6, 4, 4, "F");
-  setFill(255); setDraw(TEAL); doc.setLineWidth(1.1);
-  doc.rect(boxX, boxY + BAND_H, BOX_W, BOX_H - BAND_H, "FD");
-  doc.setFontSize(7.4); doc.setFont("helvetica", "bold"); setText(255);
-  doc.setCharSpace(1.6);
-  doc.text("SLIP NO.", boxX + BOX_W / 2, boxY + 13.5, { align: "center" });
-  doc.setCharSpace(0);
-  doc.setFontSize(23); setText(INK);
-  doc.text(String(slip.slip_number || ""), boxX + BOX_W / 2, boxY + BOX_H - 11, { align: "center" });
-  y = boxY + BOX_H + 24;
+    // The title sits on the same line as the mark, hard right.
+    doc.setFontSize(19); doc.setFont("helvetica", "bold"); setText(INK);
+    doc.text("Repair Quotation", RIGHT, y + 24, { align: "right" });
 
-  // ---- Who it is for ----
-  //
-  // The cells are weighted rather than equal, and the value shrinks to fit
-  // rather than being cut at the first wrapped line. A customer reading their
-  // own name chopped in half on a document we sent them is a bad first
-  // impression, and company names here run long: "SembCorp Marine Facilities
-  // Pte Ltd" does not fit a quarter of the page at 11pt.
-  const META_H = 56;
-  setDraw(BORDER); setFill(252); doc.setLineWidth(0.8);
-  doc.roundedRect(LEFT, y, W, META_H, 5, 5, "FD");
-  const meta = [
-    ["DATE RECEIVED", formatDate(slip.created_at) || "\u2014", 1],
-    ["COMPANY", slip.company || "\u2014", 2.1],
-    ["CONTACT", slip.contact_name || "\u2014", 1.25],
-    ["CONTACT NO.", slip.contact_number || "\u2014", 1],
-  ];
-  const weight = meta.reduce((n, m) => n + m[2], 0);
-  let cx = LEFT;
-  meta.forEach(([label, value, wgt], i) => {
-    const cellW = (W * wgt) / weight;
-    if (i) { setDraw(BORDER); doc.setLineWidth(0.7); doc.line(cx, y + 10, cx, y + META_H - 10); }
-    doc.setFontSize(6.6); doc.setFont("helvetica", "bold"); setText(140);
-    doc.setCharSpace(1.1);
-    doc.text(label, cx + 14, y + 22);
-    doc.setCharSpace(0);
+    // Address, under the mark.
+    let ay = y + MARK + 12;
+    doc.setFontSize(7.1); doc.setFont("helvetica", "normal"); setText(70);
+    OM_ADDRESS_LINES.forEach((line) => { doc.text(line, LEFT, ay); ay += 9.2; });
 
-    // Shrink to fit, then wrap to two lines if even the smallest size is not
-    // enough. Only the last resort loses anything, and by then the name is
-    // longer than anything on a Singapore company register. See pdf-fit.js.
-    doc.setFont("helvetica", "bold");
-    const fit = OM_PDF_FIT.fitCellText(value, cellW - 24, measureBold(doc));
-    doc.setFontSize(fit.size);
-    setText(INK);
-    doc.text(fit.lines, cx + 14, y + (fit.wrapped ? 37 : 43));
-    cx += cellW;
-  });
-  y += META_H + 26;
+    // The reference grid, under the title. Labels bold, values after a colon
+    // on a shared x so they line up however long the labels are.
+    const LBL = 400, COL = 486, VAL = 493;
+    let gy = y + MARK + 8;
+    const grid = [
+      ["Date", quoteDate(q.date)],
+      ["Quotation #", q.quotation_no || ""],
+      ["Customer ID", q.debtor_code || ""],
+      ["Page", ""],   // stamped at the end, once the count is known
+    ];
+    grid.forEach(([label, value]) => {
+      doc.setFontSize(8.4); doc.setFont("helvetica", "bold"); setText(INK);
+      doc.text(label, LBL, gy);
+      doc.text(":", COL, gy);
+      doc.setFont("helvetica", "normal");
+      if (value) doc.text(String(value), VAL, gy);
+      gy += 12.5;
+    });
+    doc.setFontSize(8.4); doc.setFont("helvetica", "normal"); setText(INK);
+    doc.text("Quotation valid until", LBL - 62, gy + 4);
+    doc.text(":", COL, gy + 4);
+    doc.text(quoteDate(q.valid_until), VAL, gy + 4);
 
-  // ---- Notes ----
-  //
-  // The slip's own notes, on the sheet that goes out for quoting. The workshop
-  // writes the job's context in this field - "Site: 512 AMK", "Site: Temasek
-  // Hall (NUS)", "Site: East Coast Park" - and a quotation that does not say
-  // which site it is for is a quotation the customer has to ring up about.
-  //
-  // Printed whole, and not filtered. The customer's acknowledgement copy has
-  // carried this field in full since the slip PDF was written, so nothing
-  // reaches them here that has not already reached them once. Picking out the
-  // lines I judged "internal" would be the surprising change, not this one -
-  // and the field holds things I would have guessed wrong about either way.
-  //
-  // Above the equipment rather than under the total, because it is context for
-  // what follows, and because it stays on the first page there.
-  const slipNotes = String(slip.notes || "").trim();
-  if (slipNotes) {
-    // Measure at the size it is drawn at. splitTextToSize wraps against
-    // whatever font is current, so setting it afterwards wraps to the wrong
-    // width - narrower here, since the cell above leaves 11pt bold set.
-    doc.setFont("helvetica", "normal"); doc.setFontSize(9.4);
-    const lines = doc.splitTextToSize(slipNotes, W - 32);
-    const boxH = 16 + lines.length * 12;
-    need(boxH + 24);
-    doc.setFontSize(6.6); doc.setFont("helvetica", "bold"); setText(TEAL);
-    doc.setCharSpace(1.2);
-    doc.text("NOTES", LEFT, y);
-    doc.setCharSpace(0);
-    y += 10;
-    setDraw(BORDER); setFill(252); doc.setLineWidth(0.8);
-    doc.roundedRect(LEFT, y, W, boxH, 5, 5, "FD");
-    doc.setFontSize(9.4); doc.setFont("helvetica", "normal"); setText(60);
-    doc.text(lines, LEFT + 16, y + 18);
-    y += boxH + 22;
+    // The customer, down the left.
+    let cy = Math.max(ay + 14, y + MARK + 24);
+    doc.setFontSize(9); doc.setFont("helvetica", "normal"); setText(INK);
+    doc.text("CUSTOMER :", LEFT, cy);
+    cy += 16;
+    doc.setFontSize(10.5); doc.setFont("helvetica", "bold");
+    doc.text(String(q.customer || ""), LEFT + 8, cy);
+    cy += 13;
+    doc.setFontSize(9); doc.setFont("helvetica", "normal");
+    addressLines.forEach((line) => { doc.text(String(line), LEFT + 8, cy); cy += 11.5; });
+
+    // Attn / Tel / Fax / Email, as far as the customer record holds them. A
+    // label with nothing after it is left out rather than printed empty.
+    cy += 10;
+    if (debtor && debtor.attention) {
+      doc.text(`Attn : ${debtor.attention}`, LEFT + 8, cy); cy += 12.5;
+    }
+    if (debtor && (debtor.phone || debtor.fax)) {
+      let tx = LEFT + 8;
+      if (debtor.phone) { doc.text(`Tel : ${debtor.phone}`, tx, cy); tx += 150; }
+      if (debtor.fax) doc.text(`Fax : ${debtor.fax}`, tx, cy);
+      cy += 12.5;
+    }
+    if (debtor && debtor.email) {
+      const em = doc.splitTextToSize(`Email : ${debtor.email}`, 300);
+      doc.text(em.slice(0, 2), LEFT + 8, cy);
+      cy += 12.5 * Math.min(2, em.length);
+    }
+
+    // The standing paragraph, then the column headings.
+    let ty = Math.max(cy + 12, 254);
+    doc.setFontSize(8.6); doc.setFont("helvetica", "normal"); setText(INK);
+    const intro = doc.splitTextToSize(QUOTE_INTRO, W);
+    doc.text(intro, LEFT, ty);
+    ty += intro.length * 11 + 8;
+
+    setDraw(RULE); doc.setLineWidth(0.9);
+    doc.line(LEFT, ty, RIGHT, ty);
+    ty += 12;
+    doc.setFontSize(8.2); doc.setFont("helvetica", "normal"); setText(INK);
+    doc.text("ITEM", ITEM_X, ty);
+    doc.text("PART NO.", PART_X, ty);
+    doc.text("DESCRIPTION", DESC_X + 70, ty, { align: "center" });
+    doc.text("QTY", QTY_X, ty, { align: "right" });
+    doc.text("UOM", UOM_X, ty);
+    doc.text("UNIT PRICE", UNIT_X, ty, { align: "right" });
+    doc.text("AMOUNT", AMT_X, ty, { align: "right" });
+    ty += 10;
+    doc.text("S$", UNIT_X, ty, { align: "right" });
+    doc.text("S$", AMT_X, ty, { align: "right" });
+    ty += 5;
+    doc.setLineWidth(0.9);
+    doc.line(LEFT, ty, RIGHT, ty);
+    return ty + 14;
   }
 
-  // ---- One block per machine ----
-  const CODE = LEFT + 10, DESC = LEFT + 108, QTY = RIGHT - 150, UNIT = RIGHT - 78, AMT = RIGHT - 10;
-  const partsHead = () => {
-    setFill(TEAL); doc.rect(LEFT, y, W, 18, "F");
-    doc.setFontSize(6.8); doc.setFont("helvetica", "bold"); setText(255);
-    doc.setCharSpace(1.1);
-    doc.text("PART NO.", CODE, y + 12);
-    doc.text("DESCRIPTION", DESC, y + 12);
-    doc.text("QTY", QTY, y + 12, { align: "right" });
-    doc.text("UNIT PRICE", UNIT, y + 12, { align: "right" });
-    doc.text("AMOUNT", AMT, y + 12, { align: "right" });
-    doc.setCharSpace(0);
-    y += 18;
-  };
+  let y = drawHead();
+  const newPage = () => { doc.addPage(); y = drawHead(); };
+  const need = (h) => { if (y + h > BOTTOM) newPage(); };
 
-  // The equipment-total bar, the total band and the GST note, together: what
-  // has to stay with the last machine.
-  const TOTAL_BLOCK = 34 + 44 + 30;
+  // ---- The lines, as the server built them --------------------------------
+  // The item number counts machines, not rows: it is stamped on the service
+  // line that opens each block and nowhere else, the way the template does it.
+  let itemNo = 0;
+  const lines = q.lines || [];
 
-  let grand = 0;
-  machines.forEach((m, idx) => {
-    // A condemned machine is charged for nothing here, exactly as it is on the
-    // Sales Order. It may well have parts and labour scanned against it - it
-    // was stripped and priced before anyone decided against repairing it - and
-    // none of that was fitted or spent.
-    //
-    // The two documents have to agree. Sales send this sheet, then raise the
-    // order; a customer who reads $140 on one and nothing on the other has
-    // been told two different things about the same machine.
-    const condemned = m.state === "CONDEMNED";
-    const parts = condemned ? [] : (m.parts || []);
-    const labour = condemned ? 0 : Number(m.labour_charge) || 0;
-    let total = labour;
-    for (const p of parts) total += p.unit_price * p.quantity;
-    grand += total;
+  lines.forEach((l) => {
+    const isNote = !!l.note;
+    const desc = String(l.description == null ? "" : l.description);
 
-    // Keep the machine's name with at least the first row under it. A heading
-    // alone at the foot of a page reads as an empty section.
-    //
-    // The LAST machine reserves room for the total band as well, or a sheet
-    // that fits comfortably on one page spills a second one carrying nothing
-    // but "TOTAL" and a footnote - which is what a customer notices first.
-    const last = idx === machines.length - 1;
-    need(last ? 81 + TOTAL_BLOCK : 81);
-    doc.setFontSize(6.6); doc.setFont("helvetica", "bold"); setText(TEAL);
-    doc.setCharSpace(1.2);
-    doc.text(`EQUIPMENT ${idx + 1} OF ${machines.length}`, LEFT, y);
-    doc.setCharSpace(0);
-    y += 14;
-    doc.setFontSize(12.5); doc.setFont("helvetica", "bold"); setText(INK);
-    const name = doc.splitTextToSize(m.machine_desc || "", W - 120);
-    doc.text(name, LEFT, y);
-    if (m.serial_no) {
-      doc.setFontSize(8.6); doc.setFont("helvetica", "normal"); setText(MUTED);
-      doc.text(`S/N ${m.serial_no}`, RIGHT, y, { align: "right" });
-    }
-    y += name.length * 14 + 2;
+    // A blank note row is the gap between one machine and the next.
+    if (isNote && !desc) { y += 9; return; }
 
-    // Where this one stands. Never left out: a sheet carrying a finished
-    // repair beside one nobody has approved yet has to say so on both, or the
-    // customer reads the whole thing as one or the other.
-    const stateLine = PDF_MACHINE_STATE[m.state] || "";
-    if (stateLine) {
-      doc.setFontSize(8.4); doc.setFont("helvetica", "bold");
-      setText(m.state === "CONDEMNED" ? [163, 32, 32]
-            : m.state === "REPAIRED" ? [27, 122, 66] : [168, 91, 0]);
-      doc.text(stateLine, LEFT, y + 9);
-      y += 15;
-    }
-    y += 2;
-
-    // What was done, in the technician's own words. First, because it is the
-    // part a customer reads - the parts list underneath is the evidence for it.
-    const note = String(m.repair_comment || "").trim();
-    if (note) {
-      const lines = doc.splitTextToSize(note, W - 20);
-      need(lines.length * 11 + 14);
-      setFill(248); setDraw(BORDER); doc.setLineWidth(0.7);
-      doc.roundedRect(LEFT, y, W, lines.length * 11 + 12, 4, 4, "FD");
-      doc.setFontSize(9); doc.setFont("helvetica", "normal"); setText(INK);
-      doc.text(lines, LEFT + 10, y + 15);
-      y += lines.length * 11 + 20;
+    if (isNote) {
+      // SubTotal carries a figure in the AMOUNT column and nothing else.
+      const isSubTotal = desc === "SubTotal";
+      const body = doc.splitTextToSize(desc, NOTE_W);
+      need(body.length * 11.5 + 4);
+      doc.setFontSize(8.8); doc.setFont("helvetica", "normal"); setText(INK);
+      doc.text(body, DESC_X, y);
+      if (isSubTotal && l.line_amount != null) {
+        doc.text(amt2(l.line_amount), AMT_X, y, { align: "right" });
+      }
+      y += body.length * 11.5 + 3;
+      return;
     }
 
-    if (parts.length) {
-      need(40);
-      partsHead();
-      doc.setFont("helvetica", "normal"); doc.setFontSize(8.8);
-      parts.forEach((p, i) => {
-        const desc = doc.splitTextToSize(p.description || "", QTY - DESC - 14);
-        const h = Math.max(15, desc.length * 10.5 + 5);
-        if (need(h)) partsHead();
-        if (i % 2) { setFill(249); doc.rect(LEFT, y, W, h, "F"); }
-        setText(INK);
-        doc.text(String(p.item_code || ""), CODE, y + 11);
-        doc.text(desc, DESC, y + 11);
-        doc.text(String(p.quantity), QTY, y + 11, { align: "right" });
-        doc.text(money(p.unit_price), UNIT, y + 11, { align: "right" });
-        doc.text(money(p.unit_price * p.quantity), AMT, y + 11, { align: "right" });
-        y += h;
-      });
-      setDraw(BORDER); doc.setLineWidth(0.7); doc.line(LEFT, y, RIGHT, y);
-      y += 4;
-    }
-
-    if (labour > 0) {
-      need(16);
-      doc.setFont("helvetica", "normal"); doc.setFontSize(8.8); setText(INK);
-      doc.text("Workshop labour", CODE, y + 11);
-      doc.text(money(labour), AMT, y + 11, { align: "right" });
-      y += 16;
-    }
-    if (!parts.length && labour <= 0 && !note) {
-      need(16);
-      doc.setFont("helvetica", "normal"); doc.setFontSize(8.8); setText(MUTED);
-      doc.text("No parts or labour charged.", CODE, y + 11);
-      y += 16;
-    }
-
-    need(24);
-    setFill(246); doc.rect(LEFT, y, W, 20, "F");
-    doc.setFont("helvetica", "bold"); doc.setFontSize(9.6); setText(INK);
-    doc.text("Equipment total", CODE, y + 13.5);
-    doc.text(money(total), AMT, y + 13.5, { align: "right" });
-    y += 34;
+    // A priced row. The service line that opens a machine takes the next item
+    // number; parts under it take none.
+    const opensBlock = /^A[12]\b/.test(String(l.item_code || ""));
+    const qty = Number(l.quantity) || 0;
+    const unit = Number(l.unit_price) || 0;
+    const body = doc.splitTextToSize(desc, DESC_W);
+    need(body.length * 11.5 + 4);
+    doc.setFontSize(8.8); doc.setFont("helvetica", "normal"); setText(INK);
+    if (opensBlock) doc.text(String(++itemNo), ITEM_X, y);
+    doc.text(String(l.item_code || ""), PART_X, y);
+    doc.text(body, DESC_X, y);
+    doc.text(String(qty), QTY_X, y, { align: "right" });
+    doc.text(String(l.uom || ""), UOM_X, y);
+    doc.text(amt2(unit), UNIT_X, y, { align: "right" });
+    doc.text(amt2(unit * qty), AMT_X, y, { align: "right" });
+    y += body.length * 11.5 + 3;
   });
 
-  // ---- Total ----
-  need(46);
-  setFill(TEAL); doc.roundedRect(LEFT, y, W, 34, 4, 4, "F");
-  doc.setFont("helvetica", "bold"); doc.setFontSize(11); setText(255);
-  doc.text(`TOTAL \u2014 ${machines.length} item${machines.length === 1 ? "" : "s"}`, LEFT + 14, y + 22);
-  doc.setFontSize(14);
-  doc.text(money(grand), RIGHT - 14, y + 23, { align: "right" });
-  y += 44;
+  // ---- The foot of the quotation ------------------------------------------
+  // Kept whole: the totals, the terms and the signatures belong on one page,
+  // and a quotation whose TOTAL sits alone on a sheet of its own reads badly.
+  // Measured, not guessed: from the top of the totals box to the baseline under
+  // the signature rules is 220pt. Reserving more than that sent a quotation
+  // that fitted one page onto two, with nothing on the second but the total -
+  // which is the first thing a customer notices.
+  const FOOT_H = 222;
+  if (y + 12 + FOOT_H > BOTTOM) newPage();
+  // Pinned to the foot of the sheet where there is room, so the totals and the
+  // signatures sit where they sit on every other quotation this customer has
+  // had from us, rather than floating up under a short parts list.
+  y = Math.max(y + 12, BOTTOM - FOOT_H);
 
-  need(30);
-  doc.setFont("helvetica", "normal"); doc.setFontSize(8); setText(MUTED);
-  doc.text(doc.splitTextToSize(
-    "All prices are in Singapore Dollars and exclude GST. This is a summary of "
-    + "repair work and is not a tax invoice. Items shown as awaiting approval "
-    + "have not been carried out.", W), LEFT, y);
+  // Totals, boxed, hard right - the first thing anyone looks for.
+  const BOX_L = 452, BOX_W = RIGHT - BOX_L, BOX_H = 20;
+  let by = y;
+  [["SUBTOTAL", q.subtotal],
+   [`GST ${Math.round((q.gst_rate || 0.09) * 100)}%`, q.gst],
+   ["TOTAL", q.total]].forEach(([label, value]) => {
+    doc.setFontSize(9); doc.setFont("helvetica", "bold"); setText(INK);
+    doc.text(label, BOX_L - 10, by + 13.5, { align: "right" });
+    setDraw(INK); setFill(255); doc.setLineWidth(0.8);
+    doc.rect(BOX_L, by, BOX_W, BOX_H, "FD");
+    doc.text(amt2(value), RIGHT - 8, by + 13.5, { align: "right" });
+    by += BOX_H + 6;
+  });
 
-  // ---- Footer, on every page ----
+  // After-sales and the terms, down the left, beside the totals.
+  let fy = y;
+  doc.setFontSize(9); doc.setFont("helvetica", "bold"); setText(INK);
+  doc.text("After-sales Services:", LEFT, fy);
+  fy += 13;
+  doc.setFontSize(8.4); doc.setFont("helvetica", "normal");
+  QUOTE_AFTER_SALES.forEach((line) => { doc.text(line, LEFT, fy); fy += 11; });
+
+  fy += 10;
+  doc.setFontSize(9); doc.setFont("helvetica", "bold");
+  doc.text("Terms & Conditions :", LEFT, fy);
+  fy += 14;
+  const T_LBL = LEFT, T_COL = LEFT + 118, T_VAL = LEFT + 125;
+  [["Payment Term", (terms && terms.payment) || QUOTE_PAYMENT_TERMS[0]],
+   ["Delivery Term", (terms && terms.delivery) || QUOTE_DELIVERY_TERMS[0]],
+   ["Validity of Quotation", `${q.valid_days || 30} Days`]].forEach(([label, value]) => {
+    doc.setFontSize(8.6); doc.setFont("helvetica", "bold"); setText(INK);
+    doc.text(label, T_LBL, fy);
+    doc.text(":", T_COL, fy);
+    doc.setFont("helvetica", "normal");
+    doc.text(String(value), T_VAL, fy);
+    fy += 12.5;
+  });
+
+  // The closing line and the two signatures.
+  let sy = Math.max(fy, by) + 18;
+  doc.setFontSize(8.6); doc.setFont("helvetica", "normal"); setText(INK);
+  doc.text("If you have any questions concerning this quotation, kindly contact our sales personnel on the above details.",
+           LEFT, sy);
+  sy += 26;
+  doc.text("Prepared by:", LEFT, sy);
+  doc.text("Approved by:", LEFT + 320, sy);
+  sy += 40;
+  setDraw(INK); doc.setLineWidth(0.7);
+  doc.line(LEFT, sy, LEFT + 190, sy);
+  doc.line(LEFT + 320, sy, LEFT + 500, sy);
+  sy += 12;
+  doc.setFontSize(8.4);
+  doc.text("OUTBOARD & MARINE (PTE) LTD", LEFT, sy);
+  doc.text("CUSTOMER", LEFT + 320, sy);
+
+  // ---- Page numbers, now that there is a count ----------------------------
   const pages = doc.getNumberOfPages();
   for (let i = 1; i <= pages; i++) {
     doc.setPage(i);
-    setDraw(BORDER); doc.setLineWidth(0.7);
-    doc.line(LEFT, BOTTOM + 12, RIGHT, BOTTOM + 12);
-    doc.setFont("helvetica", "normal"); doc.setFontSize(7); setText(MUTED);
-    doc.text(`Service Slip ${slip.slip_number} \u00b7 Outboard & Marine Pte Ltd`, LEFT, BOTTOM + 24);
-    doc.text(`Page ${i} of ${pages}`, RIGHT, BOTTOM + 24, { align: "right" });
+    doc.setFontSize(8.4); doc.setFont("helvetica", "normal"); setText(INK);
+    doc.text(`${i} of ${pages}`, 493, 38 + 34 + 8 + 37.5);
   }
   return doc.output("blob");
 }
 
-async function shareRepairWorkPdf(slipNumber) {
+// Ask for the two terms, then build and send. Asked every time rather than
+// remembered: they are per customer, and a quotation that quietly carried the
+// last customer's payment terms would be wrong in a way nobody would notice
+// until it was being argued about.
+async function shareRepairQuotation(slipNumber) {
+  let q;
   try {
-    // Re-read rather than using what is on screen: a technician may have
-    // finished another machine since this screen was opened, and the sheet
-    // going to the customer should be the current one.
-    const slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
-    if (!quotableMachines(slip).length) {
-      toast("Nothing recorded on this slip yet", "err");
-      return;
-    }
-    const blob = buildRepairWorkPdf(slip);
-    await deliverPdf(blob, `RepairDetails_${slip.slip_number}.pdf`,
-                     `Repair Details ${slip.slip_number}`);
+    q = await api(`/api/slips/${encodeURIComponent(slipNumber)}/quotation`);
   } catch (e) {
-    toast("Couldn't build the repair details: " + e.message, "err");
+    toast(e.message || "Couldn't build the quotation", "err");
+    return;
   }
+  if (q.debtor_error) {
+    // Say it rather than print a quotation with a silently missing address.
+    toast("Customer address unavailable - quotation will print without it", "err");
+  }
+
+  const modal = $("quote-modal");
+  $("quote-sub").textContent = `Slip ${q.slip_number} · ${q.customer || ""}`;
+  $("quote-validity").textContent =
+    `Valid until ${quoteDate(q.valid_until)} — ${q.valid_days} days from today.`;
+  $("quote-status").textContent = "";
+  modal.style.display = "";
+
+  const close = () => { modal.style.display = "none"; };
+  $("quote-close").onclick = close;
+  modal.onclick = (e) => { if (e.target === modal) close(); };
+
+  $("quote-go").onclick = async () => {
+    const terms = {
+      payment: $("quote-payment").value,
+      delivery: $("quote-delivery").value,
+    };
+    $("quote-go").disabled = true;
+    $("quote-status").textContent = "Preparing…";
+    try {
+      const blob = buildRepairQuotationPdf(q, terms);
+      close();
+      await deliverPdf(blob, `Quotation_${q.slip_number}.pdf`,
+                       `Repair Quotation ${q.quotation_no}`);
+    } catch (e) {
+      $("quote-status").textContent = "Couldn't build it: " + e.message;
+    } finally {
+      $("quote-go").disabled = false;
+    }
+  };
 }
 
 async function makeMachinePrintout() {
@@ -4036,7 +4064,7 @@ async function onViewSlipChosen(slipNumber) {
     const share = document.getElementById("vs-share");
     if (share) share.addEventListener("click", () => shareSlipPdf(slip));
     const repairBtn = document.getElementById("vs-repair-pdf");
-    if (repairBtn) repairBtn.addEventListener("click", () => shareRepairWorkPdf(slip.slip_number));
+    if (repairBtn) repairBtn.addEventListener("click", () => shareRepairQuotation(slip.slip_number));
     wireContactActions(wrap, slip);
     if (share) {
       whatsappStatus().then((wa) => {
@@ -4274,7 +4302,7 @@ function renderSlipDetail(slip) {
     ${contactActionHtml(slip)}
     <button class="btn-primary" id="vs-share" type="button" style="margin-top:10px;">Share PDF</button>${
       quotableMachines(slip).length
-        ? `<button class="btn-secondary" id="vs-repair-pdf" style="margin-top:10px;width:100%;">Repair details PDF</button>` : ""}${
+        ? `<button class="btn-secondary" id="vs-repair-pdf" style="margin-top:10px;width:100%;">Send Quotation</button>` : ""}${
       // The way back to the bench for a slip the workshop's own list no longer
       // shows - which is most of the ones anybody comes here to correct. Same
       // screen the technicians already use, not a second parts editor, so a
