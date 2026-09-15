@@ -427,6 +427,10 @@
     // The other two common requests, and the banner a technician meets on a
     // machine whose customer asked for a quote.
     "Repair only — do not service": "只维修 — 不做保养",
+    // The tickbox, shortened at John's request on 15 Sep 2026. The longer
+    // sentence is kept because the technician's banner and the slip badge
+    // still use it.
+    "Quote First": "先报价",
     "Customer wants a quote first": "客户要求先报价",
     "Add the parts and labour, then send it for quoting.": "先录入零件和工时，然后送去报价。",
     "Quote first": "先报价",

@@ -649,15 +649,19 @@ function commitMachineForm() {
 // Check & Service and Repair only are a choice between each other: "service
 // everything, but do not service anything" is not a request anybody makes.
 // Ticking one clears the other rather than refusing the second tap.
-["ns-check-service", "ns-repair-only"].forEach((id, i, all) => {
-  const box = $(id);
-  if (!box) return;
-  box.addEventListener("change", () => {
-    if (!box.checked) return;
-    const other = $(all[1 - i]);
-    if (other) other.checked = false;
-  });
-});
+// The edit screen carries the same pair, so it gets the same rule from the
+// same code - two copies of "these two are opposites" is one copy that will
+// eventually be wrong.
+[["ns-check-service", "ns-repair-only"], ["vse-check-service", "vse-repair-only"]]
+  .forEach((pair) => pair.forEach((id, i) => {
+    const box = $(id);
+    if (!box) return;
+    box.addEventListener("change", () => {
+      if (!box.checked) return;
+      const other = $(pair[1 - i]);
+      if (other) other.checked = false;
+    });
+  }));
 
 function resetNewServiceForm() {
   ["ns-company", "ns-contact-name", "ns-contact-number", "ns-whatsapp", "ns-notes"].forEach((id) => ($(id).value = ""));
@@ -4530,9 +4534,23 @@ function vseOriginal() {
     contact_number: vseSlip.contact_number || "",
     whatsapp_number: vseSlip.whatsapp_number || "",
     notes: vseSlip.notes || "",
+    // Read as true/false, because that is what the tickboxes answer with. The
+    // slip carries them as 1/0 out of SQLite.
+    check_service: !!vseSlip.check_service,
+    repair_only: !!vseSlip.repair_only,
+    quote_first: !!vseSlip.quote_first,
     machines: m,
   };
 }
+
+// The three tickboxes, paired with the field they came from and the words the
+// change list and the amendment log use for them. One list, so the form, the
+// review screen and the payload cannot name them three different things.
+const VSE_REQUESTS = [
+  ["check_service", "vse-check-service", "Check & Service for all"],
+  ["repair_only",   "vse-repair-only",   "Repair only"],
+  ["quote_first",   "vse-quote-first",   "Quote First"],
+];
 
 function openSlipEdit(slip) {
   vseSlip = slip;
@@ -4542,6 +4560,7 @@ function openSlipEdit(slip) {
   $("vse-contact-number").value = slip.contact_number || "";
   $("vse-whatsapp").value = slip.whatsapp_number || "";
   $("vse-notes").value = slip.notes || "";
+  for (const [field, id] of VSE_REQUESTS) $(id).checked = !!slip[field];
 
   const machines = slip.machines || [];
   $("vse-machines-label").textContent =
@@ -4605,6 +4624,16 @@ function vseWatch() {
     el.dataset.vseWired = "1";
     el.addEventListener("input", vseMarkAll);
   }
+  // Tickboxes report "change", not "input". Wired after the pair rule above so
+  // the count is taken once the other box has already been cleared - otherwise
+  // ticking Repair only would be counted while Check & Service still read as
+  // on, and the Save button would say one change too many for a moment.
+  for (const [, id] of VSE_REQUESTS) {
+    const el = $(id);
+    if (!el || el.dataset.vseWired) continue;
+    el.dataset.vseWired = "1";
+    el.addEventListener("change", vseMarkAll);
+  }
 }
 
 // A field that differs from what was registered is outlined and says what it
@@ -4650,6 +4679,13 @@ function vseMarkAll() {
     const el = $(id);
     if (vseMark(el.closest(".field"), before.trim(), el.value.trim())) n++;
   }
+  // All three share one field box, so they are marked as one: "changed" on the
+  // group, and a "was" line naming what was ticked before. Marking each line
+  // separately would put three amber tags in a stack of three checkboxes.
+  const wasOn = VSE_REQUESTS.filter(([f]) => o[f]).map(([, , label]) => label);
+  const nowOn = VSE_REQUESTS.filter(([, id]) => $(id).checked).map(([, , label]) => label);
+  if (vseMark(document.querySelector('#vse-modal [data-f="requests"]'),
+              wasOn.join(", "), nowOn.join(", "))) n++;
   document.querySelectorAll("#vse-machines .vse-machine").forEach((card) => {
     const was = o.machines[Number(card.dataset.machine)];
     if (!was) return;
@@ -4847,6 +4883,9 @@ function vseCollect() {
     contact_number: val("vse-contact-number"),
     whatsapp_number: val("vse-whatsapp"),
     notes: val("vse-notes"),
+    check_service: $("vse-check-service").checked,
+    repair_only: $("vse-repair-only").checked,
+    quote_first: $("vse-quote-first").checked,
     machines: [],
   };
   const o = vseOriginal();
@@ -4858,6 +4897,14 @@ function vseCollect() {
     ["notes", "Notes"],
   ]) {
     if (o[key].trim() !== payload[key]) customer.push({ label, before: o[key].trim(), after: payload[key] });
+  }
+  // One row per tickbox that moved, reading "Yes" / "No" - the same words the
+  // amendment log uses, so the screen that asks and the record that keeps it
+  // say the same thing.
+  for (const [key, , label] of VSE_REQUESTS) {
+    if (!!o[key] !== !!payload[key]) {
+      customer.push({ label, before: o[key] ? "Yes" : "No", after: payload[key] ? "Yes" : "No" });
+    }
   }
   if (customer.length) groups.push({ title: "Customer", rows: customer });
 

@@ -523,7 +523,7 @@
         <label>Common requests</label>
         <label class="ns-check-line"><input type="checkbox" id="ns-check-service" /> Check &amp; Service for all</label>
         <label class="ns-check-line"><input type="checkbox" id="ns-repair-only" /> Repair only &mdash; do not service</label>
-        <label class="ns-check-line ns-check-quote"><input type="checkbox" id="ns-quote-first" /> Customer wants a quote first</label>
+        <label class="ns-check-line ns-check-quote"><input type="checkbox" id="ns-quote-first" /> Quote First</label>
         <p class="nsm-hint">The technician is shown this, and sends the machine for quoting once they know the cost.</p>
       </div>
 
@@ -1149,6 +1149,15 @@
           <div class="field">
             <label for="vse-notes">Notes</label>
             <textarea id="vse-notes" rows="2"></textarea>
+          </div>
+          <!-- Customers change their mind after the slip is written - "actually,
+               quote me first" is a phone call, not a new slip. Same three as
+               the registration form, and the first two still clear each other. -->
+          <div class="field" data-f="requests">
+            <div class="vse-lab"><label>Common requests</label></div>
+            <label class="ns-check-line"><input type="checkbox" id="vse-check-service" /> Check &amp; Service for all</label>
+            <label class="ns-check-line"><input type="checkbox" id="vse-repair-only" /> Repair only &mdash; do not service</label>
+            <label class="ns-check-line ns-check-quote"><input type="checkbox" id="vse-quote-first" /> Quote First</label>
           </div>
         </div>
       </div>

@@ -1381,17 +1381,39 @@ function renumberSlipMachines(slipId) {
 }
 
 // ---- Editing a slip's registration details ----------------------------------
-// What was written down at the counter: company, contacts, notes, and each
-// machine's name, serial and intake remarks. Parts, labour, comments and
-// status are the WORK and live in Open Service - not touched here. A closed
-// slip is a finished record and is refused.
-function updateSlipDetails(slipNumber, { company, contact_name, contact_number, whatsapp_number, notes, machines, who = "" } = {}) {
+// What was written down at the counter: company, contacts, notes, what the
+// customer asked for, and each machine's name, serial and intake remarks.
+// Parts, labour, comments and status are the WORK and live in Open Service -
+// not touched here. A closed slip is a finished record and is refused.
+function updateSlipDetails(slipNumber, { company, contact_name, contact_number, whatsapp_number, notes, machines, check_service, repair_only, quote_first, who = "" } = {}) {
   const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
   if (slip.status === "CLOSED") { const e = new Error("Slip is closed and can no longer be edited."); e.status = 409; throw e; }
 
   const newCompany = company === undefined ? slip.company : String(company || "").trim();
   if (!newCompany) { const e = new Error("Company cannot be empty."); e.status = 400; throw e; }
+
+  // What the customer asked for, which they are entitled to change their mind
+  // about after the slip is written - "actually, quote me first" is a phone
+  // call, not a new slip.
+  //
+  // undefined is "the client did not send it", the same rule the machine
+  // fields follow: a phone running a cached copy of the app from before this
+  // existed must not silently clear all three.
+  const flag = (sent, stored) => (sent === undefined ? (stored ? 1 : 0) : (sent ? 1 : 0));
+  let newCheck = flag(check_service, slip.check_service);
+  let newRepairOnly = flag(repair_only, slip.repair_only);
+  const newQuoteFirst = flag(quote_first, slip.quote_first);
+  // The first two are opposites - "service everything" and "service nothing" -
+  // and the form clears one when the other is ticked. Enforced here as well,
+  // because a stale client or a hand-rolled call could send both, and a slip
+  // that asks for both tells the technician nothing. The one just turned on
+  // wins; with both arriving on, Repair only does, because it is the narrower
+  // instruction and doing less work than asked is the safer way to be wrong.
+  if (newCheck && newRepairOnly) {
+    if (check_service !== undefined && !slip.check_service) newRepairOnly = 0;
+    else newCheck = 0;
+  }
 
   const own = db.prepare("SELECT id FROM slip_machines WHERE slip_id = ?").all(slip.id).map((r) => r.id);
   const ownSet = new Set(own);
@@ -1440,6 +1462,17 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
   note("Contact number", before.contact_number, contact_number === undefined ? before.contact_number : contact_number);
   note("WhatsApp number", before.whatsapp_number, whatsapp_number === undefined ? before.whatsapp_number : whatsapp_number);
   note("Notes", before.notes, notes === undefined ? before.notes : notes);
+  // These print on the customer's copy, so changing one after they signed is
+  // recorded like anything else on it. Written as Yes/No rather than 1/0: the
+  // log is read by people, and "Quote First: "" -> "1"" says nothing.
+  const yesNo = (v) => (v ? "Yes" : "No");
+  for (const [label, was, now] of [
+    ["Check & Service for all", slip.check_service, newCheck],
+    ["Repair only", slip.repair_only, newRepairOnly],
+    ["Quote First", slip.quote_first, newQuoteFirst],
+  ]) {
+    if (!!was !== !!now) changes.push({ field: label, before: yesNo(was), after: yesNo(now) });
+  }
   for (const m of mEdits) {
     const was = machineById.get(m.id) || {};
     note(`Machine "${was.machine_desc || ""}"`, was.machine_desc, m.desc);
@@ -1452,7 +1485,8 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
      VALUES (?, ?, ?, ?, ?)`
   );
   const updSlip = db.prepare(
-    `UPDATE service_slips SET company = ?, contact_name = ?, contact_number = ?, whatsapp_number = ?, notes = ?
+    `UPDATE service_slips SET company = ?, contact_name = ?, contact_number = ?, whatsapp_number = ?, notes = ?,
+            check_service = ?, repair_only = ?, quote_first = ?
       WHERE id = ?`
   );
   const updMachine = db.prepare(
@@ -1473,6 +1507,7 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
       contact_number === undefined ? slip.contact_number : String(contact_number || "").trim(),
       whatsapp_number === undefined ? slip.whatsapp_number : String(whatsapp_number || "").trim(),
       notes === undefined ? slip.notes : String(notes || "").trim(),
+      newCheck, newRepairOnly, newQuoteFirst,
       slip.id
     );
     for (const m of mEdits) {
