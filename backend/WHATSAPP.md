@@ -40,9 +40,16 @@ Turning it on later is one line here — no app deploy.
     WHATSAPP_TEMPLATE_LANG     its language code (default "en")
 
 These live in the OMService service configuration alongside the AutoCount
-credentials. Set them with `nssm edit OMService` — **not** `nssm set
-AppEnvironmentExtra`, which replaces the whole list and would wipe the
-AutoCount login.
+credentials. Set them from an **Administrator** Command Prompt on the server:
+
+    C:\nssm\nssm.exe edit OMService
+
+NSSM is not on the PATH, so the full path is the command — typing `nssm` alone
+answers "not recognized", which has now cost two people ten minutes. The
+Environment tab holds every setting; **add** a line and leave the rest alone.
+
+Never `nssm set ... AppEnvironmentExtra`: it replaces the whole list and would
+wipe the AutoCount login along with everything else.
 
 ## Phone numbers
 
