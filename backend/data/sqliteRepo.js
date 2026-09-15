@@ -1286,6 +1286,94 @@ function searchSlips(query = "", scope = "all", limit = 20) {
   return { results: trimmed, hasMore };
 }
 
+// ---- A machine the counter forgot -------------------------------------------
+//
+// Its own function rather than a corner of updateSlipDetails, because it is a
+// different act. That screen corrects what a machine is CALLED; this one says
+// another machine is in the building. The amendment log says so in those
+// words, so "Changed after the customer signed" reads "Machine added" rather
+// than implying something was renamed.
+//
+// The customer signed for the machines on their copy, and nothing here can
+// change that - the signed snapshot is untouched. What this does is record the
+// addition, dated and attributed, so the slip and the customer's copy can be
+// told apart deliberately rather than by accident.
+function addMachineToSlip(slipNumber, machine, who = "") {
+  const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
+  if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
+  // Same bar as editing: a closed slip is a finished record. Everything short
+  // of that is allowed, including a slip already quoted, ordered or invoiced -
+  // a machine that turns up late turns up late, and refusing to record it just
+  // means it is not written down anywhere.
+  if (slip.status === "CLOSED") {
+    const e = new Error("Slip is closed and can no longer be edited.");
+    e.status = 409; throw e;
+  }
+
+  const m = machine || {};
+  const desc = String(m.desc || m.machine_desc || "").trim();
+  if (!desc) { const e = new Error("Model No. is required."); e.status = 400; throw e; }
+
+  // Same shape the registration form sends, so one machine or several of the
+  // same model both work the way they do at the counter.
+  const qty = Math.max(1, Math.min(20, parseInt(m.qty, 10) || 1));
+  const serial = String(m.serial || m.serial_no || "").trim();
+  const remarks = String(m.remarks || "").trim().slice(0, 500);
+  const code = String(m.machine_code || m.code || "").trim();
+  const type = String(m.machine_type || "").trim().slice(0, 40);
+
+  const insertMachine = db.prepare(
+    "INSERT INTO slip_machines (slip_id, machine_desc, machine_code, serial_no, remarks, machine_type, state) VALUES (?, ?, ?, ?, ?, ?, 'RECEIVED')"
+  );
+  const insertAmendment = db.prepare(
+    "INSERT INTO slip_amendments (slip_id, field, before, after, changed_by) VALUES (?, ?, ?, ?, ?)"
+  );
+  // Logged only against a signed slip, for the same reason the edit screen
+  // only logs then: with no signature there is nothing the change departs from.
+  const signed = db.prepare("SELECT slip_id FROM slip_signatures WHERE slip_id = ?").get(slip.id);
+
+  const added = [];
+  const tx = db.transaction(() => {
+    for (let i = 0; i < qty; i++) {
+      added.push(Number(insertMachine.run(slip.id, desc, code, serial, remarks, type).lastInsertRowid));
+    }
+    renumberSlipMachines(slip.id);
+    if (signed) {
+      insertAmendment.run(slip.id, "Machine added", "",
+        qty > 1 ? `${desc} ×${qty}` : desc, String(who || "").trim());
+    }
+  });
+  tx();
+  // A machine that has just arrived is work nobody has done yet, so a slip that
+  // had run ahead to "Call Customer" drops back. Worked out from the machines,
+  // never set here - the same as everywhere else.
+  deriveSlipStatus(slip.id);
+  return { ...getSlip(slipNumber), added_machine_ids: added };
+}
+
+// Renumber the "- 1/3" tails after the slip's machine count changes.
+//
+// The counter writes these at registration so five machines on one slip can be
+// told apart on the workshop floor, and they are cosmetic - the only code that
+// reads them is slipBlockLines(), which strips them off again.
+//
+// New machines are always appended, so no machine's OWN number ever moves;
+// only the total does. A customer holding a slip that says "1/2" has machine 1
+// of what was then two - still machine 1, and the amendment log is what says a
+// third arrived. A slip down to one machine loses the tail entirely: "- 1/1"
+// is noise, which is the same rule the registration form follows.
+function renumberSlipMachines(slipId) {
+  const rows = db.prepare(
+    "SELECT id, machine_desc FROM slip_machines WHERE slip_id = ? ORDER BY id"
+  ).all(slipId);
+  const upd = db.prepare("UPDATE slip_machines SET machine_desc = ? WHERE id = ?");
+  rows.forEach((r, i) => {
+    const base = String(r.machine_desc || "").replace(/\s-\s\d+\/\d+$/, "").trim();
+    const want = rows.length > 1 ? `${base} - ${i + 1}/${rows.length}` : base;
+    if (want !== r.machine_desc) upd.run(want, r.id);
+  });
+}
+
 // ---- Editing a slip's registration details ----------------------------------
 // What was written down at the counter: company, contacts, notes, and each
 // machine's name, serial and intake remarks. Parts, labour, comments and
@@ -1955,7 +2043,7 @@ const slips = {
   poTracking, poStatus, setPoStatus, PO_STATUSES,
   listShipments, getShipment, createShipment, updateShipment,
   allocatedByPo, receivedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
-  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, setMachineState, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 
 // ---- One-off: read the status of every open slip again ---------------------

@@ -4246,7 +4246,12 @@ function renderSlipDetail(slip) {
       ${slipSoLine(slip)}
       ${meta.length ? `<div class="vs-sub">${meta.join(" · ")}</div>` : ""}
       ${(slip.amendments || []).length ? `<div class="vs-amended"><b>Changed after the customer signed</b>${
-        slip.amendments.map((a) => `<div>${escapeHtml(a.field)}: &ldquo;${escapeHtml(a.before || "—")}&rdquo; &rarr; &ldquo;${escapeHtml(a.after || "—")}&rdquo;${
+        slip.amendments.map((a) => `<div>${escapeHtml(a.field)}: ${
+          // A machine that was added has no "before" - it was not there. The
+          // "—" → arrow is how a CORRECTION reads, and printing it here would
+          // say the machine used to be called nothing.
+          a.before ? `&ldquo;${escapeHtml(a.before)}&rdquo; &rarr; ` : ""
+        }&ldquo;${escapeHtml(a.after || "—")}&rdquo;${
           a.changed_by ? ` · ${escapeHtml(a.changed_by)}` : ""}${a.changed_at ? ` · ${escapeHtml(String(a.changed_at).slice(0, 10))}` : ""}</div>`).join("")
       }</div>` : ""}
       ${requestBadgesHtml(slip, "vs")}
@@ -4694,6 +4699,99 @@ function closeSlipEdit() {
 }
 $("vse-close").addEventListener("click", closeSlipEdit);
 $("vse-cancel").addEventListener("click", closeSlipEdit);
+
+// ---- Adding a machine somebody forgot ---------------------------------------
+//
+// Saved on its own, not through this screen's Save.
+//
+// It has to be, because the server renumbers the "- 1/3" tails when the count
+// changes, so every machine's name on the form goes stale the moment one is
+// added. Re-reading the form would then save those stale names straight back
+// and undo the renumbering. So: nothing pending, add, reload. The button says
+// so rather than silently doing nothing.
+function vseAddOpen() {
+  if (!vseSlip) return;
+  // vseMarkAll() is the same count the Save button shows, so the two can never
+  // disagree about whether there is anything unsaved.
+  if (vseMarkAll() > 0) {
+    const hint = $("vse-addm-hint");
+    hint.style.display = "block";
+    setTimeout(() => { hint.style.display = "none"; }, 4000);
+    $("vse-save").focus();
+    return;
+  }
+  $("vsa-sub").textContent = `Slip ${vseSlip.slip_number} · ${vseSlip.company}`;
+  $("vsa-signed").style.display = vseSlip.has_signature ? "flex" : "none";
+  $("vsa-model").value = "";
+  $("vsa-qty").value = "1";
+  $("vsa-serial").value = "";
+  $("vsa-remarks").value = "";
+  $("vsa-status").innerHTML = "";
+  $("vsa-go").disabled = false;
+  vsaSerialHint();
+  $("vsa-modal").style.display = "flex";
+  setTimeout(() => $("vsa-model").focus(), 50);
+}
+
+// Above one unit the serial box covers all of them - the same wording as the
+// registration form, because it is the same fact.
+function vsaSerialHint() {
+  const qty = Math.max(1, parseInt($("vsa-qty").value, 10) || 1);
+  const hint = $("vsa-serial-hint");
+  hint.textContent = qty > 1
+    ? `This adds ${qty} separate machines to the slip. Anything typed here is recorded against all ${qty}.` : "";
+  hint.style.display = qty > 1 ? "block" : "none";
+}
+
+function closeVsa() { $("vsa-modal").style.display = "none"; }
+
+$("vse-addm").addEventListener("click", vseAddOpen);
+$("vsa-close").addEventListener("click", closeVsa);
+$("vsa-qty").addEventListener("input", vsaSerialHint);
+$("vsa-qty-dec").addEventListener("click", () => {
+  $("vsa-qty").value = Math.max(1, (parseInt($("vsa-qty").value, 10) || 1) - 1);
+  vsaSerialHint();
+});
+$("vsa-qty-inc").addEventListener("click", () => {
+  $("vsa-qty").value = Math.min(20, (parseInt($("vsa-qty").value, 10) || 1) + 1);
+  vsaSerialHint();
+});
+
+$("vsa-go").addEventListener("click", async () => {
+  if (!vseSlip) return;
+  const desc = $("vsa-model").value.trim();
+  if (!desc) {
+    $("vsa-status").innerHTML = statusErr("Model No. is required.");
+    $("vsa-model").focus();
+    return;
+  }
+  const qty = Math.max(1, Math.min(20, parseInt($("vsa-qty").value, 10) || 1));
+  const btn = $("vsa-go");
+  btn.disabled = true;
+  try {
+    await api(`/api/slips/${encodeURIComponent(vseSlip.slip_number)}/machines`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        role: getRole(), who: initialsFor(getUser()),
+        desc, qty,
+        serial: $("vsa-serial").value.trim(),
+        remarks: $("vsa-remarks").value.trim(),
+      }),
+    });
+    toast(qty === 1 ? "Machine added" : `${qty} machines added`, "ok");
+    // Back to the slip rather than back to the edit form: the machine numbers
+    // have just moved, and the slip is where somebody checks that what they
+    // added is now on it.
+    const n = vseSlip.slip_number;
+    closeVsa();
+    closeSlipEdit();
+    onViewSlipChosen(n);
+  } catch (e) {
+    $("vsa-status").innerHTML = statusErr(e.message || "Could not add the machine");
+    btn.disabled = false;
+  }
+});
 
 // What the form says now, against what was registered. One pass produces both
 // the payload and the list a person reads, so the two cannot disagree.

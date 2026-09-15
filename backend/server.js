@@ -1502,6 +1502,27 @@ app.patch("/api/slips/:slip/details", async (req, res) => {
   }
 });
 
+// Add a machine to a slip that is already registered - the one the counter
+// forgot. Separate from the edit above because it is a different act and is
+// recorded as one: that PATCH corrects what a machine is called, this POST
+// says another machine came in.
+app.post("/api/slips/:slip/machines", async (req, res) => {
+  try {
+    const body = req.body || {};
+    if (!["sales", "purchaser", "admin"].includes(String(body.role || "").toLowerCase())) {
+      return res.status(403).json({ error: "Only Sales, Purchaser and Admin can add a machine." });
+    }
+    // Looked up here, exactly as at registration, so the added machine is
+    // named on the documents the same way the others are.
+    const [machine] = await withMachineTypes([{ ...body, desc: body.desc || body.machine_desc }]);
+    res.json(data.slips.addMachineToSlip(req.params.slip, machine, body.who || ""));
+  } catch (err) {
+    if ([400, 404, 409].includes(err.status)) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/slips/:slip/machines]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to add the machine" });
+  }
+});
+
 // Push an app order into AutoCount as a Sales Order. Kept separate from the
 // conversion itself so a failure here never undoes work the workshop has
 // already done - the slip stays converted and the push can be retried.

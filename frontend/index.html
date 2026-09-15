@@ -901,6 +901,51 @@
     </div>
   </div>
 
+  <!-- A machine added to a slip that is already registered. Deliberately the
+       same four fields as the registration form, so it is the form the counter
+       already knows - only the warning underneath is different, because this
+       one lands on a slip the customer may already have signed for. -->
+  <div class="modal-overlay" id="vsa-modal" style="display:none">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div>
+          <strong>Add a machine</strong>
+          <div class="mm-sub" id="vsa-sub"></div>
+        </div>
+        <button class="modal-x" id="vsa-close" type="button" aria-label="Close">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <div class="vse-signed" id="vsa-signed" style="display:none">
+          <span aria-hidden="true">&#9998;</span>
+          <span>The customer signed this slip. Adding a machine is recorded on it, and their copy will not list it &mdash; share the slip again so they have one that does.</span>
+        </div>
+        <div class="field">
+          <label for="vsa-model">Model No. <span class="req">*</span></label>
+          <input id="vsa-model" type="text" autocomplete="off" placeholder="e.g. EBZ5100" />
+        </div>
+        <div class="field">
+          <label for="vsa-qty">Qty <span class="req">*</span></label>
+          <div class="ns-qty">
+            <button type="button" class="ns-qty-dec" id="vsa-qty-dec" aria-label="Decrease quantity">&minus;</button>
+            <input id="vsa-qty" type="number" value="1" min="1" inputmode="numeric" aria-label="Quantity" />
+            <button type="button" class="ns-qty-inc" id="vsa-qty-inc" aria-label="Increase quantity">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="vsa-serial">Serial No. <span style="color:var(--ink-faint);font-weight:400;">(if applicable)</span></label>
+          <input id="vsa-serial" type="text" autocomplete="off" placeholder="e.g. 20231100123" />
+          <p class="nsm-hint" id="vsa-serial-hint" style="display:none"></p>
+        </div>
+        <div class="field">
+          <label for="vsa-remarks">Remarks <span style="color:var(--ink-faint);font-weight:400;">(optional &mdash; what the customer reported)</span></label>
+          <textarea id="vsa-remarks" rows="2" placeholder="e.g. Won't start, chain keeps slipping"></textarea>
+        </div>
+        <div class="scan-hint" id="vsa-status" style="justify-content:flex-start;min-height:20px"></div>
+        <button class="btn-primary" id="vsa-go" type="button" style="width:100%">Add to slip</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Customer signature pad -->
   <div class="modal-overlay" id="sig-modal" style="display:none">
     <div class="modal-sheet">
@@ -1110,6 +1155,15 @@
 
       <div class="vse-sec"><span id="vse-machines-label">Machines</span></div>
       <div id="vse-machines"></div>
+
+      <!-- For the machine that was in the van and not on the slip. Its own
+           button rather than a blank card in the list above, because adding a
+           machine is saved on its own and the rest of this screen is not - see
+           vseAddOpen() for why the two cannot share one Save. -->
+      <div class="vse-addrow">
+        <button class="btn-secondary" id="vse-addm" type="button">+ Add a machine</button>
+        <p class="nsm-hint" id="vse-addm-hint" style="display:none">Save or cancel your changes first.</p>
+      </div>
 
       <!-- Sticky, so Save is at the bottom of the SCREEN rather than the
            bottom of a scroll that grows with every machine on the slip. -->
