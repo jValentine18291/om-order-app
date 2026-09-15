@@ -1,0 +1,55 @@
+# Titles as printed on the 536Li XP's own drawings, read off the sheets.
+#
+# NOT THE SAME BOOK AS hust536li
+# That one is the T536Li XP, the top-handle saw. This is the 536Li XP, and the
+# drawings themselves say so - every sheet here is headed "536 LiXP / 436 Li",
+# where the T536Li's are headed "T536Li XP". Two machines, two books.
+#
+# THREE SHEETS ARE ALL FILED "ELECTRICAL"
+# The portal gives the same name to all three, so the app would show ELECTRICAL
+# (1 of 3), (2 of 3) and (3 of 3) with nothing to choose between them. The
+# drawings name them, and two of the three are BOTH "control unit gen 2",
+# telling apart only by serial number:
+#
+#   D1   ELECTRIC, CONTROL UNIT GEN 1
+#   D2   ELECTRIC, CONTROL UNIT GEN 2    UP TO S/N 20180600001
+#   D3   ELECTRIC, CONTROL UNIT GEN 2    FROM S/N 20180600001 -
+#
+# So the serial range is part of the title, not a detail. Without it the app
+# offers two identical buttons for two different control units, and the wrong
+# one is a part that does not fit a saw somebody has taken apart.
+#
+# THE CUT-OFF IS NOT THE T536Li's. That book breaks at 20180600615; this one
+# breaks at 20180600001. Both were read off the drawings at 4x rather than
+# carried across, because one transposed digit here sends a technician to the
+# wrong control unit.
+#
+# Sheet A is "CRANK CASE" on the drawing and "CRANKCASE" in the export. The
+# drawing wins - it is the page in front of the technician - and it matches
+# what the T536Li book already says.
+#
+# THE ORDER IS THE BOOK'S, NOT THE EXPORT'S
+# The export lists them D1, B, C, D2, E, D3, A, which puts the crank case last
+# and scatters the three control-unit sheets across figures 1, 4 and 6. The
+# letters on the drawings run A, B, C, D1, D2, D3, E, which is the order the
+# book is bound in and what somebody choosing between the three control units
+# expects to find together. Hence --order below.
+#
+# TO RE-IMPORT THIS BOOK, exactly this - the order and the titles go together,
+# because the titles are positional and would otherwise land on the wrong
+# sheets:
+#
+#   python tools/ipl-import-csv.py --csv "536Li XP IPL.csv" \
+#     --id hus536li --name "Husqvarna 536Li XP Chainsaw" \
+#     --short "536Li XP" --brand Husqvarna --category Chainsaw \
+#     --order "7,2,3,1,4,6,5" --titles tools/ipl-hus536li.titles.txt
+#
+# One line per sheet, in the order --dry-run lists them AFTER --order.
+# "-" keeps the export's own name for that sheet.
+CRANK CASE
+CLUTCH
+CHAIN BRAKE
+ELECTRIC, CONTROL UNIT GEN 1
+ELECTRIC, CONTROL UNIT GEN 2 (up to s/n 20180600001)
+ELECTRIC, CONTROL UNIT GEN 2 (from s/n 20180600001)
+ACCESSORIES

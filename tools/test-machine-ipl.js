@@ -160,10 +160,37 @@ check("another Automower claims none of them",
    match(machine("UHUQ AM435XAWD 967853321", "Robotic Automower 435X AWD  (SE Version)"))],
   ["", ""]);
 
-// And the field is optional: every other book carries none.
+// And the field is optional: most books carry none. This list is a tripwire,
+// not a ban - an alias is a claim that one book serves a machine it is not
+// named after, and every one of them should have been looked at. The four:
+//
+//   the three Automowers   AutoCount's code and description share no words
+//                          with the name on the drawings, so the books were
+//                          unreachable from a slip written off the catalogue
+//   hus536li               every sheet in the book is headed "536 LiXP /
+//                          436 Li", so Husqvarna publish it as one book for
+//                          two saws. Without the alias a 436Li finds nothing.
 const withAliases = INDEX.filter((e) => e.aliases);
 check("only the machines that needed them have aliases",
-  withAliases.map((e) => e.id).sort(), ["am450x", "am535epos", "am550epos"]);
+  withAliases.map((e) => e.id).sort(), ["am450x", "am535epos", "am550epos", "hus536li"]);
+
+// The 536 saws, which are two machines one letter apart.
+//
+// The top-handle T536Li XP and the rear-handle 536Li XP are separate books
+// with nearly the same name, and the 436Li rides along in the second. Sending
+// a technician to the wrong one of these is sending them to a saw with a
+// different control unit, so all three are checked by name.
+check("the rear-handle saw finds its own book",
+  [match(machine("", "536LiXP")), match(machine("", "536Li XP")),
+   match(machine("", "Husqvarna 536LiXP Chainsaw"))],
+  ["hus536li", "hus536li", "hus536li"]);
+check("the top-handle one is not confused with it",
+  [match(machine("", "T536LiXP")), match(machine("", "T536Li XP")),
+   match(machine("", "T536Li"))],
+  ["hust536li", "hust536li", "hust536li"]);
+check("and the 436Li shares the rear-handle book, as its drawings say",
+  [match(machine("", "436Li")), match(machine("", "436 Li"))],
+  ["hus536li", "hus536li"]);
 // A machine whose name merely contains the digits, and which has no book here.
 check("and a 525iB battery blower is not a T525",
   match(machine("", "525iB Battery Blower - 1/2")), "");

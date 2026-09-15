@@ -352,5 +352,17 @@
   "category": "Chipper Shredder",
   "figures": 51,
   "parts": 1356
+ },
+ {
+  "id": "hus536li",
+  "name": "Husqvarna 536Li XP Chainsaw",
+  "short": "536Li XP",
+  "brand": "Husqvarna",
+  "category": "Chainsaw",
+  "figures": 7,
+  "parts": 94,
+  "aliases": [
+   "436Li"
+  ]
  }
 ]
