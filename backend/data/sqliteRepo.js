@@ -569,14 +569,16 @@ const LABOUR_DESCRIPTION = "Being repair & replacement of part :-";
 const PEST_ITEM_CODE = "A2 SVR PEST MGT EQUIPT";
 const PEST_DESCRIPTION = "Being repair & replacement of part for pest management equipment.";
 
-// Which of the two a machine takes. The rule for "is this a fogger" is the one
-// the app already uses for the tube buttons, imported rather than rewritten -
-// see the note at the foot of fogger-tubes.js.
+// Which item a machine takes - A1 landscape, A2 pest, A3 ride-on, A12
+// Automower. The table and the rules live in service-items.js so a model can be
+// added without touching this file; the fogger rule is the one the app already
+// uses for the tube buttons, passed in rather than rewritten - see the note at
+// the foot of fogger-tubes.js.
 const FOGGER = require(require("path").join(__dirname, "..", "..", "frontend", "fogger-tubes.js"));
+const SERVICE = require(require("path").join(__dirname, "..", "..", "frontend", "service-items.js"));
 function serviceItemFor(machine) {
-  return FOGGER.isFogger(machine)
-    ? { item_code: PEST_ITEM_CODE, description: PEST_DESCRIPTION }
-    : { item_code: LABOUR_ITEM_CODE, description: LABOUR_DESCRIPTION };
+  const it = SERVICE.itemFor(machine, FOGGER.isFogger);
+  return { item_code: it.item_code, description: it.description };
 }
 
 // A condemned machine still goes on the order. The customer is collecting it
@@ -808,7 +810,7 @@ const QUOTATION_VALID_DAYS = 30;
 function quotationFingerprint(lines, terms) {
   const t = terms || {};
   return JSON.stringify([
-    String(t.payment || ""), String(t.delivery || ""),
+    String(t.payment || ""), String(t.delivery || ""), String(t.service || ""),
     (lines || []).map((l) => [
       l.note ? "" : String(l.item_code || ""),
       String(l.description == null ? "" : l.description),
@@ -836,7 +838,7 @@ function slipQuotations(slipNumber) {
 // quotation twice is not an error and does not raise the number - it hands
 // back the number that quotation already has, so a re-send is a re-send.
 function issueQuotation(slipNumber, terms) {
-  const q = quotationForSlip(slipNumber);
+  const q = quotationForSlip(slipNumber, undefined, terms);
   const fp = quotationFingerprint(q.lines, terms);
   const last = db.prepare(
     "SELECT * FROM slip_quotations WHERE slip_number = ? ORDER BY seq DESC LIMIT 1"
@@ -857,7 +859,7 @@ function issueQuotation(slipNumber, terms) {
   return { ...q, quotation_no: ref, seq, revision: seq > 1, terms };
 }
 
-function quotationForSlip(slipNumber, machineIds) {
+function quotationForSlip(slipNumber, machineIds, opts) {
   const slip = getSlip(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
 
@@ -878,7 +880,22 @@ function quotationForSlip(slipNumber, machineIds) {
     e.status = 400; throw e;
   }
 
-  const lines = slipBlockLines(slip, wanted, all);
+  let lines = slipBlockLines(slip, wanted, all);
+
+  // Sales can force one service item across the whole quotation, for a slip
+  // written before the app knew a rider from a brushcutter.
+  //
+  // THE QUOTATION ONLY. The Sales Order keeps whatever the machine says it is,
+  // because an exception there is made in AutoCount where the order is keyed -
+  // John's call. So this substitution happens here, after the shared block
+  // builder has run, and cannot reach into it.
+  const forced = SERVICE.ITEMS[String((opts || {}).service || "").toUpperCase()];
+  if (forced) {
+    lines = lines.map((l) =>
+      (!l.note && SERVICE.isServiceCode(l.item_code))
+        ? { ...l, item_code: forced.item_code, description: forced.description }
+        : l);
+  }
 
   // Priced lines only. The note rows - the machine line, the technician's
   // comment, SubTotal, the blank spacers, the contact - carry no money.

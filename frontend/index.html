@@ -749,6 +749,14 @@
             <option value="Export">Export</option>
           </select>
         </div>
+        <!-- Normally the machine decides. This is for a slip written before
+             the app could tell a rider from a brushcutter. -->
+        <div class="field" style="margin-top:12px;">
+          <label for="quote-service">Service item</label>
+          <select id="quote-service">
+            <option value="">Automatic &mdash; by machine</option>
+          </select>
+        </div>
         <p class="nsm-hint" id="quote-validity" style="margin-top:12px;"></p>
         <div class="scan-hint" id="quote-status" style="justify-content:flex-start;min-height:20px"></div>
         <button class="btn-primary" id="quote-go" type="button" style="width:100%">Create quotation</button>
@@ -1236,6 +1244,9 @@
   <!-- The face that signs the Repair Quotation. Only that one document uses
        it; it is a subset, 27 KB. -->
   <script src="./signature-font.js"></script>
+  <!-- Which AutoCount service item opens a machine's block. Edit that file to
+       add a model; the server reads the same one. -->
+  <script src="./service-items.js"></script>
   <!-- What machines are called on a slip. Edit machine-names.js to change one. -->
   <script src="./machine-names.js"></script>
   <!-- Which parts belong to the machine being worked on, so they sort first in

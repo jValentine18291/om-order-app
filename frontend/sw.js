@@ -9,7 +9,7 @@
 // on EVERY open, and opens outnumber deploys a hundred to one. Now the cached
 // copy is served instantly and the fresh one is fetched behind it, so a
 // deploy shows one open later and startup does not touch the network at all.
-const CACHE = "om-order-v229";
+const CACHE = "om-order-v230";
 
 // IPL artwork lives in its own cache, deliberately NOT version-stamped.
 // They are large, they are already fetched only when a section is opened, and
@@ -26,6 +26,7 @@ const SHELL = [
   "./common-jobs.js",
   "./pdf-fit.js",
   "./signature-font.js",
+  "./service-items.js",
   "./machine-names.js",
   "./machine-ipl.js",
   "./i18n.js",

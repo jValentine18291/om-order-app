@@ -185,6 +185,66 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
   check("and what a revision would be called", preview.next_if_revised, `QT-${rn}-5`);
   check("without recording anything", (await data.slips.slipQuotations(rn)).length, 4);
 
+  console.log("\n-- forcing the service item, on the quotation only --");
+  // For a slip written before the app could tell a rider from a brushcutter.
+  // It must not reach the Sales Order: an exception there is made in AutoCount,
+  // where the order is keyed.
+  const ov = await data.slips.createSlip({
+    company: "OVERRIDE TEST", contact_name: "Mr Tan", contact_number: "93334444",
+    machines: [{ desc: "Husqvarna 525LK Brushcutter", serial: "O1", remarks: "service" }],
+    signature: sig,
+  });
+  const on = ov.slip_number, om = ov.machines[0].id;
+  await data.slips.setMachineLabour(om, 60);
+
+  const auto = await data.slips.quotationForSlip(on);
+  check("left alone, a brushcutter is A1",
+    auto.lines[0].item_code, "A1 SVR LANDSCAPE");
+
+  const asRideOn = await data.slips.quotationForSlip(on, undefined, { service: "A3" });
+  check("forced to A3, the code changes", asRideOn.lines[0].item_code, "A3 SVR RIDE-ON EQUIPT");
+  check("and the wording with it", asRideOn.lines[0].description,
+    "Being Service of ride-on mower/tractor & parts changed:");
+  check("the money is untouched", asRideOn.subtotal, auto.subtotal);
+
+  check("an unknown code is ignored rather than obeyed",
+    (await data.slips.quotationForSlip(on, undefined, { service: "A99" })).lines[0].item_code,
+    "A1 SVR LANDSCAPE");
+
+  // An override is a different quotation on paper, so it earns a number.
+  const o1 = await data.slips.issueQuotation(on, { payment: "30 Days", delivery: "Ex-Singapore" });
+  const o2 = await data.slips.issueQuotation(on, { payment: "30 Days", delivery: "Ex-Singapore", service: "A3" });
+  check("issuing it forced makes a revision", [o1.quotation_no, o2.quotation_no],
+    [`QT-${on}`, `QT-${on}-2`]);
+  check("and the revision carries the forced code", o2.lines[0].item_code, "A3 SVR RIDE-ON EQUIPT");
+
+  const ovOrder = await data.slips.createSlipOrder(on, [om]);
+  const ovLines = (await data.slips.getSlipOrder(on)).lines;
+  check("but the Sales Order still says what the machine is",
+    ovLines[0].item_code, "A1 SVR LANDSCAPE");
+
+  console.log("\n-- and a ride-on reaches the order as A3 by itself --");
+  // No override anywhere: the machine's own name is enough, on the quotation
+  // and on the order alike.
+  const rd = await data.slips.createSlip({
+    company: "RIDE-ON TEST", contact_name: "Mr Sim", contact_number: "95556666",
+    machines: [{ desc: "FERRIS IS2600Z Zero-Turn Mower", serial: "F1", remarks: "service" },
+               { desc: "HUSQVARNA AM550 EPOS Robotic Automower", serial: "A1", remarks: "no charge" }],
+    signature: sig,
+  });
+  const rdn = rd.slip_number;
+  await data.slips.setMachineLabour(rd.machines[0].id, 250);
+  await data.slips.setMachineLabour(rd.machines[1].id, 120);
+  const rdq = await data.slips.quotationForSlip(rdn);
+  check("the Ferris opens with A3", rdq.lines[0].item_code, "A3 SVR RIDE-ON EQUIPT");
+  check("the Automower with A12",
+    rdq.lines.filter((l) => !l.note)[1].item_code, "A12 SVR AUTOMOWER");
+  await data.slips.createSlipOrder(rdn, rd.machines.map((m) => m.id));
+  const rdLines = (await data.slips.getSlipOrder(rdn)).lines.filter((l) => l.item_code);
+  check("and the Sales Order agrees, without anyone choosing",
+    [rdLines[0].item_code, rdLines[1].item_code],
+    ["A3 SVR RIDE-ON EQUIPT", "A12 SVR AUTOMOWER"]);
+
   console.log("\n-- a slip with nothing on it is refused, not quoted --");
   const empty = await data.slips.createSlip({
     company: "EMPTY", contact_name: "X", contact_number: "90000000",

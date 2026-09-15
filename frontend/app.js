@@ -3731,6 +3731,20 @@ async function shareRepairQuotation(slipNumber) {
       + `${last.issued_by ? " by " + last.issued_by : ""}. If anything has changed since, `
       + `this becomes ${q.next_if_revised}. Valid 30 days from today.`
     : `Valid until ${quoteDate(q.valid_until)} — ${q.valid_days} days from today.`;
+  // The service item choices, from the one table the server reads. "Automatic"
+  // stays first and stays selected: the machine decides unless somebody says
+  // otherwise, and saying otherwise should be a deliberate act.
+  const sel = $("quote-service");
+  sel.length = 1;
+  (window.OM_SERVICE_ITEMS ? OM_SERVICE_ITEMS.KEYS : []).forEach((k) => {
+    const it = OM_SERVICE_ITEMS.ITEMS[k];
+    const o = document.createElement("option");
+    o.value = k;
+    o.textContent = it.label;
+    sel.appendChild(o);
+  });
+  sel.value = "";
+
   // Pick up where the last one left off: the terms rarely change between a
   // quotation and its revision, and re-choosing them is a chance to get them
   // wrong.
@@ -3747,6 +3761,8 @@ async function shareRepairQuotation(slipNumber) {
     const terms = {
       payment: $("quote-payment").value,
       delivery: $("quote-delivery").value,
+      // "" means let each machine decide, which is almost always right.
+      service: $("quote-service").value,
       // Who is sending it, not who registered the slip. The two are often
       // different people, and the signature belongs to whoever put their name
       // to the price.
@@ -3762,7 +3778,8 @@ async function shareRepairQuotation(slipNumber) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          payment: terms.payment, delivery: terms.delivery, who: terms.preparedBy,
+          payment: terms.payment, delivery: terms.delivery,
+          who: terms.preparedBy, service: terms.service,
         }),
       });
       const blob = buildRepairQuotationPdf(issued, terms);

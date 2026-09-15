@@ -1687,7 +1687,8 @@ app.get("/api/slips/:slip/order", async (req, res) => {
 // costs the quotation its address block and nothing more.
 app.get("/api/slips/:slip/quotation", async (req, res) => {
   try {
-    const q = await data.slips.quotationForSlip(req.params.slip, undefined);
+    const q = await data.slips.quotationForSlip(req.params.slip, undefined,
+                    { service: String(req.query.service || "") });
     q.debtor = null;
     if (q.debtor_code && (process.env.ITEMS_SOURCE || "sqlite").toLowerCase() === "autocount") {
       try {
@@ -1714,8 +1715,9 @@ app.get("/api/slips/:slip/quotation", async (req, res) => {
 // whole of the numbering rule.
 app.post("/api/slips/:slip/quotation", async (req, res) => {
   try {
-    const { payment = "", delivery = "", who = "" } = req.body || {};
-    const issued = await data.slips.issueQuotation(req.params.slip, { payment, delivery, who });
+    const { payment = "", delivery = "", who = "", service = "" } = req.body || {};
+    const issued = await data.slips.issueQuotation(req.params.slip,
+                       { payment, delivery, who, service });
     issued.debtor = null;
     if (issued.debtor_code && (process.env.ITEMS_SOURCE || "sqlite").toLowerCase() === "autocount") {
       try {
