@@ -798,6 +798,65 @@ function setMachineLabour(machineId, amount) {
 const GST_RATE = 0.09;
 const QUOTATION_VALID_DAYS = 30;
 
+// What this quotation is, reduced to one string, so the next one can be asked
+// whether it is the same quotation or a new one.
+//
+// Everything the customer would notice: each line's code, wording, price and
+// quantity, and the two terms Sales chose. A part added, a price corrected, a
+// technician's comment reworded, a payment term switched - any of those make it
+// a revision. Reprinting the identical thing does not.
+function quotationFingerprint(lines, terms) {
+  const t = terms || {};
+  return JSON.stringify([
+    String(t.payment || ""), String(t.delivery || ""),
+    (lines || []).map((l) => [
+      l.note ? "" : String(l.item_code || ""),
+      String(l.description == null ? "" : l.description),
+      l.note ? "" : Number(l.unit_price) || 0,
+      l.note ? "" : Number(l.quantity) || 0,
+      l.line_amount == null ? "" : Number(l.line_amount) || 0,
+    ]),
+  ]);
+}
+
+const quotationRef = (slipNumber, seq) =>
+  seq > 1 ? `QT-${slipNumber}-${seq}` : `QT-${slipNumber}`;
+
+// The quotations already sent for a slip, newest last.
+function slipQuotations(slipNumber) {
+  return db.prepare(
+    "SELECT seq, ref, payment_term, delivery_term, total, issued_by, issued_at " +
+    "FROM slip_quotations WHERE slip_number = ? ORDER BY seq"
+  ).all(String(slipNumber));
+}
+
+// Record that a quotation went out, and say what it is called.
+//
+// Returns the ref plus whether this was a new revision. Issuing the same
+// quotation twice is not an error and does not raise the number - it hands
+// back the number that quotation already has, so a re-send is a re-send.
+function issueQuotation(slipNumber, terms) {
+  const q = quotationForSlip(slipNumber);
+  const fp = quotationFingerprint(q.lines, terms);
+  const last = db.prepare(
+    "SELECT * FROM slip_quotations WHERE slip_number = ? ORDER BY seq DESC LIMIT 1"
+  ).get(String(slipNumber));
+
+  if (last && last.fingerprint === fp) {
+    return { ...q, quotation_no: last.ref, seq: last.seq, revision: false,
+             issued_at: last.issued_at, terms };
+  }
+  const seq = last ? last.seq + 1 : 1;
+  const ref = quotationRef(slipNumber, seq);
+  db.prepare(
+    "INSERT INTO slip_quotations (slip_number, seq, ref, fingerprint, payment_term, delivery_term, total, issued_by) " +
+    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+  ).run(String(slipNumber), seq, ref, fp,
+        String((terms || {}).payment || ""), String((terms || {}).delivery || ""),
+        Number(q.total) || 0, String((terms || {}).who || ""));
+  return { ...q, quotation_no: ref, seq, revision: seq > 1, terms };
+}
+
 function quotationForSlip(slipNumber, machineIds) {
   const slip = getSlip(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
@@ -833,11 +892,20 @@ function quotationForSlip(slipNumber, machineIds) {
   until.setDate(until.getDate() + QUOTATION_VALID_DAYS);
   const iso = (d) => d.toISOString().slice(0, 10);
 
+  // What has already gone out for this slip. The number below is a PREVIEW -
+  // it is what this quotation would be called if it were issued unchanged.
+  // The authoritative one comes back from issueQuotation(), which is the only
+  // thing that can tell a re-send from a revision.
+  const prior = slipQuotations(slip.slip_number);
+  const lastSeq = prior.length ? prior[prior.length - 1].seq : 0;
+
   return {
     slip_number: slip.slip_number,
     // John's call: the quotation is identified by the slip it came from, so
     // anyone holding either document can find the other.
-    quotation_no: `QT-${slip.slip_number}`,
+    quotation_no: quotationRef(slip.slip_number, lastSeq || 1),
+    previous: prior,
+    next_if_revised: quotationRef(slip.slip_number, lastSeq + 1),
     date: iso(created),
     valid_until: iso(until),
     valid_days: QUOTATION_VALID_DAYS,
@@ -1837,7 +1905,7 @@ const slips = {
   poTracking, poStatus, setPoStatus, PO_STATUSES,
   listShipments, getShipment, createShipment, updateShipment,
   allocatedByPo, receivedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
-  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, setMachineState, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, setMachineState, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 
 // ---- One-off: read the status of every open slip again ---------------------

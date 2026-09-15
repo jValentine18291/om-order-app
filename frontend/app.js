@@ -3722,8 +3722,20 @@ async function shareRepairQuotation(slipNumber) {
 
   const modal = $("quote-modal");
   $("quote-sub").textContent = `Slip ${q.slip_number} · ${q.customer || ""}`;
-  $("quote-validity").textContent =
-    `Valid until ${quoteDate(q.valid_until)} — ${q.valid_days} days from today.`;
+  // Say what has already gone out, so nobody wonders whether they are about to
+  // send the customer a second copy of something they already have.
+  const sent = q.previous || [];
+  const last = sent.length ? sent[sent.length - 1] : null;
+  $("quote-validity").textContent = last
+    ? `${last.ref} was sent on ${quoteDate(String(last.issued_at).slice(0, 10))}`
+      + `${last.issued_by ? " by " + last.issued_by : ""}. If anything has changed since, `
+      + `this becomes ${q.next_if_revised}. Valid 30 days from today.`
+    : `Valid until ${quoteDate(q.valid_until)} — ${q.valid_days} days from today.`;
+  // Pick up where the last one left off: the terms rarely change between a
+  // quotation and its revision, and re-choosing them is a chance to get them
+  // wrong.
+  if (last && last.payment_term) $("quote-payment").value = last.payment_term;
+  if (last && last.delivery_term) $("quote-delivery").value = last.delivery_term;
   $("quote-status").textContent = "";
   modal.style.display = "";
 
@@ -3743,10 +3755,21 @@ async function shareRepairQuotation(slipNumber) {
     $("quote-go").disabled = true;
     $("quote-status").textContent = "Preparing…";
     try {
-      const blob = buildRepairQuotationPdf(q, terms);
+      // Issued first, then drawn. The server is the only thing that can say
+      // whether this is a revision or the same quotation again, and the number
+      // it hands back is the one printed - never a number worked out here.
+      const issued = await api(`/api/slips/${encodeURIComponent(slipNumber)}/quotation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          payment: terms.payment, delivery: terms.delivery, who: terms.preparedBy,
+        }),
+      });
+      const blob = buildRepairQuotationPdf(issued, terms);
       close();
-      await deliverPdf(blob, `Quotation_${q.slip_number}.pdf`,
-                       `Repair Quotation ${q.quotation_no}`);
+      if (issued.revision) toast(`Revision ${issued.quotation_no}`, "ok");
+      await deliverPdf(blob, `Quotation_${issued.quotation_no}.pdf`,
+                       `Repair Quotation ${issued.quotation_no}`);
     } catch (e) {
       $("quote-status").textContent = "Couldn't build it: " + e.message;
     } finally {

@@ -1706,6 +1706,32 @@ app.get("/api/slips/:slip/quotation", async (req, res) => {
   }
 });
 
+// Record that a quotation went out, and hand back what it is called.
+//
+// Separate from the GET above because this is the only part that writes. The
+// GET builds a preview as often as anyone likes; this says "that one was
+// sent", and only here can a re-send be told from a revision - which is the
+// whole of the numbering rule.
+app.post("/api/slips/:slip/quotation", async (req, res) => {
+  try {
+    const { payment = "", delivery = "", who = "" } = req.body || {};
+    const issued = await data.slips.issueQuotation(req.params.slip, { payment, delivery, who });
+    issued.debtor = null;
+    if (issued.debtor_code && (process.env.ITEMS_SOURCE || "sqlite").toLowerCase() === "autocount") {
+      try {
+        issued.debtor = await require("./data/autocountRepo").getDebtor(issued.debtor_code);
+      } catch (e) {
+        console.error("[POST /api/slips/:slip/quotation] debtor lookup:", e.message);
+        issued.debtor_error = e.message;
+      }
+    }
+    res.json(issued);
+  } catch (err) {
+    console.error("[POST /api/slips/:slip/quotation]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to issue the quotation" });
+  }
+});
+
 // Sales have keyed the Sales Order into AutoCount and got a DO/INV/CS number
 // back. Its own step, before closing: only once this has happened does anyone
 // ring the customer to come and collect.

@@ -123,6 +123,68 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
   check("and the quotation's subtotal is the order's total, before GST",
     Math.round(orderTotal * 100) / 100, q2.subtotal);
 
+  console.log("\n-- the running number, and what counts as a revision --");
+  // Technicians forget a part and Sales re-send. That is a revision and earns
+  // a number. Pressing the button twice on the same figures is not, and must
+  // not be, or the customer holds two numbers for one quotation and has to ask
+  // which one stands.
+  const rq = await data.slips.createSlip({
+    company: "RUNNING NUMBER TEST", contact_name: "Mr Ong", contact_number: "91112222",
+    machines: [{ desc: "Husqvarna 525LK", serial: "R1", remarks: "service" }], signature: sig,
+  });
+  const rn = rq.slip_number;
+  const rm = rq.machines[0].id;
+  await data.slips.setMachineLabour(rm, 30);
+  const T = { payment: "30 Days", delivery: "Ex-Singapore", who: "Chiu Yan" };
+
+  const first = await data.slips.issueQuotation(rn, T);
+  check("the first carries no suffix", first.quotation_no, "QT-" + rn);
+  check("and is not a revision", first.revision, false);
+
+  const again = await data.slips.issueQuotation(rn, T);
+  check("sending the same thing again keeps its number", again.quotation_no, "QT-" + rn);
+  check("and is still not a revision", again.revision, false);
+  check("nothing extra was recorded", (await data.slips.slipQuotations(rn)).length, 1);
+
+  // The forgotten part.
+  await data.slips.addPartToMachine(rm, {
+    item_code: "A8 SPARE PARTS", description: "Air Filter", uom: "PC",
+    unit_price: 12.50, quantity: 1, technician: "KS" });
+  const second = await data.slips.issueQuotation(rn, T);
+  check("adding a part makes it -2", second.quotation_no, `QT-${rn}-2`);
+  check("and says so", second.revision, true);
+  // 30.00 + 12.50 = 42.50, GST 3.825 which is charged at 3.83, so 46.33.
+  // Rounded to cents on the tax, not on the multiplication - a quotation
+  // quoting a third of a cent is a quotation nobody can pay.
+  check("its total moved with it", [second.subtotal, second.gst, second.total],
+    [42.5, 3.83, 46.33]);
+
+  // A price correction is a revision too - same lines, different money.
+  const partId = (await data.slips.getSlip(rn)).machines[0].parts[0].id;
+  await data.slips.setPartPrice(partId, 15);
+  const third = await data.slips.issueQuotation(rn, T);
+  check("a price change makes it -3", third.quotation_no, `QT-${rn}-3`);
+
+  // So is a change of terms: it is a different offer on paper.
+  const fourth = await data.slips.issueQuotation(rn, { ...T, payment: "C.O.D" });
+  check("changing the payment term makes it -4", fourth.quotation_no, `QT-${rn}-4`);
+  const fourthAgain = await data.slips.issueQuotation(rn, { ...T, payment: "C.O.D" });
+  check("and re-sending THAT keeps -4", fourthAgain.quotation_no, `QT-${rn}-4`);
+
+  console.log("\n-- the record of what was sent --");
+  const hist = await data.slips.slipQuotations(rn);
+  check("four quotations recorded", hist.length, 4);
+  check("numbered in order", hist.map((h) => h.ref),
+    ["QT-" + rn, `QT-${rn}-2`, `QT-${rn}-3`, `QT-${rn}-4`]);
+  check("each remembers who sent it", [...new Set(hist.map((h) => h.issued_by))], ["Chiu Yan"]);
+  check("and the terms it went out on", hist[3].payment_term, "C.O.D");
+
+  console.log("\n-- and the preview knows what has gone before --");
+  const preview = await data.slips.quotationForSlip(rn);
+  check("it names the last one sent", preview.quotation_no, `QT-${rn}-4`);
+  check("and what a revision would be called", preview.next_if_revised, `QT-${rn}-5`);
+  check("without recording anything", (await data.slips.slipQuotations(rn)).length, 4);
+
   console.log("\n-- a slip with nothing on it is refused, not quoted --");
   const empty = await data.slips.createSlip({
     company: "EMPTY", contact_name: "X", contact_number: "90000000",

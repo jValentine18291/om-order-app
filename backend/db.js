@@ -231,6 +231,28 @@ db.exec(`
   -- attests to what was on the page at the time; anything altered afterwards
   -- has to travel with the document, or the signature starts covering things
   -- nobody agreed to.
+  -- Every Repair Quotation that has actually gone out, so the next one for the
+  -- same slip can be numbered after it: QT-00040, then QT-00040-2, -3 ...
+  --
+  -- A row is written only when the quotation DIFFERS from the last one issued.
+  -- Technicians add a part they forgot and Sales re-send; that is a revision
+  -- and earns a number. Pressing the button twice on the same figures is not,
+  -- and must not, or the customer gets two numbers for one quotation and has to
+  -- ask which one stands. "fingerprint" is what that comparison is made on.
+  CREATE TABLE IF NOT EXISTS slip_quotations (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    slip_number TEXT NOT NULL,
+    seq         INTEGER NOT NULL,      -- 1, 2, 3 ... ; 1 prints without a suffix
+    ref         TEXT NOT NULL,         -- "QT-00040", "QT-00040-2"
+    fingerprint TEXT NOT NULL,         -- the lines and terms this quoted
+    payment_term  TEXT DEFAULT '',
+    delivery_term TEXT DEFAULT '',
+    total       REAL DEFAULT 0,
+    issued_by   TEXT DEFAULT '',
+    issued_at   TEXT DEFAULT (datetime('now','localtime'))
+  );
+  CREATE INDEX IF NOT EXISTS idx_slip_quotations_slip ON slip_quotations(slip_number, seq);
+
   CREATE TABLE IF NOT EXISTS slip_amendments (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     slip_id    INTEGER NOT NULL,
