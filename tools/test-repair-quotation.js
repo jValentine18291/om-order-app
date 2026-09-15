@@ -245,6 +245,37 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
     [rdLines[0].item_code, rdLines[1].item_code],
     ["A3 SVR RIDE-ON EQUIPT", "A12 SVR AUTOMOWER"]);
 
+  console.log("\n-- a model typed bare is named in full on the paperwork --");
+  // Sales register "EBZ5100" because that is the fast thing to type with a
+  // customer in front of them. What leaves the building has to say what it is.
+  const bare = await data.slips.createSlip({
+    company: "BARE MODEL TEST", contact_name: "Mr Goh", contact_number: "97778888",
+    machines: [{ desc: "EBZ5100", serial: "E1", remarks: "won't start" },
+               { desc: "525BX", serial: "B1", remarks: "service" },
+               { desc: "ZENOAH EBZ5100(AS) Backpack Leaf Blower 50.2cc", serial: "E2", remarks: "service" }],
+    signature: sig,
+  });
+  const bn = bare.slip_number;
+  for (const m of bare.machines) await data.slips.setMachineLabour(m.id, 40);
+  const bq = await data.slips.quotationForSlip(bn);
+  const named = bq.lines.filter((l) => l.note && /S\/S:/.test(l.description || ""))
+                        .map((l) => l.description.split(", S/N")[0]);
+  check("the blower is named", named[0], "EBZ5100 Backpack Blower");
+  check("and the handheld one is not called a backpack",
+    named[1], "525BX Handheld Blower");
+  check("somebody who already said it is left alone",
+    named[2], "ZENOAH EBZ5100(AS) Backpack Leaf Blower 50.2cc");
+
+  await data.slips.createSlipOrder(bn, bare.machines.map((m) => m.id));
+  const bLines = (await data.slips.getSlipOrder(bn)).lines
+    .filter((l) => !l.item_code && /S\/S:/.test(l.description || ""))
+    .map((l) => l.description.split(", S/N")[0]);
+  check("and the Sales Order says exactly the same", bLines, named);
+
+  check("while the slip still holds what was typed",
+    (await data.slips.getSlip(bn)).machines.map((m) => m.machine_desc),
+    ["EBZ5100", "525BX", "ZENOAH EBZ5100(AS) Backpack Leaf Blower 50.2cc"]);
+
   console.log("\n-- a slip with nothing on it is refused, not quoted --");
   const empty = await data.slips.createSlip({
     company: "EMPTY", contact_name: "X", contact_number: "90000000",

@@ -870,15 +870,13 @@
       <div class="modal-body">
         <div class="field">
           <label for="nsm-model">Model No. <span class="req">*</span></label>
-          <input id="nsm-model" type="text" autocomplete="off" placeholder="e.g. Husqvarna 525LK Brushcutter" />
-          <!-- Suggestions from AutoCount, and the item that was picked. Typing
-               over the box drops the pick: what is on screen is then what gets
-               recorded, which is the whole point of still allowing free text. -->
-          <div class="company-suggest" id="nsm-model-results"></div>
-          <div class="nsm-picked" id="nsm-model-picked" style="display:none">
-            <span class="mono" id="nsm-model-code"></span>
-            <button type="button" class="btn-quiet" id="nsm-model-clear">Not this one</button>
-          </div>
+          <!-- The model alone is enough now. The AutoCount suggestions used to
+               live here; they were dropped because typing the model is faster
+               with a customer standing there, and machine-types.js puts the
+               kind of machine back on the documents that leave the building.
+               The technicians' parts ranking reads the model out of this text
+               and never needed the catalogue code - see modelWordsFor(). -->
+          <input id="nsm-model" type="text" autocomplete="off" placeholder="e.g. EBZ5100" />
         </div>
         <div class="field">
           <label for="nsm-qty">Qty <span class="req">*</span></label>
@@ -1247,6 +1245,9 @@
   <!-- Which AutoCount service item opens a machine's block. Edit that file to
        add a model; the server reads the same one. -->
   <script src="./service-items.js"></script>
+  <!-- What kind of machine a model number is, so "EBZ5100" prints as
+       "EBZ5100 Backpack Blower". Edit that file to add a model. -->
+  <script src="./machine-types.js"></script>
   <!-- What machines are called on a slip. Edit machine-names.js to change one. -->
   <script src="./machine-names.js"></script>
   <!-- Which parts belong to the machine being worked on, so they sort first in

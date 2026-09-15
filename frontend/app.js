@@ -572,65 +572,23 @@ function machineOptionHtml(r) {
 // happened to word it - and it is why typing over the box has to drop the pick:
 // the text on screen is what gets recorded, so a stale code behind it would be
 // a machine claiming to be something it is not.
-let nsmPickedCode = "";      // the AutoCount item behind the typed model, if any
-
-function setPickedModel(code) {
-  nsmPickedCode = String(code || "");
-  const row = $("nsm-model-picked");
-  if (!row) return;
-  if (nsmPickedCode) {
-    $("nsm-model-code").textContent = nsmPickedCode;
-    row.style.display = "flex";
-  } else {
-    row.style.display = "none";
-  }
-}
-
-let nsmModelDebounce = null;
-function wireModelSearch() {
-  const input = $("nsm-model");
-  const box = $("nsm-model-results");
-  if (!input || !box) return;
-
-  input.addEventListener("input", () => {
-    // Anything typed by hand means this is no longer the catalogue machine.
-    setPickedModel("");
-    clearTimeout(nsmModelDebounce);
-    const q = input.value.trim();
-    if (q.length < 2) { box.innerHTML = ""; return; }
-    nsmModelDebounce = setTimeout(async () => {
-      try {
-        const data = await api(`/api/machine-search?q=${encodeURIComponent(q)}`);
-        const list = data.results || [];
-        // No message when there is nothing: the field takes free text by
-        // design, and "no matching machines" reads like a refusal when the
-        // machine simply is not one of ours.
-        if (!list.length) { box.innerHTML = ""; return; }
-        box.innerHTML = list.map(machineOptionHtml).join("");
-        box.querySelectorAll(".company-option").forEach((btn) =>
-          btn.addEventListener("click", () => {
-            input.value = btn.dataset.desc;
-            setPickedModel(btn.dataset.code);
-            box.innerHTML = "";
-          })
-        );
-      } catch (_) { box.innerHTML = ""; }
-    }, 250);
-  });
-
-  $("nsm-model-clear").addEventListener("click", () => {
-    setPickedModel("");
-    $("nsm-model").focus();
-  });
-}
-wireModelSearch();
+// The AutoCount machine suggestions used to live here.
+//
+// Dropped on John's instruction: sales register by typing the model alone -
+// "EBZ5100" - because that is the fast thing to type with a customer standing
+// there, and machine-types.js puts the kind of machine back on the documents
+// that leave the building.
+//
+// Nothing downstream needed the catalogue code it captured. The technicians'
+// parts ranking reads the model words out of the machine's TEXT, code or no
+// code - see modelWordsFor() and wordsOf() in machine-ipl.js - so a slip
+// written "EBZ5100" still floats that blower's own parts and opens its book.
+// Checked before removing this, not after.
 
 function openMachineForm(index = -1) {
   nsEditIndex = index;
   const m = index >= 0 ? nsMachines[index]
           : { model: "", qty: 1, serial: "", remarks: "", code: "" };
-  $("nsm-model-results").innerHTML = "";
-  setPickedModel(m.code || "");
   $("nsm-title").textContent = index >= 0 ? "Edit machine" : "Add machine";
   $("nsm-add").textContent = index >= 0 ? "Save" : "Add";
   $("nsm-model").value = m.model;
@@ -648,8 +606,6 @@ function closeMachineForm() {
   $("nsm-modal").style.display = "none";
   document.body.style.overflow = "";
   nsEditIndex = -1;
-  $("nsm-model-results").innerHTML = "";
-  setPickedModel("");
 }
 
 // Above one unit the serial box covers all of them, so say so rather than
@@ -676,9 +632,11 @@ function commitMachineForm() {
   if (!Number.isFinite(qty) || qty < 1) qty = 1;
   const entry = {
     model, qty,
-    // Only set when the model was chosen from the list and not typed over
-    // since - see setPickedModel.
-    code: nsmPickedCode,
+    // Always empty now the catalogue suggestions are gone. Kept as a field
+    // rather than deleted: slips registered before this still carry a code,
+    // the column still holds them, and the edit screen still shows one where
+    // there is one.
+    code: "",
     serial: $("nsm-serial").value.trim(),
     remarks: $("nsm-remarks").value.trim(),
   };
@@ -1166,7 +1124,13 @@ function buildSlipPdf(slip) {
     // measure narrow, skip its wrap, and then print at 9.6pt straight through
     // the RETURNED column.
     doc.setFontSize(9.6); doc.setFont("helvetica", "normal");
-    const lines = doc.splitTextToSize(String(m.machine_desc || ""), DESC_W - 26);
+    // Named the way the Sales Order and the Quotation name it: "EBZ5100"
+    // becomes "EBZ5100 Backpack Blower". The customer gets all three documents
+    // and they should agree about what was brought in.
+    const shown = window.OM_MACHINE_TYPES
+      ? OM_MACHINE_TYPES.expand(m.machine_desc || "")
+      : String(m.machine_desc || "");
+    const lines = doc.splitTextToSize(shown, DESC_W - 26);
     const serial = String(m.serial_no || "").trim();
     doc.setFontSize(8);
     const serialLines = serial ? doc.splitTextToSize("S/N " + serial, DESC_W - 26) : [];

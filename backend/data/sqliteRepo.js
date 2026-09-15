@@ -576,6 +576,7 @@ const PEST_DESCRIPTION = "Being repair & replacement of part for pest management
 // the foot of fogger-tubes.js.
 const FOGGER = require(require("path").join(__dirname, "..", "..", "frontend", "fogger-tubes.js"));
 const SERVICE = require(require("path").join(__dirname, "..", "..", "frontend", "service-items.js"));
+const MACHINE_TYPES = require(require("path").join(__dirname, "..", "..", "frontend", "machine-types.js"));
 function serviceItemFor(machine) {
   const it = SERVICE.itemFor(machine, FOGGER.isFogger);
   return { item_code: it.item_code, description: it.description };
@@ -701,7 +702,13 @@ function slipBlockLines(slip, wanted, all) {
     // together. On the slip it tells one unit from another; on the Sales Order
     // it collides with the position, so a line would read "525BX - 1/2 ... -
     // 1/3". Only the position on the slip belongs here.
-    const model = String(m.machine_desc || "").replace(/\s-\s\d+\/\d+$/, "").trim();
+    //
+    // And say what the machine IS. Sales register by typing the model alone -
+    // "EBZ5100" - because that is the fast thing to type with a customer in
+    // front of them; a document leaving the building has to read "EBZ5100
+    // Backpack Blower". The slip keeps what was typed; only the paper changes.
+    const model = MACHINE_TYPES.expand(
+      String(m.machine_desc || "").replace(/\s-\s\d+\/\d+$/, "").trim());
     lines.push({
       note: true,
       description:
