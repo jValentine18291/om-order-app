@@ -3662,12 +3662,34 @@ function buildRepairQuotationPdf(q, terms) {
   sy += 26;
   doc.text("Prepared by:", LEFT, sy);
   doc.text("Approved by:", LEFT + 320, sy);
+
+  // Whoever pressed Send Quotation, signed above the rule in Great Vibes.
+  //
+  // Shrunk to fit rather than allowed to run past the rule it sits on: a
+  // script face is wide, and "Chiu Yan" and a three-part name are not close to
+  // the same length. Nothing is printed when the app does not know who is
+  // signing - 13 of the 45 slips on file have no name against them, and an
+  // empty rule is honest where a made-up name would not be.
+  const signer = String((terms && terms.preparedBy) || "").trim();
+  if (signer) {
+    const fam = (window.OM_SIGNATURE_FONT && OM_SIGNATURE_FONT.register(doc)) || "";
+    const SIG_W = 180;
+    let size = 21;
+    doc.setFont(fam || "helvetica", fam ? "normal" : "italic");
+    doc.setFontSize(size);
+    while (size > 11 && doc.getTextWidth(signer) > SIG_W) {
+      size -= 0.5; doc.setFontSize(size);
+    }
+    setText(INK);
+    doc.text(signer, LEFT + 6, sy + 32);
+  }
+
   sy += 40;
   setDraw(INK); doc.setLineWidth(0.7);
   doc.line(LEFT, sy, LEFT + 190, sy);
   doc.line(LEFT + 320, sy, LEFT + 500, sy);
   sy += 12;
-  doc.setFontSize(8.4);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(8.4); setText(INK);
   doc.text("OUTBOARD & MARINE (PTE) LTD", LEFT, sy);
   doc.text("CUSTOMER", LEFT + 320, sy);
 
@@ -3713,6 +3735,10 @@ async function shareRepairQuotation(slipNumber) {
     const terms = {
       payment: $("quote-payment").value,
       delivery: $("quote-delivery").value,
+      // Who is sending it, not who registered the slip. The two are often
+      // different people, and the signature belongs to whoever put their name
+      // to the price.
+      preparedBy: userName(),
     };
     $("quote-go").disabled = true;
     $("quote-status").textContent = "Preparing…";
