@@ -3420,11 +3420,14 @@ function buildRepairQuotationPdf(q, terms) {
   // x; ITEM, PART NO., DESCRIPTION and UOM start at theirs.
   const ITEM_X = 46, PART_X = 78, DESC_X = 196;
   const QTY_X = 398, UOM_X = 412, UNIT_X = 492, AMT_X = RIGHT;
+  // Every column wraps inside itself. Nothing is allowed to run on into the
+  // next one, including a note row - a machine line crossing under the QTY
+  // heading reads as a column that has burst, even where the cell beside it is
+  // empty.
+  const PART_W = DESC_X - PART_X - 8;
   const DESC_W = QTY_X - 10 - DESC_X;
-  // A note row has no quantity or price beside it, so its text may run on into
-  // the space those columns would have used. That is what keeps a machine line
-  // - model, serial, slip number, technician, position - on one line.
-  const NOTE_W = UNIT_X - 8 - DESC_X;
+  const UOM_W = 42;
+  const LEAD = 11.5;
 
   const debtor = q.debtor || null;
   const addressLines = (debtor && debtor.address_lines) || [];
@@ -3454,14 +3457,22 @@ function buildRepairQuotationPdf(q, terms) {
 
     // The reference grid, under the title. Labels bold, values after a colon
     // on a shared x so they line up however long the labels are.
-    const LBL = 400, COL = 486, VAL = 493;
-    let gy = y + MARK + 8;
+    const COL = 486, VAL = 493;
     const grid = [
       ["Date", quoteDate(q.date)],
       ["Quotation #", q.quotation_no || ""],
       ["Customer ID", q.debtor_code || ""],
       ["Page", ""],   // stamped at the end, once the count is known
+      ["Quotation valid until", quoteDate(q.valid_until)],
     ];
+    // One left edge for all five, set by the longest label, so the colons line
+    // up and nothing runs into them. "Quotation valid until" used to hang off
+    // on its own below the block; it belongs with the rest, and measuring the
+    // labels rather than guessing a number means adding a longer one later
+    // moves the column instead of colliding with it.
+    doc.setFontSize(8.4); doc.setFont("helvetica", "bold");
+    const LBL = COL - 6 - Math.max(...grid.map(([label]) => doc.getTextWidth(label)));
+    let gy = y + MARK + 8;
     grid.forEach(([label, value]) => {
       doc.setFontSize(8.4); doc.setFont("helvetica", "bold"); setText(INK);
       doc.text(label, LBL, gy);
@@ -3470,10 +3481,6 @@ function buildRepairQuotationPdf(q, terms) {
       if (value) doc.text(String(value), VAL, gy);
       gy += 12.5;
     });
-    doc.setFontSize(8.4); doc.setFont("helvetica", "normal"); setText(INK);
-    doc.text("Quotation valid until", LBL - 62, gy + 4);
-    doc.text(":", COL, gy + 4);
-    doc.text(quoteDate(q.valid_until), VAL, gy + 4);
 
     // The customer, down the left, inside a ruled box.
     //
@@ -3570,36 +3577,48 @@ function buildRepairQuotationPdf(q, terms) {
     // A blank note row is the gap between one machine and the next.
     if (isNote && !desc) { y += 9; return; }
 
+    // Set before measuring. splitTextToSize wraps against whatever font is
+    // current, so measuring first and setting after wraps to the wrong width.
+    doc.setFontSize(8.8); doc.setFont("helvetica", "normal");
+
     if (isNote) {
       // SubTotal carries a figure in the AMOUNT column and nothing else.
       const isSubTotal = desc === "SubTotal";
-      const body = doc.splitTextToSize(desc, NOTE_W);
-      need(body.length * 11.5 + 4);
-      doc.setFontSize(8.8); doc.setFont("helvetica", "normal"); setText(INK);
+      const body = doc.splitTextToSize(desc, DESC_W);
+      need(body.length * LEAD + 4);
+      setText(INK);
       doc.text(body, DESC_X, y);
       if (isSubTotal && l.line_amount != null) {
         doc.text(amt2(l.line_amount), AMT_X, y, { align: "right" });
       }
-      y += body.length * 11.5 + 3;
+      y += body.length * LEAD + 3;
       return;
     }
 
     // A priced row. The service line that opens a machine takes the next item
-    // number; parts under it take none.
-    const opensBlock = /^A[12]\b/.test(String(l.item_code || ""));
+    // number; parts under it take none. Asked of the service-item table rather
+    // than matched on the code: a pattern for A1 and A2 stopped numbering the
+    // blocks the moment A3 and A12 arrived.
+    const opensBlock = !!(window.OM_SERVICE_ITEMS &&
+                          OM_SERVICE_ITEMS.isServiceCode(l.item_code));
     const qty = Number(l.quantity) || 0;
     const unit = Number(l.unit_price) || 0;
+    // Each column wrapped to its own width, and the row as tall as the tallest
+    // of them. The figures stay on the first line, where the eye reads across.
+    const part = doc.splitTextToSize(String(l.item_code || ""), PART_W);
     const body = doc.splitTextToSize(desc, DESC_W);
-    need(body.length * 11.5 + 4);
-    doc.setFontSize(8.8); doc.setFont("helvetica", "normal"); setText(INK);
+    const uom = doc.splitTextToSize(String(l.uom || ""), UOM_W);
+    const rows = Math.max(part.length, body.length, uom.length, 1);
+    need(rows * LEAD + 4);
+    setText(INK);
     if (opensBlock) doc.text(String(++itemNo), ITEM_X, y);
-    doc.text(String(l.item_code || ""), PART_X, y);
+    doc.text(part, PART_X, y);
     doc.text(body, DESC_X, y);
     doc.text(String(qty), QTY_X, y, { align: "right" });
-    doc.text(String(l.uom || ""), UOM_X, y);
+    doc.text(uom, UOM_X, y);
     doc.text(amt2(unit), UNIT_X, y, { align: "right" });
     doc.text(amt2(unit * qty), AMT_X, y, { align: "right" });
-    y += body.length * 11.5 + 3;
+    y += rows * LEAD + 3;
   });
 
   // ---- The foot of the quotation ------------------------------------------
