@@ -3475,34 +3475,56 @@ function buildRepairQuotationPdf(q, terms) {
     doc.text(":", COL, gy + 4);
     doc.text(quoteDate(q.valid_until), VAL, gy + 4);
 
-    // The customer, down the left.
+    // The customer, down the left, inside a ruled box.
+    //
+    // The box stops at 344 rather than running the width of the page: the
+    // "Quotation valid until" line sits at 338 on the same band, and a border
+    // through it would read as a mistake. Everything inside wraps to suit.
+    const BOX_R = 344, IN_X = LEFT + 8, IN_W = BOX_R - IN_X - 8;
     let cy = Math.max(ay + 14, y + MARK + 24);
+    const boxTop = cy - 11;
     doc.setFontSize(9); doc.setFont("helvetica", "normal"); setText(INK);
-    doc.text("CUSTOMER :", LEFT, cy);
+    doc.text("CUSTOMER :", LEFT + 6, cy);
     cy += 16;
     doc.setFontSize(10.5); doc.setFont("helvetica", "bold");
-    doc.text(String(q.customer || ""), LEFT + 8, cy);
-    cy += 13;
+    const nameLines = doc.splitTextToSize(String(q.customer || ""), IN_W);
+    doc.text(nameLines.slice(0, 2), IN_X, cy);
+    cy += 13 * Math.min(2, nameLines.length);
     doc.setFontSize(9); doc.setFont("helvetica", "normal");
-    addressLines.forEach((line) => { doc.text(String(line), LEFT + 8, cy); cy += 11.5; });
+    addressLines.forEach((line) => {
+      doc.text(doc.splitTextToSize(String(line), IN_W)[0] || "", IN_X, cy);
+      cy += 11.5;
+    });
 
     // Attn / Tel / Fax / Email, as far as the customer record holds them. A
-    // label with nothing after it is left out rather than printed empty.
-    cy += 10;
+    // label with nothing after it is left out rather than printed empty, and
+    // the gap above them only appears when there is something to separate.
+    const hasContact = debtor && (debtor.attention || debtor.phone || debtor.fax || debtor.email);
+    if (hasContact) cy += 10;
     if (debtor && debtor.attention) {
-      doc.text(`Attn : ${debtor.attention}`, LEFT + 8, cy); cy += 12.5;
+      // Clipped to the box. Some customer records hold two or three contacts in
+      // this one field, and a name running out through the border would look
+      // like the border was the mistake.
+      doc.text(doc.splitTextToSize(`Attn : ${debtor.attention}`, IN_W)[0] || "", IN_X, cy);
+      cy += 12.5;
     }
     if (debtor && (debtor.phone || debtor.fax)) {
-      let tx = LEFT + 8;
-      if (debtor.phone) { doc.text(`Tel : ${debtor.phone}`, tx, cy); tx += 150; }
+      let tx = IN_X;
+      if (debtor.phone) { doc.text(`Tel : ${debtor.phone}`, tx, cy); tx += 140; }
       if (debtor.fax) doc.text(`Fax : ${debtor.fax}`, tx, cy);
       cy += 12.5;
     }
     if (debtor && debtor.email) {
-      const em = doc.splitTextToSize(`Email : ${debtor.email}`, 300);
-      doc.text(em.slice(0, 2), LEFT + 8, cy);
+      const em = doc.splitTextToSize(`Email : ${debtor.email}`, IN_W);
+      doc.text(em.slice(0, 2), IN_X, cy);
       cy += 12.5 * Math.min(2, em.length);
     }
+
+    // Drawn last, now that the block's height is known. Stroke only - a fill
+    // would put a panel behind the customer's own name, which is not what a
+    // separating rule is for.
+    setDraw(RULE); doc.setLineWidth(0.8);
+    doc.rect(LEFT, boxTop, BOX_R - LEFT, (cy - 6) - boxTop);
 
     // The standing paragraph, then the column headings.
     let ty = Math.max(cy + 12, 254);

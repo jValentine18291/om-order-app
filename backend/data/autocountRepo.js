@@ -399,7 +399,13 @@ function pick(row, names) {
   const keys = Object.keys(row);
   for (const want of names) {
     const hit = keys.find((k) => k.toLowerCase() === want.toLowerCase());
-    if (hit && row[hit] != null && String(row[hit]).trim()) return String(row[hit]).trim();
+    // Collapsed to one line. These fields are typed by hand in AutoCount and
+    // some carry line breaks - OCS GROUP's Attention is two contacts on two
+    // lines - which would come through as a control character in the middle of
+    // a PDF text run.
+    if (hit && row[hit] != null && String(row[hit]).trim()) {
+      return String(row[hit]).replace(/\s+/g, " ").trim();
+    }
   }
   return "";
 }
