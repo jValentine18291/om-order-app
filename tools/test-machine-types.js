@@ -82,6 +82,43 @@ check("a hand-written oddity", T.expand("Wright stander B"), "Wright stander B")
 check("empty stays empty", T.expand(""), "");
 check("and null does not become the word null", T.expand(null), "");
 
+console.log("\n-- AutoCount's ItemCategory, for models not on the list --");
+// Read off the live catalogue on 15 Sep 2026. The field already holds words,
+// so nothing is decoded - only cased, because John's list is title case and
+// one document should not read "EBZ5100 Backpack Blower" beside "572XP
+// CHAINSAW".
+check("CHAINSAW", T.fromCategory("CHAINSAW"), "Chainsaw");
+check("HEDGE TRIMMER", T.fromCategory("HEDGE TRIMMER"), "Hedge Trimmer");
+check("LEAF BLOWER", T.fromCategory("LEAF BLOWER"), "Leaf Blower");
+check("BRUSH CUTTER", T.fromCategory("BRUSH CUTTER"), "Brush Cutter");
+check("WATER PUMP", T.fromCategory("WATER PUMP"), "Water Pump");
+check("POLE SAW", T.fromCategory("POLE SAW"), "Pole Saw");
+check("RIDE-ON MOWER keeps its small o", T.fromCategory("RIDE-ON MOWER"), "Ride-on Mower");
+
+console.log("\n-- categories that are not a kind of machine are ignored --");
+// A slip is for equipment. "Husqvarna jacket APPAREL" is not a description of
+// a repair, and these categories exist because the catalogue also sells them.
+["APPAREL", "PPE", "MERCHANDISE", "TOOLS", "SP"].forEach((c) => {
+  check(c, T.fromCategory(c), "");
+});
+check("and an empty category", T.fromCategory(""), "");
+check("or a missing one", T.fromCategory(null), "");
+
+console.log("\n-- the list beats AutoCount, because it knows more --");
+// AutoCount files every blower as LEAF BLOWER. The list knows a backpack one
+// from a handheld one, so it is asked first.
+check("EBZ5100 is a backpack blower, not a leaf blower",
+  T.expand("EBZ5100", "LEAF BLOWER"), "EBZ5100 Backpack Blower");
+check("525BX is a handheld one", T.expand("525BX", "LEAF BLOWER"), "525BX Handheld Blower");
+check("and an unlisted model takes what AutoCount says",
+  T.expand("Husqvarna 572XP", "CHAINSAW"), "Husqvarna 572XP Chainsaw");
+check("an unlisted model with no category is printed as typed",
+  T.expand("Wright stander B", ""), "Wright stander B");
+check("a category nobody should print is ignored",
+  T.expand("Husqvarna jacket", "APPAREL"), "Husqvarna jacket");
+check("and a machine that already says it is left alone",
+  T.expand("Portable sprayer", "SPRAYER"), "Portable sprayer");
+
 console.log("\n-- the list itself holds together --");
 // A model in two types would make the answer depend on object key order,
 // which is the kind of bug that shows up on one machine and not another.

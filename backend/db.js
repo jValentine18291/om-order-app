@@ -147,6 +147,12 @@ db.exec(`
     so_number      TEXT    DEFAULT '',      -- which Sales Order it went onto
     repair_comment TEXT    DEFAULT '',
     labour_charge  REAL    DEFAULT 0,     -- technician labour billed for this machine
+    -- What AutoCount calls this kind of machine - its ItemCategory, looked up
+    -- once when the slip is registered. Only used to NAME the machine on the
+    -- documents that leave the building, and only for models that are not on
+    -- the list in machine-types.js. Resolved here rather than when a document
+    -- is built so a quotation still prints with AutoCount unreachable.
+    machine_type   TEXT    DEFAULT '',
     -- WHERE THIS MACHINE IS, and the only thing that says so. The slip's own
     -- status is worked out from these; nothing sets it directly except closing.
     --   RECEIVED       in the workshop, nothing decided
@@ -309,6 +315,18 @@ try {
 db.prepare(
   "INSERT OR IGNORE INTO counters (name, value) VALUES ('slip_number', 0)"
 ).run();
+
+// Migration: machine_type on slip_machines, for slips registered before the
+// documents started saying what kind of machine it is.
+try {
+  const cols = db.prepare("PRAGMA table_info(slip_machines)").all();
+  if (cols.length && !cols.some((c) => c.name === "machine_type")) {
+    db.exec("ALTER TABLE slip_machines ADD COLUMN machine_type TEXT DEFAULT ''");
+    console.log("[db] migrated: added machine_type to slip_machines");
+  }
+} catch (e) {
+  console.error("[db] slip_machines.machine_type migration failed:", e.message);
+}
 
 // Migration: drive_file_id on slip_quotations. The table shipped a version
 // before the Drive folder existed, so a server that has already run it has the

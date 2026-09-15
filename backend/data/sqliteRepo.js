@@ -199,6 +199,9 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
           // code the catalogue holds.
           code: String((m && m.machine_code) || "").trim(),
           serial: String((m && m.serial) || "").trim(),
+          // AutoCount's ItemCategory for this model, resolved by the route
+          // before we got here. Only used to name the machine on paper.
+          type: String((m && m.machine_type) || "").trim().slice(0, 40),
           remarks: String((m && m.remarks) || "").trim().slice(0, 500),
           // Phones run a cached copy of the app for a shift after a deploy, so
           // this per-machine tick still arrives from the counter. It is folded
@@ -225,7 +228,7 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'OPEN')`
   );
   const insertMachine = db.prepare(
-    "INSERT INTO slip_machines (slip_id, machine_desc, machine_code, serial_no, remarks, state) VALUES (?, ?, ?, ?, ?, ?)"
+    "INSERT INTO slip_machines (slip_id, machine_desc, machine_code, serial_no, remarks, machine_type, state) VALUES (?, ?, ?, ?, ?, ?, ?)"
   );
   const insertSignature = db.prepare(
     "INSERT INTO slip_signatures (slip_id, image, signed_content) VALUES (?, ?, ?)"
@@ -257,7 +260,7 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
     // anything, with no parts and no labour to quote. A machine reaches that
     // list when a technician sends it, which is when there is a figure to give.
     for (const m of machineList) {
-      insertMachine.run(slipId, m.desc, m.code, m.serial, m.remarks, "RECEIVED");
+      insertMachine.run(slipId, m.desc, m.code, m.serial, m.remarks, m.type, "RECEIVED");
     }
     if (sig) {
       // Written inside the same transaction as the slip, so a signature can
@@ -708,7 +711,8 @@ function slipBlockLines(slip, wanted, all) {
     // front of them; a document leaving the building has to read "EBZ5100
     // Backpack Blower". The slip keeps what was typed; only the paper changes.
     const model = MACHINE_TYPES.expand(
-      String(m.machine_desc || "").replace(/\s-\s\d+\/\d+$/, "").trim());
+      String(m.machine_desc || "").replace(/\s-\s\d+\/\d+$/, "").trim(),
+      m.machine_type);
     lines.push({
       note: true,
       description:
@@ -1311,6 +1315,10 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
     return {
       id,
       desc,
+      // Same rule as the code: undefined means the client did not send it, so
+      // leave whatever is stored alone rather than clearing it.
+      type: (m || {}).machine_type === undefined
+        ? undefined : String((m || {}).machine_type || "").trim().slice(0, 40),
       code: rawCode === undefined ? undefined : String(rawCode || "").trim(),
       serial: String((m || {}).serial_no || "").trim(),
       remarks: String((m || {}).remarks || "").trim().slice(0, 500),
@@ -1359,6 +1367,11 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
   const updMachineWithCode = db.prepare(
     "UPDATE slip_machines SET machine_desc = ?, serial_no = ?, remarks = ?, machine_code = ? WHERE id = ?"
   );
+  // A machine renamed on this screen is a different machine as far as naming
+  // it goes, so the type is re-resolved by the route and written here.
+  const updMachineType = db.prepare(
+    "UPDATE slip_machines SET machine_type = ? WHERE id = ?"
+  );
   const tx = db.transaction(() => {
     updSlip.run(
       newCompany,
@@ -1371,6 +1384,7 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
     for (const m of mEdits) {
       if (m.code === undefined) updMachine.run(m.desc, m.serial, m.remarks, m.id);
       else updMachineWithCode.run(m.desc, m.serial, m.remarks, m.code, m.id);
+      if (m.type !== undefined) updMachineType.run(m.type, m.id);
     }
     // Only where the slip carries a signature. An unsigned slip - which the
     // app does not allow, but old data might - has nothing to be amended

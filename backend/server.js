@@ -194,10 +194,40 @@ app.get("/api/orders/:so", async (req, res) => {
 // ============================================================================
 
 // Create a new service slip (New Service)
+// What AutoCount calls each machine, looked up once at registration and stored
+// on the slip.
+//
+// Here rather than when a document is built, for two reasons: a quotation must
+// still print with AutoCount unreachable, and a slip of six machines would
+// otherwise cost six queries every time anyone produced one.
+//
+// Only asked for models that machine-types.js does not already know, and a
+// failure is silent by design - the machine is then named exactly as it was
+// typed, which is what it did before any of this existed.
+const MACHINE_TYPES = require("../frontend/machine-types.js");
+async function withMachineTypes(machines) {
+  const list = Array.isArray(machines) ? machines : [];
+  if ((process.env.ITEMS_SOURCE || "sqlite").toLowerCase() !== "autocount") return list;
+  const acRepo = require("./data/autocountRepo");
+  const seen = new Map();
+  return Promise.all(list.map(async (m) => {
+    const desc = String((m && m.desc) || "").trim();
+    if (!desc || MACHINE_TYPES.typeFor(desc) || MACHINE_TYPES.namesAType(desc)) return m;
+    if (!seen.has(desc)) {
+      seen.set(desc, acRepo.machineCategory(desc).catch((e) => {
+        console.error("[machine-type]", desc, e.message);
+        return "";
+      }));
+    }
+    return { ...m, machine_type: await seen.get(desc) };
+  }));
+}
+
 app.post("/api/slips", async (req, res) => {
   try {
     const { company, debtor_code, contact_name, contact_number, whatsapp_number, check_service, repair_only, quote_first, notes, machines, signature, created_by } = req.body || {};
-    const slip = await data.slips.createSlip({ company, debtor_code, contact_name, contact_number, whatsapp_number, check_service, repair_only, quote_first, notes, machines, signature, created_by });
+    const withTypes = await withMachineTypes(machines);
+    const slip = await data.slips.createSlip({ company, debtor_code, contact_name, contact_number, whatsapp_number, check_service, repair_only, quote_first, notes, machines: withTypes, signature, created_by });
     res.status(201).json(slip);
   } catch (err) {
     if (err.status === 400) return res.status(400).json({ error: err.message });
@@ -1458,7 +1488,13 @@ app.patch("/api/slips/:slip/details", async (req, res) => {
     if (!["sales", "purchaser", "admin"].includes(String(body.role || "").toLowerCase())) {
       return res.status(403).json({ error: "Only Sales, Purchaser and Admin can edit a slip." });
     }
-    res.json(await data.slips.updateSlipDetails(req.params.slip, { ...body, who: body.who || "" }));
+    // A machine renamed here needs its type looked up again, or the documents
+    // would go on naming it after the model it used to be.
+    const machines = Array.isArray(body.machines)
+      ? await withMachineTypes(body.machines.map((m) => ({ ...m, desc: m.desc || m.machine_desc })))
+      : body.machines;
+    res.json(await data.slips.updateSlipDetails(req.params.slip,
+      { ...body, machines, who: body.who || "" }));
   } catch (err) {
     if ([400, 404, 409].includes(err.status)) return res.status(err.status).json({ error: err.message });
     console.error("[PATCH /api/slips/:slip/details]", err);

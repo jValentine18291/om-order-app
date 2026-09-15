@@ -72,26 +72,66 @@
     return tokensOf(text).some((t) => TYPE_WORDS.has(t));
   }
 
+  // ---- AutoCount's own ItemCategory, for models not on the list above ------
+  //
+  // Read off the live catalogue on 15 Sep 2026: the field holds readable words
+  // already - CHAINSAW, LEAF BLOWER, RIDE-ON MOWER - so nothing has to be
+  // decoded. It is stored in capitals, and John's list is in title case; left
+  // as found, one document would read "EBZ5100 Backpack Blower" beside
+  // "572XP CHAINSAW", so it is cased to match.
+  //
+  // Not every category is a kind of machine. A slip is for equipment, so these
+  // are ignored rather than printed - "Husqvarna jacket APPAREL" is not a
+  // description of a repair.
+  const NOT_A_MACHINE = new Set(["APPAREL", "PPE", "MERCHANDISE", "TOOLS", "SP"]);
+
+  // Where title case alone gets it wrong.
+  const CATEGORY_SPELLING = { "RIDE-ON MOWER": "Ride-on Mower" };
+
+  function fromCategory(category) {
+    const c = String(category || "").trim().toUpperCase();
+    if (!c || NOT_A_MACHINE.has(c)) return "";
+    if (CATEGORY_SPELLING[c]) return CATEGORY_SPELLING[c];
+    return c.toLowerCase().replace(/(^|[\s/])([a-z])/g, (m, p, ch) => p + ch.toUpperCase());
+  }
+
   // "EBZ5100" -> "EBZ5100 Backpack Blower".
   //
-  // Left exactly as written when: the model is not on the list, or the text
-  // already names a type. Somebody who took the trouble to write "EBZ5100
-  // Backpack Leaf Blower 50.2cc" has said it better than this table can, and
-  // a machine nobody listed is printed as typed rather than guessed at.
-  function expand(text) {
+  // John's list first, because it is the more precise of the two: AutoCount
+  // files every blower as LEAF BLOWER, where the list knows a backpack one
+  // from a handheld one. `category` is the machine's AutoCount ItemCategory
+  // where we have it, and is only reached for a model nobody listed.
+  //
+  // Left exactly as written when neither knows it, or when the text already
+  // names a type: somebody who took the trouble to write "EBZ5100 Backpack
+  // Leaf Blower 50.2cc" has said it better than either table can.
+  // Does the text already contain every word of this type? namesAType catches
+  // the four families the list knows; this catches the rest, so a machine
+  // written "Portable sprayer" against AutoCount's SPRAYER is not turned into
+  // "Portable sprayer Sprayer".
+  function alreadySays(text, type) {
+    const have = new Set(tokensOf(text));
+    const words = tokensOf(type);
+    return words.length > 0 && words.every((w) => have.has(w));
+  }
+
+  function expand(text, category) {
     const s = String(text == null ? "" : text).trim();
     if (!s) return s;
     if (namesAType(s)) return s;
-    const type = typeFor(s);
-    return type ? `${s} ${type}` : s;
+    const type = typeFor(s) || fromCategory(category);
+    if (!type || alreadySays(s, type)) return s;
+    return `${s} ${type}`;
   }
 
   return {
     BY_TYPE: BY_TYPE,
     TYPE_OF: TYPE_OF,
     TYPE_WORDS: TYPE_WORDS,
+    NOT_A_MACHINE: NOT_A_MACHINE,
     typeFor: typeFor,
     namesAType: namesAType,
+    fromCategory: fromCategory,
     expand: expand,
   };
 });

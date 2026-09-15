@@ -663,6 +663,48 @@ async function searchMachines(q, limit = 15) {
 }
 module.exports.searchMachines = searchMachines;
 
+// What AutoCount calls the kind of machine a model is - its ItemCategory.
+//
+// For models not on John's list in machine-types.js. The field holds readable
+// words (CHAINSAW, LEAF BLOWER, RIDE-ON MOWER), so nothing needs decoding.
+//
+// ONE MATCH OR NOTHING
+// Sales type the model alone, so this looks the model up as text. A term that
+// finds several machines is refused rather than guessed at: "525" matches a
+// brushcutter, two blowers and two trimmers, and the wrong one of those on a
+// customer's quotation is worse than no type at all. It also refuses when the
+// matches disagree about the category - which is the same question asked of
+// the data rather than of the code.
+//
+// Whole words only, for the same reason machine-types.js matches whole words:
+// EBZ5100 must not be found by searching EBZ51.
+async function machineCategory(modelText) {
+  const tokens = String(modelText || "")
+    .toUpperCase().split(/[^A-Z0-9]+/).filter((t) => t.length >= 3 && /[0-9]/.test(t));
+  if (!tokens.length) return "";
+
+  for (const t of tokens) {
+    const rows = await query(
+      `SELECT DISTINCT LTRIM(RTRIM(i.ItemCategory)) AS cat
+         FROM Item i
+        WHERE i.IsActive = 'T'
+          AND UPPER(i.ItemCode) LIKE 'U%'
+          AND i.ItemCategory IS NOT NULL AND i.ItemCategory <> ''
+          -- The code reads "UZEN EBZ5100(AS) 966488802": the model is one
+          -- space-separated part of it, so the token has to sit on a boundary
+          -- rather than anywhere inside.
+          AND ' ' + REPLACE(REPLACE(REPLACE(UPPER(i.ItemCode), '(', ' '), ')', ' '), '-', ' ') + ' '
+              LIKE '% ' + @t + ' %'`,
+      { t }
+    );
+    if (rows.length === 1 && rows[0].cat) return rows[0].cat;
+    // Several categories for one model: ambiguous, so say nothing and try the
+    // next token rather than picking one.
+  }
+  return "";
+}
+module.exports.machineCategory = machineCategory;
+
 // What is on a shelf. The shelf lives on the item's BASE-UOM row, which is the
 // same row setPartShelf writes to - ask any other row and the answer would be
 // blank for most items.

@@ -1128,7 +1128,7 @@ function buildSlipPdf(slip) {
     // becomes "EBZ5100 Backpack Blower". The customer gets all three documents
     // and they should agree about what was brought in.
     const shown = window.OM_MACHINE_TYPES
-      ? OM_MACHINE_TYPES.expand(m.machine_desc || "")
+      ? OM_MACHINE_TYPES.expand(m.machine_desc || "", m.machine_type)
       : String(m.machine_desc || "");
     const lines = doc.splitTextToSize(shown, DESC_W - 26);
     const serial = String(m.serial_no || "").trim();
