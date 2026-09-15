@@ -1734,6 +1734,55 @@ app.post("/api/slips/:slip/quotation", async (req, res) => {
   }
 });
 
+// File a Repair Quotation in the staff Drive folder.
+//
+// Filed only - no link is created and none is stored. The customer gets the
+// quotation as an attachment off the phone; this is the office's own copy, so
+// that "what did we quote them in September" has an answer that does not
+// depend on someone's sent items.
+//
+// The PDF comes up as raw bytes from the browser that drew it, for the same
+// reason the slip does: rebuilding it here would eventually produce a document
+// subtly different from the one the customer was sent.
+app.post(
+  "/api/quotations/:ref/pdf",
+  express.raw({ type: "application/pdf", limit: "10mb" }),
+  async (req, res) => {
+    const drive = require("./drive");
+    try {
+      const ready = drive.quotationReadiness();
+      if (!ready.enabled) {
+        return res.status(403).json({ error: "Google Drive is switched off on this server." });
+      }
+      if (!ready.configured) {
+        return res.status(503).json({ error: `Quotation filing is not set up (missing ${ready.missing.join(", ")}).` });
+      }
+      if (!req.body || !req.body.length) {
+        return res.status(400).json({ error: "No PDF was received." });
+      }
+      const q = await data.slips.quotationByRef(req.params.ref);
+      if (!q) return res.status(404).json({ error: "No such quotation." });
+
+      const slip = await data.slips.getSlip(q.slip_number);
+      const fileId = await drive.storeQuotation({
+        ref: q.ref,
+        company: slip ? slip.company : "",
+        pdf: req.body,
+        fileId: q.drive_file_id || "",
+      });
+      await data.slips.setQuotationDrive(q.ref, fileId);
+      console.log(`[drive] quotation ${q.ref} filed (${req.body.length} bytes)`);
+      res.json({ ok: true });
+    } catch (err) {
+      // Filing is a convenience. A Drive failure must never look like the
+      // quotation failed - it has a number, it is recorded, and the copy going
+      // to the customer is already in the sender's hands.
+      console.error("[POST /api/quotations/:ref/pdf]", err.message);
+      res.status(502).json({ error: err.message || "Could not file the quotation." });
+    }
+  }
+);
+
 // Sales have keyed the Sales Order into AutoCount and got a DO/INV/CS number
 // back. Its own step, before closing: only once this has happened does anyone
 // ring the customer to come and collect.

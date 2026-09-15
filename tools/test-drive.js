@@ -137,6 +137,49 @@ server.listen(0, async () => {
     check("archiving shares nothing", seen.shares.length, sharesBefore);
     check("and hands out no link", filed.link, "");
 
+    // ---- Repair Quotations, filed for staff --------------------------------
+    // Their own folder, so the slips archive stays a list of slips. Filed and
+    // nothing more: no link is created for one, because the customer's copy
+    // goes as an attachment off the phone.
+    process.env.DRIVE_QUOTATION_FOLDER_ID = "quotes-xyz";
+    check("quotation filing is ready", drive.quotationReadiness(),
+      { enabled: true, configured: true, missing: [] });
+
+    const sharesBeforeQuote = seen.shares.length;
+    const qid = await drive.storeQuotation({
+      ref: "QT-00042", company: "TAN LANDSCAPING PTE LTD", pdf, fileId: "",
+    });
+    check("filed in the QUOTATION folder, not the slips one",
+      seen.uploads.at(-1).parents, ["quotes-xyz"]);
+    check("named for the quotation", seen.uploads.at(-1).name,
+      "Quotation_QT-00042 - TAN LANDSCAPING PTE LTD.pdf");
+    check("and shares nothing at all", seen.shares.length, sharesBeforeQuote);
+
+    // A revision is a different document and becomes a file of its own, so the
+    // folder shows what was quoted and what changed.
+    await drive.storeQuotation({ ref: "QT-00042-2", company: "TAN LANDSCAPING PTE LTD", pdf, fileId: "" });
+    check("a revision is its own file", seen.uploads.at(-1).name,
+      "Quotation_QT-00042-2 - TAN LANDSCAPING PTE LTD.pdf");
+    check("created, not replacing the first", seen.uploads.at(-1).method, "POST");
+
+    // Re-sending the SAME number replaces its file rather than piling up.
+    await drive.storeQuotation({ ref: "QT-00042", company: "TAN LANDSCAPING PTE LTD", pdf, fileId: qid });
+    check("a re-send replaces in place", seen.uploads.at(-1).method, "PATCH");
+    check("the same file", seen.uploads.at(-1).replacingId, qid);
+    check("and is not re-filed into the folder", seen.uploads.at(-1).parents, null);
+
+    // Without the folder set, quotations are not filed - and slips carry on.
+    process.env.DRIVE_QUOTATION_FOLDER_ID = "";
+    check("says what a quotation still needs",
+      drive.quotationReadiness().missing, ["DRIVE_QUOTATION_FOLDER_ID"]);
+    check("while slips are unaffected", drive.readiness().configured, true);
+    let qerr = "";
+    try { await drive.storeQuotation({ ref: "QT-1", company: "x", pdf, fileId: "" }); }
+    catch (e) { qerr = e.message; }
+    check("and refuses rather than filing it somewhere else",
+      /DRIVE_QUOTATION_FOLDER_ID/.test(qerr), true);
+    process.env.DRIVE_QUOTATION_FOLDER_ID = "quotes-xyz";
+
     // ---- Switched off ------------------------------------------------------
     process.env.DRIVE_ENABLED = "false";
     let err = "";

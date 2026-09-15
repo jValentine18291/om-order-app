@@ -249,7 +249,10 @@ db.exec(`
     delivery_term TEXT DEFAULT '',
     total       REAL DEFAULT 0,
     issued_by   TEXT DEFAULT '',
-    issued_at   TEXT DEFAULT (datetime('now','localtime'))
+    issued_at   TEXT DEFAULT (datetime('now','localtime')),
+    -- The copy filed in the staff Drive folder. Kept so re-sending the same
+    -- quotation replaces its file instead of leaving two.
+    drive_file_id TEXT DEFAULT ''
   );
   CREATE INDEX IF NOT EXISTS idx_slip_quotations_slip ON slip_quotations(slip_number, seq);
 
@@ -306,6 +309,19 @@ try {
 db.prepare(
   "INSERT OR IGNORE INTO counters (name, value) VALUES ('slip_number', 0)"
 ).run();
+
+// Migration: drive_file_id on slip_quotations. The table shipped a version
+// before the Drive folder existed, so a server that has already run it has the
+// table without the column.
+try {
+  const cols = db.prepare("PRAGMA table_info(slip_quotations)").all();
+  if (cols.length && !cols.some((c) => c.name === "drive_file_id")) {
+    db.exec("ALTER TABLE slip_quotations ADD COLUMN drive_file_id TEXT DEFAULT ''");
+    console.log("[db] migrated: added drive_file_id to slip_quotations");
+  }
+} catch (e) {
+  console.error("[db] slip_quotations.drive_file_id migration failed:", e.message);
+}
 
 // Migration: add repair_comment to slip_machines if an older DB lacks it.
 // (CREATE TABLE IF NOT EXISTS won't alter an existing table, so do it explicitly.)

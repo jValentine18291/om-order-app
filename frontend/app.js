@@ -3804,6 +3804,17 @@ async function shareRepairQuotation(slipNumber) {
       const blob = buildRepairQuotationPdf(issued, terms);
       close();
       if (issued.revision) toast(`Revision ${issued.quotation_no}`, "ok");
+      // File the office copy before handing the sender theirs, so the two are
+      // the same bytes. Filing is a convenience and must never stop a
+      // quotation going out: a Drive that is off, unconfigured or unreachable
+      // is said once, quietly, and the send carries on.
+      try {
+        await api(`/api/quotations/${encodeURIComponent(issued.quotation_no)}/pdf`,
+          { method: "POST", headers: { "Content-Type": "application/pdf" }, body: blob });
+      } catch (e) {
+        console.warn("[quotation] not filed to Drive:", e.message);
+        toast("Sent, but not filed to Drive: " + e.message, "err");
+      }
       await deliverPdf(blob, `Quotation_${issued.quotation_no}.pdf`,
                        `Repair Quotation ${issued.quotation_no}`);
     } catch (e) {

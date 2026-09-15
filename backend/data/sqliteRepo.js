@@ -827,9 +827,21 @@ const quotationRef = (slipNumber, seq) =>
 // The quotations already sent for a slip, newest last.
 function slipQuotations(slipNumber) {
   return db.prepare(
-    "SELECT seq, ref, payment_term, delivery_term, total, issued_by, issued_at " +
+    "SELECT seq, ref, payment_term, delivery_term, total, issued_by, issued_at, drive_file_id " +
     "FROM slip_quotations WHERE slip_number = ? ORDER BY seq"
   ).all(String(slipNumber));
+}
+
+// One quotation by the name it was given, so the copy filed in Drive can be
+// found and replaced rather than duplicated.
+function quotationByRef(ref) {
+  return db.prepare("SELECT * FROM slip_quotations WHERE ref = ?").get(String(ref)) || null;
+}
+
+function setQuotationDrive(ref, fileId) {
+  db.prepare("UPDATE slip_quotations SET drive_file_id = ? WHERE ref = ?")
+    .run(String(fileId || ""), String(ref));
+  return quotationByRef(ref);
 }
 
 // Record that a quotation went out, and say what it is called.
@@ -1922,7 +1934,7 @@ const slips = {
   poTracking, poStatus, setPoStatus, PO_STATUSES,
   listShipments, getShipment, createShipment, updateShipment,
   allocatedByPo, receivedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
-  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, setMachineState, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, setMachineState, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 
 // ---- One-off: read the status of every open slip again ---------------------

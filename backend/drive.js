@@ -24,6 +24,10 @@
 // SETTINGS (all on the server, never in the repo)
 //   DRIVE_ENABLED        "true" to allow uploads at all. Default off.
 //   DRIVE_FOLDER_ID      the staff-only folder inside the Shared Drive
+//   DRIVE_QUOTATION_FOLDER_ID
+//                        where Repair Quotations are filed. Its own folder, so
+//                        the slips archive stays a list of slips. Unset means
+//                        quotations are not filed at all - slips carry on.
 //   DRIVE_KEY_FILE       path to the service account's JSON key
 //   DRIVE_API_BASE       override the API host (used by the tests)
 //   DRIVE_TOKEN_URL      override the token endpoint (used by the tests)
@@ -42,6 +46,7 @@ function config() {
   return {
     enabled: on(process.env.DRIVE_ENABLED),
     folderId: process.env.DRIVE_FOLDER_ID || "",
+    quotationFolderId: process.env.DRIVE_QUOTATION_FOLDER_ID || "",
     keyFile: process.env.DRIVE_KEY_FILE || "",
   };
 }
@@ -210,4 +215,65 @@ async function storeAndShare({ slipNumber, company, pdf, fileId = "", share = fa
   return { fileId: id, link: downloadLink(id) };
 }
 
-module.exports = { config, readiness, storeAndShare, downloadLink, uploadSlip, shareFile };
+// ---- Repair Quotations ------------------------------------------------------
+// Filed for staff, and that is all. No link is ever created for one: the
+// quotation reaches the customer as an attachment off the phone, so nothing
+// needs to be readable by whoever holds a URL.
+//
+// Its own folder, so the slips archive stays a list of slips. Unset means
+// quotations are simply not filed - slips are unaffected, because a folder
+// nobody has made yet is not a fault.
+function quotationReadiness() {
+  const c = config();
+  const r = readiness();
+  const missing = r.missing.slice();
+  if (!c.quotationFolderId) missing.push("DRIVE_QUOTATION_FOLDER_ID");
+  return { enabled: c.enabled, configured: missing.length === 0, missing };
+}
+
+async function uploadQuotation({ ref, company, pdf, fileId = "" }) {
+  const { quotationFolderId } = config();
+  const safe = String(company || "").replace(/[\\/:*?"<>|]/g, "").trim();
+  // Named after the quotation, not the slip: QT-00042 and QT-00042-2 are two
+  // documents, and which one the customer is holding is the thing anyone
+  // looking in this folder needs to know.
+  const name = `Quotation_${ref}${safe ? " - " + safe : ""}.pdf`;
+
+  const meta = fileId ? { name } : { name, parents: [quotationFolderId] };
+  const { boundary, body } = multipart(meta, pdf);
+  const path = fileId
+    ? `/upload/drive/v3/files/${encodeURIComponent(fileId)}?uploadType=multipart&supportsAllDrives=true&fields=id`
+    : `/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true&fields=id`;
+
+  const saved = await api(path, {
+    method: fileId ? "PATCH" : "POST",
+    headers: { "Content-Type": `multipart/related; boundary=${boundary}` },
+    body,
+  });
+  return saved.id;
+}
+
+// File one quotation. Re-sending the SAME number replaces its file rather than
+// piling up copies; a revision has a different number, so it becomes a file of
+// its own and both stay in the folder.
+async function storeQuotation({ ref, company, pdf, fileId = "" }) {
+  const r = quotationReadiness();
+  if (!r.enabled) throw new Error("Google Drive is switched off on this server.");
+  if (!r.configured) throw new Error(`Quotation filing is not set up: missing ${r.missing.join(", ")}.`);
+
+  try {
+    return await uploadQuotation({ ref, company, pdf, fileId });
+  } catch (e) {
+    // A stored id can go stale - somebody deletes the file by hand. Take it as
+    // new rather than failing for good.
+    if (fileId && /404|not found/i.test(e.message)) {
+      return await uploadQuotation({ ref, company, pdf, fileId: "" });
+    }
+    throw e;
+  }
+}
+
+module.exports = {
+  config, readiness, storeAndShare, downloadLink, uploadSlip, shareFile,
+  quotationReadiness, uploadQuotation, storeQuotation,
+};
