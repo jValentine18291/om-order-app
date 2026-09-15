@@ -4322,6 +4322,20 @@ function renderSlipDetail(slip) {
       }
     }
 
+    // The way back from a decision nobody meant to make - slip 00053, where
+    // "Need to Quote" was pressed instead of the button beside it and every
+    // action on offer afterwards moved the machine further along.
+    //
+    // Quiet, and last, because it is not a step in the job: it says this
+    // machine never left the start. The server decides whether it is offered
+    // (m.can_undo) - the moment a technician records a part, a labour charge
+    // or a comment, there is something to lose and the answer becomes no.
+    if (canDecide() && live && m.can_undo) {
+      html += `<div class="decide-row decide-undo" data-undo="${m.id}">
+          <button type="button" class="decide-btn decide-btn-undo">Put the status back to &ldquo;${escapeHtml(MACHINE_STATE.RECEIVED.label)}&rdquo;</button>
+        </div>`;
+    }
+
     // A condemned machine is still in the workshop until somebody says where it
     // went, and the slip will not close until they do. Asked here, on the
     // screen sales are looking at when the customer rings about collecting it.
@@ -4438,6 +4452,35 @@ function wireDecideButtons(wrap, slipNumber) {
       } catch (e) {
         toast(e.message || "Could not save that", "err");
         row.querySelectorAll("button").forEach((b) => { b.disabled = false; });
+      }
+    });
+  });
+
+  // Putting a status back. Confirmed first - it is undoing somebody else's
+  // entry, and the person pressing it should have meant to.
+  wrap.querySelectorAll(".decide-undo button").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const row = btn.closest(".decide-undo");
+      const machineId = Number(row.dataset.undo);
+      if (!confirm(
+        `Put this machine's status back to "${MACHINE_STATE.RECEIVED.label}"?\n\n` +
+        "Use this when a status was set by mistake. Nothing has been recorded " +
+        "against the machine, so nothing is lost."
+      )) return;
+      btn.disabled = true;
+      try {
+        await api(`/api/slips/${encodeURIComponent(slipNumber)}/machines/${machineId}/undo`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ role: getRole(), who: initialsFor(getUser()) }),
+        });
+        toast("Status put back", "ok");
+        onViewSlipChosen(slipNumber);
+        if (viewSearch) viewSearch.refresh();
+        refreshQuoteCount();
+      } catch (e) {
+        toast(e.message || "Could not put the status back", "err");
+        btn.disabled = false;
       }
     });
   });

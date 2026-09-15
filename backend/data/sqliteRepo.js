@@ -376,7 +376,13 @@ function getSlip(slipNumber, includeSignature = false) {
   if (!slip) return null;
   const machines = db.prepare("SELECT * FROM slip_machines WHERE slip_id = ?").all(slip.id);
   const getParts = db.prepare("SELECT * FROM machine_parts WHERE machine_id = ? ORDER BY id");
-  for (const m of machines) m.parts = getParts.all(m.id);
+  for (const m of machines) {
+    m.parts = getParts.all(m.id);
+    // Whether its status can be put back - see undoMachineDecision(). Decided
+    // here rather than in the app so the button and the rule that refuses it
+    // are the same sentence; the app only has to read the answer.
+    m.can_undo = canUndoMachine(m);
+  }
   slip.machines = machines;
   // Small and always present: whatever displays a slip needs to know it was
   // changed after signing, and a flag nobody fetched is a flag nobody sees.
@@ -1933,6 +1939,66 @@ function setMachineState(slipNumber, machineId, state, who = "") {
   return getSlip(slipNumber);
 }
 
+// ---- Undoing a decision nobody meant to make ---------------------------------
+//
+// Slip 00053: a machine was sent for quoting and then marked quoted, by
+// somebody who meant to press the button beside it. Nothing had been done to
+// the machine - no parts, no labour, no comment - and there was no way back.
+// Every action offered on a quoted machine moves it FORWARD ("Confirm Repair",
+// "Send for quoting again"), so the only fix was to reach into the database.
+//
+// This is the way back, and it only exists while there is nothing to lose.
+// The moment a technician records anything against the machine, the decision
+// has been acted on and undoing it would be rewriting history rather than
+// correcting a slip - so this refuses, and says what is in the way.
+//
+// Deliberately NOT part of setMachineState. That function moves a machine
+// along and asks no questions, which is right for the eight buttons that use
+// it; this one is a correction and has to be sure of itself first.
+function machineWork(machineId) {
+  const m = db.prepare("SELECT * FROM slip_machines WHERE id = ?").get(machineId);
+  const parts = db.prepare("SELECT COUNT(*) AS n FROM machine_parts WHERE machine_id = ?").get(machineId).n;
+  const found = [];
+  if (parts) found.push(parts === 1 ? "1 part" : `${parts} parts`);
+  if (Number(m.labour_charge) > 0) found.push("a labour charge");
+  if (String(m.repair_comment || "").trim()) found.push("a repair comment");
+  if (String(m.converted_at || "").trim()) found.push("a Sales Order");
+  if (String(m.disposal || "").trim()) found.push("a disposal");
+  return found;
+}
+
+function undoMachineDecision(slipNumber, machineId, who = "") {
+  const { slip, machine } = machineOnSlip(slipNumber, machineId);
+  if (machine.state === "RECEIVED") {
+    const e = new Error("Nothing has been decided about this machine.");
+    e.status = 409; throw e;
+  }
+  const work = machineWork(machine.id);
+  if (work.length) {
+    // Named, so the person reading it knows what to go and look at rather than
+    // being told "no" by a screen that will not say why.
+    const e = new Error(
+      `This machine has ${work.join(", ")} recorded against it, so its status cannot be put back. ` +
+      `Remove that first, or move it on with the buttons above.`
+    );
+    e.status = 409; throw e;
+  }
+  db.prepare(
+    `UPDATE slip_machines
+        SET state = 'RECEIVED', decided_by = ?, decided_at = datetime('now','localtime'),
+            disposal = '', disposal_at = '', disposal_by = ''
+      WHERE id = ?`
+  ).run(String(who || "").trim(), machine.id);
+  deriveSlipStatus(slip.id);
+  return getSlip(slipNumber);
+}
+
+// Can this machine's status be put back? Answered here rather than in the app,
+// so the button and the rule behind it cannot drift apart.
+function canUndoMachine(machine) {
+  return !!machine && machine.state !== "RECEIVED" && machineWork(machine.id).length === 0;
+}
+
 // A technician has pressed Save on a machine. If that machine was simply being
 // worked on, it is now repaired.
 //
@@ -2043,7 +2109,7 @@ const slips = {
   poTracking, poStatus, setPoStatus, PO_STATUSES,
   listShipments, getShipment, createShipment, updateShipment,
   allocatedByPo, receivedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
-  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 
 // ---- One-off: read the status of every open slip again ---------------------

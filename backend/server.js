@@ -1395,6 +1395,28 @@ async function handleMachineState(req, res) {
 }
 app.patch("/api/slips/:slip/machines/:id/state", handleMachineState);
 
+// Put a machine's status back to where it started, for the decision nobody
+// meant to make. Its own route rather than a state of "RECEIVED" sent to the
+// one above, because that route moves a machine along and asks no questions -
+// this one refuses the moment there is anything recorded against the machine,
+// and the check belongs with the act, not with the caller.
+//
+// No push notification: the point of this is that nothing happened.
+app.post("/api/slips/:slip/machines/:id/undo", async (req, res) => {
+  try {
+    const body = req.body || {};
+    if (!["sales", "purchaser", "admin"].includes(String(body.role || "").toLowerCase())) {
+      return res.status(403).json({ error: "Only Sales, Purchaser and Admin can put a status back." });
+    }
+    res.json(await data.slips.undoMachineDecision(
+      req.params.slip, Number(req.params.id), body.who || ""));
+  } catch (err) {
+    if ([400, 404, 409].includes(err.status)) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/slips/:slip/machines/:id/undo]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to put the status back" });
+  }
+});
+
 // The same move applied to every machine on the slip - "all of these need
 // quoting", "none of them do". Machines already billed or already disposed of
 // are left where they are.

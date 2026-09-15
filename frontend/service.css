@@ -2112,6 +2112,17 @@ select {
 .decide-btn:active { filter: brightness(.96); }
 .decide-btn:disabled { opacity: .55; cursor: default; }
 
+/* Putting a status back is not a step in the job - it says this machine never
+   left the start - so it is deliberately the quietest thing in the stack:
+   lighter, smaller, no border competing with the real decisions above it. */
+.decide-undo { margin-top: 6px; }
+.decide-btn-undo {
+  min-height: 34px; font-size: .8rem; font-weight: 600;
+  color: var(--ink-faint); background: transparent; border-color: transparent;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.decide-btn-undo:active { background: var(--surface); }
+
 /* Quoted, and waiting on the customer. Amber, like "waiting to quote", because
    it is the same kind of fact: nobody in the workshop can do anything yet. */
 .decision-quoted { background: #FFF1DC; border-color: #C97A00; color: #7a4a00; }
