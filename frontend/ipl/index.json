@@ -90,6 +90,18 @@
   "parts": 199
  },
  {
+  "id": "hus536li",
+  "name": "Husqvarna 536Li XP Chainsaw",
+  "short": "536Li XP",
+  "brand": "Husqvarna",
+  "category": "Chainsaw",
+  "figures": 7,
+  "parts": 94,
+  "aliases": [
+   "436Li"
+  ]
+ },
+ {
   "id": "am450x",
   "name": "Husqvarna Automower 450X",
   "short": "Automower 450X",
@@ -336,6 +348,15 @@
   "parts": 149
  },
  {
+  "id": "psj2600",
+  "name": "Zenoah PSJ2600 Pole Saw",
+  "short": "PSJ2600",
+  "brand": "Zenoah",
+  "category": "Pole Saw",
+  "figures": 6,
+  "parts": 213
+ },
+ {
   "id": "shtza",
   "name": "Zenoah SHTZ-A Trimmer Head",
   "short": "SHTZ-A",
@@ -352,17 +373,5 @@
   "category": "Chipper Shredder",
   "figures": 51,
   "parts": 1356
- },
- {
-  "id": "hus536li",
-  "name": "Husqvarna 536Li XP Chainsaw",
-  "short": "536Li XP",
-  "brand": "Husqvarna",
-  "category": "Chainsaw",
-  "figures": 7,
-  "parts": 94,
-  "aliases": [
-   "436Li"
-  ]
  }
 ]

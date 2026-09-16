@@ -9,7 +9,11 @@
 const fs = require("fs");
 const vm = require("vm");
 
-const src = fs.readFileSync("P:/1-SCAN/om-order-app/frontend/app.js", "utf8");
+// Found relative to this file, not by absolute path: the repo was checked out
+// at P:\1-SCAN\om-order-app and later moved to C:\Claude Code\om-order-app,
+// and a hard-coded path meant this suite stopped running the moment it did.
+const src = fs.readFileSync(
+  require("path").resolve(__dirname, "..", "frontend", "app.js"), "utf8");
 const start = src.indexOf("function renderPickerLines()");
 if (start < 0) throw new Error("renderPickerLines not found");
 // To the blank line before the next top-level declaration.

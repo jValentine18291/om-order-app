@@ -1,0 +1,24 @@
+# PSJ2600 — one callout the reading got wrong, and what the page prints.
+#
+#     <figure> add  <key> <x%> <y%>     put a hotspot here
+#     <figure> drop <key> <x%> <y%>     remove the one already here
+#
+# THE "11" ON THE POLE SAW HEAD SHEET
+# Printed as one callout, but the PDF carries its two strokes as two separate
+# words, so it was read as a "1" beside a "1". Both were placed, both keyed 1,
+# and the result was worse than a miss:
+#
+#   - tapping the printed 11 offered part 1, the CASE COMP, instead of the
+#     collar it points at
+#   - part 11 had no callout at all, so there was no way to reach it
+#
+# The two readings sit at 56.557,34.593 and 57.370,34.592 - a digit apart on
+# one baseline, which is what gives them away. They are dropped and replaced by
+# a single hotspot centred between them, where the number is actually printed.
+#
+# tools/ipl-check-hotspots.py is what found it: "Fig.6 keys 1 and 1 share one
+# number". Two hotspots for one key, close enough to be one printed callout, is
+# this failure's signature - worth looking for on the next book read this way.
+6 drop 1 56.557 34.593
+6 drop 1 57.370 34.592
+6 add 11 56.96 34.59

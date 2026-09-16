@@ -348,17 +348,35 @@ function parseFigure(page, keys) {
 // that have nothing to do with each other.
 function sameDrawing(a, b) {
   if (!a || !b || a === b) return false;
-  const signature = (page) => {
+  const callouts = (page) => {
     const { width, height, words } = wordsForPage(page);
     return words
       .filter((w) => CALLOUT.test(w.text) && w.y2 < height - 55)
-      .map((w) => `${w.text}@${Math.round((w.x1 / width) * 200)},${Math.round((w.y1 / height) * 200)}`)
-      .sort()
-      .join(" ");
+      .map((w) => ({ text: w.text, x: w.x1 / width, y: w.y1 / height }))
+      .sort((p, q) => p.text.localeCompare(q.text) || p.x - q.x || p.y - q.y);
   };
-  const sa = signature(a);
-  if (sa.split(" ").length < 8) return false;
-  return sa === signature(b);
+  const ca = callouts(a);
+  if (ca.length < 8) return false;
+  const cb = callouts(b);
+  if (ca.length !== cb.length) return false;
+  // Compared with a tolerance rather than to the exact spot.
+  //
+  // This used to round each position into a 200x200 grid and compare the two
+  // as strings. The PSJ2600 reprints its POLE SAW HEAD drawing for a second
+  // parts table, and between the two copies one callout - the "38" - sits
+  // about a thousandth of a page further left. Invisible on paper, but it
+  // straddled a grid line, so the two sheets read as different drawings and
+  // were kept as two figures: 46, 47 and 48 were printed on the first sheet
+  // with nothing behind them, and 1-45 were dead on the second.
+  //
+  // A tolerance says what is actually meant - the same callouts in the same
+  // places, give or take the drift between two printings. Half a percent of
+  // the page is far tighter than the gap between any two callouts on these
+  // sheets, so two genuinely different drawings still cannot pass; and to
+  // reach here they must already carry the same printed figure number.
+  const TOL = 0.005;
+  return ca.every((p, i) =>
+    cb[i].text === p.text && Math.abs(cb[i].x - p.x) <= TOL && Math.abs(cb[i].y - p.y) <= TOL);
 }
 
 // Where the drawing stops on a page it shares with its parts table, as a
