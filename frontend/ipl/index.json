@@ -418,5 +418,14 @@
   "category": "Brushcutter",
   "figures": 26,
   "parts": 270
+ },
+ {
+  "id": "hus120ib",
+  "name": "Husqvarna 120iB Blower",
+  "short": "120iB",
+  "brand": "Husqvarna",
+  "category": "Blower",
+  "figures": 5,
+  "parts": 29
  }
 ]

@@ -1,0 +1,15 @@
+# 120iB sheet titles, in the order the export lists them (A to E already).
+#
+# The printed names, not the export's. Same rule as the 541RB: what a
+# technician is holding is the book, so the book's words win.
+#
+# Sheet 1 is the one that matters. The export calls it TUBE; the drawing calls
+# it CHASSI, and the drawing is right - the sheet carries the nozzle, the tube,
+# the throttle control, both housings, two covers, the spring and the push
+# button, which is the whole body of the machine. Filed under "TUBE" a
+# technician looking for a housing would not open it.
+CHASSI
+DECALS
+ELECTRIC SYSTEM
+FAN SYSTEM
+ACCESSORIES

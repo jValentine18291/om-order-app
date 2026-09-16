@@ -1,0 +1,571 @@
+{
+ "id": "hus120ib",
+ "name": "Husqvarna 120iB Blower",
+ "source": "Husqvarna portal CSV export (120iB IPL.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "CHASSI",
+   "image": "hus120ib-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 35.235,
+     "y": 12.986,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 20.222,
+     "y": 34.692,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 75.402,
+     "y": 41.322,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 54.903,
+     "y": 41.997,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 17.867,
+     "y": 64.844,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 20.194,
+     "y": 85.705,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 37.064,
+     "y": 53.062,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 73.657,
+     "y": 58.805,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 27.922,
+     "y": 87.521,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 45.485,
+     "y": 90.435,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 58.864,
+     "y": 80.764,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 73.38,
+     "y": 77.47,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 80.859,
+     "y": 70.883,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 84.515,
+     "y": 69.573,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "582599601",
+     "depth": 0,
+     "sub": false,
+     "description": "NOZZLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "582599601"
+    },
+    {
+     "key": "2",
+     "part_number": "582501601",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE",
+     "qty": "1",
+     "remarks": "",
+     "search": "582501601"
+    },
+    {
+     "key": "3",
+     "part_number": "579564102",
+     "depth": 0,
+     "sub": false,
+     "description": "THROTTLE CONTROL",
+     "qty": "1",
+     "remarks": "",
+     "search": "579564102"
+    },
+    {
+     "key": "4",
+     "part_number": "584914301",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "584914301"
+    },
+    {
+     "key": "5",
+     "part_number": "580292901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCT",
+     "qty": "15",
+     "remarks": "",
+     "search": "580292901"
+    },
+    {
+     "key": "6",
+     "part_number": "544042003",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE INSERT",
+     "qty": "2",
+     "remarks": "",
+     "search": "544042003"
+    },
+    {
+     "key": "7",
+     "part_number": "584157402",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING",
+     "qty": "1",
+     "remarks": "",
+     "search": "584157402"
+    },
+    {
+     "key": "8",
+     "part_number": "576901201",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "576901201"
+    },
+    {
+     "key": "9",
+     "part_number": "584157302",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING",
+     "qty": "1",
+     "remarks": "",
+     "search": "584157302"
+    },
+    {
+     "key": "10",
+     "part_number": "585480001",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "585480001"
+    },
+    {
+     "key": "11",
+     "part_number": "577996601",
+     "depth": 0,
+     "sub": false,
+     "description": "PUSH BUTTON",
+     "qty": "1",
+     "remarks": "",
+     "search": "577996601"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 CHASSI"
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "DECALS",
+   "image": "hus120ib-fig2.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 41.053,
+     "y": 22.255,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 59.28,
+     "y": 22.255,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 40.776,
+     "y": 67.251,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "586834108",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "586834108"
+    },
+    {
+     "key": "2",
+     "part_number": "586834208",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "586834208"
+    },
+    {
+     "key": "3",
+     "part_number": "503709701",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "503709701"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 DECALS"
+  },
+  {
+   "id": "3",
+   "number": "3",
+   "title": "ELECTRIC SYSTEM",
+   "image": "hus120ib-fig3.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 61.247,
+     "y": 35.579,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 61.219,
+     "y": 18.264,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 58.864,
+     "y": 86.17,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 17.23,
+     "y": 39.337,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 50.97,
+     "y": 77.048,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "598002201",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "598002201"
+    },
+    {
+     "key": "2",
+     "part_number": "599233801",
+     "depth": 0,
+     "sub": false,
+     "description": "KEYPAD",
+     "qty": "1",
+     "remarks": "",
+     "search": "599233801"
+    },
+    {
+     "key": "3",
+     "part_number": "503212813",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW CCRPANT",
+     "qty": "1",
+     "remarks": "",
+     "search": "503212813"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 ELECTRIC SYSTEM"
+  },
+  {
+   "id": "4",
+   "number": "4",
+   "title": "FAN SYSTEM",
+   "image": "hus120ib-fig4.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 68.116,
+     "y": 56.292,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 39.695,
+     "y": 56.081,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 50.332,
+     "y": 80.089,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 79.28,
+     "y": 74.599,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 23.241,
+     "y": 80.11,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 58.255,
+     "y": 64.231,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 35.429,
+     "y": 22.551,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 51.496,
+     "y": 19.552,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "597213701",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "597213701"
+    },
+    {
+     "key": "2",
+     "part_number": "590818203",
+     "depth": 0,
+     "sub": false,
+     "description": "STATOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "590818203"
+    },
+    {
+     "key": "3",
+     "part_number": "590818302",
+     "depth": 0,
+     "sub": false,
+     "description": "ROTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "590818302"
+    },
+    {
+     "key": "4",
+     "part_number": "503202512",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "3",
+     "remarks": "",
+     "search": "503202512"
+    },
+    {
+     "key": "5",
+     "part_number": "503911001",
+     "depth": 0,
+     "sub": false,
+     "description": "SUSPENSION",
+     "qty": "6",
+     "remarks": "",
+     "search": "503911001"
+    },
+    {
+     "key": "6",
+     "part_number": "580292901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCT",
+     "qty": "3",
+     "remarks": "",
+     "search": "580292901"
+    },
+    {
+     "key": "7",
+     "part_number": "582501601",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE",
+     "qty": "1",
+     "remarks": "",
+     "search": "582501601"
+    },
+    {
+     "key": "8",
+     "part_number": "599302601",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "599302601"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.4 FAN SYSTEM"
+  },
+  {
+   "id": "5",
+   "number": "5",
+   "title": "ACCESSORIES",
+   "image": "hus120ib-fig5.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 25.069,
+     "y": 31.06,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 42.77,
+     "y": 37.162,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 69.529,
+     "y": 59.565,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 46.953,
+     "y": 72.656,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "537216201",
+     "depth": 0,
+     "sub": false,
+     "description": "HARNESS",
+     "qty": "1",
+     "remarks": "",
+     "search": "537216201"
+    },
+    {
+     "key": "2",
+     "part_number": "586106302",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "586106302"
+    },
+    {
+     "key": "3",
+     "part_number": "588009701",
+     "depth": 0,
+     "sub": false,
+     "description": "EYELET",
+     "qty": "1",
+     "remarks": "",
+     "search": "588009701"
+    },
+    {
+     "key": "4",
+     "part_number": "579797501",
+     "depth": 0,
+     "sub": false,
+     "description": "NOZZLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "579797501"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.5 ACCESSORIES"
+  }
+ ]
+}
