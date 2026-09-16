@@ -129,6 +129,34 @@ figs = run(["1 drop 1 17.35 4.97", "2 unlisted 24 50.0 60.0", "2 add 25 30.0 40.
 check("the drop took", len(figs[0]["hotspots"]), 2)
 check("and both additions", sorted(h["key"] for h in figs[1]["hotspots"]), ["1", "24", "25"])
 
+# ---- Husqvarna's DUMMY PART placeholder --------------------------------------
+# A callout with no orderable part behind it is exported as article 900000002,
+# "DUMMY PART", with the real answer buried in the Comment. Left alone a
+# technician is shown a part number that AutoCount will never have and that
+# looks exactly like one they could order, so the comment becomes the
+# description and the fake number is dropped.
+#
+# The comments are written by hand and the shapes vary, which is the whole
+# reason to pin them down here.
+print("\n-- DUMMY PART rows are rewritten from their comment --")
+check("name and note split on the dash",
+      mod.placeholder("Fuel Tank - See Fuel tank page"),
+      ("", "Fuel Tank", "See Fuel tank page"))
+check("stars are decoration, not content",
+      mod.placeholder("Blade - ***See Service Reference***"),
+      ("", "Blade", "See Service Reference"))
+check("no dash means it is all name",
+      mod.placeholder("Not Used"),
+      ("", "Not Used", "No part number in this book."))
+check("and an empty comment still says something true",
+      mod.placeholder(""),
+      ("", "Not listed in this book", "No part number in this book."))
+# The fake number must never survive into the book: an empty search is what
+# stops the app asking AutoCount about a part that cannot be there.
+check("the number is always dropped",
+      [mod.placeholder(c)[0] for c in ("Blade - x", "", "Not Used")],
+      ["", "", ""])
+
 print("" if failures else "\nAll good." if not failures else "")
 print("%d FAILED" % failures if failures else "")
 sys.exit(1 if failures else 0)

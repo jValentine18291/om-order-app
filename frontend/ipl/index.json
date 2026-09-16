@@ -427,5 +427,14 @@
   "category": "Blower",
   "figures": 5,
   "parts": 29
+ },
+ {
+  "id": "hus125b",
+  "name": "Husqvarna 125B Blower",
+  "short": "125B",
+  "brand": "Husqvarna",
+  "category": "Blower",
+  "figures": 7,
+  "parts": 98
  }
 ]

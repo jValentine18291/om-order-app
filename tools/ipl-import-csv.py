@@ -56,6 +56,39 @@ IPL_DIR = os.path.join(REPO, "frontend", "ipl")
 # What the app serves. The coordinate page is read per sheet from the export.
 OUT_W = 1240
 
+# Husqvarna's own placeholder. A callout that is printed on the drawing but has
+# no orderable part behind it is exported as article 900000002, "DUMMY PART",
+# with the real answer written in the Comment:
+#
+#   900000002  DUMMY PART  "Blade - ***See Service Reference***"
+#   900000002  DUMMY PART  "Fuel Tank - See Fuel tank page"
+#   900000002  DUMMY PART  "Not Used"
+#
+# Imported as they stand, a technician taps the callout and is shown a part
+# called DUMMY PART with the number 900000002 - a number AutoCount will never
+# have and which is exactly the sort of thing that ends up copied onto a slip.
+# The Comment is the only part of that row worth reading, so it becomes the
+# description and the fake number is dropped. An empty search is safe: the
+# server refuses a blank query, so the sheet says the part is not in AutoCount,
+# which is true, and still offers the note and the replacement.
+DUMMY_ARTICLE = "900000002"
+
+
+def placeholder(comment):
+    """(code, description, remarks) for a DUMMY PART row, from its Comment.
+
+    The comments read "NAME - NOTE", with the note sometimes wrapped in stars
+    for emphasis. Split on the first dash; anything that does not fit becomes
+    the description whole, which is still better than "DUMMY PART".
+    """
+    text = (comment or "").replace("*", "").strip()
+    name, sep, note = text.partition(" - ")
+    if not sep:
+        name, note = text, ""
+    name = name.strip()
+    note = note.strip()
+    return "", (name or "Not listed in this book"), (note or "No part number in this book.")
+
 
 def read_rows(path):
     with io.open(path, encoding="utf-8-sig", newline="") as f:
@@ -359,14 +392,18 @@ def main():
         for r in group:
             ref = (r["Ref"] or "").strip()
             code = (r["Article Number"] or "").strip()
+            desc = (r["Article Name"] or "").strip()
+            note = (r.get("Comment") or "").strip()
+            if code == DUMMY_ARTICLE:
+                code, desc, note = placeholder(note)
             parts.append({
                 "key": ref,
                 "part_number": code,
                 "depth": 0,
                 "sub": False,
-                "description": (r["Article Name"] or "").strip(),
+                "description": desc,
                 "qty": (r["Qty"] or "").strip(),
-                "remarks": (r.get("Comment") or "").strip(),
+                "remarks": note,
                 "search": "".join(ch for ch in code.upper() if ch.isalnum()),
             })
             spots.extend(hotspots_for(r.get("Coordinates"), ref, page_w, page_h))

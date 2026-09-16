@@ -1,0 +1,73 @@
+# 125B - the gasket kit's seven phantom callouts.
+#
+#     <figure> add|unlisted|drop  <key> <x%> <y%>
+#
+# THE PROBLEM
+# Ref 35 is the Gasket Kit, and the export gives it EIGHT coordinate boxes -
+# one for every gasket and seal the kit contains, scattered across the whole
+# engine sheet. The drawing prints "35" exactly ONCE, on the boxed "Gasket Kit"
+# legend at the bottom. The other seven are places where a gasket happens to
+# sit, not places where the number 35 appears.
+#
+# Two of them landed straight on top of the printed 30s - the crank seals -
+# which is how this was caught: ipl-check-hotspots.py refuses overlaps, and
+# reported "keys 30 and 35 share one number" twice. Both were checked against
+# the drawing and both print 30, not 35.
+#
+# The remaining five sit on ink but on no printed number at all. Those are
+# quieter and worse: nothing marks them, so a technician panning the sheet can
+# land on one and be told a seal is a gasket kit.
+#
+# So all seven go and the legend one stays. What is left is what the draughtsman
+# actually wrote.
+#
+# WHY NOT FIX THE IMPORTER
+# Because a part legitimately called out in several places is normal and common
+# - 29 and 30 on this very sheet are each printed twice, and the 541RB has a
+# screw called out three times. There is no rule separating "the same part in
+# four places" from "one part whose kit contents were mapped", except reading
+# the drawing. This is what the override file is for.
+
+# --- Fig.1 ENGINE, the phantoms -----------------------------------------------
+# Kept: 55.09,84.25 - the "Gasket Kit" legend box, the only printed 35.
+1 drop 35 24.48 68.04
+1 drop 35 29.00 75.12
+1 drop 35 41.42 75.21
+1 drop 35 42.92 53.23
+1 drop 35 56.83 26.76
+1 drop 35 65.98 18.28
+1 drop 35 68.97 35.85
+
+# --- Fig.1 ENGINE, the numbers with no part -----------------------------------
+# The export skips 2, 13, 16 and 31; the draughtsman printed all four, and 31
+# twice. Dropping the phantom 35s above is what made them visible - two of
+# those phantoms sat exactly on the two 31s, so the sheet LOOKED complete while
+# telling anyone who tapped there that a linkage was a gasket kit. Finding
+# these was the reason to look again rather than take "no overlaps" for "done".
+1 unlisted 2  66.05 18.20
+1 unlisted 13 56.80 26.50
+1 unlisted 16 69.10 36.00
+1 unlisted 31 28.60 75.00
+1 unlisted 31 41.80 75.00
+
+# --- Fig.5 DECALS -------------------------------------------------------------
+# The sheet prints 1 to 5 across three views of the machine; the export lists
+# only 2 and 4. Refs 6 and 7 are the decal KITS and carry no coordinates at all
+# - they are listed under the drawing with no callout, which is right, because
+# the drawing does not point at them either.
+5 unlisted 1 29.75  4.50
+5 unlisted 3 38.60 82.00
+5 unlisted 5 99.00 32.50
+
+# --- Fig.7 SERVICE REFERENCE (2 of 2) -----------------------------------------
+# A text page, and the most important one in the book: it is the rule that the
+# impeller and the crankshaft must be changed together, and which pair goes
+# with which serial number. It prints 14, 22 and 28 beside two small drawings
+# and the export gives those three rows NO coordinates at all, so the page
+# arrived with nothing to tap on.
+#
+# "add", not "unlisted": all three parts ARE listed here with real article
+# numbers, so these hotspots lead somewhere. Measured off the page.
+7 add 14 64.60 24.20
+7 add 22 83.60 31.20
+7 add 28 67.30 37.80
