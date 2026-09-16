@@ -10,6 +10,17 @@
 
 const db = require("../db");
 
+// Today, where the workshop is - "2026-09-16".
+//
+// NOT toISOString().slice(0,10), which is UTC: in Singapore that is eight hours
+// behind, so anything recorded before 08:00 came out dated the day before. Every
+// timestamp this app stores is local time (see the migration in db.js), and a
+// date worked out in JavaScript has to agree with them.
+function localDate(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-` +
+         `${String(d.getDate()).padStart(2, "0")}`;
+}
+
 // ---- SO number generation --------------------------------------------------
 function nextSoNumber() {
   const tx = db.transaction(() => {
@@ -766,7 +777,7 @@ function finishSlipOrder(slip, wanted, so) {
   // every machine has been converted - a partly converted slip is still work
   // in progress as far as the sales desk is concerned.
   const stamp = db.prepare(
-    "UPDATE slip_machines SET converted_at = datetime('now'), so_number = ? WHERE id = ?"
+    "UPDATE slip_machines SET converted_at = datetime('now','localtime'), so_number = ? WHERE id = ?"
   );
   const finish = db.transaction(() => {
     for (const m of wanted) stamp.run(so.so_number, m.id);
@@ -936,7 +947,11 @@ function quotationForSlip(slipNumber, machineIds, opts) {
   const created = new Date();
   const until = new Date(created.getTime());
   until.setDate(until.getDate() + QUOTATION_VALID_DAYS);
-  const iso = (d) => d.toISOString().slice(0, 10);
+  // The LOCAL date, not toISOString()'s UTC one. A quotation raised before
+  // 08:00 in Singapore would otherwise be dated the previous day on the
+  // customer's copy, and its thirty days counted from that wrong day - the
+  // same eight-hour fault that put Sales Orders out of step with their slips.
+  const iso = localDate;
 
   // What has already gone out for this slip. The number below is a PREVIEW -
   // it is what this quotation would be called if it were issued unchanged.
@@ -1222,7 +1237,7 @@ function closeSlip(slipNumber, closingRef, who = "") {
   }
   db.prepare(
     `UPDATE service_slips
-        SET status = 'CLOSED', closing_ref = ?, closed_by = ?, closed_at = datetime('now')
+        SET status = 'CLOSED', closing_ref = ?, closed_by = ?, closed_at = datetime('now','localtime')
       WHERE id = ?`
   ).run(ref, String(who || "").trim(), slip.id);
   return getSlip(slipNumber);
@@ -1570,7 +1585,11 @@ function setPoStatus(docNo, status, who = "") {
   // remembers, and re-ticking it should not invent a new date.
   const existing = db.prepare("SELECT ordered_at FROM po_tracking WHERE doc_no = ?").get(no);
   const orderedAt = st === "ORDERED"
-    ? (existing && existing.ordered_at) || new Date().toISOString().slice(0, 10)
+    // Local date, for the same reason as the quotation's: toISOString() is UTC,
+    // so a PO marked sent before 08:00 recorded yesterday. Only new writes are
+    // affected - a date-only value already stored cannot be told right from
+    // wrong after the fact, so history is left alone.
+    ? (existing && existing.ordered_at) || localDate()
     : (existing && existing.ordered_at) || null;
   db.prepare(
     `INSERT INTO po_tracking (doc_no, status, ordered_at, updated_by, updated_at)

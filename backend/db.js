@@ -61,6 +61,18 @@ try {
   console.log("[db] using built-in node:sqlite (fallback)");
 }
 
+// Is this a database that already holds work, or one being created right now?
+//
+// Asked HERE, before a single CREATE TABLE, because it is the only moment the
+// answer is knowable. The timestamp migration at the foot of this file needs
+// it: a brand-new database has nothing to convert, and its seeded rows are
+// written by the current, local-time defaults - shifting those would put them
+// eight hours into the future, which is exactly what the first version of that
+// migration did.
+const DB_IS_NEW = !db.prepare(
+  "SELECT COUNT(*) AS n FROM sqlite_master WHERE type = 'table' AND name = 'service_slips'"
+).get().n;
+
 // ---- Schema ----------------------------------------------------------------
 db.exec(`
   CREATE TABLE IF NOT EXISTS items (
@@ -71,7 +83,7 @@ db.exec(`
     brand         TEXT,
     uom           TEXT    DEFAULT 'UNIT',
     unit_price    REAL    DEFAULT 0,
-    created_at    TEXT    DEFAULT (datetime('now'))
+    created_at    TEXT    DEFAULT (datetime('now','localtime'))
   );
 
   CREATE TABLE IF NOT EXISTS orders (
@@ -83,7 +95,7 @@ db.exec(`
     total_amount  REAL    NOT NULL DEFAULT 0,
     autocount_doc_no TEXT DEFAULT '',   -- the Sales Order written into AutoCount
     autocount_error  TEXT DEFAULT '',   -- why the last attempt to write it failed
-    created_at    TEXT    DEFAULT (datetime('now'))
+    created_at    TEXT    DEFAULT (datetime('now','localtime'))
   );
 
   CREATE TABLE IF NOT EXISTS order_lines (
@@ -132,7 +144,7 @@ db.exec(`
     -- Who took the machine in. Slips written before this existed have '',
     -- which the app shows as nothing rather than guessing at a name.
     created_by     TEXT    DEFAULT '',
-    created_at     TEXT    DEFAULT (datetime('now')),
+    created_at     TEXT    DEFAULT (datetime('now','localtime')),
     closed_at      TEXT
   );
 
@@ -197,7 +209,7 @@ db.exec(`
     variant        TEXT    DEFAULT '',
     technician     TEXT,                        -- WJ / XL / KM / R
     free_text      INTEGER DEFAULT 0,           -- 1 = staff name this line themselves
-    created_at     TEXT    DEFAULT (datetime('now')),
+    created_at     TEXT    DEFAULT (datetime('now','localtime')),
     FOREIGN KEY (machine_id) REFERENCES slip_machines(id) ON DELETE CASCADE
   );
 
@@ -211,7 +223,7 @@ db.exec(`
     list_price       REAL,
     contractor_price REAL,
     reseller_price   REAL,
-    updated_at       TEXT    DEFAULT (datetime('now')),
+    updated_at       TEXT    DEFAULT (datetime('now','localtime')),
     updated_by       TEXT    DEFAULT ''
   );
 
@@ -225,7 +237,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS slip_signatures (
     slip_id    INTEGER PRIMARY KEY,
     image      TEXT    NOT NULL,
-    signed_at  TEXT    DEFAULT (datetime('now')),
+    signed_at  TEXT    DEFAULT (datetime('now','localtime')),
     -- What the customer was actually looking at when they signed, as JSON.
     -- Without it there is no way to say whether a slip still matches its
     -- signature, only that it might not.
@@ -922,7 +934,102 @@ db.exec(`
     note       TEXT NOT NULL,
     updated_by TEXT DEFAULT '',
     updated_at TEXT DEFAULT (datetime('now','localtime'))
+  );
+
+  -- One-off jobs that must run exactly once, recorded by name.
+  --
+  -- Every other migration in this file is safe to re-run because it asks a
+  -- question first - does this column exist, is there a row like this. A
+  -- migration that SHIFTS existing values cannot ask that question: shifted
+  -- data looks exactly like data that was always right, so running it twice
+  -- would shift it twice and there would be no way to tell. Hence a marker.
+  CREATE TABLE IF NOT EXISTS schema_meta (
+    key        TEXT PRIMARY KEY,
+    value      TEXT DEFAULT '',
+    applied_at TEXT DEFAULT (datetime('now','localtime'))
   )
 `);
+
+// ---- One-off: put every timestamp in local time ------------------------------
+//
+// Half this schema stored UTC and half stored local time, which nobody noticed
+// until a Sales Order's created_at was compared with its slip's and came out
+// eight hours apart. Worse, `formatDate` in app.js reads the date straight off
+// the stored string without converting, so a UTC timestamp DISPLAYS its UTC
+// date: anything recorded before 08:00 Singapore time would have shown the day
+// before. Live data was checked at the time and no slip had crossed that line -
+// the earliest was 09:25 - but the margin was under an hour and a half, and
+// the same fault dated the customer's quotation.
+//
+// Local time is the target because it is what the majority already used, what
+// every screen displays, and what the price-updates log has always written.
+//
+// SHIFTED, because they were UTC:
+//   items.created_at              orders.created_at
+//   service_slips.created_at      service_slips.closed_at
+//   machine_parts.created_at      slip_signatures.signed_at
+//   slip_machines.converted_at    part_prices.updated_at  (retired, for tidiness)
+//
+// NOT SHIFTED, because they were already local and shifting them would break
+// what is currently right: invoiced_at on slips and orders, decided_at and
+// disposal_at on machines, and everything in slip_quotations, slip_amendments,
+// part_requests, po_tracking, shipments and part_notes.
+//
+// The offset is taken from the server rather than assumed, and Singapore has no
+// daylight saving, so one offset is right for every row ever written here. On a
+// server that observed DST this would need to be per-row and this comment is
+// the warning.
+try {
+  const KEY = "timestamps-to-localtime";
+  const done = db.prepare("SELECT 1 FROM schema_meta WHERE key = ?").get(KEY);
+  if (!done && DB_IS_NEW) {
+    // Nothing here predates the local-time defaults, so there is nothing to
+    // convert - but the marker still goes in, or the next start would find an
+    // unmarked database full of local timestamps and shift them.
+    db.prepare("INSERT INTO schema_meta (key, value) VALUES (?, ?)")
+      .run(KEY, "new database - created with local-time defaults, nothing to convert");
+  } else if (!done) {
+    const { hours } = db.prepare(
+      "SELECT (julianday(datetime('now','localtime')) - julianday(datetime('now'))) * 24 AS hours"
+    ).get();
+    const offset = Math.round(hours * 60);          // minutes, to survive half-hour zones
+    const modifier = `${offset >= 0 ? "+" : ""}${offset} minutes`;
+
+    const targets = [
+      ["items", "created_at"],
+      ["orders", "created_at"],
+      ["service_slips", "created_at"],
+      ["service_slips", "closed_at"],
+      ["machine_parts", "created_at"],
+      ["slip_signatures", "signed_at"],
+      ["slip_machines", "converted_at"],
+      ["part_prices", "updated_at"],
+    ];
+    let moved = 0;
+    const tx = db.transaction(() => {
+      for (const [table, col] of targets) {
+        // A table or column that never existed on this server is not an error:
+        // the schema has grown over time and old installs differ.
+        let cols;
+        try { cols = db.prepare(`PRAGMA table_info(${table})`).all().map((c) => c.name); }
+        catch (_) { continue; }
+        if (!cols.includes(col)) continue;
+        // datetime() returns NULL for anything it cannot read, so a blank or a
+        // hand-typed value is left exactly as it is rather than becoming NULL.
+        const r = db.prepare(
+          `UPDATE ${table} SET ${col} = datetime(${col}, ?)
+            WHERE ${col} IS NOT NULL AND ${col} != '' AND datetime(${col}) IS NOT NULL`
+        ).run(modifier);
+        moved += r.changes;
+      }
+      db.prepare("INSERT INTO schema_meta (key, value) VALUES (?, ?)")
+        .run(KEY, `${moved} timestamp(s) shifted by ${modifier}`);
+    });
+    tx();
+    if (moved) console.log(`[db] migrated: ${moved} UTC timestamp(s) shifted ${modifier} to local time`);
+  }
+} catch (e) {
+  console.error("[db] timestamp localtime migration failed:", e.message);
+}
 
 module.exports = db;
