@@ -1,0 +1,34 @@
+# 525RX - numbers the drawings print and the parts tables list no part for.
+#
+#     <figure> add|unlisted|drop  <key> <x%> <y%>
+#
+# Without this the callout is dead: the app invites a tap on a number and
+# tapping it does nothing, which reads as a broken app rather than an
+# incomplete book. Marked "unlisted", the app says the book prints the number
+# and lists no part for it - which is the truth.
+#
+# THERE IS EXACTLY ONE, and that is a finding rather than an assumption. Two
+# checks were run over the whole book:
+#
+#   1. Every section's Ref column was scanned for gaps in 1..max. Sixteen of
+#      the seventeen sheets are contiguous; only BEVEL GEAR has a hole, at 19.
+#   2. All seventeen rendered sheets were then looked at, because a gap scan
+#      cannot see a callout printed BEYOND the table's last number - which is
+#      how the Z242F picked up a 17 on a table that stopped at 16. Nothing of
+#      that kind here; every other printed number has a part.
+#
+# HOW THE POSITION WAS ARRIVED AT
+# There is no coordinate to read - ref 19 has no row in the export - so it was
+# measured off the rendered sheet with a percentage grid laid over it, coarse
+# first and then at 1%. The glyph spans x 54.4-55.6 and y 57.3-58.1; the centre
+# below is good to a couple of tenths, well inside the callout's own width.
+#
+# tools/ipl-check-hotspots.py is the proof it landed right: it refuses
+# overlaps, so a marker placed on top of a real callout - which would steal
+# that callout's tap - cannot pass unnoticed.
+
+# --- Fig.1 BEVEL GEAR ---------------------------------------------------------
+# The export runs 1-18 then jumps to 20. 19 is the bracket under the gear
+# housing, calling out the assembly the neighbouring parts belong to; Husqvarna
+# print it but sell nothing against it on this model.
+1 unlisted 19 55.0 57.7

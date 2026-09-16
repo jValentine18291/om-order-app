@@ -400,5 +400,14 @@
   "category": "Chipper Shredder",
   "figures": 51,
   "parts": 1356
+ },
+ {
+  "id": "hus525rx",
+  "name": "Husqvarna 525RX Brushcutter",
+  "short": "525RX",
+  "brand": "Husqvarna",
+  "category": "Brushcutter",
+  "figures": 17,
+  "parts": 270
  }
 ]
