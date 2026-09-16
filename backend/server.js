@@ -1287,7 +1287,30 @@ app.post("/api/machines/:machineId/finish", async (req, res) => {
   try {
     const machineId = Number(req.params.machineId);
     const { who = "" } = req.body || {};
-    res.json(await data.slips.finishRepair(machineId, who));
+    const result = await data.slips.finishRepair(machineId, who);
+    res.json(result);
+
+    // Any price the technician had to look up goes into AutoCount now.
+    //
+    // Answer first, write after - the same shape as notifyStateChange below
+    // it. Each part is a round trip to SQL Server, and the technician standing
+    // at the bench should not wait on the accounts database to be told their
+    // machine is saved. The write is recorded in price-updates.log either way,
+    // and the pass at Sales Order conversion catches anything this misses.
+    //
+    // Run even when finishRepair moved nothing: a machine already marked
+    // repaired can still have had a part added to it, and that part's price is
+    // just as worth saving.
+    const slipNumber = (result && result.slip && result.slip.slip_number) || "";
+    if (slipNumber) {
+      const machine = ((result.slip.machines || []).find((m) => m.id === machineId)) || {};
+      // Not a machine already on an order: that batch has been through the
+      // conversion pass, and its prices are AutoCount's business now.
+      if (!String(machine.converted_at || "").trim()) {
+        writeSlipPricesToAutoCount(machine.parts || [], `Slip ${slipNumber}`)
+          .catch((e) => console.error("[price-writeback] on finish:", e.message));
+      }
+    }
   } catch (err) {
     if (err.status) return res.status(err.status).json({ error: err.message });
     console.error("[POST /api/machines/:machineId/finish]", err);
@@ -1627,6 +1650,78 @@ app.post("/api/orders/:so/push-to-autocount", async (req, res) => {
   }
 });
 
+// ---- Prices keyed on a slip, into AutoCount ---------------------------------
+//
+// Some parts have no price in AutoCount. The technician looks the price up in
+// the office price list and types it on the slip; this is what carries it back,
+// filling the blank so nobody has to look it up twice.
+//
+// Called from TWO places, deliberately:
+//
+//   when a technician presses Save on a machine  - the moment they say the job
+//        is done, so the price is settled but nothing waits on Sales
+//   when Sales convert the slip to a Sales Order - the backstop, for parts
+//        added after Save, machines that were never finished, and slips
+//        already in flight when this was written
+//
+// Running twice costs nothing: the write only ever fills a blank, so the second
+// pass finds the price already set and skips it.
+//
+// THE WRITE IS ONE-WAY AND FINAL. It never overwrites, so whichever pass gets
+// there first decides the price in AutoCount for good. That is why this fires
+// at Save and not on every keystroke: a technician correcting a typo a minute
+// later would not be able to correct AutoCount.
+//
+// Governed by AUTOCOUNT_PRICE_WRITEBACK_ORDERS. The name now under-describes
+// it - it is one decision, "let prices keyed on a slip reach AutoCount", and
+// splitting it in two would allow a state where Save writes and conversion
+// does not, which is not a thing anybody would want.
+async function writeSlipPricesToAutoCount(parts, source) {
+  const out = { updated: [], skipped: 0, failed: [] };
+  const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+  if (itemsSource !== "autocount") return out;
+  if (String(process.env.AUTOCOUNT_PRICE_WRITEBACK_ORDERS || "false").toLowerCase() !== "true") return out;
+
+  const acRepo = require("./data/autocountRepo");
+  const { logPriceEvent } = require("./priceLog");
+  for (const part of parts || []) {
+    if (!(Number(part.unit_price) > 0)) continue;      // nothing keyed in
+    try {
+      const r = await acRepo.updateItemPriceIfMissing(part.item_code, part.unit_price);
+      if (r.status === "updated") {
+        out.updated.push(r.item_code);
+        logPriceEvent({
+          source, itemCode: r.item_code, tier: "Contractor Price",
+          oldPrice: r.old_price, newPrice: r.new_price,
+          who: part.technician, outcome: "updated in AutoCount",
+        });
+      } else {
+        out.skipped++;
+        // has-price skips are the normal case for every ordinarily priced part
+        // and would flood the log. The other two are rare and each means a
+        // price the staff expected to save did not, so they are worth a line.
+        if (r.status === "skipped_not_found" || r.status === "skipped_no_uom_row") {
+          logPriceEvent({
+            source, itemCode: part.item_code, tier: "Contractor Price",
+            oldPrice: null, newPrice: part.unit_price, who: part.technician,
+            outcome: r.status === "skipped_no_uom_row"
+              ? "SKIPPED - item has no unit-of-measure row in AutoCount"
+              : "SKIPPED - item not found in AutoCount",
+          });
+        }
+      }
+    } catch (e) {
+      out.failed.push(part.item_code);
+      logPriceEvent({
+        source, itemCode: part.item_code, tier: "Contractor Price",
+        oldPrice: null, newPrice: part.unit_price, who: part.technician,
+        outcome: `FAILED - ${e.message}`,
+      });
+    }
+  }
+  return out;
+}
+
 // Create the Sales Order for a slip (-> ALL_REPAIRED)
 // If AutoCount price write-back is enabled, prices keyed in by staff for parts
 // that had NO price in AutoCount are saved to AutoCount's ItemUOM at this
@@ -1638,62 +1733,15 @@ app.post("/api/slips/:slip/order", async (req, res) => {
     const result = await data.slips.createSlipOrder(req.params.slip, (req.body || {}).machine_ids);
 
     // ---- Price write-back (guarded, best-effort) ----
-    const priceSync = { updated: [], skipped: 0, failed: [] };
+    // The backstop pass. Most parts were already written when the technician
+    // pressed Save; this catches anything added since, and any machine that
+    // reached an order without being finished. Parts already priced are
+    // skipped, so a second pass over the same slip writes nothing.
+    let priceSync = { updated: [], skipped: 0, failed: [] };
     try {
-      const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
-      const acRepo = itemsSource === "autocount" ? require("./data/autocountRepo") : null;
-      // Deliberately a SEPARATE switch from the Parts Diagram one. Turning on
-      // price-setting there must not silently start writing prices from every
-      // Sales Order as well — that is a different decision, so it needs its
-      // own explicit opt-in.
-      const ordersWriteback =
-        String(process.env.AUTOCOUNT_PRICE_WRITEBACK_ORDERS || "false").toLowerCase() === "true";
-      if (acRepo && ordersWriteback) {
-        const { logPriceEvent } = require("./priceLog");
-        const slip = await data.slips.getSlip(req.params.slip);
-        for (const machine of slip.machines || []) {
-          for (const part of machine.parts || []) {
-            if (!(Number(part.unit_price) > 0)) continue; // nothing keyed in
-            try {
-              const r = await acRepo.updateItemPriceIfMissing(part.item_code, part.unit_price);
-              if (r.status === "updated") {
-                priceSync.updated.push(r.item_code);
-                logPriceEvent({
-                  source: `Slip ${slip.slip_number}`, itemCode: r.item_code,
-                  tier: "Contractor Price",
-                  oldPrice: r.old_price, newPrice: r.new_price,
-                  who: part.technician, outcome: "updated in AutoCount",
-                });
-              } else {
-                priceSync.skipped++;
-                // has-price skips are the normal case for every ordinarily
-                // priced part and would flood the log. The other two are rare
-                // and each means a price the staff expected to save did not,
-                // so they are worth a line.
-                if (r.status === "skipped_not_found" || r.status === "skipped_no_uom_row") {
-                  logPriceEvent({
-                    source: `Slip ${slip.slip_number}`, itemCode: part.item_code,
-                    tier: "Contractor Price",
-                    oldPrice: null, newPrice: part.unit_price,
-                    who: part.technician,
-                    outcome: r.status === "skipped_no_uom_row"
-                      ? "SKIPPED - item has no unit-of-measure row in AutoCount"
-                      : "SKIPPED - item not found in AutoCount",
-                  });
-                }
-              }
-            } catch (e) {
-              priceSync.failed.push(part.item_code);
-              logPriceEvent({
-                source: `Slip ${slip.slip_number}`, itemCode: part.item_code,
-                tier: "Contractor Price",
-                oldPrice: null, newPrice: part.unit_price,
-                who: part.technician, outcome: `FAILED - ${e.message}`,
-              });
-            }
-          }
-        }
-      }
+      const slip = await data.slips.getSlip(req.params.slip);
+      const parts = (slip.machines || []).flatMap((m) => m.parts || []);
+      priceSync = await writeSlipPricesToAutoCount(parts, `Slip ${slip.slip_number}`);
     } catch (e) {
       console.error("[price-writeback] sync step error:", e.message);
     }
