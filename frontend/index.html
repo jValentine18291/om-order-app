@@ -1279,7 +1279,13 @@
       </div>
       <div class="field">
         <label for="repl-q">Search AutoCount</label>
-        <input type="search" id="repl-q" autocomplete="off" placeholder="Part number or description">
+        <!-- type="text", like every other search box here. type="search" is
+             not in the .field rule below, so it fell through to the browser's
+             own tiny input: 13px text in a 1px-padded box next to the app's
+             16px. Under 16px iOS also zooms the page on focus, which moves the
+             layout under a technician's thumb. -->
+        <input type="text" id="repl-q" autocomplete="off" autocapitalize="off"
+               spellcheck="false" placeholder="Part number or description">
       </div>
       <div id="repl-results"></div>
       <p class="loc-warn">Everyone who opens this part will see the replacement, including the technicians.</p>

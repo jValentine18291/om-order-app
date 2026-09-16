@@ -91,6 +91,10 @@
 .field input[type="tel"],
 .field input[type="email"],
 .field input[type="number"],
+/* search is listed even though nothing uses it today. It was reached for once,
+   silently missed this rule, and shipped a box a third the size of every other
+   one on the screen - the kind of mistake that is invisible in a diff. */
+.field input[type="search"],
 .field input[type="date"] {
   width: 100%;
   padding: 13px 14px;
@@ -2069,6 +2073,24 @@ select {
   font-size: .82rem; color: var(--ink-faint); cursor: pointer; width: 100%;
   text-align: left;
 }
+
+/* ---- Picking the replacement (the search sheet) ------------------------- */
+/* The results scroll inside their own box rather than growing the sheet. With
+   fifteen matches the sheet itself scrolled, which pushed the line warning that
+   everyone will see this off the bottom - so the warning was only read by
+   people who had already scrolled past the thing it warns about. */
+#repl-results {
+  display: flex; flex-direction: column; gap: 8px;
+  max-height: 46vh; overflow-y: auto;
+  margin-top: 4px; padding: 2px;
+}
+/* Room for a thumb. These rows are tapped in a workshop, often one-handed and
+   often wearing gloves, and the code underneath is what is actually being
+   chosen - so it is given its own line at a readable size rather than the
+   footnote treatment it gets in a desktop list. */
+#repl-results .company-option { padding: 12px 14px; }
+#repl-results .fp-opt-desc { font-size: .95rem; line-height: 1.35; }
+#repl-results .fp-opt-code { font-size: .85rem; margin-top: 3px; }
 
 /* ---- Replacement parts -------------------------------------------------- */
 /* Green, where the note is amber. The note warns - something is odd about this
