@@ -1,0 +1,41 @@
+# Z242F — numbers the drawings print and the parts tables list no part for.
+#
+#     <figure> add|unlisted|drop  <key> <x%> <y%>
+#
+# Husqvarna's own tables skip these refs, but their draughtsman still printed
+# the callouts. Before this file they were dead: the app invites a tap on a
+# number, and tapping these did nothing at all, which reads as a broken app
+# rather than an incomplete book. Marked "unlisted", the app says the book
+# prints the number and lists no part for it - which is the truth.
+#
+# HOW THE POSITIONS WERE ARRIVED AT
+# There are no coordinates to take: these refs have no row in the export, so
+# there is nothing to read. Each was measured off the rendered sheet with a 5%
+# grid laid over it and the reading checked against the 25% rules - see the
+# working in this session. They are good to a few tenths of a percent, which is
+# well inside a callout's own width.
+#
+# tools/ipl-check-hotspots.py is the proof they landed right: it refuses
+# overlaps, so an "unlisted" marker placed on top of a real callout - which
+# would steal that callout's tap - cannot pass unnoticed.
+#
+# NOT EVERY SKIPPED REF IS HERE. Most of the gaps in these tables are numbers
+# the drawing never prints; only the ones actually on the page are marked. They
+# were found by looking at every sheet.
+
+# --- Fig.3 FRAME --------------------------------------------------------------
+# Two 24s, both on bolts along the right-hand rail. The table runs 1-32 with 24
+# missing entirely.
+3 unlisted 24 68.7 49.3
+3 unlisted 24 85.5 53.8
+
+# --- Fig.8 MOWER LIFT / DECK LIFT ---------------------------------------------
+# This sheet skips nine refs; two of them are printed, each twice.
+8 unlisted 6 16.6 2.9
+8 unlisted 6 85.2 37.3
+8 unlisted 13 89.9 41.3
+8 unlisted 13 76.5 94.4
+
+# --- Fig.11 WHEELS AND TIRES --------------------------------------------------
+# The table stops at 16; the drawing prints a 17 beside the caster washer.
+11 unlisted 17 52.7 74.3

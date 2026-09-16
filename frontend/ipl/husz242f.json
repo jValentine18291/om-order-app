@@ -1287,6 +1287,20 @@
      "conf": 100
     },
     {
+     "key": "24",
+     "x": 68.7,
+     "y": 49.3,
+     "byHand": true,
+     "unlisted": true
+    },
+    {
+     "key": "24",
+     "x": 85.5,
+     "y": 53.8,
+     "byHand": true,
+     "unlisted": true
+    },
+    {
      "key": "25",
      "x": 81.734,
      "y": 51.583,
@@ -4243,6 +4257,20 @@
      "conf": 100
     },
     {
+     "key": "6",
+     "x": 16.6,
+     "y": 2.9,
+     "byHand": true,
+     "unlisted": true
+    },
+    {
+     "key": "6",
+     "x": 85.2,
+     "y": 37.3,
+     "byHand": true,
+     "unlisted": true
+    },
+    {
      "key": "7",
      "x": 45.979,
      "y": 76.401,
@@ -4283,6 +4311,20 @@
      "x": 50.71,
      "y": 35.092,
      "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 89.9,
+     "y": 41.3,
+     "byHand": true,
+     "unlisted": true
+    },
+    {
+     "key": "13",
+     "x": 76.5,
+     "y": 94.4,
+     "byHand": true,
+     "unlisted": true
     },
     {
      "key": "14",
@@ -5604,6 +5646,13 @@
      "x": 72.605,
      "y": 44.169,
      "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 52.7,
+     "y": 74.3,
+     "byHand": true,
+     "unlisted": true
     }
    ],
    "parts": [

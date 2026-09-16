@@ -1,0 +1,15 @@
+# P525DX — one box in the export that is not a callout.
+#
+#     <figure> add|unlisted|drop  <key> <x%> <y%>
+#
+# THE "1" IN THE SHEET TITLE
+# Figure 2 is headed "ENGINE - 1", and Husqvarna's export carries a box on that
+# numeral as if it were callout 1. Tapping the title offered part 1, a SCREW
+# EHHFM. It is the only one in the book: the other three numbered titles -
+# ENGINE - 2, HYDRAULICS - 1 and - 2 - carry no box, and nothing else in 780
+# hotspots lands in a title.
+#
+# Dropped by position, because position is the only thing that tells it apart.
+# Key 1 has three boxes on that sheet and the other two are real callouts at
+# 72.21,35.86 and 33.52,88.56 - both must survive, and the test proves they do.
+2 drop 1 17.35 4.97

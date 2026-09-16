@@ -47,7 +47,7 @@ Hotspots are stored as the box's CENTRE, as a percentage of the image, which is
 what the app draws.
 """
 
-import argparse, csv, hashlib, io, json, os, sys, urllib.request
+import argparse, csv, hashlib, io, json, math, os, sys, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -141,6 +141,107 @@ def write_image(src, dest):
         im = im.convert("L")
     im.save(dest, optimize=True)
     return im.size
+
+
+# ---- Corrections -------------------------------------------------------------
+#
+# The export is the manufacturer's own data and is right almost everywhere, but
+# "almost" has now cost us twice:
+#
+#   P525DX   the ENGINE - 1 sheet has a box on the numeral in its own TITLE, so
+#            tapping the "1" in "ENGINE - 1" offered part 1, a screw.
+#   Z242F    several drawings print a callout their own parts table skips -
+#            FRAME 24, MOWER LIFT 6 and 13, WHEELS AND TIRES 17. Tapping those
+#            did nothing at all, and silence reads as a broken app rather than
+#            an incomplete book.
+#
+# Hand-editing the generated JSON would not survive the next run, so corrections
+# live in tools/ipl-<id>.hotspots.txt, one instruction a line. The format is
+# deliberately the SAME as ipl-extract.js uses for the PDF books - one format to
+# learn, and a correction can be moved between the two tools unchanged:
+#
+#     <figure> add      <key> <x%> <y%>    put a hotspot here
+#     <figure> unlisted <key> <x%> <y%>    a number the book prints and lists
+#                                          no part for; the app says so
+#     <figure> drop     <key> <x%> <y%>    remove the one already here
+#
+# <figure> is the figure's position in the finished book, 1-based, AFTER --order
+# has been applied - the number --dry-run prints beside each sheet.
+#
+# Every failure here stops the run rather than warning. A drop that matches
+# nothing means the export has changed underneath the file, and the rest of it
+# should be re-read before any of it is trusted.
+def apply_hotspot_overrides(figures, model_id, here):
+    path = os.path.join(here, "ipl-%s.hotspots.txt" % model_id)
+    if not os.path.exists(path):
+        return
+    name = os.path.basename(path)
+    added = dropped = 0
+    with io.open(path, encoding="utf-8") as fh:
+        for lineno, raw in enumerate(fh, 1):
+            line = raw.strip()
+            if not line or line.startswith("#"):
+                continue
+            where = '%s line %d: "%s"' % (name, lineno, line)
+            bits = line.split()
+            if len(bits) != 5:
+                sys.exit("%s - expected: <figure> add|unlisted|drop <key> <x%%> <y%%>" % where)
+            fig_no, verb, key, xs, ys = bits
+            if not fig_no.isdigit() or not (1 <= int(fig_no) <= len(figures)):
+                sys.exit("%s - no figure %s (the book has %d)" % (where, fig_no, len(figures)))
+            fig = figures[int(fig_no) - 1]
+            try:
+                x, y = float(xs), float(ys)
+            except ValueError:
+                sys.exit("%s - x and y must be percentages" % where)
+            if not (0 <= x <= 100 and 0 <= y <= 100):
+                sys.exit("%s - %s,%s is off the sheet" % (where, xs, ys))
+
+            listed = any(p["key"] == key for p in fig["parts"])
+            if verb == "add":
+                if not listed:
+                    sys.exit("%s - figure %s lists no part %s. Use \"unlisted\" if the "
+                             "book prints the number without listing a part." % (where, fig_no, key))
+                fig["hotspots"].append({"key": key, "x": x, "y": y, "byHand": True})
+                added += 1
+            elif verb == "unlisted":
+                # Deliberately NOT spelled "add": that verb's check against the
+                # parts list is what stops a mistyped key becoming a hotspot
+                # that leads nowhere, and this must not be the way around it.
+                if listed:
+                    sys.exit("%s - figure %s DOES list %s - use \"add\"" % (where, fig_no, key))
+                fig["hotspots"].append({"key": key, "x": x, "y": y, "byHand": True, "unlisted": True})
+                added += 1
+            elif verb == "drop":
+                # Nearest hotspot for that key, and it has to be close: a drop
+                # aimed at a callout that has since moved should fail rather
+                # than silently delete a different one.
+                best, best_d = None, None
+                for h in fig["hotspots"]:
+                    if h["key"] != key:
+                        continue
+                    d = math.hypot(h["x"] - x, h["y"] - y)
+                    if best_d is None or d < best_d:
+                        best, best_d = h, d
+                if best is None:
+                    sys.exit("%s - figure %s has no hotspot keyed %s" % (where, fig_no, key))
+                if best_d > 1.5:
+                    sys.exit("%s - nothing to drop near %s,%s (nearest %s is %.2f%% away)"
+                             % (where, xs, ys, key, best_d))
+                fig["hotspots"].remove(best)
+                dropped += 1
+            else:
+                sys.exit("%s - unknown instruction \"%s\"" % (where, verb))
+
+    for fig in figures:
+        fig["hotspots"].sort(key=lambda h: (len(h["key"]), h["key"]))
+    bits = []
+    if added:
+        bits.append("%d placed by hand" % added)
+    if dropped:
+        bits.append("%d removed" % dropped)
+    if bits:
+        print("    %s: %s" % (name, ", ".join(bits)))
 
 
 def main():
@@ -325,6 +426,15 @@ def main():
             "sheet": sheet_no,
             "label": label,
         })
+
+    # Corrections last, once every figure exists and its position is settled -
+    # the file addresses figures by their place in the finished book.
+    apply_hotspot_overrides(figures, a.id, HERE)
+    # Recounted, not carried: a sheet the export left bare may have been given
+    # its callouts by hand just above, and reporting it as bare afterwards
+    # would send somebody looking for a problem that has been fixed.
+    total_spots = sum(len(f["hotspots"]) for f in figures)
+    no_spots = [f["label"] for f in figures if not f["hotspots"]]
 
     doc = {
         "id": a.id,
