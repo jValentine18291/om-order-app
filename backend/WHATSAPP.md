@@ -34,7 +34,7 @@ Turning it on later is one line here — no app deploy.
 
 ## The other settings
 
-    WHATSAPP_PHONE_NUMBER_ID   from the WhatsApp API Setup page
+    WHATSAPP_PHONE_NUMBER_ID   1232499416620504
     WHATSAPP_TOKEN             permanent System User token — never logged
     WHATSAPP_TEMPLATE          approved template name
     WHATSAPP_TEMPLATE_LANG     its language code (default "en")
@@ -71,6 +71,43 @@ A landline is allowed. Verification is by **voice call** rather than SMS: Meta
 rings the number and reads the code aloud, so somebody has to be at the phone
 when we do it. Registering it does not affect the telephony — 6743 4039 goes on
 ringing as an ordinary office line.
+
+Added and voice-verified 16 Sep 2026. Meta's own identifiers for it:
+
+    WhatsApp Business account ID   29180188664920249
+    Phone Number ID                1232499416620504
+
+The Phone Number ID is the one the app needs; it is an address, not a secret,
+and is useless to anyone without the token.
+
+### The 6-digit PIN
+
+Registering the number sets a **two-step verification PIN**. It is not in this
+file and must not be: it is the credential that stops somebody else moving
+6743 4039 onto their own WhatsApp account.
+
+It is needed again to RE-register the number — after a migration, a reset, or
+if the number is ever removed and added back — and Meta will not show it again
+or reset it on request. Keep it wherever the AutoCount password is kept, not in
+the repository and not in a chat message.
+
+### The WhatsApp Business profile
+
+What customers see next to the message:
+
+    Display name   Outboard and Marine Pte Ltd
+    Category       Professional Services
+    Time zone      (GMT+08:00) Asia/Singapore
+
+**"and", not "&".** Meta rejected `Outboard & Marine Pte Ltd` outright — *"Your
+display name violates WhatsApp guidelines"*, against the rule "don't add
+unnecessary punctuation, emojis or symbols". Spelling it out passed on the
+first try, and it is closer to the ACRA name Meta verified us under, OUTBOARD
+AND MARINE (PTE.) LIMITED. Do not try to put the ampersand back later: a
+display name change goes through review and would fail the same rule.
+
+Business description was left empty. It is optional and editable any time in
+Meta Business Suite → Business assets, so it need not hold up the number.
 
 ## The log
 
@@ -129,10 +166,10 @@ the number is dynamic. Ours is fixed, so the payload is unchanged.
 
 ## What is still missing (all on Meta's side)
 
-1. **Business verification** — submitted 16 Sep 2026 and **In review**; Meta
-   said about two working days. Domain `gardenequipment.com.sg` verified the
-   same day by DNS TXT record.
-2. **An approved template** — Utility category, with a **Document** header.
+1. ~~**Business verification**~~ — **done** 16 Sep 2026. Domain
+   `gardenequipment.com.sg` verified the same day by DNS TXT record.
+2. **An approved template** — **submitted 16 Sep 2026, In review.** Utility
+   category, with a **Document** header.
    Name `service_slip_confirmation`, language **English** (`en`), and **four**
    body variables in this exact order:
 
@@ -149,8 +186,94 @@ the number is dynamic. Ours is fixed, so the payload is unchanged.
    list - the template reads "No. of Equipment: {{4}}", and the machines are
    itemised on the attached slip anyway.
 3. **A payment method on the WhatsApp account** — business-initiated messages
-   (this is one) will not send without one.
-4. **A phone number** — see the note below.
+   (this is one) will not send without one. **Still outstanding**, and it is
+   now the only thing that blocks a first real send once the template clears.
+4. ~~**A phone number**~~ — **done** 16 Sep 2026, +65 6743 4039 Connected.
+
+### Submitting the template: two things that will bite again
+
+**Never type `}}`.** The body editor auto-expands `{{` into a complete,
+auto-numbered `{{1}}` and leaves the cursor after it. Typing the full `{{1}}`
+gives `{{1}}1}}`, which looks close enough to miss on screen — it was caught by
+reading the textarea value, not by looking. Type `Dear {{` and the editor
+writes `Dear {{1}}` for you; the numbering follows the order you type them in.
+
+**The sample document is fake on purpose.** Meta keeps the uploaded sample and
+shows it to human reviewers, so a real signed slip would hand a customer's
+name, phone number and signature to a third party for no benefit; Meta's own
+warning on that page says not to include customer information. The generator is
+`tools/make-sample-slip-pdf.py` — raw PDF, no dependencies — and the variable
+samples (Mr Tan / 00123 / 16 Sep 2026 / 2) deliberately match what the sample
+PDF says, so a reviewer sees one consistent story.
+
+**Known Meta problem 2, the Register button (16 Sep 2026).** +65 6743 4039 was
+added and voice-verified without trouble, but **Register** in Step 2 fails every
+time with a red "Registration failed. Please try again." The console's own
+message is worthless; the GraphQL reply underneath is not:
+
+    mutation  register_devx_phone_number -> null
+    message   "A server error field_exception occured. Check server logs..."
+    severity  CRITICAL      api_error_code  -1
+    is_transient  false     allow_user_retry  false
+    fbtrace_id  BN+7IS56ibR  mid  a0ce9c12eae410e6f3cec58b3819bfd2
+
+Read that before blaming the PIN, as we did twice. `api_error_code: -1` with
+"check server logs" is an exception thrown inside Meta's resolver, not a
+rejection of anything we sent, and **`allow_user_retry: false` means clicking
+Register again cannot work** — the two of us wasted attempts learning that.
+
+Ruled out at the time, each by looking rather than assuming: two-step
+verification was off and unset (so no stale PIN), the display name carried no
+review flag, and the number sat at status Pending, which is the normal
+"verified, awaiting registration" state. A page reload to clear an unrelated
+React crash (#185) changed nothing.
+
+The suspected cause is the same binding fault as below: the orphaned **Test**
+WhatsApp Business Account (ID 1072019868648567) is still in the portfolio, and
+a resolver that finds the WABA from the app binding would reach the test
+account rather than 29180188664920249 and throw exactly this.
+
+**What worked**, same day: the documented Graph API call, which does not go
+through the console's wrapper at all. Run from any machine with internet — it
+touches Meta only, not the server, the database or AutoCount:
+
+    $t = Read-Host 'Token'; $p = Read-Host 'PIN'; try { Invoke-RestMethod -Method Post `
+      -Uri 'https://graph.facebook.com/v21.0/1232499416620504/register' `
+      -Body @{ messaging_product='whatsapp'; pin=$p; access_token=$t } | ConvertTo-Json } `
+      catch { $rd = New-Object IO.StreamReader($_.Exception.Response.GetResponseStream()); $rd.ReadToEnd() }
+
+`Read-Host` rather than literals so neither secret lands in PowerShell history,
+and the `catch` because `Invoke-RestMethod` throws away the response body on a
+400 — which is where Meta puts the only useful part. It answered
+`{"success": true}` first time, and the number went Pending -> **Connected** in
+WhatsApp Manager.
+
+Unlike the console this returns real error codes: 133005 wrong PIN, 133006 not
+verified, 133008 too many attempts, 200/10 token permissions too narrow.
+
+### The system user
+
+    name         Outboard Marine      (not a typo - see below)
+    id           61594060756802
+    role         Employee             deliberately not Admin
+    assets       OM Service Slips app           -> Develop app
+                 Outboard and Marine Pte Ltd    -> Message templates (view and
+                 manage), Phone numbers (view and manage), Messages
+    scopes       whatsapp_business_messaging, whatsapp_business_management
+    expiry       Never
+
+"Phone numbers (view and manage)" is the one that carries *registrations*, so
+it is not optional however tempting the shorter list looks. Expiry is **Never**
+on purpose: a 60-day token would stop customer messages dead every two months
+on an unattended server, with nothing in the app to explain why.
+
+**Naming a system user is not free text.** Meta validates it against the
+PERSONAL profile name policy, and says only "You chose an invalid system user
+name." Rejected here: `OM Service Sender`, `OMServiceSender` ("Profile names
+can't have too many capital letters"), `om service sender` ("Name not allowed"
+- role words). `Outboard Marine` passed. Pick something that reads like a
+person's name, mostly lower case, with no words like service, sender, bot or
+admin in it.
 
 **Known Meta problem, unresolved:** claiming a test number creates a WhatsApp
 Business Account under the portfolio but never binds it to the app, so the app
