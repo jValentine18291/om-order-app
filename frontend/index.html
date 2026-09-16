@@ -834,6 +834,11 @@
            number a cover changed at, the thread size of a screw, and on the
            EB6200 the line that explains why a part has no number of its own. -->
       <div class="ipl-part-note" id="ipl-part-note" style="display:none"></div>
+      <!-- What we fit when the book's part cannot be had. Above the stock
+           figures on purpose: a part we no longer carry will read zero in
+           stock, and the answer to that has to be visible before the zero
+           sends somebody off to order something that is not coming. -->
+      <div id="ipl-part-repl"></div>
       <div id="ipl-part-stock"></div>
       <div id="ipl-part-price"></div>
       <!-- Only once the diagram number has been resolved to a real AutoCount
@@ -1256,6 +1261,28 @@
       <p class="loc-warn">Everyone who looks this part up will see this, including the technicians.</p>
       <button class="btn-primary" id="note-save" style="margin-top:8px;">Save note</button>
       <button class="btn-secondary" id="note-delete" style="display:none; margin-top:8px;">Remove the note</button>
+    </div>
+  </div>
+
+  <!-- Picking the replacement. A search box rather than a text field, because
+       the thing being recorded is a part and not a sentence: what is stored is
+       whatever AutoCount calls the row that gets tapped here, so it cannot be
+       mistyped and it always has a price and a stock figure behind it. -->
+  <div class="modal-overlay" id="repl-modal" style="display:none">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div>
+          <strong>Replacement part</strong>
+          <div class="mm-sub" id="repl-for"></div>
+        </div>
+        <button class="modal-x" id="repl-close" aria-label="Close">&#10005;</button>
+      </div>
+      <div class="field">
+        <label for="repl-q">Search AutoCount</label>
+        <input type="search" id="repl-q" autocomplete="off" placeholder="Part number or description">
+      </div>
+      <div id="repl-results"></div>
+      <p class="loc-warn">Everyone who opens this part will see the replacement, including the technicians.</p>
     </div>
   </div>
 

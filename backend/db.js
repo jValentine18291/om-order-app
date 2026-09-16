@@ -936,6 +936,41 @@ db.exec(`
     updated_at TEXT DEFAULT (datetime('now','localtime'))
   );
 
+  -- What we fit when the part the book names cannot be had.
+  --
+  -- SEPARATE FROM part_notes on purpose. A note is prose and can say anything -
+  -- "not sold separately, order the assembly" - and that freedom is why it
+  -- cannot be trusted to name a part: nothing checks the code, so a typo points
+  -- nowhere and nobody finds out until someone orders it. A replacement is the
+  -- narrow case where the answer IS a part, so it is stored as one, and the
+  -- server refuses any item_code AutoCount does not hold. The two coexist: a
+  -- part with no substitute at all still wants the note.
+  CREATE TABLE IF NOT EXISTS part_replacements (
+    id          INTEGER PRIMARY KEY,
+    -- What is being replaced. The AutoCount item code where the original
+    -- resolves - the stabler identity, shared with Find Part - and otherwise
+    -- the book's own IPL:BRAND:NUMBER key, exactly as part_notes does it.
+    part_key    TEXT NOT NULL,
+    -- The book's key, recorded WHENEVER it is known even if part_key is an
+    -- item code. A diagram lists up to forty parts and marking the ones with a
+    -- replacement must not cost forty AutoCount lookups; this key is computed
+    -- from the book alone, so one query marks the whole figure.
+    ipl_key     TEXT NOT NULL DEFAULT '',
+    item_code   TEXT NOT NULL,          -- the replacement: exact AutoCount ItemCode
+    -- Description as it read when recorded. AutoCount stays the source of
+    -- truth and is re-read on open; this is so an old row still says what it
+    -- meant if the item is ever renamed or retired.
+    description TEXT NOT NULL DEFAULT '',
+    created_by  TEXT DEFAULT '',
+    created_at  TEXT DEFAULT (datetime('now','localtime'))
+  );
+
+  -- Several alternatives for one part are allowed and useful; the same one
+  -- twice is a double tap, not a second opinion.
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_part_replacements_pair
+    ON part_replacements(part_key, item_code);
+  CREATE INDEX IF NOT EXISTS idx_part_replacements_ipl ON part_replacements(ipl_key);
+
   -- One-off jobs that must run exactly once, recorded by name.
   --
   -- Every other migration in this file is safe to re-run because it asks a

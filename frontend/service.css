@@ -2059,6 +2059,56 @@ select {
   text-align: left;
 }
 
+/* ---- Replacement parts -------------------------------------------------- */
+/* Green, where the note is amber. The note warns - something is odd about this
+   part; a replacement answers - here is what to fit. Two different messages
+   sitting one above the other, so they must not look like the same one. */
+.repl-box { margin-bottom: 12px; }
+.repl-box:not(.repl-empty) {
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  background: #E9F6EE; border-left: 3px solid #1B7A42; color: #14532d;
+}
+.repl-head {
+  display: block; font-size: .78rem; letter-spacing: .04em;
+  text-transform: uppercase; opacity: .8; margin-bottom: 4px;
+}
+.repl-row {
+  display: grid; grid-template-columns: 1fr auto; align-items: baseline;
+  column-gap: 8px; padding: 4px 0;
+}
+.repl-row + .repl-row { border-top: 1px solid #cfe6d8; }
+.repl-code {
+  padding: 0; border: 0; background: none; cursor: pointer;
+  font: inherit; font-weight: 700; color: inherit;
+  text-decoration: underline; text-underline-offset: 2px; text-align: left;
+}
+.repl-code:active { opacity: .6; }
+.repl-desc { grid-column: 1; font-size: .88rem; line-height: 1.45; }
+.repl-who  { grid-column: 1; font-size: .78rem; opacity: .75; }
+/* Small, and last in the row: removing one is rare next to reading one. */
+.repl-del {
+  grid-row: 1 / span 3; grid-column: 2; align-self: center;
+  width: 28px; height: 28px; border-radius: 999px;
+  border: 1px solid #b9dcc8; background: transparent;
+  font-size: .8rem; color: #14532d; cursor: pointer;
+}
+.repl-del:active { background: #d6ecdf; }
+.repl-add {
+  margin-top: 8px; padding: 8px 12px; border-radius: var(--radius-sm);
+  border: 1px dashed var(--border); background: transparent;
+  font-size: .82rem; color: var(--ink-faint); cursor: pointer; width: 100%;
+  text-align: left;
+}
+.repl-empty .repl-add { margin-top: 0; }
+/* The marker in the parts list. A letter rather than a coloured dot: a dot
+   needs a legend, and "R" next to a part reads as itself. */
+.repl-dot {
+  display: inline-block; margin-left: 6px; padding: 0 5px;
+  border-radius: 999px; background: #1B7A42; color: #fff;
+  font-size: .64rem; font-weight: 700; line-height: 1.5;
+  vertical-align: middle;
+}
+
 /* ---- Change location (Admin only) -------------------------------------- */
 .loc-current { display: block; margin-top: 6px; font-size: .82rem; color: var(--ink-faint); }
 .loc-confirm-box {

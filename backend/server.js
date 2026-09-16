@@ -881,6 +881,92 @@ app.post("/api/part-notes", async (req, res) => {
   }
 });
 
+// ---- Replacement parts ------------------------------------------------------
+// What we fit when the part the book names cannot be had. Unlike a note, ANY
+// role may record one, technicians included: they are who finds out, and a
+// replacement that waits to be passed on is a replacement nobody records.
+//
+// The safety is not a role check, it is the catalogue. Every code is looked up
+// in AutoCount before it is stored and refused if it is not there, so the worst
+// a careless entry can be is the wrong REAL part - visible, priced, and
+// correctable - rather than a code that silently leads nowhere. That is the
+// whole reason this is a table of its own rather than more free text.
+async function requireAutoCountItem(code) {
+  const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+  if (itemsSource !== "autocount") {
+    const e = new Error("AutoCount is not connected, so a replacement cannot be checked.");
+    e.status = 503;
+    throw e;
+  }
+  const acRepo = require("./data/autocountRepo");
+  const item = await acRepo.findItem(code);
+  const norm = (s) => String(s || "").replace(/\s+/g, "").toUpperCase();
+  // findItem falls back to a trailing-match for scanned barcodes, which is
+  // right when a person is scanning and wrong here: this code came from a list
+  // the user picked from, so anything but the exact item means we resolved to
+  // something they did not choose.
+  if (!item || norm(item.item_code) !== norm(code)) {
+    const e = new Error(`AutoCount has no part with the code ${code}.`);
+    e.status = 400;
+    throw e;
+  }
+  return item;
+}
+
+app.get("/api/part-replacements/:key", async (req, res) => {
+  try {
+    res.json({ results: await data.replacements.get(req.params.key, req.query.ipl_key || "") });
+  } catch (err) {
+    console.error("[GET /api/part-replacements]", err.message);
+    // Same rule as the notes: this is an extra on a part sheet, and it must
+    // never be the reason a lookup fails.
+    res.json({ results: [] });
+  }
+});
+
+// Which parts in a figure have one - asked once for the whole list.
+app.post("/api/part-replacements/which", async (req, res) => {
+  try {
+    const keys = Array.isArray((req.body || {}).keys) ? req.body.keys : [];
+    res.json({ counts: await data.replacements.counts(keys) });
+  } catch (err) {
+    console.error("[POST /api/part-replacements/which]", err.message);
+    res.json({ counts: {} });
+  }
+});
+
+app.post("/api/part-replacements", async (req, res) => {
+  try {
+    const { part_key, ipl_key = "", item_code, who = "" } = req.body || {};
+    const item = await requireAutoCountItem(item_code);
+    // The description is AutoCount's, not the caller's: a client that sent its
+    // own could label the row anything it liked.
+    res.json({
+      results: await data.replacements.add({
+        part_key, ipl_key, item_code: item.item_code, description: item.description, who,
+      }),
+    });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/part-replacements]", err);
+    res.status(500).json({ error: "Could not save the replacement." });
+  }
+});
+
+// Removing one is not role-gated either, for the same reason as adding: a
+// technician who has just discovered the substitute does not fit must be able
+// to take it back out, and leaving a known-wrong answer on screen while waiting
+// for the office is worse than either mistake.
+app.delete("/api/part-replacements/:id", async (req, res) => {
+  try {
+    res.json(await data.replacements.remove(req.params.id));
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    console.error("[DELETE /api/part-replacements]", err);
+    res.status(500).json({ error: "Could not remove the replacement." });
+  }
+});
+
 // Find Part: search parts by description/code (suggestion list).
 app.get("/api/parts-search", async (req, res) => {
   try {

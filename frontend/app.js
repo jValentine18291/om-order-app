@@ -6100,6 +6100,163 @@ $("note-delete").addEventListener("click", () => {
   saveNote("");
 });
 
+// ---- Replacement parts ------------------------------------------------------
+// "The book says this part; we fit that one instead." A note can say the same
+// thing in prose, and still should when the answer is not a part at all - not
+// sold separately, order the assembly. This is for the case where the answer IS
+// a part: it is picked from AutoCount rather than typed, so it cannot be
+// mistyped and it arrives with a description, a price and a stock figure.
+//
+// ANY role may record one, technicians included. They are the people who find
+// out, at the bench, with the machine in front of them; a replacement that has
+// to be passed to the office first is a replacement that never gets written
+// down. What keeps that safe is not a permission but the catalogue - the server
+// refuses a code AutoCount does not hold - so a careless entry is the wrong
+// real part, which somebody can see and correct, not a dead code.
+let replPart = null;          // { part_key, ipl_key, description }
+let replOnSaved = null;
+let replSeq = 0;              // drops the answer to a search that has been overtaken
+
+async function fetchPartReplacements(partKey, iplKey) {
+  if (!partKey && !iplKey) return [];
+  try {
+    const q = iplKey && iplKey !== partKey ? `?ipl_key=${encodeURIComponent(iplKey)}` : "";
+    const r = await api(`/api/part-replacements/${encodeURIComponent(partKey || iplKey)}${q}`);
+    return r.results || [];
+  } catch (_) {
+    return [];                // like a note: never the reason a lookup fails
+  }
+}
+
+function replRowsHtml(list) {
+  return list.map((r) => `
+    <div class="repl-row" data-id="${escapeAttr(r.id)}">
+      <button type="button" class="repl-code mono" data-part-code="${escapeAttr(r.item_code)}">${escapeHtml(r.item_code)}</button>
+      <span class="repl-desc">${escapeHtml(r.description || "")}</span>
+      <span class="repl-who">${escapeHtml([r.created_by, String(r.created_at || "").split(" ")[0]].filter(Boolean).join(" · "))}</span>
+      <button type="button" class="repl-del" data-del="${escapeAttr(r.id)}" aria-label="Remove this replacement">&#10005;</button>
+    </div>`).join("");
+}
+
+// container is emptied and rewritten, so this owns its own box rather than
+// being inserted into someone else's card.
+async function renderPartReplacements(container, part, onSaved) {
+  if (!container || !part) return;
+  const list = await fetchPartReplacements(part.part_key, part.ipl_key);
+  const add = `<button type="button" class="repl-add" data-repl-add>+ ${list.length ? "Another replacement" : "Record a replacement part"}</button>`;
+  container.innerHTML = list.length
+    ? `<div class="repl-box">
+         <b class="repl-head">We fit instead</b>
+         ${replRowsHtml(list)}
+         ${add}
+       </div>`
+    : `<div class="repl-box repl-empty">${add}</div>`;
+
+  const btn = container.querySelector("[data-repl-add]");
+  if (btn) btn.addEventListener("click", () => openReplModal(part, onSaved));
+  // Tapping the code opens the replacement itself - the question a substitute
+  // raises is "what IS that, and have we got any", and being carried away to
+  // another screen answers it while losing your place.
+  container.querySelectorAll("[data-part-code]").forEach((el) =>
+    el.addEventListener("click", () => peekAtPart(el.dataset.partCode))
+  );
+  container.querySelectorAll("[data-del]").forEach((el) =>
+    el.addEventListener("click", async () => {
+      if (!confirm("Remove this replacement?\n\nNobody looking up this part will see it any more.")) return;
+      try {
+        await api(`/api/part-replacements/${encodeURIComponent(el.dataset.del)}`, { method: "DELETE" });
+        toast("Replacement removed", "ok");
+        // The marker in the parts list is drawn from a count fetched once per
+        // figure, so it has to be asked again or the removed row keeps its dot.
+        iplReplCounts = null;
+        if (onSaved) onSaved(); else renderPartReplacements(container, part, onSaved);
+      } catch (e) {
+        toast(e.message || "Could not remove it", "err");
+      }
+    })
+  );
+}
+
+function openReplModal(part, onSaved) {
+  replPart = part;
+  replOnSaved = onSaved || null;
+  $("repl-for").textContent = `Instead of ${part.description || part.part_key}`;
+  $("repl-q").value = "";
+  $("repl-results").innerHTML =
+    `<div class="fp-empty">Search for the part you fit instead.</div>`;
+  $("repl-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+  setTimeout(() => $("repl-q").focus(), 50);
+}
+
+function closeReplModal() {
+  $("repl-modal").style.display = "none";
+  const stillOpen = ["ipl-modal", "machine-modal", "order-modal"]
+    .some((id) => $(id) && $(id).style.display === "flex");
+  if (!stillOpen) document.body.style.overflow = "";
+  replPart = null;
+  replOnSaved = null;
+}
+$("repl-close").addEventListener("click", closeReplModal);
+$("repl-modal").addEventListener("click", (e) => { if (e.target === $("repl-modal")) closeReplModal(); });
+
+let replDebounce = null;
+$("repl-q").addEventListener("input", () => {
+  clearTimeout(replDebounce);
+  const q = $("repl-q").value.trim();
+  // Two characters, the same floor Find Part uses: one letter matches half the
+  // catalogue and the answer is useless by the time it arrives.
+  if (q.length < 2) {
+    $("repl-results").innerHTML = `<div class="fp-empty">Search for the part you fit instead.</div>`;
+    return;
+  }
+  replDebounce = setTimeout(async () => {
+    const mine = ++replSeq;
+    $("repl-results").innerHTML = `<div class="fp-loading">Searching…</div>`;
+    try {
+      const d = await api(`/api/parts-search?q=${encodeURIComponent(q)}`);
+      if (mine !== replSeq) return;       // a later keystroke already answered
+      const list = d.results || [];
+      $("repl-results").innerHTML = list.length
+        ? list.map((r) => `
+            <button type="button" class="company-option" data-code="${escapeAttr(r.item_code)}">
+              <span class="fp-opt-desc">${escapeHtml(r.description)}</span>
+              <span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>
+            </button>`).join("")
+        : `<div class="fp-empty">No part in AutoCount matches that.</div>`;
+      $("repl-results").querySelectorAll(".company-option").forEach((b) =>
+        b.addEventListener("click", () => saveReplacement(b.dataset.code))
+      );
+    } catch (e) {
+      if (mine !== replSeq) return;
+      $("repl-results").innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Search failed")}</div>`;
+    }
+  }, 250);
+});
+
+async function saveReplacement(itemCode) {
+  if (!replPart) return;
+  try {
+    await api("/api/part-replacements", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        part_key: replPart.part_key,
+        ipl_key: replPart.ipl_key || "",
+        item_code: itemCode,
+        who: initialsFor(getUser()),
+      }),
+    });
+    const saved = replOnSaved;
+    toast("Replacement recorded", "ok");
+    iplReplCounts = null;                 // the list marker must be asked again
+    closeReplModal();
+    if (saved) saved();
+  } catch (e) {
+    toast(e.message || "Could not save the replacement", "err");
+  }
+}
+
 // ---- Location row, shared by both stock cards -------------------------------
 // Find Part and the IPL part sheet render the same card. The row lives here so
 // the Change button cannot end up on one and not the other.
@@ -8611,6 +8768,10 @@ function showIplFigure(id) {
   if (!fig) return;
   ipl.figure = fig;
   ipl.selectedKey = null;
+  // Which parts on the NEW sheet have a replacement is a different question
+  // from the last sheet's. Dropped here rather than in renderIplList, which
+  // also runs on every keystroke in the filter box.
+  iplReplCounts = null;
 
   $("ipl-figs").querySelectorAll(".ipl-fig-btn").forEach((b) =>
     b.classList.toggle("on", b.dataset.fig === id)
@@ -8687,7 +8848,7 @@ function renderIplList() {
 
   $("ipl-list").innerHTML = rows.length
     ? rows.map((p) => `
-        <button type="button" class="ipl-row${p.key === ipl.selectedKey ? " on" : ""}" data-key="${escapeAttr(p.key)}" data-index="${fig.parts.indexOf(p)}">
+        <button type="button" class="ipl-row${p.key === ipl.selectedKey ? " on" : ""}" data-key="${escapeAttr(p.key)}" data-index="${fig.parts.indexOf(p)}" data-repl-key="${escapeAttr(iplNoteKey(p))}">
           <span class="k">${escapeHtml(p.key)}</span>
           <span class="d">
             <span class="n">${iplIndent(p)}${escapeHtml(p.description)}</span>
@@ -8703,6 +8864,53 @@ function renderIplList() {
       openIplPart(Number(b.dataset.index));
     })
   );
+  markIplListReplacements();
+}
+
+// A part with a replacement recorded is marked in the list, because otherwise
+// the knowledge is invisible until somebody opens that exact part - and nobody
+// opens a part they have no reason to doubt. Drawn after the rows rather than
+// inside them: the answer comes from the server, and a list that waited for it
+// would stall on every keystroke in the filter box.
+//
+// One request for the whole figure. The key is computed from the book alone,
+// so this costs nothing per part; asking AutoCount what each of forty rows
+// resolves to, only to decide forty dots, would not be worth the dots.
+let iplReplCounts = null;
+
+async function markIplListReplacements() {
+  const fig = ipl.figure;
+  if (!fig) return;
+  if (!iplReplCounts) {
+    const keys = [...new Set(fig.parts.map((p) => iplNoteKey(p)))];
+    const asked = fig;
+    try {
+      const r = await api("/api/part-replacements/which", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keys }),
+      });
+      // The figure can be changed while this is in flight, and marking the new
+      // sheet with the old sheet's answer is worse than not marking it.
+      if (ipl.figure !== asked) return;
+      iplReplCounts = r.counts || {};
+    } catch (_) {
+      iplReplCounts = {};       // never the reason the list fails to draw
+    }
+  }
+  const counts = iplReplCounts;
+  document.querySelectorAll("#ipl-list .ipl-row").forEach((row) => {
+    const n = counts[row.dataset.replKey] || 0;
+    row.classList.toggle("has-repl", n > 0);
+    const old = row.querySelector(".repl-dot");
+    if (old) old.remove();
+    if (!n) return;
+    const dot = document.createElement("span");
+    dot.className = "repl-dot";
+    dot.textContent = "R";
+    dot.title = n > 1 ? `${n} replacements recorded` : "A replacement is recorded";
+    row.querySelector(".d").appendChild(dot);
+  });
 }
 
 // Highlight a key on both the drawing and the list. fromDiagram scrolls the
@@ -8765,6 +8973,11 @@ async function openIplPart(index) {
     note.style.display = text ? "block" : "none";
   }
   $("ipl-part-stock").innerHTML = `<div class="fp-loading">Looking up stock…</div>`;
+  // The previous part's replacements must not sit there while this one loads.
+  // Rendered for real below, once it is known whether this part resolves to an
+  // AutoCount item, because that decides what the replacement is recorded
+  // against.
+  $("ipl-part-repl").innerHTML = "";
   // Prices are per part and hidden until asked for, so reset the panel rather
   // than leaving the previous part's figures showing.
   //
@@ -8807,6 +9020,14 @@ async function openIplPart(index) {
         item_code: iplNoteKey(part),
         note_key: iplNoteKey(part),
         resolved: false,
+        description: part.description || part.part_number,
+      }, () => openIplPart(index));
+      // A part the catalogue does not hold is the likeliest of all to have
+      // been replaced, so the offer to record one belongs here most of all.
+      // Keyed to the book, there being no item code to key it to.
+      await renderPartReplacements($("ipl-part-repl"), {
+        part_key: iplNoteKey(part),
+        ipl_key: iplNoteKey(part),
         description: part.description || part.part_number,
       }, () => openIplPart(index));
       return;
@@ -8862,6 +9083,14 @@ async function renderIplStock(itemCode) {
       ...p,
       note_key: iplDiagramPart ? iplNoteKey(iplDiagramPart) : null,
       resolved: true,
+    }, () => renderIplStock(p.item_code));
+    // Recorded against the AutoCount item - the stabler identity, and the one
+    // Find Part would ask by - while still carrying the book's key so the
+    // diagram list can be marked without resolving every row.
+    renderPartReplacements($("ipl-part-repl"), {
+      part_key: p.item_code,
+      ipl_key: iplDiagramPart ? iplNoteKey(iplDiagramPart) : "",
+      description: p.description,
     }, () => renderIplStock(p.item_code));
   } catch (e) {
     box.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Stock lookup failed")}</div>`;

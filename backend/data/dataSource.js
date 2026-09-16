@@ -107,6 +107,14 @@ module.exports = {
     getPartNotes: (...a) => sqliteRepo.partNotes.getPartNotes(...a),
     setPartNote: (...a) => sqliteRepo.partNotes.setPartNote(...a),
   },
+  // Which part we fit instead. Local, like the notes: AutoCount holds what a
+  // part IS, never what this workshop does when it cannot be had.
+  replacements: {
+    get: (...a) => sqliteRepo.partReplacements.getPartReplacements(...a),
+    counts: (...a) => sqliteRepo.partReplacements.countPartReplacements(...a),
+    add: (...a) => sqliteRepo.partReplacements.addPartReplacement(...a),
+    remove: (...a) => sqliteRepo.partReplacements.deletePartReplacement(...a),
+  },
   requests: {
     createPartRequest: (...a) => sqliteRepo.partRequests.createPartRequest(...a),
     createPartRequestBatch: (...a) => sqliteRepo.partRequests.createPartRequestBatch(...a),

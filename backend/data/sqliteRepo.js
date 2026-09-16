@@ -2249,6 +2249,110 @@ function setPartNote(itemCode, note, who = "") {
 const partNotes = { getPartNote, getPartNotes, setPartNote };
 module.exports.partNotes = partNotes;
 
+// ---- Replacement parts ------------------------------------------------------
+// "The book says this part; we fit that one instead." Written by anyone,
+// including technicians - they are the ones who find out at the bench, and a
+// replacement that waits for the office to be told is a replacement nobody
+// records. Validating the code is what makes that safe: see server.js, which
+// refuses anything AutoCount does not hold, so the worst a wrong entry can be
+// is the wrong REAL part rather than a code that leads nowhere.
+
+// Both identities answer here. A replacement recorded while the original was
+// unknown to AutoCount is keyed to the book; the day that part is added to the
+// catalogue the sheet starts asking by item code, and the row must not vanish.
+function getPartReplacements(key, iplKey = "") {
+  const a = String(key || "").trim();
+  const b = String(iplKey || "").trim();
+  if (!a && !b) return [];
+  const keys = [...new Set([a, b].filter(Boolean))];
+  const marks = keys.map(() => "?").join(",");
+  return db.prepare(
+    `SELECT id, part_key, ipl_key, item_code, description, created_by, created_at
+       FROM part_replacements
+      WHERE part_key IN (${marks}) OR (ipl_key <> '' AND ipl_key IN (${marks}))
+      ORDER BY created_at, id`
+  ).all(...keys, ...keys);
+}
+
+// Which of these parts have a replacement - one question for a whole figure.
+// Returns a count per key rather than the rows: the list only needs to know
+// whether to draw the marker, and forty parts' worth of rows to decide forty
+// booleans is a lot of answer for the question asked.
+function countPartReplacements(keys) {
+  const list = [...new Set((keys || []).map((k) => String(k || "").trim()).filter(Boolean))];
+  if (!list.length) return {};
+  const out = {};
+  // Chunked because SQLite has a bound-variable ceiling (999 by default) and
+  // each key is asked twice below. A figure never comes close, but a caller
+  // asking about a whole book would, and failing then would be baffling.
+  const CHUNK = 400;
+  for (let i = 0; i < list.length; i += CHUNK) {
+    const part = list.slice(i, i + CHUNK);
+    const marks = part.map(() => "?").join(",");
+    const rows = db.prepare(
+      `SELECT part_key, ipl_key, COUNT(*) AS n
+         FROM part_replacements
+        WHERE part_key IN (${marks}) OR (ipl_key <> '' AND ipl_key IN (${marks}))
+        GROUP BY part_key, ipl_key`
+    ).all(...part, ...part);
+    const want = new Set(part);
+    for (const r of rows) {
+      // Deduped: a replacement recorded while the original was unknown to
+      // AutoCount has the SAME value in both columns, and counting it under
+      // each would tell the list two replacements where there is one.
+      for (const k of new Set([r.part_key, r.ipl_key])) {
+        if (k && want.has(k)) out[k] = (out[k] || 0) + r.n;
+      }
+    }
+  }
+  return out;
+}
+
+function addPartReplacement({ part_key, ipl_key = "", item_code, description = "", who = "" }) {
+  const key = String(part_key || "").trim();
+  const code = String(item_code || "").trim();
+  if (!key) { const e = new Error("Missing the part being replaced."); e.status = 400; throw e; }
+  if (!code) { const e = new Error("Missing the replacement part."); e.status = 400; throw e; }
+  if (key === code) {
+    const e = new Error("A part cannot replace itself.");
+    e.status = 400;
+    throw e;
+  }
+  try {
+    db.prepare(
+      `INSERT INTO part_replacements (part_key, ipl_key, item_code, description, created_by, created_at)
+       VALUES (?, ?, ?, ?, ?, datetime('now','localtime'))`
+    ).run(key, String(ipl_key || "").trim(), code,
+          String(description || "").trim().slice(0, 200), String(who || "").trim());
+  } catch (err) {
+    // Already recorded. Saying so plainly beats an error that reads like a
+    // failure, because the wanted state is the state we are already in.
+    if (String(err.message || "").includes("UNIQUE")) {
+      const e = new Error("That replacement is already recorded for this part.");
+      e.status = 409;
+      throw e;
+    }
+    throw err;
+  }
+  return getPartReplacements(key, ipl_key);
+}
+
+function deletePartReplacement(id) {
+  const n = Number(id);
+  if (!Number.isInteger(n) || n <= 0) {
+    const e = new Error("Missing which replacement to remove."); e.status = 400; throw e;
+  }
+  const row = db.prepare("SELECT * FROM part_replacements WHERE id = ?").get(n);
+  if (!row) { const e = new Error("That replacement is no longer there."); e.status = 404; throw e; }
+  db.prepare("DELETE FROM part_replacements WHERE id = ?").run(n);
+  return { ok: true, removed: row };
+}
+
+const partReplacements = {
+  getPartReplacements, countPartReplacements, addPartReplacement, deletePartReplacement,
+};
+module.exports.partReplacements = partReplacements;
+
 // ---- Part reorder requests ("Order more" / "Bulk Order" -> Orders list) -----
 // Every request belongs to a batch: a bulk order is several parts submitted
 // together and reviewed as ONE order, and a part ordered on its own is simply a
