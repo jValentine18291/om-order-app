@@ -60,6 +60,18 @@ It **refuses** anything it cannot read confidently rather than guessing — an 8
 digit number that does not start 8 or 9 is rejected with a message asking for
 the country code, because a wrong number here sends a signed slip to a stranger.
 
+### The number OM sends FROM
+
+The office landline, **+65 6743 4039** (John, 16 Sep 2026). It is not
+registered on the WhatsApp app, which it must not be — a number on the Business
+Platform cannot also be a WhatsApp or WhatsApp Business app account, and one
+already registered has to be deleted from WhatsApp first.
+
+A landline is allowed. Verification is by **voice call** rather than SMS: Meta
+rings the number and reads the code aloud, so somebody has to be at the phone
+when we do it. Registering it does not affect the telephony — 6743 4039 goes on
+ringing as an ordinary office line.
+
 ## The log
 
 Every attempt, including the failures:
@@ -75,9 +87,51 @@ withdrawn, no payment method, number not on WhatsApp — and the real reason fro
 Meta is recorded verbatim. Excluded from GitHub: it holds customer phone
 numbers. It is copied by `backup-db.bat` along with the database.
 
+## The template, word for word
+
+Submit it EXACTLY as below. A template cannot be edited once approved — any
+change means submitting again and waiting out another review — so the footer
+and the button belong in the first submission, not a later one.
+
+**Name** `service_slip_confirmation` · **Category** Utility · **Language**
+English (`en`)
+
+**Header:** Document. The slip PDF, passed at send time as a media id.
+
+**Body:**
+
+    Dear {{1}},
+
+    We have received your equipment for servicing.
+
+    Service Slip No.: {{2}}
+    Date Received: {{3}}
+    No. of Equipment: {{4}}
+
+    Your signed service slip is attached for your reference.
+
+**Footer:** `Automated message. Replies are not monitored.`
+
+**Button:** Call phone number — label `Call us`, number `+65 6743 4039`.
+
+### Why the footer and the button, and not a setting
+
+There is no no-reply mode in WhatsApp. The customer always gets a text box,
+and this app only sends: `whatsapp.js` has `sendSlip` and `uploadPdf` and
+there is no webhook anywhere in the backend, so a reply reaches Meta and is
+dropped with nobody at OM ever seeing it. John's decision (16 Sep 2026) is
+that this is how it should work - questions go to the office by phone - so the
+message has to SAY so, and give a one-tap way to do it.
+
+Neither addition touches the code. `sendSlip` transmits two components, header
+and body; a footer carries no parameter, and a Call button only needs one when
+the number is dynamic. Ours is fixed, so the payload is unchanged.
+
 ## What is still missing (all on Meta's side)
 
-1. **Business verification** — still Unverified. Needs ACRA documents, takes days.
+1. **Business verification** — submitted 16 Sep 2026 and **In review**; Meta
+   said about two working days. Domain `gardenequipment.com.sg` verified the
+   same day by DNS TXT record.
 2. **An approved template** — Utility category, with a **Document** header.
    Name `service_slip_confirmation`, language **English** (`en`), and **four**
    body variables in this exact order:
