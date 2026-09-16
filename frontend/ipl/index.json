@@ -409,5 +409,14 @@
   "category": "Brushcutter",
   "figures": 17,
   "parts": 270
+ },
+ {
+  "id": "hus541rb",
+  "name": "Husqvarna 541RB Brushcutter",
+  "short": "541RB",
+  "brand": "Husqvarna",
+  "category": "Brushcutter",
+  "figures": 26,
+  "parts": 270
  }
 ]

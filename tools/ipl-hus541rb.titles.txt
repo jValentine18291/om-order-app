@@ -1,0 +1,50 @@
+# 541RB sheet titles, in the order --order puts them.
+#
+# TWO THINGS THE CSV CANNOT SAY, both taken from the drawings themselves.
+#
+# The market. This book is built for three: "For Asia and LA", "For South
+# Korea" and, on the throttle sheet alone, "For LA". The export carries that in
+# a Comment column that never reaches the screen, so without these titles a
+# technician sees two identical "TUBE AND SHAFT" tabs and no way to tell which
+# one is the machine in front of him. Same wording as the 531RB book, which is
+# the same family and the same three markets.
+#
+# The name. The drawings say GEAR, TUBE & SHAFT, HANDLEBAR and CRANK SHAFT
+# where the export says GEARS, TUBE AND SHAFT, HANDLE and CRANKSHAFT. The
+# printed book is what a technician is holding, so the printed words win.
+#
+# Sheet 15 is not a second copy of the starter - the drawing calls it EASY
+# STARTER, a different mechanism fitted to the South Korean machines, and
+# titling it "STARTER (South Korea)" would hide that.
+#
+# SHAFT ASSY is the one the export gets wrong rather than merely leaves out.
+# Its Comment column is EMPTY, so it reads as a sheet for every machine, but
+# the drawing is headed FOR SOUTH KOREA. Untitled it would have been the only
+# unqualified sheet in the shaft group, which is exactly how a technician ends
+# up ordering a Korean shaft for an Asian machine. The drawing wins.
+GEAR (Asia & LA)
+GEAR (South Korea)
+SHAFT ASSY (South Korea)
+TUBE & SHAFT (Asia & LA)
+TUBE & SHAFT (South Korea)
+HANDLEBAR (Asia & LA)
+HANDLEBAR (South Korea)
+THROTTLE CONTROLS (LA)
+THROTTLE CONTROLS (Asia & South Korea)
+CLUTCH
+IGNITION SYSTEM
+CYLINDER COVER
+MUFFLER
+STARTER (Asia & LA)
+EASY STARTER (South Korea)
+FUEL TANK
+CARBURETOR & AIRFILTER
+CYLINDER & PISTON
+CRANK SHAFT
+CRANKCASE
+CARBURETOR
+ACCESSORIES
+ACCESSORIES (Asia & LA)
+ACCESSORIES (South Korea)
+FRAME
+HARNESS
