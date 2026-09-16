@@ -1,95 +1,1469 @@
 {
  "id": "k10sp",
  "name": "PulsFOG K-10-SP",
- "source": "PF_K10SP_IPL.pdf",
+ "source": "Operating Instructions K-10-SP, Revision 01, 17-OCT-2012 (parts tables, text layer) + PulsFOG_K10SP_Parts.pdf 01/2008 (resonator drawing)",
  "figures": [
   {
    "id": "1",
-   "number": 1,
-   "title": "Resonator side \u2014 extralong protective grating",
-   "label": "Fig.1 Resonator side (extralong grating)",
-   "sheet": 1,
-   "sheets": 1,
+   "number": "1",
+   "title": "Resonator side",
    "image": "k10sp-fig1.png",
+   "ocr": false,
    "hotspots": [],
-   "parts": []
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "G00001",
+     "depth": 0,
+     "sub": false,
+     "description": "Chassis K-10-SP",
+     "qty": "",
+     "remarks": "Order No. 101.100.00",
+     "search": "G00001"
+    },
+    {
+     "key": "1",
+     "part_number": "G00280",
+     "depth": 0,
+     "sub": false,
+     "description": "Chassis K-10-DESERT (for primer black 2-piece)",
+     "qty": "",
+     "remarks": "",
+     "search": "G00280"
+    },
+    {
+     "key": "14",
+     "part_number": "Z00075",
+     "depth": 0,
+     "sub": false,
+     "description": "Plastic feet",
+     "qty": "",
+     "remarks": "Order No. 900.100.01",
+     "search": "Z00075"
+    },
+    {
+     "key": "31",
+     "part_number": "G00025",
+     "depth": 0,
+     "sub": false,
+     "description": "Resonator K-10-SP",
+     "qty": "",
+     "remarks": "Order No. 101.410.00",
+     "search": "G00025"
+    },
+    {
+     "key": "46",
+     "part_number": "N00041",
+     "depth": 0,
+     "sub": false,
+     "description": "Sheet head screw 3,9 x 9,5",
+     "qty": "",
+     "remarks": "Order No. 999.009.01",
+     "search": "N00041"
+    },
+    {
+     "key": "47",
+     "part_number": "G00026",
+     "depth": 0,
+     "sub": false,
+     "description": "Diffusor K-10-SP",
+     "qty": "",
+     "remarks": "Order No. 101.420.00",
+     "search": "G00026"
+    },
+    {
+     "key": "56a",
+     "part_number": "G00027",
+     "depth": 0,
+     "sub": false,
+     "description": "Cooling jacket with protective grating",
+     "qty": "",
+     "remarks": "Order No. 101.430.00",
+     "search": "G00027"
+    },
+    {
+     "key": "57",
+     "part_number": "F00027",
+     "depth": 0,
+     "sub": false,
+     "description": "Lid for cooling jacket (closed)",
+     "qty": "",
+     "remarks": "Order No. 100.433.00",
+     "search": "F00027"
+    },
+    {
+     "key": "60",
+     "part_number": "G00028",
+     "depth": 0,
+     "sub": false,
+     "description": "Holding device for cooling jacket",
+     "qty": "",
+     "remarks": "Order No. 100.440.00",
+     "search": "G00028"
+    },
+    {
+     "key": "61",
+     "part_number": "N00090",
+     "depth": 0,
+     "sub": false,
+     "description": "Clip size 80-100",
+     "qty": "",
+     "remarks": "Order No. 992.003.02",
+     "search": "N00090"
+    },
+    {
+     "key": "63",
+     "part_number": "G00002",
+     "depth": 0,
+     "sub": false,
+     "description": "Carburettor (red, 1 bore-hole ) for K-10-SP cpl. with diaphragm valve",
+     "qty": "",
+     "remarks": "Order No. 100.310.01",
+     "search": "G00002"
+    },
+    {
+     "key": "63",
+     "part_number": "G00281",
+     "depth": 0,
+     "sub": false,
+     "description": "Carburettor (black, 1 bore-hole) for K-10-DESERT cpl. \" with diaphragm valve",
+     "qty": "",
+     "remarks": "",
+     "search": "G00281"
+    },
+    {
+     "key": "187",
+     "part_number": "Z00047",
+     "depth": 0,
+     "sub": false,
+     "description": "Battery pipe",
+     "qty": "",
+     "remarks": "Order No. 900.220.01",
+     "search": "Z00047"
+    },
+    {
+     "key": "209a",
+     "part_number": "Z00201",
+     "depth": 0,
+     "sub": false,
+     "description": "Spark plug cap",
+     "qty": "",
+     "remarks": "Order No. 900.211.02",
+     "search": "Z00201"
+    },
+    {
+     "key": "210",
+     "part_number": "G00035",
+     "depth": 0,
+     "sub": false,
+     "description": "Primer (black, 2-piece) cpl.",
+     "qty": "",
+     "remarks": "Order No. 900.341.03",
+     "search": "G00035"
+    },
+    {
+     "key": "210",
+     "part_number": "G00346",
+     "depth": 0,
+     "sub": false,
+     "description": "Primer (black, 1-piece) cpl. (2 fixings)",
+     "qty": "",
+     "remarks": "",
+     "search": "G00346"
+    },
+    {
+     "key": "210",
+     "part_number": "G00430",
+     "depth": 0,
+     "sub": false,
+     "description": "Primer (black, 1 piece) cpl. (4 fixings)",
+     "qty": "",
+     "remarks": "",
+     "search": "G00430"
+    },
+    {
+     "key": "225",
+     "part_number": "Z00002",
+     "depth": 0,
+     "sub": false,
+     "description": "Sling",
+     "qty": "",
+     "remarks": "Order No. 900.000.02",
+     "search": "Z00002"
+    },
+    {
+     "key": "309",
+     "part_number": "N00072",
+     "depth": 0,
+     "sub": false,
+     "description": "Hexagon screw M5x10",
+     "qty": "",
+     "remarks": "Order No. 999.004.02",
+     "search": "N00072"
+    },
+    {
+     "key": "316",
+     "part_number": "N00019",
+     "depth": 0,
+     "sub": false,
+     "description": "Tooth lock washer (internal) d 5,3",
+     "qty": "",
+     "remarks": "Order No. 997.006.03",
+     "search": "N00019"
+    },
+    {
+     "key": "",
+     "part_number": "G00187",
+     "depth": 0,
+     "sub": false,
+     "description": "Extralong protective grating K-10-SP",
+     "qty": "",
+     "remarks": "Order No. 101.450.00",
+     "search": "G00187"
+    },
+    {
+     "key": "",
+     "part_number": "G00042",
+     "depth": 0,
+     "sub": false,
+     "description": "Holding device for extralong protective grating (incl. No. 61)",
+     "qty": "",
+     "remarks": "Order No. 101.440.05",
+     "search": "G00042"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 Resonator side"
   },
   {
    "id": "2",
-   "number": 2,
-   "title": "Resonator side",
-   "label": "Fig.2 Resonator side",
-   "sheet": 1,
-   "sheets": 1,
+   "number": "2",
+   "title": "Fog solution installation",
    "image": "k10sp-fig2.png",
+   "ocr": false,
    "hotspots": [],
-   "parts": []
+   "parts": [
+    {
+     "key": "63",
+     "part_number": "G00002",
+     "depth": 0,
+     "sub": false,
+     "description": "Carburettor (red, 1 bore-hole) cpl. with diaphragm valve K-10",
+     "qty": "",
+     "remarks": "Order No. 100.310.01",
+     "search": "G00002"
+    },
+    {
+     "key": "63",
+     "part_number": "G00505",
+     "depth": 0,
+     "sub": false,
+     "description": "Carburettor (red, 2 bore-holes) cpl. with diaphragm valve K-10 for automatic cut-off device",
+     "qty": "",
+     "remarks": "",
+     "search": "G00505"
+    },
+    {
+     "key": "113",
+     "part_number": "F00097",
+     "depth": 0,
+     "sub": false,
+     "description": "Lid with bore-hole (tri-cornered)",
+     "qty": "",
+     "remarks": "Order No. 900.520.14",
+     "search": "F00097"
+    },
+    {
+     "key": "114",
+     "part_number": "F00129",
+     "depth": 0,
+     "sub": false,
+     "description": "Solution tank with lid, 5 Itr.",
+     "qty": "",
+     "remarks": "Order No. 900.510.05",
+     "search": "F00129"
+    },
+    {
+     "key": "115",
+     "part_number": "Z00051",
+     "depth": 0,
+     "sub": false,
+     "description": "Passage",
+     "qty": "",
+     "remarks": "Order No. 900.520.10",
+     "search": "Z00051"
+    },
+    {
+     "key": "119",
+     "part_number": "Z00052",
+     "depth": 0,
+     "sub": false,
+     "description": "Laminate gasket",
+     "qty": "",
+     "remarks": "Order No. 900.520.11",
+     "search": "Z00052"
+    },
+    {
+     "key": "120K",
+     "part_number": "G00056",
+     "depth": 0,
+     "sub": false,
+     "description": "Fog tap cpl., connecting piece: brass/PA K-10",
+     "qty": "",
+     "remarks": "Order No. 900.526.00",
+     "search": "G00056"
+    },
+    {
+     "key": "",
+     "part_number": "G00420",
+     "depth": 0,
+     "sub": false,
+     "description": "Fog tap cpl., connecting piece: brass/PA K-10 incl. nut + lock washers",
+     "qty": "",
+     "remarks": "For K-10-SP with automatic cut-off device",
+     "search": "G00420"
+    },
+    {
+     "key": "",
+     "part_number": "G00099",
+     "depth": 0,
+     "sub": false,
+     "description": "Fog tap cpl., connecting piece: stainless steel/stainless steel K-10",
+     "qty": "",
+     "remarks": "For K-10-SP with automatic cut-off device",
+     "search": "G00099"
+    },
+    {
+     "key": "",
+     "part_number": "G00421",
+     "depth": 0,
+     "sub": false,
+     "description": "Fog tap cpl., connecting piece: stainless/stainless K-10 incl. nut + lock washer",
+     "qty": "",
+     "remarks": "For K-10-SP with automatic cut-off device",
+     "search": "G00421"
+    },
+    {
+     "key": "121",
+     "part_number": "N00030",
+     "depth": 0,
+     "sub": false,
+     "description": "Flat hexagon nut M10 x 1 (brass)",
+     "qty": "",
+     "remarks": "Order No. 998.005.03",
+     "search": "N00030"
+    },
+    {
+     "key": "122y",
+     "part_number": "F00083",
+     "depth": 0,
+     "sub": false,
+     "description": "Fog solution tube 150 mm, Viton",
+     "qty": "",
+     "remarks": "Order No. 900.521.03",
+     "search": "F00083"
+    },
+    {
+     "key": "122z",
+     "part_number": "G00022",
+     "depth": 0,
+     "sub": false,
+     "description": "Fog solution conduit (stainless steel)",
+     "qty": "",
+     "remarks": "Order No. 100.531.01",
+     "search": "G00022"
+    },
+    {
+     "key": "123",
+     "part_number": "N00031",
+     "depth": 0,
+     "sub": false,
+     "description": "Lock washer S",
+     "qty": "",
+     "remarks": "Order No. 997.009.01",
+     "search": "N00031"
+    },
+    {
+     "key": "128z",
+     "part_number": "Z00199",
+     "depth": 0,
+     "sub": false,
+     "description": "Pressure pipe (plastic) K-10-SP",
+     "qty": "",
+     "remarks": "Order No. 101.520.30",
+     "search": "Z00199"
+    },
+    {
+     "key": "129",
+     "part_number": "Z00055",
+     "depth": 0,
+     "sub": false,
+     "description": "Supporting spring 8 x 100",
+     "qty": "",
+     "remarks": "Order No. 900.520.01",
+     "search": "Z00055"
+    },
+    {
+     "key": "129a",
+     "part_number": "Z00018",
+     "depth": 0,
+     "sub": false,
+     "description": "Supporting spring 8 x 150",
+     "qty": "",
+     "remarks": "Order No. 900.520.02",
+     "search": "Z00018"
+    },
+    {
+     "key": "129b",
+     "part_number": "Z00095",
+     "depth": 0,
+     "sub": false,
+     "description": "Supporting spring 8,5 x 100",
+     "qty": "",
+     "remarks": "Order No. 900.520.03",
+     "search": "Z00095"
+    },
+    {
+     "key": "129c",
+     "part_number": "Z00062",
+     "depth": 0,
+     "sub": false,
+     "description": "Supporting spring 8,5 x 160",
+     "qty": "",
+     "remarks": "Order No. 900.520.04",
+     "search": "Z00062"
+    },
+    {
+     "key": "129d",
+     "part_number": "Z00094",
+     "depth": 0,
+     "sub": false,
+     "description": "Supporting spring 9 x 100",
+     "qty": "",
+     "remarks": "Order No. 900.520.05",
+     "search": "Z00094"
+    },
+    {
+     "key": "139",
+     "part_number": "G00165",
+     "depth": 0,
+     "sub": false,
+     "description": "Single suction piece (PA with brass-weight)",
+     "qty": "",
+     "remarks": "Order No. 900.520.21",
+     "search": "G00165"
+    },
+    {
+     "key": "139",
+     "part_number": "Z00185",
+     "depth": 0,
+     "sub": false,
+     "description": "Single suction piece (stainless steel)",
+     "qty": "",
+     "remarks": "Order No. 900.520.22",
+     "search": "Z00185"
+    },
+    {
+     "key": "139",
+     "part_number": "G00166",
+     "depth": 0,
+     "sub": false,
+     "description": "Single suction piece (PA with stainless-weight) \"acid-resistant\"",
+     "qty": "",
+     "remarks": "Order No. 900.520.23",
+     "search": "G00166"
+    },
+    {
+     "key": "139a",
+     "part_number": "G00021",
+     "depth": 0,
+     "sub": false,
+     "description": "Single suction piece (PA with brass-weight) cpl. with Viton tube",
+     "qty": "",
+     "remarks": "Order No. 900.523.01",
+     "search": "G00021"
+    },
+    {
+     "key": "139a",
+     "part_number": "G00311",
+     "depth": 0,
+     "sub": false,
+     "description": "Single suction piece (stainless steel) cpl. with Viton tube",
+     "qty": "",
+     "remarks": "Order No. 900.523.01",
+     "search": "G00311"
+    },
+    {
+     "key": "140",
+     "part_number": "F00066",
+     "depth": 0,
+     "sub": false,
+     "description": "Fog solution tube 310 mm, Viton",
+     "qty": "",
+     "remarks": "Order No. 900.521.06",
+     "search": "F00066"
+    },
+    {
+     "key": "141",
+     "part_number": "F00070",
+     "depth": 0,
+     "sub": false,
+     "description": "Fog solution tube 210 mm, Viton",
+     "qty": "",
+     "remarks": "Order No. 900.521.04",
+     "search": "F00070"
+    },
+    {
+     "key": "142",
+     "part_number": "F00111",
+     "depth": 0,
+     "sub": false,
+     "description": "Tube 265 mm, black",
+     "qty": "",
+     "remarks": "Order No. 900.525.09",
+     "search": "F00111"
+    },
+    {
+     "key": "149",
+     "part_number": "",
+     "depth": 0,
+     "sub": false,
+     "description": "Dosing nozzle",
+     "qty": "",
+     "remarks": "Order No. 900.550.00",
+     "search": ""
+    },
+    {
+     "key": "151",
+     "part_number": "Z00065",
+     "depth": 0,
+     "sub": false,
+     "description": "Nozzle cane",
+     "qty": "",
+     "remarks": "Order No. 912.540.00",
+     "search": "Z00065"
+    },
+    {
+     "key": "152",
+     "part_number": "Z00067",
+     "depth": 0,
+     "sub": false,
+     "description": "Distance husk 11,5 mm long (stainless steel)",
+     "qty": "",
+     "remarks": "Order No. 900.560.01",
+     "search": "Z00067"
+    },
+    {
+     "key": "153",
+     "part_number": "N00033",
+     "depth": 0,
+     "sub": false,
+     "description": "Gasket 10x14x1 Cu",
+     "qty": "",
+     "remarks": "Order No. 993.001.02",
+     "search": "N00033"
+    },
+    {
+     "key": "153",
+     "part_number": "N00062",
+     "depth": 0,
+     "sub": false,
+     "description": "Gasket 10x14x1 Al \"acid-resistant\"",
+     "qty": "",
+     "remarks": "Order No. 993.003.02",
+     "search": "N00062"
+    },
+    {
+     "key": "154",
+     "part_number": "F00075",
+     "depth": 0,
+     "sub": false,
+     "description": "Tube 75 mm, black (pulsFOG No. S311)",
+     "qty": "",
+     "remarks": "Order No. 900.525.04",
+     "search": "F00075"
+    },
+    {
+     "key": "222",
+     "part_number": "F00076",
+     "depth": 0,
+     "sub": false,
+     "description": "Tube 40 mm, black",
+     "qty": "",
+     "remarks": "Order No. 900.525.02",
+     "search": "F00076"
+    },
+    {
+     "key": "177",
+     "part_number": "N00032",
+     "depth": 0,
+     "sub": false,
+     "description": "Gasket 8x12x1 Cu",
+     "qty": "",
+     "remarks": "Order No. 993.001.01",
+     "search": "N00032"
+    },
+    {
+     "key": "177",
+     "part_number": "N00061",
+     "depth": 0,
+     "sub": false,
+     "description": "Gasket 8x12x1 Al \"acid-resistant\"",
+     "qty": "",
+     "remarks": "Order No. 993.003.01",
+     "search": "N00061"
+    },
+    {
+     "key": "8583",
+     "part_number": "G00023",
+     "depth": 0,
+     "sub": false,
+     "description": "Pressure valve (grey/green)",
+     "qty": "",
+     "remarks": "Order No. 900.323.00",
+     "search": "G00023"
+    },
+    {
+     "key": "",
+     "part_number": "G00327",
+     "depth": 0,
+     "sub": false,
+     "description": "Relief valve (red/blue) (instead of Pressure valve (grey/green) Pos. No. 8583)",
+     "qty": "",
+     "remarks": "For K-10-SP with automatic cut-off device",
+     "search": "G00327"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 Fog solution installation"
   },
   {
    "id": "3",
-   "number": 3,
-   "title": "Fog solution installation",
-   "label": "Fig.3 Fog solution installation",
-   "sheet": 1,
-   "sheets": 1,
+   "number": "3",
+   "title": "Starting installation",
    "image": "k10sp-fig3.png",
+   "ocr": false,
    "hotspots": [],
-   "parts": []
+   "parts": [
+    {
+     "key": "63",
+     "part_number": "G00002",
+     "depth": 0,
+     "sub": false,
+     "description": "Carburettor (red, 1 bore-hole) cpl. with diaphragm valve K-10",
+     "qty": "",
+     "remarks": "Order No. 100.310.01",
+     "search": "G00002"
+    },
+    {
+     "key": "63",
+     "part_number": "G00505",
+     "depth": 0,
+     "sub": false,
+     "description": "Carburettor (red, 2 bore-holes) cpl. with diaphragm valve K-10 for automatic cut-off device",
+     "qty": "",
+     "remarks": "",
+     "search": "G00505"
+    },
+    {
+     "key": "63b",
+     "part_number": "F00093",
+     "depth": 0,
+     "sub": false,
+     "description": "Carburettor (red, 1 bore-hole), body K-10",
+     "qty": "",
+     "remarks": "Order No. 100.310.00",
+     "search": "F00093"
+    },
+    {
+     "key": "63b",
+     "part_number": "F00413",
+     "depth": 0,
+     "sub": false,
+     "description": "Carburettor (red, 2 bore-holes), body K-10 for automatic cut-off device",
+     "qty": "",
+     "remarks": "Order No. 100.310.00",
+     "search": "F00413"
+    },
+    {
+     "key": "63",
+     "part_number": "G00281",
+     "depth": 0,
+     "sub": false,
+     "description": "Carburettor (black, 1 bore-hole) for K-10-DESERT cpl. (without diaphragm valve)",
+     "qty": "",
+     "remarks": "",
+     "search": "G00281"
+    },
+    {
+     "key": "63b",
+     "part_number": "F00232",
+     "depth": 0,
+     "sub": false,
+     "description": "Carburettor (black) body (for K-10-DESERT)",
+     "qty": "",
+     "remarks": "",
+     "search": "F00232"
+    },
+    {
+     "key": "66",
+     "part_number": "Z00120",
+     "depth": 0,
+     "sub": false,
+     "description": "Fuel nozzle K-10",
+     "qty": "",
+     "remarks": "Order No. 100.311.01",
+     "search": "Z00120"
+    },
+    {
+     "key": "67",
+     "part_number": "Z00011",
+     "depth": 0,
+     "sub": false,
+     "description": "Ring slot nozzle K-10",
+     "qty": "",
+     "remarks": "Order No. 100.311.02",
+     "search": "Z00011"
+    },
+    {
+     "key": "70",
+     "part_number": "Z00008",
+     "depth": 0,
+     "sub": false,
+     "description": "Support plate",
+     "qty": "",
+     "remarks": "Order No. 900.313.01",
+     "search": "Z00008"
+    },
+    {
+     "key": "72",
+     "part_number": "Z00007",
+     "depth": 0,
+     "sub": false,
+     "description": "Diaphragm (Teflon) for carburettor",
+     "qty": "",
+     "remarks": "Order No. 900.313.02",
+     "search": "Z00007"
+    },
+    {
+     "key": "73",
+     "part_number": "Z00004",
+     "depth": 0,
+     "sub": false,
+     "description": "Membrane thread (diaphragm valve cap)",
+     "qty": "",
+     "remarks": "Order No. 900.313.03",
+     "search": "Z00004"
+    },
+    {
+     "key": "75",
+     "part_number": "N00004",
+     "depth": 0,
+     "sub": false,
+     "description": "Counter nut M6",
+     "qty": "",
+     "remarks": "Order No. 998.002.02",
+     "search": "N00004"
+    },
+    {
+     "key": "76",
+     "part_number": "N00007",
+     "depth": 0,
+     "sub": false,
+     "description": "Gasket 6x12x1 Fi",
+     "qty": "",
+     "remarks": "Order No. 993.002.01",
+     "search": "N00007"
+    },
+    {
+     "key": "78",
+     "part_number": "Z00014",
+     "depth": 0,
+     "sub": false,
+     "description": "Carburettor gasket (Abil)",
+     "qty": "",
+     "remarks": "Order No. 900.310.01",
+     "search": "Z00014"
+    },
+    {
+     "key": "91",
+     "part_number": "N00093",
+     "depth": 0,
+     "sub": false,
+     "description": "Hexagon head screw M6x20",
+     "qty": "",
+     "remarks": "Order No. 999.004.06",
+     "search": "N00093"
+    },
+    {
+     "key": "92",
+     "part_number": "N00010",
+     "depth": 0,
+     "sub": false,
+     "description": "Tooth lock washer (external) d 6,4",
+     "qty": "",
+     "remarks": "Order No. 997.005.04",
+     "search": "N00010"
+    },
+    {
+     "key": "93",
+     "part_number": "N00011",
+     "depth": 0,
+     "sub": false,
+     "description": "Hexagon nut M6",
+     "qty": "",
+     "remarks": "Order No. 998.001.06",
+     "search": "N00011"
+    },
+    {
+     "key": "94",
+     "part_number": "N00015",
+     "depth": 0,
+     "sub": false,
+     "description": "Tube clip (size 8)",
+     "qty": "",
+     "remarks": "Order No. 992.001.02",
+     "search": "N00015"
+    },
+    {
+     "key": "96y",
+     "part_number": "F00114",
+     "depth": 0,
+     "sub": false,
+     "description": "Fuel tube (blue)",
+     "qty": "",
+     "remarks": "Order No. 923.353.01",
+     "search": "F00114"
+    },
+    {
+     "key": "97",
+     "part_number": "N00014",
+     "depth": 0,
+     "sub": false,
+     "description": "Tube clip (size 9)",
+     "qty": "",
+     "remarks": "Order No. 992.001.03",
+     "search": "N00014"
+    },
+    {
+     "key": "103a",
+     "part_number": "G00007",
+     "depth": 0,
+     "sub": false,
+     "description": "Knurled washer cpl.",
+     "qty": "",
+     "remarks": "Order No. 900.312.03",
+     "search": "G00007"
+    },
+    {
+     "key": "103b",
+     "part_number": "N00071",
+     "depth": 0,
+     "sub": false,
+     "description": "Locking screw M4x8",
+     "qty": "",
+     "remarks": "Order No. 999.007.01",
+     "search": "N00071"
+    },
+    {
+     "key": "103c",
+     "part_number": "G00008",
+     "depth": 0,
+     "sub": false,
+     "description": "Threaded spindle",
+     "qty": "",
+     "remarks": "Order No. 900.312.01",
+     "search": "G00008"
+    },
+    {
+     "key": "103z",
+     "part_number": "G00006",
+     "depth": 0,
+     "sub": false,
+     "description": "Adjustable screw cpl. with O-ring",
+     "qty": "",
+     "remarks": "Order No. 900.312.00",
+     "search": "G00006"
+    },
+    {
+     "key": "110",
+     "part_number": "N00063",
+     "depth": 0,
+     "sub": false,
+     "description": "O-ring",
+     "qty": "",
+     "remarks": "Order No. 993.005.01",
+     "search": "N00063"
+    },
+    {
+     "key": "111",
+     "part_number": "N00006",
+     "depth": 0,
+     "sub": false,
+     "description": "Ring piece",
+     "qty": "",
+     "remarks": "Order No. 900.311.03",
+     "search": "N00006"
+    },
+    {
+     "key": "165",
+     "part_number": "F00151",
+     "depth": 0,
+     "sub": false,
+     "description": "Fuel tank with bore-holes and lid (d 32 mm)",
+     "qty": "",
+     "remarks": "Order No. 912.351.01",
+     "search": "F00151"
+    },
+    {
+     "key": "165/1",
+     "part_number": "G00010",
+     "depth": 0,
+     "sub": false,
+     "description": "Fuel tank with fuel valve cpl.",
+     "qty": "",
+     "remarks": "Order No. 100.352.00",
+     "search": "G00010"
+    },
+    {
+     "key": "165a",
+     "part_number": "Z00025",
+     "depth": 0,
+     "sub": false,
+     "description": "Lid for fuel tank (d 32 mm)",
+     "qty": "",
+     "remarks": "Order No. 900.350.01",
+     "search": "Z00025"
+    },
+    {
+     "key": "166z",
+     "part_number": "G00012",
+     "depth": 0,
+     "sub": false,
+     "description": "Connecting piece (bent)",
+     "qty": "",
+     "remarks": "Order No. 900.354.03",
+     "search": "G00012"
+    },
+    {
+     "key": "168",
+     "part_number": "Z00152",
+     "depth": 0,
+     "sub": false,
+     "description": "Aeration piece",
+     "qty": "",
+     "remarks": "Order No. 900.354.04",
+     "search": "Z00152"
+    },
+    {
+     "key": "169z",
+     "part_number": "Z00027",
+     "depth": 0,
+     "sub": false,
+     "description": "Fuel suction piece",
+     "qty": "",
+     "remarks": "Order No. 900.354.01",
+     "search": "Z00027"
+    },
+    {
+     "key": "170",
+     "part_number": "F00081",
+     "depth": 0,
+     "sub": false,
+     "description": "Fuel suction tube, Viton",
+     "qty": "",
+     "remarks": "Order No. 900.354.02",
+     "search": "F00081"
+    },
+    {
+     "key": "174z",
+     "part_number": "N00013",
+     "depth": 0,
+     "sub": false,
+     "description": "Hexagon nut (flat) M10 x 1,75 (brass)",
+     "qty": "",
+     "remarks": "Order No. 998.005.04",
+     "search": "N00013"
+    },
+    {
+     "key": "175",
+     "part_number": "N00012",
+     "depth": 0,
+     "sub": false,
+     "description": "Hexagon nut (flat) M8 (brass)",
+     "qty": "",
+     "remarks": "Order No. 998.005.02",
+     "search": "N00012"
+    },
+    {
+     "key": "176",
+     "part_number": "N00005",
+     "depth": 0,
+     "sub": false,
+     "description": "Gasket 10x14x1 Fi",
+     "qty": "",
+     "remarks": "Order No. 993.002.02",
+     "search": "N00005"
+    },
+    {
+     "key": "178",
+     "part_number": "F00082",
+     "depth": 0,
+     "sub": false,
+     "description": "Tube 85 mm, black",
+     "qty": "",
+     "remarks": "Order No. 900.525.05",
+     "search": "F00082"
+    },
+    {
+     "key": "222",
+     "part_number": "F00076",
+     "depth": 0,
+     "sub": false,
+     "description": "Air tube 40 mm, black",
+     "qty": "",
+     "remarks": "Order No. 900.525.02",
+     "search": "F00076"
+    },
+    {
+     "key": "S301",
+     "part_number": "G00235",
+     "depth": 0,
+     "sub": false,
+     "description": "Block valve (grey/grey/blue)",
+     "qty": "",
+     "remarks": "Order No. 912.331.00",
+     "search": "G00235"
+    },
+    {
+     "key": "S302",
+     "part_number": "G00004",
+     "depth": 0,
+     "sub": false,
+     "description": "Starting nozzle",
+     "qty": "",
+     "remarks": "Order No. 900.313.04",
+     "search": "G00004"
+    },
+    {
+     "key": "S310",
+     "part_number": "F00113",
+     "depth": 0,
+     "sub": false,
+     "description": "Tube 40 mm, transparent",
+     "qty": "",
+     "remarks": "Order No. 900.355.02",
+     "search": "F00113"
+    },
+    {
+     "key": "S311",
+     "part_number": "F00075",
+     "depth": 0,
+     "sub": false,
+     "description": "Tube 75 mm, black",
+     "qty": "",
+     "remarks": "Order No. 900.525.04",
+     "search": "F00075"
+    },
+    {
+     "key": "7980",
+     "part_number": "G00014",
+     "depth": 0,
+     "sub": false,
+     "description": "Fuel valve (red) with transparent tube",
+     "qty": "",
+     "remarks": "Order No. 900.321.01",
+     "search": "G00014"
+    },
+    {
+     "key": "7980a",
+     "part_number": "G00013",
+     "depth": 0,
+     "sub": false,
+     "description": "Fuel valve (red) cpl. with tubes",
+     "qty": "",
+     "remarks": "Order No. 923.321.02",
+     "search": "G00013"
+    },
+    {
+     "key": "8583",
+     "part_number": "G00023",
+     "depth": 0,
+     "sub": false,
+     "description": "Pressure valve (grey/green)",
+     "qty": "",
+     "remarks": "Order No. 900.323.00",
+     "search": "G00023"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 Starting installation"
   },
   {
    "id": "4",
-   "number": 4,
-   "title": "Fog solution installation \u2014 parts list",
-   "label": "Fig.4 Fog solution installation (parts list)",
-   "sheet": 1,
-   "sheets": 1,
-   "image": "k10sp-fig4.png",
-   "hotspots": [],
-   "parts": []
-  },
-  {
-   "id": "5",
-   "number": 5,
-   "title": "Starting installation",
-   "label": "Fig.5 Starting installation",
-   "sheet": 1,
-   "sheets": 1,
-   "image": "k10sp-fig5.png",
-   "hotspots": [],
-   "parts": []
-  },
-  {
-   "id": "6",
-   "number": 6,
-   "title": "Starting installation \u2014 parts list",
-   "label": "Fig.6 Starting installation (parts list)",
-   "sheet": 1,
-   "sheets": 1,
-   "image": "k10sp-fig6.png",
-   "hotspots": [],
-   "parts": []
-  },
-  {
-   "id": "7",
-   "number": 7,
+   "number": "4",
    "title": "Primer and ignition installation",
-   "label": "Fig.7 Primer and ignition installation",
-   "sheet": 1,
-   "sheets": 1,
-   "image": "k10sp-fig7.png",
+   "image": "k10sp-fig4.png",
+   "ocr": false,
    "hotspots": [],
-   "parts": []
-  },
-  {
-   "id": "8",
-   "number": 8,
-   "title": "Primer and ignition installation \u2014 parts list",
-   "label": "Fig.8 Primer and ignition installation (parts list)",
-   "sheet": 1,
+   "parts": [
+    {
+     "key": "183",
+     "part_number": "Z00041",
+     "depth": 0,
+     "sub": false,
+     "description": "Ignition device",
+     "qty": "",
+     "remarks": "Order No. 900.211.01",
+     "search": "Z00041"
+    },
+    {
+     "key": "184",
+     "part_number": "Z00042",
+     "depth": 0,
+     "sub": false,
+     "description": "Micro - switch",
+     "qty": "",
+     "remarks": "Order No. 900.210.00",
+     "search": "Z00042"
+    },
+    {
+     "key": "185",
+     "part_number": "Z00043",
+     "depth": 0,
+     "sub": false,
+     "description": "Battery 1,5 V",
+     "qty": "",
+     "remarks": "Order No. 900.221.00",
+     "search": "Z00043"
+    },
+    {
+     "key": "186",
+     "part_number": "Z00044",
+     "depth": 0,
+     "sub": false,
+     "description": "Spark plug",
+     "qty": "",
+     "remarks": "Order No. 900.212.00",
+     "search": "Z00044"
+    },
+    {
+     "key": "188",
+     "part_number": "F00010",
+     "depth": 0,
+     "sub": false,
+     "description": "Lid for battery pipe",
+     "qty": "",
+     "remarks": "Order No. 900.220.02",
+     "search": "F00010"
+    },
+    {
+     "key": "193",
+     "part_number": "N00022",
+     "depth": 0,
+     "sub": false,
+     "description": "Butterfly screw M5 x 10",
+     "qty": "",
+     "remarks": "Order No. 999.008.01",
+     "search": "N00022"
+    },
+    {
+     "key": "197",
+     "part_number": "N00021",
+     "depth": 0,
+     "sub": false,
+     "description": "Fillister head screw M3 x 20",
+     "qty": "",
+     "remarks": "Order No. 999.001.02",
+     "search": "N00021"
+    },
+    {
+     "key": "198",
+     "part_number": "N00023",
+     "depth": 0,
+     "sub": false,
+     "description": "Hexagon nut M3",
+     "qty": "",
+     "remarks": "Order No. 998.001.01",
+     "search": "N00023"
+    },
+    {
+     "key": "199",
+     "part_number": "N00020",
+     "depth": 0,
+     "sub": false,
+     "description": "Hexagon nut M5",
+     "qty": "",
+     "remarks": "Order No. 998.001.05",
+     "search": "N00020"
+    },
+    {
+     "key": "200",
+     "part_number": "N00024",
+     "depth": 0,
+     "sub": false,
+     "description": "Spring washer M3",
+     "qty": "",
+     "remarks": "Order No. 997.003.01",
+     "search": "N00024"
+    },
+    {
+     "key": "202",
+     "part_number": "G00019",
+     "depth": 0,
+     "sub": false,
+     "description": "Contact piece with cable",
+     "qty": "",
+     "remarks": "Order No. 900.220.00",
+     "search": "G00019"
+    },
+    {
+     "key": "205",
+     "part_number": "Z00046",
+     "depth": 0,
+     "sub": false,
+     "description": "Rubber washer 45 x 30 x 3",
+     "qty": "",
+     "remarks": "Order No. 900.210.01",
+     "search": "Z00046"
+    },
+    {
+     "key": "207",
+     "part_number": "N00027",
+     "depth": 0,
+     "sub": false,
+     "description": "Fillister head screw M5 x 6 (brass)",
+     "qty": "",
+     "remarks": "Order No. 999.001.07",
+     "search": "N00027"
+    },
+    {
+     "key": "209",
+     "part_number": "N00019",
+     "depth": 0,
+     "sub": false,
+     "description": "Tooth lock washer (internal) d 5,3",
+     "qty": "",
+     "remarks": "Order No. 997.006.03",
+     "search": "N00019"
+    },
+    {
+     "key": "209a",
+     "part_number": "Z00201",
+     "depth": 0,
+     "sub": false,
+     "description": "Spark plug cap",
+     "qty": "",
+     "remarks": "Order No. 900.211.02",
+     "search": "Z00201"
+    },
+    {
+     "key": "210",
+     "part_number": "G00035",
+     "depth": 0,
+     "sub": false,
+     "description": "Primer (black, 2-piece) cpl. rubber",
+     "qty": "",
+     "remarks": "Order No. 900.341.03",
+     "search": "G00035"
+    },
+    {
+     "key": "210",
+     "part_number": "G00346",
+     "depth": 0,
+     "sub": false,
+     "description": "Primer (black, 1-piece) cpl. (2 fixings)",
+     "qty": "",
+     "remarks": "",
+     "search": "G00346"
+    },
+    {
+     "key": "210",
+     "part_number": "G00430",
+     "depth": 0,
+     "sub": false,
+     "description": "Primer (black, 1 piece) cpl. (4 fixings)",
+     "qty": "",
+     "remarks": "",
+     "search": "G00430"
+    },
+    {
+     "key": "210a",
+     "part_number": "F00338",
+     "depth": 0,
+     "sub": false,
+     "description": "Primer (black, 1-piece), body (2 fixings)",
+     "qty": "",
+     "remarks": "",
+     "search": "F00338"
+    },
+    {
+     "key": "210a",
+     "part_number": "F00400",
+     "depth": 0,
+     "sub": false,
+     "description": "Primer (black, 1-piece), body (4 fixings)",
+     "qty": "",
+     "remarks": "",
+     "search": "F00400"
+    },
+    {
+     "key": "210a",
+     "part_number": "G00036",
+     "depth": 0,
+     "sub": false,
+     "description": "Primer (black, 2-piece), body rubber",
+     "qty": "",
+     "remarks": "Order No. 900.341.00",
+     "search": "G00036"
+    },
+    {
+     "key": "",
+     "part_number": "Z00079",
+     "depth": 0,
+     "sub": false,
+     "description": "Primer (black, 2-piece) – bottom part rubber",
+     "qty": "",
+     "remarks": "Order No. 900.341.01",
+     "search": "Z00079"
+    },
+    {
+     "key": "",
+     "part_number": "Z00078",
+     "depth": 0,
+     "sub": false,
+     "description": "Primer (black, 2-piece) – top part rubber",
+     "qty": "",
+     "remarks": "Order No. 900.341.02",
+     "search": "Z00078"
+    },
+    {
+     "key": "212",
+     "part_number": "Z00039",
+     "depth": 0,
+     "sub": false,
+     "description": "Connection piece M 12 (for primer black, 1-piece)",
+     "qty": "",
+     "remarks": "Order No. 900.342.01",
+     "search": "Z00039"
+    },
+    {
+     "key": "212",
+     "part_number": "Z00080",
+     "depth": 0,
+     "sub": false,
+     "description": "Connection piece M 8 (for primer black, 2-piece)",
+     "qty": "",
+     "remarks": "",
+     "search": "Z00080"
+    },
+    {
+     "key": "213",
+     "part_number": "N00068",
+     "depth": 0,
+     "sub": false,
+     "description": "Flat headed screw M5 x 10 (for primer black, 1-piece)",
+     "qty": "",
+     "remarks": "Order No. 999.005.01",
+     "search": "N00068"
+    },
+    {
+     "key": "213",
+     "part_number": "N00047",
+     "depth": 0,
+     "sub": false,
+     "description": "Flat headed screw M5 x 16 (for primer black, 2-piece)",
+     "qty": "",
+     "remarks": "Order No. 999.005.02",
+     "search": "N00047"
+    },
+    {
+     "key": "216",
+     "part_number": "N00017",
+     "depth": 0,
+     "sub": false,
+     "description": "Hexagon nut M 12, flat (for primer black, 1-piece)",
+     "qty": "",
+     "remarks": "Order No. 998.005.05",
+     "search": "N00017"
+    },
+    {
+     "key": "216",
+     "part_number": "N00012",
+     "depth": 0,
+     "sub": false,
+     "description": "Hexagon nut M 8, flat (for primer black, 2-piece)",
+     "qty": "",
+     "remarks": "",
+     "search": "N00012"
+    },
+    {
+     "key": "217",
+     "part_number": "Z00040",
+     "depth": 0,
+     "sub": false,
+     "description": "Plastic washer Ø13 (for primer black, 1-piece)",
+     "qty": "",
+     "remarks": "Order No. 900.342.02",
+     "search": "Z00040"
+    },
+    {
+     "key": "217",
+     "part_number": "Z00081",
+     "depth": 0,
+     "sub": false,
+     "description": "Plastic washer Ø8 (for primer black, 2-piece)",
+     "qty": "",
+     "remarks": "",
+     "search": "Z00081"
+    },
+    {
+     "key": "223",
+     "part_number": "F00148",
+     "depth": 0,
+     "sub": false,
+     "description": "Diaphragm for non-return valve (for primer)",
+     "qty": "",
+     "remarks": "Order No. 900.342.04",
+     "search": "F00148"
+    },
+    {
+     "key": "223a",
+     "part_number": "Z00038",
+     "depth": 0,
+     "sub": false,
+     "description": "Non-return valve without diaphragm (for primer)",
+     "qty": "",
+     "remarks": "Order No. 900.342.03",
+     "search": "Z00038"
+    },
+    {
+     "key": "223b",
+     "part_number": "G00017",
+     "depth": 0,
+     "sub": false,
+     "description": "Non-return valve with diaphragm (for primer)",
+     "qty": "",
+     "remarks": "Order No. 900.342.05",
+     "search": "G00017"
+    },
+    {
+     "key": "226",
+     "part_number": "N00042",
+     "depth": 0,
+     "sub": false,
+     "description": "Hexagon screw M5 x 30",
+     "qty": "",
+     "remarks": "Order No. 999.004.04",
+     "search": "N00042"
+    }
+   ],
    "sheets": 1,
-   "image": "k10sp-fig8.png",
-   "hotspots": [],
-   "parts": []
+   "sheet": 1,
+   "label": "Fig.4 Primer and ignition installation"
   }
  ]
 }

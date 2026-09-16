@@ -1,5 +1,14 @@
 [
  {
+  "id": "hus131rb",
+  "name": "Husqvarna 131RB Brushcutter",
+  "short": "131RB",
+  "brand": "Husqvarna",
+  "category": "Brushcutter",
+  "figures": 20,
+  "parts": 65
+ },
+ {
   "id": "hus345bt",
   "name": "Husqvarna 345BT",
   "short": "345BT",
@@ -141,6 +150,15 @@
   ]
  },
  {
+  "id": "husp525dx",
+  "name": "Husqvarna P525DX Ride-on Mower",
+  "short": "P525DX",
+  "brand": "Husqvarna",
+  "category": "Ride-on Mower",
+  "figures": 16,
+  "parts": 584
+ },
+ {
   "id": "hust525",
   "name": "Husqvarna T525 Chainsaw",
   "short": "T525",
@@ -159,13 +177,22 @@
   "parts": 98
  },
  {
+  "id": "husz242f",
+  "name": "Husqvarna Z242F Zero-Turn Mower",
+  "short": "Z242F",
+  "brand": "Husqvarna",
+  "category": "Zero-Turn Mower",
+  "figures": 11,
+  "parts": 369
+ },
+ {
   "id": "k10sp",
   "name": "PulsFOG K-10-SP",
   "short": "K-10-SP",
   "brand": "PulsFOG",
   "category": "Thermal Fogger",
-  "figures": 8,
-  "parts": 0
+  "figures": 4,
+  "parts": 141
  },
  {
   "id": "bk3410fl",
@@ -373,32 +400,5 @@
   "category": "Chipper Shredder",
   "figures": 51,
   "parts": 1356
- },
- {
-  "id": "husz242f",
-  "name": "Husqvarna Z242F Zero-Turn Mower",
-  "short": "Z242F",
-  "brand": "Husqvarna",
-  "category": "Zero-Turn Mower",
-  "figures": 11,
-  "parts": 369
- },
- {
-  "id": "husp525dx",
-  "name": "Husqvarna P525DX Ride-on Mower",
-  "short": "P525DX",
-  "brand": "Husqvarna",
-  "category": "Ride-on Mower",
-  "figures": 16,
-  "parts": 584
- },
- {
-  "id": "hus131rb",
-  "name": "Husqvarna 131RB Brushcutter",
-  "short": "131RB",
-  "brand": "Husqvarna",
-  "category": "Brushcutter",
-  "figures": 20,
-  "parts": 65
  }
 ]
