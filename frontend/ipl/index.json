@@ -391,5 +391,14 @@
   "category": "Ride-on Mower",
   "figures": 16,
   "parts": 584
+ },
+ {
+  "id": "hus131rb",
+  "name": "Husqvarna 131RB Brushcutter",
+  "short": "131RB",
+  "brand": "Husqvarna",
+  "category": "Brushcutter",
+  "figures": 20,
+  "parts": 65
  }
 ]

@@ -1,0 +1,60 @@
+# 131RB — titles as printed on the machine's own drawings.
+#
+# THREE SHEETS ARE PRINTED TWICE, ONCE PER MACHINE
+# The 131RB ships as two SKUs, 967843201 and 967843301, and three sheets differ
+# between them - the carburettor, the muffler and the frame. The portal files
+# both copies under one name, so the app would show three pairs of identical
+# buttons. Getting this wrong is not cosmetic: the two carburettors are
+# different part numbers (593830201 against 593657801), as are the two mufflers
+# (593658201 / 593658301), so the wrong tab orders a part that will not fit.
+#
+# Each drawing says which machine it is for, on the line under its title, and
+# that line is put in the tab. Read off all six: the first of each pair is
+# always 967843201 and the second 967843301.
+#
+# THE LETTERS ON THESE DRAWINGS DO NOT ORDER THE BOOK
+# They run in two independent series - J, L, M and N each appear twice, once in
+# the engine section and once in the machine section. So there is no --order
+# here; the export's own sequence (IPL IDs ...16273 to ...16292) is kept.
+#
+# WHERE THE DRAWING WORDS IT DIFFERENTLY from the portal, the drawing wins:
+#   portal "HOUSING"              -> drawing "ENGINE HOUSING"
+#   portal "CRANKSHAFT"           -> drawing "ENGINE SYSTEM - CRANKSHAFT ASSY"
+#   portal "CRANKCASE"            -> drawing "ENGINE SYSTEM - CRANKCASE ASSY"
+#   portal "CARBURETOR AND AIR FILTER" -> drawing "CARBURETOR & AIRFILTER"
+#   portal "HANDLE AND CONTROLS"  -> drawing "HANDLE & CONTROLS"
+#
+# WHY THIS BOOK LOOKS SO THIN - and it is not a bad export. Husqvarna service
+# this machine by assembly: the GEAR CASE drawing prints exactly three callouts
+# (1, 17, 22) and the pieces inside them are drawn but deliberately unnumbered,
+# because they are not sold separately. 65 parts across 20 sheets is the whole
+# list, and every callout the drawings print is in it.
+#
+# TO RE-IMPORT:
+#
+#   python tools/ipl-import-csv.py --csv "131RB IPL.csv" \
+#     --id hus131rb --name "Husqvarna 131RB Brushcutter" \
+#     --short "131RB" --brand Husqvarna --category Brushcutter \
+#     --titles tools/ipl-hus131rb.titles.txt
+#
+# One line per sheet, in the order --dry-run lists them.
+GEAR CASE
+TUBE
+CLUTCH
+CARBURETOR & AIRFILTER (for 967843201)
+CARBURETOR & AIRFILTER (for 967843301)
+CYLINDER PISTON
+IGNITION SYSTEM
+ENGINE HOUSING
+MUFFLER (for 967843201)
+MUFFLER (for 967843301)
+ENGINE SYSTEM - CRANKSHAFT ASSY
+ENGINE SYSTEM - CRANKCASE ASSY
+SHAFT
+DEBRIS SHIELD
+HANDLE & CONTROLS
+HANDLE
+FRAME (for 967843201)
+FRAME (for 967843301)
+STARTER
+ACCESSORIES

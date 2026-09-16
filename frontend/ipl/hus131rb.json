@@ -1,0 +1,1327 @@
+{
+ "id": "hus131rb",
+ "name": "Husqvarna 131RB Brushcutter",
+ "source": "Husqvarna portal CSV export (131RB IPL.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "GEAR CASE",
+   "image": "hus131rb-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 49.841,
+     "y": 14.973,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 43.579,
+     "y": 46.779,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 50.636,
+     "y": 43.966,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "593702701",
+     "depth": 0,
+     "sub": false,
+     "description": "GEAR CASE",
+     "qty": "1",
+     "remarks": "For 131RB 967843201, 967843301",
+     "search": "593702701"
+    },
+    {
+     "key": "17",
+     "part_number": "593825601",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER KIT",
+     "qty": "1",
+     "remarks": "For 131RB 967843201, 967843301",
+     "search": "593825601"
+    },
+    {
+     "key": "22",
+     "part_number": "599860001",
+     "depth": 0,
+     "sub": false,
+     "description": "GEAR WHEEL KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "599860001"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 GEAR CASE"
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "TUBE",
+   "image": "hus131rb-fig2.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 49.205,
+     "y": 13.43,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 49.205,
+     "y": 74.955,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "593907001",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE ASSY",
+     "qty": "1",
+     "remarks": "Tube Assy",
+     "search": "593907001"
+    },
+    {
+     "key": "4",
+     "part_number": "593864801",
+     "depth": 0,
+     "sub": false,
+     "description": "SHAFT ASSY",
+     "qty": "1",
+     "remarks": "Shaft Assy",
+     "search": "593864801"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 TUBE"
+  },
+  {
+   "id": "3",
+   "number": "3",
+   "title": "CLUTCH",
+   "image": "hus131rb-fig3.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 49.396,
+     "y": 15.744,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 54.959,
+     "y": 25.023,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 49.841,
+     "y": 63.113,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "593864901",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING",
+     "qty": "1",
+     "remarks": "Housing Kit",
+     "search": "593864901"
+    },
+    {
+     "key": "9",
+     "part_number": "593865001",
+     "depth": 0,
+     "sub": false,
+     "description": "DRUM",
+     "qty": "1",
+     "remarks": "Drum Kit",
+     "search": "593865001"
+    },
+    {
+     "key": "14",
+     "part_number": "593659401",
+     "depth": 0,
+     "sub": false,
+     "description": "CLUTCH ASSY",
+     "qty": "1",
+     "remarks": "Clutch Assy",
+     "search": "593659401"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 CLUTCH"
+  },
+  {
+   "id": "4",
+   "number": "4",
+   "title": "CARBURETOR & AIRFILTER (for 967843201)",
+   "image": "hus131rb-fig4.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 24.762,
+     "y": 22.368,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 32.708,
+     "y": 25.227,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 43.77,
+     "y": 30.535,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 55.531,
+     "y": 32.441,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 64.622,
+     "y": 33.848,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 40.464,
+     "y": 65.971,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 59.154,
+     "y": 78.221,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 28.258,
+     "y": 56.488,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "597174001",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597174001"
+    },
+    {
+     "key": "2",
+     "part_number": "593638001",
+     "depth": 0,
+     "sub": false,
+     "description": "INSULATOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "593638001"
+    },
+    {
+     "key": "4",
+     "part_number": "597174201",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597174201"
+    },
+    {
+     "key": "5",
+     "part_number": "593830201",
+     "depth": 0,
+     "sub": false,
+     "description": "CARBURETTOR",
+     "qty": "1",
+     "remarks": "Carburettor",
+     "search": "593830201"
+    },
+    {
+     "key": "6",
+     "part_number": "593639201",
+     "depth": 0,
+     "sub": false,
+     "description": "FILTER HOLDER ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "593639201"
+    },
+    {
+     "key": "11",
+     "part_number": "593656601",
+     "depth": 0,
+     "sub": false,
+     "description": "FILTER",
+     "qty": "1",
+     "remarks": "Filter",
+     "search": "593656601"
+    },
+    {
+     "key": "15",
+     "part_number": "596197301",
+     "depth": 0,
+     "sub": false,
+     "description": "FILTER COVER ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "596197301"
+    },
+    {
+     "key": "16",
+     "part_number": "599860201",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "599860201"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 1,
+   "label": "Fig.4 CARBURETOR & AIRFILTER (for 967843201)"
+  },
+  {
+   "id": "5",
+   "number": "4",
+   "title": "CARBURETOR & AIRFILTER (for 967843301)",
+   "image": "hus131rb-fig5.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "4",
+     "x": 54.291,
+     "y": 26.52,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 36.268,
+     "y": 49.592,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 63.191,
+     "y": 60.889,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 57.597,
+     "y": 63.09,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 19.326,
+     "y": 38.317,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "4",
+     "part_number": "593657701",
+     "depth": 0,
+     "sub": false,
+     "description": "INSULATOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "593657701"
+    },
+    {
+     "key": "6",
+     "part_number": "593657801",
+     "depth": 0,
+     "sub": false,
+     "description": "CARBURETTOR",
+     "qty": "1",
+     "remarks": "Carburettor",
+     "search": "593657801"
+    },
+    {
+     "key": "9",
+     "part_number": "593670101",
+     "depth": 0,
+     "sub": false,
+     "description": "FILTER",
+     "qty": "1",
+     "remarks": "Filter",
+     "search": "593670101"
+    },
+    {
+     "key": "12",
+     "part_number": "593658101",
+     "depth": 0,
+     "sub": false,
+     "description": "AIR FILTER ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "593658101"
+    },
+    {
+     "key": "13",
+     "part_number": "593865501",
+     "depth": 0,
+     "sub": false,
+     "description": "THROTTLE CABLE ASSY",
+     "qty": "1",
+     "remarks": "Throttle Cable Assy",
+     "search": "593865501"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 2,
+   "label": "Fig.4 CARBURETOR & AIRFILTER (for 967843301)"
+  },
+  {
+   "id": "6",
+   "number": "5",
+   "title": "CYLINDER PISTON",
+   "image": "hus131rb-fig6.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 48.729,
+     "y": 15.812,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 79.625,
+     "y": 24.433,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 62.842,
+     "y": 61.774,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 60.235,
+     "y": 76.112,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 59.409,
+     "y": 58.235,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "593636301",
+     "depth": 0,
+     "sub": false,
+     "description": "CYLINDER ASSY",
+     "qty": "1",
+     "remarks": "Cylinder Piston Assy",
+     "search": "593636301"
+    },
+    {
+     "key": "2",
+     "part_number": "577484001",
+     "depth": 0,
+     "sub": false,
+     "description": "SPARK PLUG",
+     "qty": "1",
+     "remarks": "Sparkplug NGK BPMR7A",
+     "search": "577484001"
+    },
+    {
+     "key": "7",
+     "part_number": "596197501",
+     "depth": 0,
+     "sub": false,
+     "description": "PISTON ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "596197501"
+    },
+    {
+     "key": "10",
+     "part_number": "593637001",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "593637001"
+    },
+    {
+     "key": "11",
+     "part_number": "536086101",
+     "depth": 0,
+     "sub": false,
+     "description": "PISTON RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "536086101"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.5 CYLINDER PISTON"
+  },
+  {
+   "id": "7",
+   "number": "6",
+   "title": "IGNITION SYSTEM",
+   "image": "hus131rb-fig7.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 22.155,
+     "y": 21.189,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 42.88,
+     "y": 78.312,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 66.179,
+     "y": 60.799,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "593637401",
+     "depth": 0,
+     "sub": false,
+     "description": "COIL",
+     "qty": "1",
+     "remarks": "COIL",
+     "search": "593637401"
+    },
+    {
+     "key": "11",
+     "part_number": "593637201",
+     "depth": 0,
+     "sub": false,
+     "description": "ROTOR",
+     "qty": "1",
+     "remarks": "ROTOR",
+     "search": "593637201"
+    },
+    {
+     "key": "12",
+     "part_number": "596197701",
+     "depth": 0,
+     "sub": false,
+     "description": "SHORT CIRCUIT CABLE",
+     "qty": "1",
+     "remarks": "SHORT CIRCUIT CABLE",
+     "search": "596197701"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.6 IGNITION SYSTEM"
+  },
+  {
+   "id": "8",
+   "number": "7",
+   "title": "ENGINE HOUSING",
+   "image": "hus131rb-fig8.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "8",
+     "x": 48.601,
+     "y": 16.606,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "8",
+     "part_number": "593660201",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING SYSTEM",
+     "qty": "1",
+     "remarks": "HOUSING SYSTEM",
+     "search": "593660201"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.7 ENGINE HOUSING"
+  },
+  {
+   "id": "9",
+   "number": "8",
+   "title": "MUFFLER (for 967843201)",
+   "image": "hus131rb-fig9.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "9",
+     "x": 50.826,
+     "y": 20.826,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "9",
+     "part_number": "593658201",
+     "depth": 0,
+     "sub": false,
+     "description": "MUFFLER SYSTEM",
+     "qty": "1",
+     "remarks": "MUFFLER SYSTEM",
+     "search": "593658201"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 1,
+   "label": "Fig.8 MUFFLER (for 967843201)"
+  },
+  {
+   "id": "10",
+   "number": "8",
+   "title": "MUFFLER (for 967843301)",
+   "image": "hus131rb-fig10.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "8",
+     "x": 50.826,
+     "y": 20.826,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "8",
+     "part_number": "593658301",
+     "depth": 0,
+     "sub": false,
+     "description": "MUFFLER SYSTEM",
+     "qty": "1",
+     "remarks": "MUFFLER SYSTEM",
+     "search": "593658301"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 2,
+   "label": "Fig.8 MUFFLER (for 967843301)"
+  },
+  {
+   "id": "11",
+   "number": "9",
+   "title": "ENGINE SYSTEM - CRANKSHAFT ASSY",
+   "image": "hus131rb-fig11.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "3",
+     "x": 65.734,
+     "y": 31.806,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 22.695,
+     "y": 54.174,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 50.254,
+     "y": 23.049,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "3",
+     "part_number": "738220125",
+     "depth": 0,
+     "sub": false,
+     "description": "BALL BEARING",
+     "qty": "1",
+     "remarks": "",
+     "search": "738220125"
+    },
+    {
+     "key": "5",
+     "part_number": "596197601",
+     "depth": 0,
+     "sub": false,
+     "description": "CRANKSHAFT KIT",
+     "qty": "1",
+     "remarks": "CRANKSHAFT KIT",
+     "search": "596197601"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.9 ENGINE SYSTEM - CRANKSHAFT ASSY"
+  },
+  {
+   "id": "12",
+   "number": "10",
+   "title": "ENGINE SYSTEM - CRANKCASE ASSY",
+   "image": "hus131rb-fig12.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "5",
+     "x": 77.495,
+     "y": 27.995,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 37.19,
+     "y": 50.544,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 52.257,
+     "y": 41.742,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 61.983,
+     "y": 36.525,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 57.724,
+     "y": 36.434,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 63.16,
+     "y": 16.062,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 20.788,
+     "y": 55.309,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 16.91,
+     "y": 75.771,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "5",
+     "part_number": "593636101",
+     "depth": 0,
+     "sub": false,
+     "description": "SEAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "593636101"
+    },
+    {
+     "key": "7",
+     "part_number": "738220125",
+     "depth": 0,
+     "sub": false,
+     "description": "BALL BEARING",
+     "qty": "1",
+     "remarks": "",
+     "search": "738220125"
+    },
+    {
+     "key": "9",
+     "part_number": "593636201",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "593636201"
+    },
+    {
+     "key": "11",
+     "part_number": "596197401",
+     "depth": 0,
+     "sub": false,
+     "description": "CRANKCASE KIT",
+     "qty": "1",
+     "remarks": "CRANKCASE KIT",
+     "search": "596197401"
+    },
+    {
+     "key": "12",
+     "part_number": "536029401",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "536029401"
+    },
+    {
+     "key": "13",
+     "part_number": "536061101",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT",
+     "qty": "1",
+     "remarks": "",
+     "search": "536061101"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.10 ENGINE SYSTEM - CRANKCASE ASSY"
+  },
+  {
+   "id": "13",
+   "number": "11",
+   "title": "SHAFT",
+   "image": "hus131rb-fig13.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "5",
+     "x": 60.267,
+     "y": 14.451,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 26.192,
+     "y": 18.217,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 41.004,
+     "y": 49.524,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "5",
+     "part_number": "593907101",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE ASSY",
+     "qty": "1",
+     "remarks": "Tube Assy",
+     "search": "593907101"
+    },
+    {
+     "key": "6",
+     "part_number": "535588701",
+     "depth": 0,
+     "sub": false,
+     "description": "COUPLER",
+     "qty": "1",
+     "remarks": "Coupler Kit",
+     "search": "535588701"
+    },
+    {
+     "key": "7",
+     "part_number": "536086001",
+     "depth": 0,
+     "sub": false,
+     "description": "DRIVE SHAFT",
+     "qty": "1",
+     "remarks": "",
+     "search": "536086001"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.11 SHAFT"
+  },
+  {
+   "id": "14",
+   "number": "12",
+   "title": "DEBRIS SHIELD",
+   "image": "hus131rb-fig14.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 47.68,
+     "y": 13.544,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "593865601",
+     "depth": 0,
+     "sub": false,
+     "description": "SAFETY GUARD",
+     "qty": "1",
+     "remarks": "Safety Guard",
+     "search": "593865601"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.12 DEBRIS SHIELD"
+  },
+  {
+   "id": "15",
+   "number": "13",
+   "title": "HANDLE & CONTROLS",
+   "image": "hus131rb-fig15.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 49.396,
+     "y": 14.383,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 57.088,
+     "y": 63.022,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "593706501",
+     "depth": 0,
+     "sub": false,
+     "description": "THROTTLE CONTROL ASSY",
+     "qty": "1",
+     "remarks": "Handle system. For 967843201.",
+     "search": "593706501"
+    },
+    {
+     "key": "1",
+     "part_number": "593912201",
+     "depth": 0,
+     "sub": false,
+     "description": "THROTTLE CONTROL ASSY",
+     "qty": "1",
+     "remarks": "Handle System. For 967843301.",
+     "search": "593912201"
+    },
+    {
+     "key": "17",
+     "part_number": "596197101",
+     "depth": 0,
+     "sub": false,
+     "description": "THROTTLE CABLE ASSY",
+     "qty": "1",
+     "remarks": "For 967843301.",
+     "search": "596197101"
+    },
+    {
+     "key": "17",
+     "part_number": "596197201",
+     "depth": 0,
+     "sub": false,
+     "description": "THROTTLE CABLE ASSY",
+     "qty": "1",
+     "remarks": "For 967843201.",
+     "search": "596197201"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.13 HANDLE & CONTROLS"
+  },
+  {
+   "id": "16",
+   "number": "14",
+   "title": "HANDLE",
+   "image": "hus131rb-fig16.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 48.824,
+     "y": 12.568,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "593907201",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE ASSY",
+     "qty": "1",
+     "remarks": "Handle Assy",
+     "search": "593907201"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.14 HANDLE"
+  },
+  {
+   "id": "17",
+   "number": "15",
+   "title": "FRAME (for 967843201)",
+   "image": "hus131rb-fig17.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "3",
+     "x": 17.61,
+     "y": 42.332,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 73.776,
+     "y": 35.73,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "3",
+     "part_number": "593864701",
+     "depth": 0,
+     "sub": false,
+     "description": "JOINT",
+     "qty": "3",
+     "remarks": "Joint Assy",
+     "search": "593864701"
+    },
+    {
+     "key": "19",
+     "part_number": "593906801",
+     "depth": 0,
+     "sub": false,
+     "description": "HARNESS",
+     "qty": "1",
+     "remarks": "Harness",
+     "search": "593906801"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 1,
+   "label": "Fig.15 FRAME (for 967843201)"
+  },
+  {
+   "id": "18",
+   "number": "15",
+   "title": "FRAME (for 967843301)",
+   "image": "hus131rb-fig18.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "2",
+     "x": 46.693,
+     "y": 18.756,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 50.132,
+     "y": 32.063,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 21.23,
+     "y": 50.094,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 15.84,
+     "y": 79.256,
+     "conf": 100
+    },
+    {
+     "key": "31",
+     "x": 79.563,
+     "y": 69.691,
+     "conf": 100
+    },
+    {
+     "key": "32",
+     "x": 17.725,
+     "y": 71.001,
+     "conf": 100
+    },
+    {
+     "key": "33",
+     "x": 22.487,
+     "y": 90.412,
+     "conf": 100
+    },
+    {
+     "key": "39",
+     "x": 83.267,
+     "y": 38.962,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "2",
+     "part_number": "593865201",
+     "depth": 0,
+     "sub": false,
+     "description": "TANK CAP ASSY",
+     "qty": "1",
+     "remarks": "Tank Cap Assy",
+     "search": "593865201"
+    },
+    {
+     "key": "3",
+     "part_number": "597168001",
+     "depth": 0,
+     "sub": false,
+     "description": "FUEL TANK",
+     "qty": "1",
+     "remarks": "",
+     "search": "597168001"
+    },
+    {
+     "key": "13",
+     "part_number": "593865301",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "Spring Kit",
+     "search": "593865301"
+    },
+    {
+     "key": "23",
+     "part_number": "593864701",
+     "depth": 0,
+     "sub": false,
+     "description": "JOINT",
+     "qty": "3",
+     "remarks": "Joint Assy",
+     "search": "593864701"
+    },
+    {
+     "key": "31",
+     "part_number": "536086601",
+     "depth": 0,
+     "sub": false,
+     "description": "FRAME ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "536086601"
+    },
+    {
+     "key": "32",
+     "part_number": "536086501",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "536086501"
+    },
+    {
+     "key": "33",
+     "part_number": "536086401",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "536086401"
+    },
+    {
+     "key": "39",
+     "part_number": "593906801",
+     "depth": 0,
+     "sub": false,
+     "description": "HARNESS",
+     "qty": "1",
+     "remarks": "Harness",
+     "search": "593906801"
+    },
+    {
+     "key": "40",
+     "part_number": "536891201",
+     "depth": 0,
+     "sub": false,
+     "description": "FRAME ASSY",
+     "qty": "1",
+     "remarks": "Complete Frame",
+     "search": "536891201"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 2,
+   "label": "Fig.15 FRAME (for 967843301)"
+  },
+  {
+   "id": "19",
+   "number": "16",
+   "title": "STARTER",
+   "image": "hus131rb-fig19.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 50.318,
+     "y": 15.132,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 29.402,
+     "y": 61.683,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 20.884,
+     "y": 37.455,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "593659801",
+     "depth": 0,
+     "sub": false,
+     "description": "BRIDGE",
+     "qty": "1",
+     "remarks": "Bridge",
+     "search": "593659801"
+    },
+    {
+     "key": "2",
+     "part_number": "597892701",
+     "depth": 0,
+     "sub": false,
+     "description": "STARTER",
+     "qty": "1",
+     "remarks": "",
+     "search": "597892701"
+    },
+    {
+     "key": "8",
+     "part_number": "593660001",
+     "depth": 0,
+     "sub": false,
+     "description": "STARTER ASSY",
+     "qty": "1",
+     "remarks": "Easy Starter",
+     "search": "593660001"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.16 STARTER"
+  },
+  {
+   "id": "20",
+   "number": "17",
+   "title": "ACCESSORIES",
+   "image": "hus131rb-fig20.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 26.065,
+     "y": 14.61,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 58.582,
+     "y": 31.034,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "593707601",
+     "depth": 0,
+     "sub": false,
+     "description": "TRIMMER HEAD",
+     "qty": "1",
+     "remarks": "Trimmer Head",
+     "search": "593707601"
+    },
+    {
+     "key": "9",
+     "part_number": "593707401",
+     "depth": 0,
+     "sub": false,
+     "description": "GRASS BLADE",
+     "qty": "1",
+     "remarks": "Grass Knife, Multi (2T)",
+     "search": "593707401"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.17 ACCESSORIES"
+  }
+ ]
+}
