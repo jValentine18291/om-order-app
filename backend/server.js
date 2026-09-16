@@ -640,8 +640,26 @@ app.get("/api/part-prices/:code", async (req, res) => {
 // The role check is an accident guard, not security: this app has no logins,
 // so the role comes from the browser and could be anything. It stops a
 // technician tapping something they should not, which is what it is for.
+// Who may change a price AutoCount ALREADY has. Everyone else may still fill
+// in a blank one, which is the safe case: there is nothing to lose.
+//
+// Identified by the STAFF id, not by initials. John's initials are the single
+// letter "J" (see initialsFor in app.js), and hanging a permission on one
+// letter is asking for the day somebody is added whose initial is also J. The
+// id is stable and unique, and the same comment in app.js says not to change
+// one once it is in use.
+//
+// This is an accident guard, exactly like the role checks around it, and it is
+// worth being plain about the limit: the app has no logins, so the id arrives
+// from the browser and anyone who taps "John" on the user picker is John as far
+// as this check can tell. What it stops is a wrong tap by someone who never
+// meant to change a price, which is the realistic failure. What it cannot stop
+// is somebody deliberately choosing another person's name - for that, the
+// answer is the log, which records the id, the old price and the new one.
+const PRICE_OVERWRITE_USERS = ["john"];
+
 app.post("/api/part-prices", async (req, res) => {
-  const { item_code, tier, price, who, role } = req.body || {};
+  const { item_code, tier, price, who, role, user_id, overwrite } = req.body || {};
   const { logPriceEvent } = require("./priceLog");
   const stamp = (outcome, extra = {}) =>
     logPriceEvent({
@@ -650,7 +668,12 @@ app.post("/api/part-prices", async (req, res) => {
       tier: extra.tier || tier,
       oldPrice: extra.old_price ?? null,
       newPrice: price,
-      who: `${who || "?"} (${role || "?"})`,
+      // The id as well as the initials on an overwrite: this is the one write
+      // that destroys a figure rather than filling a gap, and "J" on its own is
+      // a thin thing to have to trace it by afterwards.
+      who: overwrite
+        ? `${who || "?"} (${role || "?"}, ${String(user_id || "?")}, OVERWRITE)`
+        : `${who || "?"} (${role || "?"})`,
       outcome,
     });
 
@@ -673,10 +696,28 @@ app.post("/api/part-prices", async (req, res) => {
       return res.status(400).json({ error: "Enter your initials so the change can be traced." });
     }
 
-    const r = await acRepo.setMissingPrice(item_code, tier, price);
+    // Overwriting an existing price is a different act from filling in a blank
+    // one, and is asked for explicitly rather than inferred: a client that
+    // simply retried a "set" on a part somebody else had just priced must not
+    // quietly become an overwrite.
+    if (overwrite && !PRICE_OVERWRITE_USERS.includes(String(user_id || "").toLowerCase())) {
+      // "unknown", not blank: the refusal happens before AutoCount is asked, so
+      // the old price genuinely was not read - and it certainly was not absent.
+      stamp("REFUSED - not allowed to change an existing price", { old_price: "unknown" });
+      return res.status(403).json({
+        error: "Only John can change a price that AutoCount already has.",
+      });
+    }
+
+    const r = overwrite
+      ? await acRepo.overwritePrice(item_code, tier, price)
+      : await acRepo.setMissingPrice(item_code, tier, price);
     const messages = {
-      updated: `${r.tier} set to ${Number(r.new_price).toFixed(2)} in AutoCount.`,
+      updated: overwrite
+        ? `${r.tier} changed from ${Number(r.old_price).toFixed(2)} to ${Number(r.new_price).toFixed(2)} in AutoCount.`
+        : `${r.tier} set to ${Number(r.new_price).toFixed(2)} in AutoCount.`,
       already_priced: `${r.tier} is already set in AutoCount — nothing was changed.`,
+      unchanged: `${r.tier} is already ${Number(r.new_price).toFixed(2)} — nothing was changed.`,
       not_found: `"${item_code}" is no longer in AutoCount.`,
       no_uom_row: `This item has no unit-of-measure row in AutoCount, so the price must be set there.`,
     };

@@ -9292,6 +9292,22 @@ let iplPriceState = { code: "" };
 // prices on the slip screens, but these values feed customer quotes.
 const CAN_SET_PRICE = ["sales", "purchaser", "admin"];
 
+// Who may CHANGE a price AutoCount already has - a different and much larger
+// power, because it destroys a figure rather than filling a gap, and the app
+// cannot undo it. By STAFF id, not initials: John's initials are the single
+// letter "J".
+//
+// The server holds the same list and enforces it; this one only decides whether
+// the button is drawn. Both must be changed together - the phones run a cached
+// copy of this file for a shift after a deploy, so the browser's idea of who
+// may do what is always the stale one.
+const CAN_OVERWRITE_PRICE = ["john"];
+
+function canOverwritePrice() {
+  const u = getUser();
+  return !!u && CAN_OVERWRITE_PRICE.includes(u.id);
+}
+
 // box is passed in because two cards render this now - the IPL part sheet and
 // the Find Part stock card. Only one is ever on screen at a time, which is why
 // the price state below can stay a single value.
@@ -9319,11 +9335,17 @@ async function loadIplPrices(box = $("ipl-part-price")) {
       // mean the same thing to a person looking at the screen.
       const missing = v === null || v === undefined || Number(v) === 0;
       const canSet = missing && CAN_SET_PRICE.includes(getRole());
+      // A price that is already there can be changed, by one person. The button
+      // says "Change" rather than "Set" because the two are not the same act
+      // and the word is the last warning before the confirm.
+      const canChange = !missing && canOverwritePrice();
       html += `
         <div class="ipl-price-row" data-tier="${t.tier}">
           <span class="lbl"><b>${t.code}</b>${t.name}</span>
           <span class="val${missing ? " none" : ""}">${missing ? "Not set" : money(v)}</span>
-          ${canSet ? `<button type="button" class="ipl-setprice" data-tier="${t.tier}" data-name="${escapeHtml(t.name)}">Set price</button>` : ""}
+          ${canSet || canChange
+            ? `<button type="button" class="ipl-setprice${canChange ? " ipl-changeprice" : ""}" data-tier="${t.tier}" data-name="${escapeHtml(t.name)}"${canChange ? ` data-current="${escapeAttr(String(v))}"` : ""}>${canChange ? "Change price" : "Set price"}</button>`
+            : ""}
         </div>`;
     }
     html += `</div>`;
@@ -9332,7 +9354,10 @@ async function loadIplPrices(box = $("ipl-part-price")) {
     iplPriceState.itemCode = p.item_code;
     box.innerHTML = html;
     box.querySelectorAll(".ipl-setprice").forEach((b) =>
-      b.addEventListener("click", () => openSetPrice(b.dataset.tier, b.dataset.name))
+      b.addEventListener("click", () =>
+        openSetPrice(b.dataset.tier, b.dataset.name,
+          b.dataset.current === undefined ? null : Number(b.dataset.current))
+      )
     );
   } catch (e) {
     box.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Couldn't load prices")}</div>`;
@@ -9343,10 +9368,16 @@ async function loadIplPrices(box = $("ipl-part-price")) {
 // typed into a small form, and then confirmed against the item code and tier
 // spelled out in full, because this writes to the accounting database and the
 // app cannot undo it afterwards.
-function openSetPrice(tier, tierName) {
+// `current` is the price AutoCount already holds, or null when it has none.
+// Its presence is what turns this from filling a gap into replacing a figure,
+// and the two are shown differently the whole way through: a different heading,
+// the old price on screen while the new one is typed, and a confirm that spells
+// out both numbers rather than only the one being saved.
+function openSetPrice(tier, tierName, current = null) {
   const row = document.querySelector(`.ipl-price-row[data-tier="${tier}"]`);
   if (!row || row.querySelector(".ipl-setform")) return;
   row.querySelector(".ipl-setprice").style.display = "none";
+  const overwrite = Number(current) > 0;
 
   // No "your initials" box any more - the app knows who is signed in, and a
   // typed-in name on an audit trail is only as good as whoever typed it.
@@ -9355,16 +9386,18 @@ function openSetPrice(tier, tierName) {
   form.innerHTML = `
     <div class="ipl-setform-item">${escapeHtml(iplPriceState.itemCode || iplPriceState.code)}</div>
     <div class="ipl-setform-fields">
-      <label>${escapeHtml(tierName)}
+      <label>${escapeHtml(tierName)}${overwrite ? ` <span class="sp-was">now ${escapeHtml(money(current))}</span>` : ""}
         <input type="number" class="sp-price" inputmode="decimal" step="0.01" min="0.01" placeholder="0.00">
       </label>
     </div>
     <div class="ipl-setform-by">Recorded against ${escapeHtml(userName() || "an unknown user")}</div>
     <div class="ipl-setform-actions">
       <button type="button" class="sp-cancel">Cancel</button>
-      <button type="button" class="sp-save">Save to AutoCount</button>
+      <button type="button" class="sp-save">${overwrite ? "Change in AutoCount" : "Save to AutoCount"}</button>
     </div>
-    <div class="ipl-setform-note">Writes into AutoCount. It cannot be changed back from this app.</div>`;
+    <div class="ipl-setform-note">${overwrite
+      ? "Replaces the price AutoCount holds now. It cannot be changed back from this app, and the old figure is kept only in the log."
+      : "Writes into AutoCount. It cannot be changed back from this app."}</div>`;
   row.appendChild(form);
   const price = form.querySelector(".sp-price");
   price.focus();
@@ -9382,15 +9415,22 @@ function openSetPrice(tier, tierName) {
     if (!initials) { toast("Pick your name on the first screen before setting a price.", "err"); return; }
 
     const item = iplPriceState.itemCode || iplPriceState.code;
+    // Both numbers in the question when one is being replaced. "Set the price
+    // to 45.00" reads the same whether it is filling a blank or wiping out
+    // 450.00, and those are not the same thing to agree to.
     const ok = confirm(
-      `Set the ${tierName} for ${item} to ${money(value)} in AutoCount?
-
-` +
-      `This writes to AutoCount and cannot be undone from this app.`
+      overwrite
+        ? `Change the ${tierName} for ${item}?\n\n` +
+          `    now:  ${money(current)}\n` +
+          `    new:  ${money(value)}\n\n` +
+          `This replaces the price in AutoCount. It cannot be undone from this app.`
+        : `Set the ${tierName} for ${item} to ${money(value)} in AutoCount?\n\n` +
+          `This writes to AutoCount and cannot be undone from this app.`
     );
     if (!ok) return;
 
     const btn = form.querySelector(".sp-save");
+    const label = btn.textContent;
     btn.disabled = true; btn.textContent = "Saving…";
     try {
       const r = await api("/api/part-prices", {
@@ -9398,13 +9438,18 @@ function openSetPrice(tier, tierName) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           item_code: item, tier, price: value, who: initials, role: getRole(),
+          // Asked for explicitly, never inferred from the price being there:
+          // the server must be able to tell a retried "set" from a deliberate
+          // replacement. The id is what the permission is actually checked on.
+          user_id: (getUser() || {}).id || "",
+          overwrite,
         }),
       });
       toast(r.message || "Price saved.", "ok");
       loadIplPrices();
     } catch (e) {
       toast(e.message || "Could not save the price.", "err");
-      btn.disabled = false; btn.textContent = "Save to AutoCount";
+      btn.disabled = false; btn.textContent = label;
     }
   });
 }

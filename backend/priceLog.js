@@ -29,8 +29,16 @@ function ts() {
 
 // A price that was never set reads better as "not set" than "0.00", which
 // looks like someone deliberately priced the part at zero.
-const amount = (v) =>
-  v === null || v === undefined || Number(v) === 0 ? "not set" : Number(v).toFixed(2);
+//
+// A non-numeric string is passed straight through, for the one case where the
+// old price is neither blank nor known: an overwrite refused before AutoCount
+// was ever asked. Printing "not set" there would record that the part had no
+// price, which is the opposite of what happened - the whole reason the attempt
+// was refused is that it HAD one.
+const amount = (v) => {
+  if (typeof v === "string" && v.trim() && !Number.isFinite(Number(v))) return v.trim();
+  return v === null || v === undefined || Number(v) === 0 ? "not set" : Number(v).toFixed(2);
+};
 
 function logPriceEvent({ source, itemCode, tier, oldPrice, newPrice, who, outcome }) {
   const line =

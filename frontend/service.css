@@ -1640,6 +1640,17 @@ select {
   padding: 6px 12px; border-radius: 999px; cursor: pointer; white-space: nowrap;
 }
 .ipl-setprice:active { background: var(--primary-tint); }
+/* Replacing a price is not the same act as filling one in, so it does not get
+   the same button. Amber rather than the house colour: this one destroys a
+   figure the accounts already hold. */
+.ipl-changeprice { border-color: #C2870F; color: #8A5B00; }
+.ipl-changeprice:active { background: #FFF6E5; }
+/* The price being replaced, shown beside the field while the new one is typed
+   - the number about to be lost should be readable at the moment of typing. */
+.sp-was {
+  font-weight: 700; color: #8A5B00; text-transform: none;
+  font-variant-numeric: tabular-nums;
+}
 
 .ipl-setform {
   flex-basis: 100%; margin-top: 10px; padding: 12px;

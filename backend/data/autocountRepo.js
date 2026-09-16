@@ -242,6 +242,70 @@ async function setMissingPrice(exactItemCode, tier, newPrice) {
   return { ...base, status: "updated", old_price: 0 };
 }
 
+// Change a price that AutoCount ALREADY has.
+//
+// Deliberately a separate function from setMissingPrice rather than a flag on
+// it. That name is a promise - it cannot overwrite anything, and every caller
+// relies on that without having to check how it was called. A flag would make
+// the promise conditional on an argument, and the argument is the thing most
+// likely to be got wrong. Two names, two behaviours, no reading required.
+//
+// Everything else is kept: the same tier table so no browser string reaches the
+// SQL, the same fat-finger ceiling, the same exact-code rule, the same single
+// base-UOM row. What it drops is the one guard that made the write safe, which
+// is why the route above it lets exactly one person through.
+async function overwritePrice(exactItemCode, tier, newPrice) {
+  const spec = PRICE_TIERS[String(tier || "").toLowerCase()];
+  if (!spec) { const e = new Error("Unknown price type."); e.status = 400; throw e; }
+  const code = String(exactItemCode || "").trim();
+  if (!code) { const e = new Error("Missing item code."); e.status = 400; throw e; }
+  const p = Number(newPrice);
+  if (!Number.isFinite(p) || p <= 0) {
+    const e = new Error("Enter a price greater than zero."); e.status = 400; throw e;
+  }
+  if (p > MAX_PRICE) {
+    const e = new Error(`That price looks wrong (over ${MAX_PRICE}). Set it in AutoCount if it is correct.`);
+    e.status = 400; throw e;
+  }
+  const price = Math.round(p * 100) / 100;
+
+  const rows = await query(
+    `SELECT TOP 1 i.ItemCode, i.BaseUOM, u.UOM AS UomRow, u.${spec.column} AS CurrentPrice
+       FROM Item i
+       LEFT JOIN ItemUOM u ON u.ItemCode = i.ItemCode AND u.UOM = i.BaseUOM
+      WHERE i.ItemCode = @code`,
+    { code }
+  );
+  if (!rows.length) {
+    return { status: "not_found", tier: spec.label, item_code: code, old_price: null, new_price: price };
+  }
+  const row = rows[0];
+  const base = { tier: spec.label, item_code: row.ItemCode, new_price: price };
+  if (row.UomRow === null || row.UomRow === undefined) {
+    return { ...base, status: "no_uom_row", old_price: null };
+  }
+  const old = row.CurrentPrice === null || row.CurrentPrice === undefined ? 0 : Number(row.CurrentPrice);
+
+  // Writing the same number again is not a change. Saying so stops a pointless
+  // write to the accounting database and keeps the log honest about what
+  // actually moved.
+  if (old === price) {
+    return { ...base, status: "unchanged", old_price: old };
+  }
+
+  const res = await execute(
+    `UPDATE ItemUOM SET ${spec.column} = @price WHERE ItemCode = @code AND UOM = @uom`,
+    { price, code: row.ItemCode, uom: row.BaseUOM }
+  );
+  // rowsAffected is read, never assumed: the UOM row was there a moment ago and
+  // reporting a change that did not happen is the worst outcome here.
+  if (!res.rowsAffected) {
+    return { ...base, status: "no_uom_row", old_price: old };
+  }
+  return { ...base, status: "updated", old_price: old };
+}
+module.exports.overwritePrice = overwritePrice;
+
 // ============================================================================
 // SHELF LOCATION WRITE-BACK
 // ============================================================================
