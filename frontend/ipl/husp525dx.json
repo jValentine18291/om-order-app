@@ -1,0 +1,10751 @@
+{
+ "id": "husp525dx",
+ "name": "Husqvarna P525DX Ride-on Mower",
+ "source": "Husqvarna portal CSV export (P525DX IPL.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "PTO",
+   "image": "husp525dx-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 72.949,
+     "y": 19.743,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 68.626,
+     "y": 19.257,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 30.404,
+     "y": 18.971,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 10.283,
+     "y": 27.643,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 89.071,
+     "y": 61.729,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 73.758,
+     "y": 73.714,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 22.04,
+     "y": 94.6,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 34.808,
+     "y": 75.671,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 27.859,
+     "y": 89.071,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 18.525,
+     "y": 52.986,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 14.364,
+     "y": 59.129,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 77.737,
+     "y": 52.057,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 87.556,
+     "y": 40.814,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 70.242,
+     "y": 40.871,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 80.505,
+     "y": 52.3,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 85.515,
+     "y": 32.671,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 83.596,
+     "y": 14.4,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 54.323,
+     "y": 11.3,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 47.778,
+     "y": 13.0,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 16.242,
+     "y": 24.4,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 12.869,
+     "y": 40.043,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 24.768,
+     "y": 35.486,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 27.737,
+     "y": 34.414,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 40.747,
+     "y": 15.886,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 35.354,
+     "y": 32.8,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 81.253,
+     "y": 54.471,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 76.525,
+     "y": 57.514,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 50.626,
+     "y": 82.143,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 41.818,
+     "y": 71.929,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 44.222,
+     "y": 80.771,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 49.657,
+     "y": 67.3,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 75.172,
+     "y": 66.757,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 65.374,
+     "y": 55.071,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 59.677,
+     "y": 57.371,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 14.465,
+     "y": 76.414,
+     "conf": 100
+    },
+    {
+     "key": "30",
+     "x": 19.697,
+     "y": 90.314,
+     "conf": 100
+    },
+    {
+     "key": "31",
+     "x": 34.586,
+     "y": 86.629,
+     "conf": 100
+    },
+    {
+     "key": "32",
+     "x": 55.071,
+     "y": 41.314,
+     "conf": 100
+    },
+    {
+     "key": "33",
+     "x": 23.596,
+     "y": 49.571,
+     "conf": 100
+    },
+    {
+     "key": "34",
+     "x": 25.939,
+     "y": 50.357,
+     "conf": 100
+    },
+    {
+     "key": "35",
+     "x": 35.354,
+     "y": 54.586,
+     "conf": 100
+    },
+    {
+     "key": "36",
+     "x": 29.333,
+     "y": 67.814,
+     "conf": 100
+    },
+    {
+     "key": "37",
+     "x": 24.646,
+     "y": 68.443,
+     "conf": 100
+    },
+    {
+     "key": "38",
+     "x": 70.707,
+     "y": 59.071,
+     "conf": 100
+    },
+    {
+     "key": "39",
+     "x": 70.485,
+     "y": 36.757,
+     "conf": 100
+    },
+    {
+     "key": "40",
+     "x": 78.141,
+     "y": 20.443,
+     "conf": 100
+    },
+    {
+     "key": "41",
+     "x": 73.455,
+     "y": 30.071,
+     "conf": 100
+    },
+    {
+     "key": "42",
+     "x": 87.697,
+     "y": 29.614,
+     "conf": 100
+    },
+    {
+     "key": "43",
+     "x": 83.333,
+     "y": 33.671,
+     "conf": 100
+    },
+    {
+     "key": "43",
+     "x": 89.96,
+     "y": 43.886,
+     "conf": 100
+    },
+    {
+     "key": "44",
+     "x": 77.374,
+     "y": 45.357,
+     "conf": 100
+    },
+    {
+     "key": "44",
+     "x": 84.747,
+     "y": 34.886,
+     "conf": 100
+    },
+    {
+     "key": "45",
+     "x": 79.636,
+     "y": 50.686,
+     "conf": 100
+    },
+    {
+     "key": "45",
+     "x": 91.414,
+     "y": 46.114,
+     "conf": 100
+    },
+    {
+     "key": "46",
+     "x": 78.707,
+     "y": 47.829,
+     "conf": 100
+    },
+    {
+     "key": "47",
+     "x": 79.152,
+     "y": 49.314,
+     "conf": 100
+    },
+    {
+     "key": "48",
+     "x": 85.515,
+     "y": 5.857,
+     "conf": 100
+    },
+    {
+     "key": "48",
+     "x": 63.273,
+     "y": 9.4,
+     "conf": 100
+    },
+    {
+     "key": "49",
+     "x": 68.747,
+     "y": 4.886,
+     "conf": 100
+    },
+    {
+     "key": "49",
+     "x": 59.556,
+     "y": 6.386,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "502233601",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "1",
+     "remarks": "",
+     "search": "502233601"
+    },
+    {
+     "key": "2",
+     "part_number": "502233602",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "3",
+     "remarks": "",
+     "search": "502233602"
+    },
+    {
+     "key": "3",
+     "part_number": "506675402",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "4",
+     "remarks": "",
+     "search": "506675402"
+    },
+    {
+     "key": "4",
+     "part_number": "725545501",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "2",
+     "remarks": "",
+     "search": "725545501"
+    },
+    {
+     "key": "5",
+     "part_number": "725254285",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "725254285"
+    },
+    {
+     "key": "6",
+     "part_number": "506675403",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "6",
+     "remarks": "",
+     "search": "506675403"
+    },
+    {
+     "key": "7",
+     "part_number": "502233601",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "8",
+     "remarks": "",
+     "search": "502233601"
+    },
+    {
+     "key": "8",
+     "part_number": "506675401",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "2",
+     "remarks": "",
+     "search": "506675401"
+    },
+    {
+     "key": "9",
+     "part_number": "725250271",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "2",
+     "remarks": "",
+     "search": "725250271"
+    },
+    {
+     "key": "10",
+     "part_number": "506570105",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "1",
+     "remarks": "",
+     "search": "506570105"
+    },
+    {
+     "key": "11",
+     "part_number": "535423801",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW RSQM",
+     "qty": "3",
+     "remarks": "",
+     "search": "535423801"
+    },
+    {
+     "key": "12",
+     "part_number": "576645704",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "3",
+     "remarks": "",
+     "search": "576645704"
+    },
+    {
+     "key": "13",
+     "part_number": "731232001",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "731232001"
+    },
+    {
+     "key": "14",
+     "part_number": "515983202",
+     "depth": 0,
+     "sub": false,
+     "description": "CLUTCH ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "515983202"
+    },
+    {
+     "key": "15",
+     "part_number": "515983501",
+     "depth": 0,
+     "sub": false,
+     "description": "SPACER",
+     "qty": "1",
+     "remarks": "",
+     "search": "515983501"
+    },
+    {
+     "key": "16",
+     "part_number": "505020401",
+     "depth": 0,
+     "sub": false,
+     "description": "PULLEY",
+     "qty": "1",
+     "remarks": "",
+     "search": "505020401"
+    },
+    {
+     "key": "17",
+     "part_number": "506043202",
+     "depth": 0,
+     "sub": false,
+     "description": "BEARING CAGE",
+     "qty": "1",
+     "remarks": "",
+     "search": "506043202"
+    },
+    {
+     "key": "18",
+     "part_number": "506043401",
+     "depth": 0,
+     "sub": false,
+     "description": "SHAFT",
+     "qty": "1",
+     "remarks": "",
+     "search": "506043401"
+    },
+    {
+     "key": "19",
+     "part_number": "522664401",
+     "depth": 0,
+     "sub": false,
+     "description": "BALL BEARING",
+     "qty": "1",
+     "remarks": "",
+     "search": "522664401"
+    },
+    {
+     "key": "20",
+     "part_number": "522664301",
+     "depth": 0,
+     "sub": false,
+     "description": "CIRCLIP",
+     "qty": "1",
+     "remarks": "",
+     "search": "522664301"
+    },
+    {
+     "key": "21",
+     "part_number": "589539501",
+     "depth": 0,
+     "sub": false,
+     "description": "DRIVE BELT",
+     "qty": "1",
+     "remarks": "",
+     "search": "589539501"
+    },
+    {
+     "key": "22",
+     "part_number": "585999301",
+     "depth": 0,
+     "sub": false,
+     "description": "PULLEY ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "585999301"
+    },
+    {
+     "key": "23",
+     "part_number": "504813501",
+     "depth": 0,
+     "sub": false,
+     "description": "WEDGE",
+     "qty": "1",
+     "remarks": "",
+     "search": "504813501"
+    },
+    {
+     "key": "24",
+     "part_number": "579296201",
+     "depth": 0,
+     "sub": false,
+     "description": "SHAFT",
+     "qty": "1",
+     "remarks": "",
+     "search": "579296201"
+    },
+    {
+     "key": "25",
+     "part_number": "597692501",
+     "depth": 0,
+     "sub": false,
+     "description": "CLUTCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "597692501"
+    },
+    {
+     "key": "26",
+     "part_number": "510243601",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "510243601"
+    },
+    {
+     "key": "27",
+     "part_number": "596987201",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "596987201"
+    },
+    {
+     "key": "28",
+     "part_number": "597474401",
+     "depth": 0,
+     "sub": false,
+     "description": "BEARING UNIT",
+     "qty": "2",
+     "remarks": "",
+     "search": "597474401"
+    },
+    {
+     "key": "29",
+     "part_number": "597513101",
+     "depth": 0,
+     "sub": false,
+     "description": "SPACER PLATE",
+     "qty": "3",
+     "remarks": "",
+     "search": "597513101"
+    },
+    {
+     "key": "30",
+     "part_number": "599442601",
+     "depth": 0,
+     "sub": false,
+     "description": "SHAFT ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "599442601"
+    },
+    {
+     "key": "31",
+     "part_number": "501323201",
+     "depth": 0,
+     "sub": false,
+     "description": "RUBBER RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "501323201"
+    },
+    {
+     "key": "32",
+     "part_number": "597504201",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597504201"
+    },
+    {
+     "key": "33",
+     "part_number": "574561901",
+     "depth": 0,
+     "sub": false,
+     "description": "BEARING",
+     "qty": "2",
+     "remarks": "",
+     "search": "574561901"
+    },
+    {
+     "key": "34",
+     "part_number": "506504806",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "506504806"
+    },
+    {
+     "key": "35",
+     "part_number": "597563501",
+     "depth": 0,
+     "sub": false,
+     "description": "SHAFT",
+     "qty": "1",
+     "remarks": "",
+     "search": "597563501"
+    },
+    {
+     "key": "36",
+     "part_number": "597535401",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597535401"
+    },
+    {
+     "key": "37",
+     "part_number": "597587801",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE SLEEVE",
+     "qty": "2",
+     "remarks": "",
+     "search": "597587801"
+    },
+    {
+     "key": "38",
+     "part_number": "597514001",
+     "depth": 0,
+     "sub": false,
+     "description": "STAY",
+     "qty": "1",
+     "remarks": "",
+     "search": "597514001"
+    },
+    {
+     "key": "39",
+     "part_number": "597514101",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597514101"
+    },
+    {
+     "key": "40",
+     "part_number": "597559501",
+     "depth": 0,
+     "sub": false,
+     "description": "BELT TENSIONER ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "597559501"
+    },
+    {
+     "key": "41",
+     "part_number": "598436602",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTION ROD",
+     "qty": "1",
+     "remarks": "",
+     "search": "598436602"
+    },
+    {
+     "key": "42",
+     "part_number": "506839803",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT",
+     "qty": "1",
+     "remarks": "",
+     "search": "506839803"
+    },
+    {
+     "key": "43",
+     "part_number": "576473503",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "576473503"
+    },
+    {
+     "key": "44",
+     "part_number": "576473502",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "576473502"
+    },
+    {
+     "key": "45",
+     "part_number": "734117441",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "734117441"
+    },
+    {
+     "key": "46",
+     "part_number": "598819901",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "598819901"
+    },
+    {
+     "key": "47",
+     "part_number": "598822701",
+     "depth": 0,
+     "sub": false,
+     "description": "SLEEVE",
+     "qty": "1",
+     "remarks": "",
+     "search": "598822701"
+    },
+    {
+     "key": "48",
+     "part_number": "515983401",
+     "depth": 0,
+     "sub": false,
+     "description": "RUBBER RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "515983401"
+    },
+    {
+     "key": "49",
+     "part_number": "725549501",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "1",
+     "remarks": "",
+     "search": "725549501"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 PTO"
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "ENGINE - 1",
+   "image": "husp525dx-fig2.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 17.352,
+     "y": 4.974,
+     "conf": 100
+    },
+    {
+     "key": "1",
+     "x": 72.209,
+     "y": 35.861,
+     "conf": 100
+    },
+    {
+     "key": "1",
+     "x": 33.515,
+     "y": 88.555,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 49.536,
+     "y": 92.36,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 42.825,
+     "y": 87.058,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 59.593,
+     "y": 91.933,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 15.256,
+     "y": 76.055,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 38.553,
+     "y": 77.779,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 49.516,
+     "y": 84.179,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 88.613,
+     "y": 82.682,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 24.204,
+     "y": 55.972,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 27.025,
+     "y": 56.941,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 85.631,
+     "y": 81.314,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 81.56,
+     "y": 75.47,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 40.407,
+     "y": 60.505,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 81.862,
+     "y": 76.981,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 40.73,
+     "y": 62.015,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 15.175,
+     "y": 71.622,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 57.86,
+     "y": 86.873,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 15.054,
+     "y": 73.005,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 57.759,
+     "y": 88.255,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 68.077,
+     "y": 54.361,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 30.955,
+     "y": 48.96,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 43.732,
+     "y": 44.042,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 26.965,
+     "y": 35.519,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 63.341,
+     "y": 12.03,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 69.549,
+     "y": 18.33,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 71.503,
+     "y": 24.53,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 53.285,
+     "y": 33.196,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 21.705,
+     "y": 5.73,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 36.356,
+     "y": 14.766,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 66.788,
+     "y": 73.389,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 32.971,
+     "y": 5.915,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 67.735,
+     "y": 68.942,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 34.825,
+     "y": 76.326,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 70.052,
+     "y": 86.103,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 28.255,
+     "y": 72.777,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 58.626,
+     "y": 89.795,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 14.913,
+     "y": 74.629,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 70.919,
+     "y": 48.019,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 65.961,
+     "y": 34.436,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 68.339,
+     "y": 52.851,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 41.556,
+     "y": 45.168,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 12.838,
+     "y": 40.849,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 42.382,
+     "y": 48.731,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 43.773,
+     "y": 46.465,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 14.228,
+     "y": 39.139,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 26.642,
+     "y": 27.323,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 76.663,
+     "y": 42.788,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 43.813,
+     "y": 42.417,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 47.682,
+     "y": 9.222,
+     "conf": 100
+    },
+    {
+     "key": "30",
+     "x": 38.775,
+     "y": 8.395,
+     "conf": 100
+    },
+    {
+     "key": "31",
+     "x": 37.606,
+     "y": 26.311,
+     "conf": 100
+    },
+    {
+     "key": "32",
+     "x": 69.589,
+     "y": 20.596,
+     "conf": 100
+    },
+    {
+     "key": "33",
+     "x": 25.373,
+     "y": 4.504,
+     "conf": 100
+    },
+    {
+     "key": "34",
+     "x": 64.248,
+     "y": 15.636,
+     "conf": 100
+    },
+    {
+     "key": "35",
+     "x": 54.111,
+     "y": 91.22,
+     "conf": 100
+    },
+    {
+     "key": "36",
+     "x": 20.173,
+     "y": 16.106,
+     "conf": 100
+    },
+    {
+     "key": "37",
+     "x": 10.157,
+     "y": 14.567,
+     "conf": 100
+    },
+    {
+     "key": "38",
+     "x": 36.497,
+     "y": 21.337,
+     "conf": 100
+    },
+    {
+     "key": "39",
+     "x": 60.117,
+     "y": 79.091,
+     "conf": 100
+    },
+    {
+     "key": "39",
+     "x": 74.365,
+     "y": 63.512,
+     "conf": 100
+    },
+    {
+     "key": "40",
+     "x": 58.847,
+     "y": 77.452,
+     "conf": 100
+    },
+    {
+     "key": "41",
+     "x": 24.909,
+     "y": 15.151,
+     "conf": 100
+    },
+    {
+     "key": "42",
+     "x": 88.835,
+     "y": 59.849,
+     "conf": 100
+    },
+    {
+     "key": "43",
+     "x": 85.933,
+     "y": 57.326,
+     "conf": 100
+    },
+    {
+     "key": "44",
+     "x": 74.506,
+     "y": 60.704,
+     "conf": 100
+    },
+    {
+     "key": "45",
+     "x": 71.846,
+     "y": 65.308,
+     "conf": 100
+    },
+    {
+     "key": "46",
+     "x": 81.902,
+     "y": 69.099,
+     "conf": 100
+    },
+    {
+     "key": "47",
+     "x": 52.338,
+     "y": 83.167,
+     "conf": 100
+    },
+    {
+     "key": "48",
+     "x": 52.68,
+     "y": 81.642,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "506570103",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "5",
+     "remarks": "",
+     "search": "506570103"
+    },
+    {
+     "key": "2",
+     "part_number": "506570105",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "2",
+     "remarks": "",
+     "search": "506570105"
+    },
+    {
+     "key": "3",
+     "part_number": "576645704",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "9",
+     "remarks": "",
+     "search": "576645704"
+    },
+    {
+     "key": "4",
+     "part_number": "576426701",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "13",
+     "remarks": "",
+     "search": "576426701"
+    },
+    {
+     "key": "5",
+     "part_number": "734117201",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "12",
+     "remarks": "",
+     "search": "734117201"
+    },
+    {
+     "key": "6",
+     "part_number": "725253671",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "4",
+     "remarks": "",
+     "search": "725253671"
+    },
+    {
+     "key": "7",
+     "part_number": "734117801",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "4",
+     "remarks": "",
+     "search": "734117801"
+    },
+    {
+     "key": "8",
+     "part_number": "725545301",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "8",
+     "remarks": "",
+     "search": "725545301"
+    },
+    {
+     "key": "9",
+     "part_number": "734116401",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "8",
+     "remarks": "",
+     "search": "734116401"
+    },
+    {
+     "key": "10",
+     "part_number": "506675401",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "4",
+     "remarks": "",
+     "search": "506675401"
+    },
+    {
+     "key": "11",
+     "part_number": "725533365",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "4",
+     "remarks": "",
+     "search": "725533365"
+    },
+    {
+     "key": "12",
+     "part_number": "506570104",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "8",
+     "remarks": "",
+     "search": "506570104"
+    },
+    {
+     "key": "13",
+     "part_number": "506597401",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "2",
+     "remarks": "",
+     "search": "506597401"
+    },
+    {
+     "key": "14",
+     "part_number": "535475212",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "4",
+     "remarks": "",
+     "search": "535475212"
+    },
+    {
+     "key": "15",
+     "part_number": "725246451",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "1",
+     "remarks": "",
+     "search": "725246451"
+    },
+    {
+     "key": "16",
+     "part_number": "732211801",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCK NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "732211801"
+    },
+    {
+     "key": "17",
+     "part_number": "597708601",
+     "depth": 0,
+     "sub": false,
+     "description": "ENGINE UNIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "597708601"
+    },
+    {
+     "key": "18",
+     "part_number": "579578101",
+     "depth": 0,
+     "sub": false,
+     "description": "PROTECTIVE PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "579578101"
+    },
+    {
+     "key": "19",
+     "part_number": "597335601",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597335601"
+    },
+    {
+     "key": "20",
+     "part_number": "597335602",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597335602"
+    },
+    {
+     "key": "21",
+     "part_number": "587448301",
+     "depth": 0,
+     "sub": false,
+     "description": "ANTIVIBRATION ELEMENT",
+     "qty": "4",
+     "remarks": "",
+     "search": "587448301"
+    },
+    {
+     "key": "22",
+     "part_number": "597656801",
+     "depth": 0,
+     "sub": false,
+     "description": "ENGINE FRAME",
+     "qty": "1",
+     "remarks": "",
+     "search": "597656801"
+    },
+    {
+     "key": "23",
+     "part_number": "576464501",
+     "depth": 0,
+     "sub": false,
+     "description": "HINGE",
+     "qty": "1",
+     "remarks": "",
+     "search": "576464501"
+    },
+    {
+     "key": "24",
+     "part_number": "579161301",
+     "depth": 0,
+     "sub": false,
+     "description": "STAY",
+     "qty": "2",
+     "remarks": "",
+     "search": "579161301"
+    },
+    {
+     "key": "25",
+     "part_number": "579488501",
+     "depth": 0,
+     "sub": false,
+     "description": "ANTIVIBRATION ELEMENT",
+     "qty": "2",
+     "remarks": "",
+     "search": "579488501"
+    },
+    {
+     "key": "26",
+     "part_number": "576433301",
+     "depth": 0,
+     "sub": false,
+     "description": "LATCH",
+     "qty": "2",
+     "remarks": "",
+     "search": "576433301"
+    },
+    {
+     "key": "27",
+     "part_number": "576640501",
+     "depth": 0,
+     "sub": false,
+     "description": "SEALING STRIP",
+     "qty": "2",
+     "remarks": "",
+     "search": "576640501"
+    },
+    {
+     "key": "28",
+     "part_number": "576990404",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "576990404"
+    },
+    {
+     "key": "29",
+     "part_number": "597468501",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "597468501"
+    },
+    {
+     "key": "30",
+     "part_number": "544282601",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE CLAMP",
+     "qty": "4",
+     "remarks": "",
+     "search": "544282601"
+    },
+    {
+     "key": "31",
+     "part_number": "599813301",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "599813301"
+    },
+    {
+     "key": "32",
+     "part_number": "597740201",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597740201"
+    },
+    {
+     "key": "33",
+     "part_number": "599832301",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "599832301"
+    },
+    {
+     "key": "34",
+     "part_number": "597547001",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597547001"
+    },
+    {
+     "key": "35",
+     "part_number": "578935301",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "578935301"
+    },
+    {
+     "key": "36",
+     "part_number": "576955701",
+     "depth": 0,
+     "sub": false,
+     "description": "FUEL FILTER",
+     "qty": "1",
+     "remarks": "",
+     "search": "576955701"
+    },
+    {
+     "key": "37",
+     "part_number": "599334905",
+     "depth": 0,
+     "sub": false,
+     "description": "FUEL HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "599334905"
+    },
+    {
+     "key": "38",
+     "part_number": "599334902",
+     "depth": 0,
+     "sub": false,
+     "description": "FUEL HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "599334902"
+    },
+    {
+     "key": "39",
+     "part_number": "599301901",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTION",
+     "qty": "1",
+     "remarks": "",
+     "search": "599301901"
+    },
+    {
+     "key": "40",
+     "part_number": "501081601",
+     "depth": 0,
+     "sub": false,
+     "description": "PAN",
+     "qty": "1",
+     "remarks": "OIL PAN",
+     "search": "501081601"
+    },
+    {
+     "key": "41",
+     "part_number": "578010101",
+     "depth": 0,
+     "sub": false,
+     "description": "PREFILTER",
+     "qty": "1",
+     "remarks": "",
+     "search": "578010101"
+    },
+    {
+     "key": "42",
+     "part_number": "578009902",
+     "depth": 0,
+     "sub": false,
+     "description": "DRIVE BELT",
+     "qty": "1",
+     "remarks": "",
+     "search": "578009902"
+    },
+    {
+     "key": "43",
+     "part_number": "578009702",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "578009702"
+    },
+    {
+     "key": "44",
+     "part_number": "599296601",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Water temp sensor",
+     "search": "599296601"
+    },
+    {
+     "key": "45",
+     "part_number": "578010301",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH",
+     "qty": "1",
+     "remarks": "Oil switch",
+     "search": "578010301"
+    },
+    {
+     "key": "46",
+     "part_number": "578009802",
+     "depth": 0,
+     "sub": false,
+     "description": "OIL FILTER",
+     "qty": "1",
+     "remarks": "",
+     "search": "578009802"
+    },
+    {
+     "key": "47",
+     "part_number": "578009501",
+     "depth": 0,
+     "sub": false,
+     "description": "PLUG",
+     "qty": "1",
+     "remarks": "",
+     "search": "578009501"
+    },
+    {
+     "key": "48",
+     "part_number": "578009601",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "578009601"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 1,
+   "label": "Fig.2 ENGINE - 1"
+  },
+  {
+   "id": "3",
+   "number": "2",
+   "title": "ENGINE - 2",
+   "image": "husp525dx-fig3.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 44.374,
+     "y": 52.813,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 71.647,
+     "y": 56.397,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 86.141,
+     "y": 9.006,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 12.27,
+     "y": 48.344,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 17.292,
+     "y": 65.948,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 23.395,
+     "y": 62.455,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 24.412,
+     "y": 22.799,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 28.671,
+     "y": 66.402,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 84.17,
+     "y": 23.253,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 56.389,
+     "y": 6.057,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 75.652,
+     "y": 8.122,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 70.629,
+     "y": 32.827,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 38.652,
+     "y": 28.562,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 26.001,
+     "y": 24.887,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 34.711,
+     "y": 9.324,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 50.763,
+     "y": 48.14,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 66.815,
+     "y": 44.147,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 39.86,
+     "y": 6.942,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 62.842,
+     "y": 52.269,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 48.029,
+     "y": 53.221,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 41.99,
+     "y": 61.479,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 81.691,
+     "y": 54.288,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 84.488,
+     "y": 65.54,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 78.163,
+     "y": 65.858,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 78.29,
+     "y": 77.768,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 18.436,
+     "y": 45.803,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 37.54,
+     "y": 44.805,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 28.099,
+     "y": 53.153,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 26.669,
+     "y": 41.221,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 32.295,
+     "y": 56.466,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 42.181,
+     "y": 50.794,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 76.287,
+     "y": 44.26,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 80.865,
+     "y": 38.702,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 72.95,
+     "y": 35.368,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 73.363,
+     "y": 30.535,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 37.635,
+     "y": 58.326,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "576645704",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "576645704"
+    },
+    {
+     "key": "2",
+     "part_number": "506570104",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "21",
+     "remarks": "",
+     "search": "506570104"
+    },
+    {
+     "key": "3",
+     "part_number": "597296401",
+     "depth": 0,
+     "sub": false,
+     "description": "COOLER",
+     "qty": "1",
+     "remarks": "",
+     "search": "597296401"
+    },
+    {
+     "key": "4",
+     "part_number": "577093501",
+     "depth": 0,
+     "sub": false,
+     "description": "CAP",
+     "qty": "1",
+     "remarks": "",
+     "search": "577093501"
+    },
+    {
+     "key": "5",
+     "part_number": "579582001",
+     "depth": 0,
+     "sub": false,
+     "description": "WALL",
+     "qty": "1",
+     "remarks": "",
+     "search": "579582001"
+    },
+    {
+     "key": "6",
+     "part_number": "578936201",
+     "depth": 0,
+     "sub": false,
+     "description": "SHROUD",
+     "qty": "1",
+     "remarks": "",
+     "search": "578936201"
+    },
+    {
+     "key": "7",
+     "part_number": "506963601",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "4",
+     "remarks": "",
+     "search": "506963601"
+    },
+    {
+     "key": "8",
+     "part_number": "577807801",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE",
+     "qty": "2",
+     "remarks": "",
+     "search": "577807801"
+    },
+    {
+     "key": "9",
+     "part_number": "578936001",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "578936001"
+    },
+    {
+     "key": "10",
+     "part_number": "578936101",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "578936101"
+    },
+    {
+     "key": "11",
+     "part_number": "544202702",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE CLAMP",
+     "qty": "4",
+     "remarks": "",
+     "search": "544202702"
+    },
+    {
+     "key": "12",
+     "part_number": "578935901",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "578935901"
+    },
+    {
+     "key": "13",
+     "part_number": "578935801",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "578935801"
+    },
+    {
+     "key": "14",
+     "part_number": "544202703",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE CLAMP",
+     "qty": "3",
+     "remarks": "",
+     "search": "544202703"
+    },
+    {
+     "key": "15",
+     "part_number": "579156301",
+     "depth": 0,
+     "sub": false,
+     "description": "AIR CLEANER",
+     "qty": "1",
+     "remarks": "",
+     "search": "579156301"
+    },
+    {
+     "key": "16",
+     "part_number": "579156501",
+     "depth": 0,
+     "sub": false,
+     "description": "AIR CLEANER",
+     "qty": "1",
+     "remarks": "",
+     "search": "579156501"
+    },
+    {
+     "key": "17",
+     "part_number": "579156601",
+     "depth": 0,
+     "sub": false,
+     "description": "AIR CLEANER",
+     "qty": "1",
+     "remarks": "",
+     "search": "579156601"
+    },
+    {
+     "key": "18",
+     "part_number": "579156701",
+     "depth": 0,
+     "sub": false,
+     "description": "AIR CLEANER",
+     "qty": "1",
+     "remarks": "",
+     "search": "579156701"
+    },
+    {
+     "key": "19",
+     "part_number": "597032601",
+     "depth": 0,
+     "sub": false,
+     "description": "MUFFLER",
+     "qty": "1",
+     "remarks": "",
+     "search": "597032601"
+    },
+    {
+     "key": "20",
+     "part_number": "597077201",
+     "depth": 0,
+     "sub": false,
+     "description": "EXHAUST",
+     "qty": "1",
+     "remarks": "",
+     "search": "597077201"
+    },
+    {
+     "key": "21",
+     "part_number": "501152202",
+     "depth": 0,
+     "sub": false,
+     "description": "CLAMP ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "501152202"
+    },
+    {
+     "key": "22",
+     "part_number": "501152204",
+     "depth": 0,
+     "sub": false,
+     "description": "CLAMP ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "501152204"
+    },
+    {
+     "key": "23",
+     "part_number": "598686601",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "598686601"
+    },
+    {
+     "key": "24",
+     "part_number": "597149001",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597149001"
+    },
+    {
+     "key": "25",
+     "part_number": "589315601",
+     "depth": 0,
+     "sub": false,
+     "description": "EXPANSION TANK",
+     "qty": "0",
+     "remarks": "",
+     "search": "589315601"
+    },
+    {
+     "key": "26",
+     "part_number": "504800011",
+     "depth": 0,
+     "sub": false,
+     "description": "FUEL HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "504800011"
+    },
+    {
+     "key": "27",
+     "part_number": "579317401",
+     "depth": 0,
+     "sub": false,
+     "description": "STRAP",
+     "qty": "1",
+     "remarks": "",
+     "search": "579317401"
+    },
+    {
+     "key": "28",
+     "part_number": "544282601",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE CLAMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "544282601"
+    },
+    {
+     "key": "29",
+     "part_number": "576972501",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "576972501"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 2,
+   "label": "Fig.2 ENGINE - 2"
+  },
+  {
+   "id": "4",
+   "number": "3",
+   "title": "FUEL SYSTEM",
+   "image": "husp525dx-fig4.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 85.505,
+     "y": 39.133,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 30.324,
+     "y": 20.531,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 59.631,
+     "y": 32.328,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 63.128,
+     "y": 62.182,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 13.922,
+     "y": 63.77,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 50.032,
+     "y": 70.803,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 13.827,
+     "y": 51.86,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 26.637,
+     "y": 45.803,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 76.542,
+     "y": 28.221,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 15.83,
+     "y": 52.79,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 28.671,
+     "y": 46.733,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 68.627,
+     "y": 64.36,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 19.866,
+     "y": 53.221,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 55.563,
+     "y": 72.981,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 72.664,
+     "y": 29.288,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 66.147,
+     "y": 56.375,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 63.096,
+     "y": 40.086,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 57.152,
+     "y": 60.504,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 47.076,
+     "y": 34.483,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 47.711,
+     "y": 44.805,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 66.116,
+     "y": 76.86,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 65.798,
+     "y": 46.438,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 53.21,
+     "y": 15.041,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 55.753,
+     "y": 44.011,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 17.546,
+     "y": 63.271,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 24.348,
+     "y": 52.382,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 81.214,
+     "y": 30.535,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 71.265,
+     "y": 44.941,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 47.33,
+     "y": 38.226,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 75.016,
+     "y": 37.455,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 78.099,
+     "y": 42.037,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 65.893,
+     "y": 37.863,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 88.175,
+     "y": 37.319,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 56.262,
+     "y": 30.898,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 57.851,
+     "y": 29.378,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 81.278,
+     "y": 32.464,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "535475212",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "1",
+     "remarks": "",
+     "search": "535475212"
+    },
+    {
+     "key": "2",
+     "part_number": "502435301",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "9",
+     "remarks": "",
+     "search": "502435301"
+    },
+    {
+     "key": "3",
+     "part_number": "535423805",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW RSQM",
+     "qty": "1",
+     "remarks": "",
+     "search": "535423805"
+    },
+    {
+     "key": "4",
+     "part_number": "535423802",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW RSQM",
+     "qty": "2",
+     "remarks": "",
+     "search": "535423802"
+    },
+    {
+     "key": "5",
+     "part_number": "506570103",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "2",
+     "remarks": "",
+     "search": "506570103"
+    },
+    {
+     "key": "6",
+     "part_number": "725236461",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFT",
+     "qty": "1",
+     "remarks": "",
+     "search": "725236461"
+    },
+    {
+     "key": "7",
+     "part_number": "503230403",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "503230403"
+    },
+    {
+     "key": "8",
+     "part_number": "576645704",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "3",
+     "remarks": "",
+     "search": "576645704"
+    },
+    {
+     "key": "9",
+     "part_number": "576645703",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "576645703"
+    },
+    {
+     "key": "10",
+     "part_number": "740481202",
+     "depth": 0,
+     "sub": false,
+     "description": "O-RING",
+     "qty": "2",
+     "remarks": "",
+     "search": "740481202"
+    },
+    {
+     "key": "11",
+     "part_number": "597073501",
+     "depth": 0,
+     "sub": false,
+     "description": "FUEL TANK",
+     "qty": "1",
+     "remarks": "",
+     "search": "597073501"
+    },
+    {
+     "key": "12",
+     "part_number": "597485601",
+     "depth": 0,
+     "sub": false,
+     "description": "GAUGE",
+     "qty": "1",
+     "remarks": "",
+     "search": "597485601"
+    },
+    {
+     "key": "13",
+     "part_number": "590209101",
+     "depth": 0,
+     "sub": false,
+     "description": "GROMMET",
+     "qty": "1",
+     "remarks": "",
+     "search": "590209101"
+    },
+    {
+     "key": "14",
+     "part_number": "579570101",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE",
+     "qty": "1",
+     "remarks": "",
+     "search": "579570101"
+    },
+    {
+     "key": "15",
+     "part_number": "597074101",
+     "depth": 0,
+     "sub": false,
+     "description": "PIPE",
+     "qty": "1",
+     "remarks": "",
+     "search": "597074101"
+    },
+    {
+     "key": "16",
+     "part_number": "597082201",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597082201"
+    },
+    {
+     "key": "17",
+     "part_number": "599643001",
+     "depth": 0,
+     "sub": false,
+     "description": "TANK CAP",
+     "qty": "1",
+     "remarks": "",
+     "search": "599643001"
+    },
+    {
+     "key": "18",
+     "part_number": "597076201",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597076201"
+    },
+    {
+     "key": "19",
+     "part_number": "597079301",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597079301"
+    },
+    {
+     "key": "20",
+     "part_number": "599334902",
+     "depth": 0,
+     "sub": false,
+     "description": "FUEL HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "599334902"
+    },
+    {
+     "key": "21",
+     "part_number": "599334904",
+     "depth": 0,
+     "sub": false,
+     "description": "FUEL HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "599334904"
+    },
+    {
+     "key": "22",
+     "part_number": "585510507",
+     "depth": 0,
+     "sub": false,
+     "description": "FUEL HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "585510507"
+    },
+    {
+     "key": "23",
+     "part_number": "574531201",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE CLAMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "574531201"
+    },
+    {
+     "key": "24",
+     "part_number": "574531202",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE CLAMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "574531202"
+    },
+    {
+     "key": "25",
+     "part_number": "544282601",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE CLAMP",
+     "qty": "4",
+     "remarks": "",
+     "search": "544282601"
+    },
+    {
+     "key": "26",
+     "part_number": "544282606",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE CLAMP",
+     "qty": "2",
+     "remarks": "",
+     "search": "544282606"
+    },
+    {
+     "key": "27",
+     "part_number": "576955501",
+     "depth": 0,
+     "sub": false,
+     "description": "PREFILTER",
+     "qty": "1",
+     "remarks": "",
+     "search": "576955501"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 FUEL SYSTEM"
+  },
+  {
+   "id": "5",
+   "number": "4",
+   "title": "PROPULSION",
+   "image": "husp525dx-fig5.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 44.278,
+     "y": 63.135,
+     "conf": 100
+    },
+    {
+     "key": "1",
+     "x": 61.411,
+     "y": 52.064,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 37.317,
+     "y": 70.213,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 45.327,
+     "y": 56.012,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 70.915,
+     "y": 51.384,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 70.629,
+     "y": 38.77,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 39.924,
+     "y": 31.511,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 44.342,
+     "y": 50.386,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 74.952,
+     "y": 33.734,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 62.937,
+     "y": 58.462,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 61.284,
+     "y": 31.08,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 59.568,
+     "y": 69.941,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 66.211,
+     "y": 35.98,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 75.238,
+     "y": 35.322,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 83.058,
+     "y": 68.671,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 47.171,
+     "y": 66.039,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 50.159,
+     "y": 31.579,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 47.171,
+     "y": 68.444,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 37.699,
+     "y": 67.219,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 44.596,
+     "y": 53.199,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 62.81,
+     "y": 48.934,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 59.663,
+     "y": 54.242,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 68.15,
+     "y": 56.556,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 34.011,
+     "y": 48.979,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 58.582,
+     "y": 29.174,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 15.321,
+     "y": 50.476,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 41.672,
+     "y": 37.613,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 74.507,
+     "y": 31.897,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 74.317,
+     "y": 30.127,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 61.602,
+     "y": 55.467,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 64.272,
+     "y": 67.128,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 74.317,
+     "y": 40.721,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 83.98,
+     "y": 52.518,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 80.928,
+     "y": 51.316,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 81.055,
+     "y": 48.072,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 79.275,
+     "y": 46.302,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 82.263,
+     "y": 50.068,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 79.402,
+     "y": 67.015,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 75.493,
+     "y": 65.222,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "544256301",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "2",
+     "remarks": "",
+     "search": "544256301"
+    },
+    {
+     "key": "2",
+     "part_number": "544256303",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "4",
+     "remarks": "",
+     "search": "544256303"
+    },
+    {
+     "key": "3",
+     "part_number": "576645705",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT FLANGE",
+     "qty": "3",
+     "remarks": "",
+     "search": "576645705"
+    },
+    {
+     "key": "4",
+     "part_number": "576645706",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "4",
+     "remarks": "",
+     "search": "576645706"
+    },
+    {
+     "key": "5",
+     "part_number": "576823101",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "576823101"
+    },
+    {
+     "key": "6",
+     "part_number": "725250271",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "2",
+     "remarks": "",
+     "search": "725250271"
+    },
+    {
+     "key": "7",
+     "part_number": "725251351",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "1",
+     "remarks": "",
+     "search": "725251351"
+    },
+    {
+     "key": "8",
+     "part_number": "727649951",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "727649951"
+    },
+    {
+     "key": "10",
+     "part_number": "732212001",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCK NUT",
+     "qty": "7",
+     "remarks": "",
+     "search": "732212001"
+    },
+    {
+     "key": "11",
+     "part_number": "734117201",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "734117201"
+    },
+    {
+     "key": "12",
+     "part_number": "734117771",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "6",
+     "remarks": "",
+     "search": "734117771"
+    },
+    {
+     "key": "13",
+     "part_number": "577376701",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "1",
+     "remarks": "",
+     "search": "577376701"
+    },
+    {
+     "key": "14",
+     "part_number": "725249751",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "725249751"
+    },
+    {
+     "key": "15",
+     "part_number": "575881402",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "2",
+     "remarks": "",
+     "search": "575881402"
+    },
+    {
+     "key": "16",
+     "part_number": "579409001",
+     "depth": 0,
+     "sub": false,
+     "description": "TRANSMISSION",
+     "qty": "1",
+     "remarks": "",
+     "search": "579409001"
+    },
+    {
+     "key": "17",
+     "part_number": "579408901",
+     "depth": 0,
+     "sub": false,
+     "description": "TRANSMISSION",
+     "qty": "1",
+     "remarks": "",
+     "search": "579408901"
+    },
+    {
+     "key": "18",
+     "part_number": "577390601",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "577390601"
+    },
+    {
+     "key": "19",
+     "part_number": "577408501",
+     "depth": 0,
+     "sub": false,
+     "description": "ROD END",
+     "qty": "3",
+     "remarks": "",
+     "search": "577408501"
+    },
+    {
+     "key": "20",
+     "part_number": "577388601",
+     "depth": 0,
+     "sub": false,
+     "description": "PULL ROD",
+     "qty": "1",
+     "remarks": "",
+     "search": "577388601"
+    },
+    {
+     "key": "21",
+     "part_number": "577389601",
+     "depth": 0,
+     "sub": false,
+     "description": "SPEED LIMITER",
+     "qty": "1",
+     "remarks": "",
+     "search": "577389601"
+    },
+    {
+     "key": "22",
+     "part_number": "577390601",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "577390601"
+    },
+    {
+     "key": "23",
+     "part_number": "576823101",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "576823101"
+    },
+    {
+     "key": "24",
+     "part_number": "586050101",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "586050101"
+    },
+    {
+     "key": "25",
+     "part_number": "577408501",
+     "depth": 0,
+     "sub": false,
+     "description": "ROD END",
+     "qty": "1",
+     "remarks": "",
+     "search": "577408501"
+    },
+    {
+     "key": "26",
+     "part_number": "577401001",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE",
+     "qty": "2",
+     "remarks": "",
+     "search": "577401001"
+    },
+    {
+     "key": "27",
+     "part_number": "577400301",
+     "depth": 0,
+     "sub": false,
+     "description": "BUSHING",
+     "qty": "2",
+     "remarks": "",
+     "search": "577400301"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.4 PROPULSION"
+  },
+  {
+   "id": "6",
+   "number": "5",
+   "title": "WHEELS AND TIRES",
+   "image": "husp525dx-fig6.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 57.879,
+     "y": 24.914,
+     "conf": 100
+    },
+    {
+     "key": "1",
+     "x": 57.879,
+     "y": 66.443,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 62.566,
+     "y": 47.086,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 62.566,
+     "y": 88.614,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 55.495,
+     "y": 48.914,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 55.495,
+     "y": 90.443,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 63.576,
+     "y": 50.3,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 63.576,
+     "y": 91.829,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 32.343,
+     "y": 14.871,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 32.343,
+     "y": 56.4,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 46.828,
+     "y": 77.343,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 46.788,
+     "y": 35.786,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 44.485,
+     "y": 76.214,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 44.444,
+     "y": 34.657,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 49.535,
+     "y": 78.471,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 49.495,
+     "y": 36.914,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 11.01,
+     "y": 62.429,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 10.97,
+     "y": 20.871,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 12.889,
+     "y": 63.086,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 12.848,
+     "y": 21.529,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 75.475,
+     "y": 24.357,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 75.475,
+     "y": 65.886,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 81.293,
+     "y": 27.486,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 81.293,
+     "y": 69.014,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 30.808,
+     "y": 7.986,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 24.808,
+     "y": 49.171,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 30.101,
+     "y": 51.3,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 35.333,
+     "y": 62.357,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 35.374,
+     "y": 20.829,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 31.98,
+     "y": 29.914,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 22.121,
+     "y": 25.886,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 31.98,
+     "y": 71.443,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 22.121,
+     "y": 67.414,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 19.253,
+     "y": 23.9,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 19.253,
+     "y": 65.429,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 37.071,
+     "y": 65.714,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 37.111,
+     "y": 24.186,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "580769301",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL ASSY",
+     "qty": "4",
+     "remarks": "",
+     "search": "580769301"
+    },
+    {
+     "key": "2",
+     "part_number": "580769401",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL RIM",
+     "qty": "1",
+     "remarks": "",
+     "search": "580769401"
+    },
+    {
+     "key": "3",
+     "part_number": "523034701",
+     "depth": 0,
+     "sub": false,
+     "description": "VALVE",
+     "qty": "1",
+     "remarks": "",
+     "search": "523034701"
+    },
+    {
+     "key": "4",
+     "part_number": "579732601",
+     "depth": 0,
+     "sub": false,
+     "description": "TYRE",
+     "qty": "1",
+     "remarks": "",
+     "search": "579732601"
+    },
+    {
+     "key": "5",
+     "part_number": "597526301",
+     "depth": 0,
+     "sub": false,
+     "description": "HUB ASSY",
+     "qty": "4",
+     "remarks": "",
+     "search": "597526301"
+    },
+    {
+     "key": "6",
+     "part_number": "597656901",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER ASSY",
+     "qty": "4",
+     "remarks": "",
+     "search": "597656901"
+    },
+    {
+     "key": "7",
+     "part_number": "599443501",
+     "depth": 0,
+     "sub": false,
+     "description": "SEALING RING",
+     "qty": "4",
+     "remarks": "",
+     "search": "599443501"
+    },
+    {
+     "key": "8",
+     "part_number": "735313910",
+     "depth": 0,
+     "sub": false,
+     "description": "CIRCLIP",
+     "qty": "4",
+     "remarks": "",
+     "search": "735313910"
+    },
+    {
+     "key": "9",
+     "part_number": "735313110",
+     "depth": 0,
+     "sub": false,
+     "description": "CIRCLIP",
+     "qty": "4",
+     "remarks": "",
+     "search": "735313110"
+    },
+    {
+     "key": "10",
+     "part_number": "576127801",
+     "depth": 0,
+     "sub": false,
+     "description": "O-RING",
+     "qty": "4",
+     "remarks": "",
+     "search": "576127801"
+    },
+    {
+     "key": "11",
+     "part_number": "506865001",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL NUT",
+     "qty": "16",
+     "remarks": "M12x1.5",
+     "search": "506865001"
+    },
+    {
+     "key": "12",
+     "part_number": "506864801",
+     "depth": 0,
+     "sub": false,
+     "description": "PROTECTIVE COVER",
+     "qty": "4",
+     "remarks": "",
+     "search": "506864801"
+    },
+    {
+     "key": "13",
+     "part_number": "506675401",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "8",
+     "remarks": "M10x25",
+     "search": "506675401"
+    },
+    {
+     "key": "14",
+     "part_number": "727649951",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "8",
+     "remarks": "M10x40",
+     "search": "727649951"
+    },
+    {
+     "key": "15",
+     "part_number": "576645705",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT FLANGE",
+     "qty": "8",
+     "remarks": "M10",
+     "search": "576645705"
+    },
+    {
+     "key": "16",
+     "part_number": "538957401",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL AXLE",
+     "qty": "4",
+     "remarks": "Including 4 mounted bolts",
+     "search": "538957401"
+    },
+    {
+     "key": "17",
+     "part_number": "738210904",
+     "depth": 0,
+     "sub": false,
+     "description": "BALL BEARING",
+     "qty": "2",
+     "remarks": "",
+     "search": "738210904"
+    },
+    {
+     "key": "18",
+     "part_number": "576127701",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCK RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "576127701"
+    },
+    {
+     "key": "20",
+     "part_number": "599442701",
+     "depth": 0,
+     "sub": false,
+     "description": "PIN",
+     "qty": "16",
+     "remarks": "",
+     "search": "599442701"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.5 WHEELS AND TIRES"
+  },
+  {
+   "id": "7",
+   "number": "6",
+   "title": "ELECTRICAL",
+   "image": "husp525dx-fig7.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 68.263,
+     "y": 21.957,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 65.98,
+     "y": 20.786,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 48.04,
+     "y": 56.086,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 49.838,
+     "y": 64.043,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 73.636,
+     "y": 25.071,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 76.667,
+     "y": 32.986,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 49.111,
+     "y": 8.314,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 23.717,
+     "y": 61.357,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 43.657,
+     "y": 68.786,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 77.313,
+     "y": 37.171,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 82.646,
+     "y": 25.843,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 69.96,
+     "y": 63.443,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 74.04,
+     "y": 42.114,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 72.808,
+     "y": 44.143,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 56.384,
+     "y": 45.829,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 60.485,
+     "y": 48.157,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 65.717,
+     "y": 45.386,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 42.99,
+     "y": 40.986,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 43.01,
+     "y": 42.357,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 83.96,
+     "y": 29.657,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 78.081,
+     "y": 34.214,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 78.162,
+     "y": 35.871,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 9.475,
+     "y": 47.314,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 14.566,
+     "y": 45.157,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 67.96,
+     "y": 14.071,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 43.737,
+     "y": 30.529,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 37.677,
+     "y": 11.371,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 32.141,
+     "y": 23.929,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 23.576,
+     "y": 65.514,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 67.798,
+     "y": 63.986,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 61.192,
+     "y": 64.7,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 67.677,
+     "y": 28.043,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 63.051,
+     "y": 57.014,
+     "conf": 100
+    },
+    {
+     "key": "30",
+     "x": 38.424,
+     "y": 39.786,
+     "conf": 100
+    },
+    {
+     "key": "31",
+     "x": 36.97,
+     "y": 41.757,
+     "conf": 100
+    },
+    {
+     "key": "32",
+     "x": 42.182,
+     "y": 39.429,
+     "conf": 100
+    },
+    {
+     "key": "33",
+     "x": 13.091,
+     "y": 55.314,
+     "conf": 100
+    },
+    {
+     "key": "34",
+     "x": 19.475,
+     "y": 90.114,
+     "conf": 100
+    },
+    {
+     "key": "35",
+     "x": 11.515,
+     "y": 83.4,
+     "conf": 100
+    },
+    {
+     "key": "36",
+     "x": 84.0,
+     "y": 72.314,
+     "conf": 100
+    },
+    {
+     "key": "37",
+     "x": 35.111,
+     "y": 55.029,
+     "conf": 100
+    },
+    {
+     "key": "38",
+     "x": 63.515,
+     "y": 41.5,
+     "conf": 100
+    },
+    {
+     "key": "39",
+     "x": 32.848,
+     "y": 56.029,
+     "conf": 100
+    },
+    {
+     "key": "40",
+     "x": 30.222,
+     "y": 56.714,
+     "conf": 100
+    },
+    {
+     "key": "41",
+     "x": 42.323,
+     "y": 37.957,
+     "conf": 100
+    },
+    {
+     "key": "42",
+     "x": 34.364,
+     "y": 57.643,
+     "conf": 100
+    },
+    {
+     "key": "43",
+     "x": 48.0,
+     "y": 61.571,
+     "conf": 100
+    },
+    {
+     "key": "44",
+     "x": 71.98,
+     "y": 55.314,
+     "conf": 100
+    },
+    {
+     "key": "45",
+     "x": 88.263,
+     "y": 22.886,
+     "conf": 100
+    },
+    {
+     "key": "46",
+     "x": 74.929,
+     "y": 39.529,
+     "conf": 100
+    },
+    {
+     "key": "47",
+     "x": 62.566,
+     "y": 53.414,
+     "conf": 100
+    },
+    {
+     "key": "47",
+     "x": 68.566,
+     "y": 50.314,
+     "conf": 100
+    },
+    {
+     "key": "48",
+     "x": 83.434,
+     "y": 92.171,
+     "conf": 100
+    },
+    {
+     "key": "49",
+     "x": 72.081,
+     "y": 84.814,
+     "conf": 100
+    },
+    {
+     "key": "50",
+     "x": 11.677,
+     "y": 77.857,
+     "conf": 100
+    },
+    {
+     "key": "51",
+     "x": 33.172,
+     "y": 73.686,
+     "conf": 100
+    },
+    {
+     "key": "52",
+     "x": 27.515,
+     "y": 33.986,
+     "conf": 100
+    },
+    {
+     "key": "53",
+     "x": 68.162,
+     "y": 11.443,
+     "conf": 100
+    },
+    {
+     "key": "54",
+     "x": 76.687,
+     "y": 30.443,
+     "conf": 100
+    },
+    {
+     "key": "55",
+     "x": 21.051,
+     "y": 54.414,
+     "conf": 100
+    },
+    {
+     "key": "56",
+     "x": 75.232,
+     "y": 43.671,
+     "conf": 100
+    },
+    {
+     "key": "57",
+     "x": 75.131,
+     "y": 46.386,
+     "conf": 100
+    },
+    {
+     "key": "58",
+     "x": 66.424,
+     "y": 54.7,
+     "conf": 100
+    },
+    {
+     "key": "59",
+     "x": 52.808,
+     "y": 67.257,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "597907101",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCKING PIN",
+     "qty": "3",
+     "remarks": "",
+     "search": "597907101"
+    },
+    {
+     "key": "2",
+     "part_number": "597907601",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "3",
+     "remarks": "",
+     "search": "597907601"
+    },
+    {
+     "key": "3",
+     "part_number": "574856202",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "6",
+     "remarks": "",
+     "search": "574856202"
+    },
+    {
+     "key": "4",
+     "part_number": "535429101",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING NUT",
+     "qty": "4",
+     "remarks": "",
+     "search": "535429101"
+    },
+    {
+     "key": "5",
+     "part_number": "502435301",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "5",
+     "remarks": "",
+     "search": "502435301"
+    },
+    {
+     "key": "6",
+     "part_number": "535475212",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "4",
+     "remarks": "",
+     "search": "535475212"
+    },
+    {
+     "key": "7",
+     "part_number": "725537001",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "2",
+     "remarks": "",
+     "search": "725537001"
+    },
+    {
+     "key": "8",
+     "part_number": "576645703",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "576645703"
+    },
+    {
+     "key": "9",
+     "part_number": "544291302",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANM",
+     "qty": "4",
+     "remarks": "",
+     "search": "544291302"
+    },
+    {
+     "key": "10",
+     "part_number": "576434201",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "576434201"
+    },
+    {
+     "key": "11",
+     "part_number": "506570106",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "1",
+     "remarks": "",
+     "search": "506570106"
+    },
+    {
+     "key": "12",
+     "part_number": "535476101",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "535476101"
+    },
+    {
+     "key": "13",
+     "part_number": "535475001",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "535475001"
+    },
+    {
+     "key": "14",
+     "part_number": "506570104",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "1",
+     "remarks": "",
+     "search": "506570104"
+    },
+    {
+     "key": "15",
+     "part_number": "734116401",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "734116401"
+    },
+    {
+     "key": "16",
+     "part_number": "731231801",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "731231801"
+    },
+    {
+     "key": "17",
+     "part_number": "725523001",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "2",
+     "remarks": "",
+     "search": "725523001"
+    },
+    {
+     "key": "18",
+     "part_number": "731231001",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "731231001"
+    },
+    {
+     "key": "19",
+     "part_number": "599706802",
+     "depth": 0,
+     "sub": false,
+     "description": "ELECTRONIC BOX",
+     "qty": "1",
+     "remarks": "",
+     "search": "599706802"
+    },
+    {
+     "key": "22",
+     "part_number": "535130310",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "8",
+     "remarks": "",
+     "search": "535130310"
+    },
+    {
+     "key": "23",
+     "part_number": "544381501",
+     "depth": 0,
+     "sub": false,
+     "description": "BUSHING",
+     "qty": "1",
+     "remarks": "",
+     "search": "544381501"
+    },
+    {
+     "key": "25",
+     "part_number": "593728501",
+     "depth": 0,
+     "sub": false,
+     "description": "HEADLIGHT",
+     "qty": "1",
+     "remarks": "",
+     "search": "593728501"
+    },
+    {
+     "key": "26",
+     "part_number": "599832001",
+     "depth": 0,
+     "sub": false,
+     "description": "FUSE",
+     "qty": "1",
+     "remarks": "150A",
+     "search": "599832001"
+    },
+    {
+     "key": "27",
+     "part_number": "599831901",
+     "depth": 0,
+     "sub": false,
+     "description": "FUSE",
+     "qty": "2",
+     "remarks": "50A",
+     "search": "599831901"
+    },
+    {
+     "key": "28",
+     "part_number": "597708101",
+     "depth": 0,
+     "sub": false,
+     "description": "LID",
+     "qty": "1",
+     "remarks": "",
+     "search": "597708101"
+    },
+    {
+     "key": "29",
+     "part_number": "599831501",
+     "depth": 0,
+     "sub": false,
+     "description": "FUSE BOX",
+     "qty": "1",
+     "remarks": "",
+     "search": "599831501"
+    },
+    {
+     "key": "30",
+     "part_number": "597708501",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "USB",
+     "search": "597708501"
+    },
+    {
+     "key": "31",
+     "part_number": "535474901",
+     "depth": 0,
+     "sub": false,
+     "description": "KEY SWITCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "535474901"
+    },
+    {
+     "key": "32",
+     "part_number": "535476001",
+     "depth": 0,
+     "sub": false,
+     "description": "IGNITION KEY",
+     "qty": "1",
+     "remarks": "",
+     "search": "535476001"
+    },
+    {
+     "key": "33",
+     "part_number": "579014101",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING",
+     "qty": "1",
+     "remarks": "Extra hydraulic switch",
+     "search": "579014101"
+    },
+    {
+     "key": "34",
+     "part_number": "597756702",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "TO ENGINE",
+     "search": "597756702"
+    },
+    {
+     "key": "35",
+     "part_number": "597757001",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "STARTER CABLE",
+     "search": "597757001"
+    },
+    {
+     "key": "36",
+     "part_number": "597708301",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "MAIN",
+     "search": "597708301"
+    },
+    {
+     "key": "37",
+     "part_number": "576468401",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH",
+     "qty": "1",
+     "remarks": "12v Switch",
+     "search": "576468401"
+    },
+    {
+     "key": "38",
+     "part_number": "597756301",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "597756301"
+    },
+    {
+     "key": "39",
+     "part_number": "593987101",
+     "depth": 0,
+     "sub": false,
+     "description": "TOGGLE SWITCH",
+     "qty": "1",
+     "remarks": "Light Switch",
+     "search": "593987101"
+    },
+    {
+     "key": "40",
+     "part_number": "589887201",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH",
+     "qty": "1",
+     "remarks": "PTO switch",
+     "search": "589887201"
+    },
+    {
+     "key": "41",
+     "part_number": "597756001",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "12v Socket",
+     "search": "597756001"
+    },
+    {
+     "key": "42",
+     "part_number": "593739203",
+     "depth": 0,
+     "sub": false,
+     "description": "DISPLAY",
+     "qty": "1",
+     "remarks": "",
+     "search": "593739203"
+    },
+    {
+     "key": "43",
+     "part_number": "590568002",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "1",
+     "remarks": "(IRIS)",
+     "search": "590568002"
+    },
+    {
+     "key": "44",
+     "part_number": "576958201",
+     "depth": 0,
+     "sub": false,
+     "description": "BATTERY",
+     "qty": "1",
+     "remarks": "",
+     "search": "576958201"
+    },
+    {
+     "key": "45",
+     "part_number": "577432001",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING",
+     "qty": "1",
+     "remarks": "GROUND TERMINAL",
+     "search": "577432001"
+    },
+    {
+     "key": "46",
+     "part_number": "597621501",
+     "depth": 0,
+     "sub": false,
+     "description": "MAIN SWITCH",
+     "qty": "1",
+     "remarks": "Main switch 12v",
+     "search": "597621501"
+    },
+    {
+     "key": "47",
+     "part_number": "577325101",
+     "depth": 0,
+     "sub": false,
+     "description": "RELAY",
+     "qty": "4",
+     "remarks": "",
+     "search": "577325101"
+    },
+    {
+     "key": "48",
+     "part_number": "597756501",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Fuse Power",
+     "search": "597756501"
+    },
+    {
+     "key": "49",
+     "part_number": "599689401",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Road kit control",
+     "search": "599689401"
+    },
+    {
+     "key": "50",
+     "part_number": "597756201",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "P-brake and seat",
+     "search": "597756201"
+    },
+    {
+     "key": "51",
+     "part_number": "599296601",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Water temp sensor",
+     "search": "599296601"
+    },
+    {
+     "key": "52",
+     "part_number": "598423301",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Jumper, IRIS",
+     "search": "598423301"
+    },
+    {
+     "key": "53",
+     "part_number": "599738101",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Jumper, P-brake",
+     "search": "599738101"
+    },
+    {
+     "key": "54",
+     "part_number": "599833601",
+     "depth": 0,
+     "sub": false,
+     "description": "SHEET",
+     "qty": "1",
+     "remarks": "GROUND TERMINAL",
+     "search": "599833601"
+    },
+    {
+     "key": "55",
+     "part_number": "579014201",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING",
+     "qty": "1",
+     "remarks": "AUX Switch",
+     "search": "579014201"
+    },
+    {
+     "key": "56",
+     "part_number": "597756901",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "597756901"
+    },
+    {
+     "key": "57",
+     "part_number": "597757101",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "597757101"
+    },
+    {
+     "key": "58",
+     "part_number": "544323701",
+     "depth": 0,
+     "sub": false,
+     "description": "GROUND CABLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "544323701"
+    },
+    {
+     "key": "59",
+     "part_number": "501182101",
+     "depth": 0,
+     "sub": false,
+     "description": "BUZZER",
+     "qty": "1",
+     "remarks": "",
+     "search": "501182101"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.6 ELECTRICAL"
+  },
+  {
+   "id": "8",
+   "number": "7",
+   "title": "LIFTING SYSTEM",
+   "image": "husp525dx-fig8.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 51.017,
+     "y": 20.259,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 54.418,
+     "y": 27.11,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 63.382,
+     "y": 16.901,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 50.668,
+     "y": 36.729,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 62.111,
+     "y": 41.13,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 69.421,
+     "y": 45.032,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 39.097,
+     "y": 32.486,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 58.868,
+     "y": 50.34,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 35.41,
+     "y": 41.629,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 61.92,
+     "y": 28.017,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 65.353,
+     "y": 51.112,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 18.627,
+     "y": 36.434,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 55.658,
+     "y": 53.312,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 28.29,
+     "y": 45.009,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 61.729,
+     "y": 55.059,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 33.884,
+     "y": 27.813,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 29.498,
+     "y": 28.857,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 72.378,
+     "y": 46.529,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 35.696,
+     "y": 31.284,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 86.809,
+     "y": 53.539,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 12.905,
+     "y": 28.516,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 81.818,
+     "y": 58.53,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 15.989,
+     "y": 30.377,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 39.701,
+     "y": 40.086,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 42.022,
+     "y": 41.198,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 69.072,
+     "y": 53.426,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 22.823,
+     "y": 33.394,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 47.425,
+     "y": 53.199,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 57.978,
+     "y": 18.875,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 60.935,
+     "y": 51.565,
+     "conf": 100
+    },
+    {
+     "key": "30",
+     "x": 48.951,
+     "y": 34.732,
+     "conf": 100
+    },
+    {
+     "key": "31",
+     "x": 47.87,
+     "y": 43.149,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "576050101",
+     "depth": 0,
+     "sub": false,
+     "description": "GAS SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "576050101"
+    },
+    {
+     "key": "3",
+     "part_number": "721857001",
+     "depth": 0,
+     "sub": false,
+     "description": "CLEVIS PIN",
+     "qty": "2",
+     "remarks": "",
+     "search": "721857001"
+    },
+    {
+     "key": "4",
+     "part_number": "574458801",
+     "depth": 0,
+     "sub": false,
+     "description": "CIRCLIP",
+     "qty": "2",
+     "remarks": "",
+     "search": "574458801"
+    },
+    {
+     "key": "5",
+     "part_number": "738881002",
+     "depth": 0,
+     "sub": false,
+     "description": "LUBRICATION NIPPLE",
+     "qty": "2",
+     "remarks": "",
+     "search": "738881002"
+    },
+    {
+     "key": "6",
+     "part_number": "576630401",
+     "depth": 0,
+     "sub": false,
+     "description": "BUSHING",
+     "qty": "2",
+     "remarks": "",
+     "search": "576630401"
+    },
+    {
+     "key": "7",
+     "part_number": "597709301",
+     "depth": 0,
+     "sub": false,
+     "description": "LIFTING ARM",
+     "qty": "1",
+     "remarks": "",
+     "search": "597709301"
+    },
+    {
+     "key": "8",
+     "part_number": "597709302",
+     "depth": 0,
+     "sub": false,
+     "description": "LIFTING ARM",
+     "qty": "1",
+     "remarks": "",
+     "search": "597709302"
+    },
+    {
+     "key": "9",
+     "part_number": "575814401",
+     "depth": 0,
+     "sub": false,
+     "description": "BEAM",
+     "qty": "1",
+     "remarks": "",
+     "search": "575814401"
+    },
+    {
+     "key": "10",
+     "part_number": "504887601",
+     "depth": 0,
+     "sub": false,
+     "description": "COTTER",
+     "qty": "2",
+     "remarks": "",
+     "search": "504887601"
+    },
+    {
+     "key": "11",
+     "part_number": "586424701",
+     "depth": 0,
+     "sub": false,
+     "description": "COTTER",
+     "qty": "2",
+     "remarks": "",
+     "search": "586424701"
+    },
+    {
+     "key": "13",
+     "part_number": "580717601",
+     "depth": 0,
+     "sub": false,
+     "description": "LINK",
+     "qty": "2",
+     "remarks": "LINK",
+     "search": "580717601"
+    },
+    {
+     "key": "14",
+     "part_number": "576645704",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "576645704"
+    },
+    {
+     "key": "15",
+     "part_number": "506570105",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "2",
+     "remarks": "",
+     "search": "506570105"
+    },
+    {
+     "key": "20",
+     "part_number": "597709901",
+     "depth": 0,
+     "sub": false,
+     "description": "SHAFT ASSY",
+     "qty": "2",
+     "remarks": "",
+     "search": "597709901"
+    },
+    {
+     "key": "24",
+     "part_number": "576654809",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "2",
+     "remarks": "",
+     "search": "576654809"
+    },
+    {
+     "key": "25",
+     "part_number": "544253201",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "4",
+     "remarks": "",
+     "search": "544253201"
+    },
+    {
+     "key": "26",
+     "part_number": "579811701",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING WASHER",
+     "qty": "4",
+     "remarks": "",
+     "search": "579811701"
+    },
+    {
+     "key": "27",
+     "part_number": "576625601",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "576625601"
+    },
+    {
+     "key": "28",
+     "part_number": "506966601",
+     "depth": 0,
+     "sub": false,
+     "description": "HAIR PIN COTTER",
+     "qty": "2",
+     "remarks": "",
+     "search": "506966601"
+    },
+    {
+     "key": "29",
+     "part_number": "721680251",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING COTTER",
+     "qty": "4",
+     "remarks": "",
+     "search": "721680251"
+    },
+    {
+     "key": "30",
+     "part_number": "506504806",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "4",
+     "remarks": "",
+     "search": "506504806"
+    },
+    {
+     "key": "31",
+     "part_number": "731432201",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON THIN NUT",
+     "qty": "4",
+     "remarks": "",
+     "search": "731432201"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.7 LIFTING SYSTEM"
+  },
+  {
+   "id": "9",
+   "number": "8",
+   "title": "PEDAL/BRAKE SYSTEM",
+   "image": "husp525dx-fig9.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 73.273,
+     "y": 29.486,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 9.051,
+     "y": 13.1,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 67.071,
+     "y": 79.5,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 85.354,
+     "y": 86.586,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 33.152,
+     "y": 11.029,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 55.212,
+     "y": 16.1,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 29.475,
+     "y": 13.071,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 54.283,
+     "y": 22.586,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 26.869,
+     "y": 42.343,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 57.434,
+     "y": 10.8,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 59.576,
+     "y": 8.9,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 27.939,
+     "y": 25.243,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 80.182,
+     "y": 22.729,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 82.101,
+     "y": 87.1,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 90.586,
+     "y": 25.957,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 77.515,
+     "y": 20.414,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 90.444,
+     "y": 14.214,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 67.071,
+     "y": 10.443,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 90.081,
+     "y": 24.214,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 68.667,
+     "y": 16.586,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 10.465,
+     "y": 68.114,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 46.061,
+     "y": 72.314,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 52.162,
+     "y": 84.114,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 76.505,
+     "y": 86.457,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 59.394,
+     "y": 79.329,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 55.838,
+     "y": 85.514,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 41.838,
+     "y": 72.243,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 73.01,
+     "y": 82.771,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 64.404,
+     "y": 81.571,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 87.293,
+     "y": 90.771,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 14.545,
+     "y": 61.143,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 64.323,
+     "y": 91.9,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 44.283,
+     "y": 84.071,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 38.263,
+     "y": 70.614,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 34.788,
+     "y": 69.314,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 26.687,
+     "y": 12.414,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 17.616,
+     "y": 8.571,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 9.556,
+     "y": 7.486,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 24.747,
+     "y": 11.243,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 15.576,
+     "y": 16.329,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 69.535,
+     "y": 80.514,
+     "conf": 100
+    },
+    {
+     "key": "30",
+     "x": 23.111,
+     "y": 73.757,
+     "conf": 100
+    },
+    {
+     "key": "31",
+     "x": 18.384,
+     "y": 76.986,
+     "conf": 100
+    },
+    {
+     "key": "32",
+     "x": 32.889,
+     "y": 74.371,
+     "conf": 100
+    },
+    {
+     "key": "32",
+     "x": 61.697,
+     "y": 40.2,
+     "conf": 100
+    },
+    {
+     "key": "33",
+     "x": 30.566,
+     "y": 80.714,
+     "conf": 100
+    },
+    {
+     "key": "33",
+     "x": 10.909,
+     "y": 71.514,
+     "conf": 100
+    },
+    {
+     "key": "33",
+     "x": 80.97,
+     "y": 53.986,
+     "conf": 100
+    },
+    {
+     "key": "34",
+     "x": 35.293,
+     "y": 78.243,
+     "conf": 100
+    },
+    {
+     "key": "34",
+     "x": 13.677,
+     "y": 70.429,
+     "conf": 100
+    },
+    {
+     "key": "34",
+     "x": 84.485,
+     "y": 51.6,
+     "conf": 100
+    },
+    {
+     "key": "35",
+     "x": 68.788,
+     "y": 33.814,
+     "conf": 100
+    },
+    {
+     "key": "36",
+     "x": 19.697,
+     "y": 65.057,
+     "conf": 100
+    },
+    {
+     "key": "36",
+     "x": 72.101,
+     "y": 36.743,
+     "conf": 100
+    },
+    {
+     "key": "37",
+     "x": 44.364,
+     "y": 56.414,
+     "conf": 100
+    },
+    {
+     "key": "38",
+     "x": 65.818,
+     "y": 62.457,
+     "conf": 100
+    },
+    {
+     "key": "39",
+     "x": 60.162,
+     "y": 58.114,
+     "conf": 100
+    },
+    {
+     "key": "39",
+     "x": 70.667,
+     "y": 59.914,
+     "conf": 100
+    },
+    {
+     "key": "40",
+     "x": 57.192,
+     "y": 60.386,
+     "conf": 100
+    },
+    {
+     "key": "40",
+     "x": 34.828,
+     "y": 59.871,
+     "conf": 100
+    },
+    {
+     "key": "41",
+     "x": 48.303,
+     "y": 55.286,
+     "conf": 100
+    },
+    {
+     "key": "41",
+     "x": 68.566,
+     "y": 60.971,
+     "conf": 100
+    },
+    {
+     "key": "42",
+     "x": 62.465,
+     "y": 64.429,
+     "conf": 100
+    },
+    {
+     "key": "42",
+     "x": 40.929,
+     "y": 64.3,
+     "conf": 100
+    },
+    {
+     "key": "43",
+     "x": 75.152,
+     "y": 95.129,
+     "conf": 100
+    },
+    {
+     "key": "43",
+     "x": 66.364,
+     "y": 68.586,
+     "conf": 100
+    },
+    {
+     "key": "43",
+     "x": 73.657,
+     "y": 59.757,
+     "conf": 100
+    },
+    {
+     "key": "44",
+     "x": 57.333,
+     "y": 68.357,
+     "conf": 100
+    },
+    {
+     "key": "45",
+     "x": 41.03,
+     "y": 47.757,
+     "conf": 100
+    },
+    {
+     "key": "45",
+     "x": 48.404,
+     "y": 65.543,
+     "conf": 100
+    },
+    {
+     "key": "46",
+     "x": 21.939,
+     "y": 39.129,
+     "conf": 100
+    },
+    {
+     "key": "46",
+     "x": 38.465,
+     "y": 46.971,
+     "conf": 100
+    },
+    {
+     "key": "46",
+     "x": 48.263,
+     "y": 63.271,
+     "conf": 100
+    },
+    {
+     "key": "47",
+     "x": 58.788,
+     "y": 70.186,
+     "conf": 100
+    },
+    {
+     "key": "48",
+     "x": 58.808,
+     "y": 72.4,
+     "conf": 100
+    },
+    {
+     "key": "49",
+     "x": 9.96,
+     "y": 27.914,
+     "conf": 100
+    },
+    {
+     "key": "49",
+     "x": 48.707,
+     "y": 60.586,
+     "conf": 100
+    },
+    {
+     "key": "50",
+     "x": 78.465,
+     "y": 56.786,
+     "conf": 100
+    },
+    {
+     "key": "51",
+     "x": 79.717,
+     "y": 51.371,
+     "conf": 100
+    },
+    {
+     "key": "52",
+     "x": 28.061,
+     "y": 35.029,
+     "conf": 100
+    },
+    {
+     "key": "52",
+     "x": 73.717,
+     "y": 46.771,
+     "conf": 100
+    },
+    {
+     "key": "53",
+     "x": 19.556,
+     "y": 24.657,
+     "conf": 100
+    },
+    {
+     "key": "54",
+     "x": 83.354,
+     "y": 36.914,
+     "conf": 100
+    },
+    {
+     "key": "55",
+     "x": 22.869,
+     "y": 26.529,
+     "conf": 100
+    },
+    {
+     "key": "56",
+     "x": 40.242,
+     "y": 40.086,
+     "conf": 100
+    },
+    {
+     "key": "57",
+     "x": 65.778,
+     "y": 51.686,
+     "conf": 100
+    },
+    {
+     "key": "58",
+     "x": 51.515,
+     "y": 45.143,
+     "conf": 100
+    },
+    {
+     "key": "59",
+     "x": 54.02,
+     "y": 46.4,
+     "conf": 100
+    },
+    {
+     "key": "60",
+     "x": 13.212,
+     "y": 24.029,
+     "conf": 100
+    },
+    {
+     "key": "60",
+     "x": 18.222,
+     "y": 30.886,
+     "conf": 100
+    },
+    {
+     "key": "60",
+     "x": 29.636,
+     "y": 43.814,
+     "conf": 100
+    },
+    {
+     "key": "60",
+     "x": 24.505,
+     "y": 41.357,
+     "conf": 100
+    },
+    {
+     "key": "61",
+     "x": 58.505,
+     "y": 40.614,
+     "conf": 100
+    },
+    {
+     "key": "62",
+     "x": 68.04,
+     "y": 50.629,
+     "conf": 100
+    },
+    {
+     "key": "63",
+     "x": 70.626,
+     "y": 45.086,
+     "conf": 100
+    },
+    {
+     "key": "64",
+     "x": 32.788,
+     "y": 30.929,
+     "conf": 100
+    },
+    {
+     "key": "65",
+     "x": 85.091,
+     "y": 42.0,
+     "conf": 100
+    },
+    {
+     "key": "66",
+     "x": 78.384,
+     "y": 62.614,
+     "conf": 100
+    },
+    {
+     "key": "67",
+     "x": 83.879,
+     "y": 64.829,
+     "conf": 100
+    },
+    {
+     "key": "68",
+     "x": 90.949,
+     "y": 59.0,
+     "conf": 100
+    },
+    {
+     "key": "69",
+     "x": 86.525,
+     "y": 70.371,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "501062201",
+     "depth": 0,
+     "sub": false,
+     "description": "SHEET",
+     "qty": "1",
+     "remarks": "",
+     "search": "501062201"
+    },
+    {
+     "key": "2",
+     "part_number": "506570104",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "11",
+     "remarks": "",
+     "search": "506570104"
+    },
+    {
+     "key": "3",
+     "part_number": "506916201",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "506916201"
+    },
+    {
+     "key": "5",
+     "part_number": "599641001",
+     "depth": 0,
+     "sub": false,
+     "description": "ARM",
+     "qty": "1",
+     "remarks": "",
+     "search": "599641001"
+    },
+    {
+     "key": "6",
+     "part_number": "576998701",
+     "depth": 0,
+     "sub": false,
+     "description": "SLEEVE",
+     "qty": "1",
+     "remarks": "",
+     "search": "576998701"
+    },
+    {
+     "key": "7",
+     "part_number": "725253671",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "1",
+     "remarks": "",
+     "search": "725253671"
+    },
+    {
+     "key": "8",
+     "part_number": "576645706",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "576645706"
+    },
+    {
+     "key": "9",
+     "part_number": "501062301",
+     "depth": 0,
+     "sub": false,
+     "description": "LID",
+     "qty": "1",
+     "remarks": "",
+     "search": "501062301"
+    },
+    {
+     "key": "10",
+     "part_number": "582084501",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "582084501"
+    },
+    {
+     "key": "11",
+     "part_number": "575882101",
+     "depth": 0,
+     "sub": false,
+     "description": "RECEPTACLE",
+     "qty": "2",
+     "remarks": "",
+     "search": "575882101"
+    },
+    {
+     "key": "12",
+     "part_number": "575881901",
+     "depth": 0,
+     "sub": false,
+     "description": "STUD",
+     "qty": "2",
+     "remarks": "",
+     "search": "575881901"
+    },
+    {
+     "key": "13",
+     "part_number": "575882001",
+     "depth": 0,
+     "sub": false,
+     "description": "RETAINER",
+     "qty": "2",
+     "remarks": "",
+     "search": "575882001"
+    },
+    {
+     "key": "14",
+     "part_number": "582087101",
+     "depth": 0,
+     "sub": false,
+     "description": "STAY",
+     "qty": "1",
+     "remarks": "",
+     "search": "582087101"
+    },
+    {
+     "key": "15",
+     "part_number": "588692001",
+     "depth": 0,
+     "sub": false,
+     "description": "PEDAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "588692001"
+    },
+    {
+     "key": "16",
+     "part_number": "576475101",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "576475101"
+    },
+    {
+     "key": "17",
+     "part_number": "506554301",
+     "depth": 0,
+     "sub": false,
+     "description": "BEARING",
+     "qty": "4",
+     "remarks": "",
+     "search": "506554301"
+    },
+    {
+     "key": "18",
+     "part_number": "586175001",
+     "depth": 0,
+     "sub": false,
+     "description": "PEDAL ARM",
+     "qty": "1",
+     "remarks": "",
+     "search": "586175001"
+    },
+    {
+     "key": "19",
+     "part_number": "576348901",
+     "depth": 0,
+     "sub": false,
+     "description": "SHAFT",
+     "qty": "1",
+     "remarks": "",
+     "search": "576348901"
+    },
+    {
+     "key": "21",
+     "part_number": "735311820",
+     "depth": 0,
+     "sub": false,
+     "description": "E-CLIP",
+     "qty": "2",
+     "remarks": "",
+     "search": "735311820"
+    },
+    {
+     "key": "22",
+     "part_number": "738881001",
+     "depth": 0,
+     "sub": false,
+     "description": "LUBRICATION NIPPLE",
+     "qty": "2",
+     "remarks": "",
+     "search": "738881001"
+    },
+    {
+     "key": "23",
+     "part_number": "582092501",
+     "depth": 0,
+     "sub": false,
+     "description": "LEVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "582092501"
+    },
+    {
+     "key": "24",
+     "part_number": "734117801",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "734117801"
+    },
+    {
+     "key": "25",
+     "part_number": "579296801",
+     "depth": 0,
+     "sub": false,
+     "description": "PEDAL PLATE ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "579296801"
+    },
+    {
+     "key": "26",
+     "part_number": "535479901",
+     "depth": 0,
+     "sub": false,
+     "description": "FOOTPLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "535479901"
+    },
+    {
+     "key": "27",
+     "part_number": "586966401",
+     "depth": 0,
+     "sub": false,
+     "description": "PEDAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "586966401"
+    },
+    {
+     "key": "28",
+     "part_number": "721430970",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING PIN",
+     "qty": "1",
+     "remarks": "",
+     "search": "721430970"
+    },
+    {
+     "key": "29",
+     "part_number": "585877301",
+     "depth": 0,
+     "sub": false,
+     "description": "SLEEVE",
+     "qty": "3",
+     "remarks": "",
+     "search": "585877301"
+    },
+    {
+     "key": "30",
+     "part_number": "506535603",
+     "depth": 0,
+     "sub": false,
+     "description": "DRAW SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "506535603"
+    },
+    {
+     "key": "31",
+     "part_number": "576352201",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRE ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "576352201"
+    },
+    {
+     "key": "32",
+     "part_number": "735310920",
+     "depth": 0,
+     "sub": false,
+     "description": "E-CLIP",
+     "qty": "1",
+     "remarks": "",
+     "search": "735310920"
+    },
+    {
+     "key": "33",
+     "part_number": "721839901",
+     "depth": 0,
+     "sub": false,
+     "description": "CLEVIS PIN",
+     "qty": "3",
+     "remarks": "",
+     "search": "721839901"
+    },
+    {
+     "key": "34",
+     "part_number": "721615201",
+     "depth": 0,
+     "sub": false,
+     "description": "SPLIT PIN",
+     "qty": "3",
+     "remarks": "",
+     "search": "721615201"
+    },
+    {
+     "key": "35",
+     "part_number": "579370001",
+     "depth": 0,
+     "sub": false,
+     "description": "STAY",
+     "qty": "1",
+     "remarks": "",
+     "search": "579370001"
+    },
+    {
+     "key": "36",
+     "part_number": "506570106",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "2",
+     "remarks": "",
+     "search": "506570106"
+    },
+    {
+     "key": "37",
+     "part_number": "576291402",
+     "depth": 0,
+     "sub": false,
+     "description": "PUSH ROD",
+     "qty": "1",
+     "remarks": "",
+     "search": "576291402"
+    },
+    {
+     "key": "38",
+     "part_number": "576291401",
+     "depth": 0,
+     "sub": false,
+     "description": "PUSH ROD",
+     "qty": "1",
+     "remarks": "",
+     "search": "576291401"
+    },
+    {
+     "key": "39",
+     "part_number": "506789901",
+     "depth": 0,
+     "sub": false,
+     "description": "VINKELLÄNK DIN 71802",
+     "qty": "2",
+     "remarks": "",
+     "search": "506789901"
+    },
+    {
+     "key": "40",
+     "part_number": "506789902",
+     "depth": 0,
+     "sub": false,
+     "description": "VINKELLÄNK DIN 71802",
+     "qty": "2",
+     "remarks": "",
+     "search": "506789902"
+    },
+    {
+     "key": "41",
+     "part_number": "506897601",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "506897601"
+    },
+    {
+     "key": "42",
+     "part_number": "731232001",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "731232001"
+    },
+    {
+     "key": "43",
+     "part_number": "576645705",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT FLANGE",
+     "qty": "4",
+     "remarks": "",
+     "search": "576645705"
+    },
+    {
+     "key": "44",
+     "part_number": "579440901",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL LEVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "579440901"
+    },
+    {
+     "key": "45",
+     "part_number": "576351501",
+     "depth": 0,
+     "sub": false,
+     "description": "SLEEVE",
+     "qty": "1",
+     "remarks": "",
+     "search": "576351501"
+    },
+    {
+     "key": "46",
+     "part_number": "506986101",
+     "depth": 0,
+     "sub": false,
+     "description": "BEARING",
+     "qty": "3",
+     "remarks": "",
+     "search": "506986101"
+    },
+    {
+     "key": "47",
+     "part_number": "576351601",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "576351601"
+    },
+    {
+     "key": "48",
+     "part_number": "725246451",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "1",
+     "remarks": "",
+     "search": "725246451"
+    },
+    {
+     "key": "49",
+     "part_number": "576434201",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON NUT",
+     "qty": "3",
+     "remarks": "",
+     "search": "576434201"
+    },
+    {
+     "key": "50",
+     "part_number": "579448901",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL LEVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "579448901"
+    },
+    {
+     "key": "51",
+     "part_number": "506570103",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "2",
+     "remarks": "",
+     "search": "506570103"
+    },
+    {
+     "key": "52",
+     "part_number": "506938301",
+     "depth": 0,
+     "sub": false,
+     "description": "DAMPER",
+     "qty": "2",
+     "remarks": "",
+     "search": "506938301"
+    },
+    {
+     "key": "53",
+     "part_number": "579303601",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "579303601"
+    },
+    {
+     "key": "54",
+     "part_number": "599640101",
+     "depth": 0,
+     "sub": false,
+     "description": "PARKING BRAKE",
+     "qty": "1",
+     "remarks": "",
+     "search": "599640101"
+    },
+    {
+     "key": "55",
+     "part_number": "588164103",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "588164103"
+    },
+    {
+     "key": "56",
+     "part_number": "588838901",
+     "depth": 0,
+     "sub": false,
+     "description": "LINK ARM",
+     "qty": "1",
+     "remarks": "",
+     "search": "588838901"
+    },
+    {
+     "key": "57",
+     "part_number": "506570107",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "2",
+     "remarks": "",
+     "search": "506570107"
+    },
+    {
+     "key": "58",
+     "part_number": "579303801",
+     "depth": 0,
+     "sub": false,
+     "description": "SHEET",
+     "qty": "1",
+     "remarks": "",
+     "search": "579303801"
+    },
+    {
+     "key": "59",
+     "part_number": "506597401",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "2",
+     "remarks": "",
+     "search": "506597401"
+    },
+    {
+     "key": "60",
+     "part_number": "732211801",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCK NUT",
+     "qty": "6",
+     "remarks": "",
+     "search": "732211801"
+    },
+    {
+     "key": "61",
+     "part_number": "505450301",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE",
+     "qty": "2",
+     "remarks": "",
+     "search": "505450301"
+    },
+    {
+     "key": "62",
+     "part_number": "535423802",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW RSQM",
+     "qty": "2",
+     "remarks": "",
+     "search": "535423802"
+    },
+    {
+     "key": "63",
+     "part_number": "579303701",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "579303701"
+    },
+    {
+     "key": "64",
+     "part_number": "579304001",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "579304001"
+    },
+    {
+     "key": "65",
+     "part_number": "579328702",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "579328702"
+    },
+    {
+     "key": "66",
+     "part_number": "544133601",
+     "depth": 0,
+     "sub": false,
+     "description": "DRAW SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "544133601"
+    },
+    {
+     "key": "67",
+     "part_number": "579304101",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "579304101"
+    },
+    {
+     "key": "68",
+     "part_number": "506570105",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "1",
+     "remarks": "",
+     "search": "506570105"
+    },
+    {
+     "key": "69",
+     "part_number": "580667801",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "580667801"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.8 PEDAL/BRAKE SYSTEM"
+  },
+  {
+   "id": "10",
+   "number": "9",
+   "title": "HYDRAULICS - 1",
+   "image": "husp525dx-fig10.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 70.057,
+     "y": 59.664,
+     "conf": 100
+    },
+    {
+     "key": "1",
+     "x": 84.456,
+     "y": 62.908,
+     "conf": 100
+    },
+    {
+     "key": "1",
+     "x": 87.603,
+     "y": 53.789,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 46.186,
+     "y": 27.291,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 88.493,
+     "y": 90.426,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 53.465,
+     "y": 45.463,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 77.94,
+     "y": 91.969,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 55.245,
+     "y": 35.277,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 30.992,
+     "y": 28.97,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 87.476,
+     "y": 43.194,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 62.238,
+     "y": 77.836,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 88.462,
+     "y": 78.834,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 58.392,
+     "y": 83.779,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 49.332,
+     "y": 8.099,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 66.656,
+     "y": 19.805,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 31.087,
+     "y": 23.389,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 38.048,
+     "y": 7.94,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 22.664,
+     "y": 47.89,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 79.752,
+     "y": 30.059,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 13.541,
+     "y": 64.61,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 65.162,
+     "y": 66.243,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 21.297,
+     "y": 58.961,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 75.334,
+     "y": 32.917,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 47.235,
+     "y": 69.351,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 20.28,
+     "y": 76.974,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 34.234,
+     "y": 59.188,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 66.783,
+     "y": 45.871,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 69.39,
+     "y": 61.751,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 82.708,
+     "y": 26.157,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 45.963,
+     "y": 38.181,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 54.323,
+     "y": 56.965,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 34.965,
+     "y": 42.582,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 48.188,
+     "y": 44.805,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 84.234,
+     "y": 61.162,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 87.921,
+     "y": 34.301,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 62.587,
+     "y": 46.801,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 73.935,
+     "y": 39.02,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 34.584,
+     "y": 64.043,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 31.659,
+     "y": 85.549,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 40.083,
+     "y": 57.509,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 61.093,
+     "y": 71.484,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 69.485,
+     "y": 67.967,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 46.058,
+     "y": 49.682,
+     "conf": 100
+    },
+    {
+     "key": "30",
+     "x": 69.294,
+     "y": 53.244,
+     "conf": 100
+    },
+    {
+     "key": "31",
+     "x": 37.254,
+     "y": 55.694,
+     "conf": 100
+    },
+    {
+     "key": "32",
+     "x": 48.188,
+     "y": 46.756,
+     "conf": 100
+    },
+    {
+     "key": "33",
+     "x": 64.971,
+     "y": 87.908,
+     "conf": 100
+    },
+    {
+     "key": "34",
+     "x": 87.413,
+     "y": 55.989,
+     "conf": 100
+    },
+    {
+     "key": "35",
+     "x": 69.326,
+     "y": 64.95,
+     "conf": 100
+    },
+    {
+     "key": "36",
+     "x": 84.139,
+     "y": 65.994,
+     "conf": 100
+    },
+    {
+     "key": "37",
+     "x": 84.234,
+     "y": 72.391,
+     "conf": 100
+    },
+    {
+     "key": "38",
+     "x": 88.048,
+     "y": 70.576,
+     "conf": 100
+    },
+    {
+     "key": "39",
+     "x": 69.485,
+     "y": 80.966,
+     "conf": 100
+    },
+    {
+     "key": "40",
+     "x": 71.488,
+     "y": 66.583,
+     "conf": 100
+    },
+    {
+     "key": "40",
+     "x": 71.488,
+     "y": 69.102,
+     "conf": 100
+    },
+    {
+     "key": "41",
+     "x": 69.104,
+     "y": 75.476,
+     "conf": 100
+    },
+    {
+     "key": "42",
+     "x": 87.031,
+     "y": 89.02,
+     "conf": 100
+    },
+    {
+     "key": "43",
+     "x": 66.052,
+     "y": 76.52,
+     "conf": 100
+    },
+    {
+     "key": "44",
+     "x": 60.871,
+     "y": 47.936,
+     "conf": 100
+    },
+    {
+     "key": "45",
+     "x": 58.773,
+     "y": 48.866,
+     "conf": 100
+    },
+    {
+     "key": "46",
+     "x": 41.894,
+     "y": 51.475,
+     "conf": 100
+    },
+    {
+     "key": "46",
+     "x": 59.981,
+     "y": 53.516,
+     "conf": 100
+    },
+    {
+     "key": "47",
+     "x": 87.953,
+     "y": 41.357,
+     "conf": 100
+    },
+    {
+     "key": "48",
+     "x": 32.867,
+     "y": 52.654,
+     "conf": 100
+    },
+    {
+     "key": "49",
+     "x": 46.917,
+     "y": 20.599,
+     "conf": 100
+    },
+    {
+     "key": "50",
+     "x": 45.582,
+     "y": 9.914,
+     "conf": 100
+    },
+    {
+     "key": "51",
+     "x": 45.55,
+     "y": 31.919,
+     "conf": 100
+    },
+    {
+     "key": "51",
+     "x": 51.748,
+     "y": 34.233,
+     "conf": 100
+    },
+    {
+     "key": "52",
+     "x": 63.668,
+     "y": 20.917,
+     "conf": 100
+    },
+    {
+     "key": "53",
+     "x": 43.833,
+     "y": 48.344,
+     "conf": 100
+    },
+    {
+     "key": "54",
+     "x": 86.427,
+     "y": 94.102,
+     "conf": 100
+    },
+    {
+     "key": "55",
+     "x": 86.459,
+     "y": 92.377,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "502435301",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "16",
+     "remarks": "",
+     "search": "502435301"
+    },
+    {
+     "key": "2",
+     "part_number": "506570104",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "2",
+     "remarks": "",
+     "search": "506570104"
+    },
+    {
+     "key": "3",
+     "part_number": "725236871",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "1",
+     "remarks": "",
+     "search": "725236871"
+    },
+    {
+     "key": "4",
+     "part_number": "506675408",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "506675408"
+    },
+    {
+     "key": "5",
+     "part_number": "535423802",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW RSQM",
+     "qty": "1",
+     "remarks": "",
+     "search": "535423802"
+    },
+    {
+     "key": "6",
+     "part_number": "535423801",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW RSQM",
+     "qty": "1",
+     "remarks": "",
+     "search": "535423801"
+    },
+    {
+     "key": "7",
+     "part_number": "576434201",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "576434201"
+    },
+    {
+     "key": "8",
+     "part_number": "535475245",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "2",
+     "remarks": "",
+     "search": "535475245"
+    },
+    {
+     "key": "9",
+     "part_number": "576645703",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "576645703"
+    },
+    {
+     "key": "10",
+     "part_number": "576645704",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "576645704"
+    },
+    {
+     "key": "11",
+     "part_number": "576645705",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT FLANGE",
+     "qty": "2",
+     "remarks": "",
+     "search": "576645705"
+    },
+    {
+     "key": "12",
+     "part_number": "506570106",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "10",
+     "remarks": "",
+     "search": "506570106"
+    },
+    {
+     "key": "13",
+     "part_number": "575886401",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT",
+     "qty": "1",
+     "remarks": "",
+     "search": "575886401"
+    },
+    {
+     "key": "14",
+     "part_number": "575874802",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "575874802"
+    },
+    {
+     "key": "15",
+     "part_number": "576632102",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "576632102"
+    },
+    {
+     "key": "16",
+     "part_number": "579270001",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC PIPE",
+     "qty": "1",
+     "remarks": "",
+     "search": "579270001"
+    },
+    {
+     "key": "17",
+     "part_number": "575874701",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "575874701"
+    },
+    {
+     "key": "18",
+     "part_number": "575874602",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "575874602"
+    },
+    {
+     "key": "19",
+     "part_number": "575874503",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "575874503"
+    },
+    {
+     "key": "20",
+     "part_number": "587444601",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "587444601"
+    },
+    {
+     "key": "21",
+     "part_number": "575875901",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC PIPE",
+     "qty": "1",
+     "remarks": "",
+     "search": "575875901"
+    },
+    {
+     "key": "22",
+     "part_number": "597696901",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC PIPE",
+     "qty": "1",
+     "remarks": "",
+     "search": "597696901"
+    },
+    {
+     "key": "23",
+     "part_number": "575881301",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "4",
+     "remarks": "",
+     "search": "575881301"
+    },
+    {
+     "key": "24",
+     "part_number": "575881304",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "5",
+     "remarks": "",
+     "search": "575881304"
+    },
+    {
+     "key": "25",
+     "part_number": "575881303",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "3",
+     "remarks": "",
+     "search": "575881303"
+    },
+    {
+     "key": "26",
+     "part_number": "575881402",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "2",
+     "remarks": "",
+     "search": "575881402"
+    },
+    {
+     "key": "27",
+     "part_number": "575881401",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "4",
+     "remarks": "",
+     "search": "575881401"
+    },
+    {
+     "key": "28",
+     "part_number": "544009701",
+     "depth": 0,
+     "sub": false,
+     "description": "PIPE FITTING",
+     "qty": "1",
+     "remarks": "",
+     "search": "544009701"
+    },
+    {
+     "key": "29",
+     "part_number": "575886501",
+     "depth": 0,
+     "sub": false,
+     "description": "PIPE FITTING",
+     "qty": "1",
+     "remarks": "",
+     "search": "575886501"
+    },
+    {
+     "key": "30",
+     "part_number": "575881502",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "575881502"
+    },
+    {
+     "key": "31",
+     "part_number": "579408801",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC PUMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "579408801"
+    },
+    {
+     "key": "32",
+     "part_number": "597222201",
+     "depth": 0,
+     "sub": false,
+     "description": "FILTER UNIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "597222201"
+    },
+    {
+     "key": "33",
+     "part_number": "597929401",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC TANK ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "597929401"
+    },
+    {
+     "key": "34",
+     "part_number": "544176401",
+     "depth": 0,
+     "sub": false,
+     "description": "TANK CAP",
+     "qty": "1",
+     "remarks": "",
+     "search": "544176401"
+    },
+    {
+     "key": "35",
+     "part_number": "575870801",
+     "depth": 0,
+     "sub": false,
+     "description": "PIPE",
+     "qty": "1",
+     "remarks": "",
+     "search": "575870801"
+    },
+    {
+     "key": "36",
+     "part_number": "575870901",
+     "depth": 0,
+     "sub": false,
+     "description": "PIPE",
+     "qty": "1",
+     "remarks": "",
+     "search": "575870901"
+    },
+    {
+     "key": "37",
+     "part_number": "544046506",
+     "depth": 0,
+     "sub": false,
+     "description": "O-RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "544046506"
+    },
+    {
+     "key": "38",
+     "part_number": "544046503",
+     "depth": 0,
+     "sub": false,
+     "description": "O-RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "544046503"
+    },
+    {
+     "key": "39",
+     "part_number": "544046505",
+     "depth": 0,
+     "sub": false,
+     "description": "O-RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "544046505"
+    },
+    {
+     "key": "40",
+     "part_number": "544010001",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "2",
+     "remarks": "",
+     "search": "544010001"
+    },
+    {
+     "key": "41",
+     "part_number": "544001901",
+     "depth": 0,
+     "sub": false,
+     "description": "OIL FILTER",
+     "qty": "1",
+     "remarks": "",
+     "search": "544001901"
+    },
+    {
+     "key": "42",
+     "part_number": "575871201",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "575871201"
+    },
+    {
+     "key": "43",
+     "part_number": "575871301",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "575871301"
+    },
+    {
+     "key": "44",
+     "part_number": "506775701",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "506775701"
+    },
+    {
+     "key": "45",
+     "part_number": "522471301",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "522471301"
+    },
+    {
+     "key": "46",
+     "part_number": "740421300",
+     "depth": 0,
+     "sub": false,
+     "description": "O-RING",
+     "qty": "2",
+     "remarks": "",
+     "search": "740421300"
+    },
+    {
+     "key": "47",
+     "part_number": "579736101",
+     "depth": 0,
+     "sub": false,
+     "description": "PIPE CLAMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "579736101"
+    },
+    {
+     "key": "48",
+     "part_number": "544010004",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "2",
+     "remarks": "",
+     "search": "544010004"
+    },
+    {
+     "key": "49",
+     "part_number": "597485201",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597485201"
+    },
+    {
+     "key": "50",
+     "part_number": "597484801",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597484801"
+    },
+    {
+     "key": "51",
+     "part_number": "597739501",
+     "depth": 0,
+     "sub": false,
+     "description": "SHEET",
+     "qty": "2",
+     "remarks": "",
+     "search": "597739501"
+    },
+    {
+     "key": "52",
+     "part_number": "506992001",
+     "depth": 0,
+     "sub": false,
+     "description": "PIPE",
+     "qty": "4",
+     "remarks": "",
+     "search": "506992001"
+    },
+    {
+     "key": "53",
+     "part_number": "597464301",
+     "depth": 0,
+     "sub": false,
+     "description": "OIL FILTER",
+     "qty": "1",
+     "remarks": "",
+     "search": "597464301"
+    },
+    {
+     "key": "54",
+     "part_number": "522471201",
+     "depth": 0,
+     "sub": false,
+     "description": "OIL PLUG",
+     "qty": "1",
+     "remarks": "",
+     "search": "522471201"
+    },
+    {
+     "key": "55",
+     "part_number": "522471301",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "522471301"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 1,
+   "label": "Fig.9 HYDRAULICS - 1"
+  },
+  {
+   "id": "11",
+   "number": "9",
+   "title": "HYDRAULICS - 2",
+   "image": "husp525dx-fig11.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 43.611,
+     "y": 40.358,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 75.715,
+     "y": 66.016,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 38.811,
+     "y": 43.625,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 57.438,
+     "y": 69.76,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 22.028,
+     "y": 37.409,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 57.788,
+     "y": 34.165,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 27.94,
+     "y": 32.146,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 56.516,
+     "y": 31.647,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 46.027,
+     "y": 77.722,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 42.435,
+     "y": 39.36,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 52.066,
+     "y": 75.204,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 52.448,
+     "y": 36.479,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 57.47,
+     "y": 30.036,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 48.538,
+     "y": 70.69,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 14.495,
+     "y": 71.552,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 16.751,
+     "y": 45.667,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 77.622,
+     "y": 27.042,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 83.026,
+     "y": 10.867,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 80.515,
+     "y": 22.55,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 17.832,
+     "y": 66.084,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 23.744,
+     "y": 53.993,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 20.407,
+     "y": 59.596,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 29.498,
+     "y": 86.706,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 55.34,
+     "y": 51.588,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 56.961,
+     "y": 17.967,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 75.079,
+     "y": 78.221,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 48.347,
+     "y": 90.948,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 62.587,
+     "y": 46.325,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 79.879,
+     "y": 73.503,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 60.299,
+     "y": 45.44,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 52.13,
+     "y": 41.107,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 58.423,
+     "y": 10.368,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 58.741,
+     "y": 28.652,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 56.071,
+     "y": 19.51,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 55.277,
+     "y": 77.926,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 71.551,
+     "y": 66.697,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 51.081,
+     "y": 48.072,
+     "conf": 100
+    },
+    {
+     "key": "30",
+     "x": 44.342,
+     "y": 25.862,
+     "conf": 100
+    },
+    {
+     "key": "31",
+     "x": 85.982,
+     "y": 68.035,
+     "conf": 100
+    },
+    {
+     "key": "32",
+     "x": 58.36,
+     "y": 71.325,
+     "conf": 100
+    },
+    {
+     "key": "33",
+     "x": 48.729,
+     "y": 78.607,
+     "conf": 100
+    },
+    {
+     "key": "33",
+     "x": 57.438,
+     "y": 75.544,
+     "conf": 100
+    },
+    {
+     "key": "34",
+     "x": 47.839,
+     "y": 72.323,
+     "conf": 100
+    },
+    {
+     "key": "34",
+     "x": 53.306,
+     "y": 67.151,
+     "conf": 100
+    },
+    {
+     "key": "35",
+     "x": 40.464,
+     "y": 73.548,
+     "conf": 100
+    },
+    {
+     "key": "36",
+     "x": 58.106,
+     "y": 81.828,
+     "conf": 100
+    },
+    {
+     "key": "37",
+     "x": 80.737,
+     "y": 48.82,
+     "conf": 100
+    },
+    {
+     "key": "38",
+     "x": 70.121,
+     "y": 40.495,
+     "conf": 100
+    },
+    {
+     "key": "39",
+     "x": 41.291,
+     "y": 28.562,
+     "conf": 100
+    },
+    {
+     "key": "40",
+     "x": 24.412,
+     "y": 39.043,
+     "conf": 100
+    },
+    {
+     "key": "41",
+     "x": 38.748,
+     "y": 37.772,
+     "conf": 100
+    },
+    {
+     "key": "42",
+     "x": 27.463,
+     "y": 40.064,
+     "conf": 100
+    },
+    {
+     "key": "43",
+     "x": 44.247,
+     "y": 27.405,
+     "conf": 100
+    },
+    {
+     "key": "44",
+     "x": 39.034,
+     "y": 29.333,
+     "conf": 100
+    },
+    {
+     "key": "45",
+     "x": 36.682,
+     "y": 30.195,
+     "conf": 100
+    },
+    {
+     "key": "46",
+     "x": 69.104,
+     "y": 23.299,
+     "conf": 100
+    },
+    {
+     "key": "47",
+     "x": 55.563,
+     "y": 35.231,
+     "conf": 100
+    },
+    {
+     "key": "48",
+     "x": 66.529,
+     "y": 75.567,
+     "conf": 100
+    },
+    {
+     "key": "49",
+     "x": 82.994,
+     "y": 72.436,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "522669001",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCFM",
+     "qty": "1",
+     "remarks": "",
+     "search": "522669001"
+    },
+    {
+     "key": "2",
+     "part_number": "506570103",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "6",
+     "remarks": "",
+     "search": "506570103"
+    },
+    {
+     "key": "3",
+     "part_number": "506570104",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "5",
+     "remarks": "",
+     "search": "506570104"
+    },
+    {
+     "key": "4",
+     "part_number": "731231601",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "731231601"
+    },
+    {
+     "key": "5",
+     "part_number": "506570108",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "3",
+     "remarks": "",
+     "search": "506570108"
+    },
+    {
+     "key": "6",
+     "part_number": "727646951",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW RSQM",
+     "qty": "1",
+     "remarks": "",
+     "search": "727646951"
+    },
+    {
+     "key": "7",
+     "part_number": "576645704",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "9",
+     "remarks": "",
+     "search": "576645704"
+    },
+    {
+     "key": "8",
+     "part_number": "725236461",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFT",
+     "qty": "1",
+     "remarks": "",
+     "search": "725236461"
+    },
+    {
+     "key": "9",
+     "part_number": "575875101",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "575875101"
+    },
+    {
+     "key": "10",
+     "part_number": "575875402",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "575875402"
+    },
+    {
+     "key": "11",
+     "part_number": "575875801",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "575875801"
+    },
+    {
+     "key": "12",
+     "part_number": "598508101",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "598508101"
+    },
+    {
+     "key": "13",
+     "part_number": "599128201",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "599128201"
+    },
+    {
+     "key": "14",
+     "part_number": "575875002",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "575875002"
+    },
+    {
+     "key": "15",
+     "part_number": "575875303",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "575875303"
+    },
+    {
+     "key": "16",
+     "part_number": "575875201",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "575875201"
+    },
+    {
+     "key": "17",
+     "part_number": "575874401",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "575874401"
+    },
+    {
+     "key": "18",
+     "part_number": "575881304",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "575881304"
+    },
+    {
+     "key": "19",
+     "part_number": "576444001",
+     "depth": 0,
+     "sub": false,
+     "description": "PIPE FITTING",
+     "qty": "4",
+     "remarks": "",
+     "search": "576444001"
+    },
+    {
+     "key": "20",
+     "part_number": "575881401",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "2",
+     "remarks": "",
+     "search": "575881401"
+    },
+    {
+     "key": "21",
+     "part_number": "575881302",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "575881302"
+    },
+    {
+     "key": "22",
+     "part_number": "579737601",
+     "depth": 0,
+     "sub": false,
+     "description": "PIPE FITTING",
+     "qty": "1",
+     "remarks": "",
+     "search": "579737601"
+    },
+    {
+     "key": "23",
+     "part_number": "575881501",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "575881501"
+    },
+    {
+     "key": "24",
+     "part_number": "575881503",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "575881503"
+    },
+    {
+     "key": "25",
+     "part_number": "597948301",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTION",
+     "qty": "2",
+     "remarks": "",
+     "search": "597948301"
+    },
+    {
+     "key": "26",
+     "part_number": "598818301",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "598818301"
+    },
+    {
+     "key": "27",
+     "part_number": "598844901",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC CYLINDER",
+     "qty": "1",
+     "remarks": "",
+     "search": "598844901"
+    },
+    {
+     "key": "28",
+     "part_number": "537594501",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC CYLINDER",
+     "qty": "1",
+     "remarks": "",
+     "search": "537594501"
+    },
+    {
+     "key": "29",
+     "part_number": "589651201",
+     "depth": 0,
+     "sub": false,
+     "description": "POWER STEERING",
+     "qty": "1",
+     "remarks": "",
+     "search": "589651201"
+    },
+    {
+     "key": "30",
+     "part_number": "588548601",
+     "depth": 0,
+     "sub": false,
+     "description": "VALVE",
+     "qty": "1",
+     "remarks": "",
+     "search": "588548601"
+    },
+    {
+     "key": "31",
+     "part_number": "576286401",
+     "depth": 0,
+     "sub": false,
+     "description": "SHAFT ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "576286401"
+    },
+    {
+     "key": "32",
+     "part_number": "576286402",
+     "depth": 0,
+     "sub": false,
+     "description": "SHAFT ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "576286402"
+    },
+    {
+     "key": "33",
+     "part_number": "576308501",
+     "depth": 0,
+     "sub": false,
+     "description": "COTTER",
+     "qty": "2",
+     "remarks": "",
+     "search": "576308501"
+    },
+    {
+     "key": "34",
+     "part_number": "735312600",
+     "depth": 0,
+     "sub": false,
+     "description": "CIRCLIP",
+     "qty": "2",
+     "remarks": "",
+     "search": "735312600"
+    },
+    {
+     "key": "35",
+     "part_number": "574531203",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE CLAMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "574531203"
+    },
+    {
+     "key": "36",
+     "part_number": "597844602",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "597844602"
+    },
+    {
+     "key": "37",
+     "part_number": "505453802",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE GUARD",
+     "qty": "1",
+     "remarks": "",
+     "search": "505453802"
+    },
+    {
+     "key": "38",
+     "part_number": "505453804",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE GUARD",
+     "qty": "1",
+     "remarks": "",
+     "search": "505453804"
+    },
+    {
+     "key": "39",
+     "part_number": "535437201",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "535437201"
+    },
+    {
+     "key": "40",
+     "part_number": "578254801",
+     "depth": 0,
+     "sub": false,
+     "description": "SHEET",
+     "qty": "1",
+     "remarks": "",
+     "search": "578254801"
+    },
+    {
+     "key": "41",
+     "part_number": "578370101",
+     "depth": 0,
+     "sub": false,
+     "description": "SHEET",
+     "qty": "1",
+     "remarks": "",
+     "search": "578370101"
+    },
+    {
+     "key": "42",
+     "part_number": "578254701",
+     "depth": 0,
+     "sub": false,
+     "description": "SHEET",
+     "qty": "1",
+     "remarks": "",
+     "search": "578254701"
+    },
+    {
+     "key": "43",
+     "part_number": "575881306",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "2",
+     "remarks": "",
+     "search": "575881306"
+    },
+    {
+     "key": "44",
+     "part_number": "544397401",
+     "depth": 0,
+     "sub": false,
+     "description": "QUICK COUPLING",
+     "qty": "2",
+     "remarks": "",
+     "search": "544397401"
+    },
+    {
+     "key": "45",
+     "part_number": "544461201",
+     "depth": 0,
+     "sub": false,
+     "description": "SEALING PLUG",
+     "qty": "2",
+     "remarks": "",
+     "search": "544461201"
+    },
+    {
+     "key": "46",
+     "part_number": "598955901",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRAULIC HOSE",
+     "qty": "2",
+     "remarks": "",
+     "search": "598955901"
+    },
+    {
+     "key": "47",
+     "part_number": "597849201",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597849201"
+    },
+    {
+     "key": "48",
+     "part_number": "586978501",
+     "depth": 0,
+     "sub": false,
+     "description": "BEARING",
+     "qty": "1",
+     "remarks": "",
+     "search": "586978501"
+    },
+    {
+     "key": "49",
+     "part_number": "595878501",
+     "depth": 0,
+     "sub": false,
+     "description": "SERVICE KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "595878501"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 2,
+   "label": "Fig.9 HYDRAULICS - 2"
+  },
+  {
+   "id": "12",
+   "number": "10",
+   "title": "COVER",
+   "image": "husp525dx-fig12.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 85.188,
+     "y": 40.109,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 79.212,
+     "y": 18.897,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 44.882,
+     "y": 8.326,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 47.934,
+     "y": 12.591,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 75.016,
+     "y": 75.862,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 53.846,
+     "y": 76.089,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 12.587,
+     "y": 48.299,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 29.688,
+     "y": 82.464,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 49.523,
+     "y": 19.442,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 52.638,
+     "y": 70.213,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 56.707,
+     "y": 51.429,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 28.004,
+     "y": 54.106,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 42.149,
+     "y": 23.299,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 47.298,
+     "y": 69.374,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 23.967,
+     "y": 26.792,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 34.266,
+     "y": 44.578,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 36.554,
+     "y": 69.578,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 25.493,
+     "y": 27.79,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 20.757,
+     "y": 50.068,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 50.477,
+     "y": 21.438,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 50.191,
+     "y": 27.314,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 42.435,
+     "y": 32.577,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 66.624,
+     "y": 11.729,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 82.009,
+     "y": 21.665,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 59.441,
+     "y": 68.489,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 38.175,
+     "y": 50.703,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 56.039,
+     "y": 54.537,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 48.538,
+     "y": 83.689,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 41.195,
+     "y": 62.228,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 46.186,
+     "y": 62.908,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 25.048,
+     "y": 54.515,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 39.86,
+     "y": 52.586,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 45.2,
+     "y": 78.153,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 36.84,
+     "y": 72.436,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 27.527,
+     "y": 84.279,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 24.285,
+     "y": 15.858,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 33.916,
+     "y": 7.464,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 32.74,
+     "y": 47.799,
+     "conf": 100
+    },
+    {
+     "key": "30",
+     "x": 15.13,
+     "y": 29.787,
+     "conf": 100
+    },
+    {
+     "key": "31",
+     "x": 74.698,
+     "y": 60.095,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "535425802",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHPANM",
+     "qty": "4",
+     "remarks": "",
+     "search": "535425802"
+    },
+    {
+     "key": "2",
+     "part_number": "577013901",
+     "depth": 0,
+     "sub": false,
+     "description": "RIVET",
+     "qty": "17",
+     "remarks": "",
+     "search": "577013901"
+    },
+    {
+     "key": "3",
+     "part_number": "576645703",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "4",
+     "remarks": "",
+     "search": "576645703"
+    },
+    {
+     "key": "4",
+     "part_number": "574856201",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "4",
+     "remarks": "",
+     "search": "574856201"
+    },
+    {
+     "key": "5",
+     "part_number": "574856202",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "20",
+     "remarks": "",
+     "search": "574856202"
+    },
+    {
+     "key": "6",
+     "part_number": "535429101",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING NUT",
+     "qty": "15",
+     "remarks": "",
+     "search": "535429101"
+    },
+    {
+     "key": "7",
+     "part_number": "597907101",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCKING PIN",
+     "qty": "2",
+     "remarks": "",
+     "search": "597907101"
+    },
+    {
+     "key": "8",
+     "part_number": "597907001",
+     "depth": 0,
+     "sub": false,
+     "description": "CLIP",
+     "qty": "2",
+     "remarks": "",
+     "search": "597907001"
+    },
+    {
+     "key": "9",
+     "part_number": "522557301",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "522557301"
+    },
+    {
+     "key": "10",
+     "part_number": "597907601",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "597907601"
+    },
+    {
+     "key": "11",
+     "part_number": "506916204",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "506916204"
+    },
+    {
+     "key": "12",
+     "part_number": "581878601",
+     "depth": 0,
+     "sub": false,
+     "description": "ENGINE HOOD",
+     "qty": "1",
+     "remarks": "",
+     "search": "581878601"
+    },
+    {
+     "key": "13",
+     "part_number": "576973401",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "576973401"
+    },
+    {
+     "key": "14",
+     "part_number": "577469001",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "2",
+     "remarks": "",
+     "search": "577469001"
+    },
+    {
+     "key": "15",
+     "part_number": "581747101",
+     "depth": 0,
+     "sub": false,
+     "description": "NET",
+     "qty": "1",
+     "remarks": "",
+     "search": "581747101"
+    },
+    {
+     "key": "16",
+     "part_number": "581747401",
+     "depth": 0,
+     "sub": false,
+     "description": "NET",
+     "qty": "1",
+     "remarks": "",
+     "search": "581747401"
+    },
+    {
+     "key": "17",
+     "part_number": "576237501",
+     "depth": 0,
+     "sub": false,
+     "description": "HINGE",
+     "qty": "1",
+     "remarks": "",
+     "search": "576237501"
+    },
+    {
+     "key": "18",
+     "part_number": "577229701",
+     "depth": 0,
+     "sub": false,
+     "description": "KEEPER",
+     "qty": "2",
+     "remarks": "",
+     "search": "577229701"
+    },
+    {
+     "key": "19",
+     "part_number": "598025701",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "598025701"
+    },
+    {
+     "key": "20",
+     "part_number": "586332001",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "586332001"
+    },
+    {
+     "key": "21",
+     "part_number": "597925001",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "597925001"
+    },
+    {
+     "key": "22",
+     "part_number": "599705001",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "599705001"
+    },
+    {
+     "key": "23",
+     "part_number": "599584702",
+     "depth": 0,
+     "sub": false,
+     "description": "SHEET",
+     "qty": "1",
+     "remarks": "",
+     "search": "599584702"
+    },
+    {
+     "key": "24",
+     "part_number": "589495701",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "589495701"
+    },
+    {
+     "key": "25",
+     "part_number": "597268801",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "597268801"
+    },
+    {
+     "key": "26",
+     "part_number": "597269001",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "597269001"
+    },
+    {
+     "key": "27",
+     "part_number": "597269301",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "597269301"
+    },
+    {
+     "key": "28",
+     "part_number": "597582301",
+     "depth": 0,
+     "sub": false,
+     "description": "BOX",
+     "qty": "1",
+     "remarks": "",
+     "search": "597582301"
+    },
+    {
+     "key": "29",
+     "part_number": "597268402",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "597268402"
+    },
+    {
+     "key": "30",
+     "part_number": "597268501",
+     "depth": 0,
+     "sub": false,
+     "description": "LID",
+     "qty": "1",
+     "remarks": "",
+     "search": "597268501"
+    },
+    {
+     "key": "31",
+     "part_number": "597576001",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "597576001"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.10 COVER"
+  },
+  {
+   "id": "13",
+   "number": "11",
+   "title": "DECALS",
+   "image": "husp525dx-fig13.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 26.582,
+     "y": 10.676,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 57.819,
+     "y": 9.749,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 81.177,
+     "y": 14.852,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 28.436,
+     "y": 41.177,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 53.426,
+     "y": 34.934,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 78.295,
+     "y": 35.975,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 31.016,
+     "y": 63.327,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 59.936,
+     "y": 64.282,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 31.862,
+     "y": 80.245,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 63.583,
+     "y": 78.734,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 78.799,
+     "y": 78.606,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "522446301",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "522446301"
+    },
+    {
+     "key": "2",
+     "part_number": "582570005",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "582570005"
+    },
+    {
+     "key": "3",
+     "part_number": "505516601",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "505516601"
+    },
+    {
+     "key": "4",
+     "part_number": "580712901",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "4",
+     "remarks": "",
+     "search": "580712901"
+    },
+    {
+     "key": "5",
+     "part_number": "599672101",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "599672101"
+    },
+    {
+     "key": "6",
+     "part_number": "593585201",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "593585201"
+    },
+    {
+     "key": "7",
+     "part_number": "580712801",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "580712801"
+    },
+    {
+     "key": "8",
+     "part_number": "599655201",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "2",
+     "remarks": "",
+     "search": "599655201"
+    },
+    {
+     "key": "9",
+     "part_number": "598729401",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "2",
+     "remarks": "",
+     "search": "598729401"
+    },
+    {
+     "key": "10",
+     "part_number": "506584501",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "506584501"
+    },
+    {
+     "key": "11",
+     "part_number": "546284006",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "546284006"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.11 DECALS"
+  },
+  {
+   "id": "14",
+   "number": "12",
+   "title": "CHASSIS",
+   "image": "husp525dx-fig14.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 18.118,
+     "y": 51.924,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 61.89,
+     "y": 40.964,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 85.107,
+     "y": 39.595,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 78.859,
+     "y": 36.032,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 79.0,
+     "y": 81.87,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 66.284,
+     "y": 41.334,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 65.236,
+     "y": 43.073,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 35.57,
+     "y": 36.374,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 87.364,
+     "y": 23.903,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 67.896,
+     "y": 14.424,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 23.801,
+     "y": 12.457,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 53.93,
+     "y": 24.815,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 34.946,
+     "y": 16.762,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 44.841,
+     "y": 28.25,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 23.499,
+     "y": 22.164,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 27.973,
+     "y": 43.116,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 50.423,
+     "y": 50.171,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 54.131,
+     "y": 81.172,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 33.817,
+     "y": 40.18,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 64.45,
+     "y": 60.704,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 14.309,
+     "y": 32.127,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 19.871,
+     "y": 57.839,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 27.207,
+     "y": 47.149,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 57.678,
+     "y": 64.809,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 64.027,
+     "y": 57.326,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 58.404,
+     "y": 49.572,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 75.574,
+     "y": 61.574,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 67.251,
+     "y": 68.8,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 67.251,
+     "y": 66.947,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 66.102,
+     "y": 82.027,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 66.546,
+     "y": 64.153,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 66.546,
+     "y": 62.899,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 66.546,
+     "y": 58.58,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 85.127,
+     "y": 41.619,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 85.127,
+     "y": 43.629,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 71.503,
+     "y": 40.208,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 67.856,
+     "y": 49.558,
+     "conf": 100
+    },
+    {
+     "key": "30",
+     "x": 67.513,
+     "y": 51.069,
+     "conf": 100
+    },
+    {
+     "key": "31",
+     "x": 79.121,
+     "y": 37.828,
+     "conf": 100
+    },
+    {
+     "key": "32",
+     "x": 63.442,
+     "y": 42.432,
+     "conf": 100
+    },
+    {
+     "key": "35",
+     "x": 18.138,
+     "y": 40.051,
+     "conf": 100
+    },
+    {
+     "key": "35",
+     "x": 35.933,
+     "y": 47.99,
+     "conf": 100
+    },
+    {
+     "key": "36",
+     "x": 72.148,
+     "y": 19.056,
+     "conf": 100
+    },
+    {
+     "key": "38",
+     "x": 37.042,
+     "y": 23.047,
+     "conf": 100
+    },
+    {
+     "key": "38",
+     "x": 37.525,
+     "y": 29.561,
+     "conf": 100
+    },
+    {
+     "key": "39",
+     "x": 19.146,
+     "y": 21.066,
+     "conf": 100
+    },
+    {
+     "key": "39",
+     "x": 56.429,
+     "y": 35.832,
+     "conf": 100
+    },
+    {
+     "key": "40",
+     "x": 20.052,
+     "y": 23.96,
+     "conf": 100
+    },
+    {
+     "key": "40",
+     "x": 52.116,
+     "y": 37.03,
+     "conf": 100
+    },
+    {
+     "key": "41",
+     "x": 15.578,
+     "y": 25.812,
+     "conf": 100
+    },
+    {
+     "key": "41",
+     "x": 35.228,
+     "y": 33.709,
+     "conf": 100
+    },
+    {
+     "key": "42",
+     "x": 88.996,
+     "y": 65.835,
+     "conf": 100
+    },
+    {
+     "key": "43",
+     "x": 17.977,
+     "y": 38.341,
+     "conf": 100
+    },
+    {
+     "key": "43",
+     "x": 37.586,
+     "y": 46.152,
+     "conf": 100
+    },
+    {
+     "key": "44",
+     "x": 38.835,
+     "y": 93.843,
+     "conf": 100
+    },
+    {
+     "key": "45",
+     "x": 38.996,
+     "y": 92.104,
+     "conf": 100
+    },
+    {
+     "key": "46",
+     "x": 41.233,
+     "y": 86.117,
+     "conf": 100
+    },
+    {
+     "key": "46",
+     "x": 54.534,
+     "y": 67.289,
+     "conf": 100
+    },
+    {
+     "key": "47",
+     "x": 63.926,
+     "y": 8.979,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "506675408",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "4",
+     "remarks": "",
+     "search": "506675408"
+    },
+    {
+     "key": "2",
+     "part_number": "506570104",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "2",
+     "remarks": "",
+     "search": "506570104"
+    },
+    {
+     "key": "3",
+     "part_number": "544362401",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "4",
+     "remarks": "",
+     "search": "544362401"
+    },
+    {
+     "key": "4",
+     "part_number": "577376701",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "1",
+     "remarks": "",
+     "search": "577376701"
+    },
+    {
+     "key": "5",
+     "part_number": "576645705",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT FLANGE",
+     "qty": "1",
+     "remarks": "",
+     "search": "576645705"
+    },
+    {
+     "key": "6",
+     "part_number": "502233601",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "4",
+     "remarks": "",
+     "search": "502233601"
+    },
+    {
+     "key": "7",
+     "part_number": "734117201",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "4",
+     "remarks": "",
+     "search": "734117201"
+    },
+    {
+     "key": "8",
+     "part_number": "576654809",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "4",
+     "remarks": "",
+     "search": "576654809"
+    },
+    {
+     "key": "9",
+     "part_number": "576645706",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "4",
+     "remarks": "",
+     "search": "576645706"
+    },
+    {
+     "key": "10",
+     "part_number": "577411601",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "2",
+     "remarks": "",
+     "search": "577411601"
+    },
+    {
+     "key": "11",
+     "part_number": "577411901",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT FLANGE",
+     "qty": "2",
+     "remarks": "",
+     "search": "577411901"
+    },
+    {
+     "key": "12",
+     "part_number": "731231801",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "731231801"
+    },
+    {
+     "key": "13",
+     "part_number": "597972501",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "5",
+     "remarks": "",
+     "search": "597972501"
+    },
+    {
+     "key": "14",
+     "part_number": "597972301",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "5",
+     "remarks": "",
+     "search": "597972301"
+    },
+    {
+     "key": "15",
+     "part_number": "597707502",
+     "depth": 0,
+     "sub": false,
+     "description": "FRAME ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "597707502"
+    },
+    {
+     "key": "16",
+     "part_number": "579622301",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTACT PLATE",
+     "qty": "2",
+     "remarks": "",
+     "search": "579622301"
+    },
+    {
+     "key": "17",
+     "part_number": "544254101",
+     "depth": 0,
+     "sub": false,
+     "description": "PLUG",
+     "qty": "2",
+     "remarks": "",
+     "search": "544254101"
+    },
+    {
+     "key": "18",
+     "part_number": "596677101",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "596677101"
+    },
+    {
+     "key": "19",
+     "part_number": "594744701",
+     "depth": 0,
+     "sub": false,
+     "description": "REAR AXLE ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "594744701"
+    },
+    {
+     "key": "20",
+     "part_number": "594744501",
+     "depth": 0,
+     "sub": false,
+     "description": "BEARING",
+     "qty": "1",
+     "remarks": "",
+     "search": "594744501"
+    },
+    {
+     "key": "21",
+     "part_number": "598565001",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCKING RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "598565001"
+    },
+    {
+     "key": "22",
+     "part_number": "738881001",
+     "depth": 0,
+     "sub": false,
+     "description": "LUBRICATION NIPPLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "738881001"
+    },
+    {
+     "key": "23",
+     "part_number": "597613901",
+     "depth": 0,
+     "sub": false,
+     "description": "FIXING PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "597613901"
+    },
+    {
+     "key": "24",
+     "part_number": "597614101",
+     "depth": 0,
+     "sub": false,
+     "description": "SPACER RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "597614101"
+    },
+    {
+     "key": "25",
+     "part_number": "510034003",
+     "depth": 0,
+     "sub": false,
+     "description": "CAP",
+     "qty": "1",
+     "remarks": "",
+     "search": "510034003"
+    },
+    {
+     "key": "26",
+     "part_number": "585563001",
+     "depth": 0,
+     "sub": false,
+     "description": "WEAR PLATE",
+     "qty": "2",
+     "remarks": "",
+     "search": "585563001"
+    },
+    {
+     "key": "27",
+     "part_number": "576474201",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE",
+     "qty": "2",
+     "remarks": "",
+     "search": "576474201"
+    },
+    {
+     "key": "28",
+     "part_number": "596973701",
+     "depth": 0,
+     "sub": false,
+     "description": "LINK ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "596973701"
+    },
+    {
+     "key": "29",
+     "part_number": "583854701",
+     "depth": 0,
+     "sub": false,
+     "description": "SHAFT PIVOT",
+     "qty": "1",
+     "remarks": "",
+     "search": "583854701"
+    },
+    {
+     "key": "30",
+     "part_number": "583861201",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "583861201"
+    },
+    {
+     "key": "31",
+     "part_number": "578246401",
+     "depth": 0,
+     "sub": false,
+     "description": "SLEEVE",
+     "qty": "1",
+     "remarks": "",
+     "search": "578246401"
+    },
+    {
+     "key": "32",
+     "part_number": "597010701",
+     "depth": 0,
+     "sub": false,
+     "description": "SHEET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597010701"
+    },
+    {
+     "key": "35",
+     "part_number": "579703302",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE SLEEVE",
+     "qty": "4",
+     "remarks": "",
+     "search": "579703302"
+    },
+    {
+     "key": "36",
+     "part_number": "577406101",
+     "depth": 0,
+     "sub": false,
+     "description": "STIFFENING PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "577406101"
+    },
+    {
+     "key": "38",
+     "part_number": "577668101",
+     "depth": 0,
+     "sub": false,
+     "description": "PLASTIC COVER",
+     "qty": "2",
+     "remarks": "",
+     "search": "577668101"
+    },
+    {
+     "key": "39",
+     "part_number": "574388002",
+     "depth": 0,
+     "sub": false,
+     "description": "PIN",
+     "qty": "2",
+     "remarks": "",
+     "search": "574388002"
+    },
+    {
+     "key": "40",
+     "part_number": "721680251",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING COTTER",
+     "qty": "2",
+     "remarks": "",
+     "search": "721680251"
+    },
+    {
+     "key": "41",
+     "part_number": "501976601",
+     "depth": 0,
+     "sub": false,
+     "description": "ANTIVIBRATION ELEMENT",
+     "qty": "2",
+     "remarks": "",
+     "search": "501976601"
+    },
+    {
+     "key": "42",
+     "part_number": "580643101",
+     "depth": 0,
+     "sub": false,
+     "description": "INSERT",
+     "qty": "2",
+     "remarks": "",
+     "search": "580643101"
+    },
+    {
+     "key": "43",
+     "part_number": "529554301",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "4",
+     "remarks": "",
+     "search": "529554301"
+    },
+    {
+     "key": "44",
+     "part_number": "725249551",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "7",
+     "remarks": "",
+     "search": "725249551"
+    },
+    {
+     "key": "45",
+     "part_number": "522449801",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "522449801"
+    },
+    {
+     "key": "46",
+     "part_number": "596663001",
+     "depth": 0,
+     "sub": false,
+     "description": "SHAFT",
+     "qty": "1",
+     "remarks": "",
+     "search": "596663001"
+    },
+    {
+     "key": "47",
+     "part_number": "547663501",
+     "depth": 0,
+     "sub": false,
+     "description": "ROPS",
+     "qty": "1",
+     "remarks": "Complete rops kit",
+     "search": "547663501"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.12 CHASSIS"
+  },
+  {
+   "id": "15",
+   "number": "13",
+   "title": "STEERING",
+   "image": "husp525dx-fig15.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 43.071,
+     "y": 61.048,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 19.962,
+     "y": 66.198,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 57.788,
+     "y": 62.681,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 47.489,
+     "y": 51.27,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 85.06,
+     "y": 40.699,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 51.621,
+     "y": 57.736,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 31.405,
+     "y": 74.569,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 57.597,
+     "y": 80.24,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 53.02,
+     "y": 87.545,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 10.648,
+     "y": 45.372,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 36.205,
+     "y": 71.688,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 57.47,
+     "y": 64.27,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 89.383,
+     "y": 51.815,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 24.476,
+     "y": 26.429,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 55.467,
+     "y": 42.151,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 67.832,
+     "y": 64.859,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 63.287,
+     "y": 11.547,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 74.698,
+     "y": 67.332,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 59.186,
+     "y": 9.868,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 45.01,
+     "y": 18.852,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 37.508,
+     "y": 15.789,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 22.314,
+     "y": 43.534,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 63.7,
+     "y": 64.247,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 51.43,
+     "y": 82.759,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 29.625,
+     "y": 90.29,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 54.355,
+     "y": 76.112,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 65.067,
+     "y": 67.377,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 56.23,
+     "y": 65.517,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 67.514,
+     "y": 48.14,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 57.057,
+     "y": 24.501,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 33.439,
+     "y": 14.791,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 52.193,
+     "y": 49.887,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 42.721,
+     "y": 27.11,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 28.036,
+     "y": 24.206,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 42.339,
+     "y": 20.032,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 36.173,
+     "y": 31.012,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 78.64,
+     "y": 64.496,
+     "conf": 100
+    },
+    {
+     "key": "30",
+     "x": 57.661,
+     "y": 42.877,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "576434201",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "576434201"
+    },
+    {
+     "key": "2",
+     "part_number": "506570106",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "3",
+     "remarks": "",
+     "search": "506570106"
+    },
+    {
+     "key": "3",
+     "part_number": "506570101",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "2",
+     "remarks": "",
+     "search": "506570101"
+    },
+    {
+     "key": "4",
+     "part_number": "725236461",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFT",
+     "qty": "4",
+     "remarks": "",
+     "search": "725236461"
+    },
+    {
+     "key": "5",
+     "part_number": "506916204",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "506916204"
+    },
+    {
+     "key": "6",
+     "part_number": "580272901",
+     "depth": 0,
+     "sub": false,
+     "description": "INSERT",
+     "qty": "3",
+     "remarks": "",
+     "search": "580272901"
+    },
+    {
+     "key": "7",
+     "part_number": "506570104",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "7",
+     "remarks": "",
+     "search": "506570104"
+    },
+    {
+     "key": "8",
+     "part_number": "544221601",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "544221601"
+    },
+    {
+     "key": "9",
+     "part_number": "535475212",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "6",
+     "remarks": "",
+     "search": "535475212"
+    },
+    {
+     "key": "10",
+     "part_number": "535429101",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING NUT",
+     "qty": "4",
+     "remarks": "",
+     "search": "535429101"
+    },
+    {
+     "key": "11",
+     "part_number": "574856202",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "4",
+     "remarks": "",
+     "search": "574856202"
+    },
+    {
+     "key": "12",
+     "part_number": "506916201",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "4",
+     "remarks": "",
+     "search": "506916201"
+    },
+    {
+     "key": "13",
+     "part_number": "725545101",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "4",
+     "remarks": "",
+     "search": "725545101"
+    },
+    {
+     "key": "14",
+     "part_number": "597508901",
+     "depth": 0,
+     "sub": false,
+     "description": "CONSOLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "597508901"
+    },
+    {
+     "key": "15",
+     "part_number": "599811201",
+     "depth": 0,
+     "sub": false,
+     "description": "PANEL ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "599811201"
+    },
+    {
+     "key": "16",
+     "part_number": "599584101",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "599584101"
+    },
+    {
+     "key": "17",
+     "part_number": "576444301",
+     "depth": 0,
+     "sub": false,
+     "description": "SHEET",
+     "qty": "1",
+     "remarks": "",
+     "search": "576444301"
+    },
+    {
+     "key": "18",
+     "part_number": "597496001",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597496001"
+    },
+    {
+     "key": "19",
+     "part_number": "544291401",
+     "depth": 0,
+     "sub": false,
+     "description": "STEERING WHEEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "544291401"
+    },
+    {
+     "key": "20",
+     "part_number": "735881200",
+     "depth": 0,
+     "sub": false,
+     "description": "WOODRUFF KEY",
+     "qty": "1",
+     "remarks": "",
+     "search": "735881200"
+    },
+    {
+     "key": "21",
+     "part_number": "597453401",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597453401"
+    },
+    {
+     "key": "22",
+     "part_number": "597454701",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "597454701"
+    },
+    {
+     "key": "23",
+     "part_number": "597268601",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "597268601"
+    },
+    {
+     "key": "24",
+     "part_number": "544404301",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCKWASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "544404301"
+    },
+    {
+     "key": "25",
+     "part_number": "580328203",
+     "depth": 0,
+     "sub": false,
+     "description": "SEALING STRIP",
+     "qty": "1",
+     "remarks": "",
+     "search": "580328203"
+    },
+    {
+     "key": "26",
+     "part_number": "597466601",
+     "depth": 0,
+     "sub": false,
+     "description": "THROTTLE CONTROL",
+     "qty": "1",
+     "remarks": "",
+     "search": "597466601"
+    },
+    {
+     "key": "27",
+     "part_number": "592933401",
+     "depth": 0,
+     "sub": false,
+     "description": "KNOB",
+     "qty": "1",
+     "remarks": "",
+     "search": "592933401"
+    },
+    {
+     "key": "28",
+     "part_number": "593785801",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRE",
+     "qty": "1",
+     "remarks": "",
+     "search": "593785801"
+    },
+    {
+     "key": "29",
+     "part_number": "529511701",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "529511701"
+    },
+    {
+     "key": "30",
+     "part_number": "529674101",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "529674101"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.13 STEERING"
+  },
+  {
+   "id": "16",
+   "number": "14",
+   "title": "SEAT",
+   "image": "husp525dx-fig16.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 67.769,
+     "y": 15.268,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 41.068,
+     "y": 61.456,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 59.822,
+     "y": 55.558,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 54.927,
+     "y": 62.16,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 59.186,
+     "y": 65.177,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 72.982,
+     "y": 62.409,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 36.141,
+     "y": 82.827,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 40.623,
+     "y": 83.598,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 64.209,
+     "y": 74.115,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 29.371,
+     "y": 80.808,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 52.448,
+     "y": 83.848,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 52.956,
+     "y": 58.802,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 72.664,
+     "y": 44.76,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 67.069,
+     "y": 57.464,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 56.993,
+     "y": 63.68,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 28.353,
+     "y": 18.761,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 58.805,
+     "y": 35.685,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 58.455,
+     "y": 81.329,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 77.273,
+     "y": 28.516,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 31.214,
+     "y": 45.826,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 31.341,
+     "y": 44.124,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 30.769,
+     "y": 47.074,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 80.229,
+     "y": 6.783,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 40.655,
+     "y": 9.8,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 69.676,
+     "y": 19.76,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "529521701",
+     "depth": 0,
+     "sub": false,
+     "description": "SEAT ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "529521701"
+    },
+    {
+     "key": "2",
+     "part_number": "599533202",
+     "depth": 0,
+     "sub": false,
+     "description": "SHEET",
+     "qty": "1",
+     "remarks": "",
+     "search": "599533202"
+    },
+    {
+     "key": "3",
+     "part_number": "537594601",
+     "depth": 0,
+     "sub": false,
+     "description": "LATCH",
+     "qty": "1",
+     "remarks": "From S/N 20234000009",
+     "search": "537594601"
+    },
+    {
+     "key": "3",
+     "part_number": "538979101",
+     "depth": 0,
+     "sub": false,
+     "description": "LATCH ASSY",
+     "qty": "1",
+     "remarks": "Up to S/N 20234000008, including POS 4",
+     "search": "538979101"
+    },
+    {
+     "key": "4",
+     "part_number": "535438201",
+     "depth": 0,
+     "sub": false,
+     "description": "KNOB",
+     "qty": "1",
+     "remarks": "Up to S/N 20234000008",
+     "search": "535438201"
+    },
+    {
+     "key": "4",
+     "part_number": "537464201",
+     "depth": 0,
+     "sub": false,
+     "description": "KNOB",
+     "qty": "1",
+     "remarks": "From S/N 20234000009",
+     "search": "537464201"
+    },
+    {
+     "key": "5",
+     "part_number": "544218103",
+     "depth": 0,
+     "sub": false,
+     "description": "DRAW SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "544218103"
+    },
+    {
+     "key": "6",
+     "part_number": "506597401",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "4",
+     "remarks": "",
+     "search": "506597401"
+    },
+    {
+     "key": "7",
+     "part_number": "576645704",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "6",
+     "remarks": "",
+     "search": "576645704"
+    },
+    {
+     "key": "8",
+     "part_number": "506916201",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "506916201"
+    },
+    {
+     "key": "9",
+     "part_number": "576543001",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "576543001"
+    },
+    {
+     "key": "10",
+     "part_number": "506570103",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "4",
+     "remarks": "",
+     "search": "506570103"
+    },
+    {
+     "key": "11",
+     "part_number": "544914301",
+     "depth": 0,
+     "sub": false,
+     "description": "SAFETY BELT",
+     "qty": "1",
+     "remarks": "",
+     "search": "544914301"
+    },
+    {
+     "key": "12",
+     "part_number": "575883501",
+     "depth": 0,
+     "sub": false,
+     "description": "STAY",
+     "qty": "1",
+     "remarks": "",
+     "search": "575883501"
+    },
+    {
+     "key": "13",
+     "part_number": "531110401",
+     "depth": 0,
+     "sub": false,
+     "description": "HARNESS",
+     "qty": "1",
+     "remarks": "",
+     "search": "531110401"
+    },
+    {
+     "key": "14",
+     "part_number": "734116401",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "4",
+     "remarks": "",
+     "search": "734116401"
+    },
+    {
+     "key": "15",
+     "part_number": "725246151",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "4",
+     "remarks": "",
+     "search": "725246151"
+    },
+    {
+     "key": "16",
+     "part_number": "588612301",
+     "depth": 0,
+     "sub": false,
+     "description": "DISTANCE",
+     "qty": "2",
+     "remarks": "",
+     "search": "588612301"
+    },
+    {
+     "key": "17",
+     "part_number": "529905201",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH",
+     "qty": "1",
+     "remarks": "NOT SHOWN",
+     "search": "529905201"
+    },
+    {
+     "key": "18",
+     "part_number": "582310201",
+     "depth": 0,
+     "sub": false,
+     "description": "ARM REST",
+     "qty": "1",
+     "remarks": "",
+     "search": "582310201"
+    },
+    {
+     "key": "19",
+     "part_number": "582310401",
+     "depth": 0,
+     "sub": false,
+     "description": "ARM REST",
+     "qty": "1",
+     "remarks": "",
+     "search": "582310401"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.14 SEAT"
+  }
+ ]
+}

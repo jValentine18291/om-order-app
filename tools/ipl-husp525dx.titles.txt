@@ -1,0 +1,54 @@
+# P525DX — titles as printed on the machine's own drawings, read off the sheets.
+#
+# TWO PAIRS SHARE A NAME IN THE EXPORT
+# The portal files two sheets as "ENGINE" and two more as "HYDRAULICS", so the
+# app would show two identical buttons in each case with nothing to choose
+# between them. The drawings number them, and that is all the difference there
+# is - so the numbers are the title:
+#
+#   ENGINE - 1        ENGINE - 2
+#   HYDRAULICS - 1    HYDRAULICS - 2
+#
+# FOUR MORE WHERE THE DRAWING SIMPLY SAYS SOMETHING ELSE
+# The rule in ipl-import-csv.py is that the drawing wins, because it is the page
+# in front of the technician. These are the four:
+#
+#   portal "MOWER LIFT / DECK LIFT"  ->  drawing "LIFTING SYSTEM"
+#   portal "PEDALS"                  ->  drawing "PEDAL/BRAKE SYSTEM"
+#   portal "CHASSIS / FRAME"         ->  drawing "CHASSIS"
+#
+# Worth knowing: the Z242F book was imported with no titles file, so it carries
+# the portal's wording and calls the same section "MOWER LIFT / DECK LIFT".
+# Two ride-on books naming one section two ways is Husqvarna's own inconsistency
+# showing through, not a mistake here - but if the two should be made to agree,
+# this is the file to change.
+#
+# THE ORDER IS THE EXPORT'S, AND THAT IS THE BOOK'S
+# The IPL IDs run HVA_PL-000008814 to ...8829 in the order the sheets appear,
+# so no --order is needed here.
+#
+# TO RE-IMPORT:
+#
+#   python tools/ipl-import-csv.py --csv "P525DX IPL.csv" \
+#     --id husp525dx --name "Husqvarna P525DX Ride-on Mower" \
+#     --short "P525DX" --brand Husqvarna --category "Ride-on Mower" \
+#     --titles tools/ipl-husp525dx.titles.txt
+#
+# One line per sheet, in the order --dry-run lists them.
+# "-" keeps the export's own name for that sheet.
+PTO
+ENGINE - 1
+ENGINE - 2
+FUEL SYSTEM
+PROPULSION
+WHEELS AND TIRES
+ELECTRICAL
+LIFTING SYSTEM
+PEDAL/BRAKE SYSTEM
+HYDRAULICS - 1
+HYDRAULICS - 2
+COVER
+DECALS
+CHASSIS
+STEERING
+SEAT

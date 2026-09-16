@@ -382,5 +382,14 @@
   "category": "Zero-Turn Mower",
   "figures": 11,
   "parts": 369
+ },
+ {
+  "id": "husp525dx",
+  "name": "Husqvarna P525DX Ride-on Mower",
+  "short": "P525DX",
+  "brand": "Husqvarna",
+  "category": "Ride-on Mower",
+  "figures": 16,
+  "parts": 584
  }
 ]
