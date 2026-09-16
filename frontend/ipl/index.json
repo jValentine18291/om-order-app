@@ -373,5 +373,14 @@
   "category": "Chipper Shredder",
   "figures": 51,
   "parts": 1356
+ },
+ {
+  "id": "husz242f",
+  "name": "Husqvarna Z242F Zero-Turn Mower",
+  "short": "Z242F",
+  "brand": "Husqvarna",
+  "category": "Zero-Turn Mower",
+  "figures": 11,
+  "parts": 369
  }
 ]
