@@ -1,5 +1,23 @@
 [
  {
+  "id": "hus120ib",
+  "name": "Husqvarna 120iB Blower",
+  "short": "120iB",
+  "brand": "Husqvarna",
+  "category": "Blower",
+  "figures": 5,
+  "parts": 29
+ },
+ {
+  "id": "hus125b",
+  "name": "Husqvarna 125B Blower",
+  "short": "125B",
+  "brand": "Husqvarna",
+  "category": "Blower",
+  "figures": 7,
+  "parts": 98
+ },
+ {
   "id": "hus131rb",
   "name": "Husqvarna 131RB Brushcutter",
   "short": "131RB",
@@ -81,6 +99,15 @@
   "parts": 280
  },
  {
+  "id": "hus525rx",
+  "name": "Husqvarna 525RX Brushcutter",
+  "short": "525RX",
+  "brand": "Husqvarna",
+  "category": "Brushcutter",
+  "figures": 17,
+  "parts": 270
+ },
+ {
   "id": "hus531rb",
   "name": "Husqvarna 531RB",
   "short": "531RB",
@@ -109,6 +136,15 @@
   "aliases": [
    "436Li"
   ]
+ },
+ {
+  "id": "hus541rb",
+  "name": "Husqvarna 541RB Brushcutter",
+  "short": "541RB",
+  "brand": "Husqvarna",
+  "category": "Brushcutter",
+  "figures": 26,
+  "parts": 270
  },
  {
   "id": "am450x",
@@ -384,6 +420,15 @@
   "parts": 213
  },
  {
+  "id": "sgcz231st",
+  "name": "Zenoah SGCZ231ST-L-EZ Reciprocator",
+  "short": "SGCZ231ST-L-EZ",
+  "brand": "Zenoah",
+  "category": "Reciprocator",
+  "figures": 8,
+  "parts": 231
+ },
+ {
   "id": "shtza",
   "name": "Zenoah SHTZ-A Trimmer Head",
   "short": "SHTZ-A",
@@ -400,41 +445,5 @@
   "category": "Chipper Shredder",
   "figures": 51,
   "parts": 1356
- },
- {
-  "id": "hus525rx",
-  "name": "Husqvarna 525RX Brushcutter",
-  "short": "525RX",
-  "brand": "Husqvarna",
-  "category": "Brushcutter",
-  "figures": 17,
-  "parts": 270
- },
- {
-  "id": "hus541rb",
-  "name": "Husqvarna 541RB Brushcutter",
-  "short": "541RB",
-  "brand": "Husqvarna",
-  "category": "Brushcutter",
-  "figures": 26,
-  "parts": 270
- },
- {
-  "id": "hus120ib",
-  "name": "Husqvarna 120iB Blower",
-  "short": "120iB",
-  "brand": "Husqvarna",
-  "category": "Blower",
-  "figures": 5,
-  "parts": 29
- },
- {
-  "id": "hus125b",
-  "name": "Husqvarna 125B Blower",
-  "short": "125B",
-  "brand": "Husqvarna",
-  "category": "Blower",
-  "figures": 7,
-  "parts": 98
  }
 ]

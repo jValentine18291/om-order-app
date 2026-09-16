@@ -90,6 +90,31 @@ def placeholder(comment):
     return "", (name or "Not listed in this book"), (note or "No part number in this book.")
 
 
+def maker_code(comment):
+    """The maker's OWN part number, off the front of the Comment column.
+
+    Husqvarna's article number is not always what AutoCount holds. On the
+    Zenoah books the Comment carries the Kawasaki number that AutoCount is
+    actually stocked under - "848A2J66B1,L600" is the blade AutoCount calls
+    "SZEN 848A2J66B1" - and without it those parts find nothing. The app only
+    reaches for this when the article number finds nothing, so it costs nothing
+    when it is wrong.
+
+    But the same column holds PROSE on the Husqvarna books - "For Asia and LA",
+    "SERIAL 202522XXXXX AND LOWER", "Blade - ***See Service Reference***" - and
+    a fallback search for those is noise at best. A part number has no spaces in
+    it and carries real digits, so that is the test: whitespace anywhere in the
+    first comma-separated field disqualifies it, as does fewer than five digits.
+    Five is the same threshold the app uses to decide what looks like a part
+    code inside a note.
+    """
+    first = (comment or "").split(",")[0].strip()
+    if not first or any(ch.isspace() for ch in first):
+        return ""
+    code = "".join(ch for ch in first.upper() if ch.isalnum())
+    return code if sum(ch.isdigit() for ch in code) >= 5 else ""
+
+
 def read_rows(path):
     with io.open(path, encoding="utf-8-sig", newline="") as f:
         rows = list(csv.DictReader(f))
@@ -394,9 +419,12 @@ def main():
             code = (r["Article Number"] or "").strip()
             desc = (r["Article Name"] or "").strip()
             note = (r.get("Comment") or "").strip()
+            # Read before the placeholder rewrite consumes the comment. A
+            # placeholder has no part to find, so it gets no fallback either.
+            alt = "" if code == DUMMY_ARTICLE else maker_code(note)
             if code == DUMMY_ARTICLE:
                 code, desc, note = placeholder(note)
-            parts.append({
+            part = {
                 "key": ref,
                 "part_number": code,
                 "depth": 0,
@@ -405,7 +433,13 @@ def main():
                 "qty": (r["Qty"] or "").strip(),
                 "remarks": note,
                 "search": "".join(ch for ch in code.upper() if ch.isalnum()),
-            })
+            }
+            # Only when there is one, and only when it says something the
+            # article number does not - so a book without maker codes is
+            # byte-for-byte what it was before this existed.
+            if alt and alt != part["search"]:
+                part["search_alt"] = alt
+            parts.append(part)
             spots.extend(hotspots_for(r.get("Coordinates"), ref, page_w, page_h))
 
         # One callout can list several parts - the 345BT's muffler is catalyst

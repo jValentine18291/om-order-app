@@ -157,6 +157,28 @@ check("the number is always dropped",
       [mod.placeholder(c)[0] for c in ("Blade - x", "", "Not Used")],
       ["", "", ""])
 
+# ---- the maker's own part number ---------------------------------------------
+# On the Zenoah books the Comment holds the Kawasaki number AutoCount is
+# actually stocked under, and the app falls back to it when the article number
+# finds nothing. On the Husqvarna books the same column holds prose. Telling
+# those apart is the whole job, and getting it wrong is quiet: a fallback search
+# for "FORASIAANDLA" simply returns nothing and nobody ever knows why a part
+# would not resolve.
+print("\n-- the Comment column, when it is a part number and when it is not --")
+check("a bare maker code is taken",
+      mod.maker_code("110141310"), "110141310")
+check("and the first field of a coded one",
+      mod.maker_code("026390514,M5x14-CS/PS"), "026390514")
+check("separators are stripped, as AutoCount stores them",
+      mod.maker_code("848A2J66B1,L600"), "848A2J66B1")
+check("a market note is not a part number", mod.maker_code("For Asia and LA"), "")
+check("nor is a serial range", mod.maker_code("SERIAL 202522XXXXX AND LOWER"), "")
+check("nor a cross-reference", mod.maker_code("Blade - ***See Service Reference***"), "")
+# No spaces but no digits either - a fastener spec, not something to search for.
+check("nor a thread spec", mod.maker_code("M6xHF"), "")
+check("nor a single word", mod.maker_code("Chrome"), "")
+check("and nothing at all is nothing", mod.maker_code(""), "")
+
 print("" if failures else "\nAll good." if not failures else "")
 print("%d FAILED" % failures if failures else "")
 sys.exit(1 if failures else 0)

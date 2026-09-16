@@ -18,7 +18,7 @@
 //
 // REQUIRES poppler (pdftotext, pdftoppm). Set POPPLER_BIN if they are not on
 // PATH — on John's PC a copy ships with the Invoice Processor:
-//   POPPLER_BIN="P:/1-SCAN/Invoice Processor Portable/_internal/poppler/Library/bin"
+//   POPPLER_BIN="C:/Claude Code/Invoice Processor Portable/_internal/poppler/Library/bin"
 // ============================================================================
 
 const { execFileSync } = require("child_process");

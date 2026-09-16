@@ -20,8 +20,8 @@
 //
 // REQUIRES poppler and tesseract. On John's PC both ship with the Invoice
 // Processor:
-//   POPPLER_BIN="P:/1-SCAN/Invoice Processor Portable/_internal/poppler/Library/bin"
-//   TESSERACT_BIN="P:/1-SCAN/Invoice Processor Portable/_internal/tesseract"
+//   POPPLER_BIN="C:/Claude Code/Invoice Processor Portable/_internal/poppler/Library/bin"
+//   TESSERACT_BIN="C:/Claude Code/Invoice Processor Portable/_internal/tesseract"
 // ============================================================================
 
 const { execFileSync } = require("child_process");

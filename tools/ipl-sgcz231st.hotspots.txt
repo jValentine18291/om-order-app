@@ -1,0 +1,36 @@
+# SGCZ231ST-L-EZ - the two labels that name more than one part.
+#
+#     <figure> add|unlisted|drop  <key> <x%> <y%>
+#
+# Zenoah label a set of alternatives with one run of text rather than one
+# number per part:
+#
+#     15A,15B,15C   three shims, T0.3 / T0.2 / T0.1
+#     39A,39B       two blade sets, 230mm standard and 255mm optional
+#
+# The extractor reads callouts out of the PDF's text layer and takes each as a
+# whole token, so neither run matched a part key and five parts ended up with
+# nothing to tap. They are the parts a technician is MOST likely to be hunting
+# on this sheet - which shim to pack, which blade to fit - so leaving them
+# untappable would miss the point of the page.
+#
+# One hotspot per name, placed on its own name. The label is wide and each of
+# the three sits at its own x, so this is not a fudge: tapping "15B" lands on
+# the text that says 15B. Measured off the sheet with a 1% grid.
+#
+# "add", not "unlisted": every one of these keys IS in the parts list.
+
+# --- Fig.8 CUTTING HEAD -------------------------------------------------------
+8 add 15A 26.80 29.00
+8 add 15B 30.10 29.00
+8 add 15C 33.50 29.00
+8 add 39A 64.90 68.10
+8 add 39B 68.40 68.10
+
+# NOT corrected here, deliberately: part 41, the STABILIZER, has no callout
+# anywhere on the sheet, while "40" - a bolt, M6x8, quantity 8 - is printed
+# three times and the third points at a disc that is plainly not a bolt. It
+# looks like Zenoah printed 40 where they meant 41, but the drawing is the
+# drawing, and inventing a 41 on top of a printed 40 would make the app
+# disagree with the book in a technician's hands. 41 stays in the parts list,
+# reachable by reading rather than tapping. Raised with John 16 Sep 2026.
