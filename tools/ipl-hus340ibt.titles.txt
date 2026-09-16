@@ -1,0 +1,17 @@
+# 340iBT sheet titles, in the order the export lists them (A to G already).
+#
+# Only two differ from the export, and they are the same two the 120iB needed:
+# the drawings say FAN SYSTEM and ELECTRIC SYSTEM where the export says FAN and
+# ELECTRICAL. Using the printed words puts the two battery blowers in the same
+# language as each other as well as as their own books.
+#
+# Sheet 1 is genuinely TUBE here, unlike the 120iB, whose equivalent sheet the
+# drawing calls CHASSI - so it is left alone. The printed name wins either way;
+# it just happens to agree this time.
+TUBE
+THROTTLE CONTROLS
+HOUSING
+FAN SYSTEM
+ELECTRIC SYSTEM
+HARNESS
+ACCESSORIES
