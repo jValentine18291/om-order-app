@@ -1,0 +1,15 @@
+# LC 347iVX corrections.
+#
+# One line. DECK 23 is printed and numbered on the drawing, between 22 and 24,
+# with no row in the parts list. Its leader points at a small ribbed moulding
+# on the side of the chassis - a pad or a cover of some sort; the drawing does
+# not say and neither will this file. The refs step 22, 24, which from the
+# data alone is indistinguishable from a retired number.
+#
+# Marked unlisted, so the app says the book prints this callout and lists no
+# part for it rather than leaving a dead spot in the middle of the deck.
+#
+# Position read off a percentage grid drawn on the sheet itself in absolute
+# percentages, so it needs no neighbour to calibrate against; the grid lines
+# for 26 and 64 landed where they should, which is the check that matters.
+1 unlisted 23 27.2 65.1

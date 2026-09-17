@@ -1,0 +1,31 @@
+# LC 347iVX sheet titles, in the order the export lists them (A to D already).
+#
+# Two names differ from the portal, and both are the portal being longer than
+# the page rather than differently worded:
+#
+#     A   DECK    export: MOWER DECK / CUTTING DECK
+#     C   BLADE   export: BLADE MOTOR AND CUTTING EQUIPMENT
+#
+# BLADE is the one worth getting right. The export's name promises the blade
+# motor, and the blade motor is not on it - C is the blade, its support, the
+# bolt stack that holds it and the deck it mounts to. The motor is D, a sheet
+# of its own. A technician sent to "BLADE MOTOR AND CUTTING EQUIPMENT" for a
+# motor finds a blade and reasonably concludes the book is wrong.
+#
+# THE SUPPLIER SPLIT ON D, which the export does carry in its remarks, so it
+# needs nothing here - but it is unlike any other split in the app and worth
+# knowing exists. Three callouts on MOTOR list two parts each, and they are
+# not early-and-late versions of one design, they are two suppliers:
+#
+#     3   CONTACT PLATE   "Local" 593133601   /  "Tyco" 593133603
+#     4   CONTROL UNIT    "Local" 593132701   /  "Tyco" 593132703
+#     5   MOTOR           "Local" 592749301   /  "Tyco" 592749302
+#
+# The Tyco rows add "Use in models after S/N 20191900001", the Local rows say
+# nothing about serials at all, so the two readings are not symmetrical and
+# the drawing cannot settle it. Tapping the callout shows both with their
+# notes, which is the honest answer; the machine's own serial decides.
+DECK
+HANDLE
+BLADE
+MOTOR

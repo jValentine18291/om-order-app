@@ -1,0 +1,1532 @@
+{
+ "id": "huslc347ivx",
+ "name": "Husqvarna LC 347iVX Lawn Mower",
+ "source": "Husqvarna portal CSV export (LC 347iVX Battery Lawn Mower IPL.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "DECK",
+   "image": "huslc347ivx-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 58.614,
+     "y": 13.907,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 33.376,
+     "y": 12.999,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 17.324,
+     "y": 28.698,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 56.898,
+     "y": 19.487,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 25.207,
+     "y": 23.503,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 56.802,
+     "y": 23.026,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 33.757,
+     "y": 20.349,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 37.603,
+     "y": 29.923,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 66.465,
+     "y": 30.989,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 53.433,
+     "y": 38.589,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 66.783,
+     "y": 42.536,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 82.39,
+     "y": 44.328,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 80.547,
+     "y": 50.272,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 52.098,
+     "y": 5.672,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 18.881,
+     "y": 43.33,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 78.576,
+     "y": 36.774,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 41.068,
+     "y": 14.95,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 50.572,
+     "y": 11.139,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 56.262,
+     "y": 58.553,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 75.461,
+     "y": 68.285,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 57.565,
+     "y": 79.333,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 65.385,
+     "y": 79.923,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 80.547,
+     "y": 66.652,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 84.107,
+     "y": 71.166,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 48.061,
+     "y": 76.452,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 41.195,
+     "y": 62.069,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 27.2,
+     "y": 65.1,
+     "byHand": true,
+     "unlisted": true
+    },
+    {
+     "key": "24",
+     "x": 16.434,
+     "y": 61.683,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 34.425,
+     "y": 77.473,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 18.627,
+     "y": 83.394,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 30.642,
+     "y": 9.642,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 33.503,
+     "y": 73.299,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 41.958,
+     "y": 37.999,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 10.394,
+     "y": 59.233,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 51.939,
+     "y": 56.76,
+     "conf": 100
+    },
+    {
+     "key": "30",
+     "x": 59.25,
+     "y": 60.368,
+     "conf": 100
+    },
+    {
+     "key": "31",
+     "x": 62.27,
+     "y": 61.23,
+     "conf": 100
+    },
+    {
+     "key": "32",
+     "x": 65.13,
+     "y": 61.933,
+     "conf": 100
+    },
+    {
+     "key": "32",
+     "x": 70.248,
+     "y": 64.201,
+     "conf": 100
+    },
+    {
+     "key": "33",
+     "x": 67.737,
+     "y": 62.863,
+     "conf": 100
+    },
+    {
+     "key": "34",
+     "x": 47.807,
+     "y": 94.669,
+     "conf": 100
+    },
+    {
+     "key": "35",
+     "x": 42.594,
+     "y": 88.929,
+     "conf": 100
+    },
+    {
+     "key": "36",
+     "x": 86.491,
+     "y": 39.769,
+     "conf": 100
+    },
+    {
+     "key": "37",
+     "x": 67.228,
+     "y": 11.729,
+     "conf": 100
+    },
+    {
+     "key": "38",
+     "x": 65.035,
+     "y": 6.352,
+     "conf": 100
+    },
+    {
+     "key": "39",
+     "x": 71.551,
+     "y": 84.188,
+     "conf": 100
+    },
+    {
+     "key": "40",
+     "x": 75.493,
+     "y": 84.596,
+     "conf": 100
+    },
+    {
+     "key": "40",
+     "x": 88.907,
+     "y": 70.894,
+     "conf": 100
+    },
+    {
+     "key": "41",
+     "x": 67.514,
+     "y": 13.407,
+     "conf": 100
+    },
+    {
+     "key": "42",
+     "x": 67.832,
+     "y": 15.041,
+     "conf": 100
+    },
+    {
+     "key": "43",
+     "x": 68.023,
+     "y": 16.901,
+     "conf": 100
+    },
+    {
+     "key": "44",
+     "x": 47.521,
+     "y": 70.259,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "587203701",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER HALF",
+     "qty": "1",
+     "remarks": "Husqvarna,Suspension - Left - Height adjustment",
+     "search": "587203701"
+    },
+    {
+     "key": "2",
+     "part_number": "587203801",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER HALF",
+     "qty": "1",
+     "remarks": "Husqvarna,Suspension - Right - Height adjustment",
+     "search": "587203801"
+    },
+    {
+     "key": "3",
+     "part_number": "587687001",
+     "depth": 0,
+     "sub": false,
+     "description": "SHAFT",
+     "qty": "2",
+     "remarks": "Suspension",
+     "search": "587687001"
+    },
+    {
+     "key": "4",
+     "part_number": "735311220",
+     "depth": 0,
+     "sub": false,
+     "description": "E-CLIP",
+     "qty": "2",
+     "remarks": "7x0.9 St PP,SHAFTS",
+     "search": "735311220"
+    },
+    {
+     "key": "5",
+     "part_number": "587160801",
+     "depth": 0,
+     "sub": false,
+     "description": "ROD",
+     "qty": "1",
+     "remarks": "Suspension 170/210",
+     "search": "587160801"
+    },
+    {
+     "key": "6",
+     "part_number": "587212302",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE SUPPORT",
+     "qty": "1",
+     "remarks": "right",
+     "search": "587212302"
+    },
+    {
+     "key": "7",
+     "part_number": "590594001",
+     "depth": 0,
+     "sub": false,
+     "description": "HATCH",
+     "qty": "1",
+     "remarks": "HVA, rear discharge",
+     "search": "590594001"
+    },
+    {
+     "key": "8",
+     "part_number": "587674401",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "47 cm,Balance - Suspension",
+     "search": "587674401"
+    },
+    {
+     "key": "9",
+     "part_number": "587095402",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "Service door",
+     "search": "587095402"
+    },
+    {
+     "key": "10",
+     "part_number": "587212102",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE SUPPORT",
+     "qty": "1",
+     "remarks": "left",
+     "search": "587212102"
+    },
+    {
+     "key": "11",
+     "part_number": "578175802",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "7",
+     "remarks": "8x24, TBO,For Thermoplastics",
+     "search": "578175802"
+    },
+    {
+     "key": "12",
+     "part_number": "587151005",
+     "depth": 0,
+     "sub": false,
+     "description": "CHASSIS",
+     "qty": "1",
+     "remarks": "Husqvarna,47 cm",
+     "search": "587151005"
+    },
+    {
+     "key": "13",
+     "part_number": "586984601",
+     "depth": 0,
+     "sub": false,
+     "description": "AXLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "586984601"
+    },
+    {
+     "key": "14",
+     "part_number": "589597601",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "HA Button",
+     "search": "589597601"
+    },
+    {
+     "key": "15",
+     "part_number": "587697401",
+     "depth": 0,
+     "sub": false,
+     "description": "BUTTON",
+     "qty": "1",
+     "remarks": "ASSY - Suspension - Height adjustment",
+     "search": "587697401"
+    },
+    {
+     "key": "16",
+     "part_number": "587072501",
+     "depth": 0,
+     "sub": false,
+     "description": "LINK ARM",
+     "qty": "1",
+     "remarks": "Rear idler 210",
+     "search": "587072501"
+    },
+    {
+     "key": "17",
+     "part_number": "582305701",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL ASSY",
+     "qty": "2",
+     "remarks": "Husqvarna, With Sleeve,210, idle, medium",
+     "search": "582305701"
+    },
+    {
+     "key": "18",
+     "part_number": "587631501",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL ASSY",
+     "qty": "2",
+     "remarks": "Husqvarna,170, Idler",
+     "search": "587631501"
+    },
+    {
+     "key": "19",
+     "part_number": "587990901",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "4",
+     "remarks": "Lock, M12x10",
+     "search": "587990901"
+    },
+    {
+     "key": "20",
+     "part_number": "584159301",
+     "depth": 0,
+     "sub": false,
+     "description": "HUB CAP",
+     "qty": "2",
+     "remarks": "Wheel Ø210mm",
+     "search": "584159301"
+    },
+    {
+     "key": "21",
+     "part_number": "587072601",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL AXLE",
+     "qty": "1",
+     "remarks": "Rear 47 cm,Suspension",
+     "search": "587072601"
+    },
+    {
+     "key": "22",
+     "part_number": "587072401",
+     "depth": 0,
+     "sub": false,
+     "description": "LINK ARM",
+     "qty": "2",
+     "remarks": "Front idler 170",
+     "search": "587072401"
+    },
+    {
+     "key": "24",
+     "part_number": "587072602",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL AXLE",
+     "qty": "1",
+     "remarks": "Front 47 cm,Suspension",
+     "search": "587072602"
+    },
+    {
+     "key": "25",
+     "part_number": "588202701",
+     "depth": 0,
+     "sub": false,
+     "description": "SKID PLATE",
+     "qty": "1",
+     "remarks": "Husqvarna,Front",
+     "search": "588202701"
+    },
+    {
+     "key": "26",
+     "part_number": "502435301",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "4",
+     "remarks": "T50x16 Zn/Fe (A009)",
+     "search": "502435301"
+    },
+    {
+     "key": "27",
+     "part_number": "579317401",
+     "depth": 0,
+     "sub": false,
+     "description": "STRAP",
+     "qty": "1",
+     "remarks": "FIR TREE 170x5",
+     "search": "579317401"
+    },
+    {
+     "key": "28",
+     "part_number": "577092801",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "12/22/2 FZB ISO7089",
+     "search": "577092801"
+    },
+    {
+     "key": "29",
+     "part_number": "579682802",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE",
+     "qty": "2",
+     "remarks": "Rubber",
+     "search": "579682802"
+    },
+    {
+     "key": "30",
+     "part_number": "501861001",
+     "depth": 0,
+     "sub": false,
+     "description": "BUSHING",
+     "qty": "1",
+     "remarks": "ASSY",
+     "search": "501861001"
+    },
+    {
+     "key": "31",
+     "part_number": "587204002",
+     "depth": 0,
+     "sub": false,
+     "description": "DUST COVER",
+     "qty": "2",
+     "remarks": "Drive 210",
+     "search": "587204002"
+    },
+    {
+     "key": "32",
+     "part_number": "735311401",
+     "depth": 0,
+     "sub": false,
+     "description": "CIRCLIP",
+     "qty": "2",
+     "remarks": "12x1 st ZPB,SGA",
+     "search": "735311401"
+    },
+    {
+     "key": "33",
+     "part_number": "544342301",
+     "depth": 0,
+     "sub": false,
+     "description": "PINION",
+     "qty": "1",
+     "remarks": "Full Width,PM, 11 T, 21.25mm Root Diam",
+     "search": "544342301"
+    },
+    {
+     "key": "34",
+     "part_number": "599692001",
+     "depth": 0,
+     "sub": false,
+     "description": "TRANSMISSION",
+     "qty": "1",
+     "remarks": "Assy",
+     "search": "599692001"
+    },
+    {
+     "key": "35",
+     "part_number": "502435301",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "2",
+     "remarks": "T50x16 Zn/Fe (A009)",
+     "search": "502435301"
+    },
+    {
+     "key": "36",
+     "part_number": "587101501",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "hatch",
+     "search": "587101501"
+    },
+    {
+     "key": "37",
+     "part_number": "590701010",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE",
+     "qty": "1",
+     "remarks": "47cm",
+     "search": "590701010"
+    },
+    {
+     "key": "38",
+     "part_number": "590790901",
+     "depth": 0,
+     "sub": false,
+     "description": "MULCH KIT",
+     "qty": "1",
+     "remarks": "Mulch plug and combi blade kit",
+     "search": "590790901"
+    },
+    {
+     "key": "39",
+     "part_number": "587632701",
+     "depth": 0,
+     "sub": false,
+     "description": "HUB CAP",
+     "qty": "2",
+     "remarks": "Ø170 Husqvarna",
+     "search": "587632701"
+    },
+    {
+     "key": "40",
+     "part_number": "584159401",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT CAP",
+     "qty": "4",
+     "remarks": "Nut Cap",
+     "search": "584159401"
+    },
+    {
+     "key": "41",
+     "part_number": "734116441",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "SRKB 8.4/25X2",
+     "search": "734116441"
+    },
+    {
+     "key": "42",
+     "part_number": "579684201",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "579684201"
+    },
+    {
+     "key": "43",
+     "part_number": "725245571",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "1",
+     "remarks": "M8x30 8.8 ZPB",
+     "search": "725245571"
+    },
+    {
+     "key": "44",
+     "part_number": "590800401",
+     "depth": 0,
+     "sub": false,
+     "description": "BELT COVER",
+     "qty": "1",
+     "remarks": "Belt cover",
+     "search": "590800401"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 DECK"
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "HANDLE",
+   "image": "huslc347ivx-fig2.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 37.349,
+     "y": 6.738,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 38.779,
+     "y": 27.926,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 67.324,
+     "y": 25.363,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 45.963,
+     "y": 14.043,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 22.409,
+     "y": 21.461,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 75.842,
+     "y": 13.68,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 74.348,
+     "y": 20.758,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 82.994,
+     "y": 29.946,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 51.303,
+     "y": 49.705,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 56.929,
+     "y": 39.496,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 66.243,
+     "y": 44.283,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 12.142,
+     "y": 43.807,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 14.59,
+     "y": 45.213,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 17.991,
+     "y": 43.739,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 19.835,
+     "y": 45.123,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 23.903,
+     "y": 45.644,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 25.811,
+     "y": 49.047,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 17.737,
+     "y": 57.963,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 23.14,
+     "y": 57.985,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 24.952,
+     "y": 60.141,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 66.116,
+     "y": 76.747,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 79.561,
+     "y": 75.749,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 41.608,
+     "y": 39.905,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "596253601",
+     "depth": 0,
+     "sub": false,
+     "description": "BAIL",
+     "qty": "1",
+     "remarks": "OPC Bail",
+     "search": "596253601"
+    },
+    {
+     "key": "2",
+     "part_number": "587101802",
+     "depth": 0,
+     "sub": false,
+     "description": "BAIL",
+     "qty": "1",
+     "remarks": "Drive bail",
+     "search": "587101802"
+    },
+    {
+     "key": "3",
+     "part_number": "593198701",
+     "depth": 0,
+     "sub": false,
+     "description": "DRIVE SCREW",
+     "qty": "2",
+     "remarks": "M4 bail screw",
+     "search": "593198701"
+    },
+    {
+     "key": "4",
+     "part_number": "593118701",
+     "depth": 0,
+     "sub": false,
+     "description": "SUPPORT ASSY",
+     "qty": "1",
+     "remarks": "Bail support assembly",
+     "search": "593118701"
+    },
+    {
+     "key": "5",
+     "part_number": "593198601",
+     "depth": 0,
+     "sub": false,
+     "description": "EXTENSION CABLE",
+     "qty": "1",
+     "remarks": "Control panel assy cable",
+     "search": "593198601"
+    },
+    {
+     "key": "6",
+     "part_number": "596253002",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL BOARD",
+     "qty": "1",
+     "remarks": "Drive",
+     "search": "596253002"
+    },
+    {
+     "key": "7",
+     "part_number": "593118001",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCHBOX ASSY",
+     "qty": "1",
+     "remarks": "Drive",
+     "search": "593118001"
+    },
+    {
+     "key": "8",
+     "part_number": "591086401",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE HOLDER",
+     "qty": "2",
+     "remarks": "Handle mounted clip",
+     "search": "591086401"
+    },
+    {
+     "key": "9",
+     "part_number": "593119702",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE ASSY",
+     "qty": "1",
+     "remarks": "Upper",
+     "search": "593119702"
+    },
+    {
+     "key": "10",
+     "part_number": "731231801",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON NUT",
+     "qty": "2",
+     "remarks": "M8 8 ZPB,ISO 4032",
+     "search": "731231801"
+    },
+    {
+     "key": "11",
+     "part_number": "587237201",
+     "depth": 0,
+     "sub": false,
+     "description": "KNOB",
+     "qty": "2",
+     "remarks": "Knob assy",
+     "search": "587237201"
+    },
+    {
+     "key": "12",
+     "part_number": "732211801",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCK NUT",
+     "qty": "2",
+     "remarks": "M8-8",
+     "search": "732211801"
+    },
+    {
+     "key": "13",
+     "part_number": "734182051",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "8x16x1.5 St ZPB,Type NB",
+     "search": "734182051"
+    },
+    {
+     "key": "14",
+     "part_number": "587780401",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "Washer handle/handlesupport",
+     "search": "587780401"
+    },
+    {
+     "key": "15",
+     "part_number": "506570104",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "2",
+     "remarks": "M8x20 8.8 ZPB,EHHFM",
+     "search": "506570104"
+    },
+    {
+     "key": "16",
+     "part_number": "731431801",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON THIN NUT",
+     "qty": "2",
+     "remarks": "M8 St 04 ZPB,ISO 4035",
+     "search": "731431801"
+    },
+    {
+     "key": "17",
+     "part_number": "588157401",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "Nylon Washer",
+     "search": "588157401"
+    },
+    {
+     "key": "18",
+     "part_number": "588157302",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT",
+     "qty": "2",
+     "remarks": "Esloc,Carriage Bolt M8",
+     "search": "588157302"
+    },
+    {
+     "key": "19",
+     "part_number": "587182001",
+     "depth": 0,
+     "sub": false,
+     "description": "FRAME",
+     "qty": "1",
+     "remarks": "Grassbag",
+     "search": "587182001"
+    },
+    {
+     "key": "20",
+     "part_number": "587292301",
+     "depth": 0,
+     "sub": false,
+     "description": "GRASSBAG",
+     "qty": "1",
+     "remarks": "Husqvarna, Fabric assembly",
+     "search": "587292301"
+    },
+    {
+     "key": "21",
+     "part_number": "597688701",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "597688701"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 HANDLE"
+  },
+  {
+   "id": "3",
+   "number": "3",
+   "title": "BLADE",
+   "image": "huslc347ivx-fig3.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 89.828,
+     "y": 43.988,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 67.896,
+     "y": 64.088,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 67.928,
+     "y": 65.948,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 28.036,
+     "y": 49.841,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 56.993,
+     "y": 77.881,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 35.251,
+     "y": 82.985,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 37.953,
+     "y": 86.638,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 38.398,
+     "y": 89.678,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 38.652,
+     "y": 92.718,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "590531402",
+     "depth": 0,
+     "sub": false,
+     "description": "POWER UNIT",
+     "qty": "1",
+     "remarks": "Powerhead Unit",
+     "search": "590531402"
+    },
+    {
+     "key": "2",
+     "part_number": "504466801",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "4",
+     "remarks": "10.5x22x2 BRB ZPB",
+     "search": "504466801"
+    },
+    {
+     "key": "3",
+     "part_number": "725250271",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "4",
+     "remarks": "M10x55 8.8 ZPB,ISO 4017",
+     "search": "725250271"
+    },
+    {
+     "key": "4",
+     "part_number": "578295101",
+     "depth": 0,
+     "sub": false,
+     "description": "SLEEVE",
+     "qty": "4",
+     "remarks": "For engine screws, Plastic chassis",
+     "search": "578295101"
+    },
+    {
+     "key": "5",
+     "part_number": "591084301",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SUPPORT",
+     "qty": "1",
+     "remarks": "Transmission system",
+     "search": "591084301"
+    },
+    {
+     "key": "6",
+     "part_number": "590593410",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE",
+     "qty": "1",
+     "remarks": "47cm",
+     "search": "590593410"
+    },
+    {
+     "key": "7",
+     "part_number": "734116441",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "SRKB 8.4/25X2",
+     "search": "734116441"
+    },
+    {
+     "key": "8",
+     "part_number": "579684201",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "579684201"
+    },
+    {
+     "key": "9",
+     "part_number": "725245571",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "1",
+     "remarks": "M8x30 8.8 ZPB",
+     "search": "725245571"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 BLADE"
+  },
+  {
+   "id": "4",
+   "number": "4",
+   "title": "MOTOR",
+   "image": "huslc347ivx-fig4.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 9.758,
+     "y": 19.771,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 12.404,
+     "y": 43.471,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 32.384,
+     "y": 52.9,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 21.657,
+     "y": 53.714,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 37.758,
+     "y": 61.786,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 86.707,
+     "y": 50.014,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 57.859,
+     "y": 33.986,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 27.98,
+     "y": 29.471,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 71.333,
+     "y": 43.886,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 71.657,
+     "y": 86.943,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 63.818,
+     "y": 94.557,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 28.343,
+     "y": 79.9,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 26.263,
+     "y": 87.4,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 50.404,
+     "y": 50.243,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "593124301",
+     "depth": 0,
+     "sub": false,
+     "description": "LID ASSY",
+     "qty": "1",
+     "remarks": "Powerhead lid and hinge",
+     "search": "593124301"
+    },
+    {
+     "key": "2",
+     "part_number": "593124501",
+     "depth": 0,
+     "sub": false,
+     "description": "BATTERY BOX",
+     "qty": "1",
+     "remarks": "Battery pocket. Local - 90000309801",
+     "search": "593124501"
+    },
+    {
+     "key": "2",
+     "part_number": "593124504",
+     "depth": 0,
+     "sub": false,
+     "description": "BATTERY BOX",
+     "qty": "1",
+     "remarks": "Battery pocket. Tyco - 2900200324",
+     "search": "593124504"
+    },
+    {
+     "key": "3",
+     "part_number": "593133601",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTACT PLATE",
+     "qty": "1",
+     "remarks": "Battery control plate. Local - 2108200011A.",
+     "search": "593133601"
+    },
+    {
+     "key": "3",
+     "part_number": "593133603",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTACT PLATE",
+     "qty": "1",
+     "remarks": "Use in models after S/N 20191900001. Tyco - 2108900172A.",
+     "search": "593133603"
+    },
+    {
+     "key": "4",
+     "part_number": "593132701",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "1",
+     "remarks": "Motor control box. Local - 2108200009A.",
+     "search": "593132701"
+    },
+    {
+     "key": "4",
+     "part_number": "593132703",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "1",
+     "remarks": "Use in models after S/N 20191900001. Tyco - 2106300272A.",
+     "search": "593132703"
+    },
+    {
+     "key": "5",
+     "part_number": "592749302",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR",
+     "qty": "1",
+     "remarks": "Use in models after S/N 20191900001. Tyco - 2102300183A.",
+     "search": "592749302"
+    },
+    {
+     "key": "5",
+     "part_number": "592749301",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR",
+     "qty": "1",
+     "remarks": "Brushless motor 750W. Local - 2102200005A.",
+     "search": "592749301"
+    },
+    {
+     "key": "6",
+     "part_number": "593203901",
+     "depth": 0,
+     "sub": false,
+     "description": "ENGINE HOOD ASSY",
+     "qty": "1",
+     "remarks": "Power unit cover",
+     "search": "593203901"
+    },
+    {
+     "key": "7",
+     "part_number": "501490101",
+     "depth": 0,
+     "sub": false,
+     "description": "KEY",
+     "qty": "1",
+     "remarks": "battery pocket key",
+     "search": "501490101"
+    },
+    {
+     "key": "8",
+     "part_number": "593755501",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "16",
+     "remarks": "Engine hood screws",
+     "search": "593755501"
+    },
+    {
+     "key": "9",
+     "part_number": "593722801",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE",
+     "qty": "1",
+     "remarks": "handle",
+     "search": "593722801"
+    },
+    {
+     "key": "10",
+     "part_number": "593722601",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE",
+     "qty": "1",
+     "remarks": "transmission",
+     "search": "593722601"
+    },
+    {
+     "key": "11",
+     "part_number": "579686902",
+     "depth": 0,
+     "sub": false,
+     "description": "KEY SWITCH",
+     "qty": "1",
+     "remarks": "4 pin switch",
+     "search": "579686902"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.4 MOTOR"
+  }
+ ]
+}

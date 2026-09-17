@@ -656,5 +656,14 @@
   "category": "Lawn Mower",
   "figures": 5,
   "parts": 38
+ },
+ {
+  "id": "huslc347ivx",
+  "name": "Husqvarna LC 347iVX Lawn Mower",
+  "short": "LC 347iVX",
+  "brand": "Husqvarna",
+  "category": "Lawn Mower",
+  "figures": 4,
+  "parts": 88
  }
 ]
