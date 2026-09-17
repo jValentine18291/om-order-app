@@ -517,5 +517,18 @@
   "category": "Pole Hedge Trimmer",
   "figures": 6,
   "parts": 104
+ },
+ {
+  "id": "am105",
+  "name": "Husqvarna Automower 105",
+  "short": "Automower 105",
+  "brand": "Husqvarna",
+  "category": "Robotic Mower",
+  "figures": 7,
+  "parts": 187,
+  "aliases": [
+   "AM105",
+   "AM 105"
+  ]
  }
 ]

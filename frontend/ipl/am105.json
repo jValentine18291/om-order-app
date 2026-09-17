@@ -1,0 +1,2858 @@
+{
+ "id": "am105",
+ "name": "Husqvarna Automower 105",
+ "source": "Husqvarna portal CSV export (AM 105 IPL.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "COVER",
+   "image": "am105-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 85.346,
+     "y": 22.527,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 27.082,
+     "y": 46.279,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 75.747,
+     "y": 32.554,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 76.542,
+     "y": 36.025,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 76.097,
+     "y": 39.02,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 76.828,
+     "y": 43.149,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 48.093,
+     "y": 49.592,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 73.554,
+     "y": 57.191,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 22.823,
+     "y": 67.65,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 39.034,
+     "y": 71.007,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 44.151,
+     "y": 67.219,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 50.668,
+     "y": 68.739,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 52.893,
+     "y": 70.917,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 52.702,
+     "y": 73.571,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 51.907,
+     "y": 77.042,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 19.294,
+     "y": 75.476,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 26.573,
+     "y": 82.441,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "577734702",
+     "depth": 0,
+     "sub": false,
+     "description": "BUMPER",
+     "qty": "1",
+     "remarks": "Bumper Front, Grey",
+     "search": "577734702"
+    },
+    {
+     "key": "2",
+     "part_number": "577747202",
+     "depth": 0,
+     "sub": false,
+     "description": "KIT",
+     "qty": "1",
+     "remarks": "Main Body KIT",
+     "search": "577747202"
+    },
+    {
+     "key": "3",
+     "part_number": "590740201",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "590740201"
+    },
+    {
+     "key": "4",
+     "part_number": "574469002",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "2",
+     "remarks": "Bracket, Lift Sensor",
+     "search": "574469002"
+    },
+    {
+     "key": "5",
+     "part_number": "574469102",
+     "depth": 0,
+     "sub": false,
+     "description": "DAMPER",
+     "qty": "2",
+     "remarks": "Rubber Damper",
+     "search": "574469102"
+    },
+    {
+     "key": "6",
+     "part_number": "574485102",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "2",
+     "remarks": "Spring, Lift Sensor",
+     "search": "574485102"
+    },
+    {
+     "key": "7",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "7",
+     "remarks": "For 2016 models",
+     "search": "575543314"
+    },
+    {
+     "key": "8",
+     "part_number": "576183202",
+     "depth": 0,
+     "sub": false,
+     "description": "MAGNET",
+     "qty": "1",
+     "remarks": "",
+     "search": "576183202"
+    },
+    {
+     "key": "9",
+     "part_number": "576240001",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "Warning Label",
+     "search": "576240001"
+    },
+    {
+     "key": "10",
+     "part_number": "576030101",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "Plate, Collision Sensor",
+     "search": "576030101"
+    },
+    {
+     "key": "11",
+     "part_number": "576183301",
+     "depth": 0,
+     "sub": false,
+     "description": "MAGNET",
+     "qty": "1",
+     "remarks": "Magnet, Collision Sensor",
+     "search": "576183301"
+    },
+    {
+     "key": "12",
+     "part_number": "590740201",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "590740201"
+    },
+    {
+     "key": "13",
+     "part_number": "575416002",
+     "depth": 0,
+     "sub": false,
+     "description": "CLAMP",
+     "qty": "2",
+     "remarks": "Support Clamp",
+     "search": "575416002"
+    },
+    {
+     "key": "14",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "4",
+     "remarks": "For 2016 models",
+     "search": "575543314"
+    },
+    {
+     "key": "15",
+     "part_number": "574469102",
+     "depth": 0,
+     "sub": false,
+     "description": "DAMPER",
+     "qty": "2",
+     "remarks": "Rubber Damper",
+     "search": "574469102"
+    },
+    {
+     "key": "16",
+     "part_number": "574465202",
+     "depth": 0,
+     "sub": false,
+     "description": "BUMPER",
+     "qty": "1",
+     "remarks": "Bumper, Rear",
+     "search": "574465202"
+    },
+    {
+     "key": "17",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "For 2016 models",
+     "search": "575543314"
+    },
+    {
+     "key": "17",
+     "part_number": "575543310",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "For 2020, 2019, 2018, & 2017 models. Screw, Grey (10 mm).",
+     "search": "575543310"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 COVER"
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "CHASSIS UPPER",
+   "image": "am105-fig2.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 32.104,
+     "y": 11.865,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 27.336,
+     "y": 19.691,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 50.668,
+     "y": 21.597,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 71.869,
+     "y": 19.102,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 58.678,
+     "y": 25.045,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 73.808,
+     "y": 28.721,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 31.087,
+     "y": 32.509,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 24.921,
+     "y": 42.695,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 79.021,
+     "y": 38.544,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 22.727,
+     "y": 51.633,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 30.356,
+     "y": 58.258,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 69.803,
+     "y": 54.946,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 60.807,
+     "y": 58.666,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 34.965,
+     "y": 59.574,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 36.046,
+     "y": 62.432,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 33.662,
+     "y": 64.61,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 33.884,
+     "y": 67.786,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 55.69,
+     "y": 61.615,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 60.172,
+     "y": 65.699,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 62.873,
+     "y": 70.1,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 31.405,
+     "y": 71.416,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 30.833,
+     "y": 74.682,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 34.075,
+     "y": 76.52,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 24.73,
+     "y": 82.532,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 56.135,
+     "y": 92.922,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 77.305,
+     "y": 74.093,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 77.781,
+     "y": 66.992,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "588797603",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "Cover Height Adjustment, Grey",
+     "search": "588797603"
+    },
+    {
+     "key": "2",
+     "part_number": "574464701",
+     "depth": 0,
+     "sub": false,
+     "description": "BUTTON",
+     "qty": "1",
+     "remarks": "Stop Button",
+     "search": "574464701"
+    },
+    {
+     "key": "3",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "Screw, Grey (14 mm)",
+     "search": "575543314"
+    },
+    {
+     "key": "4",
+     "part_number": "574377901",
+     "depth": 0,
+     "sub": false,
+     "description": "HINGE",
+     "qty": "1",
+     "remarks": "Hinge, Height Adjustment Lid",
+     "search": "574377901"
+    },
+    {
+     "key": "5",
+     "part_number": "575779401",
+     "depth": 0,
+     "sub": false,
+     "description": "KEYBOARD",
+     "qty": "1",
+     "remarks": "Keyboard",
+     "search": "575779401"
+    },
+    {
+     "key": "6",
+     "part_number": "576242101",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "Spring, Height Adjustment Lid",
+     "search": "576242101"
+    },
+    {
+     "key": "7",
+     "part_number": "574487001",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "Spring, Stop Button",
+     "search": "574487001"
+    },
+    {
+     "key": "8",
+     "part_number": "577752802",
+     "depth": 0,
+     "sub": false,
+     "description": "KIT",
+     "qty": "1",
+     "remarks": "Display Cover KIT incl. Sealing & Keypad",
+     "search": "577752802"
+    },
+    {
+     "key": "9",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "5",
+     "remarks": "Screw, Grey (14 mm)",
+     "search": "575543314"
+    },
+    {
+     "key": "10",
+     "part_number": "574480301",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH",
+     "qty": "1",
+     "remarks": "Micro Switch, Stop Button",
+     "search": "574480301"
+    },
+    {
+     "key": "11",
+     "part_number": "535089801",
+     "depth": 0,
+     "sub": false,
+     "description": "CLIP",
+     "qty": "1",
+     "remarks": "Clip, Stop Button",
+     "search": "535089801"
+    },
+    {
+     "key": "12",
+     "part_number": "574475901",
+     "depth": 0,
+     "sub": false,
+     "description": "BUZZER",
+     "qty": "1",
+     "remarks": "Buzzer, Display Cover",
+     "search": "574475901"
+    },
+    {
+     "key": "13",
+     "part_number": "588441901",
+     "depth": 0,
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY",
+     "qty": "1",
+     "remarks": "Display/HMI, Circuit Board  (From S/N 16010001-)",
+     "search": "588441901"
+    },
+    {
+     "key": "14",
+     "part_number": "575409001",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCK",
+     "qty": "1",
+     "remarks": "Lock, Stop Button",
+     "search": "575409001"
+    },
+    {
+     "key": "15",
+     "part_number": "576242201",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "Spring Lock, Stop Button",
+     "search": "576242201"
+    },
+    {
+     "key": "16",
+     "part_number": "575415801",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING HOLDER",
+     "qty": "1",
+     "remarks": "Spring Holder, Stop Button",
+     "search": "575415801"
+    },
+    {
+     "key": "17",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "Screw, Grey (14 mm)",
+     "search": "575543314"
+    },
+    {
+     "key": "18",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "Screw, Grey (14 mm)",
+     "search": "575543314"
+    },
+    {
+     "key": "19",
+     "part_number": "576053901",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "For 2017 & 2016 models",
+     "search": "576053901"
+    },
+    {
+     "key": "19",
+     "part_number": "576053902",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "For 2020, 2019, & 2018 models. Cover, Height Indicator.",
+     "search": "576053902"
+    },
+    {
+     "key": "20",
+     "part_number": "574874704",
+     "depth": 0,
+     "sub": false,
+     "description": "SEALING STRIP",
+     "qty": "1",
+     "remarks": "Sealing Strip (1 pcs, ¯4 mm)",
+     "search": "574874704"
+    },
+    {
+     "key": "21",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "Screw, Grey (14 mm)",
+     "search": "575543314"
+    },
+    {
+     "key": "22",
+     "part_number": "576697001",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "Cover, Air Filter",
+     "search": "576697001"
+    },
+    {
+     "key": "23",
+     "part_number": "577753701",
+     "depth": 0,
+     "sub": false,
+     "description": "AIR FILTER",
+     "qty": "1",
+     "remarks": "Air Filter KIT (10 pcs)",
+     "search": "577753701"
+    },
+    {
+     "key": "24",
+     "part_number": "577752902",
+     "depth": 0,
+     "sub": false,
+     "description": "CHASSIS ASSY",
+     "qty": "1",
+     "remarks": "Chassis Upper KIT incl. Sealing & Air Filter",
+     "search": "577752902"
+    },
+    {
+     "key": "25",
+     "part_number": "590740201",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "590740201"
+    },
+    {
+     "key": "26",
+     "part_number": "574450101",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "10",
+     "remarks": "Screw",
+     "search": "574450101"
+    },
+    {
+     "key": "27",
+     "part_number": "579742401",
+     "depth": 0,
+     "sub": false,
+     "description": "KNOB",
+     "qty": "1",
+     "remarks": "Knob, KIT incl. Label",
+     "search": "579742401"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 CHASSIS UPPER"
+  },
+  {
+   "id": "3",
+   "number": "3",
+   "title": "CHASSIS LOWER",
+   "image": "am105-fig3.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 27.972,
+     "y": 9.437,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 27.718,
+     "y": 13.975,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 23.077,
+     "y": 24.251,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 42.975,
+     "y": 12.886,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 46.281,
+     "y": 20.826,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 56.612,
+     "y": 25.817,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 54.482,
+     "y": 23.457,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 57.978,
+     "y": 15.835,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 59.695,
+     "y": 9.12,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 72.028,
+     "y": 6.647,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 79.053,
+     "y": 6.715,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 82.931,
+     "y": 8.802,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 89.224,
+     "y": 12.976,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 79.148,
+     "y": 27.473,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 88.557,
+     "y": 37.296,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 54.895,
+     "y": 35.572,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 52.352,
+     "y": 46.143,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 57.947,
+     "y": 47.731,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 80.515,
+     "y": 43.761,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 50.636,
+     "y": 50.93,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 82.009,
+     "y": 53.97,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 47.807,
+     "y": 64.859,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 81.945,
+     "y": 74.456,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 17.165,
+     "y": 56.76,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 38.938,
+     "y": 53.811,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 34.87,
+     "y": 65.245,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 17.546,
+     "y": 69.192,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 36.65,
+     "y": 80.354,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 22.982,
+     "y": 83.485,
+     "conf": 100
+    },
+    {
+     "key": "30",
+     "x": 18.563,
+     "y": 90.926,
+     "conf": 100
+    },
+    {
+     "key": "31",
+     "x": 29.402,
+     "y": 94.056,
+     "conf": 100
+    },
+    {
+     "key": "32",
+     "x": 46.98,
+     "y": 92.65,
+     "conf": 100
+    },
+    {
+     "key": "33",
+     "x": 48.188,
+     "y": 94.714,
+     "conf": 100
+    },
+    {
+     "key": "34",
+     "x": 50.826,
+     "y": 93.466,
+     "conf": 100
+    },
+    {
+     "key": "35",
+     "x": 72.092,
+     "y": 90.517,
+     "conf": 100
+    },
+    {
+     "key": "36",
+     "x": 68.404,
+     "y": 80.127,
+     "conf": 100
+    },
+    {
+     "key": "37",
+     "x": 71.424,
+     "y": 85.299,
+     "conf": 100
+    },
+    {
+     "key": "38",
+     "x": 70.47,
+     "y": 88.294,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "575430801",
+     "depth": 0,
+     "sub": false,
+     "description": "HUB CAP",
+     "qty": "2",
+     "remarks": "Hub Cap, Drive Wheel",
+     "search": "575430801"
+    },
+    {
+     "key": "2",
+     "part_number": "576213902",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANM",
+     "qty": "6",
+     "remarks": "Screw",
+     "search": "576213902"
+    },
+    {
+     "key": "3",
+     "part_number": "577093201",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "Washer, Drive Wheel",
+     "search": "577093201"
+    },
+    {
+     "key": "4",
+     "part_number": "574465104",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL",
+     "qty": "2",
+     "remarks": "Wheel, Drive Wheel",
+     "search": "574465104"
+    },
+    {
+     "key": "5",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "6",
+     "remarks": "Screw, Grey (14 mm)",
+     "search": "575543314"
+    },
+    {
+     "key": "6",
+     "part_number": "577839906",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL MOTOR ASSY",
+     "qty": "2",
+     "remarks": "Wheel Motor KIT incl. Sealing",
+     "search": "577839906"
+    },
+    {
+     "key": "7",
+     "part_number": "592851701",
+     "depth": 0,
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY",
+     "qty": "1",
+     "remarks": "Main Circuit Board (MCB) (From S/N 16010001-)",
+     "search": "592851701"
+    },
+    {
+     "key": "8",
+     "part_number": "535130310",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "2",
+     "remarks": "Screw (10 mm)",
+     "search": "535130310"
+    },
+    {
+     "key": "9",
+     "part_number": "576220201",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Loom, Buzzer Extension",
+     "search": "576220201"
+    },
+    {
+     "key": "10",
+     "part_number": "588832701",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE",
+     "qty": "1",
+     "remarks": "Loom, Display (From S/N 16010001-)",
+     "search": "588832701"
+    },
+    {
+     "key": "11",
+     "part_number": "588901201",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Loom, Loop and Lift Sensor  (From S/N 16010001-)",
+     "search": "588901201"
+    },
+    {
+     "key": "12",
+     "part_number": "535130310",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "1",
+     "remarks": "Screw (10 mm)",
+     "search": "535130310"
+    },
+    {
+     "key": "13",
+     "part_number": "592851901",
+     "depth": 0,
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY",
+     "qty": "1",
+     "remarks": "PCB Sensor Board",
+     "search": "592851901"
+    },
+    {
+     "key": "14",
+     "part_number": "574874704",
+     "depth": 0,
+     "sub": false,
+     "description": "SEALING STRIP",
+     "qty": "1",
+     "remarks": "Sealing Strip (1 pcs, ¯4 mm)",
+     "search": "574874704"
+    },
+    {
+     "key": "15",
+     "part_number": "574874703",
+     "depth": 0,
+     "sub": false,
+     "description": "SEALING STRIP",
+     "qty": "1",
+     "remarks": "Sealing Strip, Chassis (1 pcs, ¯4 mm)",
+     "search": "574874703"
+    },
+    {
+     "key": "16",
+     "part_number": "574373701",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "2",
+     "remarks": "Sealing/Gasket, Motor Flange",
+     "search": "574373701"
+    },
+    {
+     "key": "17",
+     "part_number": "535277601",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Battery cable",
+     "search": "535277601"
+    },
+    {
+     "key": "18",
+     "part_number": "574501901",
+     "depth": 0,
+     "sub": false,
+     "description": "GUIDE RAIL",
+     "qty": "1",
+     "remarks": "",
+     "search": "574501901"
+    },
+    {
+     "key": "19",
+     "part_number": "574484601",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "Height Adjustment Screw",
+     "search": "574484601"
+    },
+    {
+     "key": "20",
+     "part_number": "575408201",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCK",
+     "qty": "1",
+     "remarks": "Lock, Battery Plug",
+     "search": "575408201"
+    },
+    {
+     "key": "21",
+     "part_number": "577103201",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCKING SPRING",
+     "qty": "1",
+     "remarks": "Locking Spring",
+     "search": "577103201"
+    },
+    {
+     "key": "22",
+     "part_number": "577846203",
+     "depth": 0,
+     "sub": false,
+     "description": "CHASSIS",
+     "qty": "1",
+     "remarks": "",
+     "search": "577846203"
+    },
+    {
+     "key": "23",
+     "part_number": "590740201",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "590740201"
+    },
+    {
+     "key": "24",
+     "part_number": "534177601",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Charging plate cable",
+     "search": "534177601"
+    },
+    {
+     "key": "25",
+     "part_number": "575529502",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANTT",
+     "qty": "2",
+     "remarks": "Screw, Grey (14 mm)",
+     "search": "575529502"
+    },
+    {
+     "key": "26",
+     "part_number": "579708701",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Swith ON/OFF with Seal",
+     "search": "579708701"
+    },
+    {
+     "key": "27",
+     "part_number": "574467202",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING",
+     "qty": "1",
+     "remarks": "Housing, Rear Wheel",
+     "search": "574467202"
+    },
+    {
+     "key": "28",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "3",
+     "remarks": "",
+     "search": "575543314"
+    },
+    {
+     "key": "29",
+     "part_number": "583853902",
+     "depth": 0,
+     "sub": false,
+     "description": "REAR WHEEL",
+     "qty": "1",
+     "remarks": "Rear Wheel KIT",
+     "search": "583853902"
+    },
+    {
+     "key": "30",
+     "part_number": "578275103",
+     "depth": 0,
+     "sub": false,
+     "description": "REAR WHEEL",
+     "qty": "1",
+     "remarks": "Rear Wheel KIT Complete",
+     "search": "578275103"
+    },
+    {
+     "key": "31",
+     "part_number": "578275201",
+     "depth": 0,
+     "sub": false,
+     "description": "BEARING KIT",
+     "qty": "1",
+     "remarks": "Bearing (x2), Sealing (x2), O-Ring (x1)",
+     "search": "578275201"
+    },
+    {
+     "key": "32",
+     "part_number": "577715001",
+     "depth": 0,
+     "sub": false,
+     "description": "BEARING HOUSING",
+     "qty": "2",
+     "remarks": "Bearing Housing, Rear Wheel",
+     "search": "577715001"
+    },
+    {
+     "key": "33",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "4",
+     "remarks": "Screw, Grey (14 mm)",
+     "search": "575543314"
+    },
+    {
+     "key": "34",
+     "part_number": "574450101",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "4",
+     "remarks": "Screw",
+     "search": "574450101"
+    },
+    {
+     "key": "35",
+     "part_number": "574467301",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "Cover, Battery",
+     "search": "574467301"
+    },
+    {
+     "key": "36",
+     "part_number": "589586102",
+     "depth": 0,
+     "sub": false,
+     "description": "BATTERY",
+     "qty": "1",
+     "remarks": "Battery, Lithium 18 v",
+     "search": "589586102"
+    },
+    {
+     "key": "37",
+     "part_number": "582386101",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "Bracket",
+     "search": "582386101"
+    },
+    {
+     "key": "38",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "575543314"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 CHASSIS LOWER"
+  },
+  {
+   "id": "4",
+   "number": "4",
+   "title": "BLADE MOTOR & CUTTING EQUIPMENT",
+   "image": "am105-fig4.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 60.108,
+     "y": 13.226,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 41.291,
+     "y": 20.463,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 40.623,
+     "y": 23.956,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 42.467,
+     "y": 31.942,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 59.949,
+     "y": 38.181,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 59.027,
+     "y": 42.264,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 42.276,
+     "y": 43.081,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 34.647,
+     "y": 48.866,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 42.657,
+     "y": 55.898,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 65.671,
+     "y": 59.846,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 57.947,
+     "y": 64.451,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 65.321,
+     "y": 67.173,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 58.137,
+     "y": 74.614,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 38.048,
+     "y": 78.63,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 40.432,
+     "y": 85.549,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 58.582,
+     "y": 84.914,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 58.042,
+     "y": 92.74,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 57.12,
+     "y": 69.397,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "584989302",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTER MOTOR",
+     "qty": "1",
+     "remarks": "Cutting Motor",
+     "search": "584989302"
+    },
+    {
+     "key": "2",
+     "part_number": "575543310",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "For 2020, 2019, 2018 & 2017 models. Screw, Grey (14 mm).",
+     "search": "575543310"
+    },
+    {
+     "key": "2",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "For 2016 models",
+     "search": "575543314"
+    },
+    {
+     "key": "3",
+     "part_number": "574503501",
+     "depth": 0,
+     "sub": false,
+     "description": "HEIGHT ADJUSTER",
+     "qty": "1",
+     "remarks": "Height Indicator",
+     "search": "574503501"
+    },
+    {
+     "key": "4",
+     "part_number": "581020301",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR HOUSING",
+     "qty": "1",
+     "remarks": "Motor Housing",
+     "search": "581020301"
+    },
+    {
+     "key": "5",
+     "part_number": "588222201",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANM",
+     "qty": "3",
+     "remarks": "For 2017 & 2016 models",
+     "search": "588222201"
+    },
+    {
+     "key": "5",
+     "part_number": "576213801",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANM",
+     "qty": "1",
+     "remarks": "For 2020, 2019, 2018 models",
+     "search": "576213801"
+    },
+    {
+     "key": "6",
+     "part_number": "587423401",
+     "depth": 0,
+     "sub": false,
+     "description": "HUB",
+     "qty": "1",
+     "remarks": "Hub, Cutting Motor",
+     "search": "587423401"
+    },
+    {
+     "key": "7",
+     "part_number": "576213501",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSETM",
+     "qty": "1",
+     "remarks": "Stop Screw",
+     "search": "576213501"
+    },
+    {
+     "key": "8",
+     "part_number": "579758301",
+     "depth": 0,
+     "sub": false,
+     "description": "GUARD",
+     "qty": "1",
+     "remarks": "Guard, Cutting Disc",
+     "search": "579758301"
+    },
+    {
+     "key": "9",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "3",
+     "remarks": "For 2016 models",
+     "search": "575543314"
+    },
+    {
+     "key": "10",
+     "part_number": "587423601",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTING DISC",
+     "qty": "1",
+     "remarks": "Cutting Disc",
+     "search": "587423601"
+    },
+    {
+     "key": "11",
+     "part_number": "535130502",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "3",
+     "remarks": "Screw",
+     "search": "535130502"
+    },
+    {
+     "key": "12",
+     "part_number": "588421702",
+     "depth": 0,
+     "sub": false,
+     "description": "BEARING HOUSING ASSY",
+     "qty": "1",
+     "remarks": "Bearing Housing ASSY",
+     "search": "588421702"
+    },
+    {
+     "key": "13",
+     "part_number": "535076001",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "Screw",
+     "search": "535076001"
+    },
+    {
+     "key": "14",
+     "part_number": "587423701",
+     "depth": 0,
+     "sub": false,
+     "description": "SKID PLATE",
+     "qty": "1",
+     "remarks": "Skid Plate",
+     "search": "587423701"
+    },
+    {
+     "key": "15",
+     "part_number": "587449601",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER KIT",
+     "qty": "1",
+     "remarks": "Bearing Cover",
+     "search": "587449601"
+    },
+    {
+     "key": "16",
+     "part_number": "585297501",
+     "depth": 0,
+     "sub": false,
+     "description": "O-RING",
+     "qty": "1",
+     "remarks": "O-Ring",
+     "search": "585297501"
+    },
+    {
+     "key": "17",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "3",
+     "remarks": "For 2016 models",
+     "search": "575543314"
+    },
+    {
+     "key": "18",
+     "part_number": "535075703",
+     "depth": 0,
+     "sub": false,
+     "description": "BALL BEARING",
+     "qty": "1",
+     "remarks": "",
+     "search": "535075703"
+    },
+    {
+     "key": "18",
+     "part_number": "593080801",
+     "depth": 0,
+     "sub": false,
+     "description": "BALL BEARING",
+     "qty": "1",
+     "remarks": "Tube 50 pcs",
+     "search": "593080801"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.4 BLADE MOTOR & CUTTING EQUIPMENT"
+  },
+  {
+   "id": "5",
+   "number": "5",
+   "title": "CHARGING STATION (2017-2020 models)",
+   "image": "am105-fig5.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 61.284,
+     "y": 7.214,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 47.552,
+     "y": 11.797,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 65.257,
+     "y": 24.456,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 20.28,
+     "y": 24.909,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 20.248,
+     "y": 28.539,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 23.84,
+     "y": 29.401,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 41.195,
+     "y": 28.131,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 44.183,
+     "y": 34.029,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 50.858,
+     "y": 35.753,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 38.589,
+     "y": 41.107,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 20.852,
+     "y": 52.405,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 20.407,
+     "y": 56.216,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 82.009,
+     "y": 56.103,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 21.901,
+     "y": 78.811,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 20.82,
+     "y": 93.33,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 46.027,
+     "y": 88.475,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "576636712",
+     "depth": 0,
+     "sub": false,
+     "description": "CHARGING STATION",
+     "qty": "1",
+     "remarks": "Charging Station",
+     "search": "576636712"
+    },
+    {
+     "key": "2",
+     "part_number": "590217201",
+     "depth": 0,
+     "sub": false,
+     "description": "LENS",
+     "qty": "1",
+     "remarks": "Diode Lens",
+     "search": "590217201"
+    },
+    {
+     "key": "3",
+     "part_number": "575708402",
+     "depth": 0,
+     "sub": false,
+     "description": "CHARGING STATION",
+     "qty": "1",
+     "remarks": "Charging Station Cover, Grey",
+     "search": "575708402"
+    },
+    {
+     "key": "4",
+     "part_number": "592909401",
+     "depth": 0,
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY",
+     "qty": "1",
+     "remarks": "Circuit Board, Charging Station",
+     "search": "592909401"
+    },
+    {
+     "key": "5",
+     "part_number": "588222101",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON NUT FLANGE",
+     "qty": "2",
+     "remarks": "Nut Flange",
+     "search": "588222101"
+    },
+    {
+     "key": "6",
+     "part_number": "535087401",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "Washer",
+     "search": "535087401"
+    },
+    {
+     "key": "7",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "Screw, Grey (14 mm)",
+     "search": "575543314"
+    },
+    {
+     "key": "8",
+     "part_number": "587125101",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTACT",
+     "qty": "2",
+     "remarks": "Contact, Charging Station",
+     "search": "587125101"
+    },
+    {
+     "key": "9",
+     "part_number": "588222201",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANM",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "588222201"
+    },
+    {
+     "key": "10",
+     "part_number": "582381001",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE ASSY",
+     "qty": "1",
+     "remarks": "Loom, Charging Station",
+     "search": "582381001"
+    },
+    {
+     "key": "11",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "Screw, Grey (14 mm)",
+     "search": "575543314"
+    },
+    {
+     "key": "12",
+     "part_number": "535127901",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "2",
+     "remarks": "Bracket",
+     "search": "535127901"
+    },
+    {
+     "key": "13",
+     "part_number": "581551903",
+     "depth": 0,
+     "sub": false,
+     "description": "CHARGING STATION",
+     "qty": "1",
+     "remarks": "Charging Station Base Plate",
+     "search": "581551903"
+    },
+    {
+     "key": "14",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "4",
+     "remarks": "Screw, Grey (14 mm)",
+     "search": "575543314"
+    },
+    {
+     "key": "17",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "4",
+     "remarks": "Screw, Grey (14 mm)",
+     "search": "575543314"
+    },
+    {
+     "key": "18",
+     "part_number": "582356401",
+     "depth": 0,
+     "sub": false,
+     "description": "PANEL ASSY",
+     "qty": "1",
+     "remarks": "Guide Cover, Charging Station",
+     "search": "582356401"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.5 CHARGING STATION (2017-2020 models)"
+  },
+  {
+   "id": "6",
+   "number": "6",
+   "title": "INSTALLATION ACCESSORIES",
+   "image": "am105-fig6.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 13.001,
+     "y": 16.13,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 19.898,
+     "y": 47.255,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 32.804,
+     "y": 47.709,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 28.481,
+     "y": 54.991,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 54.323,
+     "y": 48.072,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 49.8,
+     "y": 53.2,
+     "byHand": true,
+     "unlisted": true
+    },
+    {
+     "key": "7",
+     "x": 68.023,
+     "y": 53.063,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 87.127,
+     "y": 48.253,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 25.874,
+     "y": 67.151,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 44.946,
+     "y": 66.289,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 58.805,
+     "y": 70.485,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 41.894,
+     "y": 78.993,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 42.053,
+     "y": 84.71,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 41.863,
+     "y": 89.995,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 57.629,
+     "y": 78.743,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 71.869,
+     "y": 86.638,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 89.256,
+     "y": 86.388,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 83.28,
+     "y": 61.57,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 78.703,
+     "y": 78.811,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "967623601",
+     "depth": 0,
+     "sub": false,
+     "description": "INSTALLATION KIT",
+     "qty": "1",
+     "remarks": "Installation KIT S: Wire (150 m), Staples (300 pcs), Connectors (3 pcs), Couplers (5 pcs)",
+     "search": "967623601"
+    },
+    {
+     "key": "1",
+     "part_number": "967623602",
+     "depth": 0,
+     "sub": false,
+     "description": "INSTALLATION KIT",
+     "qty": "1",
+     "remarks": "Installation KIT M: Wire (250 m), Staples (400 pcs), Connectors (3 pcs), Couplers (5 pcs)",
+     "search": "967623602"
+    },
+    {
+     "key": "1",
+     "part_number": "967623603",
+     "depth": 0,
+     "sub": false,
+     "description": "INSTALLATION KIT",
+     "qty": "1",
+     "remarks": "Installation KIT L: Wire (400 m), Staples (600 pcs), Connectors (5 pcs), Couplers (5 pcs)",
+     "search": "967623603"
+    },
+    {
+     "key": "2",
+     "part_number": "535129001",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "1",
+     "remarks": "Loop Wire Connector",
+     "search": "535129001"
+    },
+    {
+     "key": "2",
+     "part_number": "535129002",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "1",
+     "remarks": "Loop Wire Connector, Blister Pack, 100 pcs",
+     "search": "535129002"
+    },
+    {
+     "key": "2",
+     "part_number": "577864801",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "1",
+     "remarks": "Loop Wire Connector, Blister Pack, 5 pcs",
+     "search": "577864801"
+    },
+    {
+     "key": "3",
+     "part_number": "501980201",
+     "depth": 0,
+     "sub": false,
+     "description": "COUPLER",
+     "qty": "1",
+     "remarks": "Coupler, 1 pcs",
+     "search": "501980201"
+    },
+    {
+     "key": "3",
+     "part_number": "501980203",
+     "depth": 0,
+     "sub": false,
+     "description": "COUPLER",
+     "qty": "1",
+     "remarks": "Coupler, 100 pcs",
+     "search": "501980203"
+    },
+    {
+     "key": "3",
+     "part_number": "577864701",
+     "depth": 0,
+     "sub": false,
+     "description": "COUPLER",
+     "qty": "1",
+     "remarks": "Coupler, Blister Pack, 5 pcs",
+     "search": "577864701"
+    },
+    {
+     "key": "4",
+     "part_number": "577864201",
+     "depth": 0,
+     "sub": false,
+     "description": "STAPLE",
+     "qty": "1",
+     "remarks": "100 pcs 85mm",
+     "search": "577864201"
+    },
+    {
+     "key": "5",
+     "part_number": "577864302",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRE",
+     "qty": "1",
+     "remarks": "Loop Wire, Blister Pack (50 m)",
+     "search": "577864302"
+    },
+    {
+     "key": "5",
+     "part_number": "597237801",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRE",
+     "qty": "1",
+     "remarks": "Loop Wire (150 m)",
+     "search": "597237801"
+    },
+    {
+     "key": "7",
+     "part_number": "580662006",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRE",
+     "qty": "1",
+     "remarks": "Loop Wire (250 m)",
+     "search": "580662006"
+    },
+    {
+     "key": "8",
+     "part_number": "580662004",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRE",
+     "qty": "1",
+     "remarks": "Wire (800 m)",
+     "search": "580662004"
+    },
+    {
+     "key": "9",
+     "part_number": "593163601",
+     "depth": 0,
+     "sub": false,
+     "description": "POWER SUPPLY UNIT",
+     "qty": "1",
+     "remarks": "Power Supply Unit EU",
+     "search": "593163601"
+    },
+    {
+     "key": "10",
+     "part_number": "590442202",
+     "depth": 0,
+     "sub": false,
+     "description": "POWER UNIT",
+     "qty": "1",
+     "remarks": "Power Supply Unit UK",
+     "search": "590442202"
+    },
+    {
+     "key": "10",
+     "part_number": "590442203",
+     "depth": 0,
+     "sub": false,
+     "description": "POWER SUPPLY UNIT",
+     "qty": "1",
+     "remarks": "Power Supply Unit CH",
+     "search": "590442203"
+    },
+    {
+     "key": "10",
+     "part_number": "590442206",
+     "depth": 0,
+     "sub": false,
+     "description": "POWER UNIT",
+     "qty": "1",
+     "remarks": "Power Supply Unit JP",
+     "search": "590442206"
+    },
+    {
+     "key": "10",
+     "part_number": "584862601",
+     "depth": 0,
+     "sub": false,
+     "description": "POWER UNIT",
+     "qty": "1",
+     "remarks": "EU",
+     "search": "584862601"
+    },
+    {
+     "key": "10",
+     "part_number": "584862605",
+     "depth": 0,
+     "sub": false,
+     "description": "POWER UNIT",
+     "qty": "1",
+     "remarks": "Power Supply Unit AU-NZ",
+     "search": "584862605"
+    },
+    {
+     "key": "11",
+     "part_number": "577606604",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SET",
+     "qty": "1",
+     "remarks": "Long Life - Safety Blade, 300 pcs",
+     "search": "577606604"
+    },
+    {
+     "key": "11",
+     "part_number": "577864603",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SET",
+     "qty": "1",
+     "remarks": "Long Life - Safety Blade, Blister pack, 9 pcs",
+     "search": "577864603"
+    },
+    {
+     "key": "11",
+     "part_number": "577606505",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SET",
+     "qty": "1",
+     "remarks": "Long Life - Safety Blade, 45 pcs",
+     "search": "577606505"
+    },
+    {
+     "key": "14",
+     "part_number": "579825101",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE ASSY",
+     "qty": "1",
+     "remarks": "Low Voltage Cable 20 m",
+     "search": "579825101"
+    },
+    {
+     "key": "15",
+     "part_number": "579825102",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE ASSY",
+     "qty": "1",
+     "remarks": "Low Voltage Cable 10 m",
+     "search": "579825102"
+    },
+    {
+     "key": "16",
+     "part_number": "579825103",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE ASSY",
+     "qty": "1",
+     "remarks": "Low Voltage Cable 3 m",
+     "search": "579825103"
+    },
+    {
+     "key": "16",
+     "part_number": "579825104",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE ASSY",
+     "qty": "1",
+     "remarks": "Low Voltage Cable (5 m)",
+     "search": "579825104"
+    },
+    {
+     "key": "17",
+     "part_number": "577864901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "Anchor Screw KIT, Blister Pack, 3 pcs",
+     "search": "577864901"
+    },
+    {
+     "key": "18",
+     "part_number": "586277901",
+     "depth": 0,
+     "sub": false,
+     "description": "STICKER",
+     "qty": "1",
+     "remarks": "Sticker, Cable Markers, 10 pcs",
+     "search": "586277901"
+    },
+    {
+     "key": "19",
+     "part_number": "579571201",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "Label Alarm",
+     "search": "579571201"
+    },
+    {
+     "key": "20",
+     "part_number": "590855001",
+     "depth": 0,
+     "sub": false,
+     "description": "BOX",
+     "qty": "1",
+     "remarks": "Cable Connector Protection",
+     "search": "590855001"
+    },
+    {
+     "key": "21",
+     "part_number": "596339801",
+     "depth": 0,
+     "sub": false,
+     "description": "TOOL",
+     "qty": "1",
+     "remarks": "Bit for Automower blades MOQ 5 pcs",
+     "search": "596339801"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.6 INSTALLATION ACCESSORIES"
+  },
+  {
+   "id": "7",
+   "number": "7",
+   "title": "ACCESSORIES",
+   "image": "am105-fig7.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 30.102,
+     "y": 19.124,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 68.976,
+     "y": 15.812,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 82.676,
+     "y": 12.727,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 16.942,
+     "y": 30.74,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 58.678,
+     "y": 26.701,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 73.172,
+     "y": 27.541,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 21.297,
+     "y": 40.767,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 70.629,
+     "y": 42.4,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 62.492,
+     "y": 65.358,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 20.725,
+     "y": 65.676,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 42.975,
+     "y": 72.21,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 63.096,
+     "y": 84.052,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "577858103",
+     "depth": 0,
+     "sub": false,
+     "description": "DVD",
+     "qty": "1",
+     "remarks": "Autocheck EXP - Service Program DVD",
+     "search": "577858103"
+    },
+    {
+     "key": "2",
+     "part_number": "577518102",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE",
+     "qty": "1",
+     "remarks": "USB Service Cable, G3 Mowers",
+     "search": "577518102"
+    },
+    {
+     "key": "3",
+     "part_number": "580689502",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "Warranty Seal 1pcs",
+     "search": "580689502"
+    },
+    {
+     "key": "4",
+     "part_number": "577606801",
+     "depth": 0,
+     "sub": false,
+     "description": "TEST EQUIPMENT",
+     "qty": "1",
+     "remarks": "Loop Wire Interruption Detector",
+     "search": "577606801"
+    },
+    {
+     "key": "5",
+     "part_number": "588408401",
+     "depth": 0,
+     "sub": false,
+     "description": "BATTERY CHARGER",
+     "qty": "1",
+     "remarks": "Quick Charger with Battery Test",
+     "search": "588408401"
+    },
+    {
+     "key": "6",
+     "part_number": "588202601",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE ASSY",
+     "qty": "1",
+     "remarks": "Cable Quick Charger",
+     "search": "588202601"
+    },
+    {
+     "key": "7",
+     "part_number": "580965402",
+     "depth": 0,
+     "sub": false,
+     "description": "BODY KIT",
+     "qty": "1",
+     "remarks": "Body, White Upgrade KIT",
+     "search": "580965402"
+    },
+    {
+     "key": "8",
+     "part_number": "581165701",
+     "depth": 0,
+     "sub": false,
+     "description": "THREAD INSERT",
+     "qty": "1",
+     "remarks": "Metal Insert Repair KIT (4 pcs)",
+     "search": "581165701"
+    },
+    {
+     "key": "9",
+     "part_number": "115445001",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, Swedish",
+     "search": "115445001"
+    },
+    {
+     "key": "9",
+     "part_number": "115445036",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, Dutch",
+     "search": "115445036"
+    },
+    {
+     "key": "9",
+     "part_number": "115445011",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, Finnish",
+     "search": "115445011"
+    },
+    {
+     "key": "9",
+     "part_number": "115445026",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, English",
+     "search": "115445026"
+    },
+    {
+     "key": "9",
+     "part_number": "115445006",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, Danish",
+     "search": "115445006"
+    },
+    {
+     "key": "9",
+     "part_number": "115445031",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, French",
+     "search": "115445031"
+    },
+    {
+     "key": "9",
+     "part_number": "115445041",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, Italian",
+     "search": "115445041"
+    },
+    {
+     "key": "9",
+     "part_number": "115445051",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, German",
+     "search": "115445051"
+    },
+    {
+     "key": "9",
+     "part_number": "115445021",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, Norwegian",
+     "search": "115445021"
+    },
+    {
+     "key": "9",
+     "part_number": "115445046",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, Spanish",
+     "search": "115445046"
+    },
+    {
+     "key": "9",
+     "part_number": "115445058",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, Hungarian",
+     "search": "115445058"
+    },
+    {
+     "key": "9",
+     "part_number": "115445056",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, Russian",
+     "search": "115445056"
+    },
+    {
+     "key": "9",
+     "part_number": "115445061",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, Polish",
+     "search": "115445061"
+    },
+    {
+     "key": "9",
+     "part_number": "115445064",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, Latvian",
+     "search": "115445064"
+    },
+    {
+     "key": "9",
+     "part_number": "115445063",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, Estonian",
+     "search": "115445063"
+    },
+    {
+     "key": "9",
+     "part_number": "115445062",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, Romanian",
+     "search": "115445062"
+    },
+    {
+     "key": "9",
+     "part_number": "115445065",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, Lithuanian",
+     "search": "115445065"
+    },
+    {
+     "key": "9",
+     "part_number": "115445071",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, Greek",
+     "search": "115445071"
+    },
+    {
+     "key": "9",
+     "part_number": "115445090",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, Czech",
+     "search": "115445090"
+    },
+    {
+     "key": "9",
+     "part_number": "115445081",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, Croatian",
+     "search": "115445081"
+    },
+    {
+     "key": "9",
+     "part_number": "115445076",
+     "depth": 0,
+     "sub": false,
+     "description": "WORKSHOP MANUAL",
+     "qty": "1",
+     "remarks": "TECHNICAL MANUAL, Turkish",
+     "search": "115445076"
+    },
+    {
+     "key": "10",
+     "part_number": "591374103",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "Original Parts sticker EN ES FR IT",
+     "search": "591374103"
+    },
+    {
+     "key": "10",
+     "part_number": "591374102",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "Original Parts sticker DE FR NL IT",
+     "search": "591374102"
+    },
+    {
+     "key": "10",
+     "part_number": "591374101",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "Original Parts sticker SV NO DK FI",
+     "search": "591374101"
+    },
+    {
+     "key": "11",
+     "part_number": "590855101",
+     "depth": 0,
+     "sub": false,
+     "description": "MAINTENANCE KIT",
+     "qty": "1",
+     "remarks": "Maintenance and cleaning kit",
+     "search": "590855101"
+    },
+    {
+     "key": "12",
+     "part_number": "593967901",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRAY",
+     "qty": "1",
+     "remarks": "",
+     "search": "593967901"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.7 ACCESSORIES"
+  }
+ ]
+}

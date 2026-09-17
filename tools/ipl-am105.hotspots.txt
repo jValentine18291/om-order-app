@@ -1,0 +1,25 @@
+# AM 105 corrections.
+#
+# The INSTALLATION ACCESSORIES sheet draws four reels of boundary wire in a
+# row and numbers them 5, 6, 7, 8 - the sizes you can see, each reel drawn
+# larger than the last. The export lists three of them:
+#
+#     5   Loop Wire, blister pack (50 m) and Loop Wire (150 m)
+#     7   Loop Wire (250 m)
+#     8   Wire (800 m)
+#
+# 6 is drawn, numbered, and not listed. Nothing in the export hints at it: the
+# refs simply step 5, 7, 8, which reads like a retired number rather than a
+# missing one, and the checker was satisfied - eighteen keys, eighteen
+# hotspots, every one on ink. It is only on the drawing that the fourth reel
+# is sitting there with a plain black 6 beside three red rings.
+#
+# Marked unlisted, so the app says the book prints this callout and lists no
+# part for it. A technician looking for the length between 150 m and 250 m now
+# gets told that, rather than tapping a reel that does nothing.
+#
+# 12 and 13 are genuinely absent - not in the list, not on the drawing.
+#
+# Position read off a percentage grid: the 5 above it measured 54.35/47.99
+# against the export's 54.32/48.07.
+6 unlisted 6 49.8 53.2

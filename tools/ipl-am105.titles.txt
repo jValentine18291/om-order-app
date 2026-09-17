@@ -1,0 +1,25 @@
+# AM 105 sheet titles, in the order the export lists them (A to G already).
+#
+# Two changes only, and one of them matters.
+#
+# BLADE MOTOR & CUTTING EQUIPMENT. The drawing sets it with an ampersand where
+# the export writes AND. Cosmetic, but it is what the page says.
+#
+# CHARGING STATION (2017-2020 MODELS). This is the one worth reading. The
+# sheet carries a line across its top right - "For 2020, 2019, 2018, & 2017
+# models" - and the export drops it, as it drops every banner. It is not a
+# footnote: this book covers machines from 2016 on, and the COVER sheet is
+# full of parts split "For 2016 models" against "For 2020, 2019, 2018, & 2017
+# models", so 2016 machines are squarely in scope. Their charging station is
+# not on this sheet, and nothing else in the book says so.
+#
+# Without the note a technician working on a 2016 machine reads this tab as
+# the charging station and orders from it. With it, they know to look
+# elsewhere before they do.
+COVER
+CHASSIS UPPER
+CHASSIS LOWER
+BLADE MOTOR & CUTTING EQUIPMENT
+CHARGING STATION (2017-2020 models)
+INSTALLATION ACCESSORIES
+ACCESSORIES
