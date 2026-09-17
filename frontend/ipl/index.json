@@ -472,5 +472,14 @@
   "category": "Blower",
   "figures": 9,
   "parts": 83
+ },
+ {
+  "id": "hus115ihd45",
+  "name": "Husqvarna 115iHD45 Hedge Trimmer",
+  "short": "115iHD45",
+  "brand": "Husqvarna",
+  "category": "Hedge Trimmer",
+  "figures": 7,
+  "parts": 50
  }
 ]

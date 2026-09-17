@@ -1,0 +1,34 @@
+# 115iHD45 sheet titles, in the order the export lists them (A to E already).
+#
+# THE SERIAL NUMBER IS THE POINT OF THIS FILE.
+# The gears and the electrical system each come in two versions, and which one
+# a machine has depends on the serial it was built after. Husqvarna label the
+# sheets B1/B2 and E1/E2 and print the rule across the top; the export says
+# nothing at all - both sheets are just "GEARS", told apart only by an IPL ID
+# nobody sees. Untitled, a technician gets two identical GEARS tabs and a
+# fifty-fifty guess at a motor and a gearbox.
+#
+#   B1 and E1      967098301 up to S/N 20181600359
+#                  967098302 / 967098303 up to S/N 20181600001
+#   B2 and E2      967098301 higher than S/N 20181600359
+#                  967098302 / 967098303 higher than S/N 20181600001
+#
+# The tab says which of the two it is; the exact break is printed across the
+# top of the drawing, so it is on screen the moment the tab is opened. Putting
+# four serial numbers in a tab would make it unreadable and would still need
+# checking against the machine.
+#
+# The parts really do differ: B1 has a needle bearing at 6 where B2 has a
+# screw, and the motor, the gear, the control unit and the micro switch are
+# all different part numbers between the two.
+#
+# No renaming here. This book's drawings say ELECTRICAL, unlike the battery
+# blowers whose drawings say ELECTRIC SYSTEM - the printed name wins either
+# way, and here it already agrees with the export.
+CUTTING EQUIPMENT
+GEARS (B1, earlier S/N)
+GEARS (B2, later S/N)
+HANDLE
+HOUSING
+ELECTRICAL (E1, earlier S/N)
+ELECTRICAL (E2, later S/N)

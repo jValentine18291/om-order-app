@@ -1,0 +1,905 @@
+{
+ "id": "hus115ihd45",
+ "name": "Husqvarna 115iHD45 Hedge Trimmer",
+ "source": "Husqvarna portal CSV export (115iHD45 IPL.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "CUTTING EQUIPMENT",
+   "image": "hus115ihd45-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 44.183,
+     "y": 31.647,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 53.846,
+     "y": 63.044,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 58.868,
+     "y": 74.977,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "590655101",
+     "depth": 0,
+     "sub": false,
+     "description": "DRIVER ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "590655101"
+    },
+    {
+     "key": "2",
+     "part_number": "585637301",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE",
+     "qty": "1",
+     "remarks": "",
+     "search": "585637301"
+    },
+    {
+     "key": "3",
+     "part_number": "588760101",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE",
+     "qty": "1",
+     "remarks": "",
+     "search": "588760101"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 CUTTING EQUIPMENT"
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "GEARS (B1, earlier S/N)",
+   "image": "hus115ihd45-fig2.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 32.549,
+     "y": 24.251,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 79.243,
+     "y": 35.413,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 79.085,
+     "y": 72.845,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 62.397,
+     "y": 50.023,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 35.029,
+     "y": 53.153,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 37.508,
+     "y": 55.377,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 43.357,
+     "y": 68.013,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 74.412,
+     "y": 68.398,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 42.912,
+     "y": 71.416,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 75.874,
+     "y": 83.485,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 55.308,
+     "y": 88.113,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 30.038,
+     "y": 90.109,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "589605901",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "589605901"
+    },
+    {
+     "key": "2",
+     "part_number": "589766701",
+     "depth": 0,
+     "sub": false,
+     "description": "GEAR",
+     "qty": "1",
+     "remarks": "",
+     "search": "589766701"
+    },
+    {
+     "key": "3",
+     "part_number": "582492601",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "582492601"
+    },
+    {
+     "key": "4",
+     "part_number": "585818801",
+     "depth": 0,
+     "sub": false,
+     "description": "SLEEVE",
+     "qty": "2",
+     "remarks": "",
+     "search": "585818801"
+    },
+    {
+     "key": "5",
+     "part_number": "585944401",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "3",
+     "remarks": "",
+     "search": "585944401"
+    },
+    {
+     "key": "6",
+     "part_number": "585628301",
+     "depth": 0,
+     "sub": false,
+     "description": "NEEDLE BEARING",
+     "qty": "1",
+     "remarks": "",
+     "search": "585628301"
+    },
+    {
+     "key": "7",
+     "part_number": "585635801",
+     "depth": 0,
+     "sub": false,
+     "description": "BALL BEARING",
+     "qty": "1",
+     "remarks": "",
+     "search": "585635801"
+    },
+    {
+     "key": "8",
+     "part_number": "585628201",
+     "depth": 0,
+     "sub": false,
+     "description": "PAD",
+     "qty": "2",
+     "remarks": "",
+     "search": "585628201"
+    },
+    {
+     "key": "9",
+     "part_number": "588267701",
+     "depth": 0,
+     "sub": false,
+     "description": "GEARBOX",
+     "qty": "1",
+     "remarks": "",
+     "search": "588267701"
+    },
+    {
+     "key": "10",
+     "part_number": "585818601",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "585818601"
+    },
+    {
+     "key": "11",
+     "part_number": "585818701",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "4",
+     "remarks": "",
+     "search": "585818701"
+    },
+    {
+     "key": "12",
+     "part_number": "503989603",
+     "depth": 0,
+     "sub": false,
+     "description": "GREASE",
+     "qty": "1",
+     "remarks": "20g",
+     "search": "503989603"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 1,
+   "label": "Fig.2 GEARS (B1, earlier S/N)"
+  },
+  {
+   "id": "3",
+   "number": "2",
+   "title": "GEARS (B2, later S/N)",
+   "image": "hus115ihd45-fig3.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 58.251,
+     "y": 18.923,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 79.583,
+     "y": 29.079,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 79.114,
+     "y": 66.804,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 64.487,
+     "y": 45.913,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 37.389,
+     "y": 50.549,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 20.464,
+     "y": 47.713,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 43.952,
+     "y": 64.059,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 74.988,
+     "y": 61.772,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 44.093,
+     "y": 67.841,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 75.738,
+     "y": 76.258,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 69.362,
+     "y": 83.974,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 29.606,
+     "y": 85.285,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "590675201",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "590675201"
+    },
+    {
+     "key": "2",
+     "part_number": "591368701",
+     "depth": 0,
+     "sub": false,
+     "description": "GEAR",
+     "qty": "1",
+     "remarks": "",
+     "search": "591368701"
+    },
+    {
+     "key": "3",
+     "part_number": "582492601",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "582492601"
+    },
+    {
+     "key": "4",
+     "part_number": "585818801",
+     "depth": 0,
+     "sub": false,
+     "description": "SLEEVE",
+     "qty": "2",
+     "remarks": "",
+     "search": "585818801"
+    },
+    {
+     "key": "5",
+     "part_number": "585944401",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "3",
+     "remarks": "",
+     "search": "585944401"
+    },
+    {
+     "key": "6",
+     "part_number": "586903002",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "586903002"
+    },
+    {
+     "key": "7",
+     "part_number": "585635801",
+     "depth": 0,
+     "sub": false,
+     "description": "BALL BEARING",
+     "qty": "1",
+     "remarks": "",
+     "search": "585635801"
+    },
+    {
+     "key": "8",
+     "part_number": "585628201",
+     "depth": 0,
+     "sub": false,
+     "description": "PAD",
+     "qty": "2",
+     "remarks": "",
+     "search": "585628201"
+    },
+    {
+     "key": "9",
+     "part_number": "588267701",
+     "depth": 0,
+     "sub": false,
+     "description": "GEARBOX",
+     "qty": "1",
+     "remarks": "",
+     "search": "588267701"
+    },
+    {
+     "key": "10",
+     "part_number": "585818601",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "585818601"
+    },
+    {
+     "key": "11",
+     "part_number": "585818701",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "4",
+     "remarks": "",
+     "search": "585818701"
+    },
+    {
+     "key": "12",
+     "part_number": "503989603",
+     "depth": 0,
+     "sub": false,
+     "description": "GREASE",
+     "qty": "1",
+     "remarks": "20g",
+     "search": "503989603"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 2,
+   "label": "Fig.2 GEARS (B2, later S/N)"
+  },
+  {
+   "id": "4",
+   "number": "3",
+   "title": "HANDLE",
+   "image": "hus115ihd45-fig4.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 21.647,
+     "y": 50.227,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "591426401",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "591426401"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 HANDLE"
+  },
+  {
+   "id": "5",
+   "number": "4",
+   "title": "HOUSING",
+   "image": "hus115ihd45-fig5.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 39.352,
+     "y": 21.892,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 39.479,
+     "y": 24.932,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 51.113,
+     "y": 20.44,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 51.113,
+     "y": 23.934,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 51.685,
+     "y": 31.919,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 31.85,
+     "y": 41.652,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 48.57,
+     "y": 39.27,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 68.214,
+     "y": 44.714,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 76.224,
+     "y": 60.844,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 31.373,
+     "y": 62.591,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 55.372,
+     "y": 68.943,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 78.608,
+     "y": 71.869,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 65.48,
+     "y": 73.117,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 45.391,
+     "y": 82.781,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "577996601",
+     "depth": 0,
+     "sub": false,
+     "description": "PUSH BUTTON",
+     "qty": "1",
+     "remarks": "",
+     "search": "577996601"
+    },
+    {
+     "key": "2",
+     "part_number": "585636201",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "585636201"
+    },
+    {
+     "key": "3",
+     "part_number": "585636001",
+     "depth": 0,
+     "sub": false,
+     "description": "PUSH BUTTON",
+     "qty": "1",
+     "remarks": "",
+     "search": "585636001"
+    },
+    {
+     "key": "4",
+     "part_number": "585636601",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "585636601"
+    },
+    {
+     "key": "5",
+     "part_number": "585634901",
+     "depth": 0,
+     "sub": false,
+     "description": "BATTERY BOX",
+     "qty": "1",
+     "remarks": "",
+     "search": "585634901"
+    },
+    {
+     "key": "6",
+     "part_number": "585818901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "4",
+     "remarks": "",
+     "search": "585818901"
+    },
+    {
+     "key": "7",
+     "part_number": "588145803",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING",
+     "qty": "1",
+     "remarks": "",
+     "search": "588145803"
+    },
+    {
+     "key": "8",
+     "part_number": "588145701",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING",
+     "qty": "1",
+     "remarks": "",
+     "search": "588145701"
+    },
+    {
+     "key": "9",
+     "part_number": "585819002",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "9",
+     "remarks": "",
+     "search": "585819002"
+    },
+    {
+     "key": "10",
+     "part_number": "593352101",
+     "depth": 0,
+     "sub": false,
+     "description": "TRIGGER",
+     "qty": "1",
+     "remarks": "",
+     "search": "593352101"
+    },
+    {
+     "key": "11",
+     "part_number": "585633901",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "585633901"
+    },
+    {
+     "key": "12",
+     "part_number": "591468202",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "591468202"
+    },
+    {
+     "key": "13",
+     "part_number": "591468201",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "591468201"
+    },
+    {
+     "key": "14",
+     "part_number": "503709701",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "503709701"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.4 HOUSING"
+  },
+  {
+   "id": "6",
+   "number": "5",
+   "title": "ELECTRICAL (E1, earlier S/N)",
+   "image": "hus115ihd45-fig6.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 19.167,
+     "y": 27.579,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 54.963,
+     "y": 58.467,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 19.909,
+     "y": 71.619,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 79.92,
+     "y": 49.322,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 77.638,
+     "y": 50.329,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "599392401",
+     "depth": 0,
+     "sub": false,
+     "description": "KEYPAD",
+     "qty": "1",
+     "remarks": "",
+     "search": "599392401"
+    },
+    {
+     "key": "2",
+     "part_number": "582405907",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "582405907"
+    },
+    {
+     "key": "3",
+     "part_number": "585590601",
+     "depth": 0,
+     "sub": false,
+     "description": "MICRO SWITCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "585590601"
+    },
+    {
+     "key": "4",
+     "part_number": "588259701",
+     "depth": 0,
+     "sub": false,
+     "description": "TERMINAL",
+     "qty": "3",
+     "remarks": "",
+     "search": "588259701"
+    },
+    {
+     "key": "5",
+     "part_number": "588259801",
+     "depth": 0,
+     "sub": false,
+     "description": "SLEEVE",
+     "qty": "3",
+     "remarks": "",
+     "search": "588259801"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 1,
+   "label": "Fig.5 ELECTRICAL (E1, earlier S/N)"
+  },
+  {
+   "id": "7",
+   "number": "5",
+   "title": "ELECTRICAL (E2, later S/N)",
+   "image": "hus115ihd45-fig7.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 19.237,
+     "y": 24.928,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 53.56,
+     "y": 54.151,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 19.442,
+     "y": 72.688,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "599392401",
+     "depth": 0,
+     "sub": false,
+     "description": "KEYPAD",
+     "qty": "1",
+     "remarks": "",
+     "search": "599392401"
+    },
+    {
+     "key": "2",
+     "part_number": "593264602",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "593264602"
+    },
+    {
+     "key": "3",
+     "part_number": "590808501",
+     "depth": 0,
+     "sub": false,
+     "description": "MICRO SWITCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "590808501"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 2,
+   "label": "Fig.5 ELECTRICAL (E2, later S/N)"
+  }
+ ]
+}
