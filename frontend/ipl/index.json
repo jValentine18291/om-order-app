@@ -602,5 +602,14 @@
   "category": "Pole Saw",
   "figures": 6,
   "parts": 79
+ },
+ {
+  "id": "hus536lipt5",
+  "name": "Husqvarna 536LiPT5 Pole Saw",
+  "short": "536LiPT5",
+  "brand": "Husqvarna",
+  "category": "Pole Saw",
+  "figures": 6,
+  "parts": 103
  }
 ]

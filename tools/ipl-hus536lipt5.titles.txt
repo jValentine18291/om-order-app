@@ -1,0 +1,39 @@
+# 536LiPT5 sheet titles, in the order --order puts them.
+#
+# THE SAME THREE-MACHINE BOOK AS THE 536LiP4, seen from the other side. One
+# IPL covers the 536LiPX, LiP4 and LiPT5, and the printed letters say which
+# sheet belongs to which:
+#
+#     A    SAW HEAD     headed "536LiPX, 536LiP4, 536LiPT5" - shared, and
+#                       the drawing is the same one the LiP4 book carries
+#     B    SHAFT        the LiPT5's own
+#     C    HOUSING      shared again, same drawing as the LiP4's
+#     D5   ELECTRICAL   the LiPT5's, up to S/N 20174600122
+#     D6   ELECTRICAL   the LiPT5's, from S/N 20174600122
+#     E3   ACCESSORIES  the LiPT5's own
+#
+# Note B, with no number after it, where the LiP4's equivalent sheet is B2 and
+# is titled TUBE rather than SHAFT. The suffixes are not a tidy per-model
+# scheme; they are just how Husqvarna numbered the variants of each section as
+# they were drawn. Do not try to make the two books agree.
+#
+# ORDER. Same as the LiP4's: the export lists D5, A, B, C, D6, E3, so the
+# electrical sheets arrive first and split apart. --order puts the book back
+# in its own run and sets the two D sheets side by side.
+#
+# THE SERIAL SPLIT IS NOT THE LiP4'S. Both sheets head themselves "536LiPT5
+# ELECTRICAL" and nothing more; the cut-off is printed across the top right
+# corner and dropped by the export:
+#
+#     D5   UP TO S/N 20174600122
+#     D6   FROM S/N 20174600122
+#
+# The LiP4 splits at 20174600001. Same family, same month, different number -
+# so a technician who remembers the other machine's figure will get it wrong.
+# That is the whole reason it is on the tab rather than in a note somewhere.
+SAW HEAD
+SHAFT
+HOUSING
+ELECTRICAL (D5, up to S/N 20174600122)
+ELECTRICAL (D6, from S/N 20174600122)
+ACCESSORIES
