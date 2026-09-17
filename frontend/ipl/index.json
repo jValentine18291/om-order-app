@@ -454,5 +454,14 @@
   "category": "Blower",
   "figures": 7,
   "parts": 59
+ },
+ {
+  "id": "hus525ib",
+  "name": "Husqvarna 525iB Blower",
+  "short": "525iB",
+  "brand": "Husqvarna",
+  "category": "Blower",
+  "figures": 5,
+  "parts": 35
  }
 ]

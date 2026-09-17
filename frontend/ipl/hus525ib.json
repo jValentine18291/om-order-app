@@ -1,0 +1,655 @@
+{
+ "id": "hus525ib",
+ "name": "Husqvarna 525iB Blower",
+ "source": "Husqvarna portal CSV export (525iB IPL.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "CHASSI",
+   "image": "hus525ib-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 33.121,
+     "y": 14.02,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 13.541,
+     "y": 38.612,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 68.722,
+     "y": 32.804,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 53.592,
+     "y": 38.317,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 12.27,
+     "y": 77.337,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 13.16,
+     "y": 62.024,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 37.635,
+     "y": 55.104,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 50.858,
+     "y": 74.047,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 68.849,
+     "y": 49.456,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 32.994,
+     "y": 92.06,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 18.214,
+     "y": 82.146,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 44.628,
+     "y": 89.088,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 76.828,
+     "y": 75.272,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 84.901,
+     "y": 68.24,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 89.065,
+     "y": 66.856,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 60.108,
+     "y": 78.085,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 34.615,
+     "y": 62.976,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 16.37,
+     "y": 86.298,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "586106302",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "586106302"
+    },
+    {
+     "key": "2",
+     "part_number": "582501601",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE",
+     "qty": "1",
+     "remarks": "",
+     "search": "582501601"
+    },
+    {
+     "key": "3",
+     "part_number": "584213701",
+     "depth": 0,
+     "sub": false,
+     "description": "FRAME",
+     "qty": "1",
+     "remarks": "",
+     "search": "584213701"
+    },
+    {
+     "key": "4",
+     "part_number": "584914701",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "584914701"
+    },
+    {
+     "key": "5",
+     "part_number": "580292901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCT",
+     "qty": "16",
+     "remarks": "",
+     "search": "580292901"
+    },
+    {
+     "key": "6",
+     "part_number": "579564102",
+     "depth": 0,
+     "sub": false,
+     "description": "THROTTLE CONTROL",
+     "qty": "1",
+     "remarks": "",
+     "search": "579564102"
+    },
+    {
+     "key": "7",
+     "part_number": "544042003",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE INSERT",
+     "qty": "2",
+     "remarks": "",
+     "search": "544042003"
+    },
+    {
+     "key": "8",
+     "part_number": "586514201",
+     "depth": 0,
+     "sub": false,
+     "description": "EYELET",
+     "qty": "1",
+     "remarks": "",
+     "search": "586514201"
+    },
+    {
+     "key": "9",
+     "part_number": "584157402",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING",
+     "qty": "1",
+     "remarks": "",
+     "search": "584157402"
+    },
+    {
+     "key": "10",
+     "part_number": "584157302",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING",
+     "qty": "1",
+     "remarks": "",
+     "search": "584157302"
+    },
+    {
+     "key": "11",
+     "part_number": "585480001",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "585480001"
+    },
+    {
+     "key": "12",
+     "part_number": "577996601",
+     "depth": 0,
+     "sub": false,
+     "description": "PUSH BUTTON",
+     "qty": "1",
+     "remarks": "",
+     "search": "577996601"
+    },
+    {
+     "key": "13",
+     "part_number": "576901201",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "576901201"
+    },
+    {
+     "key": "14",
+     "part_number": "503212813",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW CCRPANT",
+     "qty": "1",
+     "remarks": "",
+     "search": "503212813"
+    },
+    {
+     "key": "15",
+     "part_number": "588009701",
+     "depth": 0,
+     "sub": false,
+     "description": "EYELET",
+     "qty": "1",
+     "remarks": "",
+     "search": "588009701"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 CHASSI"
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "DECALS",
+   "image": "hus525ib-fig2.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 40.877,
+     "y": 25.091,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 60.458,
+     "y": 25.0,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 40.146,
+     "y": 79.333,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "586834106",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "586834106"
+    },
+    {
+     "key": "2",
+     "part_number": "586834206",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "586834206"
+    },
+    {
+     "key": "3",
+     "part_number": "503709701",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "503709701"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 DECALS"
+  },
+  {
+   "id": "3",
+   "number": "3",
+   "title": "ELECTRIC SYSTEM",
+   "image": "hus525ib-fig3.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 39.415,
+     "y": 14.632,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 80.992,
+     "y": 49.138,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 53.624,
+     "y": 32.713,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 48.284,
+     "y": 39.723,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 67.514,
+     "y": 83.326,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 20.025,
+     "y": 55.921,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 45.9,
+     "y": 80.898,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 43.579,
+     "y": 59.914,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 84.298,
+     "y": 69.601,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "587948601",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "587948601"
+    },
+    {
+     "key": "2",
+     "part_number": "582050701",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "582050701"
+    },
+    {
+     "key": "3",
+     "part_number": "582837601",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "582837601"
+    },
+    {
+     "key": "4",
+     "part_number": "587327201",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "587327201"
+    },
+    {
+     "key": "5",
+     "part_number": "503212813",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW CCRPANT",
+     "qty": "2",
+     "remarks": "",
+     "search": "503212813"
+    },
+    {
+     "key": "6",
+     "part_number": "586492201",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "586492201"
+    },
+    {
+     "key": "7",
+     "part_number": "586963901",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "586963901"
+    },
+    {
+     "key": "8",
+     "part_number": "588009801",
+     "depth": 0,
+     "sub": false,
+     "description": "KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "588009801"
+    },
+    {
+     "key": "9",
+     "part_number": "593813001",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "593813001"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 ELECTRIC SYSTEM"
+  },
+  {
+   "id": "4",
+   "number": "4",
+   "title": "FAN SYSTEM",
+   "image": "hus525ib-fig4.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 74.666,
+     "y": 45.803,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 15.289,
+     "y": 72.799,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 85.474,
+     "y": 47.89,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "586492201",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "586492201"
+    },
+    {
+     "key": "2",
+     "part_number": "503911001",
+     "depth": 0,
+     "sub": false,
+     "description": "SUSPENSION",
+     "qty": "6",
+     "remarks": "",
+     "search": "503911001"
+    },
+    {
+     "key": "5",
+     "part_number": "588009901",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "588009901"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.4 FAN SYSTEM"
+  },
+  {
+   "id": "5",
+   "number": "5",
+   "title": "ACCESSORIES",
+   "image": "hus525ib-fig5.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 13.223,
+     "y": 32.532,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 73.617,
+     "y": 10.844,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 65.353,
+     "y": 26.679,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 56.135,
+     "y": 40.699,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 42.848,
+     "y": 80.195,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "537216201",
+     "depth": 0,
+     "sub": false,
+     "description": "HARNESS",
+     "qty": "1",
+     "remarks": "",
+     "search": "537216201"
+    },
+    {
+     "key": "2",
+     "part_number": "586106301",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE ASSY",
+     "qty": "1",
+     "remarks": "Round Nozzle (300mm)",
+     "search": "586106301"
+    },
+    {
+     "key": "3",
+     "part_number": "586106302",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE ASSY",
+     "qty": "1",
+     "remarks": "Round Nozzle (400mm)",
+     "search": "586106302"
+    },
+    {
+     "key": "4",
+     "part_number": "589811701",
+     "depth": 0,
+     "sub": false,
+     "description": "NOZZLE",
+     "qty": "1",
+     "remarks": "Nozzle Silencer (400mm)",
+     "search": "589811701"
+    },
+    {
+     "key": "5",
+     "part_number": "579797501",
+     "depth": 0,
+     "sub": false,
+     "description": "NOZZLE",
+     "qty": "1",
+     "remarks": "Flat Nozzle (600mm)",
+     "search": "579797501"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.5 ACCESSORIES"
+  }
+ ]
+}

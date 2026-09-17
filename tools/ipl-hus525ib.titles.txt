@@ -1,0 +1,19 @@
+# 525iB sheet titles, in the order the export lists them (A to E already).
+#
+# The printed names. This book is laid out exactly like the 120iB - same five
+# sections, same three disagreements with the export - so the same corrections
+# apply and the two handheld battery blowers end up reading identically:
+#
+#     export TUBE        drawing CHASSI
+#     export ELECTRICAL  drawing ELECTRIC SYSTEM
+#     export FAN         drawing FAN SYSTEM
+#
+# CHASSI is the one that matters. That sheet carries the tube, the frame, the
+# throttle control, both housings, two covers, the spring, the push button and
+# the eyelets - the whole body of the machine. Filed under "TUBE" a technician
+# hunting a housing would never open it.
+CHASSI
+DECALS
+ELECTRIC SYSTEM
+FAN SYSTEM
+ACCESSORIES
