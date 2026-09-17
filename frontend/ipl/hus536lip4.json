@@ -1,0 +1,1379 @@
+{
+ "id": "hus536lip4",
+ "name": "Husqvarna 536LiP4 Pole Saw",
+ "source": "Husqvarna portal CSV export (536LiP4 Battery Pole Saw IPL.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "SAW HEAD",
+   "image": "hus536lip4-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 67.533,
+     "y": 10.533,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 53.748,
+     "y": 14.795,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 68.944,
+     "y": 23.603,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 61.568,
+     "y": 26.311,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 21.987,
+     "y": 21.765,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 14.692,
+     "y": 20.239,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 21.423,
+     "y": 25.627,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 88.976,
+     "y": 51.796,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 75.353,
+     "y": 37.272,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 67.191,
+     "y": 47.406,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 78.073,
+     "y": 57.625,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 83.495,
+     "y": 59.122,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 85.127,
+     "y": 69.541,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 83.757,
+     "y": 73.546,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 60.802,
+     "y": 44.071,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 57.316,
+     "y": 41.904,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 47.078,
+     "y": 49.444,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 41.858,
+     "y": 55.445,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 67.07,
+     "y": 63.997,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 56.872,
+     "y": 65.094,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 27.852,
+     "y": 60.661,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 41.798,
+     "y": 71.408,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 37.183,
+     "y": 73.404,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 33.253,
+     "y": 74.316,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 16.586,
+     "y": 63.113,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 14.329,
+     "y": 68.401,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 87.042,
+     "y": 87.101,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 85.208,
+     "y": 53.563,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 42.926,
+     "y": 8.424,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 26.763,
+     "y": 81.956,
+     "conf": 100
+    },
+    {
+     "key": "30",
+     "x": 48.71,
+     "y": 80.388,
+     "conf": 100
+    },
+    {
+     "key": "31",
+     "x": 52.781,
+     "y": 93.059,
+     "conf": 100
+    },
+    {
+     "key": "32",
+     "x": 42.201,
+     "y": 85.448,
+     "conf": 100
+    },
+    {
+     "key": "33",
+     "x": 39.863,
+     "y": 87.229,
+     "conf": 100
+    },
+    {
+     "key": "34",
+     "x": 37.646,
+     "y": 88.94,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "579211901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCT",
+     "qty": "4",
+     "remarks": "",
+     "search": "579211901"
+    },
+    {
+     "key": "2",
+     "part_number": "587347201",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "587347201"
+    },
+    {
+     "key": "3",
+     "part_number": "587347101",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "587347101"
+    },
+    {
+     "key": "4",
+     "part_number": "587690801",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR ASSY",
+     "qty": "1",
+     "remarks": "IPL Update",
+     "search": "587690801"
+    },
+    {
+     "key": "5",
+     "part_number": "589241301",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "589241301"
+    },
+    {
+     "key": "6",
+     "part_number": "577878603",
+     "depth": 0,
+     "sub": false,
+     "description": "TANK CAP ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "577878603"
+    },
+    {
+     "key": "7",
+     "part_number": "587346801",
+     "depth": 0,
+     "sub": false,
+     "description": "OIL TANK",
+     "qty": "1",
+     "remarks": "",
+     "search": "587346801"
+    },
+    {
+     "key": "8",
+     "part_number": "587734201",
+     "depth": 0,
+     "sub": false,
+     "description": "INSULATOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "587734201"
+    },
+    {
+     "key": "9",
+     "part_number": "576831001",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "1",
+     "remarks": "",
+     "search": "576831001"
+    },
+    {
+     "key": "10",
+     "part_number": "587346502",
+     "depth": 0,
+     "sub": false,
+     "description": "OIL HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "587346502"
+    },
+    {
+     "key": "11",
+     "part_number": "537154801",
+     "depth": 0,
+     "sub": false,
+     "description": "PUMP CYLINDER",
+     "qty": "1",
+     "remarks": "",
+     "search": "537154801"
+    },
+    {
+     "key": "12",
+     "part_number": "540057901",
+     "depth": 0,
+     "sub": false,
+     "description": "PUMP PISTON",
+     "qty": "1",
+     "remarks": "",
+     "search": "540057901"
+    },
+    {
+     "key": "13",
+     "part_number": "503201412",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCFMO",
+     "qty": "1",
+     "remarks": "",
+     "search": "503201412"
+    },
+    {
+     "key": "14",
+     "part_number": "503200778",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCFM",
+     "qty": "1",
+     "remarks": "",
+     "search": "503200778"
+    },
+    {
+     "key": "15",
+     "part_number": "580653201",
+     "depth": 0,
+     "sub": false,
+     "description": "PAWL",
+     "qty": "1",
+     "remarks": "",
+     "search": "580653201"
+    },
+    {
+     "key": "16",
+     "part_number": "501452702",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCK NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "501452702"
+    },
+    {
+     "key": "17",
+     "part_number": "580462501",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "580462501"
+    },
+    {
+     "key": "18",
+     "part_number": "503202512",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "4",
+     "remarks": "",
+     "search": "503202512"
+    },
+    {
+     "key": "19",
+     "part_number": "579776301",
+     "depth": 0,
+     "sub": false,
+     "description": "CHASSIS",
+     "qty": "1",
+     "remarks": "",
+     "search": "579776301"
+    },
+    {
+     "key": "20",
+     "part_number": "587347302",
+     "depth": 0,
+     "sub": false,
+     "description": "PUMP PINION",
+     "qty": "1",
+     "remarks": "LiPX EU, LiP4 US, LiPT5 US/CA",
+     "search": "587347302"
+    },
+    {
+     "key": "21",
+     "part_number": "577607601",
+     "depth": 0,
+     "sub": false,
+     "description": "SPUR SPROCKET",
+     "qty": "1",
+     "remarks": "LiP4 EU, LiPT5 EU",
+     "search": "577607601"
+    },
+    {
+     "key": "22",
+     "part_number": "579534501",
+     "depth": 0,
+     "sub": false,
+     "description": "SPUR SPROCKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "579534501"
+    },
+    {
+     "key": "23",
+     "part_number": "577271501",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "IPL Update",
+     "search": "577271501"
+    },
+    {
+     "key": "24",
+     "part_number": "735311200",
+     "depth": 0,
+     "sub": false,
+     "description": "CIRCLIP",
+     "qty": "1",
+     "remarks": "IPL Update",
+     "search": "735311200"
+    },
+    {
+     "key": "25",
+     "part_number": "501742501",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "501742501"
+    },
+    {
+     "key": "26",
+     "part_number": "501652501",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "501652501"
+    },
+    {
+     "key": "27",
+     "part_number": "588698002",
+     "depth": 0,
+     "sub": false,
+     "description": "ACCESSORY BAG",
+     "qty": "1",
+     "remarks": "",
+     "search": "588698002"
+    },
+    {
+     "key": "28",
+     "part_number": "504710003",
+     "depth": 0,
+     "sub": false,
+     "description": "OIL PLUMMET",
+     "qty": "1",
+     "remarks": "",
+     "search": "504710003"
+    },
+    {
+     "key": "29",
+     "part_number": "529537101",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTING SYSTEM",
+     "qty": "1",
+     "remarks": "IPL Update",
+     "search": "529537101"
+    },
+    {
+     "key": "30",
+     "part_number": "546703601",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR ASSY",
+     "qty": "1",
+     "remarks": "IPL Update",
+     "search": "546703601"
+    },
+    {
+     "key": "31",
+     "part_number": "529653801",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR ASSY",
+     "qty": "1",
+     "remarks": "IPL Update",
+     "search": "529653801"
+    },
+    {
+     "key": "32",
+     "part_number": "597670101",
+     "depth": 0,
+     "sub": false,
+     "description": "DISC SPRING",
+     "qty": "1",
+     "remarks": "IPL Update",
+     "search": "597670101"
+    },
+    {
+     "key": "33",
+     "part_number": "503230035",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "IPL Update",
+     "search": "503230035"
+    },
+    {
+     "key": "34",
+     "part_number": "503215320",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCM",
+     "qty": "1",
+     "remarks": "IPL Update",
+     "search": "503215320"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 SAW HEAD"
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "TUBE",
+   "image": "hus536lip4-fig2.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 52.352,
+     "y": 30.377,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 78.512,
+     "y": 62.818,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "501097801",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE",
+     "qty": "1",
+     "remarks": "TUBE - HANDLE",
+     "search": "501097801"
+    },
+    {
+     "key": "2",
+     "part_number": "537353601",
+     "depth": 0,
+     "sub": false,
+     "description": "LOOP",
+     "qty": "1",
+     "remarks": "LOOP - KPL 24",
+     "search": "537353601"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 TUBE"
+  },
+  {
+   "id": "3",
+   "number": "3",
+   "title": "HOUSING",
+   "image": "hus536lip4-fig3.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 71.131,
+     "y": 13.729,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 46.081,
+     "y": 40.157,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 74.364,
+     "y": 8.757,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 82.848,
+     "y": 34.7,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 83.98,
+     "y": 88.286,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 60.0,
+     "y": 18.829,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 17.758,
+     "y": 22.9,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 53.838,
+     "y": 23.743,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 86.808,
+     "y": 29.186,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 85.919,
+     "y": 49.057,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 64.404,
+     "y": 51.643,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 59.616,
+     "y": 53.5,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 39.354,
+     "y": 43.8,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 23.475,
+     "y": 51.771,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 37.798,
+     "y": 75.386,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 89.798,
+     "y": 78.557,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 30.364,
+     "y": 87.743,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 29.253,
+     "y": 60.871,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 29.434,
+     "y": 67.7,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 29.253,
+     "y": 74.457,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 54.02,
+     "y": 89.429,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "577013202",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE HALF",
+     "qty": "1",
+     "remarks": "",
+     "search": "577013202"
+    },
+    {
+     "key": "2",
+     "part_number": "579211901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCT",
+     "qty": "20",
+     "remarks": "",
+     "search": "579211901"
+    },
+    {
+     "key": "3",
+     "part_number": "577512301",
+     "depth": 0,
+     "sub": false,
+     "description": "THROTTLE LOCKOUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "577512301"
+    },
+    {
+     "key": "4",
+     "part_number": "577013101",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE HALF",
+     "qty": "1",
+     "remarks": "",
+     "search": "577013101"
+    },
+    {
+     "key": "5",
+     "part_number": "589377901",
+     "depth": 0,
+     "sub": false,
+     "description": "TRIGGER",
+     "qty": "1",
+     "remarks": "",
+     "search": "589377901"
+    },
+    {
+     "key": "6",
+     "part_number": "577014101",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "577014101"
+    },
+    {
+     "key": "7",
+     "part_number": "577013002",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING",
+     "qty": "1",
+     "remarks": "",
+     "search": "577013002"
+    },
+    {
+     "key": "8",
+     "part_number": "577996601",
+     "depth": 0,
+     "sub": false,
+     "description": "PUSH BUTTON",
+     "qty": "1",
+     "remarks": "",
+     "search": "577996601"
+    },
+    {
+     "key": "9",
+     "part_number": "585480001",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "585480001"
+    },
+    {
+     "key": "10",
+     "part_number": "577022201",
+     "depth": 0,
+     "sub": false,
+     "description": "CLAMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "577022201"
+    },
+    {
+     "key": "11",
+     "part_number": "577007603",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING",
+     "qty": "1",
+     "remarks": "",
+     "search": "577007603"
+    },
+    {
+     "key": "12",
+     "part_number": "587346001",
+     "depth": 0,
+     "sub": false,
+     "description": "TRIGGER",
+     "qty": "1",
+     "remarks": "",
+     "search": "587346001"
+    },
+    {
+     "key": "13",
+     "part_number": "587345801",
+     "depth": 0,
+     "sub": false,
+     "description": "BUMPER",
+     "qty": "1",
+     "remarks": "",
+     "search": "587345801"
+    },
+    {
+     "key": "14",
+     "part_number": "588919801",
+     "depth": 0,
+     "sub": false,
+     "description": "SKID PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "588919801"
+    },
+    {
+     "key": "15",
+     "part_number": "588602803",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "588602803"
+    },
+    {
+     "key": "16",
+     "part_number": "588602802",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "588602802"
+    },
+    {
+     "key": "17",
+     "part_number": "588602801",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "588602801"
+    },
+    {
+     "key": "18",
+     "part_number": "588602514",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "588602514"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 HOUSING"
+  },
+  {
+   "id": "4",
+   "number": "4",
+   "title": "ELECTRICAL (D3, up to S/N 20174600001)",
+   "image": "hus536lip4-fig4.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 14.749,
+     "y": 27.858,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 71.011,
+     "y": 15.018,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 85.823,
+     "y": 57.849,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 75.016,
+     "y": 45.145,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 65.194,
+     "y": 64.474,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 50.731,
+     "y": 70.077,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 46.217,
+     "y": 76.248,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 38.811,
+     "y": 90.699,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 73.49,
+     "y": 42.809,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 82.549,
+     "y": 61.434,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "578326901",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "578326901"
+    },
+    {
+     "key": "2",
+     "part_number": "593896701",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "593896701"
+    },
+    {
+     "key": "3",
+     "part_number": "525887401",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW CITXPANT",
+     "qty": "4",
+     "remarks": "",
+     "search": "525887401"
+    },
+    {
+     "key": "4",
+     "part_number": "582054101",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "582054101"
+    },
+    {
+     "key": "5",
+     "part_number": "588255301",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING",
+     "qty": "1",
+     "remarks": "",
+     "search": "588255301"
+    },
+    {
+     "key": "6",
+     "part_number": "577976601",
+     "depth": 0,
+     "sub": false,
+     "description": "FERRITE CORE",
+     "qty": "1",
+     "remarks": "",
+     "search": "577976601"
+    },
+    {
+     "key": "7",
+     "part_number": "587663601",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "587663601"
+    },
+    {
+     "key": "8",
+     "part_number": "588176401",
+     "depth": 0,
+     "sub": false,
+     "description": "GREASE",
+     "qty": "1",
+     "remarks": "",
+     "search": "588176401"
+    },
+    {
+     "key": "9",
+     "part_number": "587327201",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "587327201"
+    },
+    {
+     "key": "10",
+     "part_number": "593813001",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "593813001"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 1,
+   "label": "Fig.4 ELECTRICAL (D3, up to S/N 20174600001)"
+  },
+  {
+   "id": "5",
+   "number": "4",
+   "title": "ELECTRICAL (D4, from S/N 20174600001)",
+   "image": "hus536lip4-fig5.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 32.231,
+     "y": 11.525,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 60.458,
+     "y": 26.701,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 72.759,
+     "y": 42.604,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 63.096,
+     "y": 46.053,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 65.194,
+     "y": 62.659,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 50.731,
+     "y": 70.281,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 46.217,
+     "y": 76.452,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 72.854,
+     "y": 17.241,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 82.454,
+     "y": 50.363,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 68.341,
+     "y": 60.458,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "582050701",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "582050701"
+    },
+    {
+     "key": "2",
+     "part_number": "589293901",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "589293901"
+    },
+    {
+     "key": "3",
+     "part_number": "525887401",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW CITXPANT",
+     "qty": "4",
+     "remarks": "",
+     "search": "525887401"
+    },
+    {
+     "key": "4",
+     "part_number": "582054101",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "582054101"
+    },
+    {
+     "key": "5",
+     "part_number": "588255301",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING",
+     "qty": "1",
+     "remarks": "",
+     "search": "588255301"
+    },
+    {
+     "key": "6",
+     "part_number": "577976601",
+     "depth": 0,
+     "sub": false,
+     "description": "FERRITE CORE",
+     "qty": "1",
+     "remarks": "",
+     "search": "577976601"
+    },
+    {
+     "key": "7",
+     "part_number": "587663601",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "587663601"
+    },
+    {
+     "key": "8",
+     "part_number": "593896701",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "593896701"
+    },
+    {
+     "key": "9",
+     "part_number": "587327201",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "587327201"
+    },
+    {
+     "key": "10",
+     "part_number": "593813001",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "593813001"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 2,
+   "label": "Fig.4 ELECTRICAL (D4, from S/N 20174600001)"
+  },
+  {
+   "id": "6",
+   "number": "5",
+   "title": "ACCESSORIES",
+   "image": "hus536lip4-fig6.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 33.884,
+     "y": 12.205,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 57.152,
+     "y": 12.341,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 47.87,
+     "y": 71.733,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 47.235,
+     "y": 90.767,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 87.699,
+     "y": 67.763,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "537216201",
+     "depth": 0,
+     "sub": false,
+     "description": "HARNESS",
+     "qty": "1",
+     "remarks": "",
+     "search": "537216201"
+    },
+    {
+     "key": "2",
+     "part_number": "537216202",
+     "depth": 0,
+     "sub": false,
+     "description": "HARNESS",
+     "qty": "1",
+     "remarks": "With back plate US",
+     "search": "537216202"
+    },
+    {
+     "key": "3",
+     "part_number": "583897101",
+     "depth": 0,
+     "sub": false,
+     "description": "DIAGNOSTIC TOOL KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "583897101"
+    },
+    {
+     "key": "4",
+     "part_number": "579621301",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "579621301"
+    },
+    {
+     "key": "5",
+     "part_number": "501691701",
+     "depth": 0,
+     "sub": false,
+     "description": "COMBINATION WRENCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "501691701"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.5 ACCESSORIES"
+  }
+ ]
+}

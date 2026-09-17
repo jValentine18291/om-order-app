@@ -1,0 +1,41 @@
+# 536LiP4 sheet titles, in the order --order puts them.
+#
+# THIS IS A SHARED BOOK, and the printed letters say so. Husqvarna publish one
+# IPL for three pole saws and letter the sheets accordingly:
+#
+#     A    SAW HEAD     headed "536LiPX, 536LiP4, 536LiPT5" - common to all
+#     B2   TUBE         the LiP4's own; B1 and B3 belong to the other two
+#     C    HOUSING      headed for all three again
+#     D3   ELECTRICAL   the LiP4's, up to S/N 20174600001
+#     D4   ELECTRICAL   the LiP4's, from S/N 20174600001
+#     E2   ACCESSORIES  the LiP4's own
+#
+# So the suffix is not a variant of the section, it is which machine's sheet
+# this is. What we hold is the 536LiP4's slice of a three-machine book.
+#
+# ORDER. The export lists them D3, A, B2, C, D4, E2 - electrical first, and
+# the two electrical sheets split apart with three others between them.
+# --order puts them back in the book's own run, so the two D sheets sit side
+# by side where a technician can compare them.
+#
+# THE SERIAL SPLIT, which is the reason the order matters. Both D sheets head
+# themselves "536LiP4 ELECTRICAL" and nothing else; the split is printed
+# across the top right corner of each, and the export drops it, as it drops
+# every banner:
+#
+#     D3   UP TO S/N 20174600001
+#     D4   FROM S/N 20174600001
+#
+# They are not close. D3's switch is 578326901 and D4's is 582050701; D3
+# carries a GREASE and a BRACKET that D4 has no row for, and D4 carries a
+# WIRING ASSY and a SWITCH KIT in different places. Two tabs reading
+# "ELECTRICAL" with no other clue is the worst case there is - it looks like a
+# duplicate, so nobody checks.
+#
+# TUBE, not SHAFT. The export files sheet B2 as SHAFT; the drawing says TUBE.
+SAW HEAD
+TUBE
+HOUSING
+ELECTRICAL (D3, up to S/N 20174600001)
+ELECTRICAL (D4, from S/N 20174600001)
+ACCESSORIES

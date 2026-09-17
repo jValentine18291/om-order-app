@@ -593,5 +593,14 @@
   "category": "Grass Trimmer",
   "figures": 6,
   "parts": 79
+ },
+ {
+  "id": "hus536lip4",
+  "name": "Husqvarna 536LiP4 Pole Saw",
+  "short": "536LiP4",
+  "brand": "Husqvarna",
+  "category": "Pole Saw",
+  "figures": 6,
+  "parts": 79
  }
 ]
