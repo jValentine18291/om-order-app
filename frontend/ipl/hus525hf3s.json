@@ -1,7 +1,7 @@
 {
  "id": "hus525hf3s",
  "name": "Husqvarna 525HF3S",
- "source": "Husqvarna portal CSV export (525HF3S IPL.csv)",
+ "source": "Husqvarna portal CSV export (525HF3S Short Reach Trimmer IPL.csv)",
  "figures": [
   {
    "id": "1",
@@ -953,6 +953,13 @@
      "x": 36.872,
      "y": 46.733,
      "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 22.4,
+     "y": 85.7,
+     "byHand": true,
+     "unlisted": true
     },
     {
      "key": "4",

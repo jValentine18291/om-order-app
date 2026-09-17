@@ -1,0 +1,17 @@
+# 525HF3S corrections.
+#
+# One line, and it is the kind that only a pair of eyes finds. The SHAFT sheet
+# prints two warning decals side by side in the bottom left corner and numbers
+# them 3 and 4. The export lists 4 - DECAL 585944001 - and says nothing at all
+# about 3, so the checker was content: every key it knew about landed on ink,
+# no strays, no overlaps. The callout sitting there unringed is invisible to it.
+#
+# 3 is the EUROPE decal, the one carrying the CE mark and the reach diagram;
+# 4 is the US warning. A machine has one or the other, which is presumably why
+# the export carries only one of them, but the drawing prints both. Marked
+# unlisted so the app can say the book prints this callout and lists no part
+# for it, rather than leaving a technician tapping a decal that does nothing.
+#
+# Position read off a percentage grid, not guessed: the 4 beside it measured
+# 38.2/88.2 and the export has it at 38.17/88.16.
+4 unlisted 3 22.4 85.7
