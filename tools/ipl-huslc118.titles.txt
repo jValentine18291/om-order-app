@@ -1,0 +1,25 @@
+# LC 118 sheet title. One sheet, no section letter.
+#
+# PRODUCT COMPLETE, where the export says COMPLETE PRODUCT - the same way
+# round as the Exclusive 54, and the opposite of the GX 560, whose artwork has
+# no title block at all to follow. Three lawn mowers, three answers.
+#
+# (2022 ON) is the other half of the printed heading. The drawing heads itself
+# "LC 118 - 2022-", which is Husqvarna's way of saying this book starts at the
+# 2022 machine and has no end date yet. It goes on the tab because this book
+# has only one tab: there is nowhere else in the app for it to be seen, and a
+# technician holding an older LC 118 should know before they order that this
+# is not their book.
+#
+# THE SERIAL SPLIT INSIDE IT is carried by the export for once, in the
+# remarks, so it needs nothing here. Three callouts change at S/N 20234450015
+# / 20234450016 - the ENGINE (1), the CUTTING DISC (21) and the KEY (22) - and
+# tapping any of them shows both rows with their own serial note. Worth
+# knowing that the engine is one of them: a 22mm crank up to that serial and a
+# 25mm from it, which is not a difference anyone should discover on the bench.
+#
+# THE ENGINE IS A SINGLE PART HERE. 599912201/02, HS139A, listed as one line.
+# There is no engine sheet in this book, so an LC 118 wanting carburettor or
+# starter parts needs Husqvarna's HS139A list, which is not in this app - the
+# same gap the GX 560 has with its Honda.
+PRODUCT COMPLETE (2022 on)

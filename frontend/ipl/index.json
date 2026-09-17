@@ -629,5 +629,14 @@
   "category": "Lawn Mower",
   "figures": 1,
   "parts": 38
+ },
+ {
+  "id": "huslc118",
+  "name": "Husqvarna LC 118 Lawn Mower",
+  "short": "LC 118",
+  "brand": "Husqvarna",
+  "category": "Lawn Mower",
+  "figures": 1,
+  "parts": 39
  }
 ]
