@@ -1,0 +1,35 @@
+# GX 560 corrections.
+#
+# One line. The sheet draws two blades - 11 at the top of the stack and 33 at
+# the bottom - and the export lists only 11. The refs step 32, 34, so from the
+# data alone 33 reads like a retired number, and 15 is genuinely missing the
+# same way and genuinely is not printed. 33 is printed, in the same bold
+# numeral as every other callout, with a leader line to its own blade.
+#
+# Marked unlisted, so a technician who sees two blades on the page and needs
+# the other one is told the book lists no part for it, rather than tapping a
+# blade that does nothing.
+#
+# Position read off a percentage grid.
+1 unlisted 33 24.7 96.4
+#
+# TWO OTHER THINGS ABOUT THIS SHEET, neither of them fixable from here.
+#
+# REF 38 IS LISTED WITH NO POSITION. It is BRACKET 531208043, "Brake cable
+# holder, For 970617501" - one product variant's part - and the export gives
+# it no coordinates because the drawing does not print it. It stays in the
+# parts list where it can be found and ordered; it simply cannot be tapped.
+# This is the one case the importer reports by itself, and it did.
+#
+# THE ARTWORK HAS NO TITLE BLOCK, and the little text it has is clipped. The
+# only line on the sheet reads "Engine HONDA GCV160E A7E1", and even that is
+# cut - the E of Engine is missing its left stroke. That is Husqvarna's own
+# file, not our downscaling: the original they serve is 1351px wide and is
+# trimmed the same way. So there is no printed name to follow here and no
+# section letter, and the tab keeps the export's COMPLETE PRODUCT. The 54
+# prints PRODUCT COMPLETE on its page and its tab says so; these two lawn
+# mowers disagree because their drawings do, not because we were careless.
+#
+# The engine line is worth knowing on its own: this book has no engine sheet
+# at all. A GX 560 needing carburettor or starter parts needs Honda's GCV160E
+# list, which is not in this app.

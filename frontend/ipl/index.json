@@ -620,5 +620,14 @@
   "category": "Lawn Mower",
   "figures": 1,
   "parts": 26
+ },
+ {
+  "id": "husgx560",
+  "name": "Husqvarna GX 560 Hover Lawn Mower",
+  "short": "GX 560",
+  "brand": "Husqvarna",
+  "category": "Lawn Mower",
+  "figures": 1,
+  "parts": 38
  }
 ]

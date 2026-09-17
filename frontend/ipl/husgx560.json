@@ -1,0 +1,618 @@
+{
+ "id": "husgx560",
+ "name": "Husqvarna GX 560 Hover Lawn Mower",
+ "source": "Husqvarna portal CSV export (GX 560 Hover Lawn Mower IPL.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "COMPLETE PRODUCT",
+   "image": "husgx560-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 17.95,
+     "y": 48.95,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 12.25,
+     "y": 39.286,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 12.25,
+     "y": 44.013,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 12.546,
+     "y": 46.586,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 60.141,
+     "y": 55.41,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 15.063,
+     "y": 72.637,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 55.107,
+     "y": 52.889,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 50.666,
+     "y": 62.447,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 50.518,
+     "y": 65.966,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 12.546,
+     "y": 79.779,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 17.432,
+     "y": 86.502,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 21.873,
+     "y": 90.441,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 50.666,
+     "y": 50.315,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 3.516,
+     "y": 63.708,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 62.953,
+     "y": 8.561,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 89.304,
+     "y": 24.58,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 94.56,
+     "y": 18.592,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 61.695,
+     "y": 11.922,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 61.843,
+     "y": 14.076,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 87.75,
+     "y": 22.216,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 62.509,
+     "y": 3.519,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 96.04,
+     "y": 14.548,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 96.336,
+     "y": 12.08,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 78.719,
+     "y": 44.695,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 76.203,
+     "y": 47.164,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 83.975,
+     "y": 40.756,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 78.942,
+     "y": 36.239,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 6.033,
+     "y": 54.044,
+     "conf": 100
+    },
+    {
+     "key": "30",
+     "x": 53.923,
+     "y": 27.468,
+     "conf": 100
+    },
+    {
+     "key": "31",
+     "x": 51.11,
+     "y": 25.368,
+     "conf": 100
+    },
+    {
+     "key": "32",
+     "x": 47.631,
+     "y": 22.899,
+     "conf": 100
+    },
+    {
+     "key": "33",
+     "x": 24.7,
+     "y": 96.4,
+     "byHand": true,
+     "unlisted": true
+    },
+    {
+     "key": "34",
+     "x": 36.677,
+     "y": 83.718,
+     "conf": 100
+    },
+    {
+     "key": "35",
+     "x": 76.869,
+     "y": 51.996,
+     "conf": 100
+    },
+    {
+     "key": "36",
+     "x": 72.65,
+     "y": 49.685,
+     "conf": 100
+    },
+    {
+     "key": "37",
+     "x": 50.888,
+     "y": 20.536,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "514005300",
+     "depth": 0,
+     "sub": false,
+     "description": "KEY",
+     "qty": "1",
+     "remarks": "",
+     "search": "514005300"
+    },
+    {
+     "key": "2",
+     "part_number": "510683900",
+     "depth": 0,
+     "sub": false,
+     "description": "ADAPTER PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "510683900"
+    },
+    {
+     "key": "3",
+     "part_number": "514961900",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "3",
+     "remarks": "",
+     "search": "514961900"
+    },
+    {
+     "key": "4",
+     "part_number": "513088200",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "3",
+     "remarks": "",
+     "search": "513088200"
+    },
+    {
+     "key": "5",
+     "part_number": "510620620",
+     "depth": 0,
+     "sub": false,
+     "description": "HOOD",
+     "qty": "1",
+     "remarks": "",
+     "search": "510620620"
+    },
+    {
+     "key": "6",
+     "part_number": "513055800",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "6",
+     "remarks": "",
+     "search": "513055800"
+    },
+    {
+     "key": "7",
+     "part_number": "512621000",
+     "depth": 0,
+     "sub": false,
+     "description": "GUIDE",
+     "qty": "1",
+     "remarks": "",
+     "search": "512621000"
+    },
+    {
+     "key": "8",
+     "part_number": "514931300",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "3",
+     "remarks": "",
+     "search": "514931300"
+    },
+    {
+     "key": "9",
+     "part_number": "514919701",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "3",
+     "remarks": "",
+     "search": "514919701"
+    },
+    {
+     "key": "10",
+     "part_number": "577172301",
+     "depth": 0,
+     "sub": false,
+     "description": "IMPELLER",
+     "qty": "1",
+     "remarks": "",
+     "search": "577172301"
+    },
+    {
+     "key": "11",
+     "part_number": "511900400",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE",
+     "qty": "1",
+     "remarks": "",
+     "search": "511900400"
+    },
+    {
+     "key": "12",
+     "part_number": "514667704",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT",
+     "qty": "1",
+     "remarks": "",
+     "search": "514667704"
+    },
+    {
+     "key": "13",
+     "part_number": "513998700",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "513998700"
+    },
+    {
+     "key": "14",
+     "part_number": "513118000",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "513118000"
+    },
+    {
+     "key": "16",
+     "part_number": "511933400",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "511933400"
+    },
+    {
+     "key": "17",
+     "part_number": "512811001",
+     "depth": 0,
+     "sub": false,
+     "description": "CHOKE CONTROL",
+     "qty": "1",
+     "remarks": "For 964000601, 964000602, 964000699",
+     "search": "512811001"
+    },
+    {
+     "key": "18",
+     "part_number": "725238151",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "1",
+     "remarks": "For 964000601, 964000602, 964000699",
+     "search": "725238151"
+    },
+    {
+     "key": "18",
+     "part_number": "725237951",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "1",
+     "remarks": "For 970617501",
+     "search": "725237951"
+    },
+    {
+     "key": "19",
+     "part_number": "514718000",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "514718000"
+    },
+    {
+     "key": "20",
+     "part_number": "514026600",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "514026600"
+    },
+    {
+     "key": "21",
+     "part_number": "513084600",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRE",
+     "qty": "1",
+     "remarks": "For 964000601, 964000602, 964000699",
+     "search": "513084600"
+    },
+    {
+     "key": "21",
+     "part_number": "513084601",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRE",
+     "qty": "1",
+     "remarks": "For 970617501",
+     "search": "513084601"
+    },
+    {
+     "key": "22",
+     "part_number": "511801000",
+     "depth": 0,
+     "sub": false,
+     "description": "LOOP",
+     "qty": "1",
+     "remarks": "",
+     "search": "511801000"
+    },
+    {
+     "key": "23",
+     "part_number": "514647600",
+     "depth": 0,
+     "sub": false,
+     "description": "KNOB",
+     "qty": "1",
+     "remarks": "",
+     "search": "514647600"
+    },
+    {
+     "key": "24",
+     "part_number": "514927500",
+     "depth": 0,
+     "sub": false,
+     "description": "SPACER",
+     "qty": "1",
+     "remarks": "",
+     "search": "514927500"
+    },
+    {
+     "key": "25",
+     "part_number": "512753700",
+     "depth": 0,
+     "sub": false,
+     "description": "CATCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "512753700"
+    },
+    {
+     "key": "26",
+     "part_number": "514668200",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "514668200"
+    },
+    {
+     "key": "27",
+     "part_number": "514647600",
+     "depth": 0,
+     "sub": false,
+     "description": "KNOB",
+     "qty": "1",
+     "remarks": "",
+     "search": "514647600"
+    },
+    {
+     "key": "28",
+     "part_number": "511924800",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "511924800"
+    },
+    {
+     "key": "29",
+     "part_number": "513790500",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "513790500"
+    },
+    {
+     "key": "30",
+     "part_number": "514919801",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT",
+     "qty": "2",
+     "remarks": "",
+     "search": "514919801"
+    },
+    {
+     "key": "31",
+     "part_number": "514026600",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "514026600"
+    },
+    {
+     "key": "32",
+     "part_number": "513767900",
+     "depth": 0,
+     "sub": false,
+     "description": "WING NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "513767900"
+    },
+    {
+     "key": "34",
+     "part_number": "513834000",
+     "depth": 0,
+     "sub": false,
+     "description": "SPACER",
+     "qty": "2",
+     "remarks": "",
+     "search": "513834000"
+    },
+    {
+     "key": "35",
+     "part_number": "514009203",
+     "depth": 0,
+     "sub": false,
+     "description": "PIVOT PIN",
+     "qty": "2",
+     "remarks": "",
+     "search": "514009203"
+    },
+    {
+     "key": "36",
+     "part_number": "514042300",
+     "depth": 0,
+     "sub": false,
+     "description": "CLIP",
+     "qty": "2",
+     "remarks": "",
+     "search": "514042300"
+    },
+    {
+     "key": "37",
+     "part_number": "513084200",
+     "depth": 0,
+     "sub": false,
+     "description": "BAND",
+     "qty": "3",
+     "remarks": "",
+     "search": "513084200"
+    },
+    {
+     "key": "38",
+     "part_number": "531208043",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "Brake cable holder, For 970617501",
+     "search": "531208043"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 COMPLETE PRODUCT"
+  }
+ ]
+}
