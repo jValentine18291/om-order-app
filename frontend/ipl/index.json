@@ -665,5 +665,14 @@
   "category": "Lawn Mower",
   "figures": 4,
   "parts": 88
+ },
+ {
+  "id": "huslc419sp",
+  "name": "Husqvarna LC 419SP Lawn Mower",
+  "short": "LC 419SP",
+  "brand": "Husqvarna",
+  "category": "Lawn Mower",
+  "figures": 1,
+  "parts": 54
  }
 ]

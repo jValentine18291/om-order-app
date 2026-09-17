@@ -1,0 +1,939 @@
+{
+ "id": "huslc419sp",
+ "name": "Husqvarna LC 419SP Lawn Mower",
+ "source": "Husqvarna portal CSV export (LC 419SP Lawn Mower IPL.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "COMPLETE PRODUCT",
+   "image": "huslc419sp-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "0",
+     "x": 29.443,
+     "y": 55.332,
+     "conf": 100
+    },
+    {
+     "key": "1",
+     "x": 54.362,
+     "y": 9.83,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 76.404,
+     "y": 12.042,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 46.195,
+     "y": 20.888,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 77.842,
+     "y": 6.801,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 79.374,
+     "y": 15.526,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 60.116,
+     "y": 30.036,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 26.334,
+     "y": 44.85,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 26.427,
+     "y": 85.05,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 85.592,
+     "y": 54.12,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 64.756,
+     "y": 52.211,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 60.766,
+     "y": 40.457,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 76.821,
+     "y": 83.747,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 90.51,
+     "y": 69.085,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 54.316,
+     "y": 66.752,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 81.044,
+     "y": 69.509,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 67.912,
+     "y": 69.206,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 55.568,
+     "y": 82.96,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 53.387,
+     "y": 63.208,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 33.666,
+     "y": 69.782,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 6.705,
+     "y": 71.297,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 59.977,
+     "y": 47.425,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 28.19,
+     "y": 48.243,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 30.0,
+     "y": 59.179,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 36.729,
+     "y": 60.663,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 41.879,
+     "y": 57.483,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 51.392,
+     "y": 50.606,
+     "conf": 100
+    },
+    {
+     "key": "30",
+     "x": 58.817,
+     "y": 6.983,
+     "conf": 100
+    },
+    {
+     "key": "31",
+     "x": 46.984,
+     "y": 23.705,
+     "conf": 100
+    },
+    {
+     "key": "32",
+     "x": 66.705,
+     "y": 18.161,
+     "conf": 100
+    },
+    {
+     "key": "34",
+     "x": 58.631,
+     "y": 45.607,
+     "conf": 100
+    },
+    {
+     "key": "37",
+     "x": 25.916,
+     "y": 76.749,
+     "conf": 100
+    },
+    {
+     "key": "38",
+     "x": 53.759,
+     "y": 23.917,
+     "conf": 100
+    },
+    {
+     "key": "38",
+     "x": 77.796,
+     "y": 94.895,
+     "conf": 100
+    },
+    {
+     "key": "38",
+     "x": 92.042,
+     "y": 79.839,
+     "conf": 100
+    },
+    {
+     "key": "38",
+     "x": 37.146,
+     "y": 27.068,
+     "conf": 100
+    },
+    {
+     "key": "39",
+     "x": 31.856,
+     "y": 77.355,
+     "conf": 100
+    },
+    {
+     "key": "39",
+     "x": 37.146,
+     "y": 29.491,
+     "conf": 100
+    },
+    {
+     "key": "40",
+     "x": 60.998,
+     "y": 13.799,
+     "conf": 100
+    },
+    {
+     "key": "40",
+     "x": 72.831,
+     "y": 14.799,
+     "conf": 100
+    },
+    {
+     "key": "41",
+     "x": 16.497,
+     "y": 59.331,
+     "conf": 100
+    },
+    {
+     "key": "41",
+     "x": 26.891,
+     "y": 64.935,
+     "conf": 100
+    },
+    {
+     "key": "42",
+     "x": 8.701,
+     "y": 68.297,
+     "conf": 100
+    },
+    {
+     "key": "43",
+     "x": 10.418,
+     "y": 66.662,
+     "conf": 100
+    },
+    {
+     "key": "45",
+     "x": 73.712,
+     "y": 94.805,
+     "conf": 100
+    },
+    {
+     "key": "45",
+     "x": 88.84,
+     "y": 79.839,
+     "conf": 100
+    },
+    {
+     "key": "46",
+     "x": 68.376,
+     "y": 94.714,
+     "conf": 100
+    },
+    {
+     "key": "46",
+     "x": 82.622,
+     "y": 79.112,
+     "conf": 100
+    },
+    {
+     "key": "47",
+     "x": 86.334,
+     "y": 69.509,
+     "conf": 100
+    },
+    {
+     "key": "49",
+     "x": 54.269,
+     "y": 93.987,
+     "conf": 100
+    },
+    {
+     "key": "50",
+     "x": 61.462,
+     "y": 93.987,
+     "conf": 100
+    },
+    {
+     "key": "51",
+     "x": 72.088,
+     "y": 82.929,
+     "conf": 100
+    },
+    {
+     "key": "52",
+     "x": 60.719,
+     "y": 80.021,
+     "conf": 100
+    },
+    {
+     "key": "53",
+     "x": 73.852,
+     "y": 79.688,
+     "conf": 100
+    },
+    {
+     "key": "54",
+     "x": 33.016,
+     "y": 40.882,
+     "conf": 100
+    },
+    {
+     "key": "55",
+     "x": 36.125,
+     "y": 40.821,
+     "conf": 100
+    },
+    {
+     "key": "56",
+     "x": 77.657,
+     "y": 77.658,
+     "conf": 100
+    },
+    {
+     "key": "58",
+     "x": 10.418,
+     "y": 80.506,
+     "conf": 100
+    },
+    {
+     "key": "59",
+     "x": 17.1,
+     "y": 94.168,
+     "conf": 100
+    },
+    {
+     "key": "60",
+     "x": 60.209,
+     "y": 59.149,
+     "conf": 100
+    },
+    {
+     "key": "61",
+     "x": 85.592,
+     "y": 59.24,
+     "conf": 100
+    },
+    {
+     "key": "62",
+     "x": 77.193,
+     "y": 68.6,
+     "conf": 100
+    },
+    {
+     "key": "63",
+     "x": 78.445,
+     "y": 58.785,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "0",
+     "part_number": "599912301",
+     "depth": 0,
+     "sub": false,
+     "description": "ENGINE",
+     "qty": "1",
+     "remarks": "HS166A",
+     "search": "599912301"
+    },
+    {
+     "key": "1",
+     "part_number": "599348512",
+     "depth": 0,
+     "sub": false,
+     "description": "STARTER ROPE GUIDE",
+     "qty": "1",
+     "remarks": "",
+     "search": "599348512"
+    },
+    {
+     "key": "2",
+     "part_number": "599348569",
+     "depth": 0,
+     "sub": false,
+     "description": "THROTTLE CONTROL",
+     "qty": "1",
+     "remarks": "",
+     "search": "599348569"
+    },
+    {
+     "key": "3",
+     "part_number": "599348524",
+     "depth": 0,
+     "sub": false,
+     "description": "SPANNER",
+     "qty": "1",
+     "remarks": "",
+     "search": "599348524"
+    },
+    {
+     "key": "4",
+     "part_number": "589779702",
+     "depth": 0,
+     "sub": false,
+     "description": "LEVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "589779702"
+    },
+    {
+     "key": "5",
+     "part_number": "541869101",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "541869101"
+    },
+    {
+     "key": "6",
+     "part_number": "598684597",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "598684597"
+    },
+    {
+     "key": "7",
+     "part_number": "599348514",
+     "depth": 0,
+     "sub": false,
+     "description": "HEIGHT ADJUSTER",
+     "qty": "1",
+     "remarks": "",
+     "search": "599348514"
+    },
+    {
+     "key": "8",
+     "part_number": "599348503",
+     "depth": 0,
+     "sub": false,
+     "description": "DEFLECTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "599348503"
+    },
+    {
+     "key": "9",
+     "part_number": "589780101",
+     "depth": 0,
+     "sub": false,
+     "description": "MULCH PLUG",
+     "qty": "1",
+     "remarks": "",
+     "search": "589780101"
+    },
+    {
+     "key": "10",
+     "part_number": "589779901",
+     "depth": 0,
+     "sub": false,
+     "description": "COLLECTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "589779901"
+    },
+    {
+     "key": "11",
+     "part_number": "599348518",
+     "depth": 0,
+     "sub": false,
+     "description": "PROTECTIVE COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "599348518"
+    },
+    {
+     "key": "12",
+     "part_number": "599348528",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "599348528"
+    },
+    {
+     "key": "13",
+     "part_number": "599348506",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "599348506"
+    },
+    {
+     "key": "14",
+     "part_number": "599348529",
+     "depth": 0,
+     "sub": false,
+     "description": "PROTECTIVE COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "599348529"
+    },
+    {
+     "key": "15",
+     "part_number": "589784101",
+     "depth": 0,
+     "sub": false,
+     "description": "REAR AXLE ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "589784101"
+    },
+    {
+     "key": "16",
+     "part_number": "599348511",
+     "depth": 0,
+     "sub": false,
+     "description": "FRONT AXLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "599348511"
+    },
+    {
+     "key": "18",
+     "part_number": "599348527",
+     "depth": 0,
+     "sub": false,
+     "description": "TRANSMISSION",
+     "qty": "1",
+     "remarks": "",
+     "search": "599348527"
+    },
+    {
+     "key": "19",
+     "part_number": "599348502",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTING DISC",
+     "qty": "1",
+     "remarks": "",
+     "search": "599348502"
+    },
+    {
+     "key": "20",
+     "part_number": "599348570",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE",
+     "qty": "1",
+     "remarks": "",
+     "search": "599348570"
+    },
+    {
+     "key": "21",
+     "part_number": "599348523",
+     "depth": 0,
+     "sub": false,
+     "description": "AXLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "599348523"
+    },
+    {
+     "key": "22",
+     "part_number": "599348537",
+     "depth": 0,
+     "sub": false,
+     "description": "SUPPORT KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "599348537"
+    },
+    {
+     "key": "26",
+     "part_number": "599348536",
+     "depth": 0,
+     "sub": false,
+     "description": "PULLEY KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "599348536"
+    },
+    {
+     "key": "27",
+     "part_number": "589777101",
+     "depth": 0,
+     "sub": false,
+     "description": "DRIVE BELT",
+     "qty": "1",
+     "remarks": "",
+     "search": "589777101"
+    },
+    {
+     "key": "28",
+     "part_number": "598684594",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "598684594"
+    },
+    {
+     "key": "29",
+     "part_number": "589778801",
+     "depth": 0,
+     "sub": false,
+     "description": "ADAPTER",
+     "qty": "1",
+     "remarks": "",
+     "search": "589778801"
+    },
+    {
+     "key": "30",
+     "part_number": "589778901",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "589778901"
+    },
+    {
+     "key": "31",
+     "part_number": "585684501",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "585684501"
+    },
+    {
+     "key": "32",
+     "part_number": "598684598",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER",
+     "qty": "1",
+     "remarks": "",
+     "search": "598684598"
+    },
+    {
+     "key": "34",
+     "part_number": "589777801",
+     "depth": 0,
+     "sub": false,
+     "description": "PLUG",
+     "qty": "1",
+     "remarks": "",
+     "search": "589777801"
+    },
+    {
+     "key": "37",
+     "part_number": "581277802",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE",
+     "qty": "1",
+     "remarks": "",
+     "search": "581277802"
+    },
+    {
+     "key": "38",
+     "part_number": "732211801",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCK NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "732211801"
+    },
+    {
+     "key": "39",
+     "part_number": "725245171",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "1",
+     "remarks": "",
+     "search": "725245171"
+    },
+    {
+     "key": "40",
+     "part_number": "732211601",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCK NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "732211601"
+    },
+    {
+     "key": "41",
+     "part_number": "581396401",
+     "depth": 0,
+     "sub": false,
+     "description": "KEY",
+     "qty": "1",
+     "remarks": "",
+     "search": "581396401"
+    },
+    {
+     "key": "42",
+     "part_number": "735117301",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "735117301"
+    },
+    {
+     "key": "43",
+     "part_number": "596238801",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "3",
+     "remarks": "",
+     "search": "596238801"
+    },
+    {
+     "key": "45",
+     "part_number": "734182051",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "734182051"
+    },
+    {
+     "key": "46",
+     "part_number": "585685001",
+     "depth": 0,
+     "sub": false,
+     "description": "SEAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "585685001"
+    },
+    {
+     "key": "47",
+     "part_number": "585683801",
+     "depth": 0,
+     "sub": false,
+     "description": "BEARING",
+     "qty": "2",
+     "remarks": "",
+     "search": "585683801"
+    },
+    {
+     "key": "49",
+     "part_number": "581404201",
+     "depth": 0,
+     "sub": false,
+     "description": "LINING",
+     "qty": "2",
+     "remarks": "",
+     "search": "581404201"
+    },
+    {
+     "key": "50",
+     "part_number": "581404601",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "2",
+     "remarks": "",
+     "search": "581404601"
+    },
+    {
+     "key": "51",
+     "part_number": "581406401",
+     "depth": 0,
+     "sub": false,
+     "description": "CLIP",
+     "qty": "2",
+     "remarks": "",
+     "search": "581406401"
+    },
+    {
+     "key": "52",
+     "part_number": "585692601",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "585692601"
+    },
+    {
+     "key": "53",
+     "part_number": "599348517",
+     "depth": 0,
+     "sub": false,
+     "description": "LINK ARM",
+     "qty": "1",
+     "remarks": "",
+     "search": "599348517"
+    },
+    {
+     "key": "54",
+     "part_number": "503200004",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "6",
+     "remarks": "",
+     "search": "503200004"
+    },
+    {
+     "key": "55",
+     "part_number": "732211401",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCK NUT",
+     "qty": "6",
+     "remarks": "",
+     "search": "732211401"
+    },
+    {
+     "key": "56",
+     "part_number": "585683801",
+     "depth": 0,
+     "sub": false,
+     "description": "BEARING",
+     "qty": "1",
+     "remarks": "",
+     "search": "585683801"
+    },
+    {
+     "key": "58",
+     "part_number": "581399601",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "2",
+     "remarks": "",
+     "search": "581399601"
+    },
+    {
+     "key": "59",
+     "part_number": "581457301",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "581457301"
+    },
+    {
+     "key": "60",
+     "part_number": "589782001",
+     "depth": 0,
+     "sub": false,
+     "description": "GEAR",
+     "qty": "1",
+     "remarks": "",
+     "search": "589782001"
+    },
+    {
+     "key": "61",
+     "part_number": "589782201",
+     "depth": 0,
+     "sub": false,
+     "description": "GEAR",
+     "qty": "1",
+     "remarks": "",
+     "search": "589782201"
+    },
+    {
+     "key": "62",
+     "part_number": "589783001",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "589783001"
+    },
+    {
+     "key": "63",
+     "part_number": "536066801",
+     "depth": 0,
+     "sub": false,
+     "description": "PULLEY",
+     "qty": "1",
+     "remarks": "",
+     "search": "536066801"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 COMPLETE PRODUCT"
+  }
+ ]
+}
