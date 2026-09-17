@@ -1,0 +1,1509 @@
+{
+ "id": "hus550ibtx",
+ "name": "Husqvarna 550iBTX Backpack Blower",
+ "source": "Husqvarna portal CSV export (550iBTX IPL.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "TUBE",
+   "image": "hus550ibtx-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 29.561,
+     "y": 13.929,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 59.504,
+     "y": 7.554,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 39.161,
+     "y": 27.949,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 75.779,
+     "y": 38.975,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 56.516,
+     "y": 44.238,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 46.027,
+     "y": 45.939,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 14.463,
+     "y": 53.426,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 48.697,
+     "y": 65.54,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 66.656,
+     "y": 60.594,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 27.972,
+     "y": 70.077,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 67.228,
+     "y": 80.195,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "576581701",
+     "depth": 0,
+     "sub": false,
+     "description": "PIPE",
+     "qty": "1",
+     "remarks": "",
+     "search": "576581701"
+    },
+    {
+     "key": "2",
+     "part_number": "576582701",
+     "depth": 0,
+     "sub": false,
+     "description": "NOZZLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "576582701"
+    },
+    {
+     "key": "3",
+     "part_number": "586106302",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "586106302"
+    },
+    {
+     "key": "4",
+     "part_number": "593785101",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE",
+     "qty": "1",
+     "remarks": "",
+     "search": "593785101"
+    },
+    {
+     "key": "5",
+     "part_number": "595338601",
+     "depth": 0,
+     "sub": false,
+     "description": "STRAP",
+     "qty": "1",
+     "remarks": "",
+     "search": "595338601"
+    },
+    {
+     "key": "6",
+     "part_number": "576581401",
+     "depth": 0,
+     "sub": false,
+     "description": "JOINT",
+     "qty": "1",
+     "remarks": "",
+     "search": "576581401"
+    },
+    {
+     "key": "7",
+     "part_number": "544274101",
+     "depth": 0,
+     "sub": false,
+     "description": "CLAMP",
+     "qty": "2",
+     "remarks": "",
+     "search": "544274101"
+    },
+    {
+     "key": "8",
+     "part_number": "587555301",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE",
+     "qty": "1",
+     "remarks": "",
+     "search": "587555301"
+    },
+    {
+     "key": "9",
+     "part_number": "594035001",
+     "depth": 0,
+     "sub": false,
+     "description": "SLEEVE",
+     "qty": "1",
+     "remarks": "",
+     "search": "594035001"
+    },
+    {
+     "key": "10",
+     "part_number": "576578301",
+     "depth": 0,
+     "sub": false,
+     "description": "ELBOW",
+     "qty": "1",
+     "remarks": "",
+     "search": "576578301"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 TUBE"
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "THROTTLE CONTROLS",
+   "image": "hus550ibtx-fig2.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 85.887,
+     "y": 56.193,
+     "conf": 100
+    },
+    {
+     "key": "1",
+     "x": 25.366,
+     "y": 16.856,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 34.202,
+     "y": 21.574,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 58.042,
+     "y": 34.596,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 56.167,
+     "y": 44.941,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 64.081,
+     "y": 43.126,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 69.739,
+     "y": 47.459,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 52.829,
+     "y": 53.902,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 66.116,
+     "y": 62.228,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 78.131,
+     "y": 71.075,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 15.226,
+     "y": 34.347,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 19.485,
+     "y": 36.32,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 26.86,
+     "y": 34.505,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 36.3,
+     "y": 41.652,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 30.356,
+     "y": 59.324,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 52.765,
+     "y": 67.196,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "580292901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCT",
+     "qty": "4",
+     "remarks": "",
+     "search": "580292901"
+    },
+    {
+     "key": "2",
+     "part_number": "593841301",
+     "depth": 0,
+     "sub": false,
+     "description": "BUTTON ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "593841301"
+    },
+    {
+     "key": "3",
+     "part_number": "593165402",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE HALF",
+     "qty": "1",
+     "remarks": "",
+     "search": "593165402"
+    },
+    {
+     "key": "4",
+     "part_number": "593913001",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "593913001"
+    },
+    {
+     "key": "5",
+     "part_number": "593044302",
+     "depth": 0,
+     "sub": false,
+     "description": "THROTTLE CONTROL ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "593044302"
+    },
+    {
+     "key": "6",
+     "part_number": "592647803",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL PANEL",
+     "qty": "1",
+     "remarks": "PNC 967681103, 967681104",
+     "search": "592647803"
+    },
+    {
+     "key": "6",
+     "part_number": "593915001",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL PANEL",
+     "qty": "1",
+     "remarks": "PNC 967681101, 967681102, 967681105",
+     "search": "593915001"
+    },
+    {
+     "key": "7",
+     "part_number": "593838601",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "593838601"
+    },
+    {
+     "key": "8",
+     "part_number": "593165501",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE HALF",
+     "qty": "1",
+     "remarks": "",
+     "search": "593165501"
+    },
+    {
+     "key": "9",
+     "part_number": "525755109",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCFM",
+     "qty": "1",
+     "remarks": "",
+     "search": "525755109"
+    },
+    {
+     "key": "10",
+     "part_number": "725234451",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "1",
+     "remarks": "",
+     "search": "725234451"
+    },
+    {
+     "key": "11",
+     "part_number": "502204001",
+     "depth": 0,
+     "sub": false,
+     "description": "KNOB",
+     "qty": "1",
+     "remarks": "",
+     "search": "502204001"
+    },
+    {
+     "key": "12",
+     "part_number": "576579701",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE HOLDER",
+     "qty": "1",
+     "remarks": "",
+     "search": "576579701"
+    },
+    {
+     "key": "13",
+     "part_number": "503221012",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "503221012"
+    },
+    {
+     "key": "14",
+     "part_number": "593734401",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER",
+     "qty": "1",
+     "remarks": "",
+     "search": "593734401"
+    },
+    {
+     "key": "15",
+     "part_number": "503226504",
+     "depth": 0,
+     "sub": false,
+     "description": "SQUARE NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "503226504"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 THROTTLE CONTROLS"
+  },
+  {
+   "id": "3",
+   "number": "3",
+   "title": "HOUSING",
+   "image": "hus550ibtx-fig3.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 82.707,
+     "y": 6.657,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 77.556,
+     "y": 10.543,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 44.424,
+     "y": 13.729,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 87.414,
+     "y": 35.114,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 54.202,
+     "y": 19.8,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 89.253,
+     "y": 19.086,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 21.313,
+     "y": 22.814,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 41.515,
+     "y": 27.9,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 65.596,
+     "y": 45.086,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 12.869,
+     "y": 49.671,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 37.495,
+     "y": 54.986,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 9.879,
+     "y": 58.929,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 57.172,
+     "y": 61.6,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 59.535,
+     "y": 77.186,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 90.182,
+     "y": 56.957,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 61.939,
+     "y": 46.129,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 81.111,
+     "y": 10.286,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 36.687,
+     "y": 64.071,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 50.788,
+     "y": 69.457,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 43.03,
+     "y": 88.271,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 54.444,
+     "y": 74.586,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 55.03,
+     "y": 89.871,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 64.323,
+     "y": 91.514,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 64.162,
+     "y": 73.414,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 87.172,
+     "y": 85.757,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 30.263,
+     "y": 62.529,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 29.111,
+     "y": 82.771,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 88.828,
+     "y": 23.014,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "576356601",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCT",
+     "qty": "2",
+     "remarks": "",
+     "search": "576356601"
+    },
+    {
+     "key": "2",
+     "part_number": "593912501",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER",
+     "qty": "1",
+     "remarks": "",
+     "search": "593912501"
+    },
+    {
+     "key": "3",
+     "part_number": "581036301",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCKING HANDLE",
+     "qty": "2",
+     "remarks": "",
+     "search": "581036301"
+    },
+    {
+     "key": "4",
+     "part_number": "590845402",
+     "depth": 0,
+     "sub": false,
+     "description": "BACKPLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "590845402"
+    },
+    {
+     "key": "5",
+     "part_number": "594954101",
+     "depth": 0,
+     "sub": false,
+     "description": "STRAP",
+     "qty": "1",
+     "remarks": "",
+     "search": "594954101"
+    },
+    {
+     "key": "6",
+     "part_number": "591095101",
+     "depth": 0,
+     "sub": false,
+     "description": "INLET",
+     "qty": "1",
+     "remarks": "",
+     "search": "591095101"
+    },
+    {
+     "key": "7",
+     "part_number": "590845501",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "590845501"
+    },
+    {
+     "key": "8",
+     "part_number": "581472301",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE CLAMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "581472301"
+    },
+    {
+     "key": "9",
+     "part_number": "592617901",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "592617901"
+    },
+    {
+     "key": "10",
+     "part_number": "580292901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCT",
+     "qty": "25",
+     "remarks": "",
+     "search": "580292901"
+    },
+    {
+     "key": "11",
+     "part_number": "591458701",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING",
+     "qty": "1",
+     "remarks": "",
+     "search": "591458701"
+    },
+    {
+     "key": "12",
+     "part_number": "591458501",
+     "depth": 0,
+     "sub": false,
+     "description": "FRAME",
+     "qty": "1",
+     "remarks": "967681104 up to S/N 20230700257, 967681103 up to 20230700120, 967681105 up to 20225000321",
+     "search": "591458501"
+    },
+    {
+     "key": "12",
+     "part_number": "531016901",
+     "depth": 0,
+     "sub": false,
+     "description": "FRAME ASSY",
+     "qty": "1",
+     "remarks": "967681104 from S/N 20230700258, 967681103 from S/N 20230800175",
+     "search": "531016901"
+    },
+    {
+     "key": "13",
+     "part_number": "591458601",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING",
+     "qty": "1",
+     "remarks": "",
+     "search": "591458601"
+    },
+    {
+     "key": "14",
+     "part_number": "591458301",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING",
+     "qty": "1",
+     "remarks": "",
+     "search": "591458301"
+    },
+    {
+     "key": "15",
+     "part_number": "591458201",
+     "depth": 0,
+     "sub": false,
+     "description": "FRAME",
+     "qty": "1",
+     "remarks": "967681104 up to S/N 20230700257, 967681103 up to 20230700120, 967681105 up to 20225000321",
+     "search": "591458201"
+    },
+    {
+     "key": "15",
+     "part_number": "531017901",
+     "depth": 0,
+     "sub": false,
+     "description": "FRAME ASSY",
+     "qty": "1",
+     "remarks": "967681104 from S/N 20230700258, 967681103 from S/N 20230800175",
+     "search": "531017901"
+    },
+    {
+     "key": "16",
+     "part_number": "591458401",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING",
+     "qty": "1",
+     "remarks": "",
+     "search": "591458401"
+    },
+    {
+     "key": "17",
+     "part_number": "596194602",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "596194602"
+    },
+    {
+     "key": "17",
+     "part_number": "596194601",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "BT symbol",
+     "search": "596194601"
+    },
+    {
+     "key": "18",
+     "part_number": "503709701",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "503709701"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 HOUSING"
+  },
+  {
+   "id": "4",
+   "number": "4",
+   "title": "FAN SYSTEM (PNC 967681101-105)",
+   "image": "hus550ibtx-fig4.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 64.994,
+     "y": 21.209,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 49.234,
+     "y": 28.606,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 54.071,
+     "y": 59.507,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 19.327,
+     "y": 40.949,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 42.664,
+     "y": 34.892,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 45.929,
+     "y": 68.401,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 59.956,
+     "y": 83.965,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "593177901",
+     "depth": 0,
+     "sub": false,
+     "description": "MUFFLER ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "593177901"
+    },
+    {
+     "key": "2",
+     "part_number": "529626301",
+     "depth": 0,
+     "sub": false,
+     "description": "FAN",
+     "qty": "1",
+     "remarks": "PNC 967681103, 967681104, 967681105",
+     "search": "529626301"
+    },
+    {
+     "key": "2",
+     "part_number": "547306501",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR KIT",
+     "qty": "1",
+     "remarks": "PNC 967681101, 967681102, IPL Update Document, FAN, 2024-11",
+     "search": "547306501"
+    },
+    {
+     "key": "3",
+     "part_number": "593178001",
+     "depth": 0,
+     "sub": false,
+     "description": "MUFFLER ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "593178001"
+    },
+    {
+     "key": "4",
+     "part_number": "590818302",
+     "depth": 0,
+     "sub": false,
+     "description": "ROTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "590818302"
+    },
+    {
+     "key": "5",
+     "part_number": "529626301",
+     "depth": 0,
+     "sub": false,
+     "description": "FAN",
+     "qty": "1",
+     "remarks": "IPL Update Document, FAN, 2024-11",
+     "search": "529626301"
+    },
+    {
+     "key": "6",
+     "part_number": "597627603",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "1",
+     "remarks": "IPL Update Document, FAN, 2024-11",
+     "search": "597627603"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 1,
+   "label": "Fig.4 FAN SYSTEM (PNC 967681101-105)"
+  },
+  {
+   "id": "5",
+   "number": "4",
+   "title": "FAN SYSTEM (PNC 970748203-205)",
+   "image": "hus550ibtx-fig5.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 68.02,
+     "y": 20.486,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 44.586,
+     "y": 28.8,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 15.576,
+     "y": 41.271,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 37.919,
+     "y": 36.471,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "529603601",
+     "depth": 0,
+     "sub": false,
+     "description": "MUFFLER",
+     "qty": "1",
+     "remarks": "",
+     "search": "529603601"
+    },
+    {
+     "key": "2",
+     "part_number": "529626302",
+     "depth": 0,
+     "sub": false,
+     "description": "FAN",
+     "qty": "1",
+     "remarks": "",
+     "search": "529626302"
+    },
+    {
+     "key": "3",
+     "part_number": "529603701",
+     "depth": 0,
+     "sub": false,
+     "description": "MUFFLER",
+     "qty": "1",
+     "remarks": "",
+     "search": "529603701"
+    },
+    {
+     "key": "4",
+     "part_number": "590818302",
+     "depth": 0,
+     "sub": false,
+     "description": "ROTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "590818302"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 2,
+   "label": "Fig.4 FAN SYSTEM (PNC 970748203-205)"
+  },
+  {
+   "id": "6",
+   "number": "5",
+   "title": "ELECTRIC SYSTEM (PNC 967681101-105)",
+   "image": "hus550ibtx-fig6.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 12.011,
+     "y": 57.754,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 20.617,
+     "y": 51.924,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 11.346,
+     "y": 70.753,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 48.347,
+     "y": 57.34,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 30.975,
+     "y": 70.168,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 65.599,
+     "y": 60.946,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 48.267,
+     "y": 80.43,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 26.582,
+     "y": 81.756,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "576356601",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCT",
+     "qty": "1",
+     "remarks": "",
+     "search": "576356601"
+    },
+    {
+     "key": "2",
+     "part_number": "593084001",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "593084001"
+    },
+    {
+     "key": "3",
+     "part_number": "525755107",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCFM",
+     "qty": "5",
+     "remarks": "",
+     "search": "525755107"
+    },
+    {
+     "key": "4",
+     "part_number": "593759201",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "1",
+     "remarks": "PNC 967681101, 967681102",
+     "search": "593759201"
+    },
+    {
+     "key": "4",
+     "part_number": "597627603",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "1",
+     "remarks": "PNC 967681103, 967681104, 967681105",
+     "search": "597627603"
+    },
+    {
+     "key": "5",
+     "part_number": "577976601",
+     "depth": 0,
+     "sub": false,
+     "description": "FERRITE CORE",
+     "qty": "1",
+     "remarks": "",
+     "search": "577976601"
+    },
+    {
+     "key": "6",
+     "part_number": "593946201",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "593946201"
+    },
+    {
+     "key": "7",
+     "part_number": "594035301",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "594035301"
+    },
+    {
+     "key": "8",
+     "part_number": "580292901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCT",
+     "qty": "2",
+     "remarks": "",
+     "search": "580292901"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 1,
+   "label": "Fig.5 ELECTRIC SYSTEM (PNC 967681101-105)"
+  },
+  {
+   "id": "7",
+   "number": "5",
+   "title": "ELECTRIC SYSTEM (PNC 970748203-205)",
+   "image": "hus550ibtx-fig7.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 12.04,
+     "y": 57.886,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 20.667,
+     "y": 52.043,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 38.747,
+     "y": 49.271,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 48.465,
+     "y": 57.471,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 65.758,
+     "y": 61.086,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 48.384,
+     "y": 80.614,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 26.646,
+     "y": 81.943,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "576356601",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCT",
+     "qty": "1",
+     "remarks": "",
+     "search": "576356601"
+    },
+    {
+     "key": "2",
+     "part_number": "599962001",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "599962001"
+    },
+    {
+     "key": "3",
+     "part_number": "599666901",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "599666901"
+    },
+    {
+     "key": "4",
+     "part_number": "594098601",
+     "depth": 0,
+     "sub": false,
+     "description": "ADAPTER",
+     "qty": "1",
+     "remarks": "",
+     "search": "594098601"
+    },
+    {
+     "key": "5",
+     "part_number": "593946201",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "593946201"
+    },
+    {
+     "key": "6",
+     "part_number": "594035301",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "594035301"
+    },
+    {
+     "key": "7",
+     "part_number": "580292901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCT",
+     "qty": "2",
+     "remarks": "",
+     "search": "580292901"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 2,
+   "label": "Fig.5 ELECTRIC SYSTEM (PNC 970748203-205)"
+  },
+  {
+   "id": "8",
+   "number": "6",
+   "title": "HARNESS",
+   "image": "hus550ibtx-fig8.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 37.699,
+     "y": 21.574,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 57.915,
+     "y": 20.871,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 22.632,
+     "y": 31.148,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 28.671,
+     "y": 33.348,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "576625301",
+     "depth": 0,
+     "sub": false,
+     "description": "PAD",
+     "qty": "1",
+     "remarks": "",
+     "search": "576625301"
+    },
+    {
+     "key": "2",
+     "part_number": "576356601",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCT",
+     "qty": "5",
+     "remarks": "",
+     "search": "576356601"
+    },
+    {
+     "key": "3",
+     "part_number": "544270001",
+     "depth": 0,
+     "sub": false,
+     "description": "CLIP",
+     "qty": "2",
+     "remarks": "",
+     "search": "544270001"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.6 HARNESS"
+  },
+  {
+   "id": "9",
+   "number": "7",
+   "title": "ACCESSORIES",
+   "image": "hus550ibtx-fig9.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 57.851,
+     "y": 22.051,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 34.139,
+     "y": 29.651,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 35.887,
+     "y": 44.328,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 50.35,
+     "y": 58.848,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 71.551,
+     "y": 86.411,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 44.183,
+     "y": 75.885,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "544400004",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLEBAR ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "544400004"
+    },
+    {
+     "key": "2",
+     "part_number": "576581801",
+     "depth": 0,
+     "sub": false,
+     "description": "PIPE",
+     "qty": "1",
+     "remarks": "",
+     "search": "576581801"
+    },
+    {
+     "key": "3",
+     "part_number": "589811701",
+     "depth": 0,
+     "sub": false,
+     "description": "NOZZLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "589811701"
+    },
+    {
+     "key": "4",
+     "part_number": "579797501",
+     "depth": 0,
+     "sub": false,
+     "description": "NOZZLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "579797501"
+    },
+    {
+     "key": "5",
+     "part_number": "575880701",
+     "depth": 0,
+     "sub": false,
+     "description": "WRENCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "575880701"
+    },
+    {
+     "key": "6",
+     "part_number": "586106301",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "586106301"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.7 ACCESSORIES"
+  }
+ ]
+}

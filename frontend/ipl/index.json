@@ -463,5 +463,14 @@
   "category": "Blower",
   "figures": 5,
   "parts": 35
+ },
+ {
+  "id": "hus550ibtx",
+  "name": "Husqvarna 550iBTX Backpack Blower",
+  "short": "550iBTX",
+  "brand": "Husqvarna",
+  "category": "Blower",
+  "figures": 9,
+  "parts": 83
  }
 ]

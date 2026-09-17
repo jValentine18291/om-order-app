@@ -1,0 +1,30 @@
+# 550iBTX sheet titles, in the order --order puts them.
+#
+# THE PNC IS THE POINT OF THIS FILE.
+# The fan and the electric system each come in two versions, and which one a
+# machine has depends on its product number. Husqvarna print it in the top
+# right corner of the drawing and put NOTHING about it in the export - both
+# sheets are just "FAN" in the IPL Name column, with different IPL IDs nobody
+# sees. Untitled, a technician gets two identical FAN SYSTEM tabs and a
+# fifty-fifty guess at a control unit.
+#
+#     967681101-105   the earlier machines
+#     970748203-205   the later ones
+#
+# Read off the drawings, which list them in full; shortened here to a range
+# because the numbers are contiguous and a tab has to stay readable.
+#
+# The two renames are the same ones every blower in this range needs: the
+# drawings say FAN SYSTEM and ELECTRIC SYSTEM where the export says FAN and
+# ELECTRICAL. Sheet 1 really is TUBE here - this is the backpack machine, so
+# the body lives on the HOUSING sheet rather than being folded into a CHASSI
+# sheet the way the handhelds do it.
+TUBE
+THROTTLE CONTROLS
+HOUSING
+FAN SYSTEM (PNC 967681101-105)
+FAN SYSTEM (PNC 970748203-205)
+ELECTRIC SYSTEM (PNC 967681101-105)
+ELECTRIC SYSTEM (PNC 970748203-205)
+HARNESS
+ACCESSORIES
