@@ -1,0 +1,24 @@
+# AM 315X Mark II corrections.
+#
+# Two callouts printed on the drawings that the export lists no part for. Both
+# sit out at the right-hand edge of their sheet in open space, which is where
+# these hide: nothing overlaps them, nothing crowds them, and the checker is
+# satisfied because every key it was given landed on ink.
+#
+# CHARGING STATION 21. A screw, leader line pointing into the base plate
+# beside the module that 22 and 23 cover. The list runs ... 19, 20, 22, 23,
+# 24, and a gap at 21 reads exactly like a retired number - 9, 12 and 13 are
+# missing the same way and genuinely are not printed.
+#
+# ACCESSORIES 3. The Automower carry bag, top right corner. This sheet's list
+# starts at 2, so the export is already short at both ends of it.
+#
+# No convention to lean on here, in case it looks like there should be: these
+# sheets print every callout as a plain numeral, circled or not is not a
+# signal, and the red rings in the check images are the checker's own. The
+# only way to find these is to read the drawing.
+#
+# Positions read off a percentage grid. Calibrated against neighbours the
+# export does place: 22 measured 83.6/74.66 against its stored 83.6/74.68.
+5 unlisted 21 86.8 69.6
+7 unlisted 3 86.9 9.6

@@ -530,5 +530,20 @@
    "AM105",
    "AM 105"
   ]
+ },
+ {
+  "id": "am315xmkii",
+  "name": "Husqvarna Automower 315X MKII",
+  "short": "Automower 315X MKII",
+  "brand": "Husqvarna",
+  "category": "Robotic Mower",
+  "figures": 7,
+  "parts": 168,
+  "aliases": [
+   "AM315X",
+   "AM 315X",
+   "315X MKII",
+   "AM315X MKII"
+  ]
  }
 ]

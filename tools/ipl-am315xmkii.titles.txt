@@ -1,0 +1,24 @@
+# AM 315X Mark II sheet titles, in the order the export lists them (A to G
+# already).
+#
+# One change: BLADE MOTOR & CUTTING EQUIPMENT, where the export writes AND.
+# The other six match.
+#
+# WORTH KNOWING, though it is not something a title can fix. Every sheet in
+# this book is headed "AUTOMOWER 315 Mark II" - no X. The drawings are shared
+# with the non-X machine, which is ordinary enough for Husqvarna, but the
+# parts list is not shared: CHASSIS UPPER 15 is a GPS MODULE, fitted, which is
+# what the X is. So the artwork is the 315 Mark II's and the list is the
+# 315X's, and the book is named for the machine the list belongs to and the
+# one the workshop asked for.
+#
+# If a 315 Mark II without the X ever comes in, this book is still the right
+# drawing for it - but check ref 15 on CHASSIS UPPER before ordering, because
+# that one is the X's.
+COVER
+CHASSIS UPPER
+CHASSIS LOWER
+BLADE MOTOR & CUTTING EQUIPMENT
+CHARGING STATION
+INSTALLATION ACCESSORIES
+ACCESSORIES
