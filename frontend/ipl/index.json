@@ -638,5 +638,14 @@
   "category": "Lawn Mower",
   "figures": 1,
   "parts": 39
+ },
+ {
+  "id": "huslc141c",
+  "name": "Husqvarna LC 141C Lawn Mower",
+  "short": "LC 141C",
+  "brand": "Husqvarna",
+  "category": "Lawn Mower",
+  "figures": 5,
+  "parts": 132
  }
 ]

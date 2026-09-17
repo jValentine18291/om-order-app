@@ -1,0 +1,37 @@
+# LC 141C sheet titles, in the order --order puts them.
+#
+# ORDER. The drawings letter themselves A1, A2, B, C, D and the export lists
+# them D, B, C, A1, A2 - very nearly backwards. --order restores the book's
+# own run, which also puts the two deck sheets next to each other where they
+# belong.
+#
+#   --order "4,5,2,3,1"
+#
+# TWO SHEETS CALLED MOWER DECK / CUTTING DECK, and the export gives them the
+# same name with nothing to tell them apart - only an unseen IPL ID. They are
+# not variants of each other; they are two halves of one section, and the
+# split is by depth rather than by machine:
+#
+#   A1   the deck shell, both axles, the wheels and the height adjustment
+#   A2   the covers over it, the blade, the mulch kit and the mains cord
+#
+# The bracketed words are ours, not Husqvarna's - the pages print only A1 and
+# A2 - but two identically named tabs is the failure this whole file exists to
+# prevent, and the letters alone do not say which half is which.
+#
+# THIS ONE IS MAINS ELECTRIC, which is worth knowing next to the other three
+# lawn mowers in the app. C MOTOR is a real motor sheet - 1800W, with a
+# capacitor, an inductor and a drive belt - where the GX 560 and the LC 118
+# carry their engine as a single line and no sheet at all. A2 27 is the mains
+# cord.
+#
+# CALLOUT 0 on the HANDLE sheet is not a mistake. Husqvarna number the whole
+# handle assembly 0 and the pieces of it 1 upwards, so tapping 0 gets the
+# HANDLE KIT 590297301 and tapping anything else gets the piece. The importer
+# and the checker both take it in their stride; it is noted here only because
+# a zero looks like a bug when you meet it.
+MOWER DECK / CUTTING DECK (A1, deck, axles & wheels)
+MOWER DECK / CUTTING DECK (A2, covers, blade & cord)
+HANDLE
+MOTOR
+BAGGER
