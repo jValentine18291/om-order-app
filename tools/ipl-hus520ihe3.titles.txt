@@ -1,0 +1,28 @@
+# 520iHE3 sheet titles, in the order the export lists them (A to F already).
+#
+# THREE GEAR SHEETS, and they are not two variants plus a spare - they are two
+# machines and a repair route. Husqvarna letter them B1, B2, B3 and print the
+# rule across the top of each; the export says nothing, all three arriving as
+# "GEAR HOUSING" with only an unseen IPL ID between them.
+#
+#     B1   from S/N 20200300001    the later machines
+#     B2   up to S/N 20200300001   the earlier ones
+#     B3   the REBUILD KIT for those earlier machines
+#
+# B3 is the one worth the trouble. Two parts on B2 - the gear housing assembly
+# and the motor assembly - are discontinued, and the export says so only in the
+# comment on a DUMMY PART row: "Ended. SEE SB-B1201009A-07 & Rebuild-/Spare
+# part-Kit 599 20 97-01 Slide B3". Slide B3 is this sheet. Without the titles a
+# technician meets a dead part on one of three identical GEAR tabs and has no
+# way to know the answer is on the tab beside it.
+#
+# Names are the printed ones: the drawings say CUTTING and GEAR where the
+# export says CUTTING EQUIPMENT and GEAR HOUSING.
+CUTTING
+GEAR (B1, from S/N 20200300001)
+GEAR (B2, up to S/N 20200300001)
+GEAR (B3, rebuild kit)
+TUBE
+HOUSING
+ELECTRICAL
+ACCESSORIES

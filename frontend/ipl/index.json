@@ -499,5 +499,14 @@
   "category": "Hedge Trimmer",
   "figures": 7,
   "parts": 93
+ },
+ {
+  "id": "hus520ihe3",
+  "name": "Husqvarna 520iHE3 Long Reach Hedge Trimmer",
+  "short": "520iHE3",
+  "brand": "Husqvarna",
+  "category": "Pole Hedge Trimmer",
+  "figures": 8,
+  "parts": 131
  }
 ]

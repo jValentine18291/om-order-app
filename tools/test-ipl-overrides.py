@@ -145,7 +145,13 @@ check("name and note split on the dash",
 check("stars are decoration, not content",
       mod.placeholder("Blade - ***See Service Reference***"),
       ("", "Blade", "See Service Reference"))
-check("no dash means it is all name",
+check("a leading full stop splits too",
+      mod.placeholder("Ended. SEE SB-B1201009A-07 & Rebuild-/Spare part-Kit 599 20 97-01 Slide B3"),
+      ("", "Ended", "SEE SB-B1201009A-07 & Rebuild-/Spare part-Kit 599 20 97-01 Slide B3"))
+check("the dash wins when a row has both",
+      mod.placeholder("Blade - Ended. See the kit"),
+      ("", "Blade", "Ended. See the kit"))
+check("neither means it is all name",
       mod.placeholder("Not Used"),
       ("", "Not Used", "No part number in this book."))
 check("and an empty comment still says something true",

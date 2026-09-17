@@ -78,11 +78,19 @@ def placeholder(comment):
     """(code, description, remarks) for a DUMMY PART row, from its Comment.
 
     The comments read "NAME - NOTE", with the note sometimes wrapped in stars
-    for emphasis. Split on the first dash; anything that does not fit becomes
-    the description whole, which is still better than "DUMMY PART".
+    for emphasis - "Blade - ***See Service Reference***". Some instead lead
+    with a full stop: "Ended. SEE SB-B1201009A-07 & Rebuild-/Spare part-Kit
+    599 20 97-01 Slide B3", where the whole thing as a description is seventy
+    characters of wall in a parts row and "Ended" is the part a technician
+    needs at a glance.
+
+    So: split on the first dash, then on the first full stop, and failing both
+    take it whole - which is still better than "DUMMY PART".
     """
     text = (comment or "").replace("*", "").strip()
     name, sep, note = text.partition(" - ")
+    if not sep:
+        name, sep, note = text.partition(". ")
     if not sep:
         name, note = text, ""
     name = name.strip()
