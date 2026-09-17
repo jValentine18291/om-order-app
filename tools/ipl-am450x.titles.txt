@@ -1,0 +1,29 @@
+# AM 450X sheet titles, in the order the export lists them.
+#
+# ORDER. Already right. The sheets are lettered A B C D E F G H I - this book
+# uses I, where the petrol books skip it - and the export runs in that order.
+# The CENTER CONSOLE sheet is the one exception in that its header carries no
+# letter at all, but it sits between B and D, so C is not in doubt.
+#
+# NAMES. Three differ from the export, two of them just ampersands:
+#
+#     WHEELS & TIRES                 export: WHEELS AND TIRES
+#     BLADE MOTOR & CUTTING EQUIPMENT   export: BLADE MOTOR AND CUTTING ...
+#
+# CENTER CONSOLE is the third and the only judgement call. The export says
+# CONSOLE; the drawing says CENTER CONSOL, missing the E. Everywhere else in
+# these files the printed name wins, because the technician is holding the
+# printed page - but that rule is there to stop us tidying away real
+# differences in wording, and a dropped letter is not one. Printing CONSOL on
+# the tab would read as our typo, not Husqvarna's, and the missing E does not
+# stop anyone matching the tab to the page. So: CENTER from the drawing, the E
+# put back.
+COVER
+CHASSIS UPPER
+CENTER CONSOLE
+CHASSIS LOWER
+WHEELS & TIRES
+BLADE MOTOR & CUTTING EQUIPMENT
+CHARGING STATION
+INSTALLATION ACCESSORIES
+ACCESSORIES

@@ -1,0 +1,32 @@
+# AM 450X corrections.
+#
+# This book was imported in August from the older export format, before the
+# hotspot checker and before anyone had looked at the sheets. The checker is
+# happy with it - 221 hotspots, every one on ink, nothing overlapping, nothing
+# astray - and it was still four callouts short. That is the whole argument for
+# the sweep by eye: the checker can only verify the callouts it was told about.
+#
+# THE SECOND COVER, on CHARGING STATION. The sheet draws the top cover twice,
+# side by side, and numbers both 2, because there are two of them: 579448203
+# without the park button and 579448204 with it. The export gives one position.
+# The right-hand 2 got a hotspot, the left-hand one got nothing, and a
+# technician holding the park-button machine taps the cover that looks like
+# theirs and nothing happens. Added rather than marked unlisted - the table
+# does list this key, it is the same part row, it simply needed its second
+# position. 17, the LID, has the same two variants and did get both.
+#
+# THREE CALLOUTS WITH NO PART BEHIND THEM. Two of the three are paperwork,
+# which is probably the reason: a book and a manual are not stocked spares.
+#
+#     WHEELS & TIRES 14              a shim in the wheel hub stack
+#     INSTALLATION ACCESSORIES 13    the operator's manual - and 14, the
+#                                    QUICK GUIDE beside it, IS listed
+#     ACCESSORIES 30                 the technical manual
+#
+# Positions read off a percentage grid, each calibrated against a ringed
+# neighbour on its own sheet. WHEELS 12 measured 62.49/47.44 against its stored
+# 62.37/47.46; INSTALLATION 14 measured 86.6/75.39 against 86.59/75.41.
+5 unlisted 14 67.2 49.2
+7 add 2 45.1 16.8
+8 unlisted 13 67.6 75.2
+9 unlisted 30 16.2 94.4
