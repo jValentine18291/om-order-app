@@ -1,7 +1,15 @@
 # Sending the Service Slip to the customer on WhatsApp
 
-Built and tested against a stand-in Meta API. **It is switched off**, and it
-cannot send until the Meta side is finished — see "What is still missing".
+**Live since 17 Sep 2026.** Every piece Meta required is done, the settings are
+in the service, and the server reports itself ready:
+
+    GET https://192.168.1.7:8443/api/whatsapp/status
+    {"enabled":true,"configured":true,"auto_send":false}
+
+That is the one command worth knowing. It answers "why is the button missing?"
+without guessing: `enabled` is `WHATSAPP_ENABLED`, `configured` means the phone
+number id and token are both set, and the button only appears when both are
+true. `auto_send` is deliberately false — see "Manual, or automatic".
 
 ## How it works
 
@@ -164,12 +172,17 @@ Neither addition touches the code. `sendSlip` transmits two components, header
 and body; a footer carries no parameter, and a Call button only needs one when
 the number is dynamic. Ours is fixed, so the payload is unchanged.
 
-## What is still missing (all on Meta's side)
+## What Meta required — all of it now done
+
+Kept as a list rather than deleted: if sending ever stops, it is far more
+likely to be one of these four lapsing than a change in the code.
 
 1. ~~**Business verification**~~ — **done** 16 Sep 2026. Domain
    `gardenequipment.com.sg` verified the same day by DNS TXT record.
-2. **An approved template** — **submitted 16 Sep 2026, In review.** Utility
-   category, with a **Document** header.
+2. ~~**An approved template**~~ — **approved 17 Sep 2026**, submitted the day
+   before. WhatsApp Manager shows it **Active – Quality pending**, which is
+   the approved state; the quality rating stays "pending" until messages have
+   actually been sent. Utility category, with a **Document** header.
    Name `service_slip_confirmation`, language **English** (`en`), and **four**
    body variables in this exact order:
 
@@ -185,9 +198,11 @@ the number is dynamic. Ours is fixed, so the payload is unchanged.
    older slip from View Slips still reads correctly. {{4}} is a COUNT, not a
    list - the template reads "No. of Equipment: {{4}}", and the machines are
    itemised on the attached slip anyway.
-3. **A payment method on the WhatsApp account** — business-initiated messages
-   (this is one) will not send without one. **Still outstanding**, and it is
-   now the only thing that blocks a first real send once the template clears.
+3. ~~**A payment method on the WhatsApp account**~~ — **done** 16 Sep 2026.
+   Business-initiated messages (this is one) will not send without one, and
+   the failure is a send error rather than anything visible in the app, so
+   this is the first thing to check if sends start failing for everyone at
+   once.
 4. ~~**A phone number**~~ — **done** 16 Sep 2026, +65 6743 4039 Connected.
 
 ### Submitting the template: two things that will bite again
