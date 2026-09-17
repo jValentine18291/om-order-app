@@ -1,0 +1,685 @@
+{
+ "id": "huslc142i",
+ "name": "Husqvarna LC 142i Lawn Mower",
+ "source": "Husqvarna portal CSV export (LC 142i Battery Lawn Mower IPL.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "DECK",
+   "image": "huslc142i-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 59.599,
+     "y": 9.006,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 18.659,
+     "y": 17.446,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 50.445,
+     "y": 23.979,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 61.507,
+     "y": 27.155,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 86.332,
+     "y": 26.066,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 31.627,
+     "y": 39.088,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 71.297,
+     "y": 38.634,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 63.541,
+     "y": 48.616,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 67.737,
+     "y": 65.132,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 44.914,
+     "y": 68.172,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 52.448,
+     "y": 72.3,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 37.635,
+     "y": 80.422,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 13.668,
+     "y": 36.093,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 57.597,
+     "y": 42.672,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "531147182",
+     "depth": 0,
+     "sub": false,
+     "description": "FLAP",
+     "qty": "1",
+     "remarks": "REAR FLAP",
+     "search": "531147182"
+    },
+    {
+     "key": "2",
+     "part_number": "531147209",
+     "depth": 0,
+     "sub": false,
+     "description": "PLUG",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147209"
+    },
+    {
+     "key": "3",
+     "part_number": "531147183",
+     "depth": 0,
+     "sub": false,
+     "description": "CHASSIS",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147183"
+    },
+    {
+     "key": "4",
+     "part_number": "531147184",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER KIT",
+     "qty": "1",
+     "remarks": "BELT PROTECTION COVER",
+     "search": "531147184"
+    },
+    {
+     "key": "5",
+     "part_number": "531146747",
+     "depth": 0,
+     "sub": false,
+     "description": "HEIGHT ADJUSTER",
+     "qty": "1",
+     "remarks": "",
+     "search": "531146747"
+    },
+    {
+     "key": "6",
+     "part_number": "531147185",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER KIT",
+     "qty": "1",
+     "remarks": "BASE COVER",
+     "search": "531147185"
+    },
+    {
+     "key": "7",
+     "part_number": "531147181",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147181"
+    },
+    {
+     "key": "8",
+     "part_number": "531147186",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTION ROD",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147186"
+    },
+    {
+     "key": "9",
+     "part_number": "599349422",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL",
+     "qty": "1",
+     "remarks": "REAR WHEEL",
+     "search": "599349422"
+    },
+    {
+     "key": "10",
+     "part_number": "531147187",
+     "depth": 0,
+     "sub": false,
+     "description": "AXLE",
+     "qty": "1",
+     "remarks": "REAR AXLE",
+     "search": "531147187"
+    },
+    {
+     "key": "11",
+     "part_number": "531146737",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "531146737"
+    },
+    {
+     "key": "12",
+     "part_number": "531147188",
+     "depth": 0,
+     "sub": false,
+     "description": "AXLE",
+     "qty": "1",
+     "remarks": "FRONT AXLE",
+     "search": "531147188"
+    },
+    {
+     "key": "14",
+     "part_number": "531146739",
+     "depth": 0,
+     "sub": false,
+     "description": "WEIGHT",
+     "qty": "1",
+     "remarks": "",
+     "search": "531146739"
+    },
+    {
+     "key": "15",
+     "part_number": "536433401",
+     "depth": 0,
+     "sub": false,
+     "description": "BAR",
+     "qty": "1",
+     "remarks": "STRENGTH BAR",
+     "search": "536433401"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 DECK"
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "HANDLE",
+   "image": "huslc142i-fig2.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 58.201,
+     "y": 15.132,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 42.562,
+     "y": 25.068,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 43.992,
+     "y": 27.609,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 84.52,
+     "y": 30.921,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 73.14,
+     "y": 42.083,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 31.055,
+     "y": 49.524,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 71.36,
+     "y": 50.431,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 55.149,
+     "y": 56.466,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 54.196,
+     "y": 59.823,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 53.179,
+     "y": 65.812,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "531146751",
+     "depth": 0,
+     "sub": false,
+     "description": "BAIL ARM ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "531146751"
+    },
+    {
+     "key": "2",
+     "part_number": "531147189",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE TUBE",
+     "qty": "1",
+     "remarks": "UPPER HANDLE",
+     "search": "531147189"
+    },
+    {
+     "key": "3",
+     "part_number": "531146750",
+     "depth": 0,
+     "sub": false,
+     "description": "SEAT BRACKET ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "531146750"
+    },
+    {
+     "key": "4",
+     "part_number": "531146749",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCHBOX ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "531146749"
+    },
+    {
+     "key": "5",
+     "part_number": "531147190",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRE",
+     "qty": "1",
+     "remarks": "HANDLE CONTROL",
+     "search": "531147190"
+    },
+    {
+     "key": "6",
+     "part_number": "531147191",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE TUBE",
+     "qty": "1",
+     "remarks": "LOWER HANDLE",
+     "search": "531147191"
+    },
+    {
+     "key": "7",
+     "part_number": "531146762",
+     "depth": 0,
+     "sub": false,
+     "description": "KNOB ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "531146762"
+    },
+    {
+     "key": "8",
+     "part_number": "599349379",
+     "depth": 0,
+     "sub": false,
+     "description": "CLIP",
+     "qty": "1",
+     "remarks": "Cable Clip",
+     "search": "599349379"
+    },
+    {
+     "key": "9",
+     "part_number": "529596001",
+     "depth": 0,
+     "sub": false,
+     "description": "KNOB ASSY",
+     "qty": "1",
+     "remarks": "Knob",
+     "search": "529596001"
+    },
+    {
+     "key": "10",
+     "part_number": "531147212",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE SUPPORT ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147212"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 HANDLE"
+  },
+  {
+   "id": "3",
+   "number": "3",
+   "title": "POWER HEAD",
+   "image": "huslc142i-fig3.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 68.881,
+     "y": 9.891,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 61.697,
+     "y": 28.335,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 65.067,
+     "y": 31.874,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 31.373,
+     "y": 33.417,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 64.94,
+     "y": 45.304,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 26.351,
+     "y": 52.926,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 65.957,
+     "y": 56.057,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 63.223,
+     "y": 67.083,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 60.776,
+     "y": 88.725,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 74.221,
+     "y": 92.309,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "531146731",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER KIT",
+     "qty": "1",
+     "remarks": "BATTERY LID KIT",
+     "search": "531146731"
+    },
+    {
+     "key": "2",
+     "part_number": "501490101",
+     "depth": 0,
+     "sub": false,
+     "description": "KEY",
+     "qty": "1",
+     "remarks": "",
+     "search": "501490101"
+    },
+    {
+     "key": "3",
+     "part_number": "531146733",
+     "depth": 0,
+     "sub": false,
+     "description": "BATTERY BOX",
+     "qty": "1",
+     "remarks": "",
+     "search": "531146733"
+    },
+    {
+     "key": "4",
+     "part_number": "531146732",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRE",
+     "qty": "1",
+     "remarks": "WIRE KIT",
+     "search": "531146732"
+    },
+    {
+     "key": "5",
+     "part_number": "531147211",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147211"
+    },
+    {
+     "key": "6",
+     "part_number": "547051501",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL",
+     "qty": "1",
+     "remarks": "",
+     "search": "547051501"
+    },
+    {
+     "key": "7",
+     "part_number": "531146736",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER KIT",
+     "qty": "1",
+     "remarks": "POWER UNIT LOWER COVER",
+     "search": "531146736"
+    },
+    {
+     "key": "8",
+     "part_number": "531147193",
+     "depth": 0,
+     "sub": false,
+     "description": "INSTALLATION KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147193"
+    },
+    {
+     "key": "9",
+     "part_number": "531146741",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SUPPORT",
+     "qty": "1",
+     "remarks": "",
+     "search": "531146741"
+    },
+    {
+     "key": "10",
+     "part_number": "534975501",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE",
+     "qty": "1",
+     "remarks": "",
+     "search": "534975501"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 POWER HEAD"
+  },
+  {
+   "id": "4",
+   "number": "4",
+   "title": "COLLECTOR",
+   "image": "huslc142i-fig4.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 65.48,
+     "y": 29.923,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 83.217,
+     "y": 44.986,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "531147196",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER",
+     "qty": "1",
+     "remarks": "GRASSBAG HOLDER",
+     "search": "531147196"
+    },
+    {
+     "key": "2",
+     "part_number": "531147197",
+     "depth": 0,
+     "sub": false,
+     "description": "GRASSBAG",
+     "qty": "1",
+     "remarks": "",
+     "search": "531147197"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.4 COLLECTOR"
+  },
+  {
+   "id": "5",
+   "number": "5",
+   "title": "ACCESSORIES",
+   "image": "huslc142i-fig5.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 81.977,
+     "y": 35.368,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 57.883,
+     "y": 72.618,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "531223201",
+     "depth": 0,
+     "sub": false,
+     "description": "MULCH KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "531223201"
+    },
+    {
+     "key": "2",
+     "part_number": "534975601",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE",
+     "qty": "1",
+     "remarks": "Mulch blade",
+     "search": "534975601"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.5 ACCESSORIES"
+  }
+ ]
+}

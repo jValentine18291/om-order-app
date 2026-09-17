@@ -647,5 +647,14 @@
   "category": "Lawn Mower",
   "figures": 5,
   "parts": 132
+ },
+ {
+  "id": "huslc142i",
+  "name": "Husqvarna LC 142i Lawn Mower",
+  "short": "LC 142i",
+  "brand": "Husqvarna",
+  "category": "Lawn Mower",
+  "figures": 5,
+  "parts": 38
  }
 ]
