@@ -1,0 +1,37 @@
+# AM 420 iQ corrections.
+#
+# THE CONSOLE SHEET ARRIVED WITH NO POSITIONS AT ALL. Seven parts, seven
+# printed callouts - 1, 2, 3, 5, 10, 11, 12 - and the Coordinates column blank
+# on every row. The importer said so ("no hotspots on: Fig.4 CONSOLE"), which
+# is the one failure of this kind it can see by itself: a sheet with parts and
+# nothing to tap is obvious, where a sheet missing one callout out of twenty
+# is not.
+#
+# All seven are placed here by hand, added rather than marked unlisted,
+# because the table lists every one of them. The tab now works like the other
+# seven sheets instead of being a picture with a parts list beside it.
+#
+# INSTALLATION ACCESSORIES 3 and 18. Two more printed callouts the export has
+# no row for. 3 is the middle low-voltage cable - 2 is the 3 m and 4 carries
+# the 10 m and 20 m, so 3 is the length between them, drawn and numbered and
+# not sold here. 18 is the second mounting plate, the twin of 16. Both marked
+# unlisted, so the app says the book prints this callout and lists no part for
+# it rather than leaving a dead spot.
+#
+# Positions read off a percentage grid laid over each sheet. The console sheet
+# had no existing hotspot to calibrate against, the grid being drawn on the
+# image itself in absolute percentages, so it needs none.
+#
+# One naming note while it is in front of us: every sheet is headed AUTOMOWER
+# 420IQ, run together. Husqvarna sell it as the Automower 420 iQ and that is
+# what the workshop says, so that is the name in the index, with AM420iQ,
+# AM 420 iQ and 420iQ as aliases.
+1 unlisted 3 41.7 33.2
+1 unlisted 18 28.0 85.5
+4 add 1 24.4 31.1
+4 add 2 44.8 22.0
+4 add 3 31.8 66.1
+4 add 5 41.9 41.9
+4 add 10 86.8 46.1
+4 add 11 65.7 60.3
+4 add 12 53.6 52.9

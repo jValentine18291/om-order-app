@@ -545,5 +545,19 @@
    "315X MKII",
    "AM315X MKII"
   ]
+ },
+ {
+  "id": "am420iq",
+  "name": "Husqvarna Automower 420 iQ",
+  "short": "Automower 420 iQ",
+  "brand": "Husqvarna",
+  "category": "Robotic Mower",
+  "figures": 8,
+  "parts": 147,
+  "aliases": [
+   "AM420iQ",
+   "AM 420 iQ",
+   "420iQ"
+  ]
  }
 ]
