@@ -1,0 +1,1349 @@
+{
+ "id": "hus525ilk",
+ "name": "Husqvarna 525iLK Combi Trimmer",
+ "source": "Husqvarna portal CSV export (525iLK Battery Combi Trimmer.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "BEVEL GEAR",
+   "image": "hus525ilk-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 18.065,
+     "y": 39.612,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 20.927,
+     "y": 75.514,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 30.0,
+     "y": 71.233,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 34.677,
+     "y": 69.378,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 25.444,
+     "y": 59.989,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 27.298,
+     "y": 57.392,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 40.081,
+     "y": 47.574,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 64.435,
+     "y": 34.304,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 85.081,
+     "y": 40.439,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 72.581,
+     "y": 46.661,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 75.927,
+     "y": 47.317,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 78.992,
+     "y": 49.344,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 80.847,
+     "y": 58.39,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 59.96,
+     "y": 14.64,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 58.468,
+     "y": 19.749,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 46.895,
+     "y": 20.634,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 32.46,
+     "y": 26.884,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "537333801",
+     "depth": 0,
+     "sub": false,
+     "description": "BEVEL GEAR",
+     "qty": "1",
+     "remarks": "",
+     "search": "537333801"
+    },
+    {
+     "key": "2",
+     "part_number": "503856301",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "503856301"
+    },
+    {
+     "key": "3",
+     "part_number": "537292601",
+     "depth": 0,
+     "sub": false,
+     "description": "CUP",
+     "qty": "1",
+     "remarks": "",
+     "search": "537292601"
+    },
+    {
+     "key": "4",
+     "part_number": "537234901",
+     "depth": 0,
+     "sub": false,
+     "description": "DRIVER ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "537234901"
+    },
+    {
+     "key": "5",
+     "part_number": "735312810",
+     "depth": 0,
+     "sub": false,
+     "description": "CIRCLIP",
+     "qty": "1",
+     "remarks": "",
+     "search": "735312810"
+    },
+    {
+     "key": "6",
+     "part_number": "525831801",
+     "depth": 0,
+     "sub": false,
+     "description": "BALL BEARING",
+     "qty": "1",
+     "remarks": "",
+     "search": "525831801"
+    },
+    {
+     "key": "7",
+     "part_number": "738219800",
+     "depth": 0,
+     "sub": false,
+     "description": "BALL BEARING",
+     "qty": "1",
+     "remarks": "",
+     "search": "738219800"
+    },
+    {
+     "key": "8",
+     "part_number": "503201501",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "503201501"
+    },
+    {
+     "key": "9",
+     "part_number": "503200725",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCFM",
+     "qty": "1",
+     "remarks": "",
+     "search": "503200725"
+    },
+    {
+     "key": "10",
+     "part_number": "738219900",
+     "depth": 0,
+     "sub": false,
+     "description": "BALL BEARING",
+     "qty": "1",
+     "remarks": "",
+     "search": "738219900"
+    },
+    {
+     "key": "11",
+     "part_number": "738219902",
+     "depth": 0,
+     "sub": false,
+     "description": "BALL BEARING",
+     "qty": "1",
+     "remarks": "",
+     "search": "738219902"
+    },
+    {
+     "key": "12",
+     "part_number": "735311100",
+     "depth": 0,
+     "sub": false,
+     "description": "CIRCLIP",
+     "qty": "1",
+     "remarks": "",
+     "search": "735311100"
+    },
+    {
+     "key": "13",
+     "part_number": "735312510",
+     "depth": 0,
+     "sub": false,
+     "description": "CIRCLIP",
+     "qty": "1",
+     "remarks": "",
+     "search": "735312510"
+    },
+    {
+     "key": "14",
+     "part_number": "503202007",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "1",
+     "remarks": "",
+     "search": "503202007"
+    },
+    {
+     "key": "14",
+     "part_number": "544218422",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCM",
+     "qty": "1",
+     "remarks": "For US only",
+     "search": "544218422"
+    },
+    {
+     "key": "15",
+     "part_number": "503201412",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCFMO",
+     "qty": "1",
+     "remarks": "",
+     "search": "503201412"
+    },
+    {
+     "key": "15",
+     "part_number": "591159801",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "For US only",
+     "search": "591159801"
+    },
+    {
+     "key": "16",
+     "part_number": "574306904",
+     "depth": 0,
+     "sub": false,
+     "description": "CLAMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "574306904"
+    },
+    {
+     "key": "16",
+     "part_number": "574306905",
+     "depth": 0,
+     "sub": false,
+     "description": "CLAMP",
+     "qty": "1",
+     "remarks": "For US only",
+     "search": "574306905"
+    },
+    {
+     "key": "17",
+     "part_number": "544843301",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "544843301"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 BEVEL GEAR"
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "SHAFT & HANDLE",
+   "image": "hus525ilk-fig2.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 50.484,
+     "y": 4.823,
+     "conf": 100
+    },
+    {
+     "key": "1",
+     "x": 78.629,
+     "y": 46.033,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 50.726,
+     "y": 28.253,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 50.726,
+     "y": 30.736,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 83.992,
+     "y": 13.385,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 89.315,
+     "y": 15.525,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 42.661,
+     "y": 19.692,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 13.71,
+     "y": 52.511,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 26.613,
+     "y": 45.12,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 30.484,
+     "y": 43.636,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 27.46,
+     "y": 36.929,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 21.008,
+     "y": 64.869,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 41.008,
+     "y": 30.965,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 43.589,
+     "y": 54.281,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 39.879,
+     "y": 66.467,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 53.669,
+     "y": 75.799,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 64.96,
+     "y": 82.106,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 63.911,
+     "y": 89.84,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 39.234,
+     "y": 93.179,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 27.056,
+     "y": 88.042,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 24.798,
+     "y": 69.378,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 17.54,
+     "y": 59.389,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "735580810",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCKWASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "735580810"
+    },
+    {
+     "key": "2",
+     "part_number": "587414601",
+     "depth": 0,
+     "sub": false,
+     "description": "PLUG",
+     "qty": "1",
+     "remarks": "",
+     "search": "587414601"
+    },
+    {
+     "key": "3",
+     "part_number": "503785202",
+     "depth": 0,
+     "sub": false,
+     "description": "SUPPORTING BEARING",
+     "qty": "1",
+     "remarks": "",
+     "search": "503785202"
+    },
+    {
+     "key": "4",
+     "part_number": "587411701",
+     "depth": 0,
+     "sub": false,
+     "description": "DRIVE SHAFT",
+     "qty": "1",
+     "remarks": "",
+     "search": "587411701"
+    },
+    {
+     "key": "5",
+     "part_number": "583938301",
+     "depth": 0,
+     "sub": false,
+     "description": "CLIP",
+     "qty": "1",
+     "remarks": "",
+     "search": "583938301"
+    },
+    {
+     "key": "6",
+     "part_number": "587988101",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "587988101"
+    },
+    {
+     "key": "7",
+     "part_number": "731231601",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "731231601"
+    },
+    {
+     "key": "8",
+     "part_number": "576282401",
+     "depth": 0,
+     "sub": false,
+     "description": "KNOB",
+     "qty": "1",
+     "remarks": "",
+     "search": "576282401"
+    },
+    {
+     "key": "9",
+     "part_number": "725237601",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "725237601"
+    },
+    {
+     "key": "10",
+     "part_number": "525755104",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCFM",
+     "qty": "2",
+     "remarks": "",
+     "search": "525755104"
+    },
+    {
+     "key": "11",
+     "part_number": "576282601",
+     "depth": 0,
+     "sub": false,
+     "description": "CLAMPING SLEEVE ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "576282601"
+    },
+    {
+     "key": "12",
+     "part_number": "537234807",
+     "depth": 0,
+     "sub": false,
+     "description": "DRIVE SHAFT",
+     "qty": "1",
+     "remarks": "",
+     "search": "537234807"
+    },
+    {
+     "key": "13",
+     "part_number": "597864301",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "597864301"
+    },
+    {
+     "key": "14",
+     "part_number": "725238051",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "1",
+     "remarks": "",
+     "search": "725238051"
+    },
+    {
+     "key": "15",
+     "part_number": "503879001",
+     "depth": 0,
+     "sub": false,
+     "description": "KNOB",
+     "qty": "1",
+     "remarks": "",
+     "search": "503879001"
+    },
+    {
+     "key": "16",
+     "part_number": "503871908",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "503871908"
+    },
+    {
+     "key": "17",
+     "part_number": "503940301",
+     "depth": 0,
+     "sub": false,
+     "description": "DISTANCE",
+     "qty": "1",
+     "remarks": "",
+     "search": "503940301"
+    },
+    {
+     "key": "18",
+     "part_number": "502197101",
+     "depth": 0,
+     "sub": false,
+     "description": "SQUARE NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "502197101"
+    },
+    {
+     "key": "19",
+     "part_number": "587889218",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "587889218"
+    },
+    {
+     "key": "20",
+     "part_number": "503692601",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "503692601"
+    },
+    {
+     "key": "21",
+     "part_number": "576282301",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCKING PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "576282301"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 SHAFT & HANDLE"
+  },
+  {
+   "id": "3",
+   "number": "3",
+   "title": "ELECTRICAL",
+   "image": "hus525ilk-fig3.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 70.806,
+     "y": 46.09,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 57.782,
+     "y": 23.202,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 35.121,
+     "y": 25.2,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 33.79,
+     "y": 40.011,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 54.677,
+     "y": 17.295,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 68.387,
+     "y": 36.102,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 50.645,
+     "y": 31.707,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 48.306,
+     "y": 20.976,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 41.573,
+     "y": 18.122,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 42.5,
+     "y": 30.508,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 42.46,
+     "y": 33.248,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "546010302",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "546010302"
+    },
+    {
+     "key": "2",
+     "part_number": "595010710",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "595010710"
+    },
+    {
+     "key": "3",
+     "part_number": "593841201",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL PANEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "593841201"
+    },
+    {
+     "key": "3",
+     "part_number": "593841101",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL PANEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "593841101"
+    },
+    {
+     "key": "4",
+     "part_number": "593712001",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "593712001"
+    },
+    {
+     "key": "5",
+     "part_number": "580292901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCT",
+     "qty": "4",
+     "remarks": "",
+     "search": "580292901"
+    },
+    {
+     "key": "6",
+     "part_number": "503911001",
+     "depth": 0,
+     "sub": false,
+     "description": "SUSPENSION",
+     "qty": "2",
+     "remarks": "",
+     "search": "503911001"
+    },
+    {
+     "key": "7",
+     "part_number": "592933501",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "592933501"
+    },
+    {
+     "key": "8",
+     "part_number": "525755101",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCFM",
+     "qty": "3",
+     "remarks": "",
+     "search": "525755101"
+    },
+    {
+     "key": "9",
+     "part_number": "525824903",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCM",
+     "qty": "1",
+     "remarks": "",
+     "search": "525824903"
+    },
+    {
+     "key": "10",
+     "part_number": "525755108",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCFM",
+     "qty": "1",
+     "remarks": "",
+     "search": "525755108"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 ELECTRICAL"
+  },
+  {
+   "id": "4",
+   "number": "4",
+   "title": "HANDLE",
+   "image": "hus525ilk-fig4.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 19.476,
+     "y": 36.33,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 51.573,
+     "y": 23.716,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 30.403,
+     "y": 39.298,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 41.331,
+     "y": 42.637,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 45.605,
+     "y": 32.591,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 59.073,
+     "y": 21.176,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 60.161,
+     "y": 40.497,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "591462301",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE HALF",
+     "qty": "1",
+     "remarks": "",
+     "search": "591462301"
+    },
+    {
+     "key": "2",
+     "part_number": "591462501",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE HALF",
+     "qty": "1",
+     "remarks": "",
+     "search": "591462501"
+    },
+    {
+     "key": "3",
+     "part_number": "593652801",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "593652801"
+    },
+    {
+     "key": "4",
+     "part_number": "593275901",
+     "depth": 0,
+     "sub": false,
+     "description": "TRIGGER",
+     "qty": "1",
+     "remarks": "",
+     "search": "593275901"
+    },
+    {
+     "key": "5",
+     "part_number": "531293601",
+     "depth": 0,
+     "sub": false,
+     "description": "THROTTLE LOCKOUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "531293601"
+    },
+    {
+     "key": "6",
+     "part_number": "580292901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCT",
+     "qty": "6",
+     "remarks": "",
+     "search": "580292901"
+    },
+    {
+     "key": "7",
+     "part_number": "594027001",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER",
+     "qty": "1",
+     "remarks": "",
+     "search": "594027001"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.4 HANDLE"
+  },
+  {
+   "id": "5",
+   "number": "5",
+   "title": "HOUSING",
+   "image": "hus525ilk-fig5.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 14.721,
+     "y": 36.529,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 36.046,
+     "y": 27.771,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 50.101,
+     "y": 22.014,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 75.343,
+     "y": 24.5,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 79.342,
+     "y": 22.643,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 87.742,
+     "y": 26.043,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 47.395,
+     "y": 63.443,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 55.351,
+     "y": 78.671,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 65.852,
+     "y": 54.957,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 82.108,
+     "y": 54.957,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 73.809,
+     "y": 66.186,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "591444602",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING",
+     "qty": "1",
+     "remarks": "",
+     "search": "591444602"
+    },
+    {
+     "key": "2",
+     "part_number": "535570201",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "535570201"
+    },
+    {
+     "key": "3",
+     "part_number": "591444901",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING",
+     "qty": "1",
+     "remarks": "",
+     "search": "591444901"
+    },
+    {
+     "key": "4",
+     "part_number": "585480001",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "585480001"
+    },
+    {
+     "key": "5",
+     "part_number": "577996601",
+     "depth": 0,
+     "sub": false,
+     "description": "PUSH BUTTON",
+     "qty": "1",
+     "remarks": "",
+     "search": "577996601"
+    },
+    {
+     "key": "6",
+     "part_number": "580292901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCT",
+     "qty": "4",
+     "remarks": "",
+     "search": "580292901"
+    },
+    {
+     "key": "7",
+     "part_number": "591461901",
+     "depth": 0,
+     "sub": false,
+     "description": "SKID PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "591461901"
+    },
+    {
+     "key": "8",
+     "part_number": "580292901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCT",
+     "qty": "4",
+     "remarks": "",
+     "search": "580292901"
+    },
+    {
+     "key": "9",
+     "part_number": "594095106",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "594095106"
+    },
+    {
+     "key": "10",
+     "part_number": "594095107",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "594095107"
+    },
+    {
+     "key": "11",
+     "part_number": "536798201",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "536798201"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.5 HOUSING"
+  },
+  {
+   "id": "6",
+   "number": "6",
+   "title": "ACCESSORIES",
+   "image": "hus525ilk-fig6.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 38.609,
+     "y": 12.397,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 28.185,
+     "y": 17.917,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 24.456,
+     "y": 29.843,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 77.016,
+     "y": 37.004,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 67.238,
+     "y": 37.004,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 16.028,
+     "y": 60.685,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 37.44,
+     "y": 60.442,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 73.246,
+     "y": 59.729,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 64.657,
+     "y": 71.983,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 41.069,
+     "y": 78.26,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "597016202",
+     "depth": 0,
+     "sub": false,
+     "description": "TRIMMER GUARD ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "597016202"
+    },
+    {
+     "key": "2",
+     "part_number": "573925801",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCFT",
+     "qty": "1",
+     "remarks": "",
+     "search": "573925801"
+    },
+    {
+     "key": "3",
+     "part_number": "503798802",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE",
+     "qty": "1",
+     "remarks": "",
+     "search": "503798802"
+    },
+    {
+     "key": "4",
+     "part_number": "503742902",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "503742902"
+    },
+    {
+     "key": "5",
+     "part_number": "503976401",
+     "depth": 0,
+     "sub": false,
+     "description": "GREASE",
+     "qty": "1",
+     "remarks": "",
+     "search": "503976401"
+    },
+    {
+     "key": "6",
+     "part_number": "535560001",
+     "depth": 0,
+     "sub": false,
+     "description": "GREASE",
+     "qty": "1",
+     "remarks": "",
+     "search": "535560001"
+    },
+    {
+     "key": "7",
+     "part_number": "502285901",
+     "depth": 0,
+     "sub": false,
+     "description": "STOP",
+     "qty": "1",
+     "remarks": "",
+     "search": "502285901"
+    },
+    {
+     "key": "8",
+     "part_number": "503558601",
+     "depth": 0,
+     "sub": false,
+     "description": "SPANNER",
+     "qty": "1",
+     "remarks": "",
+     "search": "503558601"
+    },
+    {
+     "key": "9",
+     "part_number": "575880701",
+     "depth": 0,
+     "sub": false,
+     "description": "WRENCH",
+     "qty": "1",
+     "remarks": "For US only",
+     "search": "575880701"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.6 ACCESSORIES"
+  }
+ ]
+}

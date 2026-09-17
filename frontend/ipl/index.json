@@ -584,5 +584,14 @@
   "category": "Grass Trimmer",
   "figures": 7,
   "parts": 59
+ },
+ {
+  "id": "hus525ilk",
+  "name": "Husqvarna 525iLK Combi Trimmer",
+  "short": "525iLK",
+  "brand": "Husqvarna",
+  "category": "Grass Trimmer",
+  "figures": 6,
+  "parts": 79
  }
 ]

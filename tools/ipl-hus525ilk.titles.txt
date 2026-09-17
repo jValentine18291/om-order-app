@@ -1,0 +1,28 @@
+# 525iLK sheet titles, in the order the export lists them (A to F already).
+#
+# One name differs from the portal, and it is only the ampersand: the drawing
+# sets SHAFT & HANDLE where the export writes SHAFT AND HANDLE. The other five
+# agree exactly.
+#
+# TWO SHEETS WITH "HANDLE" IN THE NAME, and they are different ends of the
+# machine. B, SHAFT & HANDLE, is the shaft, the coupling and the loop handle
+# that clamps round it. D, HANDLE, is the rear grip with the trigger and the
+# throttle lockout. Nothing can be done about that from here - both names are
+# printed - but it is the thing to know before tapping one.
+#
+# THE COMBI COUPLING is what makes this a K. B carries two tube assemblies and
+# a clamping sleeve because the shaft comes apart to take other attachments,
+# which is also why the BEVEL GEAR sheet stands on its own as A rather than
+# being part of a cutting sheet: the gear head is a fitting, not a fixture.
+#
+# US VARIANTS on the bevel gear. Keys 14, 15 and 16 each list two part numbers
+# - one plain, one marked "For US only" - so a callout there opens two rows.
+# The remarks carry the distinction; the drawing shows one screw.
+#
+# Filed under Grass Trimmer with the 115iL and the 520iLX, as asked.
+BEVEL GEAR
+SHAFT & HANDLE
+ELECTRICAL
+HANDLE
+HOUSING
+ACCESSORIES
