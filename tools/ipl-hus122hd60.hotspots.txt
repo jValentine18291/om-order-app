@@ -1,0 +1,39 @@
+# 122HD60 - the carburettor sheet, which the export shipped with no
+# coordinates at all.
+#
+#     <figure> add|unlisted|drop  <key> <x%> <y%>
+#
+# Nineteen rows, every one of them with an empty Coordinates column, on a sheet
+# whose drawing prints all nineteen callouts perfectly clearly. Husqvarna
+# simply never mapped this page. It arrived as a picture with a parts list
+# under it and nothing to tap - on the carburettor, which is the sheet a
+# technician opens most often on a machine that will not start.
+#
+# So all nineteen are placed by hand, read off a percentage grid laid over the
+# sheet. "add", not "unlisted": every key is in the parts list, so each one
+# leads somewhere.
+#
+# ipl-check-hotspots.py is the proof they landed: it refuses any hotspot that
+# is not on ink, so a number misread off the grid lands on blank paper and
+# fails rather than sitting quietly in the wrong place.
+
+# --- Fig.3 CARBURETOR AND AIR FILTER -------------------------------------------
+3 add 1  34.00 10.00
+3 add 2  20.00 10.40
+3 add 3  19.90 30.80
+3 add 4  48.00 17.00
+3 add 5  39.20 33.80
+3 add 6  50.60 47.00
+3 add 7  84.50 31.50
+3 add 8  51.70 39.10
+3 add 9  63.00 27.60
+3 add 10 77.00 35.10
+3 add 11 88.30 39.30
+3 add 12 26.00 68.60
+3 add 13 29.80 70.20
+3 add 14 33.70 76.10
+3 add 15 46.30 62.30
+3 add 16 44.00 82.20
+3 add 17 63.00 69.50
+3 add 18 65.20 84.40
+3 add 19 23.40 79.80

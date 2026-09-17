@@ -1,0 +1,25 @@
+# 122HD60 sheet titles, in the order the export lists them (A to N already).
+#
+# Three printed names differ from the export, and they are the same three the
+# 541RB needed - so using the drawings' words keeps the petrol books reading
+# alike as well as matching the page in the technician's hand:
+#
+#     export CARBURETOR AND AIR FILTER   drawing CARBURETOR & AIRFILTER
+#     export CYLINDER PISTON             drawing CYLINDER & PISTON
+#     export CRANKSHAFT                  drawing CRANK SHAFT
+#
+# Everything else already agrees. Nothing here is about variants: this machine
+# has none, which after the last four books is worth saying out loud.
+STARTER
+CYLINDER COVER
+CARBURETOR & AIRFILTER
+FUEL TANK
+IGNITION SYSTEM
+MUFFLER
+CYLINDER & PISTON
+CRANKCASE
+CRANK SHAFT
+HANDLE
+CLUTCH & GEARBOX
+CUTTING EQUIPMENT
+ACCESSORIES

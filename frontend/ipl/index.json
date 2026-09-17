@@ -481,5 +481,14 @@
   "category": "Hedge Trimmer",
   "figures": 7,
   "parts": 50
+ },
+ {
+  "id": "hus122hd60",
+  "name": "Husqvarna 122HD60 Hedge Trimmer",
+  "short": "122HD60",
+  "brand": "Husqvarna",
+  "category": "Hedge Trimmer",
+  "figures": 13,
+  "parts": 140
  }
 ]
