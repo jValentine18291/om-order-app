@@ -1,0 +1,30 @@
+# 520iHD60 sheet titles, in the order --order puts them.
+#
+# ORDER. The book letters its sections A to F - CUTTING, GEAR, HANDLE, HOUSING,
+# ELECTRIC, ACCESSORIES - and the export lists them E, A, A, B, C, D, F, so the
+# electrical sheet arrived first and the tabs would have run Fig.5, Fig.1,
+# Fig.1, Fig.2... --order puts them back in the book's own sequence, and the
+# figure numbers then match the letters printed on the pages.
+#
+# THE SERIAL SPLIT. The cutting deck comes in two versions and the drawings say
+# which in the top right corner; the export says nothing at all, both sheets
+# being "CUTTING EQUIPMENT" with only an unseen IPL ID between them. One clean
+# threshold this time, so it fits in the tab rather than needing to be read off
+# the page:
+#
+#     up to S/N 20202099999     the earlier deck
+#     from S/N 20202100001      the later one
+#
+# They share almost nothing - the deck, the bar, the bracket, the transport
+# guard, the protection and the screws are all different part numbers, and the
+# later sheet adds a wear plate, blades and spacers the earlier one has not.
+#
+# NAMES. The printed ones, as everywhere else: the drawings say CUTTING, GEAR
+# and ELECTRIC where the export says CUTTING EQUIPMENT, GEARS and ELECTRICAL.
+CUTTING (up to S/N 20202099999)
+CUTTING (from S/N 20202100001)
+GEAR
+HANDLE
+HOUSING
+ELECTRIC
+ACCESSORIES

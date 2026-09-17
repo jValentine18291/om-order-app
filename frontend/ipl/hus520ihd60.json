@@ -1,0 +1,1612 @@
+{
+ "id": "hus520ihd60",
+ "name": "Husqvarna 520iHD60 Hedge Trimmer",
+ "source": "Husqvarna portal CSV export (520iHD60 IPL.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "CUTTING (up to S/N 20202099999)",
+   "image": "hus520ihd60-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 53.846,
+     "y": 79.106,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 27.75,
+     "y": 31.103,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 20.534,
+     "y": 25.885,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 54.259,
+     "y": 7.237,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 77.146,
+     "y": 15.948,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 66.751,
+     "y": 59.8,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 78.957,
+     "y": 51.792,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 83.471,
+     "y": 56.284,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 78.131,
+     "y": 54.741,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 18.055,
+     "y": 21.211,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 30.833,
+     "y": 90.495,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 71.106,
+     "y": 8.008,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 14.081,
+     "y": 78.97,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 42.912,
+     "y": 66.334,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 15.226,
+     "y": 41.084,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 15.671,
+     "y": 74.932,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "580718304",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTING DECK",
+     "qty": "1",
+     "remarks": "",
+     "search": "580718304"
+    },
+    {
+     "key": "2",
+     "part_number": "578372201",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "578372201"
+    },
+    {
+     "key": "3",
+     "part_number": "581100901",
+     "depth": 0,
+     "sub": false,
+     "description": "PROTECTION ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "581100901"
+    },
+    {
+     "key": "4",
+     "part_number": "503220009",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON NUT",
+     "qty": "6",
+     "remarks": "",
+     "search": "503220009"
+    },
+    {
+     "key": "5",
+     "part_number": "731231401",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON NUT",
+     "qty": "7",
+     "remarks": "",
+     "search": "731231401"
+    },
+    {
+     "key": "6",
+     "part_number": "584152202",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCFM",
+     "qty": "5",
+     "remarks": "",
+     "search": "584152202"
+    },
+    {
+     "key": "7",
+     "part_number": "503230024",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "5",
+     "remarks": "",
+     "search": "503230024"
+    },
+    {
+     "key": "8",
+     "part_number": "581259302",
+     "depth": 0,
+     "sub": false,
+     "description": "TRANSPORT GUARD",
+     "qty": "1",
+     "remarks": "",
+     "search": "581259302"
+    },
+    {
+     "key": "9",
+     "part_number": "525755113",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCFM",
+     "qty": "2",
+     "remarks": "",
+     "search": "525755113"
+    },
+    {
+     "key": "10",
+     "part_number": "580931501",
+     "depth": 0,
+     "sub": false,
+     "description": "SUPPORT",
+     "qty": "1",
+     "remarks": "",
+     "search": "580931501"
+    },
+    {
+     "key": "11",
+     "part_number": "581761601",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCT",
+     "qty": "2",
+     "remarks": "",
+     "search": "581761601"
+    },
+    {
+     "key": "12",
+     "part_number": "581483501",
+     "depth": 0,
+     "sub": false,
+     "description": "PROTECTION",
+     "qty": "1",
+     "remarks": "",
+     "search": "581483501"
+    },
+    {
+     "key": "13",
+     "part_number": "578372001",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "578372001"
+    },
+    {
+     "key": "14",
+     "part_number": "580715802",
+     "depth": 0,
+     "sub": false,
+     "description": "BAR",
+     "qty": "1",
+     "remarks": "",
+     "search": "580715802"
+    },
+    {
+     "key": "15",
+     "part_number": "599616001",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTING DECK KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "599616001"
+    },
+    {
+     "key": "16",
+     "part_number": "599616501",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTING DECK KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "599616501"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 1,
+   "label": "Fig.1 CUTTING (up to S/N 20202099999)"
+  },
+  {
+   "id": "2",
+   "number": "1",
+   "title": "CUTTING (from S/N 20202100001)",
+   "image": "hus520ihd60-fig2.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 51.303,
+     "y": 79.106,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 11.825,
+     "y": 28.789,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 17.387,
+     "y": 24.841,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 29.116,
+     "y": 8.507,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 63.318,
+     "y": 19.896,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 64.209,
+     "y": 59.8,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 76.414,
+     "y": 51.792,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 86.968,
+     "y": 53.652,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 31.024,
+     "y": 72.55,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 15.512,
+     "y": 17.083,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 28.322,
+     "y": 90.495,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 11.284,
+     "y": 76.021,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 74.476,
+     "y": 14.474,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 16.434,
+     "y": 41.175,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 13.001,
+     "y": 51.928,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 13.827,
+     "y": 60.708,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 13.827,
+     "y": 66.107,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 76.987,
+     "y": 41.81,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "591479204",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTING DECK",
+     "qty": "1",
+     "remarks": "",
+     "search": "591479204"
+    },
+    {
+     "key": "2",
+     "part_number": "578372201",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "578372201"
+    },
+    {
+     "key": "3",
+     "part_number": "581100901",
+     "depth": 0,
+     "sub": false,
+     "description": "PROTECTION ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "581100901"
+    },
+    {
+     "key": "4",
+     "part_number": "503220009",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON NUT",
+     "qty": "6",
+     "remarks": "",
+     "search": "503220009"
+    },
+    {
+     "key": "5",
+     "part_number": "731231401",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON NUT",
+     "qty": "6",
+     "remarks": "",
+     "search": "731231401"
+    },
+    {
+     "key": "6",
+     "part_number": "525755114",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCFM",
+     "qty": "5",
+     "remarks": "",
+     "search": "525755114"
+    },
+    {
+     "key": "7",
+     "part_number": "503230024",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "5",
+     "remarks": "",
+     "search": "503230024"
+    },
+    {
+     "key": "8",
+     "part_number": "592748501",
+     "depth": 0,
+     "sub": false,
+     "description": "TRANSPORT GUARD",
+     "qty": "1",
+     "remarks": "",
+     "search": "592748501"
+    },
+    {
+     "key": "9",
+     "part_number": "592744601",
+     "depth": 0,
+     "sub": false,
+     "description": "BAR",
+     "qty": "1",
+     "remarks": "",
+     "search": "592744601"
+    },
+    {
+     "key": "10",
+     "part_number": "580931501",
+     "depth": 0,
+     "sub": false,
+     "description": "SUPPORT",
+     "qty": "1",
+     "remarks": "",
+     "search": "580931501"
+    },
+    {
+     "key": "11",
+     "part_number": "590919201",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "590919201"
+    },
+    {
+     "key": "12",
+     "part_number": "592750401",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "592750401"
+    },
+    {
+     "key": "13",
+     "part_number": "592737901",
+     "depth": 0,
+     "sub": false,
+     "description": "PROTECTION",
+     "qty": "1",
+     "remarks": "",
+     "search": "592737901"
+    },
+    {
+     "key": "14",
+     "part_number": "591375101",
+     "depth": 0,
+     "sub": false,
+     "description": "BAR",
+     "qty": "1",
+     "remarks": "",
+     "search": "591375101"
+    },
+    {
+     "key": "15",
+     "part_number": "591374801",
+     "depth": 0,
+     "sub": false,
+     "description": "WEAR PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "591374801"
+    },
+    {
+     "key": "16",
+     "part_number": "591452301",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE",
+     "qty": "2",
+     "remarks": "",
+     "search": "591452301"
+    },
+    {
+     "key": "17",
+     "part_number": "592638901",
+     "depth": 0,
+     "sub": false,
+     "description": "SPACER",
+     "qty": "9",
+     "remarks": "",
+     "search": "592638901"
+    },
+    {
+     "key": "18",
+     "part_number": "525755113",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCFM",
+     "qty": "2",
+     "remarks": "",
+     "search": "525755113"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 2,
+   "label": "Fig.1 CUTTING (from S/N 20202100001)"
+  },
+  {
+   "id": "3",
+   "number": "2",
+   "title": "GEAR",
+   "image": "hus520ihd60-fig3.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 78.004,
+     "y": 25.34,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 31.278,
+     "y": 84.347,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 63.16,
+     "y": 85.549,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 30.833,
+     "y": 76.225,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 33.153,
+     "y": 47.731,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 37.031,
+     "y": 71.234,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 33.916,
+     "y": 68.126,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 18.5,
+     "y": 27.904,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 33.376,
+     "y": 64.201,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 35.219,
+     "y": 52.813,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 37.063,
+     "y": 56.352,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 34.139,
+     "y": 59.483,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 22.028,
+     "y": 58.19,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 29.053,
+     "y": 32.759,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "503989603",
+     "depth": 0,
+     "sub": false,
+     "description": "GREASE",
+     "qty": "1",
+     "remarks": "",
+     "search": "503989603"
+    },
+    {
+     "key": "2",
+     "part_number": "582386602",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "582386602"
+    },
+    {
+     "key": "3",
+     "part_number": "503216872",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCT",
+     "qty": "6",
+     "remarks": "",
+     "search": "503216872"
+    },
+    {
+     "key": "4",
+     "part_number": "584411001",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "584411001"
+    },
+    {
+     "key": "5",
+     "part_number": "582363001",
+     "depth": 0,
+     "sub": false,
+     "description": "HELICAL GEAR",
+     "qty": "1",
+     "remarks": "",
+     "search": "582363001"
+    },
+    {
+     "key": "6",
+     "part_number": "578054901",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCKWASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "578054901"
+    },
+    {
+     "key": "7",
+     "part_number": "522714601",
+     "depth": 0,
+     "sub": false,
+     "description": "DISC",
+     "qty": "1",
+     "remarks": "",
+     "search": "522714601"
+    },
+    {
+     "key": "8",
+     "part_number": "582386701",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "582386701"
+    },
+    {
+     "key": "9",
+     "part_number": "531127701",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTING ROD ASSY",
+     "qty": "2",
+     "remarks": "",
+     "search": "531127701"
+    },
+    {
+     "key": "10",
+     "part_number": "578002701",
+     "depth": 0,
+     "sub": false,
+     "description": "HEAVY DUTY DOWEL PIN",
+     "qty": "2",
+     "remarks": "",
+     "search": "578002701"
+    },
+    {
+     "key": "11",
+     "part_number": "581838501",
+     "depth": 0,
+     "sub": false,
+     "description": "ECCENTRIC DISC",
+     "qty": "1",
+     "remarks": "",
+     "search": "581838501"
+    },
+    {
+     "key": "12",
+     "part_number": "582837001",
+     "depth": 0,
+     "sub": false,
+     "description": "GEAR",
+     "qty": "1",
+     "remarks": "",
+     "search": "582837001"
+    },
+    {
+     "key": "13",
+     "part_number": "582386401",
+     "depth": 0,
+     "sub": false,
+     "description": "GEAR CASE",
+     "qty": "1",
+     "remarks": "",
+     "search": "582386401"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 GEAR"
+  },
+  {
+   "id": "4",
+   "number": "3",
+   "title": "HANDLE",
+   "image": "hus520ihd60-fig4.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 22.06,
+     "y": 65.653,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 47.235,
+     "y": 20.78,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 52.384,
+     "y": 47.913,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 79.975,
+     "y": 16.924,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 34.329,
+     "y": 29.719,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 32.359,
+     "y": 19.737,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 31.723,
+     "y": 22.868,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 55.626,
+     "y": 38.612,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 19.517,
+     "y": 34.755,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "579563503",
+     "depth": 0,
+     "sub": false,
+     "description": "FRONT HANDLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "579563503"
+    },
+    {
+     "key": "2",
+     "part_number": "579563402",
+     "depth": 0,
+     "sub": false,
+     "description": "FRONT HANDLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "579563402"
+    },
+    {
+     "key": "3",
+     "part_number": "503218876",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCT",
+     "qty": "4",
+     "remarks": "",
+     "search": "503218876"
+    },
+    {
+     "key": "4",
+     "part_number": "579211901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCT",
+     "qty": "10",
+     "remarks": "",
+     "search": "579211901"
+    },
+    {
+     "key": "5",
+     "part_number": "579563602",
+     "depth": 0,
+     "sub": false,
+     "description": "FRONT HANDLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "579563602"
+    },
+    {
+     "key": "6",
+     "part_number": "580790101",
+     "depth": 0,
+     "sub": false,
+     "description": "BUSHING",
+     "qty": "3",
+     "remarks": "",
+     "search": "580790101"
+    },
+    {
+     "key": "7",
+     "part_number": "583890301",
+     "depth": 0,
+     "sub": false,
+     "description": "RECOIL SPRING",
+     "qty": "3",
+     "remarks": "",
+     "search": "583890301"
+    },
+    {
+     "key": "8",
+     "part_number": "584274001",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "584274001"
+    },
+    {
+     "key": "9",
+     "part_number": "581223201",
+     "depth": 0,
+     "sub": false,
+     "description": "LEVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "581223201"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 HANDLE"
+  },
+  {
+   "id": "5",
+   "number": "4",
+   "title": "HOUSING",
+   "image": "hus520ihd60-fig5.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 38.748,
+     "y": 7.554,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 75.779,
+     "y": 23.616,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 71.392,
+     "y": 15.29,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 50.477,
+     "y": 23.299,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 45.455,
+     "y": 21.574,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 83.535,
+     "y": 38.907,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 89.065,
+     "y": 29.855,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 11.856,
+     "y": 10.299,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 35.537,
+     "y": 20.871,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 50.223,
+     "y": 63.113,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 44.596,
+     "y": 28.312,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 38.43,
+     "y": 73.389,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 19.58,
+     "y": 37.863,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 37.413,
+     "y": 43.466,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 71.011,
+     "y": 47.618,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 19.072,
+     "y": 51.77,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 68.15,
+     "y": 74.07,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 81.278,
+     "y": 86.502,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 38.112,
+     "y": 78.38,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 69.866,
+     "y": 71.393,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 27.781,
+     "y": 64.111,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 33.566,
+     "y": 83.462,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 33.566,
+     "y": 89.27,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 60.617,
+     "y": 91.152,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "579559601",
+     "depth": 0,
+     "sub": false,
+     "description": "CHASSIS",
+     "qty": "1",
+     "remarks": "Chassis left",
+     "search": "579559601"
+    },
+    {
+     "key": "2",
+     "part_number": "579559701",
+     "depth": 0,
+     "sub": false,
+     "description": "CHASSIS",
+     "qty": "1",
+     "remarks": "Chassis right",
+     "search": "579559701"
+    },
+    {
+     "key": "3",
+     "part_number": "579560301",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "579560301"
+    },
+    {
+     "key": "4",
+     "part_number": "577996601",
+     "depth": 0,
+     "sub": false,
+     "description": "PUSH BUTTON",
+     "qty": "1",
+     "remarks": "",
+     "search": "577996601"
+    },
+    {
+     "key": "5",
+     "part_number": "577996501",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "577996501"
+    },
+    {
+     "key": "6",
+     "part_number": "503217416",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCT",
+     "qty": "4",
+     "remarks": "",
+     "search": "503217416"
+    },
+    {
+     "key": "7",
+     "part_number": "580715001",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "580715001"
+    },
+    {
+     "key": "8",
+     "part_number": "579565301",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCKING BUTTON",
+     "qty": "1",
+     "remarks": "",
+     "search": "579565301"
+    },
+    {
+     "key": "9",
+     "part_number": "503216872",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCT",
+     "qty": "4",
+     "remarks": "",
+     "search": "503216872"
+    },
+    {
+     "key": "10",
+     "part_number": "584270001",
+     "depth": 0,
+     "sub": false,
+     "description": "RECOIL SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "584270001"
+    },
+    {
+     "key": "11",
+     "part_number": "575232002",
+     "depth": 0,
+     "sub": false,
+     "description": "O-RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "575232002"
+    },
+    {
+     "key": "12",
+     "part_number": "579560101",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE HOLDER",
+     "qty": "1",
+     "remarks": "",
+     "search": "579560101"
+    },
+    {
+     "key": "13",
+     "part_number": "579211901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCT",
+     "qty": "5",
+     "remarks": "",
+     "search": "579211901"
+    },
+    {
+     "key": "14",
+     "part_number": "579563701",
+     "depth": 0,
+     "sub": false,
+     "description": "REAR HANDLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "579563701"
+    },
+    {
+     "key": "15",
+     "part_number": "579563801",
+     "depth": 0,
+     "sub": false,
+     "description": "REAR HANDLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "579563801"
+    },
+    {
+     "key": "16",
+     "part_number": "579211901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCT",
+     "qty": "5",
+     "remarks": "",
+     "search": "579211901"
+    },
+    {
+     "key": "17",
+     "part_number": "579565401",
+     "depth": 0,
+     "sub": false,
+     "description": "FRAME",
+     "qty": "1",
+     "remarks": "",
+     "search": "579565401"
+    },
+    {
+     "key": "18",
+     "part_number": "580719501",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "580719501"
+    },
+    {
+     "key": "19",
+     "part_number": "579564101",
+     "depth": 0,
+     "sub": false,
+     "description": "THROTTLE CONTROL",
+     "qty": "1",
+     "remarks": "",
+     "search": "579564101"
+    },
+    {
+     "key": "20",
+     "part_number": "581662905",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "581662905"
+    },
+    {
+     "key": "21",
+     "part_number": "581662805",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "581662805"
+    },
+    {
+     "key": "23",
+     "part_number": "503709701",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "503709701"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.4 HOUSING"
+  },
+  {
+   "id": "6",
+   "number": "5",
+   "title": "ELECTRIC",
+   "image": "hus520ihd60-fig6.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 25.175,
+     "y": 71.234,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 23.903,
+     "y": 61.434,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 31.341,
+     "y": 49.433,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 34.838,
+     "y": 28.153,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 73.109,
+     "y": 60.685,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 62.619,
+     "y": 26.18,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 62.746,
+     "y": 74.251,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 70.248,
+     "y": 34.211,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 13.795,
+     "y": 66.198,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 72.759,
+     "y": 41.606,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "583819701",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "583819701"
+    },
+    {
+     "key": "2",
+     "part_number": "582050701",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "582050701"
+    },
+    {
+     "key": "3",
+     "part_number": "579738201",
+     "depth": 0,
+     "sub": false,
+     "description": "KEYPAD",
+     "qty": "1",
+     "remarks": "",
+     "search": "579738201"
+    },
+    {
+     "key": "4",
+     "part_number": "503212813",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW CCRPANT",
+     "qty": "2",
+     "remarks": "",
+     "search": "503212813"
+    },
+    {
+     "key": "5",
+     "part_number": "581531301",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "581531301"
+    },
+    {
+     "key": "6",
+     "part_number": "581946601",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "581946601"
+    },
+    {
+     "key": "7",
+     "part_number": "588176401",
+     "depth": 0,
+     "sub": false,
+     "description": "GREASE",
+     "qty": "1",
+     "remarks": "SB-B1500023",
+     "search": "588176401",
+     "search_alt": "SBB1500023"
+    },
+    {
+     "key": "8",
+     "part_number": "579709301",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "579709301"
+    },
+    {
+     "key": "9",
+     "part_number": "593896501",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "593896501"
+    },
+    {
+     "key": "10",
+     "part_number": "593813001",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "593813001"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.5 ELECTRIC"
+  },
+  {
+   "id": "7",
+   "number": "6",
+   "title": "ACCESSORIES",
+   "image": "hus520ihd60-fig7.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 43.134,
+     "y": 11.479,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 49.746,
+     "y": 11.615,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 56.23,
+     "y": 11.615,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 48.379,
+     "y": 45.962,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 31.024,
+     "y": 81.42,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "578081901",
+     "depth": 0,
+     "sub": false,
+     "description": "MAINS CABLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "578081901"
+    },
+    {
+     "key": "2",
+     "part_number": "579130601",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "579130601"
+    },
+    {
+     "key": "3",
+     "part_number": "579130401",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "579130401"
+    },
+    {
+     "key": "4",
+     "part_number": "583897101",
+     "depth": 0,
+     "sub": false,
+     "description": "DIAGNOSTIC TOOL KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "583897101"
+    },
+    {
+     "key": "5",
+     "part_number": "579621301",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "579621301"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.6 ACCESSORIES"
+  }
+ ]
+}

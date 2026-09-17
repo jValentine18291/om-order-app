@@ -490,5 +490,14 @@
   "category": "Hedge Trimmer",
   "figures": 13,
   "parts": 140
+ },
+ {
+  "id": "hus520ihd60",
+  "name": "Husqvarna 520iHD60 Hedge Trimmer",
+  "short": "520iHD60",
+  "brand": "Husqvarna",
+  "category": "Hedge Trimmer",
+  "figures": 7,
+  "parts": 93
  }
 ]
