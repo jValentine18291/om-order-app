@@ -1,7 +1,7 @@
 {
  "id": "am535epos",
  "name": "Husqvarna Automower 535 AWD EPOS",
- "source": "Husqvarna portal CSV export (AM 535 EPOS IPL.csv)",
+ "source": "Husqvarna portal CSV export (AM 535 AWD EPOS IPL.csv)",
  "figures": [
   {
    "id": "1",
@@ -147,9 +147,35 @@
      "x": 79.162,
      "y": 66.733,
      "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 42.725,
+     "y": 14.738,
+     "conf": 100
     }
    ],
    "parts": [
+    {
+     "key": "1",
+     "part_number": "596300001",
+     "depth": 0,
+     "sub": false,
+     "description": "BODY KIT",
+     "qty": "1",
+     "remarks": "Top Cover Grey, From S/N 231010545",
+     "search": "596300001"
+    },
+    {
+     "key": "1",
+     "part_number": "596300201",
+     "depth": 0,
+     "sub": false,
+     "description": "BODY KIT",
+     "qty": "1",
+     "remarks": "Top Cover Grey, Up to S/N 231010544",
+     "search": "596300201"
+    },
     {
      "key": "1",
      "part_number": "596300003",
@@ -157,8 +183,18 @@
      "sub": false,
      "description": "BODY KIT",
      "qty": "1",
-     "remarks": "Top Cover Orange",
+     "remarks": "Top Cover Orange, From S/N 231010545",
      "search": "596300003"
+    },
+    {
+     "key": "1",
+     "part_number": "596300202",
+     "depth": 0,
+     "sub": false,
+     "description": "BODY KIT",
+     "qty": "1",
+     "remarks": "Top Cover Orange, Up to S/N 231010544",
+     "search": "596300202"
     },
     {
      "key": "2",
@@ -177,18 +213,8 @@
      "sub": false,
      "description": "WIRING ASSY",
      "qty": "1",
-     "remarks": "Up to S/N 252410530",
+     "remarks": "US Sensor",
      "search": "588596704"
-    },
-    {
-     "key": "3",
-     "part_number": "588596705",
-     "depth": 0,
-     "sub": false,
-     "description": "WIRING ASSY",
-     "qty": "1",
-     "remarks": "From S/N 252410531",
-     "search": "588596705"
     },
     {
      "key": "4",
@@ -349,6 +375,16 @@
      "qty": "1",
      "remarks": "Rear Tail",
      "search": "591467901"
+    },
+    {
+     "key": "24",
+     "part_number": "591467203",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "Front cover Orange",
+     "search": "591467203"
     }
    ],
    "sheets": 1,
@@ -358,20 +394,20 @@
   {
    "id": "2",
    "number": "2",
-   "title": "CHASSIS",
+   "title": "CHASSIS FRONT",
    "image": "am535epos-fig2.png",
    "ocr": false,
    "hotspots": [
     {
      "key": "1",
-     "x": 50.747,
-     "y": 26.914,
+     "x": 47.333,
+     "y": 25.414,
      "conf": 100
     },
     {
      "key": "2",
-     "x": 48.384,
-     "y": 18.671,
+     "x": 44.02,
+     "y": 18.171,
      "conf": 100
     },
     {
@@ -382,20 +418,20 @@
     },
     {
      "key": "3",
-     "x": 29.879,
-     "y": 88.2,
+     "x": 28.343,
+     "y": 78.786,
      "conf": 100
     },
     {
      "key": "3",
-     "x": 15.919,
-     "y": 23.186,
+     "x": 14.202,
+     "y": 22.043,
      "conf": 100
     },
     {
      "key": "3",
-     "x": 13.717,
-     "y": 69.686,
+     "x": 12.141,
+     "y": 63.043,
      "conf": 100
     },
     {
@@ -406,20 +442,20 @@
     },
     {
      "key": "5",
-     "x": 41.434,
-     "y": 42.271,
+     "x": 38.121,
+     "y": 39.357,
      "conf": 100
     },
     {
      "key": "6",
-     "x": 27.576,
-     "y": 50.943,
+     "x": 25.899,
+     "y": 46.529,
      "conf": 100
     },
     {
      "key": "7",
-     "x": 38.081,
-     "y": 77.286,
+     "x": 31.051,
+     "y": 60.857,
      "conf": 100
     },
     {
@@ -472,7 +508,7 @@
     },
     {
      "key": "18",
-     "x": 85.051,
+     "x": 84.889,
      "y": 45.4,
      "conf": 100
     },
@@ -496,26 +532,32 @@
     },
     {
      "key": "22",
-     "x": 84.121,
-     "y": 69.029,
+     "x": 82.283,
+     "y": 68.129,
      "conf": 100
     },
     {
      "key": "23",
-     "x": 88.889,
-     "y": 60.386,
+     "x": 55.535,
+     "y": 90.586,
      "conf": 100
     },
     {
      "key": "24",
-     "x": 33.434,
-     "y": 54.486,
+     "x": 27.758,
+     "y": 50.814,
      "conf": 100
     },
     {
      "key": "25",
-     "x": 28.384,
-     "y": 64.557,
+     "x": 26.545,
+     "y": 58.443,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 88.889,
+     "y": 60.386,
      "conf": 100
     }
    ],
@@ -572,13 +614,23 @@
     },
     {
      "key": "7",
-     "part_number": "536462901",
+     "part_number": "586662314",
      "depth": 0,
      "sub": false,
-     "description": "PRINTED CIRCUIT ASSY",
+     "description": "GPS MODULE",
      "qty": "1",
-     "remarks": "Communication circuit board, CBT10",
-     "search": "536462901"
+     "remarks": "AM Connect, KIT, US,CA",
+     "search": "586662314"
+    },
+    {
+     "key": "7",
+     "part_number": "586662315",
+     "depth": 0,
+     "sub": false,
+     "description": "GPS MODULE",
+     "qty": "1",
+     "remarks": "AM Connect Kit",
+     "search": "586662315"
     },
     {
      "key": "10",
@@ -592,13 +644,13 @@
     },
     {
      "key": "11",
-     "part_number": "536253901",
+     "part_number": "536253908",
      "depth": 0,
      "sub": false,
      "description": "WIRING ASSY",
      "qty": "1",
      "remarks": "Modular Jack",
-     "search": "536253901"
+     "search": "536253908"
     },
     {
      "key": "12",
@@ -617,18 +669,8 @@
      "sub": false,
      "description": "WIRING ASSY",
      "qty": "1",
-     "remarks": "Up to S/N 252410530. Ultra Sonic Extension",
+     "remarks": "Ultra Sonic Extension",
      "search": "580614402"
-    },
-    {
-     "key": "13",
-     "part_number": "580614403",
-     "depth": 0,
-     "sub": false,
-     "description": "WIRING ASSY",
-     "qty": "1",
-     "remarks": "From S/N 252410531. Ultra sonic extension",
-     "search": "580614403"
     },
     {
      "key": "14",
@@ -672,13 +714,13 @@
     },
     {
      "key": "18",
-     "part_number": "547509301",
+     "part_number": "588818403",
      "depth": 0,
      "sub": false,
      "description": "WIRING ASSY",
      "qty": "1",
-     "remarks": "Led Light Extension + USB Cable",
-     "search": "547509301"
+     "remarks": "Led Light Extension, From S/N 231010545",
+     "search": "588818403"
     },
     {
      "key": "19",
@@ -722,23 +764,23 @@
     },
     {
      "key": "23",
-     "part_number": "598369701",
+     "part_number": "584897501",
      "depth": 0,
      "sub": false,
-     "description": "DUST SEAL",
-     "qty": "1",
-     "remarks": "",
-     "search": "598369701"
+     "description": "GROMMET",
+     "qty": "4",
+     "remarks": "Up to S/N 231010544",
+     "search": "584897501"
     },
     {
      "key": "24",
-     "part_number": "536253901",
+     "part_number": "536253908",
      "depth": 0,
      "sub": false,
      "description": "WIRING ASSY",
      "qty": "1",
      "remarks": "Modular Jack",
-     "search": "536253901"
+     "search": "536253908"
     },
     {
      "key": "25",
@@ -749,11 +791,21 @@
      "qty": "1",
      "remarks": "Magnetic Sensor Board",
      "search": "591494301"
+    },
+    {
+     "key": "26",
+     "part_number": "598369701",
+     "depth": 0,
+     "sub": false,
+     "description": "DUST SEAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "598369701"
     }
    ],
    "sheets": 1,
    "sheet": 1,
-   "label": "Fig.2 CHASSIS"
+   "label": "Fig.2 CHASSIS FRONT"
   },
   {
    "id": "3",
@@ -764,164 +816,176 @@
    "hotspots": [
     {
      "key": "1",
-     "x": 39.52,
-     "y": 35.448,
+     "x": 39.616,
+     "y": 35.529,
      "conf": 100
     },
     {
      "key": "1",
-     "x": 56.852,
-     "y": 6.143,
+     "x": 56.99,
+     "y": 6.157,
      "conf": 100
     },
     {
      "key": "1",
-     "x": 31.419,
-     "y": 8.766,
+     "x": 31.495,
+     "y": 8.786,
      "conf": 100
     },
     {
      "key": "1",
-     "x": 17.634,
-     "y": 14.909,
+     "x": 17.677,
+     "y": 14.943,
      "conf": 100
     },
     {
      "key": "1",
-     "x": 36.9,
-     "y": 65.279,
+     "x": 36.99,
+     "y": 65.429,
      "conf": 100
     },
     {
      "key": "2",
-     "x": 37.787,
-     "y": 13.968,
+     "x": 37.879,
+     "y": 14.0,
      "conf": 100
     },
     {
      "key": "3",
-     "x": 43.712,
-     "y": 26.212,
+     "x": 43.818,
+     "y": 26.271,
      "conf": 100
     },
     {
      "key": "4",
-     "x": 41.858,
-     "y": 19.014,
+     "x": 41.96,
+     "y": 19.057,
      "conf": 100
     },
     {
      "key": "5",
-     "x": 74.023,
-     "y": 45.724,
+     "x": 74.202,
+     "y": 45.829,
      "conf": 100
     },
     {
      "key": "7",
-     "x": 12.918,
-     "y": 39.567,
+     "x": 12.949,
+     "y": 39.657,
      "conf": 100
     },
     {
      "key": "9",
-     "x": 38.734,
-     "y": 47.52,
+     "x": 38.828,
+     "y": 47.629,
      "conf": 100
     },
     {
      "key": "10",
-     "x": 38.452,
-     "y": 54.647,
+     "x": 38.545,
+     "y": 54.771,
      "conf": 100
     },
     {
      "key": "11",
-     "x": 39.137,
-     "y": 59.45,
+     "x": 39.232,
+     "y": 59.586,
      "conf": 100
     },
     {
      "key": "12",
-     "x": 54.696,
-     "y": 13.255,
+     "x": 54.828,
+     "y": 13.286,
      "conf": 100
     },
     {
      "key": "13",
-     "x": 53.688,
-     "y": 17.289,
+     "x": 53.818,
+     "y": 17.329,
      "conf": 100
     },
     {
      "key": "14",
-     "x": 50.464,
-     "y": 26.126,
+     "x": 50.586,
+     "y": 26.186,
      "conf": 100
     },
     {
      "key": "15",
-     "x": 58.484,
-     "y": 30.359,
+     "x": 58.626,
+     "y": 30.429,
      "conf": 100
     },
     {
      "key": "16",
-     "x": 54.293,
-     "y": 35.219,
+     "x": 54.424,
+     "y": 35.3,
      "conf": 100
     },
     {
      "key": "17",
-     "x": 39.359,
-     "y": 39.068,
+     "x": 39.455,
+     "y": 39.157,
      "conf": 100
     },
     {
      "key": "18",
-     "x": 54.635,
-     "y": 41.377,
+     "x": 54.768,
+     "y": 41.471,
      "conf": 100
     },
     {
      "key": "19",
-     "x": 63.12,
-     "y": 82.141,
+     "x": 63.596,
+     "y": 78.943,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 83.131,
+     "y": 82.686,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 88.828,
+     "y": 72.0,
      "conf": 100
     },
     {
      "key": "21",
-     "x": 66.828,
-     "y": 60.334,
+     "x": 66.99,
+     "y": 60.471,
      "conf": 100
     },
     {
      "key": "22",
-     "x": 74.043,
-     "y": 63.384,
+     "x": 74.222,
+     "y": 63.529,
      "conf": 100
     },
     {
      "key": "23",
-     "x": 69.045,
-     "y": 69.726,
+     "x": 69.212,
+     "y": 69.886,
      "conf": 100
     },
     {
      "key": "24",
-     "x": 67.15,
-     "y": 71.921,
+     "x": 67.313,
+     "y": 72.086,
      "conf": 100
     },
     {
      "key": "25",
-     "x": 55.663,
-     "y": 75.812,
+     "x": 55.798,
+     "y": 75.986,
      "conf": 100
     },
     {
      "key": "25",
-     "x": 52.116,
-     "y": 91.733,
+     "x": 52.242,
+     "y": 91.943,
      "conf": 100
     }
    ],
@@ -992,19 +1056,19 @@
      "depth": 0,
      "sub": false,
      "description": "PRINTED CIRCUIT ASSY",
-     "qty": "1",
+     "qty": "3",
      "remarks": "Magnetic Sensor",
      "search": "591125501"
     },
     {
      "key": "10",
-     "part_number": "536253901",
+     "part_number": "589350801",
      "depth": 0,
      "sub": false,
      "description": "WIRING ASSY",
      "qty": "1",
      "remarks": "Modular Jack",
-     "search": "536253901"
+     "search": "589350801"
     },
     {
      "key": "11",
@@ -1038,13 +1102,13 @@
     },
     {
      "key": "14",
-     "part_number": "591125602",
+     "part_number": "591125601",
      "depth": 0,
      "sub": false,
      "description": "PRINTED CIRCUIT ASSY",
      "qty": "1",
      "remarks": "Motor Controller Board",
-     "search": "591125602"
+     "search": "591125601"
     },
     {
      "key": "15",
@@ -1093,8 +1157,28 @@
      "sub": false,
      "description": "COVER",
      "qty": "1",
-     "remarks": "",
+     "remarks": "From S/N 232402634",
      "search": "536777901"
+    },
+    {
+     "key": "19",
+     "part_number": "594016201",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "Up to S/N 232405364",
+     "search": "594016201"
+    },
+    {
+     "key": "20",
+     "part_number": "536896001",
+     "depth": 0,
+     "sub": false,
+     "description": "BATTERY",
+     "qty": "1",
+     "remarks": "Battery upgrade kit, Up to S/N 232405364",
+     "search": "536896001"
     },
     {
      "key": "21",
@@ -1103,7 +1187,7 @@
      "sub": false,
      "description": "BATTERY",
      "qty": "1",
-     "remarks": "Battery, type 20",
+     "remarks": "Battery, From S/N 232402634",
      "search": "534199401"
     },
     {
@@ -1133,7 +1217,7 @@
      "sub": false,
      "description": "BRACKET",
      "qty": "1",
-     "remarks": "",
+     "remarks": "From S/N 232402634",
      "search": "536856101"
     },
     {
@@ -1160,152 +1244,164 @@
    "hotspots": [
     {
      "key": "1",
-     "x": 43.657,
-     "y": 11.086,
+     "x": 43.802,
+     "y": 12.137,
      "conf": 100
     },
     {
      "key": "2",
-     "x": 11.374,
-     "y": 14.957,
+     "x": 12.587,
+     "y": 15.903,
      "conf": 100
     },
     {
      "key": "3",
-     "x": 33.677,
-     "y": 14.486,
+     "x": 34.139,
+     "y": 15.449,
      "conf": 100
     },
     {
      "key": "4",
-     "x": 36.182,
-     "y": 20.243,
+     "x": 36.554,
+     "y": 21.075,
      "conf": 100
     },
     {
      "key": "5",
-     "x": 37.859,
-     "y": 28.414,
+     "x": 38.175,
+     "y": 29.038,
      "conf": 100
     },
     {
      "key": "6",
-     "x": 11.394,
-     "y": 42.943,
+     "x": 12.587,
+     "y": 43.217,
      "conf": 100
     },
     {
      "key": "14",
-     "x": 12.0,
-     "y": 65.843,
+     "x": 13.191,
+     "y": 65.54,
      "conf": 100
     },
     {
      "key": "15",
-     "x": 13.071,
-     "y": 69.9,
+     "x": 14.24,
+     "y": 69.51,
      "conf": 100
     },
     {
      "key": "16",
-     "x": 56.222,
-     "y": 10.971,
+     "x": 55.912,
+     "y": 12.001,
      "conf": 100
     },
     {
-     "key": "19",
-     "x": 75.596,
-     "y": 30.271,
-     "conf": 100
-    },
-    {
-     "key": "20",
-     "x": 90.626,
-     "y": 24.971,
+     "key": "21",
+     "x": 86.459,
+     "y": 60.39,
      "conf": 100
     },
     {
      "key": "22",
-     "x": 66.101,
-     "y": 37.514,
+     "x": 65.48,
+     "y": 37.908,
      "conf": 100
     },
     {
      "key": "23",
-     "x": 73.515,
-     "y": 20.957,
+     "x": 72.473,
+     "y": 32.26,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 76.542,
+     "y": 38.158,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 73.776,
+     "y": 40.812,
      "conf": 100
     },
     {
      "key": "26",
-     "x": 90.99,
-     "y": 41.471,
+     "x": 89.51,
+     "y": 41.765,
      "conf": 100
     },
     {
      "key": "27",
-     "x": 53.434,
-     "y": 47.114,
+     "x": 53.242,
+     "y": 47.255,
      "conf": 100
     },
     {
      "key": "28",
-     "x": 55.273,
-     "y": 52.486,
+     "x": 55.022,
+     "y": 52.518,
      "conf": 100
     },
     {
      "key": "29",
-     "x": 63.03,
-     "y": 55.557,
+     "x": 62.524,
+     "y": 55.513,
      "conf": 100
     },
     {
      "key": "30",
      "x": 47.616,
-     "y": 59.4,
+     "y": 59.256,
+     "conf": 100
+    },
+    {
+     "key": "32",
+     "x": 85.791,
+     "y": 63.135,
      "conf": 100
     },
     {
      "key": "33",
-     "x": 75.495,
-     "y": 61.657,
+     "x": 72.505,
+     "y": 61.32,
      "conf": 100
     },
     {
      "key": "34",
-     "x": 40.101,
-     "y": 86.086,
+     "x": 40.337,
+     "y": 85.299,
      "conf": 100
     },
     {
      "key": "35",
-     "x": 50.889,
-     "y": 82.543,
+     "x": 50.763,
+     "y": 81.828,
      "conf": 100
     },
     {
      "key": "36",
-     "x": 38.263,
-     "y": 76.957,
+     "x": 38.557,
+     "y": 76.384,
      "conf": 100
     },
     {
      "key": "37",
-     "x": 65.737,
-     "y": 93.257,
+     "x": 65.099,
+     "y": 92.264,
      "conf": 100
     },
     {
      "key": "38",
-     "x": 63.96,
-     "y": 60.8,
+     "x": 63.414,
+     "y": 60.64,
      "conf": 100
     },
     {
      "key": "39",
-     "x": 15.212,
-     "y": 74.771,
+     "x": 16.306,
+     "y": 74.251,
      "conf": 100
     }
    ],
@@ -1372,12 +1468,22 @@
     },
     {
      "key": "14",
+     "part_number": "591100201",
+     "depth": 0,
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY",
+     "qty": "1",
+     "remarks": "Application Board. Up to S/N 241013408",
+     "search": "591100201"
+    },
+    {
+     "key": "14",
      "part_number": "591100202",
      "depth": 0,
      "sub": false,
      "description": "PRINTED CIRCUIT ASSY",
      "qty": "1",
-     "remarks": "Application board",
+     "remarks": "Application Board. From S/N 241013409",
      "search": "591100202"
     },
     {
@@ -1401,24 +1507,14 @@
      "search": "597162101"
     },
     {
-     "key": "19",
-     "part_number": "546947801",
+     "key": "21",
+     "part_number": "593355101",
      "depth": 0,
      "sub": false,
-     "description": "HOLDER",
+     "description": "CLAMP",
      "qty": "1",
      "remarks": "",
-     "search": "546947801"
-    },
-    {
-     "key": "20",
-     "part_number": "598004501",
-     "depth": 0,
-     "sub": false,
-     "description": "INSERT",
-     "qty": "1",
-     "remarks": "",
-     "search": "598004501"
+     "search": "593355101"
     },
     {
      "key": "22",
@@ -1432,83 +1528,33 @@
     },
     {
      "key": "23",
-     "part_number": "546947501",
+     "part_number": "591487103",
      "depth": 0,
      "sub": false,
-     "description": "HOUSING ASSY",
+     "description": "COVER",
      "qty": "1",
-     "remarks": "Europe CEPOS module up to S/N 2552XXXXX",
-     "search": "546947501"
+     "remarks": "",
+     "search": "591487103"
     },
     {
-     "key": "23",
-     "part_number": "546947502",
+     "key": "24",
+     "part_number": "586444901",
      "depth": 0,
      "sub": false,
-     "description": "HOUSING ASSY",
-     "qty": "1",
-     "remarks": "Australia CEPOS module up to S/N 2552XXXXX",
-     "search": "546947502"
+     "description": "SCREW ITXSCT",
+     "qty": "2",
+     "remarks": "",
+     "search": "586444901"
     },
     {
-     "key": "23",
-     "part_number": "546947504",
+     "key": "25",
+     "part_number": "593355202",
      "depth": 0,
      "sub": false,
-     "description": "HOUSING ASSY",
+     "description": "CLAMP",
      "qty": "1",
-     "remarks": "North America CEPOS module up to S/N 2552XXXXX",
-     "search": "546947504"
-    },
-    {
-     "key": "23",
-     "part_number": "540570405",
-     "depth": 0,
-     "sub": false,
-     "description": "MODULE",
-     "qty": "1",
-     "remarks": "ROW CEPOS module - No radio. All serial numbers.",
-     "search": "540570405"
-    },
-    {
-     "key": "23",
-     "part_number": "540570401",
-     "depth": 0,
-     "sub": false,
-     "description": "MODULE",
-     "qty": "1",
-     "remarks": "Europe CEPOS module from S/N 2601XXXXX",
-     "search": "540570401"
-    },
-    {
-     "key": "23",
-     "part_number": "540570404",
-     "depth": 0,
-     "sub": false,
-     "description": "MODULE",
-     "qty": "1",
-     "remarks": "Australia CEPOS module from S/N 2601XXXXX",
-     "search": "540570404"
-    },
-    {
-     "key": "23",
-     "part_number": "540570402",
-     "depth": 0,
-     "sub": false,
-     "description": "MODULE",
-     "qty": "1",
-     "remarks": "North America CEPOS module from S/N 2601XXXXX",
-     "search": "540570402"
-    },
-    {
-     "key": "23",
-     "part_number": "540570403",
-     "depth": 0,
-     "sub": false,
-     "description": "MODULE",
-     "qty": "1",
-     "remarks": "New Zealand CEPOS module. All serial numbers.",
-     "search": "540570403"
+     "remarks": "Main Cable",
+     "search": "593355202"
     },
     {
      "key": "26",
@@ -1517,7 +1563,7 @@
      "sub": false,
      "description": "NUT",
      "qty": "1",
-     "remarks": "",
+     "remarks": "Washer",
      "search": "503220401"
     },
     {
@@ -1552,13 +1598,23 @@
     },
     {
      "key": "30",
-     "part_number": "546701301",
+     "part_number": "591203201",
      "depth": 0,
      "sub": false,
      "description": "WIRING ASSY",
      "qty": "1",
-     "remarks": "Main cable",
-     "search": "546701301"
+     "remarks": "",
+     "search": "591203201"
+    },
+    {
+     "key": "32",
+     "part_number": "586444901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCT",
+     "qty": "2",
+     "remarks": "",
+     "search": "586444901"
     },
     {
      "key": "33",
@@ -1576,7 +1632,7 @@
      "depth": 0,
      "sub": false,
      "description": "PIVOTING ARM KIT",
-     "qty": "2",
+     "qty": "1",
      "remarks": "",
      "search": "597166401"
     },
@@ -1586,8 +1642,8 @@
      "depth": 0,
      "sub": false,
      "description": "O-RING",
-     "qty": "1",
-     "remarks": "Washer",
+     "qty": "2",
+     "remarks": "",
      "search": "740431300"
     },
     {
@@ -1606,7 +1662,7 @@
      "depth": 0,
      "sub": false,
      "description": "SCREW ITXSCM",
-     "qty": "5",
+     "qty": "4",
      "remarks": "",
      "search": "525824401"
     },
@@ -1616,7 +1672,7 @@
      "depth": 0,
      "sub": false,
      "description": "CLIP",
-     "qty": "4",
+     "qty": "1",
      "remarks": "",
      "search": "597476101"
     },
@@ -1638,298 +1694,98 @@
   {
    "id": "5",
    "number": "5",
-   "title": "BLADE MOTOR AND CUTTING EQUIPMENT",
+   "title": "WHEELS & TIRES",
    "image": "am535epos-fig5.png",
    "ocr": false,
    "hotspots": [
     {
      "key": "1",
-     "x": 65.256,
-     "y": 35.804,
-     "conf": 100
-    },
-    {
-     "key": "2",
-     "x": 55.945,
-     "y": 33.025,
-     "conf": 100
-    },
-    {
-     "key": "3",
-     "x": 37.787,
-     "y": 70.482,
-     "conf": 100
-    },
-    {
-     "key": "15",
-     "x": 59.049,
-     "y": 59.806,
-     "conf": 100
-    },
-    {
-     "key": "17",
-     "x": 36.437,
-     "y": 64.552,
-     "conf": 100
-    },
-    {
-     "key": "19",
-     "x": 30.875,
-     "y": 68.942,
-     "conf": 100
-    },
-    {
-     "key": "20",
-     "x": 49.375,
-     "y": 75.57,
-     "conf": 100
-    },
-    {
-     "key": "24",
-     "x": 27.308,
-     "y": 80.929,
-     "conf": 100
-    },
-    {
-     "key": "25",
-     "x": 36.276,
-     "y": 86.787,
-     "conf": 100
-    },
-    {
-     "key": "27",
-     "x": 35.973,
-     "y": 94.869,
-     "conf": 100
-    },
-    {
-     "key": "28",
-     "x": 25.877,
-     "y": 89.168,
-     "conf": 100
-    }
-   ],
-   "parts": [
-    {
-     "key": "1",
-     "part_number": "592733701",
-     "depth": 0,
-     "sub": false,
-     "description": "CUTTING MODULE",
-     "qty": "1",
-     "remarks": "",
-     "search": "592733701"
-    },
-    {
-     "key": "2",
-     "part_number": "592735801",
-     "depth": 0,
-     "sub": false,
-     "description": "HEIGHT ADJUSTMENT MOTOR",
-     "qty": "1",
-     "remarks": "Height adjustment",
-     "search": "592735801"
-    },
-    {
-     "key": "3",
-     "part_number": "535075703",
-     "depth": 0,
-     "sub": false,
-     "description": "BALL BEARING",
-     "qty": "2",
-     "remarks": "",
-     "search": "535075703"
-    },
-    {
-     "key": "3",
-     "part_number": "593080801",
-     "depth": 0,
-     "sub": false,
-     "description": "BALL BEARING",
-     "qty": "1",
-     "remarks": "Tube 50 pcs",
-     "search": "593080801"
-    },
-    {
-     "key": "15",
-     "part_number": "536645101",
-     "depth": 0,
-     "sub": false,
-     "description": "CUTTING DISC",
-     "qty": "1",
-     "remarks": "",
-     "search": "536645101"
-    },
-    {
-     "key": "17",
-     "part_number": "590508701",
-     "depth": 0,
-     "sub": false,
-     "description": "SCREW",
-     "qty": "3",
-     "remarks": "",
-     "search": "590508701"
-    },
-    {
-     "key": "19",
-     "part_number": "588421702",
-     "depth": 0,
-     "sub": false,
-     "description": "BEARING HOUSING ASSY",
-     "qty": "1",
-     "remarks": "",
-     "search": "588421702"
-    },
-    {
-     "key": "20",
-     "part_number": "535076001",
-     "depth": 0,
-     "sub": false,
-     "description": "SCREW",
-     "qty": "1",
-     "remarks": "",
-     "search": "535076001"
-    },
-    {
-     "key": "24",
-     "part_number": "598794801",
-     "depth": 0,
-     "sub": false,
-     "description": "SKID PLATE",
-     "qty": "1",
-     "remarks": "",
-     "search": "598794801"
-    },
-    {
-     "key": "25",
-     "part_number": "585297501",
-     "depth": 0,
-     "sub": false,
-     "description": "O-RING",
-     "qty": "1",
-     "remarks": "",
-     "search": "585297501"
-    },
-    {
-     "key": "27",
-     "part_number": "575543314",
-     "depth": 0,
-     "sub": false,
-     "description": "SCREW",
-     "qty": "3",
-     "remarks": "",
-     "search": "575543314"
-    },
-    {
-     "key": "28",
-     "part_number": "587449601",
-     "depth": 0,
-     "sub": false,
-     "description": "COVER KIT",
-     "qty": "1",
-     "remarks": "",
-     "search": "587449601"
-    }
-   ],
-   "sheets": 1,
-   "sheet": 1,
-   "label": "Fig.5 BLADE MOTOR AND CUTTING EQUIPMENT"
-  },
-  {
-   "id": "6",
-   "number": "6",
-   "title": "WHEELS AND TIRES",
-   "image": "am535epos-fig6.png",
-   "ocr": false,
-   "hotspots": [
-    {
-     "key": "1",
-     "x": 74.426,
-     "y": 68.387,
+     "x": 73.681,
+     "y": 67.99,
      "conf": 100
     },
     {
      "key": "1",
-     "x": 76.602,
-     "y": 34.578,
+     "x": 75.811,
+     "y": 34.936,
      "conf": 100
     },
     {
      "key": "2",
-     "x": 56.651,
-     "y": 20.81,
+     "x": 56.484,
+     "y": 21.484,
      "conf": 100
     },
     {
      "key": "4",
-     "x": 35.409,
-     "y": 24.715,
+     "x": 35.919,
+     "y": 25.318,
      "conf": 100
     },
     {
      "key": "6",
-     "x": 25.977,
-     "y": 34.706,
+     "x": 26.764,
+     "y": 35.073,
      "conf": 100
     },
     {
      "key": "7",
-     "x": 22.874,
-     "y": 36.431,
+     "x": 23.776,
+     "y": 36.774,
      "conf": 100
     },
     {
      "key": "8",
-     "x": 18.037,
-     "y": 37.115,
+     "x": 19.072,
+     "y": 37.432,
      "conf": 100
     },
     {
      "key": "9",
-     "x": 54.938,
-     "y": 54.447,
+     "x": 54.8,
+     "y": 54.378,
      "conf": 100
     },
     {
      "key": "11",
-     "x": 37.283,
-     "y": 58.395,
+     "x": 37.699,
+     "y": 58.235,
      "conf": 100
     },
     {
      "key": "13",
-     "x": 28.476,
-     "y": 67.175,
+     "x": 29.18,
+     "y": 66.81,
      "conf": 100
     },
     {
      "key": "14",
-     "x": 25.353,
-     "y": 68.843,
+     "x": 26.128,
+     "y": 68.444,
      "conf": 100
     },
     {
      "key": "15",
-     "x": 20.879,
-     "y": 69.712,
+     "x": 21.805,
+     "y": 69.306,
      "conf": 100
     },
     {
      "key": "16",
-     "x": 82.306,
-     "y": 61.502,
+     "x": 81.31,
+     "y": 61.275,
      "conf": 100
     },
     {
      "key": "16",
-     "x": 84.482,
-     "y": 27.694,
+     "x": 83.439,
+     "y": 28.199,
      "conf": 100
     },
     {
      "key": "17",
-     "x": 82.447,
-     "y": 44.883,
+     "x": 81.469,
+     "y": 45.032,
      "conf": 100
     }
    ],
@@ -2067,7 +1923,243 @@
    ],
    "sheets": 1,
    "sheet": 1,
-   "label": "Fig.6 WHEELS AND TIRES"
+   "label": "Fig.5 WHEELS & TIRES"
+  },
+  {
+   "id": "6",
+   "number": "6",
+   "title": "BLADE MOTOR AND CUTTING EQUIPMENT",
+   "image": "am535epos-fig6.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 65.414,
+     "y": 35.886,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 56.081,
+     "y": 33.1,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 37.879,
+     "y": 70.643,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 27.98,
+     "y": 59.929,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 87.152,
+     "y": 59.943,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 36.525,
+     "y": 64.7,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 30.949,
+     "y": 69.1,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 49.495,
+     "y": 75.743,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 27.374,
+     "y": 81.114,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 36.364,
+     "y": 86.986,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 36.061,
+     "y": 95.086,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 25.939,
+     "y": 89.371,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "592733701",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTING MODULE",
+     "qty": "1",
+     "remarks": "",
+     "search": "592733701"
+    },
+    {
+     "key": "2",
+     "part_number": "592735801",
+     "depth": 0,
+     "sub": false,
+     "description": "HEIGHT ADJUSTMENT MOTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "592735801"
+    },
+    {
+     "key": "3",
+     "part_number": "535075703",
+     "depth": 0,
+     "sub": false,
+     "description": "BALL BEARING",
+     "qty": "2",
+     "remarks": "",
+     "search": "535075703"
+    },
+    {
+     "key": "3",
+     "part_number": "593080801",
+     "depth": 0,
+     "sub": false,
+     "description": "BALL BEARING",
+     "qty": "2",
+     "remarks": "Tube 50 pcs",
+     "search": "593080801"
+    },
+    {
+     "key": "15",
+     "part_number": "585296902",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTING DISC",
+     "qty": "1",
+     "remarks": "For mowers produced 2019",
+     "search": "585296902"
+    },
+    {
+     "key": "15",
+     "part_number": "536645101",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTING DISC",
+     "qty": "1",
+     "remarks": "For mowers produced from S/N 231010545",
+     "search": "536645101"
+    },
+    {
+     "key": "15",
+     "part_number": "531177401",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTING DISC",
+     "qty": "1",
+     "remarks": "For mowers produced 2020-2022",
+     "search": "531177401"
+    },
+    {
+     "key": "17",
+     "part_number": "590508701",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "3",
+     "remarks": "",
+     "search": "590508701"
+    },
+    {
+     "key": "19",
+     "part_number": "588421702",
+     "depth": 0,
+     "sub": false,
+     "description": "BEARING HOUSING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "588421702"
+    },
+    {
+     "key": "20",
+     "part_number": "535076001",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "535076001"
+    },
+    {
+     "key": "24",
+     "part_number": "585297001",
+     "depth": 0,
+     "sub": false,
+     "description": "SKID PLATE",
+     "qty": "1",
+     "remarks": "For mowers produced 2019",
+     "search": "585297001"
+    },
+    {
+     "key": "24",
+     "part_number": "598794801",
+     "depth": 0,
+     "sub": false,
+     "description": "SKID PLATE",
+     "qty": "1",
+     "remarks": "For mowers produced from 2020",
+     "search": "598794801"
+    },
+    {
+     "key": "25",
+     "part_number": "585297501",
+     "depth": 0,
+     "sub": false,
+     "description": "O-RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "585297501"
+    },
+    {
+     "key": "27",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "575543314"
+    },
+    {
+     "key": "28",
+     "part_number": "587449601",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "587449601"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.6 BLADE MOTOR AND CUTTING EQUIPMENT"
   },
   {
    "id": "7",
@@ -2078,140 +2170,152 @@
    "hotspots": [
     {
      "key": "1",
-     "x": 52.701,
-     "y": 4.946,
+     "x": 52.638,
+     "y": 5.966,
      "conf": 100
     },
     {
      "key": "2",
-     "x": 44.559,
-     "y": 14.581,
+     "x": 44.755,
+     "y": 15.404,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 15.099,
+     "y": 20.871,
      "conf": 100
     },
     {
      "key": "4",
-     "x": 14.49,
-     "y": 26.611,
+     "x": 15.639,
+     "y": 27.155,
      "conf": 100
     },
     {
      "key": "5",
-     "x": 37.304,
-     "y": 27.95,
+     "x": 37.762,
+     "y": 28.471,
      "conf": 100
     },
     {
      "key": "6",
-     "x": 36.175,
-     "y": 30.872,
+     "x": 36.618,
+     "y": 31.329,
      "conf": 100
     },
     {
      "key": "7",
-     "x": 41.153,
-     "y": 33.523,
+     "x": 41.449,
+     "y": 33.916,
      "conf": 100
     },
     {
      "key": "8",
-     "x": 37.304,
-     "y": 37.714,
+     "x": 37.73,
+     "y": 37.999,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 28.226,
+     "y": 40.064,
      "conf": 100
     },
     {
      "key": "10",
-     "x": 24.244,
-     "y": 46.85,
+     "x": 25.079,
+     "y": 46.937,
      "conf": 100
     },
     {
      "key": "11",
-     "x": 11.165,
-     "y": 48.361,
+     "x": 12.428,
+     "y": 48.412,
      "conf": 100
     },
     {
      "key": "12",
-     "x": 22.491,
-     "y": 57.426,
+     "x": 23.363,
+     "y": 57.282,
      "conf": 100
     },
     {
      "key": "13",
-     "x": 19.307,
-     "y": 63.483,
+     "x": 20.28,
+     "y": 63.203,
      "conf": 100
     },
     {
      "key": "14",
-     "x": 38.936,
-     "y": 61.075,
+     "x": 39.32,
+     "y": 60.844,
      "conf": 100
     },
     {
      "key": "15",
-     "x": 35.51,
-     "y": 57.084,
+     "x": 36.173,
+     "y": 57.282,
      "conf": 100
     },
     {
      "key": "16",
-     "x": 40.548,
-     "y": 57.084,
+     "x": 40.877,
+     "y": 57.055,
      "conf": 100
     },
     {
      "key": "17",
-     "x": 54.051,
-     "y": 54.746,
+     "x": 53.942,
+     "y": 54.651,
      "conf": 100
     },
     {
      "key": "18",
-     "x": 78.597,
-     "y": 16.035,
+     "x": 77.718,
+     "y": 16.81,
      "conf": 100
     },
     {
      "key": "19",
-     "x": 69.166,
-     "y": 18.101,
+     "x": 68.595,
+     "y": 18.852,
      "conf": 100
     },
     {
      "key": "20",
-     "x": 63.382,
-     "y": 21.066,
+     "x": 63.001,
+     "y": 21.733,
      "conf": 100
     },
     {
      "key": "21",
-     "x": 54.595,
-     "y": 29.547,
+     "x": 54.45,
+     "y": 30.014,
      "conf": 100
     },
     {
      "key": "22",
-     "x": 55.341,
-     "y": 39.239,
+     "x": 55.181,
+     "y": 39.496,
      "conf": 100
     },
     {
      "key": "23",
-     "x": 88.11,
-     "y": 52.637,
+     "x": 86.936,
+     "y": 52.609,
      "conf": 100
     },
     {
      "key": "24",
-     "x": 77.69,
-     "y": 83.609,
+     "x": 76.86,
+     "y": 82.872,
      "conf": 100
     },
     {
      "key": "25",
-     "x": 89.379,
-     "y": 83.78,
+     "x": 88.175,
+     "y": 83.054,
      "conf": 100
     }
    ],
@@ -2223,7 +2327,7 @@
      "sub": false,
      "description": "CHARGING STATION",
      "qty": "1",
-     "remarks": "",
+     "remarks": "Universal P25 3 guides",
      "search": "595310103"
     },
     {
@@ -2233,8 +2337,28 @@
      "sub": false,
      "description": "CAP",
      "qty": "1",
-     "remarks": "",
+     "remarks": "Without Park button",
      "search": "579448203"
+    },
+    {
+     "key": "2",
+     "part_number": "579448204",
+     "depth": 0,
+     "sub": false,
+     "description": "CAP",
+     "qty": "1",
+     "remarks": "With park button",
+     "search": "579448204"
+    },
+    {
+     "key": "3",
+     "part_number": "501065901",
+     "depth": 0,
+     "sub": false,
+     "description": "BUTTON KIT",
+     "qty": "1",
+     "remarks": "Home Button Kit, with park button",
+     "search": "501065901"
     },
     {
      "key": "4",
@@ -2287,6 +2411,16 @@
      "search": "575543314"
     },
     {
+     "key": "9",
+     "part_number": "579708301",
+     "depth": 0,
+     "sub": false,
+     "description": "LOOM",
+     "qty": "1",
+     "remarks": "Home Button Wiring, with park button",
+     "search": "579708301"
+    },
+    {
      "key": "10",
      "part_number": "579460502",
      "depth": 0,
@@ -2322,7 +2456,7 @@
      "depth": 0,
      "sub": false,
      "description": "SCREW",
-     "qty": "12",
+     "qty": "2",
      "remarks": "",
      "search": "575543314"
     },
@@ -2333,8 +2467,18 @@
      "sub": false,
      "description": "WIRING ASSY",
      "qty": "1",
-     "remarks": "Loom Charging Contact",
+     "remarks": "Loom Charging Contact, Up to S/N 240604716",
      "search": "531242201"
+    },
+    {
+     "key": "14",
+     "part_number": "531242202",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Loom Charging Contact, From S/N 240604717",
+     "search": "531242202"
     },
     {
      "key": "15",
@@ -2358,12 +2502,22 @@
     },
     {
      "key": "17",
+     "part_number": "579459703",
+     "depth": 0,
+     "sub": false,
+     "description": "LID",
+     "qty": "1",
+     "remarks": "2  holes, with park button",
+     "search": "579459703"
+    },
+    {
+     "key": "17",
      "part_number": "579459704",
      "depth": 0,
      "sub": false,
      "description": "LID",
      "qty": "1",
-     "remarks": "",
+     "remarks": "1 hole",
      "search": "579459704"
     },
     {
@@ -2460,145 +2614,505 @@
    "hotspots": [
     {
      "key": "1",
-     "x": 44.297,
-     "y": 23.703,
+     "x": 12.651,
+     "y": 16.357,
      "conf": 100
     },
     {
      "key": "2",
-     "x": 49.436,
-     "y": 45.852,
+     "x": 21.011,
+     "y": 53.267,
      "conf": 100
     },
     {
      "key": "3",
-     "x": 49.516,
-     "y": 64.21,
+     "x": 22.759,
+     "y": 49.025,
      "conf": 100
     },
     {
      "key": "4",
-     "x": 61.628,
-     "y": 24.316,
+     "x": 23.808,
+     "y": 60.821,
      "conf": 100
     },
     {
      "key": "5",
-     "x": 74.95,
-     "y": 45.596,
+     "x": 40.432,
+     "y": 50.25,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 35.982,
+     "y": 55.876,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 68.15,
+     "y": 48.82,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 36.682,
+     "y": 59.732,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 67.578,
+     "y": 52.881,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 38.112,
+     "y": 68.534,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 59.568,
+     "y": 75.522,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 41.736,
+     "y": 80.853,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 41.894,
+     "y": 86.456,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 41.704,
+     "y": 91.062,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 61.538,
+     "y": 88.249,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 79.307,
+     "y": 78.426,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 85.06,
+     "y": 88.612,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 81.627,
+     "y": 61.593,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 56.103,
+     "y": 68.126,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 42.371,
+     "y": 74.887,
      "conf": 100
     }
    ],
    "parts": [
     {
      "key": "1",
+     "part_number": "967623601",
+     "depth": 0,
+     "sub": false,
+     "description": "INSTALLATION KIT",
+     "qty": "1",
+     "remarks": "S Wire 150 m, Staples 300 pc, Connectors 3 pcs, Couplers 5 pcs",
+     "search": "967623601"
+    },
+    {
+     "key": "1",
+     "part_number": "967623602",
+     "depth": 0,
+     "sub": false,
+     "description": "INSTALLATION KIT",
+     "qty": "1",
+     "remarks": "M Wire 250 m, Staples 400 pc, Connectors 3 pcs, Couplers 5 pcs",
+     "search": "967623602"
+    },
+    {
+     "key": "1",
+     "part_number": "967623603",
+     "depth": 0,
+     "sub": false,
+     "description": "INSTALLATION KIT",
+     "qty": "1",
+     "remarks": "S Wire 400 m, Staples 600 pc, Connectors 5 pcs, Couplers 5 pcs",
+     "search": "967623603"
+    },
+    {
+     "key": "2",
+     "part_number": "535129001",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "1",
+     "remarks": "Loop Wire Connector",
+     "search": "535129001"
+    },
+    {
+     "key": "2",
+     "part_number": "535129002",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "1",
+     "remarks": "Loop Wire Connector, Blister Pack 100 pcs",
+     "search": "535129002"
+    },
+    {
+     "key": "2",
+     "part_number": "577864801",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR",
+     "qty": "1",
+     "remarks": "Loop Wire Connector, Blister Pack 5 pcs",
+     "search": "577864801"
+    },
+    {
+     "key": "3",
+     "part_number": "501980201",
+     "depth": 0,
+     "sub": false,
+     "description": "COUPLER",
+     "qty": "1",
+     "remarks": "Coupler",
+     "search": "501980201"
+    },
+    {
+     "key": "3",
+     "part_number": "501980203",
+     "depth": 0,
+     "sub": false,
+     "description": "COUPLER",
+     "qty": "1",
+     "remarks": "Coupler, 100 pcs",
+     "search": "501980203"
+    },
+    {
+     "key": "3",
+     "part_number": "577864701",
+     "depth": 0,
+     "sub": false,
+     "description": "COUPLER",
+     "qty": "1",
+     "remarks": "Coupler, Blister Pack 5 pcs",
+     "search": "577864701"
+    },
+    {
+     "key": "4",
+     "part_number": "577864201",
+     "depth": 0,
+     "sub": false,
+     "description": "STAPLE",
+     "qty": "1",
+     "remarks": "Staple Blister Pack 100 pcs",
+     "search": "577864201"
+    },
+    {
+     "key": "4",
+     "part_number": "583973401",
+     "depth": 0,
+     "sub": false,
+     "description": "STAPLE",
+     "qty": "1",
+     "remarks": "100 pcs",
+     "search": "583973401"
+    },
+    {
+     "key": "5",
+     "part_number": "577864301",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRE",
+     "qty": "1",
+     "remarks": "Wire, Blister Pack 150 m",
+     "search": "577864301"
+    },
+    {
+     "key": "5",
+     "part_number": "577864302",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRE",
+     "qty": "1",
+     "remarks": "Wire, Blister Pack 50 m",
+     "search": "577864302"
+    },
+    {
+     "key": "5",
+     "part_number": "580662002",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRE",
+     "qty": "1",
+     "remarks": "Wire, 150 m",
+     "search": "580662002"
+    },
+    {
+     "key": "6",
+     "part_number": "580662001",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRE",
+     "qty": "1",
+     "remarks": "Wire, 250 m",
+     "search": "580662001"
+    },
+    {
+     "key": "7",
+     "part_number": "593297701",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRE",
+     "qty": "1",
+     "remarks": "Wire Pro, 300 m",
+     "search": "593297701"
+    },
+    {
+     "key": "8",
+     "part_number": "522914101",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRE",
+     "qty": "1",
+     "remarks": "Wire, 500 m, diam 3,4mm",
+     "search": "522914101"
+    },
+    {
+     "key": "9",
+     "part_number": "580662004",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRE",
+     "qty": "1",
+     "remarks": "Wire, 800 m",
+     "search": "580662004"
+    },
+    {
+     "key": "10",
      "part_number": "547307001",
      "depth": 0,
      "sub": false,
      "description": "POWER SUPPLY UNIT",
      "qty": "1",
-     "remarks": "EU",
+     "remarks": "Power Unit EU",
      "search": "547307001"
     },
     {
-     "key": "1",
-     "part_number": "547307006",
-     "depth": 0,
-     "sub": false,
-     "description": "POWER SUPPLY UNIT",
-     "qty": "1",
-     "remarks": "JP",
-     "search": "547307006"
-    },
-    {
-     "key": "1",
-     "part_number": "547307005",
-     "depth": 0,
-     "sub": false,
-     "description": "POWER SUPPLY UNIT",
-     "qty": "1",
-     "remarks": "AUS/NZ",
-     "search": "547307005"
-    },
-    {
-     "key": "1",
+     "key": "10",
      "part_number": "547307002",
      "depth": 0,
      "sub": false,
      "description": "POWER SUPPLY UNIT",
      "qty": "1",
-     "remarks": "UK",
+     "remarks": "Power Unit GB",
      "search": "547307002"
     },
     {
-     "key": "1",
+     "key": "10",
      "part_number": "547307003",
      "depth": 0,
      "sub": false,
      "description": "POWER SUPPLY UNIT",
      "qty": "1",
-     "remarks": "CH",
+     "remarks": "Power Unit CH",
      "search": "547307003"
     },
     {
-     "key": "1",
-     "part_number": "547307004",
+     "key": "10",
+     "part_number": "537639004",
+     "depth": 0,
+     "sub": false,
+     "description": "POWER UNIT",
+     "qty": "1",
+     "remarks": "Power Unit US",
+     "search": "537639004"
+    },
+    {
+     "key": "10",
+     "part_number": "547307005",
      "depth": 0,
      "sub": false,
      "description": "POWER SUPPLY UNIT",
      "qty": "1",
-     "remarks": "US",
-     "search": "547307004"
+     "remarks": "Power Unit AUS/NZ",
+     "search": "547307005"
     },
     {
-     "key": "2",
+     "key": "12",
+     "part_number": "595084401",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SET",
+     "qty": "1",
+     "remarks": "Endurance Blade, 6 pcs",
+     "search": "595084401"
+    },
+    {
+     "key": "12",
+     "part_number": "595084402",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SET",
+     "qty": "1",
+     "remarks": "Endurance Blade, 45 pcs",
+     "search": "595084402"
+    },
+    {
+     "key": "12",
+     "part_number": "595084403",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SET",
+     "qty": "1",
+     "remarks": "Endurance Blade, 300 pcs",
+     "search": "595084403"
+    },
+    {
+     "key": "15",
      "part_number": "588765004",
      "depth": 0,
      "sub": false,
      "description": "CABLE ASSY",
      "qty": "1",
-     "remarks": "20 m",
+     "remarks": "Low Voltage Cable, 20 m",
      "search": "588765004"
     },
     {
-     "key": "3",
+     "key": "16",
      "part_number": "588765005",
      "depth": 0,
      "sub": false,
      "description": "CABLE ASSY",
      "qty": "1",
-     "remarks": "10 m",
+     "remarks": "Low Voltage Cable, 10 m",
      "search": "588765005"
     },
     {
-     "key": "3",
+     "key": "17",
      "part_number": "588765006",
      "depth": 0,
      "sub": false,
      "description": "CABLE ASSY",
      "qty": "1",
-     "remarks": "3 m",
+     "remarks": "Low Voltage Cable, 3 m",
      "search": "588765006"
     },
     {
-     "key": "4",
-     "part_number": "580689502",
+     "key": "18",
+     "part_number": "575238601",
      "depth": 0,
      "sub": false,
-     "description": "LABEL",
+     "description": "SCREW KIT",
      "qty": "1",
-     "remarks": "Warranty seal",
-     "search": "580689502"
+     "remarks": "6 pcs",
+     "search": "575238601"
     },
     {
-     "key": "5",
-     "part_number": "597435801",
+     "key": "18",
+     "part_number": "577864901",
      "depth": 0,
      "sub": false,
      "description": "SCREW",
      "qty": "1",
-     "remarks": "6 pcs + key",
-     "search": "597435801"
+     "remarks": "Blister Pack, 3 pcs",
+     "search": "577864901"
+    },
+    {
+     "key": "19",
+     "part_number": "586277901",
+     "depth": 0,
+     "sub": false,
+     "description": "STICKER",
+     "qty": "1",
+     "remarks": "Cable Markers, 10 pcs",
+     "search": "586277901"
+    },
+    {
+     "key": "20",
+     "part_number": "594054801",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "Label Alarm",
+     "search": "594054801"
+    },
+    {
+     "key": "21",
+     "part_number": "590855001",
+     "depth": 0,
+     "sub": false,
+     "description": "BOX",
+     "qty": "1",
+     "remarks": "Cable Connector Protection",
+     "search": "590855001"
+    },
+    {
+     "key": "22",
+     "part_number": "596339801",
+     "depth": 0,
+     "sub": false,
+     "description": "TOOL",
+     "qty": "1",
+     "remarks": "Bit for Robotic Blades",
+     "search": "596339801"
+    },
+    {
+     "key": "23",
+     "part_number": "577606505",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SET",
+     "qty": "1",
+     "remarks": "Long Life Safety Blade, 45 pcs",
+     "search": "577606505"
+    },
+    {
+     "key": "23",
+     "part_number": "577606604",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SET",
+     "qty": "1",
+     "remarks": "Long Life Safety Blade, 300 pcs",
+     "search": "577606604"
+    },
+    {
+     "key": "23",
+     "part_number": "577864603",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SET",
+     "qty": "1",
+     "remarks": "Long Life Safety Blade, Blister Pack 9 pcs",
+     "search": "577864603"
     }
    ],
    "sheets": 1,
@@ -2614,120 +3128,265 @@
    "hotspots": [
     {
      "key": "1",
-     "x": 38.525,
-     "y": 25.9,
+     "x": 19.58,
+     "y": 13.044,
      "conf": 100
     },
     {
      "key": "2",
-     "x": 24.182,
-     "y": 37.457,
-     "conf": 100
+     "x": 45.3,
+     "y": 12.0,
+     "byHand": true,
+     "unlisted": true
     },
     {
      "key": "3",
-     "x": 45.798,
-     "y": 36.086,
+     "x": 51.049,
+     "y": 13.339,
      "conf": 100
     },
     {
      "key": "4",
-     "x": 30.646,
-     "y": 48.643,
+     "x": 75.652,
+     "y": 14.088,
      "conf": 100
     },
     {
      "key": "5",
-     "x": 37.313,
-     "y": 50.614,
+     "x": 48.506,
+     "y": 37.477,
      "conf": 100
     },
     {
      "key": "6",
-     "x": 26.566,
-     "y": 54.957,
+     "x": 12.079,
+     "y": 46.211,
      "conf": 100
     },
     {
      "key": "7",
-     "x": 39.455,
-     "y": 55.986,
-     "conf": 100
-    },
-    {
-     "key": "8",
-     "x": 22.97,
-     "y": 57.071,
-     "conf": 100
-    },
-    {
-     "key": "9",
-     "x": 25.354,
-     "y": 60.229,
+     "x": 36.618,
+     "y": 39.995,
      "conf": 100
     },
     {
      "key": "10",
-     "x": 51.838,
-     "y": 57.057,
+     "x": 51.494,
+     "y": 45.78,
      "conf": 100
     },
     {
      "key": "11",
-     "x": 67.111,
-     "y": 40.114,
-     "conf": 100
-    },
-    {
-     "key": "12",
-     "x": 62.707,
-     "y": 37.9,
+     "x": 74.539,
+     "y": 40.404,
      "conf": 100
     },
     {
      "key": "13",
-     "x": 70.848,
-     "y": 33.729,
+     "x": 36.491,
+     "y": 53.766,
      "conf": 100
     },
     {
      "key": "14",
-     "x": 56.404,
-     "y": 56.529,
+     "x": 23.109,
+     "y": 65.041,
      "conf": 100
     },
     {
      "key": "15",
-     "x": 69.172,
-     "y": 54.114,
+     "x": 43.357,
+     "y": 63.725,
      "conf": 100
     },
     {
      "key": "16",
-     "x": 74.303,
-     "y": 64.8,
+     "x": 29.371,
+     "y": 75.953,
      "conf": 100
     },
     {
      "key": "17",
-     "x": 79.717,
-     "y": 64.471,
+     "x": 35.823,
+     "y": 77.881,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 24.444,
+     "y": 82.123,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 37.889,
+     "y": 83.122,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 21.297,
+     "y": 84.188,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 23.776,
+     "y": 87.25,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 49.396,
+     "y": 84.165,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 64.145,
+     "y": 67.627,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 59.917,
+     "y": 65.472,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 67.769,
+     "y": 61.411,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 53.814,
+     "y": 83.643,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 66.147,
+     "y": 81.284,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 71.106,
+     "y": 91.72,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 76.351,
+     "y": 91.402,
      "conf": 100
     }
    ],
    "parts": [
     {
      "key": "1",
-     "part_number": "597635302",
+     "part_number": "598013101",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Battery tester cable",
+     "search": "598013101"
+    },
+    {
+     "key": "3",
+     "part_number": "577606801",
+     "depth": 0,
+     "sub": false,
+     "description": "TEST EQUIPMENT",
+     "qty": "1",
+     "remarks": "Interruption Detector",
+     "search": "577606801"
+    },
+    {
+     "key": "4",
+     "part_number": "580689502",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "Warranty seal",
+     "search": "580689502"
+    },
+    {
+     "key": "5",
+     "part_number": "596300201",
+     "depth": 0,
+     "sub": false,
+     "description": "BODY KIT",
+     "qty": "1",
+     "remarks": "Top Cover Grey",
+     "search": "596300201"
+    },
+    {
+     "key": "5",
+     "part_number": "596300202",
+     "depth": 0,
+     "sub": false,
+     "description": "BODY KIT",
+     "qty": "1",
+     "remarks": "Top Cover Orange",
+     "search": "596300202"
+    },
+    {
+     "key": "6",
+     "part_number": "505132803",
+     "depth": 0,
+     "sub": false,
+     "description": "BRUSH KIT",
+     "qty": "1",
+     "remarks": "6 pcs",
+     "search": "505132803"
+    },
+    {
+     "key": "7",
+     "part_number": "590855101",
+     "depth": 0,
+     "sub": false,
+     "description": "MAINTENANCE KIT",
+     "qty": "1",
+     "remarks": "Maintenance and Cleaning Kit",
+     "search": "590855101"
+    },
+    {
+     "key": "10",
+     "part_number": "593967901",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRAY",
+     "qty": "1",
+     "remarks": "Care and Shine 200 ml",
+     "search": "593967901"
+    },
+    {
+     "key": "11",
+     "part_number": "502519401",
+     "depth": 0,
+     "sub": false,
+     "description": "MANDREL",
+     "qty": "1",
+     "remarks": "Tool for spliting chassis",
+     "search": "502519401"
+    },
+    {
+     "key": "13",
+     "part_number": "597635301",
      "depth": 0,
      "sub": false,
      "description": "HOUSING",
      "qty": "1",
      "remarks": "House KIT",
-     "search": "597635302"
+     "search": "597635301"
     },
     {
-     "key": "2",
+     "key": "14",
      "part_number": "577062001",
      "depth": 0,
      "sub": false,
@@ -2737,7 +3396,7 @@
      "search": "577062001"
     },
     {
-     "key": "3",
+     "key": "15",
      "part_number": "598465501",
      "depth": 0,
      "sub": false,
@@ -2747,17 +3406,17 @@
      "search": "598465501"
     },
     {
-     "key": "4",
+     "key": "16",
      "part_number": "585324002",
      "depth": 0,
      "sub": false,
      "description": "HANDLE",
      "qty": "1",
-     "remarks": "Handle left",
+     "remarks": "Handle Left",
      "search": "585324002"
     },
     {
-     "key": "5",
+     "key": "17",
      "part_number": "585324101",
      "depth": 0,
      "sub": false,
@@ -2767,7 +3426,7 @@
      "search": "585324101"
     },
     {
-     "key": "6",
+     "key": "18",
      "part_number": "580511401",
      "depth": 0,
      "sub": false,
@@ -2777,7 +3436,7 @@
      "search": "580511401"
     },
     {
-     "key": "7",
+     "key": "19",
      "part_number": "585341501",
      "depth": 0,
      "sub": false,
@@ -2787,7 +3446,7 @@
      "search": "585341501"
     },
     {
-     "key": "8",
+     "key": "20",
      "part_number": "585341601",
      "depth": 0,
      "sub": false,
@@ -2797,7 +3456,7 @@
      "search": "585341601"
     },
     {
-     "key": "9",
+     "key": "21",
      "part_number": "575543314",
      "depth": 0,
      "sub": false,
@@ -2807,7 +3466,7 @@
      "search": "575543314"
     },
     {
-     "key": "10",
+     "key": "22",
      "part_number": "585324001",
      "depth": 0,
      "sub": false,
@@ -2817,7 +3476,7 @@
      "search": "585324001"
     },
     {
-     "key": "11",
+     "key": "23",
      "part_number": "585323602",
      "depth": 0,
      "sub": false,
@@ -2827,7 +3486,7 @@
      "search": "585323602"
     },
     {
-     "key": "12",
+     "key": "24",
      "part_number": "597635801",
      "depth": 0,
      "sub": false,
@@ -2837,7 +3496,7 @@
      "search": "597635801"
     },
     {
-     "key": "13",
+     "key": "25",
      "part_number": "597435801",
      "depth": 0,
      "sub": false,
@@ -2847,37 +3506,37 @@
      "search": "597435801"
     },
     {
-     "key": "14",
-     "part_number": "548110401",
+     "key": "26",
+     "part_number": "585323802",
      "depth": 0,
      "sub": false,
      "description": "SUPPORT",
      "qty": "1",
      "remarks": "Support Base Left",
-     "search": "548110401"
+     "search": "585323802"
     },
     {
-     "key": "15",
+     "key": "27",
      "part_number": "503226601",
      "depth": 0,
      "sub": false,
      "description": "SQUARE NUT",
      "qty": "4",
-     "remarks": "Square nut",
+     "remarks": "Square Nut",
      "search": "503226601"
     },
     {
-     "key": "16",
-     "part_number": "548110402",
+     "key": "28",
+     "part_number": "585323801",
      "depth": 0,
      "sub": false,
      "description": "SUPPORT",
      "qty": "1",
-     "remarks": "Support Base Right",
-     "search": "548110402"
+     "remarks": "Support Base Left",
+     "search": "585323801"
     },
     {
-     "key": "17",
+     "key": "29",
      "part_number": "535129303",
      "depth": 0,
      "sub": false,

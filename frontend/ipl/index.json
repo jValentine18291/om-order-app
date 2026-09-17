@@ -159,20 +159,6 @@
   ]
  },
  {
-  "id": "am535epos",
-  "name": "Husqvarna Automower 535 AWD EPOS",
-  "short": "Automower 535 AWD EPOS",
-  "brand": "Husqvarna",
-  "category": "Robotic Mower",
-  "figures": 9,
-  "parts": 173,
-  "aliases": [
-   "AM535AWD",
-   "535AWD EPOS",
-   "535AWD"
-  ]
- },
- {
   "id": "am550epos",
   "name": "Husqvarna Automower 550 EPOS",
   "short": "Automower 550 EPOS",
@@ -558,6 +544,20 @@
    "AM420iQ",
    "AM 420 iQ",
    "420iQ"
+  ]
+ },
+ {
+  "id": "am535epos",
+  "name": "Husqvarna Automower 535 AWD EPOS",
+  "short": "Automower 535 AWD EPOS",
+  "brand": "Husqvarna",
+  "category": "Robotic Mower",
+  "figures": 9,
+  "parts": 219,
+  "aliases": [
+   "AM535AWD",
+   "535AWD EPOS",
+   "535AWD"
   ]
  }
 ]

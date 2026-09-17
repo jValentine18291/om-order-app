@@ -1,24 +1,41 @@
-# Titles as printed on the Automower 535 AWD EPOS's own drawings.
+# Titles as printed on the Automower 535 AWD's own drawings.
 #
-# Two differ from the way the portal files them:
+# RE-READ FROM THE NEW ARTWORK, September 2026. The portal re-issued this book
+# - 219 rows where the first export had 173 - and the drawings that came with
+# it are not the ones this file was written against. Two of the notes here
+# were right about the old sheets and wrong about these, so they are corrected
+# rather than kept:
 #
-#   Fig.2   the portal says CHASSIS / FRAME; the drawing says CHASSIS
-#   Fig.4   the portal says CONSOLE; the drawing says CENTER CONSOLE
+#   Fig.2   the portal says CHASSIS / FRAME. The old drawing said CHASSIS;
+#           this one says CHASSIS FRONT, which is the better name anyway -
+#           it pairs with CHASSIS REAR on the next tab.
+#   Fig.4   the portal says CONSOLE; the drawing says CENTER CONSOL, missing
+#           the E. CENTER from the drawing, the E put back: a dropped letter
+#           on our tab reads as our typo, not Husqvarna's, and it costs
+#           nobody anything to match the page. Same decision as the 450X.
+#   Fig.5   the portal says WHEELS AND TIRES; the drawing says WHEELS & TIRES.
 #
-# The rest agree. The drawing wins, because that is the page in front of them.
+# ORDER CHANGED TOO, and the new one is the book's own. Sheets 4, 5, 7, 8 and
+# 9 carry section letters D, E, G, H, I, which puts WHEELS AND TIRES at E and
+# BLADE MOTOR AND CUTTING EQUIPMENT at F - the order this export lists them
+# in, and the reverse of the order the old book had. The lines below follow
+# the new order. They are matched by position, not by name, so if a future
+# export moves a sheet again, run --dry-run first and reorder these to match,
+# or every sheet after the one that moved is silently mislabelled.
 #
-# THE MACHINE IS THE 535 AWD EPOS
-# Every sheet heads itself "AUTOMOWER 535 AWD EPOS", and AutoCount holds it as
-# "UHUQ AM535AWD 970745521 / HUSQVARNA 535AWD EPOS Robotic Automower". The AWD
-# is part of the name, not a variant of it - which matters, because a book is
-# found by what is written on the slip.
+# THE MACHINE IS THE 535 AWD - and this file used to say every sheet heads
+# itself "AUTOMOWER 535 AWD EPOS". These do not. They all read "AUTOMOWER 535
+# AWD", no EPOS. AutoCount still holds it as "UHUQ AM535AWD 970745521 /
+# HUSQVARNA 535AWD EPOS Robotic Automower", so EPOS stays in the name and in
+# the aliases, which is what a slip is written from - but the drawings are not
+# where that word comes from.
 #
-# TO RE-IMPORT THIS BOOK, exactly this. The aliases are not decoration: without
-# them a slip written from the AutoCount catalogue - which is most of them -
-# carries none of the words the short name is made of, and the book is
+# TO RE-IMPORT THIS BOOK, exactly this. The aliases are not decoration:
+# without them a slip written from the AutoCount catalogue - which is most of
+# them - carries none of the words the short name is made of, and the book is
 # unreachable. See modelKeys() in machine-ipl.js.
 #
-#   python tools/ipl-import-csv.py --csv "AM 535 EPOS IPL.csv" \
+#   python tools/ipl-import-csv.py --csv "AM 535 AWD EPOS IPL.csv" \
 #     --id am535epos --name "Husqvarna Automower 535 AWD EPOS" \
 #     --short "Automower 535 AWD EPOS" --brand Husqvarna \
 #     --category "Robotic Mower" \
@@ -28,11 +45,11 @@
 # One line per sheet, in the order --dry-run lists them. "-" keeps the
 # export's own name for that sheet.
 COVER
-CHASSIS
+CHASSIS FRONT
 CHASSIS REAR
 CENTER CONSOLE
+WHEELS & TIRES
 BLADE MOTOR AND CUTTING EQUIPMENT
-WHEELS AND TIRES
 CHARGING STATION
 INSTALLATION ACCESSORIES
 ACCESSORIES

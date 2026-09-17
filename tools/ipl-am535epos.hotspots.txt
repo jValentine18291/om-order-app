@@ -1,0 +1,14 @@
+# AM 535 AWD EPOS corrections.
+#
+# One line. ACCESSORIES 2 is the laptop running Automower Connect - the
+# service PC, drawn with a cable running to the tracker beside it. It is
+# printed and numbered and the export has no row for it, which is reasonable
+# enough for a laptop, but the callout is still on the page.
+#
+# Marked unlisted, so the app says the book prints this callout and lists no
+# part for it rather than leaving a dead spot on the drawing. 8, 9 and 12 are
+# missing from the list the same way and are genuinely not printed.
+#
+# Position read off a percentage grid: 3, the cable tracker immediately to its
+# right, measured 51.01/13.36 against its stored 51.05/13.34.
+9 unlisted 2 45.3 12.0
