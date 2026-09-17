@@ -1,0 +1,29 @@
+# 520iLX sheet titles, in the order the export lists them (A to G already).
+#
+# Four differ from the portal, and all four are the drawing's own words:
+#
+#     A   CUTTING          export: CUTTING EQUIPMENT
+#     D   BATTERY HOUSING  export: HOUSING
+#     E   ELECTRIC         export: ELECTRICAL
+#     G   ATTACHMENT KIT   export: ATTACHMENTS
+#
+# BATTERY HOUSING and ELECTRIC are the same two the 115iL corrects, in the
+# same direction - the portal shortens one and lengthens the other on both
+# books. They are worth keeping straight: "HOUSING" on its own would sit next
+# to the HANDLE tab and read as the trimmer's body, where the sheet is the
+# battery compartment and the covers around it.
+#
+# ATTACHMENT KIT, likewise, is not a list of attachments. It is the kit that
+# comes in the box - spanner, wrench, blade hardware, transport guard, handle,
+# harness - and several of its parts are on the ACCESSORIES sheet as well,
+# because Husqvarna sell them both ways. The spanner 503558601 is on both.
+#
+# Nothing else needed correcting: every printed callout on all seven sheets is
+# ringed, and the export order already runs A to G.
+CUTTING
+TUBE
+HANDLE
+BATTERY HOUSING
+ELECTRIC
+ACCESSORIES
+ATTACHMENT KIT

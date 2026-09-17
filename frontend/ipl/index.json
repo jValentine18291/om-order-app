@@ -575,5 +575,14 @@
   "category": "Grass Trimmer",
   "figures": 6,
   "parts": 48
+ },
+ {
+  "id": "hus520ilx",
+  "name": "Husqvarna 520iLX Grass Trimmer",
+  "short": "520iLX",
+  "brand": "Husqvarna",
+  "category": "Grass Trimmer",
+  "figures": 7,
+  "parts": 59
  }
 ]
