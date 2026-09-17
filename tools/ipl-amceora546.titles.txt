@@ -1,0 +1,76 @@
+# CEORA 546 EPOS - ONE BOOK BUILT FROM TWO EXPORTS.
+#
+# The portal files this machine as two separate IPLs, because it is two
+# machines bolted together: a drive unit that tows a cutting deck. A
+# technician working on one of these has both halves in front of them, so the
+# app carries both halves in one book. That is what the repeated --csv does.
+#
+# WHY EVERY LINE IS PREFIXED. Four sheet names appear in both halves - COVER,
+# FRAME, WHEELS, ACCESSORIES - and without the prefix the picker shows two
+# tabs called COVER and no way to tell which end of the machine either one is.
+# The prefix goes first, not in brackets afterwards, so the eight drive tabs
+# read as a block and the nine deck tabs as another.
+#
+# The importer also refuses a multi-export book whose titles repeat or are
+# missing, and numbers the figures straight through 1..17 rather than by name.
+# Numbering by name would hand the deck's COVER the drive's Fig.1 and then run
+# the rest of the deck 9, 6, 10, 11, 7 - each shared name borrowing a number
+# from the other half.
+#
+# THE TWO HALVES ARE NOT THE SAME PRODUCT, and the drawings say so:
+#
+#   sheets 1-8    "CEORA 544 EPOS, CEORA 546 EPOS"   lettered A to H
+#   sheets 9-17   "CEORA RZ 43M, CEORA RZ 43L"       no letters
+#
+# So the drive unit is shared with the 544, and the deck is a product in its
+# own right - the RZ 43M / RZ 43L. Sheet 12, BLADE MOTOR AND CUTTING
+# EQUIPMENT, is headed CEORA RZ 43M alone, so that one sheet is specific to
+# the M deck where the other eight cover both.
+#
+# NAMES are the printed ones. Only two differ from the export, both on the
+# drive half: CENTER CONSOLE where the portal says CONSOLE, and WHEELS &
+# TIRES where it says WHEELS AND TIRES. Note the deck's own wheels sheet
+# prints WHEELS AND TIRES, spelled out - the halves disagree with each other,
+# and each tab follows its own page.
+#
+# TO RE-IMPORT THIS BOOK, exactly this. The drive export comes first.
+#
+#   python tools/ipl-import-csv.py \
+#     --csv "AM CEORA 546 EPOS Drive IPL.csv" \
+#     --csv "AM CEORA 546 EPOS Cutting Deck IPL.csv" \
+#     --id amceora546 --name "Husqvarna CEORA 546 EPOS" \
+#     --short "CEORA 546 EPOS" --brand Husqvarna \
+#     --category "Robotic Mower" \
+#
+# NO ALIASES, and that was measured rather than assumed. It went in with
+# "CEORA546" and "CEORA 546", and neither changed a single match: the short
+# name "CEORA 546 EPOS" already answers to both, because a slip is allowed to
+# name the start of a key. They came off again. test-machine-ipl.js keeps a
+# tripwire on the list of books that carry aliases, for exactly this - an
+# alias nobody checked is one more way for a book to claim a machine.
+#
+# No bare "CEORA" either, and that one is a judgement rather than a
+# measurement: it would answer to a CEORA 544 as well, and most of the book
+# would be right, since the whole drive half is the 544's drawings too. But
+# sheet 12 is the RZ 43M deck alone, and a 544 on the other deck would be
+# ordering cutting parts from the wrong one. If the workshop turns out to
+# write something the short name does not catch, the alias to add is whatever
+# AutoCount actually writes.
+#     --titles tools/ipl-amceora546.titles.txt
+DRIVE · COVER
+DRIVE · CHASSIS UPPER
+DRIVE · CENTER CONSOLE
+DRIVE · CHASSIS LOWER
+DRIVE · BATTERY
+DRIVE · FRAME
+DRIVE · WHEELS & TIRES
+DRIVE · ACCESSORIES
+DECK · COVER
+DECK · COVER, ELECTRICAL SYSTEM
+DECK · FRAME
+DECK · BLADE MOTOR AND CUTTING EQUIPMENT
+DECK · FRAME, ELECTRICAL SYSTEM
+DECK · WHEELS AND TIRES
+DECK · PIVOTING ARM
+DECK · PLATE, PROTECTION
+DECK · ACCESSORIES

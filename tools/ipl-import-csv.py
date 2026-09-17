@@ -312,7 +312,14 @@ def apply_hotspot_overrides(figures, model_id, here):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--csv", required=True)
+    ap.add_argument("--csv", required=True, action="append",
+                    help="the portal export. Repeat it to build ONE book from "
+                         "several exports, in the order given - for a machine "
+                         "the portal splits into separate IPLs, like the CEORA's "
+                         "drive unit and cutting deck. Sheets keep their own "
+                         "identity either way; a repeated --csv only means they "
+                         "arrive from more than one file. Name the halves in "
+                         "--titles, because sheet names repeat across them.")
     ap.add_argument("--id", required=True, help="file name stem, e.g. sr3100")
     ap.add_argument("--name", required=True, help="full display name")
     ap.add_argument("--short", required=True, help="what AutoCount calls it, e.g. SR3100")
@@ -331,8 +338,11 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
 
-    rows = read_rows(a.csv)
-    print(f"{len(rows)} part rows")
+    # Several exports concatenate into one book. Sheets are grouped by IPL ID
+    # further down, and the portal's IDs are unique across exports, so nothing
+    # merges by accident - two sheets both called COVER stay two sheets.
+    rows = [r for path in a.csv for r in read_rows(path)]
+    print(f"{len(rows)} part rows" + (f" from {len(a.csv)} exports" if len(a.csv) > 1 else ""))
 
     # One sheet per image, in the order the export lists them. Figures are
     # numbered by NAME, so a four-sheet CONTROLS section stays "Fig.9" and the
@@ -396,6 +406,35 @@ def main():
     for i, (name, _img) in enumerate(order):
         distinct.setdefault(name, set()).add(titles[i] if titles else None)
     self_titling = {n: len(v) > 1 and None not in v for n, v in distinct.items()}
+
+    # Figure numbers. Normally a figure IS a name, so the four sheets of a
+    # CONTROLS section all read Fig.9 and the label says which one.
+    fig_num = [fig_no[name] for name, _img in order]
+
+    # A book built from several exports is our own construction rather than a
+    # page the portal publishes, and the names repeat across the halves: the
+    # CEORA's drive unit and its cutting deck each have a COVER, a FRAME,
+    # WHEELS AND TIRES and an ACCESSORIES. Numbering by name would hand the
+    # deck's COVER the drive's Fig.1 and then run the rest of the deck 9, 6,
+    # 10, 11, 7 - every shared name borrowing a number from the other half.
+    # So here a sheet is a figure, numbered straight through, and the titles
+    # are what say which half you are in. They are required, and required to
+    # be distinct, because nothing else distinguishes the sheets.
+    if len(a.csv) > 1:
+        if not titles:
+            sys.exit("--titles is required when more than one --csv is given: "
+                     "sheet names repeat across exports, so the titles are the "
+                     "only thing telling the halves apart. Run --dry-run to "
+                     "list the sheets in order.")
+        if any(t is None for t in titles):
+            sys.exit("a \"-\" line (keep the export's own name) cannot be used "
+                     "when more than one --csv is given - every sheet needs a "
+                     "title of its own.")
+        repeated = sorted({t for t in titles if titles.count(t) > 1})
+        if repeated:
+            sys.exit("--titles must all differ when more than one --csv is "
+                     "given; repeated: " + ", ".join(repeated))
+        fig_num = list(range(1, len(order) + 1))
 
     print("sheets, in order:")
     for i, (name, _img) in enumerate(order):
@@ -466,7 +505,7 @@ def main():
         spots = unique
 
         title = (titles[i - 1] if titles else None) or name
-        label = f"Fig.{fig_no[name]} {title}"
+        label = f"Fig.{fig_num[i - 1]} {title}"
         if sheet_of > 1 and not self_titling.get(name):
             label += f" ({sheet_no} of {sheet_of})"
 
@@ -518,7 +557,8 @@ def main():
     doc = {
         "id": a.id,
         "name": a.name,
-        "source": f"Husqvarna portal CSV export ({os.path.basename(a.csv)})",
+        "source": "Husqvarna portal CSV export (%s)"
+                  % ", ".join(os.path.basename(p) for p in a.csv),
         "figures": figures,
     }
 

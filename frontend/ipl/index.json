@@ -526,10 +526,8 @@
   "figures": 7,
   "parts": 168,
   "aliases": [
-   "AM315X",
-   "AM 315X",
    "315X MKII",
-   "AM315X MKII"
+   "315XMKII"
   ]
  },
  {
@@ -559,5 +557,14 @@
    "535AWD EPOS",
    "535AWD"
   ]
+ },
+ {
+  "id": "amceora546",
+  "name": "Husqvarna CEORA 546 EPOS",
+  "short": "CEORA 546 EPOS",
+  "brand": "Husqvarna",
+  "category": "Robotic Mower",
+  "figures": 17,
+  "parts": 306
  }
 ]

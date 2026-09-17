@@ -1,0 +1,5303 @@
+{
+ "id": "amceora546",
+ "name": "Husqvarna CEORA 546 EPOS",
+ "source": "Husqvarna portal CSV export (AM CEORA 546 EPOS Drive IPL.csv, AM CEORA 546 EPOS Cutting Deck IPL.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "DRIVE · COVER",
+   "image": "amceora546-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 77.686,
+     "y": 17.332,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 78.608,
+     "y": 37.818,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 18.659,
+     "y": 27.722,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 40.401,
+     "y": 27.722,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 69.358,
+     "y": 41.629,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 15.639,
+     "y": 45.599,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 36.936,
+     "y": 45.848,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 55.499,
+     "y": 45.077,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 54.8,
+     "y": 49.864,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 72.282,
+     "y": 51.27,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 82.009,
+     "y": 64.315,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 26.192,
+     "y": 70.554,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 36.904,
+     "y": 74.705,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 76.51,
+     "y": 72.028,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 86.427,
+     "y": 89.383,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 38.048,
+     "y": 64.224,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "597321001",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "Top cover",
+     "search": "597321001"
+    },
+    {
+     "key": "2",
+     "part_number": "597276901",
+     "depth": 0,
+     "sub": false,
+     "description": "LIGHT",
+     "qty": "1",
+     "remarks": "LED light  rear",
+     "search": "597276901"
+    },
+    {
+     "key": "3",
+     "part_number": "535592201",
+     "depth": 0,
+     "sub": false,
+     "description": "HATCH KIT",
+     "qty": "1",
+     "remarks": "Hatch CEORA 544 EPOS inc. screws",
+     "search": "535592201"
+    },
+    {
+     "key": "3",
+     "part_number": "535592301",
+     "depth": 0,
+     "sub": false,
+     "description": "HATCH KIT",
+     "qty": "1",
+     "remarks": "Hatch CEORA 546 EPOS inc. screws",
+     "search": "535592301"
+    },
+    {
+     "key": "4",
+     "part_number": "599597602",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Wiring assy Led Light 3P Rear",
+     "search": "599597602"
+    },
+    {
+     "key": "5",
+     "part_number": "577745901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCT",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "577745901"
+    },
+    {
+     "key": "6",
+     "part_number": "576645703",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "4",
+     "remarks": "Nut flange",
+     "search": "576645703"
+    },
+    {
+     "key": "7",
+     "part_number": "593822101",
+     "depth": 0,
+     "sub": false,
+     "description": "MAGNET",
+     "qty": "2",
+     "remarks": "Magnet",
+     "search": "593822101"
+    },
+    {
+     "key": "8",
+     "part_number": "593778401",
+     "depth": 0,
+     "sub": false,
+     "description": "CLIP",
+     "qty": "8",
+     "remarks": "Clip Body connection",
+     "search": "593778401"
+    },
+    {
+     "key": "9",
+     "part_number": "597320801",
+     "depth": 0,
+     "sub": false,
+     "description": "BODY",
+     "qty": "1",
+     "remarks": "Body",
+     "search": "597320801"
+    },
+    {
+     "key": "10",
+     "part_number": "503846101",
+     "depth": 0,
+     "sub": false,
+     "description": "BUFFER",
+     "qty": "2",
+     "remarks": "Buffer",
+     "search": "503846101"
+    },
+    {
+     "key": "11",
+     "part_number": "593778501",
+     "depth": 0,
+     "sub": false,
+     "description": "MAGNET",
+     "qty": "2",
+     "remarks": "Magnet",
+     "search": "593778501"
+    },
+    {
+     "key": "12",
+     "part_number": "595303003",
+     "depth": 0,
+     "sub": false,
+     "description": "SNAP LOCKING",
+     "qty": "4",
+     "remarks": "Snap locking",
+     "search": "595303003"
+    },
+    {
+     "key": "13",
+     "part_number": "597320901",
+     "depth": 0,
+     "sub": false,
+     "description": "BUMPER",
+     "qty": "1",
+     "remarks": "Bumper",
+     "search": "597320901"
+    },
+    {
+     "key": "14",
+     "part_number": "504124101",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "2",
+     "remarks": "Spring",
+     "search": "504124101"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 1,
+   "label": "Fig.1 DRIVE · COVER"
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "DRIVE · CHASSIS UPPER",
+   "image": "amceora546-fig2.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 31.253,
+     "y": 14.486,
+     "conf": 100
+    },
+    {
+     "key": "1",
+     "x": 35.697,
+     "y": 40.171,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 63.374,
+     "y": 15.429,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 71.071,
+     "y": 22.271,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 63.899,
+     "y": 29.457,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 24.626,
+     "y": 71.057,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 61.596,
+     "y": 32.371,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 60.586,
+     "y": 41.7,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 57.475,
+     "y": 50.386,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 35.374,
+     "y": 48.429,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 58.04,
+     "y": 34.043,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 38.646,
+     "y": 32.214,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 17.636,
+     "y": 67.243,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 23.434,
+     "y": 36.0,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 61.232,
+     "y": 35.743,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 34.323,
+     "y": 42.714,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 61.495,
+     "y": 38.571,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 34.081,
+     "y": 45.514,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 60.889,
+     "y": 44.771,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 61.394,
+     "y": 48.057,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 28.788,
+     "y": 61.086,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 60.061,
+     "y": 54.4,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 61.111,
+     "y": 59.086,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "574450101",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "574450101"
+    },
+    {
+     "key": "2",
+     "part_number": "577753701",
+     "depth": 0,
+     "sub": false,
+     "description": "AIR FILTER",
+     "qty": "1",
+     "remarks": "Air Filter",
+     "search": "577753701"
+    },
+    {
+     "key": "3",
+     "part_number": "597983801",
+     "depth": 0,
+     "sub": false,
+     "description": "CHASSIS",
+     "qty": "1",
+     "remarks": "Chassis upper",
+     "search": "597983801"
+    },
+    {
+     "key": "4",
+     "part_number": "599391501",
+     "depth": 0,
+     "sub": false,
+     "description": "BUZZER",
+     "qty": "1",
+     "remarks": "Buzzer",
+     "search": "599391501"
+    },
+    {
+     "key": "5",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "9",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "6",
+     "part_number": "580682901",
+     "depth": 0,
+     "sub": false,
+     "description": "TOOL HOLDER",
+     "qty": "2",
+     "remarks": "Holder twist lock",
+     "search": "580682901"
+    },
+    {
+     "key": "7",
+     "part_number": "536462901",
+     "depth": 0,
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY",
+     "qty": "1",
+     "remarks": "Communication circuit board, CBT10",
+     "search": "536462901"
+    },
+    {
+     "key": "8",
+     "part_number": "536253903",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Wiring assy Modular jack",
+     "search": "536253903"
+    },
+    {
+     "key": "9",
+     "part_number": "597392501",
+     "depth": 0,
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY",
+     "qty": "2",
+     "remarks": "Magnetic sensor circuit board",
+     "search": "597392501"
+    },
+    {
+     "key": "10",
+     "part_number": "591494301",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER",
+     "qty": "2",
+     "remarks": "Holder magnetic sensor board",
+     "search": "591494301"
+    },
+    {
+     "key": "11",
+     "part_number": "598743601",
+     "depth": 0,
+     "sub": false,
+     "description": "GUIDE",
+     "qty": "1",
+     "remarks": "Light guide",
+     "search": "598743601"
+    },
+    {
+     "key": "12",
+     "part_number": "597387201",
+     "depth": 0,
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY",
+     "qty": "1",
+     "remarks": "HMI circuit board",
+     "search": "597387201"
+    },
+    {
+     "key": "13",
+     "part_number": "540538501",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER ASSY",
+     "qty": "1",
+     "remarks": "RTK module / RTK 868 MHz Europe. From S/N 261408668",
+     "search": "540538501"
+    },
+    {
+     "key": "13",
+     "part_number": "599308601",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER ASSY",
+     "qty": "1",
+     "remarks": "RTK module / RTK module 868MHz Europe. Up to S/N 261408667",
+     "search": "599308601"
+    },
+    {
+     "key": "13",
+     "part_number": "540538502",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER ASSY",
+     "qty": "1",
+     "remarks": "RTK module / RTK module 915MHz North america",
+     "search": "540538502"
+    },
+    {
+     "key": "13",
+     "part_number": "540538503",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER ASSY",
+     "qty": "1",
+     "remarks": "RTK module / RTK 915 MHz New Zeeland. From S/N 2614XXXXX",
+     "search": "540538503"
+    },
+    {
+     "key": "13",
+     "part_number": "599308603",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER ASSY",
+     "qty": "1",
+     "remarks": "RTK module / RTK module 915MHz New Zealand. Up to S/N 2613XXXXX",
+     "search": "599308603"
+    },
+    {
+     "key": "13",
+     "part_number": "540538504",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER ASSY",
+     "qty": "1",
+     "remarks": "RTK module / RTK 915 MHz Australia. From S/N 2614XXXXX",
+     "search": "540538504"
+    },
+    {
+     "key": "13",
+     "part_number": "599308604",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER ASSY",
+     "qty": "1",
+     "remarks": "RTK module / RTK module 915MHz Australia. Up to S/N 2613XXXXX",
+     "search": "599308604"
+    },
+    {
+     "key": "13",
+     "part_number": "540538505",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER ASSY",
+     "qty": "1",
+     "remarks": "RTK Module. No radio Japan. From S/N 261200042",
+     "search": "540538505"
+    },
+    {
+     "key": "13",
+     "part_number": "599308605",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER ASSY",
+     "qty": "1",
+     "remarks": "RTK module No radio Japan. Up to S/N 261200041",
+     "search": "599308605"
+    },
+    {
+     "key": "14",
+     "part_number": "595311601",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "2",
+     "remarks": "Wiring assy Magnetic & Loop sensor",
+     "search": "595311601"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 DRIVE · CHASSIS UPPER"
+  },
+  {
+   "id": "3",
+   "number": "3",
+   "title": "DRIVE · CENTER CONSOLE",
+   "image": "amceora546-fig3.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 60.521,
+     "y": 34.052,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 61.093,
+     "y": 41.266,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 59.599,
+     "y": 46.257,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 40.941,
+     "y": 49.41,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 67.133,
+     "y": 48.049,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 43.357,
+     "y": 53.947,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 58.169,
+     "y": 60.005,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "4",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "2",
+     "part_number": "597984001",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "Cover",
+     "search": "597984001"
+    },
+    {
+     "key": "3",
+     "part_number": "529905601",
+     "depth": 0,
+     "sub": false,
+     "description": "GROMMET",
+     "qty": "2",
+     "remarks": "Grommet",
+     "search": "529905601"
+    },
+    {
+     "key": "4",
+     "part_number": "598460901",
+     "depth": 0,
+     "sub": false,
+     "description": "MAGNET",
+     "qty": "1",
+     "remarks": "Magnet",
+     "search": "598460901"
+    },
+    {
+     "key": "5",
+     "part_number": "535592401",
+     "depth": 0,
+     "sub": false,
+     "description": "BUTTON KIT",
+     "qty": "1",
+     "remarks": "Stop button",
+     "search": "535592401"
+    },
+    {
+     "key": "6",
+     "part_number": "576242201",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "2",
+     "remarks": "Spring Lock stop button",
+     "search": "576242201"
+    },
+    {
+     "key": "7",
+     "part_number": "597973002",
+     "depth": 0,
+     "sub": false,
+     "description": "KEYBOARD",
+     "qty": "1",
+     "remarks": "Keypad",
+     "search": "597973002"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 DRIVE · CENTER CONSOLE"
+  },
+  {
+   "id": "4",
+   "number": "4",
+   "title": "DRIVE · CHASSIS LOWER",
+   "image": "amceora546-fig4.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 49.919,
+     "y": 40.636,
+     "conf": 100
+    },
+    {
+     "key": "1",
+     "x": 70.193,
+     "y": 11.403,
+     "conf": 100
+    },
+    {
+     "key": "1",
+     "x": 72.289,
+     "y": 18.714,
+     "conf": 100
+    },
+    {
+     "key": "1",
+     "x": 68.984,
+     "y": 37.172,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 76.32,
+     "y": 23.432,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 71.0,
+     "y": 15.465,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 36.618,
+     "y": 18.757,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 36.8,
+     "y": 23.461,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 44.68,
+     "y": 26.269,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 36.094,
+     "y": 29.404,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 59.19,
+     "y": 32.169,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 69.287,
+     "y": 31.67,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 41.717,
+     "y": 36.203,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 42.281,
+     "y": 46.522,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 51.431,
+     "y": 45.111,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 37.928,
+     "y": 60.048,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 46.211,
+     "y": 56.257,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 70.375,
+     "y": 54.19,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 77.67,
+     "y": 63.697,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 81.54,
+     "y": 68.401,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 76.622,
+     "y": 75.043,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 37.042,
+     "y": 64.809,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 25.675,
+     "y": 81.642,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 14.833,
+     "y": 91.519,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 42.443,
+     "y": 84.265,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 50.766,
+     "y": 80.074,
+     "conf": 100
+    },
+    {
+     "key": "30",
+     "x": 78.396,
+     "y": 58.224,
+     "conf": 100
+    },
+    {
+     "key": "31",
+     "x": 35.067,
+     "y": 82.568,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "574450101",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "14",
+     "remarks": "Screw",
+     "search": "574450101"
+    },
+    {
+     "key": "2",
+     "part_number": "599474901",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING ASSY",
+     "qty": "2",
+     "remarks": "Loop sensor circuit board",
+     "search": "599474901"
+    },
+    {
+     "key": "5",
+     "part_number": "595311604",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Wiring assy Magnetic & loop sensor",
+     "search": "595311604"
+    },
+    {
+     "key": "6",
+     "part_number": "595311604",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Wiring assy Magnetic & loop sensor",
+     "search": "595311604"
+    },
+    {
+     "key": "7",
+     "part_number": "597276201",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Wiring assy application board to HMI PCBA",
+     "search": "597276201"
+    },
+    {
+     "key": "8",
+     "part_number": "597276501",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Wiring assy application board motor control board",
+     "search": "597276501"
+    },
+    {
+     "key": "9",
+     "part_number": "597276401",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "FROM S/N 222406529, except S/N 222704691, 222704692, Wiring assy chassis to app board & battery",
+     "search": "597276401"
+    },
+    {
+     "key": "9",
+     "part_number": "536878601",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "UP TO S/N 222406528, and S/N 222704691, 222704692, Wiring assy chassis to app board & battery",
+     "search": "536878601"
+    },
+    {
+     "key": "10",
+     "part_number": "597277401",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Wiring assy led light rear",
+     "search": "597277401"
+    },
+    {
+     "key": "11",
+     "part_number": "597562201",
+     "depth": 0,
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY",
+     "qty": "1",
+     "remarks": "Application circuit board",
+     "search": "597562201"
+    },
+    {
+     "key": "14",
+     "part_number": "598446501",
+     "depth": 0,
+     "sub": false,
+     "description": "JOYSTICK ASSY",
+     "qty": "4",
+     "remarks": "Joystick assy",
+     "search": "598446501"
+    },
+    {
+     "key": "15",
+     "part_number": "598483301",
+     "depth": 0,
+     "sub": false,
+     "description": "DAMPER",
+     "qty": "4",
+     "remarks": "Damper",
+     "search": "598483301"
+    },
+    {
+     "key": "16",
+     "part_number": "529791401",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "529791401"
+    },
+    {
+     "key": "18",
+     "part_number": "580682901",
+     "depth": 0,
+     "sub": false,
+     "description": "TOOL HOLDER",
+     "qty": "5",
+     "remarks": "Holder twist lock",
+     "search": "580682901"
+    },
+    {
+     "key": "19",
+     "part_number": "598570801",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "6",
+     "remarks": "Screw",
+     "search": "598570801"
+    },
+    {
+     "key": "21",
+     "part_number": "574874709",
+     "depth": 0,
+     "sub": false,
+     "description": "SEALING STRIP",
+     "qty": "1",
+     "remarks": "Sealing strip",
+     "search": "574874709"
+    },
+    {
+     "key": "22",
+     "part_number": "584897501",
+     "depth": 0,
+     "sub": false,
+     "description": "GROMMET",
+     "qty": "1",
+     "remarks": "Grommet",
+     "search": "584897501"
+    },
+    {
+     "key": "23",
+     "part_number": "598004501",
+     "depth": 0,
+     "sub": false,
+     "description": "INSERT",
+     "qty": "16",
+     "remarks": "Insert",
+     "search": "598004501"
+    },
+    {
+     "key": "24",
+     "part_number": "597950401",
+     "depth": 0,
+     "sub": false,
+     "description": "CHASSIS",
+     "qty": "1",
+     "remarks": "Chassis lower",
+     "search": "597950401"
+    },
+    {
+     "key": "26",
+     "part_number": "599671701",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Service outlet plug / USB Service outlet plug",
+     "search": "599671701"
+    },
+    {
+     "key": "27",
+     "part_number": "599671801",
+     "depth": 0,
+     "sub": false,
+     "description": "CAP",
+     "qty": "1",
+     "remarks": "Cap sealing for USB",
+     "search": "599671801"
+    },
+    {
+     "key": "28",
+     "part_number": "597276003",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "FROM S/N 224610358, Charging cable",
+     "search": "597276003"
+    },
+    {
+     "key": "28",
+     "part_number": "597276002",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "S/N 222103214-222103229 and S/N 222301671-224610357 Charging cable",
+     "search": "597276002"
+    },
+    {
+     "key": "28",
+     "part_number": "537485201",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Up TO S/N 222301670 except S/N 222103214-222103229, Charging chain kit.See SB B1220029A-07",
+     "search": "537485201"
+    },
+    {
+     "key": "29",
+     "part_number": "599433601",
+     "depth": 0,
+     "sub": false,
+     "description": "SEALING",
+     "qty": "1",
+     "remarks": "Sealing",
+     "search": "599433601"
+    },
+    {
+     "key": "30",
+     "part_number": "529791402",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "529791402"
+    },
+    {
+     "key": "31",
+     "part_number": "529890001",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR HOUSING",
+     "qty": "1",
+     "remarks": "Sealing cap",
+     "search": "529890001"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.4 DRIVE · CHASSIS LOWER"
+  },
+  {
+   "id": "5",
+   "number": "5",
+   "title": "DRIVE · BATTERY",
+   "image": "amceora546-fig5.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 41.227,
+     "y": 32.373,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 59.154,
+     "y": 34.71,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 59.822,
+     "y": 50.25,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "574450101",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "4",
+     "remarks": "Screw",
+     "search": "574450101"
+    },
+    {
+     "key": "2",
+     "part_number": "599374201",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER",
+     "qty": "2",
+     "remarks": "Holder Battery",
+     "search": "599374201"
+    },
+    {
+     "key": "3",
+     "part_number": "593785502",
+     "depth": 0,
+     "sub": false,
+     "description": "BATTERY",
+     "qty": "1",
+     "remarks": "Battery, From S/N 224610358",
+     "search": "593785502"
+    },
+    {
+     "key": "3",
+     "part_number": "538990201",
+     "depth": 0,
+     "sub": false,
+     "description": "BATTERY",
+     "qty": "1",
+     "remarks": "Upgrade Battery KIT incl. Drive unit cable and Chassis cable, Up to S/N 224610357, See Service Bulletin B1220032B-07",
+     "search": "538990201"
+    },
+    {
+     "key": "3",
+     "part_number": "538985901",
+     "depth": 0,
+     "sub": false,
+     "description": "BATTERY",
+     "qty": "1",
+     "remarks": "Upgrade Battery KIT incl. Drive unit cable, Up to S/N 224610357, See Service Bulletin B1220032B-07",
+     "search": "538985901"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.5 DRIVE · BATTERY"
+  },
+  {
+   "id": "6",
+   "number": "6",
+   "title": "DRIVE · FRAME",
+   "image": "amceora546-fig6.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 89.939,
+     "y": 35.771,
+     "conf": 100
+    },
+    {
+     "key": "1",
+     "x": 89.172,
+     "y": 44.4,
+     "conf": 100
+    },
+    {
+     "key": "1",
+     "x": 53.273,
+     "y": 20.9,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 26.929,
+     "y": 31.257,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 68.747,
+     "y": 33.643,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 73.515,
+     "y": 14.771,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 38.444,
+     "y": 19.643,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 31.051,
+     "y": 22.057,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 27.232,
+     "y": 24.271,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 10.323,
+     "y": 36.1,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 19.778,
+     "y": 41.0,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 86.606,
+     "y": 34.4,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 85.394,
+     "y": 46.014,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 75.556,
+     "y": 7.314,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 67.798,
+     "y": 40.371,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 52.182,
+     "y": 39.143,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 35.111,
+     "y": 43.671,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 44.182,
+     "y": 60.443,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 47.414,
+     "y": 51.057,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 31.172,
+     "y": 46.957,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 22.747,
+     "y": 47.771,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 19.192,
+     "y": 51.057,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 13.515,
+     "y": 50.929,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 15.192,
+     "y": 71.843,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 9.899,
+     "y": 63.9,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 33.192,
+     "y": 27.529,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "529791401",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "8",
+     "remarks": "Screw",
+     "search": "529791401"
+    },
+    {
+     "key": "2",
+     "part_number": "529791402",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "8",
+     "remarks": "Screw",
+     "search": "529791402"
+    },
+    {
+     "key": "3",
+     "part_number": "529551101",
+     "depth": 0,
+     "sub": false,
+     "description": "BUSHING",
+     "qty": "1",
+     "remarks": "Bushing",
+     "search": "529551101"
+    },
+    {
+     "key": "4",
+     "part_number": "525762503",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCM",
+     "qty": "1",
+     "remarks": "Screw",
+     "search": "525762503"
+    },
+    {
+     "key": "5",
+     "part_number": "540340601",
+     "depth": 0,
+     "sub": false,
+     "description": "FRAME",
+     "qty": "1",
+     "remarks": "Front beam kit",
+     "search": "540340601"
+    },
+    {
+     "key": "6",
+     "part_number": "529551201",
+     "depth": 0,
+     "sub": false,
+     "description": "JOINT",
+     "qty": "1",
+     "remarks": "Joint",
+     "search": "529551201"
+    },
+    {
+     "key": "7",
+     "part_number": "578119101",
+     "depth": 0,
+     "sub": false,
+     "description": "SLEEVE",
+     "qty": "8",
+     "remarks": "Sleeve",
+     "search": "578119101"
+    },
+    {
+     "key": "8",
+     "part_number": "535593301",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER",
+     "qty": "1",
+     "remarks": "Holder assy",
+     "search": "535593301"
+    },
+    {
+     "key": "12",
+     "part_number": "599665701",
+     "depth": 0,
+     "sub": false,
+     "description": "GROMMET",
+     "qty": "2",
+     "remarks": "Grommet",
+     "search": "599665701"
+    },
+    {
+     "key": "13",
+     "part_number": "599309201",
+     "depth": 0,
+     "sub": false,
+     "description": "PROFILE",
+     "qty": "1",
+     "remarks": "Profile drive motor",
+     "search": "599309201"
+    },
+    {
+     "key": "14",
+     "part_number": "597277001",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "2",
+     "remarks": "Wiring assy wheel brush motor",
+     "search": "597277001"
+    },
+    {
+     "key": "15",
+     "part_number": "525755105",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCFM",
+     "qty": "4",
+     "remarks": "Screw",
+     "search": "525755105"
+    },
+    {
+     "key": "16",
+     "part_number": "596888501",
+     "depth": 0,
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY",
+     "qty": "1",
+     "remarks": "Motor control circuit board drive unit",
+     "search": "596888501"
+    },
+    {
+     "key": "17",
+     "part_number": "599282201",
+     "depth": 0,
+     "sub": false,
+     "description": "SEALING",
+     "qty": "1",
+     "remarks": "Sealing",
+     "search": "599282201"
+    },
+    {
+     "key": "18",
+     "part_number": "599487401",
+     "depth": 0,
+     "sub": false,
+     "description": "FILTER",
+     "qty": "1",
+     "remarks": "Nut",
+     "search": "599487401"
+    },
+    {
+     "key": "19",
+     "part_number": "599271901",
+     "depth": 0,
+     "sub": false,
+     "description": "LID",
+     "qty": "1",
+     "remarks": "Lid",
+     "search": "599271901"
+    },
+    {
+     "key": "20",
+     "part_number": "598570801",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "14",
+     "remarks": "Screw",
+     "search": "598570801"
+    },
+    {
+     "key": "21",
+     "part_number": "599475901",
+     "depth": 0,
+     "sub": false,
+     "description": "FILTER",
+     "qty": "1",
+     "remarks": "Filter",
+     "search": "599475901"
+    },
+    {
+     "key": "22",
+     "part_number": "731432201",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON THIN NUT",
+     "qty": "1",
+     "remarks": "Nut",
+     "search": "731432201"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 1,
+   "label": "Fig.6 DRIVE · FRAME"
+  },
+  {
+   "id": "7",
+   "number": "7",
+   "title": "DRIVE · WHEELS & TIRES",
+   "image": "amceora546-fig7.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 54.929,
+     "y": 36.514,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 29.636,
+     "y": 16.1,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 38.465,
+     "y": 20.957,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 44.707,
+     "y": 20.9,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 49.737,
+     "y": 22.7,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 55.374,
+     "y": 25.457,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 61.697,
+     "y": 31.243,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 36.586,
+     "y": 53.986,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 47.818,
+     "y": 48.686,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 58.141,
+     "y": 46.814,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 70.545,
+     "y": 58.514,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 76.788,
+     "y": 59.614,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 74.04,
+     "y": 71.3,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 31.636,
+     "y": 67.943,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 57.212,
+     "y": 37.214,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "735311700",
+     "depth": 0,
+     "sub": false,
+     "description": "CIRCLIP",
+     "qty": "2",
+     "remarks": "Circlip",
+     "search": "735311700"
+    },
+    {
+     "key": "2",
+     "part_number": "597497501",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL MOTOR",
+     "qty": "2",
+     "remarks": "Wheel motor",
+     "search": "597497501"
+    },
+    {
+     "key": "3",
+     "part_number": "599714401",
+     "depth": 0,
+     "sub": false,
+     "description": "RADIAL SEAL",
+     "qty": "2",
+     "remarks": "Radial seal",
+     "search": "599714401"
+    },
+    {
+     "key": "4",
+     "part_number": "599142701",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "2",
+     "remarks": "Gasket",
+     "search": "599142701"
+    },
+    {
+     "key": "5",
+     "part_number": "598867601",
+     "depth": 0,
+     "sub": false,
+     "description": "FLANGE",
+     "qty": "2",
+     "remarks": "Flange",
+     "search": "598867601"
+    },
+    {
+     "key": "6",
+     "part_number": "598570801",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "8",
+     "remarks": "Screw",
+     "search": "598570801"
+    },
+    {
+     "key": "7",
+     "part_number": "725532901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "8",
+     "remarks": "Screw",
+     "search": "725532901"
+    },
+    {
+     "key": "8",
+     "part_number": "574450101",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "6",
+     "remarks": "Screw",
+     "search": "574450101"
+    },
+    {
+     "key": "9",
+     "part_number": "548112301",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "2",
+     "remarks": "Cover",
+     "search": "548112301"
+    },
+    {
+     "key": "10",
+     "part_number": "536888701",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL",
+     "qty": "2",
+     "remarks": "Drive wheel",
+     "search": "536888701"
+    },
+    {
+     "key": "11",
+     "part_number": "599786001",
+     "depth": 0,
+     "sub": false,
+     "description": "COLLET",
+     "qty": "2",
+     "remarks": "Collet",
+     "search": "599786001"
+    },
+    {
+     "key": "12",
+     "part_number": "548217601",
+     "depth": 0,
+     "sub": false,
+     "description": "O-RING",
+     "qty": "2",
+     "remarks": "O-ring",
+     "search": "548217601"
+    },
+    {
+     "key": "13",
+     "part_number": "548689901",
+     "depth": 0,
+     "sub": false,
+     "description": "HUB CAP ASSY",
+     "qty": "2",
+     "remarks": "Hub cap",
+     "search": "548689901"
+    },
+    {
+     "key": "14",
+     "part_number": "548529301",
+     "depth": 0,
+     "sub": false,
+     "description": "HUB CAP",
+     "qty": "1",
+     "remarks": "Hub cap Upgrade kit 2pack",
+     "search": "548529301"
+    },
+    {
+     "key": "15",
+     "part_number": "740431300",
+     "depth": 0,
+     "sub": false,
+     "description": "O-RING",
+     "qty": "2",
+     "remarks": "O-ring",
+     "search": "740431300"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 1,
+   "label": "Fig.7 DRIVE · WHEELS & TIRES"
+  },
+  {
+   "id": "8",
+   "number": "8",
+   "title": "DRIVE · ACCESSORIES",
+   "image": "amceora546-fig8.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 49.535,
+     "y": 10.657,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 36.99,
+     "y": 38.614,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 67.091,
+     "y": 38.457,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 49.535,
+     "y": 61.129,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 50.04,
+     "y": 69.771,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "529318901",
+     "depth": 0,
+     "sub": false,
+     "description": "BRUSH KIT",
+     "qty": "1",
+     "remarks": "Wheel brush start kit",
+     "search": "529318901"
+    },
+    {
+     "key": "1",
+     "part_number": "529318910",
+     "depth": 0,
+     "sub": false,
+     "description": "BRUSH KIT",
+     "qty": "1",
+     "remarks": "Wheel brush start kit North America",
+     "search": "529318910"
+    },
+    {
+     "key": "2",
+     "part_number": "529318801",
+     "depth": 0,
+     "sub": false,
+     "description": "BRUSH KIT",
+     "qty": "1",
+     "remarks": "Wheel brush refill kit",
+     "search": "529318801"
+    },
+    {
+     "key": "3",
+     "part_number": "580689502",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "Warranty seal 1 pcs",
+     "search": "580689502"
+    },
+    {
+     "key": "4",
+     "part_number": "546140802",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL KIT",
+     "qty": "1",
+     "remarks": "Terrain kit",
+     "search": "546140802"
+    },
+    {
+     "key": "4",
+     "part_number": "546140811",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL KIT",
+     "qty": "1",
+     "remarks": "Terrain kit North America",
+     "search": "546140811"
+    },
+    {
+     "key": "5",
+     "part_number": "546049101",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL",
+     "qty": "1",
+     "remarks": "Wheel",
+     "search": "546049101"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 1,
+   "label": "Fig.8 DRIVE · ACCESSORIES"
+  },
+  {
+   "id": "9",
+   "number": "1",
+   "title": "DECK · COVER",
+   "image": "amceora546-fig9.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 37.677,
+     "y": 32.429,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 54.364,
+     "y": 8.529,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 82.202,
+     "y": 26.671,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 63.535,
+     "y": 15.186,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 40.141,
+     "y": 24.671,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 84.586,
+     "y": 38.071,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 13.556,
+     "y": 76.6,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 72.828,
+     "y": 85.6,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 34.0,
+     "y": 74.371,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 35.859,
+     "y": 90.529,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 63.535,
+     "y": 39.014,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 67.899,
+     "y": 40.629,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 81.01,
+     "y": 69.657,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 24.485,
+     "y": 86.529,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 13.515,
+     "y": 83.071,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 58.707,
+     "y": 90.314,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 75.293,
+     "y": 78.457,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 20.525,
+     "y": 34.571,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 44.02,
+     "y": 74.386,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "598002901",
+     "depth": 0,
+     "sub": false,
+     "description": "BODY",
+     "qty": "1",
+     "remarks": "Body",
+     "search": "598002901"
+    },
+    {
+     "key": "2",
+     "part_number": "598004201",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "Top cover right",
+     "search": "598004201"
+    },
+    {
+     "key": "3",
+     "part_number": "598004101",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "Top cover left",
+     "search": "598004101"
+    },
+    {
+     "key": "4",
+     "part_number": "598004001",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER ASSY",
+     "qty": "1",
+     "remarks": "Top cover center",
+     "search": "598004001"
+    },
+    {
+     "key": "5",
+     "part_number": "598003401",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE",
+     "qty": "1",
+     "remarks": "Side handle right",
+     "search": "598003401"
+    },
+    {
+     "key": "6",
+     "part_number": "598003301",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE",
+     "qty": "1",
+     "remarks": "Side handle left",
+     "search": "598003301"
+    },
+    {
+     "key": "7",
+     "part_number": "598003901",
+     "depth": 0,
+     "sub": false,
+     "description": "BUMPER",
+     "qty": "1",
+     "remarks": "Bumper front right",
+     "search": "598003901"
+    },
+    {
+     "key": "8",
+     "part_number": "598003801",
+     "depth": 0,
+     "sub": false,
+     "description": "BUMPER",
+     "qty": "1",
+     "remarks": "Bumper front left",
+     "search": "598003801"
+    },
+    {
+     "key": "9",
+     "part_number": "598003101",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE",
+     "qty": "1",
+     "remarks": "Front handle",
+     "search": "598003101"
+    },
+    {
+     "key": "10",
+     "part_number": "598003201",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE",
+     "qty": "1",
+     "remarks": "Front handle",
+     "search": "598003201"
+    },
+    {
+     "key": "11",
+     "part_number": "593778501",
+     "depth": 0,
+     "sub": false,
+     "description": "MAGNET",
+     "qty": "4",
+     "remarks": "Magnet",
+     "search": "593778501"
+    },
+    {
+     "key": "12",
+     "part_number": "593778401",
+     "depth": 0,
+     "sub": false,
+     "description": "CLIP",
+     "qty": "14",
+     "remarks": "Clip",
+     "search": "593778401"
+    },
+    {
+     "key": "13",
+     "part_number": "574450101",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "24",
+     "remarks": "Screw",
+     "search": "574450101"
+    },
+    {
+     "key": "14",
+     "part_number": "598004501",
+     "depth": 0,
+     "sub": false,
+     "description": "INSERT",
+     "qty": "14",
+     "remarks": "Insert",
+     "search": "598004501"
+    },
+    {
+     "key": "15",
+     "part_number": "576645703",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "6",
+     "remarks": "Nut",
+     "search": "576645703"
+    },
+    {
+     "key": "16",
+     "part_number": "599679801",
+     "depth": 0,
+     "sub": false,
+     "description": "SUPPORT",
+     "qty": "2",
+     "remarks": "Support",
+     "search": "599679801"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 2,
+   "label": "Fig.9 DECK · COVER"
+  },
+  {
+   "id": "10",
+   "number": "9",
+   "title": "DECK · COVER, ELECTRICAL SYSTEM",
+   "image": "amceora546-fig10.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 41.899,
+     "y": 17.057,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 68.707,
+     "y": 93.314,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 38.848,
+     "y": 13.786,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 38.929,
+     "y": 29.286,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 50.202,
+     "y": 50.871,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 40.424,
+     "y": 32.814,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 68.364,
+     "y": 39.957,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 72.707,
+     "y": 47.1,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 54.606,
+     "y": 58.686,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 75.091,
+     "y": 57.943,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 32.0,
+     "y": 82.371,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 37.515,
+     "y": 95.029,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 27.293,
+     "y": 89.0,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 48.505,
+     "y": 85.543,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 33.758,
+     "y": 51.386,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 70.667,
+     "y": 56.1,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 31.455,
+     "y": 57.414,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 34.747,
+     "y": 55.4,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 34.0,
+     "y": 53.7,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 17.838,
+     "y": 19.429,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 70.04,
+     "y": 37.486,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 30.061,
+     "y": 66.929,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 77.333,
+     "y": 75.2,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 85.374,
+     "y": 53.114,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 75.232,
+     "y": 81.586,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 57.818,
+     "y": 84.771,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 21.697,
+     "y": 84.329,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 51.475,
+     "y": 74.4,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 19.313,
+     "y": 73.529,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 87.556,
+     "y": 9.214,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 33.273,
+     "y": 64.429,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "537485201",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "UP TO S/N 222303011, Charging chain kit, See SB B1220029A-07",
+     "search": "537485201"
+    },
+    {
+     "key": "1",
+     "part_number": "597277603",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "FROM S/N 222303012, Chassis cable + Charging plates",
+     "search": "597277603"
+    },
+    {
+     "key": "2",
+     "part_number": "599436401",
+     "depth": 0,
+     "sub": false,
+     "description": "TIE WRAP",
+     "qty": "17",
+     "remarks": "Tie wrap",
+     "search": "599436401"
+    },
+    {
+     "key": "3",
+     "part_number": "599476401",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING ASSY",
+     "qty": "1",
+     "remarks": "Housing assy magentic sensor",
+     "search": "599476401"
+    },
+    {
+     "key": "4",
+     "part_number": "598003501",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER",
+     "qty": "1",
+     "remarks": "Holder Charging plates",
+     "search": "598003501"
+    },
+    {
+     "key": "5",
+     "part_number": "574450101",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "19",
+     "remarks": "Screw",
+     "search": "574450101"
+    },
+    {
+     "key": "6",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "7",
+     "part_number": "598004501",
+     "depth": 0,
+     "sub": false,
+     "description": "INSERT",
+     "qty": "6",
+     "remarks": "Insert",
+     "search": "598004501"
+    },
+    {
+     "key": "8",
+     "part_number": "597978501",
+     "depth": 0,
+     "sub": false,
+     "description": "BASE",
+     "qty": "1",
+     "remarks": "Base electronic box body",
+     "search": "597978501"
+    },
+    {
+     "key": "9",
+     "part_number": "594088901",
+     "depth": 0,
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY",
+     "qty": "1",
+     "remarks": "Coupling circuit board",
+     "search": "594088901"
+    },
+    {
+     "key": "10",
+     "part_number": "599474901",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING ASSY",
+     "qty": "3",
+     "remarks": "Loop sensor circuit board (left, center, right)",
+     "search": "599474901"
+    },
+    {
+     "key": "11",
+     "part_number": "599662801",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "Cover with sealing electronic box body",
+     "search": "599662801"
+    },
+    {
+     "key": "12",
+     "part_number": "548629101",
+     "depth": 0,
+     "sub": false,
+     "description": "MEMBRANE",
+     "qty": "1",
+     "remarks": "Air Filter",
+     "search": "548629101"
+    },
+    {
+     "key": "13",
+     "part_number": "586038902",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "Cover air filter",
+     "search": "586038902"
+    },
+    {
+     "key": "14",
+     "part_number": "595312402",
+     "depth": 0,
+     "sub": false,
+     "description": "LIGHT",
+     "qty": "1",
+     "remarks": "LED light front right",
+     "search": "595312402"
+    },
+    {
+     "key": "15",
+     "part_number": "538635501",
+     "depth": 0,
+     "sub": false,
+     "description": "CLAMP",
+     "qty": "1",
+     "remarks": "Cable holder",
+     "search": "538635501"
+    },
+    {
+     "key": "16",
+     "part_number": "599645404",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "2",
+     "remarks": "Ultrasonic sensor + cable",
+     "search": "599645404"
+    },
+    {
+     "key": "17",
+     "part_number": "595312401",
+     "depth": 0,
+     "sub": false,
+     "description": "LIGHT",
+     "qty": "1",
+     "remarks": "LED light front left",
+     "search": "595312401"
+    },
+    {
+     "key": "18",
+     "part_number": "598531408",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Wiring assy Magnetic & loop sensor single",
+     "search": "598531408"
+    },
+    {
+     "key": "19",
+     "part_number": "599597603",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "2",
+     "remarks": "Wiring assy LED light 3P Front",
+     "search": "599597603"
+    },
+    {
+     "key": "20",
+     "part_number": "598531405",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Wiring assy magnetic loop doc",
+     "search": "598531405"
+    },
+    {
+     "key": "21",
+     "part_number": "598531301",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Wiring assy Magnetic & loop sensor double",
+     "search": "598531301"
+    },
+    {
+     "key": "22",
+     "part_number": "529890101",
+     "depth": 0,
+     "sub": false,
+     "description": "CONNECTOR HOUSING",
+     "qty": "1",
+     "remarks": "Sealing cap",
+     "search": "529890101"
+    },
+    {
+     "key": "23",
+     "part_number": "548468701",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "Gasket",
+     "search": "548468701"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.10 DECK · COVER, ELECTRICAL SYSTEM"
+  },
+  {
+   "id": "11",
+   "number": "6",
+   "title": "DECK · FRAME",
+   "image": "amceora546-fig11.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 69.407,
+     "y": 4.418,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 66.102,
+     "y": 7.269,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 85.349,
+     "y": 66.334,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 83.293,
+     "y": 8.295,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 85.55,
+     "y": 10.975,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 84.845,
+     "y": 13.868,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 83.333,
+     "y": 17.204,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 89.178,
+     "y": 27.822,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 81.842,
+     "y": 21.879,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 66.546,
+     "y": 28.92,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 85.268,
+     "y": 34.934,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 65.961,
+     "y": 47.135,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 54.232,
+     "y": 52.822,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 47.179,
+     "y": 86.944,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 88.755,
+     "y": 51.326,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 82.225,
+     "y": 24.444,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 41.999,
+     "y": 90.65,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 65.256,
+     "y": 39.424,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 44.357,
+     "y": 89.168,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 67.977,
+     "y": 45.125,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 83.152,
+     "y": 57.283,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 83.152,
+     "y": 58.894,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 84.865,
+     "y": 61.93,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 65.316,
+     "y": 78.706,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 81.459,
+     "y": 69.783,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 87.243,
+     "y": 78.079,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 82.95,
+     "y": 80.402,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 87.021,
+     "y": 81.485,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 77.932,
+     "y": 82.283,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 84.704,
+     "y": 93.771,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 75.977,
+     "y": 92.631,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 48.69,
+     "y": 79.575,
+     "conf": 100
+    },
+    {
+     "key": "31",
+     "x": 48.851,
+     "y": 71.422,
+     "conf": 100
+    },
+    {
+     "key": "32",
+     "x": 13.704,
+     "y": 80.83,
+     "conf": 100
+    },
+    {
+     "key": "33",
+     "x": 25.433,
+     "y": 92.175,
+     "conf": 100
+    },
+    {
+     "key": "34",
+     "x": 29.021,
+     "y": 51.183,
+     "conf": 100
+    },
+    {
+     "key": "35",
+     "x": 21.947,
+     "y": 55.773,
+     "conf": 100
+    },
+    {
+     "key": "36",
+     "x": 38.815,
+     "y": 54.376,
+     "conf": 100
+    },
+    {
+     "key": "37",
+     "x": 83.777,
+     "y": 43.529,
+     "conf": 100
+    },
+    {
+     "key": "38",
+     "x": 84.019,
+     "y": 39.752,
+     "conf": 100
+    },
+    {
+     "key": "39",
+     "x": 79.585,
+     "y": 45.767,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "586038902",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "2",
+     "remarks": "Cover",
+     "search": "586038902"
+    },
+    {
+     "key": "2",
+     "part_number": "577713801",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "8",
+     "remarks": "Screw",
+     "search": "577713801"
+    },
+    {
+     "key": "3",
+     "part_number": "577753701",
+     "depth": 0,
+     "sub": false,
+     "description": "AIR FILTER",
+     "qty": "2",
+     "remarks": "Air filter",
+     "search": "577753701"
+    },
+    {
+     "key": "4",
+     "part_number": "598027902",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "2",
+     "remarks": "Cover",
+     "search": "598027902"
+    },
+    {
+     "key": "5",
+     "part_number": "599304901",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "2",
+     "remarks": "Gasket",
+     "search": "599304901"
+    },
+    {
+     "key": "6",
+     "part_number": "597762001",
+     "depth": 0,
+     "sub": false,
+     "description": "HEIGHT ADJUSTMENT MOTOR",
+     "qty": "2",
+     "remarks": "Cutting height adjustment motor",
+     "search": "597762001"
+    },
+    {
+     "key": "7",
+     "part_number": "536487201",
+     "depth": 0,
+     "sub": false,
+     "description": "WORM GEAR ASSY",
+     "qty": "1",
+     "remarks": "Worm gear assy",
+     "search": "536487201"
+    },
+    {
+     "key": "8",
+     "part_number": "535432801",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCM",
+     "qty": "4",
+     "remarks": "Screw",
+     "search": "535432801"
+    },
+    {
+     "key": "9",
+     "part_number": "599475401",
+     "depth": 0,
+     "sub": false,
+     "description": "BRUSH",
+     "qty": "4",
+     "remarks": "Brush",
+     "search": "599475401"
+    },
+    {
+     "key": "11",
+     "part_number": "599296701",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING",
+     "qty": "2",
+     "remarks": "Housing",
+     "search": "599296701"
+    },
+    {
+     "key": "12",
+     "part_number": "529791402",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "10",
+     "remarks": "Screw",
+     "search": "529791402"
+    },
+    {
+     "key": "13",
+     "part_number": "599936703",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "Plate upper left",
+     "search": "599936703"
+    },
+    {
+     "key": "14",
+     "part_number": "599304402",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "Cutting height adjustment limiter",
+     "search": "599304402"
+    },
+    {
+     "key": "15",
+     "part_number": "529791401",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "4",
+     "remarks": "Screw",
+     "search": "529791401"
+    },
+    {
+     "key": "16",
+     "part_number": "599609401",
+     "depth": 0,
+     "sub": false,
+     "description": "DAMPER",
+     "qty": "4",
+     "remarks": "Damper",
+     "search": "599609401"
+    },
+    {
+     "key": "17",
+     "part_number": "547793201",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "6",
+     "remarks": "Screw",
+     "search": "547793201"
+    },
+    {
+     "key": "18",
+     "part_number": "598027701",
+     "depth": 0,
+     "sub": false,
+     "description": "GEAR",
+     "qty": "4",
+     "remarks": "Gear",
+     "search": "598027701"
+    },
+    {
+     "key": "19",
+     "part_number": "598028001",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "2",
+     "remarks": "Cover",
+     "search": "598028001"
+    },
+    {
+     "key": "21",
+     "part_number": "599936901",
+     "depth": 0,
+     "sub": false,
+     "description": "SLEEVE",
+     "qty": "4",
+     "remarks": "Sleeve",
+     "search": "599936901"
+    },
+    {
+     "key": "22",
+     "part_number": "599936601",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "Plate lower left",
+     "search": "599936601"
+    },
+    {
+     "key": "23",
+     "part_number": "598008001",
+     "depth": 0,
+     "sub": false,
+     "description": "SLEEVE",
+     "qty": "2",
+     "remarks": "Sleeve",
+     "search": "598008001"
+    },
+    {
+     "key": "24",
+     "part_number": "597907201",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL",
+     "qty": "2",
+     "remarks": "Servicing wheels",
+     "search": "597907201"
+    },
+    {
+     "key": "25",
+     "part_number": "576645703",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "2",
+     "remarks": "Nut",
+     "search": "576645703"
+    },
+    {
+     "key": "26",
+     "part_number": "576564301",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT",
+     "qty": "2",
+     "remarks": "Bolt",
+     "search": "576564301"
+    },
+    {
+     "key": "27",
+     "part_number": "599936201",
+     "depth": 0,
+     "sub": false,
+     "description": "SUPPORT",
+     "qty": "2",
+     "remarks": "Support",
+     "search": "599936201"
+    },
+    {
+     "key": "28",
+     "part_number": "535338501",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER KIT",
+     "qty": "2",
+     "remarks": "Holder assy",
+     "search": "535338501"
+    },
+    {
+     "key": "31",
+     "part_number": "599936801",
+     "depth": 0,
+     "sub": false,
+     "description": "BEAM",
+     "qty": "3",
+     "remarks": "Beam",
+     "search": "599936801"
+    },
+    {
+     "key": "32",
+     "part_number": "599936704",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "Plate upper right",
+     "search": "599936704"
+    },
+    {
+     "key": "33",
+     "part_number": "599936602",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "Plate lower right",
+     "search": "599936602"
+    },
+    {
+     "key": "34",
+     "part_number": "525755105",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCFM",
+     "qty": "12",
+     "remarks": "Screw",
+     "search": "525755105"
+    },
+    {
+     "key": "35",
+     "part_number": "598446501",
+     "depth": 0,
+     "sub": false,
+     "description": "JOYSTICK ASSY",
+     "qty": "6",
+     "remarks": "Joystick assy",
+     "search": "598446501"
+    },
+    {
+     "key": "36",
+     "part_number": "598483301",
+     "depth": 0,
+     "sub": false,
+     "description": "DAMPER",
+     "qty": "6",
+     "remarks": "Damper",
+     "search": "598483301"
+    },
+    {
+     "key": "37",
+     "part_number": "599936301",
+     "depth": 0,
+     "sub": false,
+     "description": "SUPPORT",
+     "qty": "2",
+     "remarks": "Support",
+     "search": "599936301"
+    },
+    {
+     "key": "38",
+     "part_number": "529791403",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "6",
+     "remarks": "Screw",
+     "search": "529791403"
+    },
+    {
+     "key": "39",
+     "part_number": "536813301",
+     "depth": 0,
+     "sub": false,
+     "description": "BUSHING",
+     "qty": "1",
+     "remarks": "Bushing",
+     "search": "536813301"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 2,
+   "label": "Fig.11 DECK · FRAME"
+  },
+  {
+   "id": "12",
+   "number": "10",
+   "title": "DECK · BLADE MOTOR AND CUTTING EQUIPMENT",
+   "image": "amceora546-fig12.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 85.192,
+     "y": 44.857,
+     "conf": 100
+    },
+    {
+     "key": "1",
+     "x": 82.404,
+     "y": 47.6,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 51.515,
+     "y": 9.671,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 52.99,
+     "y": 45.471,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 38.424,
+     "y": 38.014,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 73.596,
+     "y": 17.471,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 56.667,
+     "y": 54.014,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 72.828,
+     "y": 21.814,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 51.98,
+     "y": 19.1,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 59.697,
+     "y": 25.2,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 61.556,
+     "y": 30.543,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 56.242,
+     "y": 33.4,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 67.313,
+     "y": 37.714,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 60.323,
+     "y": 34.843,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 50.869,
+     "y": 37.629,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 57.98,
+     "y": 35.729,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 51.576,
+     "y": 43.186,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 42.222,
+     "y": 42.029,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 17.737,
+     "y": 29.671,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 54.909,
+     "y": 49.171,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 25.212,
+     "y": 37.643,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 76.182,
+     "y": 38.214,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 89.879,
+     "y": 42.243,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 86.909,
+     "y": 51.9,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 71.596,
+     "y": 50.143,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 81.576,
+     "y": 54.557,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 78.646,
+     "y": 55.929,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 69.697,
+     "y": 50.9,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 49.253,
+     "y": 59.657,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 57.434,
+     "y": 66.257,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 73.414,
+     "y": 68.543,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 49.818,
+     "y": 74.557,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 51.111,
+     "y": 82.9,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 58.141,
+     "y": 79.843,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 58.141,
+     "y": 82.171,
+     "conf": 100
+    },
+    {
+     "key": "30",
+     "x": 57.98,
+     "y": 88.157,
+     "conf": 100
+    },
+    {
+     "key": "31",
+     "x": 72.889,
+     "y": 88.529,
+     "conf": 100
+    },
+    {
+     "key": "32",
+     "x": 70.465,
+     "y": 90.086,
+     "conf": 100
+    },
+    {
+     "key": "33",
+     "x": 57.535,
+     "y": 92.2,
+     "conf": 100
+    },
+    {
+     "key": "34",
+     "x": 71.798,
+     "y": 94.543,
+     "conf": 100
+    },
+    {
+     "key": "35",
+     "x": 36.222,
+     "y": 77.9,
+     "conf": 100
+    },
+    {
+     "key": "37",
+     "x": 67.394,
+     "y": 5.5,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "525755105",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCFM",
+     "qty": "6",
+     "remarks": "",
+     "search": "525755105"
+    },
+    {
+     "key": "2",
+     "part_number": "547396002",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER KIT",
+     "qty": "3",
+     "remarks": "Bracket",
+     "search": "547396002"
+    },
+    {
+     "key": "3",
+     "part_number": "529791402",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "12",
+     "remarks": "Screw",
+     "search": "529791402"
+    },
+    {
+     "key": "4",
+     "part_number": "597599303",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTER MOTOR ASSY",
+     "qty": "3",
+     "remarks": "Cutting Motor From S/N 260404837",
+     "search": "597599303"
+    },
+    {
+     "key": "4",
+     "part_number": "540887201",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR KIT",
+     "qty": "3",
+     "remarks": "Cutting Motor Upgrade kit Up to S/N 260404836",
+     "search": "540887201"
+    },
+    {
+     "key": "5",
+     "part_number": "599412301",
+     "depth": 0,
+     "sub": false,
+     "description": "HUB",
+     "qty": "3",
+     "remarks": "Hub",
+     "search": "599412301"
+    },
+    {
+     "key": "6",
+     "part_number": "576645703",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "10",
+     "remarks": "Nut",
+     "search": "576645703"
+    },
+    {
+     "key": "7",
+     "part_number": "531022402",
+     "depth": 0,
+     "sub": false,
+     "description": "BEAM",
+     "qty": "1",
+     "remarks": "Beam",
+     "search": "531022402"
+    },
+    {
+     "key": "8",
+     "part_number": "531022602",
+     "depth": 0,
+     "sub": false,
+     "description": "SUPPORT",
+     "qty": "2",
+     "remarks": "Support Gable",
+     "search": "531022602"
+    },
+    {
+     "key": "9",
+     "part_number": "531022702",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE",
+     "qty": "3",
+     "remarks": "Plate support",
+     "search": "531022702"
+    },
+    {
+     "key": "10",
+     "part_number": "503230072",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "16",
+     "remarks": "Washer",
+     "search": "503230072"
+    },
+    {
+     "key": "11",
+     "part_number": "599690301",
+     "depth": 0,
+     "sub": false,
+     "description": "BUSHING",
+     "qty": "8",
+     "remarks": "Bushing silentblock",
+     "search": "599690301"
+    },
+    {
+     "key": "12",
+     "part_number": "525755109",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCFM",
+     "qty": "8",
+     "remarks": "Screw",
+     "search": "525755109"
+    },
+    {
+     "key": "13",
+     "part_number": "529856201",
+     "depth": 0,
+     "sub": false,
+     "description": "SLEEVE",
+     "qty": "8",
+     "remarks": "Sleeve",
+     "search": "529856201"
+    },
+    {
+     "key": "14",
+     "part_number": "598028101",
+     "depth": 0,
+     "sub": false,
+     "description": "LINK ARM",
+     "qty": "4",
+     "remarks": "Link arm",
+     "search": "598028101"
+    },
+    {
+     "key": "15",
+     "part_number": "599936402",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "Bracket height adjustment right",
+     "search": "599936402"
+    },
+    {
+     "key": "16",
+     "part_number": "599936401",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "Bracket height adjustment left",
+     "search": "599936401"
+    },
+    {
+     "key": "17",
+     "part_number": "599936504",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "Bracket Gable right",
+     "search": "599936504"
+    },
+    {
+     "key": "18",
+     "part_number": "599936503",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "Bracket gable left",
+     "search": "599936503"
+    },
+    {
+     "key": "19",
+     "part_number": "599304301",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "2",
+     "remarks": "Bracket height adjustment lifter",
+     "search": "599304301"
+    },
+    {
+     "key": "20",
+     "part_number": "529948901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "529948901"
+    },
+    {
+     "key": "21",
+     "part_number": "531093601",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "4",
+     "remarks": "Washer",
+     "search": "531093601"
+    },
+    {
+     "key": "22",
+     "part_number": "599605901",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "2",
+     "remarks": "Bracket link nut angle adjustment",
+     "search": "599605901"
+    },
+    {
+     "key": "23",
+     "part_number": "576645704",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "2",
+     "remarks": "Nut",
+     "search": "576645704"
+    },
+    {
+     "key": "24",
+     "part_number": "598408801",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTING DISC",
+     "qty": "3",
+     "remarks": "Blade disc",
+     "search": "598408801"
+    },
+    {
+     "key": "25",
+     "part_number": "590508701",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "9",
+     "remarks": "Screw",
+     "search": "590508701"
+    },
+    {
+     "key": "26",
+     "part_number": "598409301",
+     "depth": 0,
+     "sub": false,
+     "description": "RING",
+     "qty": "3",
+     "remarks": "Ring skidplate",
+     "search": "598409301"
+    },
+    {
+     "key": "27",
+     "part_number": "599412901",
+     "depth": 0,
+     "sub": false,
+     "description": "SKID PLATE",
+     "qty": "3",
+     "remarks": "Skid plate",
+     "search": "599412901"
+    },
+    {
+     "key": "28",
+     "part_number": "599412402",
+     "depth": 0,
+     "sub": false,
+     "description": "BEARING HOUSING ASSY",
+     "qty": "3",
+     "remarks": "Bearing housing assy",
+     "search": "599412402"
+    },
+    {
+     "key": "29",
+     "part_number": "548498401",
+     "depth": 0,
+     "sub": false,
+     "description": "BALL BEARING",
+     "qty": "6",
+     "remarks": "Ball bearing",
+     "search": "548498401"
+    },
+    {
+     "key": "30",
+     "part_number": "585297501",
+     "depth": 0,
+     "sub": false,
+     "description": "O-RING",
+     "qty": "3",
+     "remarks": "O-ring",
+     "search": "585297501"
+    },
+    {
+     "key": "31",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "9",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "32",
+     "part_number": "599535101",
+     "depth": 0,
+     "sub": false,
+     "description": "RETAINER",
+     "qty": "3",
+     "remarks": "Retainer",
+     "search": "599535101"
+    },
+    {
+     "key": "33",
+     "part_number": "599533701",
+     "depth": 0,
+     "sub": false,
+     "description": "STRAP",
+     "qty": "3",
+     "remarks": "Strap Cap",
+     "search": "599533701"
+    },
+    {
+     "key": "34",
+     "part_number": "598409201",
+     "depth": 0,
+     "sub": false,
+     "description": "CAP",
+     "qty": "3",
+     "remarks": "Cap",
+     "search": "598409201"
+    },
+    {
+     "key": "35",
+     "part_number": "536326202",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTING DISC",
+     "qty": "3",
+     "remarks": "",
+     "search": "536326202"
+    },
+    {
+     "key": "35",
+     "part_number": "536326211",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTING DISC",
+     "qty": "3",
+     "remarks": "North America",
+     "search": "536326211"
+    },
+    {
+     "key": "37",
+     "part_number": "525755117",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCFM",
+     "qty": "1",
+     "remarks": "Screw",
+     "search": "525755117"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.12 DECK · BLADE MOTOR AND CUTTING EQUIPMENT"
+  },
+  {
+   "id": "13",
+   "number": "11",
+   "title": "DECK · FRAME, ELECTRICAL SYSTEM",
+   "image": "amceora546-fig13.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 47.051,
+     "y": 5.114,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 34.929,
+     "y": 7.429,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 61.394,
+     "y": 9.814,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 20.606,
+     "y": 34.443,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 64.586,
+     "y": 12.4,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 29.515,
+     "y": 27.8,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 54.404,
+     "y": 39.086,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 21.273,
+     "y": 32.657,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 54.97,
+     "y": 50.557,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 52.586,
+     "y": 48.043,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 64.788,
+     "y": 39.514,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 18.141,
+     "y": 36.9,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 81.899,
+     "y": 55.129,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 30.828,
+     "y": 44.086,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 67.616,
+     "y": 57.371,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 69.212,
+     "y": 54.757,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 26.121,
+     "y": 53.971,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 69.293,
+     "y": 73.129,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 35.515,
+     "y": 57.314,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 54.404,
+     "y": 56.7,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 66.505,
+     "y": 63.4,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 57.455,
+     "y": 76.586,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 38.04,
+     "y": 79.529,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 63.475,
+     "y": 81.857,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 69.475,
+     "y": 92.014,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 63.414,
+     "y": 94.386,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 76.646,
+     "y": 64.7,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 82.808,
+     "y": 56.929,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 66.99,
+     "y": 41.314,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 17.414,
+     "y": 38.757,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 37.879,
+     "y": 24.643,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "586038902",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "Cover air filter",
+     "search": "586038902"
+    },
+    {
+     "key": "2",
+     "part_number": "548629101",
+     "depth": 0,
+     "sub": false,
+     "description": "MEMBRANE",
+     "qty": "1",
+     "remarks": "Air filter",
+     "search": "548629101"
+    },
+    {
+     "key": "3",
+     "part_number": "574450101",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "10",
+     "remarks": "Screw",
+     "search": "574450101"
+    },
+    {
+     "key": "4",
+     "part_number": "599656301",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "Cover electric box frame",
+     "search": "599656301"
+    },
+    {
+     "key": "5",
+     "part_number": "595311901",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Wiring assy Controlboard",
+     "search": "595311901"
+    },
+    {
+     "key": "6",
+     "part_number": "598531407",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Wiring assy Magnetic loop sensor single",
+     "search": "598531407"
+    },
+    {
+     "key": "7",
+     "part_number": "538635501",
+     "depth": 0,
+     "sub": false,
+     "description": "CLAMP",
+     "qty": "1",
+     "remarks": "Cable holder P-clip",
+     "search": "538635501"
+    },
+    {
+     "key": "8",
+     "part_number": "599436401",
+     "depth": 0,
+     "sub": false,
+     "description": "TIE WRAP",
+     "qty": "13",
+     "remarks": "Tie wrap",
+     "search": "599436401"
+    },
+    {
+     "key": "9",
+     "part_number": "598460901",
+     "depth": 0,
+     "sub": false,
+     "description": "MAGNET",
+     "qty": "1",
+     "remarks": "Magnet",
+     "search": "598460901"
+    },
+    {
+     "key": "10",
+     "part_number": "593822101",
+     "depth": 0,
+     "sub": false,
+     "description": "MAGNET",
+     "qty": "2",
+     "remarks": "Magnet",
+     "search": "593822101"
+    },
+    {
+     "key": "11",
+     "part_number": "598531406",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "2",
+     "remarks": "Wiring assy Magnetic loop sensor single",
+     "search": "598531406"
+    },
+    {
+     "key": "12",
+     "part_number": "525755105",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCFM",
+     "qty": "6",
+     "remarks": "Screw",
+     "search": "525755105"
+    },
+    {
+     "key": "13",
+     "part_number": "598863002",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "2",
+     "remarks": "Wiring assy Height adjustment motor",
+     "search": "598863002"
+    },
+    {
+     "key": "14",
+     "part_number": "598919503",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "3",
+     "remarks": "Control unit, cut motor board (G4/B) incl. wiring",
+     "search": "598919503"
+    },
+    {
+     "key": "15",
+     "part_number": "575543314",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "575543314"
+    },
+    {
+     "key": "16",
+     "part_number": "594086801",
+     "depth": 0,
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY",
+     "qty": "1",
+     "remarks": "Control board type 2",
+     "search": "594086801"
+    },
+    {
+     "key": "17",
+     "part_number": "529791402",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "529791402"
+    },
+    {
+     "key": "19",
+     "part_number": "598004501",
+     "depth": 0,
+     "sub": false,
+     "description": "INSERT",
+     "qty": "8",
+     "remarks": "Insert",
+     "search": "598004501"
+    },
+    {
+     "key": "20",
+     "part_number": "598370701",
+     "depth": 0,
+     "sub": false,
+     "description": "BASE",
+     "qty": "1",
+     "remarks": "Base electric box frame",
+     "search": "598370701"
+    },
+    {
+     "key": "21",
+     "part_number": "529332001",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "3",
+     "remarks": "Cover",
+     "search": "529332001"
+    },
+    {
+     "key": "22",
+     "part_number": "599476401",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING ASSY",
+     "qty": "3",
+     "remarks": "Magnetic sensor circuit board",
+     "search": "599476401"
+    },
+    {
+     "key": "23",
+     "part_number": "548468601",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "Gasket",
+     "search": "548468601"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.13 DECK · FRAME, ELECTRICAL SYSTEM"
+  },
+  {
+   "id": "14",
+   "number": "7",
+   "title": "DECK · WHEELS AND TIRES",
+   "image": "amceora546-fig14.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 28.667,
+     "y": 13.843,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 27.111,
+     "y": 18.429,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 13.192,
+     "y": 20.986,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 36.949,
+     "y": 26.971,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 28.586,
+     "y": 33.743,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 50.121,
+     "y": 32.871,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 60.545,
+     "y": 42.9,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 79.051,
+     "y": 81.514,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "535541701",
+     "depth": 0,
+     "sub": false,
+     "description": "CAP",
+     "qty": "2",
+     "remarks": "Cap, Bearing housing",
+     "search": "535541701"
+    },
+    {
+     "key": "2",
+     "part_number": "576645703",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "2",
+     "remarks": "Nut",
+     "search": "576645703"
+    },
+    {
+     "key": "3",
+     "part_number": "531370601",
+     "depth": 0,
+     "sub": false,
+     "description": "RADIAL SEAL",
+     "qty": "2",
+     "remarks": "Radial seal",
+     "search": "531370601"
+    },
+    {
+     "key": "4",
+     "part_number": "599530801",
+     "depth": 0,
+     "sub": false,
+     "description": "BELLOWS",
+     "qty": "2",
+     "remarks": "Bellows",
+     "search": "599530801"
+    },
+    {
+     "key": "5",
+     "part_number": "531370701",
+     "depth": 0,
+     "sub": false,
+     "description": "SHIELD",
+     "qty": "2",
+     "remarks": "Shield",
+     "search": "531370701"
+    },
+    {
+     "key": "6",
+     "part_number": "537582302",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL ASSY",
+     "qty": "1",
+     "remarks": "Front wheel",
+     "search": "537582302"
+    },
+    {
+     "key": "7",
+     "part_number": "546200501",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER KIT",
+     "qty": "1",
+     "remarks": "Cover kit",
+     "search": "546200501"
+    },
+    {
+     "key": "8",
+     "part_number": "574450101",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "6",
+     "remarks": "Screw",
+     "search": "574450101"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 2,
+   "label": "Fig.14 DECK · WHEELS AND TIRES"
+  },
+  {
+   "id": "15",
+   "number": "12",
+   "title": "DECK · PIVOTING ARM",
+   "image": "amceora546-fig15.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 51.131,
+     "y": 5.729,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 76.505,
+     "y": 12.9,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 66.606,
+     "y": 19.629,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 72.505,
+     "y": 23.014,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 70.465,
+     "y": 26.8,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 69.96,
+     "y": 30.014,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 82.97,
+     "y": 26.429,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 69.111,
+     "y": 31.514,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 41.394,
+     "y": 33.014,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 26.545,
+     "y": 46.929,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 82.303,
+     "y": 67.786,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 82.0,
+     "y": 70.586,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 52.929,
+     "y": 66.3,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 52.949,
+     "y": 69.857,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 73.152,
+     "y": 65.186,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 67.879,
+     "y": 74.286,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 79.232,
+     "y": 74.7,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 81.152,
+     "y": 84.086,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 75.838,
+     "y": 86.557,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 74.303,
+     "y": 62.529,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 20.929,
+     "y": 56.929,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 79.091,
+     "y": 43.943,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 34.505,
+     "y": 50.7,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 82.949,
+     "y": 31.214,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 85.576,
+     "y": 30.143,
+     "conf": 100
+    },
+    {
+     "key": "26",
+     "x": 89.131,
+     "y": 28.586,
+     "conf": 100
+    },
+    {
+     "key": "27",
+     "x": 85.192,
+     "y": 91.514,
+     "conf": 100
+    },
+    {
+     "key": "28",
+     "x": 48.121,
+     "y": 88.157,
+     "conf": 100
+    },
+    {
+     "key": "29",
+     "x": 71.939,
+     "y": 93.043,
+     "conf": 100
+    },
+    {
+     "key": "30",
+     "x": 79.111,
+     "y": 88.371,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "598014401",
+     "depth": 0,
+     "sub": false,
+     "description": "JOINT",
+     "qty": "1",
+     "remarks": "Joint",
+     "search": "598014401"
+    },
+    {
+     "key": "2",
+     "part_number": "599606201",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "Lever",
+     "search": "599606201"
+    },
+    {
+     "key": "3",
+     "part_number": "534209601",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL",
+     "qty": "2",
+     "remarks": "Wheel",
+     "search": "534209601"
+    },
+    {
+     "key": "4",
+     "part_number": "597951301",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "Excenter  support plate",
+     "search": "597951301"
+    },
+    {
+     "key": "5",
+     "part_number": "531249401",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "2",
+     "remarks": "Spring",
+     "search": "531249401"
+    },
+    {
+     "key": "6",
+     "part_number": "598024101",
+     "depth": 0,
+     "sub": false,
+     "description": "SLEEVE",
+     "qty": "2",
+     "remarks": "Sleeve",
+     "search": "598024101"
+    },
+    {
+     "key": "7",
+     "part_number": "599154001",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "2",
+     "remarks": "Cover",
+     "search": "599154001"
+    },
+    {
+     "key": "8",
+     "part_number": "531249501",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "2",
+     "remarks": "Spring",
+     "search": "531249501"
+    },
+    {
+     "key": "9",
+     "part_number": "599831001",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSETM",
+     "qty": "1",
+     "remarks": "Screw",
+     "search": "599831001"
+    },
+    {
+     "key": "10",
+     "part_number": "599606103",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "Bracket",
+     "search": "599606103"
+    },
+    {
+     "key": "11",
+     "part_number": "503230072",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "Washer",
+     "search": "503230072"
+    },
+    {
+     "key": "12",
+     "part_number": "574450101",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "574450101"
+    },
+    {
+     "key": "13",
+     "part_number": "503230005",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "Washer",
+     "search": "503230005"
+    },
+    {
+     "key": "14",
+     "part_number": "525762503",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXSCM",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "525762503"
+    },
+    {
+     "key": "15",
+     "part_number": "599504601",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "Spring excenter hook",
+     "search": "599504601"
+    },
+    {
+     "key": "16",
+     "part_number": "597908501",
+     "depth": 0,
+     "sub": false,
+     "description": "HOOK",
+     "qty": "1",
+     "remarks": "Hook lock to excenter",
+     "search": "597908501"
+    },
+    {
+     "key": "17",
+     "part_number": "529791403",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "4",
+     "remarks": "Screw",
+     "search": "529791403"
+    },
+    {
+     "key": "18",
+     "part_number": "597907302",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "Bracket interface cutting unit",
+     "search": "597907302"
+    },
+    {
+     "key": "19",
+     "part_number": "598008201",
+     "depth": 0,
+     "sub": false,
+     "description": "BUSHING",
+     "qty": "2",
+     "remarks": "Bushing",
+     "search": "598008201"
+    },
+    {
+     "key": "21",
+     "part_number": "535589401",
+     "depth": 0,
+     "sub": false,
+     "description": "SUPPORT",
+     "qty": "1",
+     "remarks": "Support",
+     "search": "535589401"
+    },
+    {
+     "key": "22",
+     "part_number": "599504301",
+     "depth": 0,
+     "sub": false,
+     "description": "SHAFT",
+     "qty": "1",
+     "remarks": "Shaft",
+     "search": "599504301"
+    },
+    {
+     "key": "23",
+     "part_number": "536813401",
+     "depth": 0,
+     "sub": false,
+     "description": "BUSHING",
+     "qty": "1",
+     "remarks": "Bushing",
+     "search": "536813401"
+    },
+    {
+     "key": "24",
+     "part_number": "535014601",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "Washer",
+     "search": "535014601"
+    },
+    {
+     "key": "25",
+     "part_number": "534998801",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "Spring",
+     "search": "534998801"
+    },
+    {
+     "key": "26",
+     "part_number": "731432401",
+     "depth": 0,
+     "sub": false,
+     "description": "HEXAGON THIN NUT",
+     "qty": "1",
+     "remarks": "Nut",
+     "search": "731432401"
+    },
+    {
+     "key": "27",
+     "part_number": "506570108",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHFM",
+     "qty": "2",
+     "remarks": "Screw",
+     "search": "506570108"
+    },
+    {
+     "key": "28",
+     "part_number": "576645704",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "2",
+     "remarks": "Nut",
+     "search": "576645704"
+    },
+    {
+     "key": "29",
+     "part_number": "548712401",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "Washer",
+     "search": "548712401"
+    },
+    {
+     "key": "30",
+     "part_number": "548501701",
+     "depth": 0,
+     "sub": false,
+     "description": "SLEEVE",
+     "qty": "2",
+     "remarks": "Sleeve",
+     "search": "548501701"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.15 DECK · PIVOTING ARM"
+  },
+  {
+   "id": "16",
+   "number": "13",
+   "title": "DECK · PLATE, PROTECTION",
+   "image": "amceora546-fig16.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 29.596,
+     "y": 36.957,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 76.182,
+     "y": 35.229,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 19.475,
+     "y": 56.286,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 50.848,
+     "y": 66.686,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "599466701",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE ASSY",
+     "qty": "1",
+     "remarks": "Protection plate",
+     "search": "599466701"
+    },
+    {
+     "key": "2",
+     "part_number": "599530701",
+     "depth": 0,
+     "sub": false,
+     "description": "BELLOWS",
+     "qty": "3",
+     "remarks": "Bellows",
+     "search": "599530701"
+    },
+    {
+     "key": "3",
+     "part_number": "574450101",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANT",
+     "qty": "16",
+     "remarks": "Screw",
+     "search": "574450101"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.16 DECK · PLATE, PROTECTION"
+  },
+  {
+   "id": "17",
+   "number": "8",
+   "title": "DECK · ACCESSORIES",
+   "image": "amceora546-fig17.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 52.545,
+     "y": 12.229,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 57.556,
+     "y": 31.129,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 50.444,
+     "y": 41.671,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 50.667,
+     "y": 68.457,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "599739901",
+     "depth": 0,
+     "sub": false,
+     "description": "TOOL",
+     "qty": "1",
+     "remarks": "",
+     "search": "599739901"
+    },
+    {
+     "key": "2",
+     "part_number": "577606505",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SET",
+     "qty": "1",
+     "remarks": "Blades 45 pcs incl. Screws",
+     "search": "577606505"
+    },
+    {
+     "key": "2",
+     "part_number": "577606604",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SET",
+     "qty": "1",
+     "remarks": "Blades 300 pcs incl. Screws",
+     "search": "577606604"
+    },
+    {
+     "key": "2",
+     "part_number": "596287201",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SET",
+     "qty": "1",
+     "remarks": "US - Blades 9 pcs incl. Screws",
+     "search": "596287201"
+    },
+    {
+     "key": "2",
+     "part_number": "596287301",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SET",
+     "qty": "1",
+     "remarks": "US - Blades 45 pcs incl. Screws",
+     "search": "596287301"
+    },
+    {
+     "key": "2",
+     "part_number": "596287302",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SET",
+     "qty": "1",
+     "remarks": "US - Blades 300 pcs incl. Screws",
+     "search": "596287302"
+    },
+    {
+     "key": "2",
+     "part_number": "599805301",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SET",
+     "qty": "1",
+     "remarks": "Blades 45 pcs incl. Screws",
+     "search": "599805301"
+    },
+    {
+     "key": "2",
+     "part_number": "599805302",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SET",
+     "qty": "1",
+     "remarks": "Blades 300 pcs incl. Screws",
+     "search": "599805302"
+    },
+    {
+     "key": "2",
+     "part_number": "599805311",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SET",
+     "qty": "1",
+     "remarks": "US - Blades 45 pcs incl. Screws",
+     "search": "599805311"
+    },
+    {
+     "key": "2",
+     "part_number": "599805312",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SET",
+     "qty": "1",
+     "remarks": "US - Blades 300 pcs incl. Screws",
+     "search": "599805312"
+    },
+    {
+     "key": "3",
+     "part_number": "536326202",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTING DISC",
+     "qty": "1",
+     "remarks": "Medium",
+     "search": "536326202"
+    },
+    {
+     "key": "3",
+     "part_number": "536326211",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTING DISC",
+     "qty": "1",
+     "remarks": "Medium - North America",
+     "search": "536326211"
+    },
+    {
+     "key": "4",
+     "part_number": "536930903",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTING DISC",
+     "qty": "1",
+     "remarks": "Large",
+     "search": "536930903"
+    },
+    {
+     "key": "4",
+     "part_number": "536930912",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTING DISC",
+     "qty": "1",
+     "remarks": "Large - North America",
+     "search": "536930912"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 2,
+   "label": "Fig.17 DECK · ACCESSORIES"
+  }
+ ]
+}

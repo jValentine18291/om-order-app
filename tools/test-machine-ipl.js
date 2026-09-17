@@ -162,17 +162,33 @@ check("another Automower claims none of them",
 
 // And the field is optional: most books carry none. This list is a tripwire,
 // not a ban - an alias is a claim that one book serves a machine it is not
-// named after, and every one of them should have been looked at. The four:
+// named after, and every one of them should have been looked at. The seven:
 //
-//   the three Automowers   AutoCount's code and description share no words
-//                          with the name on the drawings, so the books were
-//                          unreachable from a slip written off the catalogue
+//   the six Automowers     AutoCount's code and description share no words
+//                          with the name on the drawings, so the books are
+//                          unreachable from a slip written off the catalogue,
+//                          and from the shorthand the workshop writes by hand
+//                          - "AM105", "AM420iQ", "420iQ", "AM450X".
 //   hus536li               every sheet in the book is headed "536 LiXP /
 //                          436 Li", so Husqvarna publish it as one book for
 //                          two saws. Without the alias a 436Li finds nothing.
+//
+// The CEORA 546 is the counter-example and is deliberately absent: it was
+// given "CEORA546" and "CEORA 546" on the way in, and neither changed a
+// single match, because the short name "CEORA 546 EPOS" already answers to
+// both. They were taken off again. That is what this tripwire is for - an
+// alias that makes no difference is not free, it is one more way for a book
+// to claim a machine it was never checked against.
+//
+// The 315X Mark II shows the other edge. It first carried "AM315X", and a
+// plain Automower 315 - a machine we hold no book for - matched it, because
+// a slip is allowed to name the START of a key so that "BK3410" finds
+// "BK3410FL". Anything beginning "AM315" is claimed by "AM315". Its aliases
+// now begin at the 315X, which the 315 cannot be a prefix of.
 const withAliases = INDEX.filter((e) => e.aliases);
 check("only the machines that needed them have aliases",
-  withAliases.map((e) => e.id).sort(), ["am450x", "am535epos", "am550epos", "hus536li"]);
+  withAliases.map((e) => e.id).sort(),
+  ["am105", "am315xmkii", "am420iq", "am450x", "am535epos", "am550epos", "hus536li"]);
 
 // The 536 saws, which are two machines one letter apart.
 //
@@ -191,9 +207,12 @@ check("the top-handle one is not confused with it",
 check("and the 436Li shares the rear-handle book, as its drawings say",
   [match(machine("", "436Li")), match(machine("", "436 Li"))],
   ["hus536li", "hus536li"]);
-// A machine whose name merely contains the digits, and which has no book here.
+// A machine whose name merely contains the digits. It had no book of its own
+// when this was written and had to match nothing; the 525iB blower has since
+// been added, so the right answer is now its own book - and the point of the
+// check is unchanged either way, which is that it is not handed the T525's.
 check("and a 525iB battery blower is not a T525",
-  match(machine("", "525iB Battery Blower - 1/2")), "");
+  match(machine("", "525iB Battery Blower - 1/2")), "hus525ib");
 check("and not one of them matches without a brand to back it",
   shortKeys.filter((k) => match(machine("", `${k} machine`))), []);
 
