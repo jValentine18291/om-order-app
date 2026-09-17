@@ -611,5 +611,14 @@
   "category": "Pole Saw",
   "figures": 6,
   "parts": 103
+ },
+ {
+  "id": "husexclusive54",
+  "name": "Husqvarna Exclusive 54 Manual Lawn Mower",
+  "short": "Exclusive 54",
+  "brand": "Husqvarna",
+  "category": "Lawn Mower",
+  "figures": 1,
+  "parts": 26
  }
 ]

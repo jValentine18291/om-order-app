@@ -1,0 +1,431 @@
+{
+ "id": "husexclusive54",
+ "name": "Husqvarna Exclusive 54 Manual Lawn Mower",
+ "source": "Husqvarna portal CSV export (54 Manual Lawn Mower IPL.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "PRODUCT COMPLETE",
+   "image": "husexclusive54-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 11.657,
+     "y": 15.929,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 21.515,
+     "y": 22.814,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 12.667,
+     "y": 59.671,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 25.515,
+     "y": 70.214,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 23.96,
+     "y": 78.957,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 34.485,
+     "y": 85.743,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 20.263,
+     "y": 75.443,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 56.626,
+     "y": 82.929,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 51.495,
+     "y": 88.971,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 84.202,
+     "y": 86.229,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 89.495,
+     "y": 75.371,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 79.495,
+     "y": 71.771,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 66.222,
+     "y": 70.129,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 61.455,
+     "y": 63.929,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 64.99,
+     "y": 61.157,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 68.869,
+     "y": 51.843,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 43.778,
+     "y": 26.571,
+     "conf": 100
+    },
+    {
+     "key": "18",
+     "x": 45.354,
+     "y": 22.129,
+     "conf": 100
+    },
+    {
+     "key": "19",
+     "x": 30.283,
+     "y": 72.657,
+     "conf": 100
+    },
+    {
+     "key": "20",
+     "x": 45.273,
+     "y": 78.657,
+     "conf": 100
+    },
+    {
+     "key": "21",
+     "x": 56.768,
+     "y": 77.771,
+     "conf": 100
+    },
+    {
+     "key": "22",
+     "x": 51.071,
+     "y": 33.5,
+     "conf": 100
+    },
+    {
+     "key": "23",
+     "x": 79.475,
+     "y": 85.086,
+     "conf": 100
+    },
+    {
+     "key": "24",
+     "x": 89.677,
+     "y": 85.743,
+     "conf": 100
+    },
+    {
+     "key": "25",
+     "x": 25.859,
+     "y": 67.671,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "725237951",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "1",
+     "remarks": "",
+     "search": "725237951"
+    },
+    {
+     "key": "2",
+     "part_number": "725238051",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "1",
+     "remarks": "",
+     "search": "725238051"
+    },
+    {
+     "key": "3",
+     "part_number": "371906101",
+     "depth": 0,
+     "sub": false,
+     "description": "GEAR",
+     "qty": "1",
+     "remarks": "LEFT",
+     "search": "371906101"
+    },
+    {
+     "key": "4",
+     "part_number": "295611813",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE",
+     "qty": "1",
+     "remarks": "",
+     "search": "295611813"
+    },
+    {
+     "key": "5",
+     "part_number": "371900701",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT",
+     "qty": "2",
+     "remarks": "",
+     "search": "371900701"
+    },
+    {
+     "key": "6",
+     "part_number": "295656901",
+     "depth": 0,
+     "sub": false,
+     "description": "ROLLER",
+     "qty": "1",
+     "remarks": "",
+     "search": "295656901"
+    },
+    {
+     "key": "7",
+     "part_number": "295613701",
+     "depth": 0,
+     "sub": false,
+     "description": "TOOL HOLDER",
+     "qty": "1",
+     "remarks": "LEFT",
+     "search": "295613701"
+    },
+    {
+     "key": "8",
+     "part_number": "295613702",
+     "depth": 0,
+     "sub": false,
+     "description": "TOOL HOLDER",
+     "qty": "1",
+     "remarks": "RIGHT",
+     "search": "295613702"
+    },
+    {
+     "key": "9",
+     "part_number": "371902101",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "371902101"
+    },
+    {
+     "key": "10",
+     "part_number": "371914201",
+     "depth": 0,
+     "sub": false,
+     "description": "CLIP",
+     "qty": "2",
+     "remarks": "",
+     "search": "371914201"
+    },
+    {
+     "key": "11",
+     "part_number": "295696301",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL",
+     "qty": "2",
+     "remarks": "",
+     "search": "295696301"
+    },
+    {
+     "key": "12",
+     "part_number": "371906201",
+     "depth": 0,
+     "sub": false,
+     "description": "GEAR",
+     "qty": "1",
+     "remarks": "RIGHT",
+     "search": "371906201"
+    },
+    {
+     "key": "13",
+     "part_number": "725237951",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "4",
+     "remarks": "",
+     "search": "725237951"
+    },
+    {
+     "key": "14",
+     "part_number": "371379101",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCK",
+     "qty": "2",
+     "remarks": "",
+     "search": "371379101"
+    },
+    {
+     "key": "15",
+     "part_number": "295655801",
+     "depth": 0,
+     "sub": false,
+     "description": "BEARING",
+     "qty": "2",
+     "remarks": "",
+     "search": "295655801"
+    },
+    {
+     "key": "16",
+     "part_number": "732211601",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCK NUT",
+     "qty": "4",
+     "remarks": "",
+     "search": "732211601"
+    },
+    {
+     "key": "17",
+     "part_number": "732211601",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCK NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "732211601"
+    },
+    {
+     "key": "18",
+     "part_number": "371379603",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE",
+     "qty": "2",
+     "remarks": "",
+     "search": "371379603"
+    },
+    {
+     "key": "19",
+     "part_number": "734115301",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "734115301"
+    },
+    {
+     "key": "20",
+     "part_number": "725237951",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW EHHM",
+     "qty": "2",
+     "remarks": "",
+     "search": "725237951"
+    },
+    {
+     "key": "21",
+     "part_number": "732211601",
+     "depth": 0,
+     "sub": false,
+     "description": "LOCK NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "732211601"
+    },
+    {
+     "key": "22",
+     "part_number": "371397105",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE",
+     "qty": "2",
+     "remarks": "",
+     "search": "371397105"
+    },
+    {
+     "key": "23",
+     "part_number": "371914401",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "371914401"
+    },
+    {
+     "key": "24",
+     "part_number": "964901030",
+     "depth": 0,
+     "sub": false,
+     "description": "COLLECTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "964901030"
+    },
+    {
+     "key": "24",
+     "part_number": "295613305",
+     "depth": 0,
+     "sub": false,
+     "description": "HUB",
+     "qty": "2",
+     "remarks": "",
+     "search": "295613305"
+    },
+    {
+     "key": "25",
+     "part_number": "295613601",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "2",
+     "remarks": "",
+     "search": "295613601"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 PRODUCT COMPLETE"
+  }
+ ]
+}

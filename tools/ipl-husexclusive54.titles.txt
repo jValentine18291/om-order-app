@@ -1,0 +1,23 @@
+# Exclusive 54 sheet title. One sheet, and it carries no section letter.
+#
+# The drawing says PRODUCT COMPLETE; the export says COMPLETE PRODUCT. The
+# page wins, as everywhere else.
+#
+# THE NAME IS WHY THIS BOOK IS FINDABLE AT ALL. The portal files this machine
+# as "54" and the file John sent was "54 Manual Lawn Mower". Imported under
+# the short name "54" the book was unreachable, and test-machine-ipl.js said
+# so on the first run: a model key has to be three characters before the
+# matcher will use it, because two characters turn up inside every other piece
+# of text there is. "54" is two.
+#
+# The drawing gives the answer - it heads itself HUSQVARNA EXCLUSIVE 54, which
+# is the machine's actual name. "Exclusive 54" is eleven characters, stands on
+# its own, and the book is reachable from it with no aliases needed.
+#
+# WORTH CHECKING WHEN ONE COMES IN: if the workshop writes plain "54" on the
+# slip, or AutoCount files it that way, this book will still not be found, and
+# no alias can fix it - the floor is in the matcher, not in the data. The fix
+# then is whatever AutoCount actually calls the machine, added as an alias. Do
+# not be tempted to lower the floor: "54" would match a 254, a 354 and half
+# the serial numbers in the catalogue.
+PRODUCT COMPLETE
