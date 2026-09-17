@@ -6,22 +6,56 @@
 # commas in the cylinder sheet. Kept so the tabs read as the sheet in front of
 # the technician does.
 #
-# Sheet 10 is the one that decides what this machine is: SAW HEAD, with an oil
-# tank, an oil pump and a sprocket. See the note in the commit - it is a pole
-# saw, not a pole hedge trimmer.
+# Sheet 1 is the one that decides what this machine is: SAW HEAD, with an oil
+# tank, an oil pump and a sprocket. It is a pole saw, not a pole hedge trimmer.
 #
-# One line per sheet, in the order --dry-run lists them.
-ACCESSORIES
+# ORDER CORRECTED, September 2026. This book went in with the export's own
+# order, which is not the book's: it opened on ACCESSORIES, put the shaft last,
+# and left CARBURETOR seven tabs away from CARBURETOR & AIR FILTER. The
+# drawings letter themselves and the letters say otherwise:
+#
+#     A  SAW HEAD          F  STARTER        K  CYLINDER PISTON & MUFFLER
+#     B  (see below)       G  CRANKCASE      L  CRANKSHAFT
+#     C  THROTTLE CONTROLS H  FUEL TANK      M  CARBURETOR
+#     D  COVER             J  IGNITION SYSTEM & CLUTCH
+#     E  CARBURETOR & AIR FILTER
+#
+# Eleven of the fourteen are placed by their own letter and are not in doubt.
+# The other three carry none, and here is exactly how firm each one is:
+#
+#   SHAFT        placed at B, which is an INFERENCE, not a reading. B is the
+#                one letter the book does not use, the shaft is the only sheet
+#                left that belongs among the machine's structure rather than
+#                its engine, and on the 525HF3S - same family, same tool - the
+#                shaft sits third, right after the cutting sections. Nothing
+#                is printed on the sheet to confirm it. If a paper copy ever
+#                turns up, this is the line to check.
+#
+#   SHORT BLOCK  last but one, and ACCESSORIES last. Both follow the 525HE4
+#                and the 525HF3S, where SHORT BLOCK comes second from the end
+#                and ACCESSORIES closes the book. Neither is lettered on any
+#                of the three, so this is convention rather than evidence -
+#                but a short block is a whole engine and an accessories sheet
+#                is a catalogue, and neither belongs in the middle.
+#
+# There are no page numbers on these sheets to settle it with. The numerals in
+# the top corners are callouts.
+#
+# One line per sheet, in the order --order puts them - NOT the order --dry-run
+# lists them without it. The two must be changed together:
+#
+#   --order "10,14,6,8,11,7,12,5,9,2,3,4,13,1"
+SAW HEAD
+SHAFT
+THROTTLE CONTROLS
+COVER
+CARBURETOR & AIR FILTER
+STARTER
+CRANKCASE
+FUEL TANK
+IGNITION SYSTEM & CLUTCH
 CYLINDER PISTON & MUFFLER
 CRANKSHAFT
 CARBURETOR
-FUEL TANK
-THROTTLE CONTROLS
-STARTER
-COVER
-IGNITION SYSTEM & CLUTCH
-SAW HEAD
-CARBURETOR & AIR FILTER
-CRANKCASE
 SHORT BLOCK
-SHAFT
+ACCESSORIES
