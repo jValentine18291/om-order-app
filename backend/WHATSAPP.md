@@ -1,15 +1,21 @@
 # Sending the Service Slip to the customer on WhatsApp
 
-**Live since 17 Sep 2026.** Every piece Meta required is done, the settings are
-in the service, and the server reports itself ready:
+**Switched on, and NOT yet delivering.** The settings are in the service, the
+template is approved, and the server reports itself ready:
 
     GET https://192.168.1.7:8443/api/whatsapp/status
     {"enabled":true,"configured":true,"auto_send":false}
 
-That is the one command worth knowing. It answers "why is the button missing?"
-without guessing: `enabled` is `WHATSAPP_ENABLED`, `configured` means the phone
-number id and token are both set, and the button only appears when both are
-true. `auto_send` is deliberately false — see "Manual, or automatic".
+That is the one command worth knowing on this side. It answers "why is the
+button missing?" without guessing: `enabled` is `WHATSAPP_ENABLED`,
+`configured` means the phone number id and token are both set, and the button
+only appears when both are true. `auto_send` is deliberately false — see
+"Manual, or automatic".
+
+But ready is not the same as working. The first real send, on 17 Sep 2026, was
+accepted by Meta, given a genuine message id, and never delivered, because the
+Meta app is still unpublished. See "The send that says SENT and never arrives"
+below before trusting anything here.
 
 ## How it works
 
@@ -172,7 +178,7 @@ Neither addition touches the code. `sendSlip` transmits two components, header
 and body; a footer carries no parameter, and a Call button only needs one when
 the number is dynamic. Ours is fixed, so the payload is unchanged.
 
-## What Meta required — all of it now done
+## What Meta required
 
 Kept as a list rather than deleted: if sending ever stops, it is far more
 likely to be one of these four lapsing than a change in the code.
@@ -204,6 +210,86 @@ likely to be one of these four lapsing than a change in the code.
    this is the first thing to check if sends start failing for everyone at
    once.
 4. ~~**A phone number**~~ — **done** 16 Sep 2026, +65 6743 4039 Connected.
+5. **The app has to be PUBLISHED.** Still outstanding, and it is the reason
+   the first test send never arrived. See below.
+
+## The send that says SENT and never arrives
+
+17 Sep 2026, the first real send. The app reported success, and the log agreed:
+
+    2026-09-17 17:01:21 | Slip 00068 | 6593371539 | SENT | wamid.HBgKNjU5MzM3MTUzORUCABEYEjg4QkQ2QUMwQkIwODBDQkZDOQA= | John (admin)
+
+Nothing arrived on the phone.
+
+**The cause is that the Meta app is unpublished.** "OM Service Slips", app id
+1641703167381415, sits in Development mode, and the Publish page in the app
+dashboard says it plainly:
+
+> No production data, including from app admins, developers or testers, will
+> be delivered unless the app has been published.
+
+So the Graph API accepts the message, allocates a real message id, and then
+drops it. There is no error anywhere, because from the API's point of view
+nothing went wrong.
+
+### Ruling things out, in the order they were checked
+
+Worth keeping, because every one of these looks plausible from the app side
+and none of them was the problem:
+
+- **The missing `+`.** The log shows `6593371539` with no plus, which looks
+  wrong and is not. Meta's API wants the country code and no plus - their own
+  examples read `16505551234`. Our code is right.
+- **The wrong phone number.** `WHATSAPP_PHONE_NUMBER_ID` is 1232499416620504,
+  which WhatsApp Manager confirms is +65 6743 4039, Connected. Not the test
+  number: that one is +1 555 204-2573, id 1364565713396880, and it lives on a
+  separate "Test WhatsApp Business Account" (1072019868648567) that we do not
+  use for anything.
+- **Billing.** The real account has a Visa on file and a S$0.00 balance. The
+  Test account has no payment method, which does not matter.
+- **The template.** Approved, and the send would have failed loudly otherwise.
+- **`WHATSAPP_GRAPH_BASE` still pointing at the stand-in API.** This one was
+  the leading theory and was wrong: the variable is not set on the server.
+
+### How to tell those two apart next time
+
+The message id in the log settles it in one glance, without asking anyone to
+paste a token:
+
+    wamid.TEST1                         the stand-in. Nothing was really sent.
+    wamid.HBgKNjU5MzM3MTUzORUCABEY...   real Meta.
+
+A real one is base64 and decodes to something readable:
+
+    b'\x1c\x18\n6593371539\x15\x02\x00\x11\x18\x1288BD6AC0BB080CBFC9\x00'
+
+The recipient's number is in there in plain digits, which also proves the
+message was addressed correctly. A wamid is an identifier, not a credential -
+it is safe to paste into a chat or an email. The token never is.
+
+### What publishing needs
+
+The Publish page lists one unmet requirement and greys the button out until it
+is met: a **Privacy policy URL** in App settings.
+
+The website does not currently have one. Its footer links to
+`/privacy-policy/`, which returns **404** - a broken link on the live site,
+independently of WhatsApp. `/terms-and-conditions/` and `/terms/` both work.
+So a privacy policy page has to exist before the app can be published, and
+pointing Meta at the terms page instead would be answering a different
+question than the one it asked.
+
+### Why no webhook made this expensive
+
+None of the above was visible from inside the app. Meta reports delivery
+failures through webhooks, and there is no webhook here - `whatsapp.js` only
+sends. The log can therefore say SENT and mean "Meta accepted it", which is
+not the same as "the customer has it", and on 17 Sep those two came apart for
+the first time.
+
+Worth fixing eventually, and not cheaply: a webhook needs a public HTTPS
+endpoint, and this server is on the LAN at 192.168.1.7. Until then, SENT in
+the log means accepted, no more than that.
 
 ### Submitting the template: two things that will bite again
 
