@@ -566,5 +566,14 @@
   "category": "Robotic Mower",
   "figures": 17,
   "parts": 306
+ },
+ {
+  "id": "hus115il",
+  "name": "Husqvarna 115iL Grass Trimmer",
+  "short": "115iL",
+  "brand": "Husqvarna",
+  "category": "Grass Trimmer",
+  "figures": 6,
+  "parts": 48
  }
 ]

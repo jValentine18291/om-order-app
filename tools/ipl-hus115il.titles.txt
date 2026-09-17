@@ -1,0 +1,34 @@
+# 115iL sheet titles, in the order the export lists them (A to E already).
+#
+# TWO ELECTRICAL SHEETS, and they are one machine at two ages rather than two
+# variants. Husqvarna letter them D1 and D2 and print the split only in the
+# parts comments; the export files both as "ELECTRICAL" with nothing but an
+# unseen IPL ID between them, so the tabs would have read Fig.4 ELECTRICAL
+# twice and a technician would have had to open both and compare.
+#
+#     D1   up to S/N 20195201546      the earlier machines
+#     D2   above S/N 20195201546      the later ones
+#
+# They are not small differences. The keypad changes part number, the panel
+# gains a bracket, and D2 carries two keypads and a screw that D1 has no row
+# for at all - so picking the wrong tab means ordering a keypad that will not
+# fit the machine on the bench.
+#
+# The spelling difference is Husqvarna's own and is kept: D1 prints ELECTRIC,
+# D2 prints ELECTRICAL. Tidying them into one word would hide that these are
+# two drawings, which is the one thing the tabs are here to show.
+#
+# NAMES. Two others differ from the export - the drawings say CUTTING and
+# BATTERY HOUSING where the portal says CUTTING EQUIPMENT and BATTERY.
+#
+# CATEGORY. This is the first Grass Trimmer in the app. It is deliberately not
+# filed under Brushcutter: those are the heavy 525RX/541RB class with a blade
+# and a harness, and a technician filtering for one should not be handed the
+# other. The new chip needs its Chinese name in i18n.js, which is where it now
+# is - 打草机.
+CUTTING
+TUBE
+BATTERY HOUSING
+ELECTRIC (D1, up to S/N 20195201546)
+ELECTRICAL (D2, above S/N 20195201546)
+ACCESSORIES

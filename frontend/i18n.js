@@ -226,6 +226,12 @@
     "Hedge Trimmer": "绿篱机",
     "Pole Hedge Trimmer": "高枝绿篱机",
     "Brushcutter": "割灌机",
+    // The line trimmer, not the brushcutter above it and not the mower below:
+    // 割灌机 is the heavy blade-and-harness machine, 草坪机 is a lawn mower,
+    // and 打草机 is the one with a nylon head. Worth a second pair of eyes -
+    // it is the first of these three words the app has had to choose for
+    // itself rather than copy from a machine already in the catalogue.
+    "Grass Trimmer": "打草机",
     "Robotic Mower": "智能割草机",
     "Lawn Mower": "草坪机",
     "Power Cutter": "切割机",

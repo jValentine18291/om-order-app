@@ -1,0 +1,855 @@
+{
+ "id": "hus115il",
+ "name": "Husqvarna 115iL Grass Trimmer",
+ "source": "Husqvarna portal CSV export (115iL Battery Grass Trimmer IPL.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "CUTTING",
+   "image": "hus115il-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 32.115,
+     "y": 20.009,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 50.705,
+     "y": 13.612,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 68.269,
+     "y": 8.893,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 88.397,
+     "y": 51.044,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 38.846,
+     "y": 64.474,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 21.923,
+     "y": 83.485,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 39.936,
+     "y": 86.887,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 35.385,
+     "y": 77.768,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 86.154,
+     "y": 59.528,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 85.321,
+     "y": 77.904,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 88.974,
+     "y": 83.258,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 88.397,
+     "y": 88.022,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 78.974,
+     "y": 24.002,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "590390301",
+     "depth": 0,
+     "sub": false,
+     "description": "MOTOR HOUSING",
+     "qty": "1",
+     "remarks": "",
+     "search": "590390301"
+    },
+    {
+     "key": "2",
+     "part_number": "591384201",
+     "depth": 0,
+     "sub": false,
+     "description": "GEARBOX ASSY",
+     "qty": "1",
+     "remarks": "967098701/967098702, HIGHER THAN S/N 20180500001, 967098802/967098803/967098804, HIGHER THAN S/N 20180600001, 967098801, HIGHER THAN S/N 20180500001. 400W, 36V, BLDC, 3 PHASES",
+     "search": "591384201",
+     "search_alt": "967098701967098702"
+    },
+    {
+     "key": "2",
+     "part_number": "582839301",
+     "depth": 0,
+     "sub": false,
+     "description": "GEARBOX ASSY",
+     "qty": "1",
+     "remarks": "967098701/967098702, UP TO S/N 20180300276, 967098801/967098803/967098804, UP TO S/N 20180401270, 967098802, UP TO S/N 20180503270. 400W, 36V, BLDC, 3 phases",
+     "search": "582839301",
+     "search_alt": "967098701967098702"
+    },
+    {
+     "key": "3",
+     "part_number": "585339101",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "585339101"
+    },
+    {
+     "key": "4",
+     "part_number": "585819002",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "8",
+     "remarks": "For 967098801, 967098802, 967098803, 967098804",
+     "search": "585819002"
+    },
+    {
+     "key": "5",
+     "part_number": "582452901",
+     "depth": 0,
+     "sub": false,
+     "description": "GUARD",
+     "qty": "1",
+     "remarks": "US/CA",
+     "search": "582452901"
+    },
+    {
+     "key": "6",
+     "part_number": "591083001",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE",
+     "qty": "1",
+     "remarks": "US/CA",
+     "search": "591083001"
+    },
+    {
+     "key": "7",
+     "part_number": "503217516",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW IHSCFT",
+     "qty": "2",
+     "remarks": "US/CA",
+     "search": "503217516"
+    },
+    {
+     "key": "8",
+     "part_number": "586030401",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "586030401"
+    },
+    {
+     "key": "9",
+     "part_number": "576809401",
+     "depth": 0,
+     "sub": false,
+     "description": "WRENCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "576809401"
+    },
+    {
+     "key": "10",
+     "part_number": "585339201",
+     "depth": 0,
+     "sub": false,
+     "description": "GUARD",
+     "qty": "1",
+     "remarks": "For 967098801, 967098802, 967098803, 967098804",
+     "search": "585339201"
+    },
+    {
+     "key": "11",
+     "part_number": "585340901",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE",
+     "qty": "1",
+     "remarks": "For 967098801, 967098802, 967098803, 967098804",
+     "search": "585340901"
+    },
+    {
+     "key": "12",
+     "part_number": "585819002",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "For 967098801, 967098802, 967098803, 967098804",
+     "search": "585819002"
+    },
+    {
+     "key": "13",
+     "part_number": "586480101",
+     "depth": 0,
+     "sub": false,
+     "description": "RING",
+     "qty": "1",
+     "remarks": "For 967098801, 967098802, 967098803, 967098804",
+     "search": "586480101"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 CUTTING"
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "TUBE",
+   "image": "hus115il-fig2.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 28.141,
+     "y": 29.071,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 45.232,
+     "y": 21.629,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 82.283,
+     "y": 41.6,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 15.737,
+     "y": 42.371,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 68.848,
+     "y": 14.5,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 39.293,
+     "y": 57.971,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 42.202,
+     "y": 62.7,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 62.485,
+     "y": 80.471,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 74.485,
+     "y": 84.114,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "588754901",
+     "depth": 0,
+     "sub": false,
+     "description": "COUPLING",
+     "qty": "1",
+     "remarks": "",
+     "search": "588754901"
+    },
+    {
+     "key": "2",
+     "part_number": "590932701",
+     "depth": 0,
+     "sub": false,
+     "description": "LEVER",
+     "qty": "2",
+     "remarks": "",
+     "search": "590932701"
+    },
+    {
+     "key": "3",
+     "part_number": "586452301",
+     "depth": 0,
+     "sub": false,
+     "description": "SPACER",
+     "qty": "1",
+     "remarks": "",
+     "search": "586452301"
+    },
+    {
+     "key": "4",
+     "part_number": "588755002",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "588755002"
+    },
+    {
+     "key": "5",
+     "part_number": "585341101",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE",
+     "qty": "1",
+     "remarks": "UP TO S/N 20195201546",
+     "search": "585341101"
+    },
+    {
+     "key": "5",
+     "part_number": "597765701",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE",
+     "qty": "1",
+     "remarks": "HIGHER THAN S/N 20195201546",
+     "search": "597765701"
+    },
+    {
+     "key": "6",
+     "part_number": "588755101",
+     "depth": 0,
+     "sub": false,
+     "description": "COUPLING",
+     "qty": "1",
+     "remarks": "",
+     "search": "588755101"
+    },
+    {
+     "key": "7",
+     "part_number": "582553401",
+     "depth": 0,
+     "sub": false,
+     "description": "TUBE ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "582553401"
+    },
+    {
+     "key": "8",
+     "part_number": "587889218",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "587889218"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 TUBE"
+  },
+  {
+   "id": "3",
+   "number": "3",
+   "title": "BATTERY HOUSING",
+   "image": "hus115il-fig3.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 43.755,
+     "y": 16.929,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 50.627,
+     "y": 17.071,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 28.355,
+     "y": 48.014,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 49.05,
+     "y": 51.271,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 71.12,
+     "y": 90.843,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 61.58,
+     "y": 78.986,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 43.917,
+     "y": 85.243,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 22.898,
+     "y": 94.957,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "585325201",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "585325201"
+    },
+    {
+     "key": "2",
+     "part_number": "582565101",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "582565101"
+    },
+    {
+     "key": "3",
+     "part_number": "585342401",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "585342401"
+    },
+    {
+     "key": "4",
+     "part_number": "588755201",
+     "depth": 0,
+     "sub": false,
+     "description": "TRIGGER",
+     "qty": "1",
+     "remarks": "",
+     "search": "588755201"
+    },
+    {
+     "key": "5",
+     "part_number": "585327201",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "585327201"
+    },
+    {
+     "key": "6",
+     "part_number": "585819002",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "9",
+     "remarks": "",
+     "search": "585819002"
+    },
+    {
+     "key": "7",
+     "part_number": "585325301",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "585325301"
+    },
+    {
+     "key": "8",
+     "part_number": "585819001",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "585819001"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 BATTERY HOUSING"
+  },
+  {
+   "id": "4",
+   "number": "4",
+   "title": "ELECTRIC (D1, up to S/N 20195201546)",
+   "image": "hus115il-fig4.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 85.911,
+     "y": 29.628,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 18.902,
+     "y": 50.0,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 54.204,
+     "y": 54.537,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 12.227,
+     "y": 70.78,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 61.842,
+     "y": 64.701,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 87.003,
+     "y": 20.871,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 86.874,
+     "y": 37.613,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "582453401",
+     "depth": 0,
+     "sub": false,
+     "description": "KEYPAD",
+     "qty": "1",
+     "remarks": "UP TO S/N 20195201546",
+     "search": "582453401"
+    },
+    {
+     "key": "2",
+     "part_number": "593264501",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "1",
+     "remarks": "UP TO S/N 20195201546",
+     "search": "593264501"
+    },
+    {
+     "key": "3",
+     "part_number": "590808502",
+     "depth": 0,
+     "sub": false,
+     "description": "MICRO SWITCH",
+     "qty": "1",
+     "remarks": "UP TO S/N 20195201546",
+     "search": "590808502"
+    },
+    {
+     "key": "4",
+     "part_number": "585818901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "UP TO S/N 20195201546",
+     "search": "585818901"
+    },
+    {
+     "key": "5",
+     "part_number": "591076901",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE",
+     "qty": "1",
+     "remarks": "UP TO S/N 20195201546",
+     "search": "591076901"
+    },
+    {
+     "key": "6",
+     "part_number": "585327301",
+     "depth": 0,
+     "sub": false,
+     "description": "PANEL",
+     "qty": "1",
+     "remarks": "UP TO S/N 20195201546",
+     "search": "585327301"
+    },
+    {
+     "key": "7",
+     "part_number": "585861601",
+     "depth": 0,
+     "sub": false,
+     "description": "SUPPORT",
+     "qty": "1",
+     "remarks": "UP TO S/N 20195201546",
+     "search": "585861601"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 1,
+   "label": "Fig.4 ELECTRIC (D1, up to S/N 20195201546)"
+  },
+  {
+   "id": "5",
+   "number": "4",
+   "title": "ELECTRICAL (D2, above S/N 20195201546)",
+   "image": "hus115il-fig5.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 87.003,
+     "y": 34.982,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 17.747,
+     "y": 49.682,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 52.985,
+     "y": 53.902,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 11.264,
+     "y": 70.236,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 60.558,
+     "y": 64.02,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 86.489,
+     "y": 27.995,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 86.617,
+     "y": 21.779,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 86.553,
+     "y": 14.973,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 83.601,
+     "y": 38.929,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "597665401",
+     "depth": 0,
+     "sub": false,
+     "description": "KEYPAD",
+     "qty": "1",
+     "remarks": "HIGHER THAN S/N 20195201546",
+     "search": "597665401"
+    },
+    {
+     "key": "2",
+     "part_number": "593264501",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL UNIT",
+     "qty": "1",
+     "remarks": "HIGHER THAN S/N 20195201546",
+     "search": "593264501"
+    },
+    {
+     "key": "3",
+     "part_number": "590808502",
+     "depth": 0,
+     "sub": false,
+     "description": "MICRO SWITCH",
+     "qty": "1",
+     "remarks": "HIGHER THAN S/N 20195201546",
+     "search": "590808502"
+    },
+    {
+     "key": "4",
+     "part_number": "585818901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "HIGHER THAN S/N 20195201546",
+     "search": "585818901"
+    },
+    {
+     "key": "5",
+     "part_number": "591076901",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE",
+     "qty": "1",
+     "remarks": "HIGHER THAN S/N 20195201546",
+     "search": "591076901"
+    },
+    {
+     "key": "6",
+     "part_number": "597765601",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "HIGHER THAN S/N 20195201546",
+     "search": "597765601"
+    },
+    {
+     "key": "7",
+     "part_number": "597665501",
+     "depth": 0,
+     "sub": false,
+     "description": "KEYPAD",
+     "qty": "1",
+     "remarks": "HIGHER THAN S/N 20195201546",
+     "search": "597665501"
+    },
+    {
+     "key": "8",
+     "part_number": "585327301",
+     "depth": 0,
+     "sub": false,
+     "description": "PANEL",
+     "qty": "1",
+     "remarks": "HIGHER THAN S/N 20195201546",
+     "search": "585327301"
+    },
+    {
+     "key": "9",
+     "part_number": "585818901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "HIGHER THAN S/N 20195201546",
+     "search": "585818901"
+    }
+   ],
+   "sheets": 2,
+   "sheet": 2,
+   "label": "Fig.4 ELECTRICAL (D2, above S/N 20195201546)"
+  },
+  {
+   "id": "6",
+   "number": "5",
+   "title": "ACCESSORIES",
+   "image": "hus115il-fig6.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 50.032,
+     "y": 17.809,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "589873201",
+     "depth": 0,
+     "sub": false,
+     "description": "TRIMMER HEAD",
+     "qty": "1",
+     "remarks": "",
+     "search": "589873201"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.5 ACCESSORIES"
+  }
+ ]
+}
