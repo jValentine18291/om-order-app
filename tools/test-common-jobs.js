@@ -1,5 +1,5 @@
-// The three buttons that go on any machine: a weld, an oil change, a
-// carburettor service.
+// The buttons that go on any machine: a weld, an oil change, a carburettor
+// service, a yellow fuel pipe.
 //
 //   node tools/test-common-jobs.js C:/temp/scratch.db
 //
@@ -41,10 +41,11 @@ const J = global.window.OM_JOBS;
 
 console.log("\n-- the table itself --");
 check("it checks out", J.check(), []);
-check("three jobs, in the order they were asked for",
-  J.list.map((j) => j.title), ["Welding", "Change Engine Oil", "Service Carburetor & Labour"]);
-check("at the prices given", J.list.map((j) => j.price), [30, 9, 0]);
-check("one of each", J.list.map((j) => j.qty), [1, 1, 1]);
+check("the jobs, in the order they were asked for",
+  J.list.map((j) => j.title),
+  ["Welding", "Change Engine Oil", "Service Carburetor & Labour", "Yellow Fuel Pipe"]);
+check("at the prices given", J.list.map((j) => j.price), [30, 9, 0, 3]);
+check("one of each", J.list.map((j) => j.qty), [1, 1, 1, 1]);
 check("two of them share the warehouse service code",
   J.list.filter((j) => j.code === "A7 SVR WAREHOUSE").map((j) => j.title),
   ["Welding", "Service Carburetor & Labour"]);
@@ -105,6 +106,26 @@ check("four lines", parts.length, 4);
 check("on the engine oil code",
   parts.find((p) => p.variant === "OIL").item_code, "A6 SVR ENGINE OIL");
 check("at nine dollars", parts.find((p) => p.variant === "OIL").unit_price, 9);
+
+console.log("\n-- the fuel pipe goes on A8, and two of them are two lines --");
+// A8 is the spare-parts code rather than a service one, and the catalogue
+// carries no part number for a pipe cut off a roll - which is the whole reason
+// it is a button rather than something to find in Find Part. Two pipes are two
+// lines for the same reason two welds are: A8 is free text, so the wording on
+// one can be edited without silently relabelling the other.
+parts = add("PIPE");
+parts = add("PIPE");
+const pipes = parts.filter((p) => p.variant === "PIPE");
+check("two pipe lines", pipes.length, 2);
+check("on the spare parts code",
+  [...new Set(pipes.map((p) => p.item_code))], ["A8 SPARE PARTS"]);
+check("at three dollars each", pipes.map((p) => p.unit_price), [3, 3]);
+check("and they do not stack", pipes.map((p) => p.quantity), [1, 1]);
+// A8 at nothing is NOT one of these jobs priced at nothing on purpose - the
+// pipe costs $3 - so an A8 line with no price must still be flagged for
+// somebody to fill in.
+check("an A8 line at no price is still a gap",
+  J.zeroIsDeliberate({ item_code: "A8 SPARE PARTS", unit_price: 0, variant: "PIPE" }), false);
 
 console.log("\n-- a price of nothing is an answer, not a gap --");
 // The screen flags a part with no price so somebody fills it in. The

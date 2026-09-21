@@ -2369,9 +2369,13 @@ select {
 .tube-pick-head span { font-size: 12px; color: var(--ink-faint, #78868c); }
 .tube-btns { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
 @media (max-width: 420px) { .tube-btns { grid-template-columns: repeat(4, 1fr); } }
-/* Three buttons, not ten, and each carries a phrase rather than a tube number
-   - so they get a row of their own and room for the words to wrap. */
-.job-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+/* A handful of buttons, not ten, and each carries a phrase rather than a tube
+   number - so they get a row of their own and room for the words to wrap.
+   auto-fit rather than a fixed count: the number of jobs is common-jobs.js's
+   to decide, and a hard-coded 3 left a fourth job stranded alone on a second
+   row. On a phone this comes out two across, which suits "Service Carburetor
+   & Labour"; on a wider screen they sit in one row as before. */
+.job-btns { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
 .job-btn {
   font-size: 13px; line-height: 1.25;
   padding: 10px 6px 8px;

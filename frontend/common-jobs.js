@@ -1,6 +1,6 @@
 // common-jobs.js
 // ============================================================================
-// The three jobs that come up on any machine, as buttons.
+// The jobs that come up on any machine, as buttons.
 //
 // THIS IS THE FILE TO EDIT WHEN A PRICE CHANGES, or when a job is added or
 // taken away. Nothing else needs touching - the buttons, the lines they add
@@ -8,12 +8,17 @@
 // version in sw.js afterwards or phones keep the old prices.
 //
 // Asked for by the technicians, 14 Sep 2026, after the fogger tube buttons:
-// the same three lines were being typed onto slip after slip.
+// the same three lines were being typed onto slip after slip. The yellow fuel
+// pipe joined them on 21 Sep 2026, for the same reason.
 //
 // WHY THESE LINES NEED A TABLE AT ALL
-// They are not catalogue parts. A6 and A7 are AutoCount's SERVICE items - the
+// They are not catalogue parts. A6 to A8 are AutoCount's SERVICE items - the
 // accounts want the work under one code - so the code says nothing about what
 // was actually done, and the price is ours rather than the catalogue's.
+//
+// A8 "Spare Parts Of Equipment" is the code for a consumable the catalogue
+// does not carry a part number for. The yellow fuel pipe is cut off a roll
+// and has none, which is exactly what A8 is there to hold.
 //
 // TWO OF THEM SHARE ONE CODE. Welding and a carburettor service are both
 // "A7 SVR WAREHOUSE" and they are not the same job, at not the same price. So
@@ -42,6 +47,11 @@
     // part is - see zeroIsDeliberate().
     { id: "CARB", title: "Service Carburetor & Labour",
       code: "A7 SVR WAREHOUSE",    qty: 1, price: 0.00 },
+    // One pipe per tap. These lines never merge - see addPartToMachine - so a
+    // machine that took two gets two lines, or one line the technician steps
+    // up to 2 with the stepper. Either reads the same on the Sales Order.
+    { id: "PIPE", title: "Yellow Fuel Pipe",
+      code: "A8 SPARE PARTS",      qty: 1, price: 3.00 },
   ];
 
   function byId(id) {

@@ -2344,8 +2344,9 @@ async function editPartDescription(partId, current) {
 }
 
 // ---- Common jobs -----------------------------------------------------------
-// Three buttons on every machine, whatever it is. See common-jobs.js, which is
-// the file to edit when a price changes.
+// The same few buttons on every machine, whatever it is. See common-jobs.js,
+// which is the file to edit when a price changes or a job is added - the
+// buttons lay themselves out to however many are in that table.
 function renderJobPicker() {
   const box = $("job-pick");
   if (!box || !window.OM_JOBS) return;
