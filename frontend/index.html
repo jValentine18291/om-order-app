@@ -764,6 +764,27 @@
     </div>
   </div>
 
+  <!-- The question asked before anything goes to a customer. Filled in by
+       confirmAction() in app.js, which also explains why this is a sheet of
+       our own rather than a confirm(). -->
+  <div class="modal-overlay" id="ask-modal" style="display:none">
+    <div class="modal-sheet modal-sheet-narrow">
+      <div class="modal-head">
+        <div>
+          <strong id="ask-title"></strong>
+          <div class="mm-sub" id="ask-sub"></div>
+        </div>
+        <button class="modal-x" id="ask-x" type="button" aria-label="Close">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <div class="ask-to" id="ask-to"></div>
+        <p class="nsm-hint" id="ask-detail"></p>
+        <button class="btn-primary" id="ask-go" type="button" style="width:100%"></button>
+        <button class="btn-secondary" id="ask-no" type="button" style="width:100%;margin-top:8px;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="conv-modal" style="display:none">
     <div class="modal-sheet">
       <div class="modal-head">

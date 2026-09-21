@@ -391,6 +391,23 @@
     // where somebody reads a line off and types it in. That is the one rule
     // this file is built on: what comes from the catalogue or goes back to
     // it is never altered.
+    // ---- Asking before anything reaches a customer ----
+    // See confirmAction() in app.js. A technician reads this app in Chinese,
+    // and a safety question somebody cannot read is one they tap through -
+    // which is the thing it was added to stop.
+    "Send this slip to the customer?": "确定要把这张服务单发给客户吗？",
+    "They get the message and the signed PDF straight away. It cannot be unsent.":
+      "客户会立即收到信息和已签名的 PDF。发出后无法撤回。",
+    "Send on WhatsApp": "用 WhatsApp 发送",
+    "Open a WhatsApp chat with this customer?": "确定要开启这位客户的 WhatsApp 对话吗？",
+    // Two keys because the Drive sentence is tacked on to the first one before
+    // it reaches the page, and this dictionary matches whole lines.
+    "Nothing is sent yet — WhatsApp opens with the message ready and you press send there.":
+      "目前还没有发送任何东西 — WhatsApp 会带着写好的信息打开，由您在那里按发送。",
+    "Nothing is sent yet — WhatsApp opens with the message ready and you press send there. It does file this slip in Drive and put a link to it in the message, which anyone holding that link can open.":
+      "目前还没有发送任何东西 — WhatsApp 会带着写好的信息打开，由您在那里按发送。"
+      + "但它会把这张服务单存入 Drive，并在信息中附上链接，任何拿到该链接的人都能打开。",
+
     "Common jobs": "常用工序",
     "Tap one to add it to this machine": "点选即可加入此机器",
     "no charge": "不收费",
@@ -771,6 +788,7 @@
     [/^\((\d+) qty\)$/, "（$1 件）"],
 
     // Slip / machine context lines
+    [/^Slip (\d+)$/, "服务单 $1"],
     [/^· Slip (.+)$/, "· 服务单 $1"],
     [/^Machine: (.+) · Tech: (.+)$/, "机器：$1 · 技术员：$2"],
 

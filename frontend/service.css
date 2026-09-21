@@ -997,6 +997,19 @@ select {
   padding: 16px 16px 20px;
   -webkit-overflow-scrolling: touch;
 }
+/* Who the message is going to, in the confirmation sheet. Deliberately the
+   biggest thing on it: it is the one line that has to be READ, because the
+   mistake worth catching is the right message to the wrong customer, and a
+   number set in body text gets skimmed past. See confirmAction() in app.js. */
+.ask-to {
+  border: 1px solid var(--line, #e3e6e8);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: #f7fbfb;
+}
+.ask-to .ask-num { display: block; font-size: 20px; font-weight: 700; letter-spacing: .5px; }
+.ask-to .ask-who { display: block; font-size: 13px; margin-top: 2px; color: var(--ink-faint, #78868c); }
 .modal-head {
   display: flex; justify-content: space-between; align-items: flex-start;
   gap: 12px; margin-bottom: 12px;

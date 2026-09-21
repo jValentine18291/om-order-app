@@ -1366,6 +1366,74 @@ async function sendSlipWhatsApp(slipIn, { auto = false } = {}) {
   }
 }
 
+// ---- Asking before anything reaches a customer -----------------------------
+// One sheet, used by every question of this kind, answered with a promise.
+//
+// WHY THIS IS NOT A confirm(). Everywhere else in this app a confirm() is
+// right - it cannot be missed and it needs no markup. Here it is wrong, for a
+// reason that only shows up on the Open chat button:
+//
+// A browser will only open a new tab for a short while after a real tap -
+// measured in this one at somewhere between 4 and 6 seconds, which is Chrome's
+// 5-second window. Open chat has to file the slip in Drive BEFORE it can build
+// the message, so the clock is already running when the upload starts. Put a
+// confirm() in front of that and the budget also has to cover somebody reading
+// it: dialog plus upload goes over five seconds, the tab is refused, and the
+// button does nothing at all with no error to show for it.
+//
+// A sheet of our own has no such problem. Tapping ITS button is a fresh tap,
+// so the upload gets the whole window to itself - exactly the budget the
+// button had before any of this was added. Measured, not assumed: see
+// tools/test-whatsapp-confirm.js for what the probe found.
+//
+// It is also simply a better question. The customer's number can be set large
+// enough to be read rather than skimmed, which is the point of asking at all.
+function confirmAction({ title, sub = "", to = "", who = "", detail = "", ok = "Yes" }) {
+  const modal = $("ask-modal");
+  $("ask-title").textContent = title;
+  $("ask-sub").textContent = sub;
+  $("ask-to").innerHTML = to
+    ? `<span class="ask-num mono">${escapeHtml(to)}</span>${
+        who ? `<span class="ask-who">${escapeHtml(who)}</span>` : ""}`
+    : "";
+  $("ask-to").style.display = to ? "" : "none";
+  $("ask-detail").textContent = detail;
+  $("ask-go").textContent = ok;
+  modal.style.display = "";
+
+  return new Promise((resolve) => {
+    // Answered once, and every way out is wired to the same answer - a sheet
+    // that could be dismissed without resolving would leave the caller waiting
+    // forever, holding a button it had already disabled.
+    let done = false;
+    const finish = (answer) => {
+      if (done) return;
+      done = true;
+      modal.style.display = "none";
+      $("ask-go").onclick = $("ask-no").onclick = $("ask-x").onclick = null;
+      modal.onclick = null;
+      document.removeEventListener("keydown", onKey);
+      resolve(answer);
+    };
+    const onKey = (e) => { if (e.key === "Escape") finish(false); };
+    $("ask-go").onclick = () => finish(true);
+    $("ask-no").onclick = () => finish(false);
+    $("ask-x").onclick = () => finish(false);
+    // Tapping the dark surround is a no, the way it is on the other sheets.
+    modal.onclick = (e) => { if (e.target === modal) finish(false); };
+    document.addEventListener("keydown", onKey);
+  });
+}
+
+// Who the customer is, worked out the way the server works it out. One place,
+// so the question and the message cannot name different people.
+function customerContact(slip) {
+  return {
+    to: String(slip.whatsapp_number || slip.contact_number || "").trim(),
+    who: String(slip.contact_name || slip.company || "").trim(),
+  };
+}
+
 // Asked before every send a person makes.
 //
 // THIS IS THE ONE BUTTON IN THE APP THAT REACHES A CUSTOMER BY ITSELF.
@@ -1384,14 +1452,16 @@ async function sendSlipWhatsApp(slipIn, { auto = false } = {}) {
 // is the mistake that actually costs something here, worse than the stray tap
 // this was asked for.
 function confirmWhatsappSend(slip) {
-  const to = String(slip.whatsapp_number || slip.contact_number || "").trim();
-  const who = String(slip.contact_name || slip.company || "").trim();
-  return confirm(
-    `Send service slip ${slip.slip_number} to the customer on WhatsApp?\n\n` +
-    `To  ${to || "(no number on this slip)"}${who ? "  ·  " + who : ""}\n\n` +
-    "They get the message and the signed PDF straight away. " +
-    "It cannot be unsent."
-  );
+  const { to, who } = customerContact(slip);
+  return confirmAction({
+    title: "Send this slip to the customer?",
+    sub: `Slip ${slip.slip_number}`,
+    to: to || "(no number on this slip)",
+    who,
+    detail: "They get the message and the signed PDF straight away. " +
+            "It cannot be unsent.",
+    ok: "Send on WhatsApp",
+  });
 }
 
 // One button, used on the success card and again in View Slips - the second
@@ -1403,7 +1473,7 @@ function wireWhatsappButton(btn, slip, { auto = false } = {}) {
     // taken, on the server, for every slip - and it fires as the success card
     // appears, so a question there would be answered by whoever happened to be
     // holding the phone, or sit unanswered with the customer waiting.
-    if (!isAuto && !confirmWhatsappSend(slip)) return;
+    if (!isAuto && !(await confirmWhatsappSend(slip))) return;
     btn.disabled = true;
     btn.textContent = isAuto ? "Sending to customer…" : "Sending…";
     const r = await sendSlipWhatsApp(slip, { auto: isAuto });
@@ -1687,8 +1757,50 @@ const LINK_HINT =
 // the old path - open the chat, send, come back, Share PDF - still works, and
 // a Drive that is merely having a bad day falls back to it rather than
 // stranding somebody at the counter.
+// Asked before Open chat, for the same reason the send is asked about: this
+// sits in the same row, on the same long page, and gets caught by the same
+// thumb.
+//
+// BUT IT IS A DIFFERENT QUESTION, and saying "send?" here would be a lie that
+// costs something. Open chat does not send. It writes the message into
+// WhatsApp and leaves it there for somebody to press send on, and if staff
+// come to believe otherwise they will start hunting for a message the customer
+// never got - or worse, trust this button to have delivered a slip it only
+// drafted.
+//
+// What it DOES do without asking anyone is file the slip in Drive and make
+// that PDF readable by whoever holds the link. Nobody holds it yet - it exists
+// only inside the unsent draft - so a stray tap gives nothing away. It is
+// still a thing done to a customer's document, and it is the reason this
+// question is worth more than "are you sure".
+//
+// The link is only made when Drive is set up, so it is only mentioned then.
+// A warning about something that is not going to happen is how people learn to
+// stop reading these.
+function confirmOpenChat(slip, drive) {
+  const { to, who } = customerContact(slip);
+  const filing = drive && drive.enabled && drive.configured
+    ? " It does file this slip in Drive and put a link to it in the message, " +
+      "which anyone holding that link can open."
+    : "";
+  return confirmAction({
+    title: "Open a WhatsApp chat with this customer?",
+    sub: `Slip ${slip.slip_number}`,
+    to: to || "(no number on this slip)",
+    who,
+    detail: "Nothing is sent yet — WhatsApp opens with the message ready and " +
+            "you press send there." + filing,
+    ok: "Open chat",
+  });
+}
+
 async function openCustomerChat(btn, slip) {
   const d = await driveStatus();
+  // Before the filing, not after: the link is the part that cannot be taken
+  // back, so it must not be made until somebody has said yes to making it.
+  // driveStatus() is answered once and remembered, and the contact row has
+  // already asked it to draw its hint, so this does not hold up the question.
+  if (!(await confirmOpenChat(slip, d))) return;
   let link = "";
   if (d.enabled && d.configured) {
     const idle = btn.innerHTML;
