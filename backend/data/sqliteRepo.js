@@ -151,13 +151,48 @@ function getOrder(soNumber) {
 // ============================================================================
 // SERVICE SLIP OPERATIONS
 // ============================================================================
+// The next free slip number, bumping the counter past anything already used.
+//
+// The counter only ever goes up, so in normal running the first bump lands on
+// a free number and the loop turns once. It earns its keep when the counter is
+// BEHIND the slips that exist, which happens two ways:
+//
+//   - deliberately, to fill the gap a deleted slip left behind. Slip 00068 was
+//     a WhatsApp test, deleted, and nobody outside the office ever saw the
+//     number - so it is free to use again, and John would rather use it than
+//     leave a hole in the book.
+//   - accidentally, after a restore from backup, where the database goes back
+//     in time and the counter with it.
+//
+// Without this, either case ends the same way: INSERT hits the UNIQUE
+// constraint on slip_number and registration fails at the counter with a
+// customer standing there. That is the worst possible moment to find out the
+// counter is out of step, and the customer is the one who pays for it.
+//
+// MUST BE CALLED INSIDE A TRANSACTION - it reads and writes the counter, and
+// two registrations at once would otherwise both see the same value. Every
+// caller already has one open; SQLite forbids nesting them, which is why this
+// takes the statements rather than opening its own.
+function allocateSlipNumber() {
+  const bump = db.prepare("UPDATE counters SET value = value + 1 WHERE name = 'slip_number'");
+  const read = db.prepare("SELECT value FROM counters WHERE name = 'slip_number'");
+  const taken = db.prepare("SELECT 1 AS n FROM service_slips WHERE slip_number = ?");
+
+  // Bounded so a counter left absurdly low cannot spin forever holding the
+  // transaction open. 100000 is every number the 5-digit format can express,
+  // so reaching it means something is wrong that a loop cannot fix.
+  for (let i = 0; i < 100000; i++) {
+    bump.run();
+    const slipNumber = String(read.get().value).padStart(5, "0");
+    if (!taken.get(slipNumber)) return slipNumber;
+  }
+  const e = new Error("Could not find a free slip number. Check the slip_number counter.");
+  e.status = 500;
+  throw e;
+}
+
 function nextSlipNumber() {
-  const tx = db.transaction(() => {
-    db.prepare("UPDATE counters SET value = value + 1 WHERE name = 'slip_number'").run();
-    const { value } = db.prepare("SELECT value FROM counters WHERE name = 'slip_number'").get();
-    return String(value).padStart(5, "0");
-  });
-  return tx();
+  return db.transaction(allocateSlipNumber)();
 }
 
 // Create a new service slip with its machines. Returns the created slip (with machines).
@@ -258,11 +293,9 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
   }
 
   const tx = db.transaction(() => {
-    // Inline the counter bump here (calling nextSlipNumber() would open a
-    // nested transaction, which SQLite forbids).
-    db.prepare("UPDATE counters SET value = value + 1 WHERE name = 'slip_number'").run();
-    const { value } = db.prepare("SELECT value FROM counters WHERE name = 'slip_number'").get();
-    const slipNumber = String(value).padStart(5, "0");
+    // Already inside a transaction, so the bare allocator rather than
+    // nextSlipNumber() - that one opens its own, and SQLite forbids nesting.
+    const slipNumber = allocateSlipNumber();
     const info = insertSlip.run(slipNumber, String(company).trim(), String(debtor_code || "").trim(), contact_name, contact_number, whatsapp_number, checkService ? 1 : 0, repair_only ? 1 : 0, wantsQuote ? 1 : 0, notes, String(created_by || "").trim().slice(0, 60));
     const slipId = info.lastInsertRowid;
     // Every machine starts RECEIVED, even when the customer asked for a quote.
