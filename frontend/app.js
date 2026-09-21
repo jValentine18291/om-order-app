@@ -1366,11 +1366,44 @@ async function sendSlipWhatsApp(slipIn, { auto = false } = {}) {
   }
 }
 
+// Asked before every send a person makes.
+//
+// THIS IS THE ONE BUTTON IN THE APP THAT REACHES A CUSTOMER BY ITSELF.
+// Share PDF hands the file to the share sheet, and Open chat writes a draft;
+// in both, somebody still picks the recipient and presses send inside another
+// app, and that step is the check. This button has none: one tap and the
+// message has gone, to a number the customer gave us, and WhatsApp has no
+// unsend for a business message.
+//
+// Reported from the counter, 21 Sep 2026 - it sits low on a long slip and can
+// be caught while scrolling past it.
+//
+// THE NUMBER IS IN THE QUESTION ON PURPOSE. "Are you sure?" gets a yes without
+// being read. A number has to be looked at, and it is the thing that would be
+// wrong if the slip on screen were not the one somebody thought it was - which
+// is the mistake that actually costs something here, worse than the stray tap
+// this was asked for.
+function confirmWhatsappSend(slip) {
+  const to = String(slip.whatsapp_number || slip.contact_number || "").trim();
+  const who = String(slip.contact_name || slip.company || "").trim();
+  return confirm(
+    `Send service slip ${slip.slip_number} to the customer on WhatsApp?\n\n` +
+    `To  ${to || "(no number on this slip)"}${who ? "  ·  " + who : ""}\n\n` +
+    "They get the message and the signed PDF straight away. " +
+    "It cannot be unsent."
+  );
+}
+
 // One button, used on the success card and again in View Slips - the second
 // one matters, because a send that fails needs somewhere to be retried from.
 function wireWhatsappButton(btn, slip, { auto = false } = {}) {
   const idle = btn.textContent;
   const run = async (isAuto) => {
+    // Only what a person just tapped. Automatic sending is a decision already
+    // taken, on the server, for every slip - and it fires as the success card
+    // appears, so a question there would be answered by whoever happened to be
+    // holding the phone, or sit unanswered with the customer waiting.
+    if (!isAuto && !confirmWhatsappSend(slip)) return;
     btn.disabled = true;
     btn.textContent = isAuto ? "Sending to customer…" : "Sending…";
     const r = await sendSlipWhatsApp(slip, { auto: isAuto });
