@@ -132,7 +132,7 @@ the logo: it is the logo scaled to about 78% on a white square, which leaves
 the ring whole with room to spare. `OM-whatsapp-profile.png`, 1000x1000, built
 that way and checked against a simulated circular crop before uploading.
 
-Uploading it has to be done by hand. Meta builds the file input in JavaScript
+In place since 21 Sep 2026. Uploading it has to be done by hand. Meta builds the file input in JavaScript
 when the button is clicked, so it never exists in the page for automation to
 reach, and the dialog that opens is Windows', not the browser's.
 
