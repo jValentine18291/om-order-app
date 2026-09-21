@@ -757,6 +757,17 @@
             <option value="">Automatic &mdash; by machine</option>
           </select>
         </div>
+        <!-- Whether the customer's copy shows the slip's loose parts. John's
+             call: they are priced into the total when they are on it, but not
+             every customer should be shown them - so Sales decide once, here,
+             before it goes out. Hidden entirely when the slip has none. -->
+        <label class="quote-extras" id="quote-extras-row" style="display:none">
+          <input type="checkbox" id="quote-extras" checked>
+          <span>
+            <b>Include the additional parts</b>
+            <span class="quote-extras-sub" id="quote-extras-sub"></span>
+          </span>
+        </label>
         <p class="nsm-hint" id="quote-validity" style="margin-top:12px;"></p>
         <div class="scan-hint" id="quote-status" style="justify-content:flex-start;min-height:20px"></div>
         <button class="btn-primary" id="quote-go" type="button" style="width:100%">Create quotation</button>
@@ -1097,11 +1108,11 @@
         </div>
 
         <div class="section-head" style="margin-top:2px;">
-          <p class="eyebrow">Parts on this machine</p>
+          <p class="eyebrow" id="mm-parts-head">Parts on this machine</p>
         </div>
         <div class="cart-wrap" id="machine-parts"></div>
 
-        <div class="field" style="margin-top:14px;">
+        <div class="field" id="os-labour-field" style="margin-top:14px;">
           <label for="os-labour">Labour Charge <span style="color:var(--ink-faint);font-weight:400;">(technician time, on top of parts)</span></label>
           <div class="labour-row">
             <span class="labour-cur">$</span>
@@ -1109,13 +1120,13 @@
           </div>
         </div>
 
-        <div class="field" style="margin-top:14px;">
+        <div class="field" id="os-comment-field" style="margin-top:14px;">
           <label for="os-comment">Repair comment <span style="color:var(--ink-faint);font-weight:400;">(what was wrong, what was done)</span></label>
           <textarea id="os-comment" placeholder="e.g. Carburettor clogged — cleaned and replaced fuel line."></textarea>
         </div>
       </div>
       <div class="summary-card" style="margin:12px 0 0;">
-        <div class="left"><span>Machine total</span></div>
+        <div class="left"><span id="mm-total-label">Machine total</span></div>
         <div class="total"><div class="val" id="mm-total">$0.00</div></div>
       </div>
       <button class="btn-primary" id="mm-save" style="margin-top:12px;">Save</button>

@@ -1365,6 +1365,24 @@ app.post("/api/machines/:machineId/parts", async (req, res) => {
   }
 });
 
+// Add a part to the SLIP itself, belonging to no machine on it.
+//
+// Asked for by the workshop, Sep 2026: something sold alongside the repair
+// rather than fitted to it. Before this the only place to put one was on a
+// machine it was never fitted to, which billed it inside that machine's block.
+app.post("/api/slips/:slip/parts", async (req, res) => {
+  try {
+    const parts = await data.slips.addPartToSlip(req.params.slip, req.body || {});
+    res.status(201).json(parts);
+  } catch (err) {
+    if (err.status === 400 || err.status === 404 || err.status === 409) {
+      return res.status(err.status).json({ error: err.message });
+    }
+    console.error("[POST /api/slips/:slip/parts]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to add part" });
+  }
+});
+
 // Update a part line: quantity (0 removes), unit_price, and - for the A5-A8
 // and MISC codes only - the description.
 app.patch("/api/parts/:partId", async (req, res) => {
@@ -1857,7 +1875,12 @@ app.post("/api/slips/:slip/order", async (req, res) => {
   try {
     // machine_ids lets the sales desk convert part of a slip; with none given
     // it takes everything not already on an order.
-    const result = await data.slips.createSlipOrder(req.params.slip, (req.body || {}).machine_ids);
+    // extras: put the slip's loose parts on this order too. Explicit rather
+    // than assumed - they are ticked on the same screen as the machines, and
+    // once they are on one order they are never offered again.
+    const result = await data.slips.createSlipOrder(req.params.slip,
+                     (req.body || {}).machine_ids,
+                     { extras: !!(req.body || {}).extras });
 
     // ---- Price write-back (guarded, best-effort) ----
     // The backstop pass. Most parts were already written when the technician
@@ -1867,7 +1890,11 @@ app.post("/api/slips/:slip/order", async (req, res) => {
     let priceSync = { updated: [], skipped: 0, failed: [] };
     try {
       const slip = await data.slips.getSlip(req.params.slip);
-      const parts = (slip.machines || []).flatMap((m) => m.parts || []);
+      // The slip's loose parts as well as every machine's. A price somebody
+      // typed is a price somebody typed, whichever list it landed in, and the
+      // whole point of the write-back is that the catalogue learns it once.
+      const parts = (slip.machines || []).flatMap((m) => m.parts || [])
+                      .concat(slip.extras || []);
       priceSync = await writeSlipPricesToAutoCount(parts, `Slip ${slip.slip_number}`);
     } catch (e) {
       console.error("[price-writeback] sync step error:", e.message);
@@ -1941,8 +1968,12 @@ app.get("/api/slips/:slip/order", async (req, res) => {
 // costs the quotation its address block and nothing more.
 app.get("/api/slips/:slip/quotation", async (req, res) => {
   try {
+    // extras=0 leaves the slip's loose parts off. The preview includes them
+    // unless asked otherwise, so the screen opens showing what the Sales Order
+    // will actually charge.
     const q = await data.slips.quotationForSlip(req.params.slip, undefined,
-                    { service: String(req.query.service || "") });
+                    { service: String(req.query.service || ""),
+                      extras: String(req.query.extras || "") !== "0" });
     q.debtor = null;
     if (q.debtor_code && (process.env.ITEMS_SOURCE || "sqlite").toLowerCase() === "autocount") {
       try {
@@ -1969,9 +2000,9 @@ app.get("/api/slips/:slip/quotation", async (req, res) => {
 // whole of the numbering rule.
 app.post("/api/slips/:slip/quotation", async (req, res) => {
   try {
-    const { payment = "", delivery = "", who = "", service = "" } = req.body || {};
+    const { payment = "", delivery = "", who = "", service = "", extras } = req.body || {};
     const issued = await data.slips.issueQuotation(req.params.slip,
-                       { payment, delivery, who, service });
+                       { payment, delivery, who, service, extras: extras !== false });
     issued.debtor = null;
     if (issued.debtor_code && (process.env.ITEMS_SOURCE || "sqlite").toLowerCase() === "autocount") {
       try {

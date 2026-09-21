@@ -189,11 +189,21 @@ db.exec(`
     FOREIGN KEY (slip_id) REFERENCES service_slips(id) ON DELETE CASCADE
   );
 
-  -- Parts scanned against a specific machine on a slip. Records who scanned and
-  -- the price at time of scan (so later catalogue price changes don't rewrite history).
+  -- Parts scanned against a slip. Records who scanned and the price at time of
+  -- scan (so later catalogue price changes don't rewrite history).
+  --
+  -- MOST parts belong to a machine. Some belong to the SLIP and to no machine
+  -- at all - something sold alongside the repair rather than fitted to it, a
+  -- spare the customer is taking with them. The workshop asked for those in
+  -- Sep 2026; before that there was nowhere to put one but on a machine it was
+  -- never fitted to, which then billed it under that machine's block.
+  --
+  -- Exactly ONE of machine_id and slip_id is set on any row. Which one it is
+  -- is the whole difference between the two kinds of line, and every query
+  -- that wants one kind says so - see partsForSlip() and getSlip().
   CREATE TABLE IF NOT EXISTS machine_parts (
     id             INTEGER PRIMARY KEY AUTOINCREMENT,
-    machine_id     INTEGER NOT NULL,
+    machine_id     INTEGER,
     item_code      TEXT    NOT NULL,
     description    TEXT    NOT NULL,
     uom            TEXT    DEFAULT 'UNIT',
@@ -210,7 +220,14 @@ db.exec(`
     technician     TEXT,                        -- WJ / XL / KM / R
     free_text      INTEGER DEFAULT 0,           -- 1 = staff name this line themselves
     created_at     TEXT    DEFAULT (datetime('now','localtime')),
-    FOREIGN KEY (machine_id) REFERENCES slip_machines(id) ON DELETE CASCADE
+    -- SLIP-LEVEL PARTS ONLY. A machine records where it went on its own row;
+    -- these lines have no machine to record it for them, and they must not be
+    -- billed twice when a slip is converted a few machines at a time.
+    slip_id        INTEGER,
+    converted_at   TEXT,
+    so_number      TEXT    DEFAULT '',
+    FOREIGN KEY (machine_id) REFERENCES slip_machines(id) ON DELETE CASCADE,
+    FOREIGN KEY (slip_id)    REFERENCES service_slips(id) ON DELETE CASCADE
   );
 
   -- NOTE: part_prices is retired. The three tiers turned out to be in
@@ -481,6 +498,80 @@ try {
   }
 } catch (e) {
   console.error("[db] machine_parts free_text migration check failed:", e.message);
+}
+
+// Migration: let a part belong to the SLIP rather than to a machine.
+//
+// This one REBUILDS machine_parts, because machine_id was declared NOT NULL
+// and SQLite cannot relax that with ALTER TABLE. Rebuilding is the documented
+// way round it and it is done here the documented way: foreign keys off, the
+// whole thing in one transaction, keys back on, then asked whether the keys
+// still hold. Every existing row is carried across unchanged and comes out
+// with slip_id NULL - still a machine's part, exactly as it was.
+//
+// If anything here throws, the transaction rolls back and the old table is
+// still the live one. Take a backup first all the same: backend/backup-db.js.
+try {
+  const cols = db.prepare("PRAGMA table_info(machine_parts)").all().map((c) => c.name);
+  if (cols.length && !cols.includes("slip_id")) {
+    const before = db.prepare("SELECT COUNT(*) AS n FROM machine_parts").get().n;
+
+    // Pragmas cannot run inside a transaction, so this sits outside it.
+    db.pragma("foreign_keys = OFF");
+    try {
+      db.transaction(() => {
+        db.exec(`
+          CREATE TABLE machine_parts_rebuild (
+            id             INTEGER PRIMARY KEY AUTOINCREMENT,
+            machine_id     INTEGER,
+            item_code      TEXT    NOT NULL,
+            description    TEXT    NOT NULL,
+            uom            TEXT    DEFAULT 'UNIT',
+            unit_price     REAL    DEFAULT 0,
+            quantity       INTEGER NOT NULL DEFAULT 1,
+            variant        TEXT    DEFAULT '',
+            technician     TEXT,
+            free_text      INTEGER DEFAULT 0,
+            created_at     TEXT    DEFAULT (datetime('now','localtime')),
+            slip_id        INTEGER,
+            converted_at   TEXT,
+            so_number      TEXT    DEFAULT '',
+            FOREIGN KEY (machine_id) REFERENCES slip_machines(id) ON DELETE CASCADE,
+            FOREIGN KEY (slip_id)    REFERENCES service_slips(id) ON DELETE CASCADE
+          );
+        `);
+        // Columns named rather than SELECT *, so the copy does not depend on
+        // the order they happen to be in.
+        db.exec(`
+          INSERT INTO machine_parts_rebuild
+            (id, machine_id, item_code, description, uom, unit_price, quantity,
+             variant, technician, free_text, created_at)
+          SELECT id, machine_id, item_code, description, uom, unit_price, quantity,
+                 variant, technician, free_text, created_at
+            FROM machine_parts;
+        `);
+        db.exec("DROP TABLE machine_parts;");
+        db.exec("ALTER TABLE machine_parts_rebuild RENAME TO machine_parts;");
+      })();
+    } finally {
+      db.pragma("foreign_keys = ON");
+    }
+
+    const after = db.prepare("SELECT COUNT(*) AS n FROM machine_parts").get().n;
+    // Said out loud rather than assumed. A rebuild that silently lost rows is
+    // a repair history nobody can get back.
+    if (after !== before) {
+      console.error(`[db] machine_parts rebuild MOVED ${before} rows but found ${after} - tell somebody`);
+    } else {
+      console.log(`[db] migrated: machine_parts can hold slip-level parts (${after} row(s) carried across)`);
+    }
+    const broken = db.prepare("PRAGMA foreign_key_check(machine_parts)").all();
+    if (broken.length) {
+      console.error(`[db] machine_parts rebuild left ${broken.length} broken reference(s) - tell somebody`);
+    }
+  }
+} catch (e) {
+  console.error("[db] machine_parts slip_id migration failed:", e.message);
 }
 
 // Migration: remember where each slip's PDF lives in Drive.

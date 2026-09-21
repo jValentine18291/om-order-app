@@ -1010,6 +1010,28 @@ select {
 }
 .ask-to .ask-num { display: block; font-size: 20px; font-weight: 700; letter-spacing: .5px; }
 .ask-to .ask-who { display: block; font-size: 13px; margin-top: 2px; color: var(--ink-faint, #78868c); }
+/* The slip's own parts, on the slip screen and in the convert picker. Set
+   apart from the machines rather than dressed as one: a technician scanning
+   the list for the machine they are holding must not have to read this one to
+   find out it is not a machine. */
+.machine-btn-extras {
+  border-style: dashed;
+  background: #f7fbfb;
+}
+.machine-btn-extras strong { color: #1f6f78; }
+.conv-row-extras { border-top: 1px solid var(--line, #e3e6e8); margin-top: 8px; padding-top: 12px; }
+
+/* The include-or-not tick on the quotation sheet. */
+.quote-extras {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin-top: 12px; padding: 10px 12px;
+  border: 1px solid var(--line, #e3e6e8); border-radius: 10px;
+  background: #f7fbfb; cursor: pointer;
+}
+.quote-extras input { margin-top: 2px; flex: none; }
+.quote-extras b { display: block; font-size: 14px; }
+.quote-extras-sub { display: block; font-size: 12px; color: var(--ink-faint, #78868c); margin-top: 2px; }
+
 .modal-head {
   display: flex; justify-content: space-between; align-items: flex-start;
   gap: 12px; margin-bottom: 12px;

@@ -428,6 +428,10 @@ function getSlip(slipNumber, includeSignature = false) {
     m.can_undo = canUndoMachine(m);
   }
   slip.machines = machines;
+  // Parts that belong to the SLIP and to no machine on it - something sold
+  // alongside the repair rather than fitted to it. Always present, even when
+  // empty, so every screen can ask without checking whether the field is there.
+  slip.extras = extrasForSlip(slip.id);
   // Small and always present: whatever displays a slip needs to know it was
   // changed after signing, and a flag nobody fetched is a flag nobody sees.
   slip.amendments = db.prepare(
@@ -484,15 +488,73 @@ function assertSlipEditable(slipId) {
   }
 }
 
+// THE definition of a slip-level part: it names a slip and no machine.
+//
+// Both halves matter. slip_id alone would also match a machine's part if one
+// ever gained a slip_id by accident, and this is the query every document is
+// built from - a machine's part appearing twice, once in its block and once at
+// the bottom, is a line the customer is charged for twice.
+function extrasForSlip(slipId) {
+  return db.prepare(
+    "SELECT * FROM machine_parts WHERE slip_id = ? AND machine_id IS NULL ORDER BY id"
+  ).all(slipId);
+}
+
 // The same question asked from a part line rather than a machine.
+//
+// A part reaches its slip one of two ways - through its machine, or directly -
+// so the join is a LEFT one and the answer is whichever of the two is there.
+// Without this every per-part action (price, quantity, wording, delete) would
+// 404 on a slip-level part, which is how they would have silently become
+// read-only.
 function slipIdForPart(partId) {
   const row = db.prepare(
-    `SELECT m.slip_id AS slip_id FROM machine_parts p
-       JOIN slip_machines m ON m.id = p.machine_id
+    `SELECT COALESCE(m.slip_id, p.slip_id) AS slip_id
+       FROM machine_parts p
+       LEFT JOIN slip_machines m ON m.id = p.machine_id
       WHERE p.id = ?`
   ).get(partId);
-  if (!row) { const e = new Error("Part not found."); e.status = 404; throw e; }
+  if (!row || row.slip_id == null) { const e = new Error("Part not found."); e.status = 404; throw e; }
   return row.slip_id;
+}
+
+// Add a part to the SLIP rather than to a machine.
+//
+// Same rules as a machine's part - same merge, same free-text handling - with
+// one addition that matters: a line ALREADY ON A SALES ORDER is never merged
+// into. Bumping the quantity of a billed line would change what the customer
+// was charged for after the fact, on a document this app cannot alter. A
+// second scan of the same part starts a new line instead, and that line is
+// what the next order picks up.
+function addPartToSlip(slipNumber, { item_code, description, uom = "UNIT", unit_price = 0, quantity = 1, technician = "", free_text, variant = "" } = {}) {
+  const slip = db.prepare("SELECT id FROM service_slips WHERE slip_number = ?").get(slipNumber);
+  if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
+  if (!item_code) { const e = new Error("item_code is required."); e.status = 400; throw e; }
+  assertSlipEditable(slip.id);
+
+  const variantKey = String(variant || "");
+  const freeText = !!(free_text || isFreeTextPart(item_code, description));
+  const existing = freeText ? null : db.prepare(
+    `SELECT * FROM machine_parts
+      WHERE slip_id = ? AND machine_id IS NULL AND item_code = ? AND technician = ?
+        AND IFNULL(variant, '') = ?
+        AND (converted_at IS NULL OR converted_at = '')`
+  ).get(slip.id, item_code, technician, variantKey);
+
+  if (existing) {
+    db.prepare("UPDATE machine_parts SET quantity = quantity + ? WHERE id = ?")
+      .run(Number(quantity) || 1, existing.id);
+  } else {
+    db.prepare(
+      `INSERT INTO machine_parts
+         (machine_id, slip_id, item_code, description, uom, unit_price, quantity, technician, variant, free_text)
+       VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(slip.id, item_code, description || item_code, uom, Number(unit_price) || 0,
+          Number(quantity) || 1, technician, variantKey, freeText ? 1 : 0);
+  }
+  // A part on the slip is work recorded, the same as a part on a machine.
+  deriveSlipStatus(slip.id);
+  return extrasForSlip(slip.id);
 }
 
 function addPartToMachine(machineId, { item_code, description, uom = "UNIT", unit_price = 0, quantity = 1, technician = "", free_text, variant = "" } = {}) {
@@ -653,20 +715,43 @@ function phoneForOrder(raw) {
   return /^\d{8}$/.test(s) ? `${s.slice(0, 4)} ${s.slice(4)}` : s;
 }
 
-function createSlipOrder(slipNumber, machineIds) {
+// opts.extras - put the slip's loose parts on THIS order.
+//
+// They are ticked once and once only. A slip is converted a few machines at a
+// time, so without a record of which order took them they would ride along on
+// every one, and the customer would be charged for the same filter three
+// times. Each line carries its own converted_at for the same reason a machine
+// does, and an already-converted line is simply not offered again.
+function createSlipOrder(slipNumber, machineIds, opts) {
   const slip = getSlip(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
   if (slip.status === "CLOSED") { const e = new Error("Slip is already closed."); e.status = 400; throw e; }
 
+  // Only ever the ones not already on an order, whatever the caller asked for.
+  // A caller that asks twice is asking by mistake, and the mistake bills a
+  // customer twice.
+  const extras = (opts && opts.extras)
+    ? (slip.extras || []).filter((p) => !String(p.converted_at || "").trim())
+    : [];
+
   // A slip is converted a machine at a time. With no selection, take every
   // machine that has not already gone onto an order.
   const all = slip.machines || [];
-  const wanted = Array.isArray(machineIds) && machineIds.length
+  // A LIST that happens to be empty means "no machines". It does not mean "all
+  // of them". Those were the same thing until an order could be raised for the
+  // slip's loose parts alone; then an empty list quietly swept in every
+  // machine on the slip, failed on the first one with no work recorded, and
+  // looked from the screen like the button doing nothing at all. Only a caller
+  // that gives NO list gets the old default.
+  const wanted = Array.isArray(machineIds)
     ? all.filter((m) => machineIds.map(Number).includes(Number(m.id)))
     : all.filter((m) => !m.converted_at);
 
-  if (!wanted.length) {
-    const e = new Error("No machines selected for the Sales Order.");
+  // An order of nothing but loose parts is allowed - a customer collecting a
+  // spare with no machine on the bench is a real errand - so this refuses only
+  // when there is nothing at all to put on it.
+  if (!wanted.length && !extras.length) {
+    const e = new Error("Nothing selected for the Sales Order.");
     e.status = 400; throw e;
   }
   const already = wanted.filter((m) => m.converted_at);
@@ -692,11 +777,11 @@ function createSlipOrder(slipNumber, machineIds) {
     e.status = 400; throw e;
   }
 
-  const lines = slipBlockLines(slip, wanted, all);
+  const lines = slipBlockLines(slip, wanted, all, extras);
 
   const so = createOrder({ notes: `S/S: ${slip.slip_number}`, lines });
 
-  return finishSlipOrder(slip, wanted, so);
+  return finishSlipOrder(slip, wanted, so, extras);
 }
 
 // The block, exactly as it is keyed into AutoCount, one per machine:
@@ -722,7 +807,11 @@ function createSlipOrder(slipNumber, machineIds) {
 // line for line and cent for cent - Sales send the quotation, then raise the
 // order, and a customer who reads $140 on one and $155 on the other has been
 // told two different things about the same repair. One builder, two readers.
-function slipBlockLines(slip, wanted, all) {
+// What heads the slip-level block on a Sales Order and a quotation. One
+// wording, because the two documents are read side by side.
+const EXTRAS_HEADING = "Additional parts";
+
+function slipBlockLines(slip, wanted, all, extras = []) {
   const lines = [];
   const total = all.length;
 
@@ -792,6 +881,30 @@ function slipBlockLines(slip, wanted, all) {
     if (n < wanted.length - 1) lines.push({ note: true, description: "" });
   });
 
+  // Anything sold with the repair but fitted to no machine, in a block of its
+  // own at the foot of the order - John's call, and the right one: these lines
+  // belong to nobody's block, and putting them inside one would bill them
+  // under that machine.
+  //
+  // No service code opens this block, unlike a machine's. A machine's opener
+  // carries its labour and files the job under the right service account;
+  // there is no labour here and no service to file, only parts that carry
+  // their own codes. A heading note and a SubTotal give it the same shape on
+  // the page without putting anything in an account it does not belong in.
+  if (extras && extras.length) {
+    if (wanted.length) lines.push({ note: true, description: "" });
+    lines.push({ note: true, description: EXTRAS_HEADING });
+    let extrasTotal = 0;
+    for (const p of extras) {
+      lines.push({
+        item_code: p.item_code, description: p.description, uom: p.uom,
+        unit_price: p.unit_price, quantity: p.quantity,
+      });
+      extrasTotal += p.unit_price * p.quantity;
+    }
+    lines.push({ note: true, description: "SubTotal", line_amount: extrasTotal });
+  }
+
   // Customer contact, as the last line of the block, with a blank row above it
   // - the same gap that separates one machine from the next, so the contact
   // does not read as another line of the last machine's block.
@@ -805,15 +918,21 @@ function slipBlockLines(slip, wanted, all) {
   return lines;
 }
 
-function finishSlipOrder(slip, wanted, so) {
+function finishSlipOrder(slip, wanted, so, extras = []) {
   // Record which machines this order covered, then move the slip on only when
   // every machine has been converted - a partly converted slip is still work
   // in progress as far as the sales desk is concerned.
   const stamp = db.prepare(
     "UPDATE slip_machines SET converted_at = datetime('now','localtime'), so_number = ? WHERE id = ?"
   );
+  // The loose parts carry the same two facts on their own rows, there being
+  // no machine to carry them.
+  const stampPart = db.prepare(
+    "UPDATE machine_parts SET converted_at = datetime('now','localtime'), so_number = ? WHERE id = ?"
+  );
   const finish = db.transaction(() => {
     for (const m of wanted) stamp.run(so.so_number, m.id);
+    for (const p of extras) stampPart.run(so.so_number, p.id);
     const left = db.prepare(
       "SELECT COUNT(*) AS n FROM slip_machines WHERE slip_id = ? AND (converted_at IS NULL OR converted_at = '')"
     ).get(slip.id).n;
@@ -828,6 +947,7 @@ function finishSlipOrder(slip, wanted, so) {
     ss_line: `S/S: ${slip.slip_number}`,
     machines_converted: wanted.map((m) => ({ id: m.id, machine_desc: m.machine_desc })),
     machines_remaining: remaining,
+    extras_converted: extras.length,
     slip_status: db.prepare("SELECT status FROM service_slips WHERE id = ?").get(slip.id).status,
   };
 }
@@ -932,10 +1052,19 @@ function issueQuotation(slipNumber, terms) {
   return { ...q, quotation_no: ref, seq, revision: seq > 1, terms };
 }
 
+// opts.extras === false leaves the slip's loose parts OFF the quotation.
+//
+// John's call: they are priced into the total like any other line when they
+// are on it, but not every customer should be shown them - so it is Sales who
+// decide, once, before the quotation goes out. Included unless somebody says
+// otherwise, because a quotation that is short of what the Sales Order will
+// charge is the more expensive mistake of the two.
 function quotationForSlip(slipNumber, machineIds, opts) {
   const slip = getSlip(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
 
+  const allExtras = slip.extras || [];
+  const extras = (opts && opts.extras === false) ? [] : allExtras;
   const all = slip.machines || [];
   // Everything with work recorded against it, whether or not it has been
   // converted. A quotation is a statement of what the repair costs, and it is
@@ -948,12 +1077,12 @@ function quotationForSlip(slipNumber, machineIds, opts) {
         Number(m.labour_charge) > 0 ||
         String(m.repair_comment || "").trim());
 
-  if (!wanted.length) {
+  if (!wanted.length && !extras.length) {
     const e = new Error("No work recorded on this slip yet.");
     e.status = 400; throw e;
   }
 
-  let lines = slipBlockLines(slip, wanted, all);
+  let lines = slipBlockLines(slip, wanted, all, extras);
 
   // Sales can force one service item across the whole quotation, for a slip
   // written before the app knew a rider from a brushcutter.
@@ -995,6 +1124,10 @@ function quotationForSlip(slipNumber, machineIds, opts) {
 
   return {
     slip_number: slip.slip_number,
+    // So the screen can offer the choice, and say what it is choosing about,
+    // without fetching the slip a second time.
+    extras_available: allExtras.length,
+    extras_included: extras.length,
     // John's call: the quotation is identified by the slip it came from, so
     // anyone holding either document can find the other.
     quotation_no: quotationRef(slip.slip_number, lastSeq || 1),
@@ -1946,6 +2079,16 @@ function deriveSlipStatus(slipId) {
   const ms = db.prepare("SELECT * FROM slip_machines WHERE slip_id = ?").all(slipId);
   if (!ms.length) return;
 
+  // Loose parts nobody has billed yet. A slip whose machines are all dealt
+  // with is NOT finished while these are outstanding - calling it Converted is
+  // how they would quietly never be charged for, since a converted slip is one
+  // nobody looks at again.
+  const extrasLeft = db.prepare(
+    `SELECT COUNT(*) AS n FROM machine_parts
+      WHERE slip_id = ? AND machine_id IS NULL
+        AND (converted_at IS NULL OR converted_at = '')`
+  ).get(slipId).n;
+
   const any = (f) => ms.some(f);
   let next;
   if (any((m) => m.state === "AWAITING_QUOTE")) {
@@ -1954,7 +2097,7 @@ function deriveSlipStatus(slipId) {
     next = "NEED_QUOTE";
   } else if (any((m) => m.state === "QUOTED")) {
     next = "QUOTED";                                   // waiting on the customer
-  } else if (ms.every(machineSettled)) {
+  } else if (ms.every(machineSettled) && !extrasLeft) {
     next = "CONVERTED";                                // everything dealt with
   } else if (any((m) => m.converted_at)) {
     // Some of it is on a Sales Order. Which of the two this is depends on
@@ -2196,7 +2339,7 @@ const slips = {
   poTracking, poStatus, setPoStatus, PO_STATUSES,
   listShipments, getShipment, createShipment, updateShipment,
   allocatedByPo, receivedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
-  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 
 // ---- One-off: read the status of every open slip again ---------------------

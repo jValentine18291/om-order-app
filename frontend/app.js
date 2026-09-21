@@ -20,6 +20,7 @@ const session = {
   slipNumber: null,     // e.g. "00001"
   slip: null,           // full slip object (with machines + parts)
   machineId: null,      // machine being worked on in the modal
+  extras: false,        // true when the modal is showing the SLIP's own parts
   technician: "",       // chosen fresh per machine
   pendingParts: [],     // parts scanned in the modal but not yet saved
   allSlips: [],         // active-slip list for the Open Service screen
@@ -2059,7 +2060,32 @@ function renderSlipScreen() {
         ${m.remarks ? `<div class="machine-btn-remarks">“${escapeHtml(m.remarks)}”</div>` : ""}
       </button>`;
   }).join("");
-  $("sd-machines").querySelectorAll(".machine-btn").forEach((btn) =>
+  // Parts that belong to the slip and to no machine on it. Below the machines
+  // and visibly not one of them: it is not a thing on the bench, and a row
+  // that looked like a machine would be opened by a technician looking for
+  // one.
+  //
+  // Always shown, even with nothing on it. A button that only appears once it
+  // has something on it cannot be used to put the first thing there.
+  const extras = slip.extras || [];
+  const extrasTotal = extras.reduce((n, p) => n + p.unit_price * p.quantity, 0);
+  const billed = extras.filter((p) => String(p.converted_at || "").trim()).length;
+  $("sd-machines").insertAdjacentHTML("beforeend", `
+    <button type="button" class="machine-btn machine-btn-extras${extras.length ? " machine-btn-worked" : ""}" id="sd-extras">
+      <div class="machine-btn-top">
+        <strong>Additional parts</strong>
+        ${extras.length ? `<span class="machine-tick">✓</span>` : `<span class="machine-untouched">None</span>`}
+      </div>
+      <div class="machine-btn-sub">${
+        extras.length
+          ? `${extras.length} part${extras.length === 1 ? "" : "s"}${
+              extrasTotal > 0 ? " · " + money(extrasTotal) : ""}${
+              billed ? ` · ${billed} already on a Sales Order` : ""}`
+          : "Not fitted to any machine — sold with the repair"}</div>
+    </button>`);
+  $("sd-extras").addEventListener("click", openExtrasModal);
+
+  $("sd-machines").querySelectorAll(".machine-btn[data-machine]").forEach((btn) =>
     btn.addEventListener("click", () => openMachineModal(Number(btn.dataset.machine)))
   );
 
@@ -2069,6 +2095,7 @@ function renderSlipScreen() {
 
 // ---- Machine modal ----------------------------------------------------------
 function openMachineModal(machineId) {
+  session.extras = false;
   session.machineId = machineId;
   session.pendingParts = [];
 
@@ -2107,13 +2134,59 @@ function openMachineModal(machineId) {
   maybeShowEntry();
 }
 
+// The same sheet, for the parts that belong to the slip and to no machine on
+// it. Everything about a MACHINE is hidden rather than left empty: labour is
+// nobody's here, there is no repair to comment on, no quotation for one part,
+// and no decision for sales to have taken. A box on screen is a box somebody
+// will eventually fill in.
+function openExtrasModal() {
+  if (!session.slip) return;
+  session.extras = true;
+  session.machineId = null;
+  session.pendingParts = [];
+  session.technician = initialsFor(getUser());
+  $("os-tech").value = session.technician;
+  $("os-tech-field").style.display = "none";
+  $("os-entry").style.display = "none";
+  $("mm-title").textContent = "Additional parts";
+  $("mm-sub").textContent = `Slip ${session.slipNumber} · ${session.slip.company}`;
+  $("mm-who").innerHTML = "";
+  // Nothing on this sheet belongs to a machine, so none of the machine's
+  // furniture belongs on it either.
+  ["mm-remarks", "mm-ask-quote", "mm-decision", "mm-billed", "job-pick",
+   "tube-pick", "mm-quote-row"].forEach((id) => {
+    const el = $(id); if (el) el.style.display = "none";
+  });
+  $("os-labour-field").style.display = "none";
+  $("os-comment-field").style.display = "none";
+  $("mm-parts-head").textContent = "Parts on this slip";
+  $("mm-total-label").textContent = "Additional parts total";
+  renderMachineParts();
+  updateSlipFooter();
+  $("machine-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+  maybeShowEntry();
+}
+
 async function closeMachineModal(save) {
   if (!save && session.pendingParts.length) {
     const ok = confirm(`${session.pendingParts.length} scanned part(s) haven't been saved. Discard them?`);
     if (!ok) return;
   }
   try { stopQrScanner(); } catch (_) {}
-  if (save) {
+  if (save && session.extras) {
+    // Nothing here is "repaired", so there is nothing to mark. Just the parts.
+    $("mm-save").disabled = true;
+    try {
+      await commitPendingParts();
+      toast("Saved", "ok");
+    } catch (e) {
+      toast(e.message, "err");
+      $("mm-save").disabled = false;
+      return;                        // keep it open so nothing scanned is lost
+    }
+    $("mm-save").disabled = false;
+  } else if (save) {
     $("mm-save").disabled = true;
     try {
       await commitPendingParts();
@@ -2150,7 +2223,15 @@ async function closeMachineModal(save) {
   $("machine-modal").style.display = "none";
   document.body.style.overflow = "";
   session.machineId = null;
+  session.extras = false;
   session.pendingParts = [];
+  // Put back what the slip-level sheet hid, or the next machine opens without
+  // its labour box.
+  ["os-labour-field", "os-comment-field"].forEach((id) => {
+    const el = $(id); if (el) el.style.display = "";
+  });
+  $("mm-parts-head").textContent = "Parts on this machine";
+  $("mm-total-label").textContent = "Machine total";
   // Refresh the slip so the machine buttons reflect the latest state.
   try { await refreshSlip(); } catch (_) {}
   renderSlipScreen();
@@ -2166,7 +2247,12 @@ $("mm-close").addEventListener("click", () => closeMachineModal(false));
 async function commitPendingParts() {
   while (session.pendingParts.length) {
     const p = session.pendingParts[0];
-    await api(`/api/machines/${session.machineId}/parts`, {
+    // The slip's own parts go to the slip. Posting these to a machine is
+    // exactly the mistake this feature exists to stop.
+    const where = session.extras
+      ? `/api/slips/${encodeURIComponent(session.slipNumber)}/parts`
+      : `/api/machines/${session.machineId}/parts`;
+    await api(where, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -2256,7 +2342,8 @@ function onTechChosen(tech) {
 }
 
 function maybeShowEntry() {
-  const ready = session.slipNumber && session.machineId && session.technician;
+  const ready = session.slipNumber && session.technician
+                && (session.machineId || session.extras);
   $("os-entry").style.display = ready ? "block" : "none";
   if (ready) {
     // Not awaited: the search is usable immediately and simply stops
@@ -2340,7 +2427,9 @@ function fitQuery(term) {
 async function addByCode(code) {
   code = (code || "").trim();
   if (!code) return;
-  if (!session.machineId || !session.technician) {
+  // A part needs somewhere to go and somebody to have added it. On the slip's
+  // own parts there is no machine, and that is not a reason to refuse.
+  if (!(session.machineId || session.extras) || !session.technician) {
     toast("Pick your name first", "err");
     return;
   }
@@ -2451,6 +2540,20 @@ const TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 function currentMachine() {
   if (!session.slip) return null;
   return session.slip.machines.find((m) => m.id === session.machineId) || null;
+}
+
+// WHOSE parts the modal is showing: a machine's, or the slip's own.
+//
+// The two are worked on through the same sheet on purpose. Adding a part is
+// adding a part - the search, the quantity stepper, the price box, the pencil
+// on a free-text line - and a second copy of all that would be a second copy
+// to keep in step with this one. What differs is only where the parts live and
+// what else belongs on the sheet, and those are the few places that ask.
+function currentPartHolder() {
+  if (session.extras) {
+    return { id: null, extras: true, parts: (session.slip && session.slip.extras) || [] };
+  }
+  return currentMachine();
 }
 
 // The A5-A8 and MISC entries stand in for something not really in the
@@ -2741,7 +2844,7 @@ function tubeQtyDisplay(part) {
 
 function renderMachineParts() {
   const wrap = $("machine-parts");
-  const machine = currentMachine();
+  const machine = currentPartHolder();
   const parts = machine ? (machine.parts || []) : [];
   wrap.innerHTML = "";
 
@@ -2789,7 +2892,9 @@ function renderMachineParts() {
           <svg viewBox="0 0 24 24" fill="none" stroke="#1f6f78" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
         </div>
         <strong>No parts yet</strong>
-        <span>Scan or type a part to add it to this machine.</span>
+        <span>${session.extras
+          ? "Scan or type a part to add it to this slip."
+          : "Scan or type a part to add it to this machine."}</span>
       </div>`;
     return;
   }
@@ -2877,6 +2982,11 @@ function updateSlipFooter() {
     for (const p of (m.parts || [])) { slipTotal += p.unit_price * p.quantity; slipParts++; }
     slipTotal += Number(m.labour_charge) || 0;
   }
+  // The slip's own parts are part of what the slip comes to. Leaving them out
+  // would understate the figure staff read off this screen and quote from.
+  for (const p of (session.slip.extras || [])) {
+    slipTotal += p.unit_price * p.quantity; slipParts++;
+  }
   $("os-machine-name").textContent = `${machines.length} machine${machines.length === 1 ? "" : "s"}`;
   $("os-machine-total").textContent = money(slipTotal);
 
@@ -2884,13 +2994,14 @@ function updateSlipFooter() {
   renderSlipStatusUI();
 
   // Machine total inside the modal: saved parts + pending (unsaved) parts
-  const machine = currentMachine();
+  const machine = currentPartHolder();
   if (machine) {
     let mt = 0;
     for (const p of (machine.parts || [])) mt += p.unit_price * p.quantity;
     for (const p of session.pendingParts) mt += p.unit_price * p.quantity;
     // Reads the box, not the saved value, so the total moves as it is typed.
-    mt += currentLabourValue();
+    // There is no labour on the slip's own parts, and no box to read.
+    if (!session.extras) mt += currentLabourValue();
     const mmTotal = $("mm-total");
     if (mmTotal) mmTotal.textContent = money(mt);
   }
@@ -3231,8 +3342,13 @@ function openConvertPicker() {
   if (!session.slip) return;
   const machines = session.slip.machines || [];
   const left = machines.filter((m) => !m.converted_at);
-  if (!left.length) {
-    toast("Every machine on this slip is already on a Sales Order.", "ok");
+  // Loose parts nobody has billed yet. They can be the ONLY thing left on a
+  // slip - every machine converted, a spare still to charge for - so they
+  // count towards whether there is anything to open this for at all.
+  const extrasLeft = (session.slip.extras || [])
+    .filter((p) => !String(p.converted_at || "").trim());
+  if (!left.length && !extrasLeft.length) {
+    toast("Everything on this slip is already on a Sales Order.", "ok");
     return;
   }
   $("conv-sub").textContent = `Slip ${session.slip.slip_number} · ${session.slip.company}`;
@@ -3267,6 +3383,26 @@ function openConvertPicker() {
         </span>
       </label>`;
   }).join("");
+
+  // Their own row, below the machines and separated from them, because they
+  // are not one. Ticked by default like a machine with work on it: they are on
+  // the slip in order to be charged for.
+  if (extrasLeft.length || (session.slip.extras || []).length) {
+    const done = (session.slip.extras || []).length - extrasLeft.length;
+    const total = extrasLeft.reduce((n, p) => n + p.unit_price * p.quantity, 0);
+    $("conv-list").insertAdjacentHTML("beforeend", `
+      <label class="conv-row conv-row-extras${extrasLeft.length ? "" : " conv-done"}">
+        <input type="checkbox" id="conv-extras" ${extrasLeft.length ? "checked" : "disabled"}>
+        <span class="conv-main">
+          <span class="conv-name">Additional parts</span>
+          <span class="conv-sub">${extrasLeft.length
+            ? `${extrasLeft.length} part${extrasLeft.length === 1 ? "" : "s"}${total > 0 ? " · " + money(total) : ""}${
+                done ? ` · ${done} already billed` : ""}`
+            : "All already on a Sales Order"}</span>
+        </span>
+      </label>`);
+  }
+
   $("conv-modal").style.display = "flex";
   document.body.style.overflow = "hidden";
 }
@@ -3883,6 +4019,22 @@ async function shareRepairQuotation(slipNumber) {
   // wrong.
   if (last && last.payment_term) $("quote-payment").value = last.payment_term;
   if (last && last.delivery_term) $("quote-delivery").value = last.delivery_term;
+  // What there is to decide about, in the customer's own money. A tick with
+  // no figure beside it is a tick nobody can weigh.
+  const exRow = $("quote-extras-row");
+  const exParts = (session.slip && session.slip.slip_number === q.slip_number
+                     ? (session.slip.extras || []) : []);
+  if (exRow) {
+    const n = Number(q.extras_available) || 0;
+    exRow.style.display = n ? "flex" : "none";
+    $("quote-extras").checked = true;
+    const sum = exParts.reduce((t, p) => t + p.unit_price * p.quantity, 0);
+    $("quote-extras-sub").textContent = n
+      ? `${n} part${n === 1 ? "" : "s"} not fitted to any machine${
+          sum > 0 ? " · " + money(sum) : ""}. Untick to leave them off the customer's copy.`
+      : "";
+  }
+
   $("quote-status").textContent = "";
   modal.style.display = "";
 
@@ -3913,6 +4065,10 @@ async function shareRepairQuotation(slipNumber) {
         body: JSON.stringify({
           payment: terms.payment, delivery: terms.delivery,
           who: terms.preparedBy, service: terms.service,
+          // Explicitly false rather than absent: the server includes them
+          // unless told not to, which is the safer default but only works if
+          // the answer actually travels.
+          extras: !$("quote-extras") || $("quote-extras").checked,
         }),
       });
       const blob = buildRepairQuotationPdf(issued, terms);
@@ -3975,9 +4131,18 @@ function closeConvertPicker() {
 
 async function createSalesOrder() {
   if (!session.slipNumber) return;
-  const chosen = [...document.querySelectorAll("#conv-list input:checked")].map((c) => Number(c.value));
-  if (!chosen.length) {
-    $("conv-status").innerHTML = statusErr("Pick at least one machine.");
+  // The extras tick has no machine id, so it is read on its own rather than
+  // swept up with the machines - Number(undefined) would put a NaN in the list.
+  const extrasBox = $("conv-extras");
+  const wantExtras = !!(extrasBox && extrasBox.checked && !extrasBox.disabled);
+  const chosen = [...document.querySelectorAll("#conv-list input:checked")]
+    .filter((c) => c.value !== "" && c.id !== "conv-extras")
+    .map((c) => Number(c.value));
+  // An order of nothing but loose parts is a real errand - a customer
+  // collecting a spare with no machine on the bench - so this asks for
+  // SOMETHING rather than for a machine.
+  if (!chosen.length && !wantExtras) {
+    $("conv-status").innerHTML = statusErr("Pick at least one machine or the additional parts.");
     return;
   }
   $("conv-go").disabled = true;
@@ -3988,7 +4153,7 @@ async function createSalesOrder() {
     const result = await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/order`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ machine_ids: chosen }),
+      body: JSON.stringify({ machine_ids: chosen, extras: wantExtras }),
     });
     closeConvertPicker();
 

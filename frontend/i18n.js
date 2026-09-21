@@ -391,6 +391,24 @@
     // where somebody reads a line off and types it in. That is the one rule
     // this file is built on: what comes from the catalogue or goes back to
     // it is never altered.
+    // ---- Parts that belong to the slip, not to a machine ----
+    // "Additional parts" itself is DELIBERATELY ABSENT, and must stay absent.
+    // It is the heading of a block on the Sales Order and on the customer's
+    // quotation, and the Sales Order screen - the one that says "key these
+    // rows into AutoCount in this order" - is not excluded from translation.
+    // An entry here would rewrite the line as well as the button, and a
+    // technician would key Chinese into the accounts. Same reason "Welding"
+    // and "Change Engine Oil" are missing: what goes onto a document is never
+    // altered. Everything below is screen furniture and safe.
+    "Not fitted to any machine — sold with the repair": "不属于任何机器 — 随维修一起售出",
+    "Parts on this slip": "此服务单的零件",
+    "Additional parts total": "额外零件总额",
+    "Scan or type a part to add it to this slip.": "扫描或输入零件编号，加入此服务单。",
+    "All already on a Sales Order": "已全部列入销售订单",
+    "Everything on this slip is already on a Sales Order.": "此服务单的所有项目均已列入销售订单。",
+    "Include the additional parts": "在报价单中包含额外零件",
+    "Pick at least one machine or the additional parts.": "请至少选择一台机器或额外零件。",
+
     // ---- Asking before anything reaches a customer ----
     // See confirmAction() in app.js. A technician reads this app in Chinese,
     // and a safety question somebody cannot read is one they tap through -
@@ -788,6 +806,18 @@
     [/^\((\d+) qty\)$/, "（$1 件）"],
 
     // Slip / machine context lines
+    // The slip's own parts, counted. The part count itself already has a
+    // pattern; these are the tails that say what has happened to them.
+    //
+    // The DOLLAR SIGN IS INSIDE THE CAPTURE on purpose. In a replacement
+    // string "$$" means a literal dollar, so "$$2" reads as "$" followed by
+    // the character 2 - not as "$" followed by group 2. That shipped for about
+    // a minute and turned "$41.40" into "$2". Capturing the sign with the
+    // number leaves nothing to escape.
+    [/^(\d+) parts? · (\$[\d,.]+) · (\d+) already on a Sales Order$/,
+      "$1 个零件 · $2 · 其中 $3 个已列入销售订单"],
+    [/^(\d+) parts? · (\$[\d,.]+) · (\d+) already billed$/,
+      "$1 个零件 · $2 · 其中 $3 个已开单"],
     [/^Slip (\d+)$/, "服务单 $1"],
     [/^· Slip (.+)$/, "· 服务单 $1"],
     [/^Machine: (.+) · Tech: (.+)$/, "机器：$1 · 技术员：$2"],

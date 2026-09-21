@@ -54,6 +54,8 @@ module.exports = {
     getSlip: (...a) => dataRepo.slips.getSlip(...a),
     getSlipSignature: (...a) => dataRepo.slips.getSlipSignature(...a),
     addPartToMachine: (...a) => dataRepo.slips.addPartToMachine(...a),
+    // Parts belonging to the slip rather than to any machine on it.
+    addPartToSlip: (...a) => dataRepo.slips.addPartToSlip(...a),
     setPartQuantity: (...a) => dataRepo.slips.setPartQuantity(...a),
     setPartPrice: (...a) => dataRepo.slips.setPartPrice(...a),
     setPartDescription: (...a) => dataRepo.slips.setPartDescription(...a),
