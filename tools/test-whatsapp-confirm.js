@@ -72,7 +72,7 @@ function lift(name) {
 // ---------------------------------------------------------------------------
 // A counter, in miniature: a button, somebody to answer the question, and a
 // record of everything that actually left the building.
-function bench({ answer, drive = { enabled: true, configured: true } }) {
+function bench({ answer, drive = { enabled: true, configured: true }, failOn = [] }) {
   const log = { asked: [], sent: [], filed: [], opened: [], toasts: [] };
   const btn = {
     textContent: "Send to customer on WhatsApp",
@@ -85,11 +85,19 @@ function bench({ answer, drive = { enabled: true, configured: true } }) {
   };
   const env = {
     // Stands in for the sheet. Records the question rather than drawing it,
-    // and answers it the way this bench was told to.
-    confirmAction: async (q) => { log.asked.push(q); return answer; },
+    // and answers it the way this bench was told to. A question with choices
+    // is answered with ids, the way the real sheet answers it - everything
+    // ticked on yes, nothing on no.
+    confirmAction: async (q) => {
+      log.asked.push(q);
+      if (!q.choices) return answer;
+      return answer ? q.choices.filter((c) => c.checked).map((c) => c.id) : [];
+    },
     sendSlipWhatsApp: async (slip, opts) => {
-      log.sent.push({ slip: slip.slip_number, auto: !!(opts && opts.auto) });
-      return { ok: true, to: slip.whatsapp_number || slip.contact_number };
+      const id = Number((opts && opts.contact) || 1);
+      log.sent.push({ slip: slip.slip_number, auto: !!(opts && opts.auto), contact: id });
+      if (failOn.includes(id)) return { ok: false, error: `no answer from contact ${id}` };
+      return { ok: true, to: id === 2 ? slip.contact2_number : (slip.whatsapp_number || slip.contact_number) };
     },
     driveStatus: async () => drive,
     driveStoreSlip: async (slip, opts) => {
@@ -103,6 +111,7 @@ function bench({ answer, drive = { enabled: true, configured: true } }) {
 
   const body =
     lift("customerContact") + "\n" +
+    lift("slipContacts") + "\n" +
     lift("confirmWhatsappSend") + "\n" +
     lift("wireWhatsappButton") + "\n" +
     lift("confirmOpenChat") + "\n" +
@@ -126,6 +135,17 @@ const SLIP = {
   contact_name: "Mr Tan",
   contact_number: "62734000",
   whatsapp_number: "91234567",
+};
+
+// The same slip with somebody else on it as well.
+const TWO = {
+  slip_number: "00125",
+  company: "GREENSCAPE PTE LTD",
+  contact_name: "Mr Tan",
+  contact_number: "62734000",
+  whatsapp_number: "91234567",
+  contact2_name: "Ah Meng",
+  contact2_number: "98765432",
 };
 
 const settle = () => new Promise((r) => setTimeout(r, 0));
@@ -152,7 +172,7 @@ const settle = () => new Promise((r) => setTimeout(r, 0));
     btn._click();
     await settle();
     check("asked once", log.asked.length, 1);
-    check("sent once, by hand", log.sent, [{ slip: "00123", auto: false }]);
+    check("sent once, by hand", log.sent, [{ slip: "00123", auto: false, contact: 1 }]);
   }
 
   console.log("\n-- the send: the question names the customer --");
@@ -178,7 +198,72 @@ const settle = () => new Promise((r) => setTimeout(r, 0));
     wireWhatsappButton(btn, SLIP, { auto: true });
     await settle();
     check("nobody was asked", log.asked, []);
-    check("and it sent anyway", log.sent, [{ slip: "00123", auto: true }]);
+    check("and it sent anyway", log.sent, [{ slip: "00123", auto: true, contact: 1 }]);
+  }
+
+  console.log("\n-- two contacts: the sheet offers both, ticked --");
+  {
+    const { log, btn, wireWhatsappButton } = bench({ answer: false });
+    wireWhatsappButton(btn, TWO);
+    btn._click();
+    await settle();
+    const q = log.asked[0] || {};
+    check("it asked with a list, not one number", !!q.choices, true);
+    check("both people are on it", (q.choices || []).map((c) => c.label),
+      ["91234567", "98765432"]);
+    check("named", (q.choices || []).map((c) => c.sub), ["Mr Tan", "Ah Meng"]);
+    // John's call: somebody who wrote down a second contact meant them told.
+    check("and both start ticked", (q.choices || []).map((c) => c.checked), [true, true]);
+    check("saying no sends nothing at all", log.sent, []);
+  }
+
+  console.log("\n-- saying yes sends to each of them, once --");
+  {
+    const { log, btn, wireWhatsappButton } = bench({ answer: true });
+    wireWhatsappButton(btn, TWO);
+    btn._click();
+    await settle();
+    check("two sends", log.sent, [
+      { slip: "00125", auto: false, contact: 1 },
+      { slip: "00125", auto: false, contact: 2 },
+    ]);
+    check("and the button names both", btn.textContent, "Sent to 91234567 and 98765432");
+  }
+
+  console.log("\n-- one of two fails: say which went --");
+  {
+    // The half that WENT is the thing somebody needs to know. "Could not send"
+    // would have them try again and message the first person twice.
+    const { log, btn, wireWhatsappButton } = bench({ answer: true, failOn: [2] });
+    wireWhatsappButton(btn, TWO);
+    btn._click();
+    await settle();
+    check("both were attempted", log.sent.length, 2);
+    check("the button says what got through",
+      /^Sent to 91234567 — retry the rest$/.test(btn.textContent), true);
+    check("and it can be tried again", btn.disabled, false);
+    check("the message names both halves",
+      /Sent to 91234567, but no answer from contact 2/.test((log.toasts[0] || [])[0] || ""), true);
+  }
+
+  console.log("\n-- automatic sending reaches everyone, unasked --");
+  {
+    const { log, btn, wireWhatsappButton } = bench({ answer: false });
+    wireWhatsappButton(btn, TWO, { auto: true });
+    await settle();
+    check("nobody was asked", log.asked, []);
+    check("and both were sent to", log.sent.map((x) => x.contact), [1, 2]);
+  }
+
+  console.log("\n-- a second contact with no number is not a contact --");
+  {
+    const { log, btn, wireWhatsappButton } = bench({ answer: false });
+    wireWhatsappButton(btn, { ...TWO, contact2_number: "" });
+    btn._click();
+    await settle();
+    // Back to the single-number sheet, not a list of one.
+    check("it asks the plain question", !!(log.asked[0] || {}).choices, false);
+    check("about the first contact", (log.asked[0] || {}).to, "91234567");
   }
 
   console.log("\n-- Open chat: saying no files nothing and opens nothing --");
@@ -231,10 +316,27 @@ const settle = () => new Promise((r) => setTimeout(r, 0));
   {
     // Read out of server.js rather than remembered. Two expressions in two
     // files that must not drift.
-    check("the server prefers whatsapp_number, then contact_number",
-      /const to = slip\.whatsapp_number \|\| slip\.contact_number/.test(serverSrc), true);
+    // The route no longer picks a number at all - it names a contact and the
+    // repository resolves it, so that a number in the request can never decide
+    // where a customer's slip goes. The precedence moved with it.
+    check("the route names a contact rather than a number",
+      /slipContacts\(slip\)/.test(serverSrc), true);
+    check("and it never reads a number out of the request",
+      /req\.query\.(?:to|number)/.test(serverSrc), false);
+    check("the repository prefers whatsapp_number, then contact_number",
+      /slip\.whatsapp_number \|\| slip\.contact_number/.test(
+        read("backend/data/sqliteRepo.js").slice(
+          read("backend/data/sqliteRepo.js").indexOf("function slipContacts("))
+          .slice(0, 900)), true);
     check("and so does the app, in one place",
-      /slip\.whatsapp_number \|\| slip\.contact_number/.test(lift("customerContact")), true);
+      /slip\.whatsapp_number \|\| slip\.contact_number/.test(lift("slipContacts")), true);
+    // Two copies of "who can this slip reach" - one here, one in the
+    // repository, which is what actually resolves the number. They may word
+    // things differently; they may not disagree about who exists.
+    const repo = read("backend/data/sqliteRepo.js");
+    const repoList = repo.slice(repo.indexOf("function slipContacts("));
+    check("and the server keeps the same two, in the same order",
+      /id: 1[\s\S]{0,400}?id: 2/.test(repoList.slice(0, 900)), true);
 
     // Shown rather than asserted about: a slip with only a contact number must
     // name THAT, not an empty space.

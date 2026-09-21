@@ -217,6 +217,8 @@ function signedShape(slip, machines) {
     contact_name: slip.contact_name || "",
     contact_number: slip.contact_number || "",
     whatsapp_number: slip.whatsapp_number || "",
+    contact2_name: slip.contact2_name || "",
+    contact2_number: slip.contact2_number || "",
     notes: slip.notes || "",
     machines: (machines || []).map((m) => ({
       machine_desc: m.machine_desc || "",
@@ -226,7 +228,7 @@ function signedShape(slip, machines) {
   };
 }
 
-function createSlip({ company, debtor_code = "", contact_name = "", contact_number = "", whatsapp_number = "", check_service = false, repair_only = false, quote_first = false, notes = "", machines = [], signature = "", created_by = "" } = {}) {
+function createSlip({ company, debtor_code = "", contact_name = "", contact_number = "", whatsapp_number = "", contact2_name = "", contact2_number = "", check_service = false, repair_only = false, quote_first = false, notes = "", machines = [], signature = "", created_by = "" } = {}) {
   const newCompanyName = String(company || "").trim();
   if (!company || !String(company).trim()) {
     const e = new Error("Company is required to register a service slip.");
@@ -270,8 +272,8 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
   const checkService = !!check_service && !repair_only;
 
   const insertSlip = db.prepare(
-    `INSERT INTO service_slips (slip_number, company, debtor_code, contact_name, contact_number, whatsapp_number, check_service, repair_only, quote_first, notes, created_by, status)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'OPEN')`
+    `INSERT INTO service_slips (slip_number, company, debtor_code, contact_name, contact_number, whatsapp_number, contact2_name, contact2_number, check_service, repair_only, quote_first, notes, created_by, status)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'OPEN')`
   );
   const insertMachine = db.prepare(
     "INSERT INTO slip_machines (slip_id, machine_desc, machine_code, serial_no, remarks, machine_type, state) VALUES (?, ?, ?, ?, ?, ?, ?)"
@@ -296,7 +298,7 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
     // Already inside a transaction, so the bare allocator rather than
     // nextSlipNumber() - that one opens its own, and SQLite forbids nesting.
     const slipNumber = allocateSlipNumber();
-    const info = insertSlip.run(slipNumber, String(company).trim(), String(debtor_code || "").trim(), contact_name, contact_number, whatsapp_number, checkService ? 1 : 0, repair_only ? 1 : 0, wantsQuote ? 1 : 0, notes, String(created_by || "").trim().slice(0, 60));
+    const info = insertSlip.run(slipNumber, String(company).trim(), String(debtor_code || "").trim(), contact_name, contact_number, whatsapp_number, String(contact2_name || "").trim(), String(contact2_number || "").trim(), checkService ? 1 : 0, repair_only ? 1 : 0, wantsQuote ? 1 : 0, notes, String(created_by || "").trim().slice(0, 60));
     const slipId = info.lastInsertRowid;
     // Every machine starts RECEIVED, even when the customer asked for a quote.
     // Marking them AWAITING_QUOTE here used to put the slip on Sales' Need to
@@ -486,6 +488,30 @@ function assertSlipEditable(slipId) {
     const e = new Error(`Slip ${row.slip_number} is closed. Its parts can no longer be changed.`);
     e.status = 409; throw e;
   }
+}
+
+// WHO can be reached about this slip, in order, skipping any with no number.
+//
+// ONE list, used by everything: the WhatsApp picker, the Sales Order's contact
+// lines and the printed slip. They have drifted before - the server picking
+// one number while the screen showed another - and this is what stops the
+// question being answered twice.
+//
+// The first contact's WhatsApp number is separate because a company's office
+// line is often not on WhatsApp. The second is a person's mobile, so its
+// number IS its WhatsApp number - John's call, and the reason there is no
+// third field on the form.
+function slipContacts(slip) {
+  const out = [];
+  const one = String(slip.whatsapp_number || slip.contact_number || "").trim();
+  if (one) {
+    out.push({ id: 1, name: String(slip.contact_name || "").trim(), number: one });
+  }
+  const two = String(slip.contact2_number || "").trim();
+  if (two) {
+    out.push({ id: 2, name: String(slip.contact2_name || "").trim(), number: two });
+  }
+  return out;
 }
 
 // THE definition of a slip-level part: it names a slip and no machine.
@@ -908,11 +934,18 @@ function slipBlockLines(slip, wanted, all, extras = []) {
   // Customer contact, as the last line of the block, with a blank row above it
   // - the same gap that separates one machine from the next, so the contact
   // does not read as another line of the last machine's block.
-  const contact = [slip.contact_name, phoneForOrder(slip.contact_number)]
-    .filter(Boolean).join(" ").trim();
-  if (contact) {
+  // Both contacts where there are two - John asked for the second on this
+  // document as well as on the printed slip. The FIRST line keeps the contact
+  // number rather than the WhatsApp one, exactly as it always has: this is who
+  // the office rings, not who the slip was messaged to.
+  const people = [
+    [slip.contact_name, slip.contact_number],
+    [slip.contact2_name, slip.contact2_number],
+  ].map(([n, t]) => [n, phoneForOrder(t)].filter(Boolean).join(" ").trim())
+   .filter(Boolean);
+  if (people.length) {
     lines.push({ note: true, description: "" });
-    lines.push({ note: true, description: contact });
+    for (const c of people) lines.push({ note: true, description: c });
   }
 
   return lines;
@@ -1582,7 +1615,7 @@ function renumberSlipMachines(slipId) {
 // customer asked for, and each machine's name, serial and intake remarks.
 // Parts, labour, comments and status are the WORK and live in Open Service -
 // not touched here. A closed slip is a finished record and is refused.
-function updateSlipDetails(slipNumber, { company, contact_name, contact_number, whatsapp_number, notes, machines, check_service, repair_only, quote_first, who = "" } = {}) {
+function updateSlipDetails(slipNumber, { company, contact_name, contact_number, whatsapp_number, contact2_name, contact2_number, notes, machines, check_service, repair_only, quote_first, who = "" } = {}) {
   const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
   if (slip.status === "CLOSED") { const e = new Error("Slip is closed and can no longer be edited."); e.status = 409; throw e; }
@@ -1658,6 +1691,10 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
   note("Contact name", before.contact_name, contact_name === undefined ? before.contact_name : contact_name);
   note("Contact number", before.contact_number, contact_number === undefined ? before.contact_number : contact_number);
   note("WhatsApp number", before.whatsapp_number, whatsapp_number === undefined ? before.whatsapp_number : whatsapp_number);
+  note("Second contact name", before.contact2_name,
+       contact2_name === undefined ? before.contact2_name : contact2_name);
+  note("Second contact number", before.contact2_number,
+       contact2_number === undefined ? before.contact2_number : contact2_number);
   note("Notes", before.notes, notes === undefined ? before.notes : notes);
   // These print on the customer's copy, so changing one after they signed is
   // recorded like anything else on it. Written as Yes/No rather than 1/0: the
@@ -1682,7 +1719,8 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
      VALUES (?, ?, ?, ?, ?)`
   );
   const updSlip = db.prepare(
-    `UPDATE service_slips SET company = ?, contact_name = ?, contact_number = ?, whatsapp_number = ?, notes = ?,
+    `UPDATE service_slips SET company = ?, contact_name = ?, contact_number = ?, whatsapp_number = ?,
+            contact2_name = ?, contact2_number = ?, notes = ?,
             check_service = ?, repair_only = ?, quote_first = ?
       WHERE id = ?`
   );
@@ -1703,6 +1741,8 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
       contact_name === undefined ? slip.contact_name : String(contact_name || "").trim(),
       contact_number === undefined ? slip.contact_number : String(contact_number || "").trim(),
       whatsapp_number === undefined ? slip.whatsapp_number : String(whatsapp_number || "").trim(),
+      contact2_name === undefined ? slip.contact2_name : String(contact2_name || "").trim(),
+      contact2_number === undefined ? slip.contact2_number : String(contact2_number || "").trim(),
       notes === undefined ? slip.notes : String(notes || "").trim(),
       newCheck, newRepairOnly, newQuoteFirst,
       slip.id
@@ -2355,7 +2395,7 @@ const slips = {
   poTracking, poStatus, setPoStatus, PO_STATUSES,
   listShipments, getShipment, createShipment, updateShipment,
   allocatedByPo, receivedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
-  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setSlipExtrasNote, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setSlipExtrasNote, slipContacts, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 
 // ---- One-off: read the status of every open slip again ---------------------

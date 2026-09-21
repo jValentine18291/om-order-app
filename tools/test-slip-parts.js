@@ -375,6 +375,95 @@ const descs = (lines) => lines.map((l) => l.description);
     check("and emptying it empties it", reload().extras_note, "");
   }
 
+  console.log("\n-- a second contact on the slip --");
+  {
+    const two = data.slips.createSlip({
+      company: "TWO CONTACTS PTE LTD", contact_name: "Mr Tan",
+      contact_number: "62734000", whatsapp_number: "91234567",
+      contact2_name: "Ah Meng", contact2_number: "98765432",
+      signature: SIG,
+      machines: [{ desc: "525BX Blower", serial: "T1", remarks: "" }],
+    });
+    const got = data.slips.getSlip(two.slip_number);
+    check("both are kept", [got.contact2_name, got.contact2_number], ["Ah Meng", "98765432"]);
+
+    // The route names every field it forwards rather than spreading the body,
+    // which is right - nothing a client invents reaches the database - but it
+    // means a new field has to be added there TOO. contact2 was added to the
+    // table, the repository and the form, and still arrived empty, because the
+    // route quietly dropped it on the way past. Nothing failed; it was simply
+    // not there. Found by posting through HTTP rather than calling the
+    // repository, which is why this is checked at the source.
+    const server = fs.readFileSync(
+      path.resolve(__dirname, "..", "backend", "server.js"), "utf8");
+    const createRoute = server.slice(server.indexOf('app.post("/api/slips"'),
+                                     server.indexOf('app.post("/api/slips"') + 1200);
+    for (const f of ["contact2_name", "contact2_number"]) {
+      // Twice: once destructured off the body, once handed to createSlip.
+      check(`the create route passes ${f} on`,
+        (createRoute.match(new RegExp(f, "g")) || []).length >= 2, true);
+    }
+
+    // The one list everything else reads. The FIRST contact answers on its
+    // WhatsApp number where it has one, because a company's office line is
+    // often not on WhatsApp; the second's number IS its WhatsApp number.
+    const people = data.slips.slipContacts(got);
+    check("two people can be reached",
+      people.map((c) => [c.id, c.name, c.number]),
+      [[1, "Mr Tan", "91234567"], [2, "Ah Meng", "98765432"]]);
+
+    // The Sales Order carries both, at the foot, as John asked - and the FIRST
+    // line keeps the contact number rather than the WhatsApp one, because that
+    // line is who the office rings, not who the slip was messaged to.
+    const mid = got.machines[0].id;
+    data.slips.setMachineLabour(mid, 40);
+    const so = data.slips.createSlipOrder(two.slip_number, [mid], {});
+    const lines = data.slips.getSlipOrder(two.slip_number, so.so_number).lines;
+    const tail = lines.slice(-2).map((l) => l.description);
+    check("both contacts close the order", tail, ["Mr Tan 6273 4000", "Ah Meng 9876 5432"]);
+    check("and they are the last thing on it",
+      lines[lines.length - 1].description, "Ah Meng 9876 5432");
+  }
+
+  console.log("\n-- one contact still reads exactly as it did --");
+  {
+    const one = data.slips.createSlip({
+      company: "ONE CONTACT PTE LTD", contact_name: "Mr Lim",
+      contact_number: "61112222", signature: SIG,
+      machines: [{ desc: "125B Blower", serial: "O1", remarks: "" }],
+    });
+    const got = data.slips.getSlip(one.slip_number);
+    check("one person to reach", data.slips.slipContacts(got).map((c) => c.number), ["61112222"]);
+    const mid = got.machines[0].id;
+    data.slips.setMachineLabour(mid, 25);
+    const so = data.slips.createSlipOrder(one.slip_number, [mid], {});
+    const lines = data.slips.getSlipOrder(one.slip_number, so.so_number).lines;
+    check("one contact line, as before", lines[lines.length - 1].description, "Mr Lim 6111 2222");
+    // A blank line above it, not two - a slip with no second contact must not
+    // grow a gap where one would have been.
+    check("with a single blank above it", lines[lines.length - 2].description, "");
+  }
+
+  console.log("\n-- a second contact can be added afterwards, and is recorded --");
+  {
+    const later = data.slips.createSlip({
+      company: "LATER CO", contact_name: "Mr Ong", contact_number: "63334444",
+      signature: SIG, machines: [{ desc: "525RX Trimmer", serial: "L1", remarks: "" }],
+    });
+    data.slips.updateSlipDetails(later.slip_number, {
+      contact2_name: "Siti", contact2_number: "95556666", who: "KS",
+    });
+    const got = data.slips.getSlip(later.slip_number);
+    check("it is on the slip now", data.slips.slipContacts(got).length, 2);
+    // The customer signed a slip without them, so adding one is an amendment
+    // like any other change to what they signed.
+    const logged = (got.amendments || []).map((a) => [a.field, a.before, a.after]);
+    check("and the change is on the record", logged, [
+      ["Second contact name", "", "Siti"],
+      ["Second contact number", "", "95556666"],
+    ]);
+  }
+
   console.log("\n-- a closed slip takes no more of them --");
   const other = data.slips.createSlip({
     company: "SHUT CO", contact_name: "A", contact_number: "1", signature: SIG,

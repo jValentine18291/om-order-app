@@ -138,6 +138,13 @@ db.exec(`
     -- The staff-only Drive copy of this slip's PDF. The id is kept so a
     -- re-send REPLACES that file rather than adding a second one, which keeps
     -- a link already given to a customer pointing at the current document.
+    -- A SECOND person to reach about this slip, both optional. Just a name
+    -- and a number: the first contact carries a separate WhatsApp number
+    -- because a company's office line is often not on WhatsApp, and this one
+    -- is a person's mobile - so the number IS the WhatsApp number. John's
+    -- call, Sep 2026.
+    contact2_name  TEXT    DEFAULT '',
+    contact2_number TEXT   DEFAULT '',
     -- A note about the slip's own parts - the ones belonging to no machine.
     -- INTERNAL. It is shown in the app and never reaches a Sales Order, a
     -- quotation or anything else the customer sees. See slipBlockLines(),
@@ -504,6 +511,18 @@ try {
   }
 } catch (e) {
   console.error("[db] machine_parts free_text migration check failed:", e.message);
+}
+
+// Migration: a second contact person on a slip.
+try {
+  const cols = db.prepare("PRAGMA table_info(service_slips)").all().map((c) => c.name);
+  if (cols.length && !cols.includes("contact2_name")) {
+    db.exec("ALTER TABLE service_slips ADD COLUMN contact2_name TEXT DEFAULT ''");
+    db.exec("ALTER TABLE service_slips ADD COLUMN contact2_number TEXT DEFAULT ''");
+    console.log("[db] migrated: added contact2_name / contact2_number to service_slips");
+  }
+} catch (e) {
+  console.error("[db] contact2 migration check failed:", e.message);
 }
 
 // Migration: a note against the slip's own parts.

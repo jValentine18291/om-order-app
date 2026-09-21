@@ -1008,6 +1008,17 @@ select {
   margin-bottom: 12px;
   background: #f7fbfb;
 }
+/* When the sheet is asking WHICH rather than WHETHER, it holds rows instead
+   of one number - so it loses the box of its own and each row gets one. */
+.ask-to.ask-to-list { border: 0; padding: 0; background: none; }
+.ask-pick {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px; margin-bottom: 8px;
+  border: 1px solid var(--line, #e3e6e8); border-radius: 10px;
+  background: #f7fbfb; cursor: pointer;
+}
+.ask-pick:last-child { margin-bottom: 0; }
+.ask-pick input { margin-top: 5px; flex: none; width: 18px; height: 18px; }
 .ask-to .ask-num { display: block; font-size: 20px; font-weight: 700; letter-spacing: .5px; }
 .ask-to .ask-who { display: block; font-size: 13px; margin-top: 2px; color: var(--ink-faint, #78868c); }
 /* The slip's own parts, on the slip screen and in the convert picker. Set

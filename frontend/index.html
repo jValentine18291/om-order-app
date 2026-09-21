@@ -519,6 +519,16 @@
         <label class="ns-same-line"><input type="checkbox" id="ns-whatsapp-same" checked /> Same as contact number</label>
       </div>
 
+      <!-- Somebody else who can be rung about this slip, and who can be sent
+           it on WhatsApp. Optional. One number only: the first contact has a
+           separate WhatsApp field because a company's office line is often not
+           on WhatsApp, and this one is a person's mobile. -->
+      <div class="field">
+        <label for="ns-contact2-name">Second contact <span style="color:var(--ink-faint);font-weight:400;">(optional)</span></label>
+        <input id="ns-contact2-name" type="text" autocomplete="off" placeholder="Name — e.g. Ah Meng" />
+        <input id="ns-contact2-number" type="tel" autocomplete="off" placeholder="Number — e.g. 9876 5432" style="margin-top:8px;" />
+      </div>
+
       <div class="field">
         <label>Machines <span class="req">*</span></label>
         <!-- Added machines are listed here; the details are filled in on a
@@ -1206,6 +1216,11 @@
             <label for="vse-whatsapp">WhatsApp number</label>
             <input id="vse-whatsapp" type="text" autocomplete="off" inputmode="tel" />
           </div>
+      <div class="field">
+        <label for="vse-contact2-name">Second contact <span style="color:var(--ink-faint);font-weight:400;">(optional)</span></label>
+        <input id="vse-contact2-name" type="text" autocomplete="off" placeholder="Second contact name" />
+        <input id="vse-contact2-number" type="tel" autocomplete="off" placeholder="Second contact number" style="margin-top:8px;" />
+      </div>
           <div class="field">
             <label for="vse-notes">Notes</label>
             <textarea id="vse-notes" rows="2"></textarea>

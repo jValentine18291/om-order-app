@@ -665,7 +665,8 @@ function commitMachineForm() {
   }));
 
 function resetNewServiceForm() {
-  ["ns-company", "ns-contact-name", "ns-contact-number", "ns-whatsapp", "ns-notes"].forEach((id) => ($(id).value = ""));
+  ["ns-company", "ns-contact-name", "ns-contact-number", "ns-whatsapp",
+   "ns-contact2-name", "ns-contact2-number", "ns-notes"].forEach((id) => ($(id).value = ""));
   const same = $("ns-whatsapp-same"); if (same) same.checked = true;
   const wa = $("ns-whatsapp"); if (wa) wa.setAttribute("disabled", "true");
   const created = $("ns-created"); if (created) { created.style.display = "none"; created.innerHTML = ""; }
@@ -738,6 +739,8 @@ async function submitNewService() {
         // Cash Sales rather than being guessed at from the typed name.
         debtor_code: nsDebtorCode || CASH_SALES_DEBTOR,
         contact_name: $("ns-contact-name").value.trim(),
+        contact2_name: $("ns-contact2-name").value.trim(),
+        contact2_number: $("ns-contact2-number").value.trim(),
         contact_number: $("ns-contact-number").value.trim(),
         whatsapp_number: $("ns-whatsapp").value.trim(),
         // Whoever is signed in on this phone took the machine in.
@@ -1074,8 +1077,10 @@ function buildSlipPdf(slip) {
   const meta = [
     ["calendar", "DATE RECEIVED", formatDate(slip.created_at) || "—", 1],
     ["building", "COMPANY", slip.company || "—", 2.1],
-    ["person", "CONTACT", slip.contact_name || "—", 1.25],
-    ["phone", "CONTACT NO.", slip.contact_number || "—", 1],
+    ["person", "CONTACT", [slip.contact_name, slip.contact2_name]
+      .map((v) => String(v || "").trim()).filter(Boolean).join(" · ") || "—", 1.25],
+    ["phone", "CONTACT NO.", [slip.contact_number, slip.contact2_number]
+      .map((v) => String(v || "").trim()).filter(Boolean).join(" · ") || "—", 1],
   ];
   const metaWeight = meta.reduce((n, m) => n + m[3], 0);
   let mcx = LEFT;
@@ -1335,7 +1340,7 @@ function whatsappStatus() {
 // copy staff look at - then posted up as raw bytes. Sending the finished file
 // rather than asking the server to rebuild it means the customer cannot
 // receive a subtly different document from the one that was signed.
-async function sendSlipWhatsApp(slipIn, { auto = false } = {}) {
+async function sendSlipWhatsApp(slipIn, { auto = false, contact = 1 } = {}) {
   // The customer signed against these terms, so the copy they receive must
   // carry the signature - it is fetched rather than assumed present.
   const slip = await withSignature(slipIn);
@@ -1355,6 +1360,10 @@ async function sendSlipWhatsApp(slipIn, { auto = false } = {}) {
   if (me) params.set("who", me);
   params.set("role", getRole());
   if (auto) params.set("auto", "1");
+  // WHICH contact. The number itself is never sent - the server looks it up
+  // from the slip, so nothing here can post a customer's slip to a number the
+  // slip does not carry.
+  params.set("contact", String(contact));
 
   try {
     const r = await api(
@@ -1389,17 +1398,41 @@ async function sendSlipWhatsApp(slipIn, { auto = false } = {}) {
 //
 // It is also simply a better question. The customer's number can be set large
 // enough to be read rather than skimmed, which is the point of asking at all.
-function confirmAction({ title, sub = "", to = "", who = "", detail = "", ok = "Yes" }) {
+// With `choices` this asks WHICH rather than WHETHER, and answers with the
+// ids that were ticked - an empty list meaning no, exactly as false does.
+// Everything else about it is unchanged, so the one-recipient question is
+// still the one-recipient question.
+function confirmAction({ title, sub = "", to = "", who = "", detail = "", ok = "Yes", choices = null }) {
   const modal = $("ask-modal");
+  const list = Array.isArray(choices) && choices.length ? choices : null;
   $("ask-title").textContent = title;
   $("ask-sub").textContent = sub;
-  $("ask-to").innerHTML = to
-    ? `<span class="ask-num mono">${escapeHtml(to)}</span>${
-        who ? `<span class="ask-who">${escapeHtml(who)}</span>` : ""}`
-    : "";
-  $("ask-to").style.display = to ? "" : "none";
+  $("ask-to").innerHTML = list
+    ? list.map((c) => `
+        <label class="ask-pick">
+          <input type="checkbox" data-pick="${escapeAttr(c.id)}"${c.checked ? " checked" : ""}>
+          <span>
+            <span class="ask-num mono">${escapeHtml(c.label)}</span>
+            ${c.sub ? `<span class="ask-who">${escapeHtml(c.sub)}</span>` : ""}
+          </span>
+        </label>`).join("")
+    : to
+      ? `<span class="ask-num mono">${escapeHtml(to)}</span>${
+          who ? `<span class="ask-who">${escapeHtml(who)}</span>` : ""}`
+      : "";
+  $("ask-to").style.display = (list || to) ? "" : "none";
+  $("ask-to").classList.toggle("ask-to-list", !!list);
   $("ask-detail").textContent = detail;
   $("ask-go").textContent = ok;
+
+  // Nothing ticked is not a send. The button says so rather than letting
+  // somebody tap it and wonder why nothing happened.
+  const ticks = () => [...$("ask-to").querySelectorAll("[data-pick]")];
+  const picked = () => ticks().filter((t) => t.checked).map((t) => t.dataset.pick);
+  const syncGo = () => { if (list) $("ask-go").disabled = picked().length === 0; };
+  if (list) ticks().forEach((t) => t.addEventListener("change", syncGo));
+  syncGo();
+
   modal.style.display = "";
 
   return new Promise((resolve) => {
@@ -1411,17 +1444,21 @@ function confirmAction({ title, sub = "", to = "", who = "", detail = "", ok = "
       if (done) return;
       done = true;
       modal.style.display = "none";
+      $("ask-go").disabled = false;
       $("ask-go").onclick = $("ask-no").onclick = $("ask-x").onclick = null;
       modal.onclick = null;
       document.removeEventListener("keydown", onKey);
       resolve(answer);
     };
-    const onKey = (e) => { if (e.key === "Escape") finish(false); };
-    $("ask-go").onclick = () => finish(true);
-    $("ask-no").onclick = () => finish(false);
-    $("ask-x").onclick = () => finish(false);
+    // "No" is an empty list where a list was asked for, and false where it was
+    // not - so a caller can treat either as falsy and be right.
+    const no = () => finish(list ? [] : false);
+    const onKey = (e) => { if (e.key === "Escape") no(); };
+    $("ask-go").onclick = () => finish(list ? picked() : true);
+    $("ask-no").onclick = no;
+    $("ask-x").onclick = no;
     // Tapping the dark surround is a no, the way it is on the other sheets.
-    modal.onclick = (e) => { if (e.target === modal) finish(false); };
+    modal.onclick = (e) => { if (e.target === modal) no(); };
     document.addEventListener("keydown", onKey);
   });
 }
@@ -1433,6 +1470,22 @@ function customerContact(slip) {
     to: String(slip.whatsapp_number || slip.contact_number || "").trim(),
     who: String(slip.contact_name || slip.company || "").trim(),
   };
+}
+
+// Who this slip can be sent to, in the order they were written down.
+//
+// The same rule as slipContacts() on the server, which is what actually
+// resolves the number when a send is made. This one only decides what the
+// sheet OFFERS; the id it sends back is what the server looks up. So the two
+// can disagree about wording and nothing breaks - but they must agree about
+// who exists, or the sheet offers somebody the server will refuse.
+function slipContacts(slip) {
+  const out = [];
+  const one = String(slip.whatsapp_number || slip.contact_number || "").trim();
+  if (one) out.push({ id: 1, name: String(slip.contact_name || "").trim(), number: one });
+  const two = String(slip.contact2_number || "").trim();
+  if (two) out.push({ id: 2, name: String(slip.contact2_name || "").trim(), number: two });
+  return out;
 }
 
 // Asked before every send a person makes.
@@ -1452,17 +1505,46 @@ function customerContact(slip) {
 // wrong if the slip on screen were not the one somebody thought it was - which
 // is the mistake that actually costs something here, worse than the stray tap
 // this was asked for.
-function confirmWhatsappSend(slip) {
-  const { to, who } = customerContact(slip);
-  return confirmAction({
+// Returns the contact ids to send to - [] means no.
+//
+// With ONE contact this is the sheet it has always been: a single number, set
+// large, because the mistake worth catching is the right slip to the wrong
+// customer. With two it becomes a list of ticks, both on, because somebody who
+// wrote down a second contact meant them to be told - John's call.
+async function confirmWhatsappSend(slip) {
+  const people = slipContacts(slip);
+
+  if (people.length < 2) {
+    const one = people[0];
+    const ok = await confirmAction({
+      title: "Send this slip to the customer?",
+      sub: `Slip ${slip.slip_number}`,
+      to: one ? one.number : "(no number on this slip)",
+      // The company where the contact has no name of their own. A number on
+      // its own says nothing about who is about to be messaged, which is the
+      // whole reason this question exists.
+      who: (one && one.name) || String(slip.company || "").trim(),
+      detail: "They get the message and the signed PDF straight away. " +
+              "It cannot be unsent.",
+      ok: "Send on WhatsApp",
+    });
+    return ok && one ? [one.id] : [];
+  }
+
+  const chosen = await confirmAction({
     title: "Send this slip to the customer?",
     sub: `Slip ${slip.slip_number}`,
-    to: to || "(no number on this slip)",
-    who,
-    detail: "They get the message and the signed PDF straight away. " +
-            "It cannot be unsent.",
+    choices: people.map((c) => ({
+      id: String(c.id),
+      label: c.number,
+      sub: c.name || String(slip.company || "").trim(),
+      checked: true,
+    })),
+    detail: "Each person ticked gets the message and the signed PDF straight " +
+            "away. It cannot be unsent.",
     ok: "Send on WhatsApp",
   });
+  return (chosen || []).map(Number);
 }
 
 // One button, used on the success card and again in View Slips - the second
@@ -1474,20 +1556,43 @@ function wireWhatsappButton(btn, slip, { auto = false } = {}) {
     // taken, on the server, for every slip - and it fires as the success card
     // appears, so a question there would be answered by whoever happened to be
     // holding the phone, or sit unanswered with the customer waiting.
-    if (!isAuto && !(await confirmWhatsappSend(slip))) return;
+    // Automatic sending goes to everyone the slip can reach, which is the
+    // same answer the sheet gives by default. Asking there is not an option:
+    // it fires as the success card appears, with a customer at the counter.
+    const targets = isAuto
+      ? slipContacts(slip).map((c) => c.id)
+      : await confirmWhatsappSend(slip);
+    if (!targets.length) return;
+
     btn.disabled = true;
     btn.textContent = isAuto ? "Sending to customer…" : "Sending…";
-    const r = await sendSlipWhatsApp(slip, { auto: isAuto });
-    if (r.ok) {
-      btn.textContent = "Sent to " + r.to;
+
+    // One at a time, and one result each. A send that reaches the first person
+    // and fails on the second is not a failure - it is half a job, and saying
+    // "could not send" would have somebody try the whole thing again and
+    // message the first person twice.
+    const sent = [], failed = [];
+    for (const id of targets) {
+      const r = await sendSlipWhatsApp(slip, { auto: isAuto, contact: id });
+      if (r.ok) sent.push(r.to); else failed.push(r.error);
+    }
+
+    if (sent.length && !failed.length) {
+      btn.textContent = "Sent to " + sent.join(" and ");
       btn.classList.add("wa-sent");
-      toast("Slip sent on WhatsApp", "ok");
+      toast(sent.length > 1 ? `Slip sent to ${sent.length} contacts` : "Slip sent on WhatsApp", "ok");
+    } else if (sent.length) {
+      // Say BOTH halves. Which one went is the thing somebody needs to know
+      // before they try again.
+      btn.disabled = false;
+      btn.textContent = "Sent to " + sent.join(" and ") + " — retry the rest";
+      toast(`Sent to ${sent.join(" and ")}, but ${failed[0]}`, "err");
     } else {
       btn.disabled = false;
       btn.textContent = idle;
       // Left on screen rather than a toast that vanishes: a failed send is
       // something someone has to act on.
-      toast(r.error, "err");
+      toast(failed[0], "err");
     }
   };
   btn.addEventListener("click", () => run(false));
@@ -5120,6 +5225,8 @@ function vseOriginal() {
     contact_name: vseSlip.contact_name || "",
     contact_number: vseSlip.contact_number || "",
     whatsapp_number: vseSlip.whatsapp_number || "",
+    contact2_name: vseSlip.contact2_name || "",
+    contact2_number: vseSlip.contact2_number || "",
     notes: vseSlip.notes || "",
     // Read as true/false, because that is what the tickboxes answer with. The
     // slip carries them as 1/0 out of SQLite.
@@ -5146,6 +5253,8 @@ function openSlipEdit(slip) {
   $("vse-contact-name").value = slip.contact_name || "";
   $("vse-contact-number").value = slip.contact_number || "";
   $("vse-whatsapp").value = slip.whatsapp_number || "";
+  $("vse-contact2-name").value = slip.contact2_name || "";
+  $("vse-contact2-number").value = slip.contact2_number || "";
   $("vse-notes").value = slip.notes || "";
   for (const [field, id] of VSE_REQUESTS) $(id).checked = !!slip[field];
 
@@ -5203,7 +5312,8 @@ function openSlipEdit(slip) {
 // count and the amber marks honest without re-reading the form on a timer.
 function vseWatch() {
   const fields = [
-    ...["vse-company", "vse-contact-name", "vse-contact-number", "vse-whatsapp", "vse-notes"].map((id) => $(id)),
+    ...["vse-company", "vse-contact-name", "vse-contact-number", "vse-whatsapp",
+        "vse-contact2-name", "vse-contact2-number", "vse-notes"].map((id) => $(id)),
     ...document.querySelectorAll("#vse-machines input, #vse-machines textarea"),
   ];
   for (const el of fields) {
@@ -5260,6 +5370,7 @@ function vseMarkAll() {
   const pairs = [
     ["vse-company", o.company], ["vse-contact-name", o.contact_name],
     ["vse-contact-number", o.contact_number], ["vse-whatsapp", o.whatsapp_number],
+    ["vse-contact2-name", o.contact2_name], ["vse-contact2-number", o.contact2_number],
     ["vse-notes", o.notes],
   ];
   for (const [id, before] of pairs) {
@@ -5467,6 +5578,8 @@ function vseCollect() {
     role: getRole(), who: initialsFor(getUser()),
     company: val("vse-company"),
     contact_name: val("vse-contact-name"),
+    contact2_name: val("vse-contact2-name"),
+    contact2_number: val("vse-contact2-number"),
     contact_number: val("vse-contact-number"),
     whatsapp_number: val("vse-whatsapp"),
     notes: val("vse-notes"),
@@ -5481,6 +5594,7 @@ function vseCollect() {
   for (const [key, label] of [
     ["company", "Company"], ["contact_name", "Contact name"],
     ["contact_number", "Contact number"], ["whatsapp_number", "WhatsApp"],
+    ["contact2_name", "Second contact name"], ["contact2_number", "Second contact number"],
     ["notes", "Notes"],
   ]) {
     if (o[key].trim() !== payload[key]) customer.push({ label, before: o[key].trim(), after: payload[key] });

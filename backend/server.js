@@ -225,9 +225,13 @@ async function withMachineTypes(machines) {
 
 app.post("/api/slips", async (req, res) => {
   try {
-    const { company, debtor_code, contact_name, contact_number, whatsapp_number, check_service, repair_only, quote_first, notes, machines, signature, created_by } = req.body || {};
+    // Named one by one rather than spread, so nothing a client invents reaches
+    // the database - which also means a new field has to be added HERE as well
+    // as to the form and the table. contact2 was added in three places and
+    // arrived empty until it was added in the fourth.
+    const { company, debtor_code, contact_name, contact_number, whatsapp_number, contact2_name, contact2_number, check_service, repair_only, quote_first, notes, machines, signature, created_by } = req.body || {};
     const withTypes = await withMachineTypes(machines);
-    const slip = await data.slips.createSlip({ company, debtor_code, contact_name, contact_number, whatsapp_number, check_service, repair_only, quote_first, notes, machines: withTypes, signature, created_by });
+    const slip = await data.slips.createSlip({ company, debtor_code, contact_name, contact_number, whatsapp_number, contact2_name, contact2_number, check_service, repair_only, quote_first, notes, machines: withTypes, signature, created_by });
     res.status(201).json(slip);
   } catch (err) {
     if (err.status === 400) return res.status(400).json({ error: err.message });
@@ -312,8 +316,12 @@ app.post(
     const { logSend } = require("./whatsappLog");
     const who = String(req.query.who || "").trim() || (req.query.auto === "1" ? "auto" : "?");
     const role = String(req.query.role || "").trim();
+    // The contact this send was for goes in the log beside the number. Two
+    // sends of one slip to two people are otherwise two near-identical lines.
+    const label = Number(req.query.contact || 1) === 2 ? " [contact 2]" : "";
     const stamp = (outcome, detail, to) =>
-      logSend({ slip: req.params.slip, to, outcome, detail, who: role ? `${who} (${role})` : who });
+      logSend({ slip: req.params.slip, to: String(to || "") + label, outcome, detail,
+                who: role ? `${who} (${role})` : who });
 
     try {
       const ready = wa.readiness();
@@ -330,9 +338,25 @@ app.post(
       const slip = await data.slips.getSlip(req.params.slip);
       if (!slip) return res.status(404).json({ error: "Slip not found." });
 
-      // Fall back to the contact number only if no WhatsApp number was given -
-      // the form defaults one to the other, so they are usually the same.
-      const to = slip.whatsapp_number || slip.contact_number || "";
+      // WHICH of the slip's contacts this send is for. The client names the
+      // contact; the SERVER looks up the number.
+      //
+      // That way round on purpose. A number taken from the request would let
+      // anything that can reach this route post a customer's signed slip to
+      // any phone in the world, and the log would faithfully record that we
+      // did it. Naming a contact can only ever reach a number the slip itself
+      // carries.
+      const contacts = data.slips.slipContacts(slip);
+      const wanted = Number(req.query.contact || 1) === 2 ? 2 : 1;
+      const picked = contacts.find((c) => c.id === wanted);
+      if (!picked) {
+        return res.status(400).json({
+          error: wanted === 2
+            ? "This slip has no second contact number."
+            : "This slip has no contact number to send to.",
+        });
+      }
+      const to = picked.number;
       const filename = `Service Slip ${slip.slip_number}.pdf`;
 
       // The date the slip was REGISTERED, not today - re-sending an older slip

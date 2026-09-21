@@ -57,6 +57,9 @@ module.exports = {
     // Parts belonging to the slip rather than to any machine on it.
     addPartToSlip: (...a) => dataRepo.slips.addPartToSlip(...a),
     setSlipExtrasNote: (...a) => dataRepo.slips.setSlipExtrasNote(...a),
+    // Who can be reached about a slip - the one list the send route,
+    // the Sales Order and the printed slip all read.
+    slipContacts: (...a) => dataRepo.slips.slipContacts(...a),
     setPartQuantity: (...a) => dataRepo.slips.setPartQuantity(...a),
     setPartPrice: (...a) => dataRepo.slips.setPartPrice(...a),
     setPartDescription: (...a) => dataRepo.slips.setPartDescription(...a),

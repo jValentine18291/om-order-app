@@ -155,6 +155,15 @@
     "Point at a QR code": "对准二维码",
     "Stop scanning": "停止扫描",
     "Order more": "申请补货",
+    // ---- A second person to reach about a slip ----
+    "Second contact": "第二联络人",
+    "Second contact name": "第二联络人姓名",
+    "Second contact number": "第二联络人电话",
+    "Name — e.g. Ah Meng": "姓名 — 例如：阿明",
+    "Number — e.g. 9876 5432": "电话 — 例如：9876 5432",
+    "Each person ticked gets the message and the signed PDF straight away. It cannot be unsent.":
+      "每位勾选的联络人都会立即收到信息和已签名的 PDF。发出后无法撤回。",
+
     // ---- Carrying the parts catalogue on the phone ----
     "Checking…": "检查中…",
     "Not on this phone yet": "尚未下载到此手机",
