@@ -952,6 +952,22 @@ function finishSlipOrder(slip, wanted, so, extras = []) {
   };
 }
 
+// The note against the slip's own parts. One per slip, free text, INTERNAL.
+//
+// Nothing on any document reads this. slipBlockLines() builds the Sales Order
+// and the quotation and never touches it, which is the whole point: the office
+// asked for somewhere to write to each other, and a note that quietly appears
+// on a customer's quotation is worse than no note at all.
+function setSlipExtrasNote(slipNumber, note) {
+  const slip = db.prepare("SELECT id FROM service_slips WHERE slip_number = ?").get(slipNumber);
+  if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
+  // A closed slip is finished with, the same as its parts are.
+  assertSlipEditable(slip.id);
+  const text = String(note == null ? "" : note).trim();
+  db.prepare("UPDATE service_slips SET extras_note = ? WHERE id = ?").run(text, slip.id);
+  return { slip_number: String(slipNumber), extras_note: text };
+}
+
 // Labour billed for one machine, on top of its parts. Stored per machine so
 // each unit on a multi-machine slip carries its own charge.
 function setMachineLabour(machineId, amount) {
@@ -2339,7 +2355,7 @@ const slips = {
   poTracking, poStatus, setPoStatus, PO_STATUSES,
   listShipments, getShipment, createShipment, updateShipment,
   allocatedByPo, receivedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
-  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setSlipExtrasNote, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 
 // ---- One-off: read the status of every open slip again ---------------------

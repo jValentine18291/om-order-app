@@ -25,7 +25,10 @@
 //  5. Every per-part action still works on one - price, quantity, wording,
 //     delete. These reach the part through a different join from a machine's
 //     part, and getting that wrong would have made them silently read-only.
-//  6. The migration carries every existing row across. It REBUILDS
+//  6. The NOTE on the group never leaves the building. It is for the office to
+//     write to each other, and a note somebody believes is private but is not
+//     is worse than having nowhere to write one.
+//  7. The migration carries every existing row across. It REBUILDS
 //     machine_parts, because machine_id was NOT NULL and SQLite cannot relax
 //     that in place, and a rebuild that loses rows loses repair history.
 const path = require("path");
@@ -323,6 +326,55 @@ const descs = (lines) => lines.map((l) => l.description);
     Math.round((withThem.subtotal - without.subtotal) * 100) / 100,
     Math.round((13.5 * 2 + 3 + 13.5) * 100) / 100);
 
+  console.log("\n-- rule 6: the note is for us, not for the customer --");
+  {
+    const SECRET = "Ah Seng to confirm price before ordering";
+    data.slips.setSlipExtrasNote(SLIP, SECRET);
+    check("it is kept against the slip", reload().extras_note, SECRET);
+
+    // The two documents that leave the building. Neither may carry a word of
+    // it - not in a line, not in a note row, not anywhere.
+    const q = data.slips.quotationForSlip(SLIP, undefined, {});
+    const onQuote = JSON.stringify(q.lines);
+    check("not on the quotation with the parts included",
+      onQuote.includes("Ah Seng"), false);
+
+    const fresh = data.slips.createSlip({
+      company: "NOTE CO", contact_name: "D", contact_number: "4", signature: SIG,
+      machines: [{ desc: "125B Blower", serial: "N1", remarks: "" }],
+    });
+    data.slips.addPartToSlip(fresh.slip_number, {
+      item_code: "SHUQ 5774", description: "Air filter", uom: "PC",
+      unit_price: 12, quantity: 1, technician: "WJ",
+    });
+    data.slips.setSlipExtrasNote(fresh.slip_number, SECRET);
+    const so = data.slips.createSlipOrder(fresh.slip_number, [], { extras: true });
+    const order = data.slips.getSlipOrder(fresh.slip_number, so.so_number);
+    check("nor on the Sales Order", JSON.stringify(order.lines).includes("Ah Seng"), false);
+    // The parts themselves still went on, so this is not passing by accident.
+    check("while the parts it is about did go on",
+      descs(order.lines).includes("Air filter"), true);
+
+    // A machine's repair comment DOES print, as "*comment". The difference is
+    // deliberate and worth pinning down, or somebody will one day make them
+    // consistent with each other and put this in front of a customer.
+    const mid = data.slips.getSlip(fresh.slip_number).machines[0].id;
+    data.slips.setMachineComment(mid, "Carburettor cleaned");
+    data.slips.setMachineLabour(mid, 20);
+    const so2 = data.slips.createSlipOrder(fresh.slip_number, [mid], {});
+    const order2 = data.slips.getSlipOrder(fresh.slip_number, so2.so_number);
+    check("a MACHINE's comment still prints, as it always has",
+      descs(order2.lines).includes("*Carburettor cleaned"), true);
+  }
+
+  console.log("\n-- the note is editable, and clearable --");
+  {
+    data.slips.setSlipExtrasNote(SLIP, "  spaced out  ");
+    check("trimmed on the way in", reload().extras_note, "spaced out");
+    data.slips.setSlipExtrasNote(SLIP, "");
+    check("and emptying it empties it", reload().extras_note, "");
+  }
+
   console.log("\n-- a closed slip takes no more of them --");
   const other = data.slips.createSlip({
     company: "SHUT CO", contact_name: "A", contact_number: "1", signature: SIG,
@@ -333,6 +385,8 @@ const descs = (lines) => lines.map((l) => l.description);
     () => data.slips.addPartToSlip(other.slip_number, {
       item_code: "SHUQ 5774", description: "Air filter", unit_price: 12, quantity: 1,
     }), 409);
+  throws("and takes no note either",
+    () => data.slips.setSlipExtrasNote(other.slip_number, "too late"), 409);
 
   console.log(failures ? `\n${failures} FAILED\n` : "\nall passed\n");
   process.exit(failures ? 1 : 0);

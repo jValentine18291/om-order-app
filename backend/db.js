@@ -138,6 +138,12 @@ db.exec(`
     -- The staff-only Drive copy of this slip's PDF. The id is kept so a
     -- re-send REPLACES that file rather than adding a second one, which keeps
     -- a link already given to a customer pointing at the current document.
+    -- A note about the slip's own parts - the ones belonging to no machine.
+    -- INTERNAL. It is shown in the app and never reaches a Sales Order, a
+    -- quotation or anything else the customer sees. See slipBlockLines(),
+    -- which does not read it, and tools/test-slip-parts.js, which checks it
+    -- does not.
+    extras_note    TEXT    DEFAULT '',
     drive_file_id  TEXT    DEFAULT '',
     drive_link     TEXT    DEFAULT '',
     closing_ref    TEXT,                       -- DO/CS/INV number, recorded at the invoice step
@@ -498,6 +504,22 @@ try {
   }
 } catch (e) {
   console.error("[db] machine_parts free_text migration check failed:", e.message);
+}
+
+// Migration: a note against the slip's own parts.
+//
+// ONE note for the whole group, the way a machine has one repair comment, and
+// INTERNAL - it is never put on a Sales Order or a quotation. Asked for by the
+// office: the note they wanted to write is the kind that is for each other
+// ("Ah Seng to confirm price"), not for the customer.
+try {
+  const cols = db.prepare("PRAGMA table_info(service_slips)").all().map((c) => c.name);
+  if (cols.length && !cols.includes("extras_note")) {
+    db.exec("ALTER TABLE service_slips ADD COLUMN extras_note TEXT DEFAULT ''");
+    console.log("[db] migrated: added extras_note to service_slips");
+  }
+} catch (e) {
+  console.error("[db] extras_note migration check failed:", e.message);
 }
 
 // Migration: let a part belong to the SLIP rather than to a machine.

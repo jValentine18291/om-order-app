@@ -1021,6 +1021,15 @@ select {
 .machine-btn-extras strong { color: #1f6f78; }
 .conv-row-extras { border-top: 1px solid var(--line, #e3e6e8); margin-top: 8px; padding-top: 12px; }
 
+/* Says who the note is for, right next to the word "Note". Quiet, but never
+   hidden: somebody has to be able to tell at a glance that what they type here
+   does not reach the customer. */
+.ex-note-private {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--ink-faint, #78868c);
+}
+
 /* The include-or-not tick on the quotation sheet. */
 .quote-extras {
   display: flex; align-items: flex-start; gap: 10px;

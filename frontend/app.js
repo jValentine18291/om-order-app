@@ -2081,7 +2081,8 @@ function renderSlipScreen() {
           ? `${extras.length} part${extras.length === 1 ? "" : "s"}${
               extrasTotal > 0 ? " · " + money(extrasTotal) : ""}${
               billed ? ` · ${billed} already on a Sales Order` : ""}`
-          : "Not fitted to any machine — sold with the repair"}</div>
+          : "Not fitted to any machine — sold with the repair"}${
+        String(slip.extras_note || "").trim() ? " · has note" : ""}</div>
     </button>`);
   $("sd-extras").addEventListener("click", openExtrasModal);
 
@@ -2159,6 +2160,8 @@ function openExtrasModal() {
   });
   $("os-labour-field").style.display = "none";
   $("os-comment-field").style.display = "none";
+  $("ex-note-field").style.display = "";
+  $("ex-note").value = (session.slip && session.slip.extras_note) || "";
   $("mm-parts-head").textContent = "Parts on this slip";
   $("mm-total-label").textContent = "Additional parts total";
   renderMachineParts();
@@ -2175,10 +2178,12 @@ async function closeMachineModal(save) {
   }
   try { stopQrScanner(); } catch (_) {}
   if (save && session.extras) {
-    // Nothing here is "repaired", so there is nothing to mark. Just the parts.
+    // Nothing here is "repaired", so there is nothing to mark. The parts, and
+    // the note that goes with them.
     $("mm-save").disabled = true;
     try {
       await commitPendingParts();
+      await saveExtrasNote();
       toast("Saved", "ok");
     } catch (e) {
       toast(e.message, "err");
@@ -2226,10 +2231,11 @@ async function closeMachineModal(save) {
   session.extras = false;
   session.pendingParts = [];
   // Put back what the slip-level sheet hid, or the next machine opens without
-  // its labour box.
+  // its labour box - and hide what only that sheet has.
   ["os-labour-field", "os-comment-field"].forEach((id) => {
     const el = $(id); if (el) el.style.display = "";
   });
+  $("ex-note-field").style.display = "none";
   $("mm-parts-head").textContent = "Parts on this machine";
   $("mm-total-label").textContent = "Machine total";
   // Refresh the slip so the machine buttons reflect the latest state.
@@ -2266,6 +2272,21 @@ async function commitPendingParts() {
     });
     session.pendingParts.shift();
   }
+}
+
+// The note on the slip's own parts. Saved only when it has actually changed,
+// so opening the sheet and closing it again writes nothing.
+async function saveExtrasNote() {
+  const box = $("ex-note");
+  if (!box || !session.slipNumber) return;
+  const text = box.value.trim();
+  const was = ((session.slip && session.slip.extras_note) || "").trim();
+  if (text === was) return;
+  await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/extras-note`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ extras_note: text }),
+  });
 }
 
 // Load the saved comment for the currently selected machine into the textbox.

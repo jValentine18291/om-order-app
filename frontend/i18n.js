@@ -401,6 +401,9 @@
     // and "Change Engine Oil" are missing: what goes onto a document is never
     // altered. Everything below is screen furniture and safe.
     "Not fitted to any machine — sold with the repair": "不属于任何机器 — 随维修一起售出",
+    "Note": "备注",
+    "staff only — not shown to the customer": "仅供内部 — 不会显示给客户",
+    "e.g. Ah Seng to confirm price before ordering": "例如：订货前请阿成确认价格",
     "Parts on this slip": "此服务单的零件",
     "Additional parts total": "额外零件总额",
     "Scan or type a part to add it to this slip.": "扫描或输入零件编号，加入此服务单。",

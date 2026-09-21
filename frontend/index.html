@@ -1120,6 +1120,15 @@
           </div>
         </div>
 
+        <!-- The note on the slip's own parts. Shown only on that sheet, and
+             INTERNAL: it is not on the Sales Order or the quotation, and the
+             label says so, because a note somebody believes is private and
+             is not is worse than no note. -->
+        <div class="field" id="ex-note-field" style="display:none; margin-top:14px;">
+          <label for="ex-note">Note <span class="ex-note-private">staff only — not shown to the customer</span></label>
+          <textarea id="ex-note" placeholder="e.g. Ah Seng to confirm price before ordering"></textarea>
+        </div>
+
         <div class="field" id="os-comment-field" style="margin-top:14px;">
           <label for="os-comment">Repair comment <span style="color:var(--ink-faint);font-weight:400;">(what was wrong, what was done)</span></label>
           <textarea id="os-comment" placeholder="e.g. Carburettor clogged — cleaned and replaced fuel line."></textarea>

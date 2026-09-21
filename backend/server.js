@@ -1383,6 +1383,18 @@ app.post("/api/slips/:slip/parts", async (req, res) => {
   }
 });
 
+// The note against a slip's own parts. Internal - see setSlipExtrasNote.
+app.patch("/api/slips/:slip/extras-note", async (req, res) => {
+  try {
+    const r = await data.slips.setSlipExtrasNote(req.params.slip, (req.body || {}).extras_note);
+    res.json(r);
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    console.error("[PATCH /api/slips/:slip/extras-note]", err);
+    res.status(500).json({ error: "Could not save the note." });
+  }
+});
+
 // Update a part line: quantity (0 removes), unit_price, and - for the A5-A8
 // and MISC codes only - the description.
 app.patch("/api/parts/:partId", async (req, res) => {
