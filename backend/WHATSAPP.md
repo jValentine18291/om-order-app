@@ -1,6 +1,7 @@
 # Sending the Service Slip to the customer on WhatsApp
 
-**Switched on, and NOT yet delivering.** The settings are in the service, the
+**Working, since 21 September 2026.** A slip was sent from the app and arrived
+on a phone, with the PDF attached. The settings are in the service, the
 template is approved, and the server reports itself ready:
 
     GET https://192.168.1.7:8443/api/whatsapp/status
@@ -12,10 +13,10 @@ button missing?" without guessing: `enabled` is `WHATSAPP_ENABLED`,
 only appears when both are true. `auto_send` is deliberately false — see
 "Manual, or automatic".
 
-But ready is not the same as working. The first real send, on 17 Sep 2026, was
-accepted by Meta, given a genuine message id, and never delivered, because the
-Meta app is still unpublished. See "The send that says SENT and never arrives"
-below before trusting anything here.
+Ready was not the same as working, though, and for four days it was not. The
+first send was accepted by Meta, given a genuine message id, and never
+delivered, because the Meta app was unpublished. That is worth reading before
+touching any of this: see "The send that says SENT and never arrives" below.
 
 ## How it works
 
@@ -112,6 +113,28 @@ What customers see next to the message:
     Display name   Outboard and Marine Pte Ltd
     Category       Professional Services
     Time zone      (GMT+08:00) Asia/Singapore
+    Address        9 Kaki Bukit Road 1, #01-03, Eunos Technolink, S 415938
+    Email          sales@omprotools.com.sg
+    Website        https://gardenequipment.com.sg
+
+Everything below the time zone was added 21 Sep 2026, after the first real
+message went out looking anonymous. Set in WhatsApp Manager → Phone numbers →
+the number → **Profile**.
+
+#### The profile picture, and the circle
+
+The logo is `logo-obm-leaf.png` in the husqvarna-presentation assets folder -
+a green ring with the leaf inside it, drawn to the edges of its square.
+
+**WhatsApp shows profile pictures as circles**, and a circle inscribed in that
+square lands exactly on the ring and shaves it. So the file to upload is not
+the logo: it is the logo scaled to about 78% on a white square, which leaves
+the ring whole with room to spare. `OM-whatsapp-profile.png`, 1000x1000, built
+that way and checked against a simulated circular crop before uploading.
+
+Uploading it has to be done by hand. Meta builds the file input in JavaScript
+when the button is clicked, so it never exists in the page for automation to
+reach, and the dialog that opens is Windows', not the browser's.
 
 **"and", not "&".** Meta rejected `Outboard & Marine Pte Ltd` outright — *"Your
 display name violates WhatsApp guidelines"*, against the rule "don't add
@@ -210,8 +233,11 @@ likely to be one of these four lapsing than a change in the code.
    this is the first thing to check if sends start failing for everyone at
    once.
 4. ~~**A phone number**~~ — **done** 16 Sep 2026, +65 6743 4039 Connected.
-5. **The app has to be PUBLISHED.** Still outstanding, and it is the reason
-   the first test send never arrived. See below.
+5. ~~**The app has to be PUBLISHED**~~ — **done 21 Sep 2026**, and it was the
+   reason the first test send never arrived. Publishing needed a **privacy
+   policy URL**, which needed a privacy policy: the site had none, and its
+   footer linked to a `/privacy-policy/` that returned 404. The page now
+   exists and is set in App settings → Basic. See below.
 
 ## The send that says SENT and never arrives
 
@@ -267,7 +293,17 @@ The recipient's number is in there in plain digits, which also proves the
 message was addressed correctly. A wamid is an identifier, not a credential -
 it is safe to paste into a chat or an email. The token never is.
 
-### What publishing needs
+### It was the app. Publishing fixed it.
+
+Published 21 Sep 2026; the same slip was sent again from the app and arrived,
+PDF and all. Nothing in our code changed between the send that vanished and
+the send that worked - the only difference was the app going Live.
+
+So when a send is accepted and never arrives, and nothing in the log looks
+wrong, **check the app's mode first**. It is the one cause that leaves no
+trace anywhere on our side.
+
+### What publishing needed
 
 The Publish page lists one unmet requirement and greys the button out until it
 is met: a **Privacy policy URL** in App settings.
