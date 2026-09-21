@@ -2140,16 +2140,77 @@ app.post("/api/slips/:slip/close", async (req, res) => {
 const fs = require("fs");
 const https = require("https");
 
-const CERT_PATH = path.join(__dirname, "cert.pem");
-const KEY_PATH = path.join(__dirname, "key.pem");
+const tls = require("tls");
+
+// The office certificate. Overridable for the same reason the database path
+// is: so a change can be tried without putting a private key anywhere near the
+// real folder. The service sets neither, so on the server these are exactly
+// the paths they have always been.
+const CERT_PATH = process.env.OM_CERT || path.join(__dirname, "cert.pem");
+const KEY_PATH = process.env.OM_KEY || path.join(__dirname, "key.pem");
+
+// A SECOND certificate, for the name this server answers to on Tailscale.
+//
+// WHY TWO. One server, one socket, but two names: 192.168.1.7 in the office
+// and something.ts.net from outside. A certificate names who it is for, so a
+// single one cannot be right for both - and the office is the half that must
+// not break. Dropping a Tailscale certificate over cert.pem would have every
+// device at the counter refuse the server it has trusted for a year, which is
+// a bad morning caused by a change nobody at the counter made.
+//
+// So the office certificate stays exactly where it is and keeps answering
+// everything, and the Tailscale one is used only when a client asks for a
+// .ts.net name by name. A server with no Tailscale certificate behaves exactly
+// as it did before this existed.
+//
+// PUT THEM HERE (or set OM_TS_CERT / OM_TS_KEY to wherever `tailscale cert`
+// wrote them):
+const TS_CERT = process.env.OM_TS_CERT || path.join(__dirname, "tailscale-cert.pem");
+const TS_KEY = process.env.OM_TS_KEY || path.join(__dirname, "tailscale-key.pem");
+
+// Re-read when the files change on disk, so a renewed certificate is picked up
+// without restarting the service.
+//
+// These last about 90 days and are renewed by re-running `tailscale cert`. A
+// certificate that has quietly expired is the kind of fault that surfaces on a
+// Saturday, to the one person who is out on a job - and "restart the service"
+// is not a thing they can do from a customer's driveway.
+let tsCache = { at: 0, ctx: null };
+function tailscaleContext() {
+  try {
+    if (!fs.existsSync(TS_CERT) || !fs.existsSync(TS_KEY)) return null;
+    const stamp = Math.max(fs.statSync(TS_CERT).mtimeMs, fs.statSync(TS_KEY).mtimeMs);
+    if (tsCache.ctx && tsCache.at === stamp) return tsCache.ctx;
+    const ctx = tls.createSecureContext({
+      cert: fs.readFileSync(TS_CERT),
+      key: fs.readFileSync(TS_KEY),
+    });
+    tsCache = { at: stamp, ctx };
+    console.log(`[tls] Tailscale certificate loaded from ${path.basename(TS_CERT)}`);
+    return ctx;
+  } catch (e) {
+    // Never fatal. A broken second certificate must not take the office down;
+    // it falls back to the one that has always worked, and says so.
+    console.error("[tls] Tailscale certificate not usable:", e.message);
+    return null;
+  }
+}
 
 if (fs.existsSync(CERT_PATH) && fs.existsSync(KEY_PATH)) {
   const options = {
     cert: fs.readFileSync(CERT_PATH),
     key: fs.readFileSync(KEY_PATH),
+    // Asked once per connection, with the name the client typed. Anything that
+    // is not a Tailscale name - an IP address included, which sends no name at
+    // all - gets the office certificate above.
+    SNICallback: (servername, cb) => {
+      const ctx = /\.ts\.net$/i.test(String(servername || "")) ? tailscaleContext() : null;
+      cb(null, ctx || undefined);
+    },
   };
   https.createServer(options, app).listen(PORT, () => {
     console.log(`OM Service running (HTTPS) at https://localhost:${PORT}`);
+    if (tailscaleContext()) console.log("[tls] .ts.net names will use the Tailscale certificate");
   });
 } else {
   app.listen(PORT, () => {
