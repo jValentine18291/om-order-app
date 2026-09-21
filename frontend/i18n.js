@@ -155,6 +155,23 @@
     "Point at a QR code": "对准二维码",
     "Stop scanning": "停止扫描",
     "Order more": "申请补货",
+    // ---- Carrying the parts catalogue on the phone ----
+    "Checking…": "检查中…",
+    "Not on this phone yet": "尚未下载到此手机",
+    "Partly downloaded": "已下载部分",
+    "Available offline": "可离线使用",
+    "Downloading…": "下载中…",
+    "Download": "下载",
+    "Finish": "继续下载",
+    "Check again": "重新检查",
+    "Stop": "停止",
+    "Download every parts diagram?": "确定要下载全部零件图吗？",
+    "About 85 MB. Do this on the office Wi-Fi, not on mobile data. Afterwards the IPL works on site with no signal at all.":
+      "约 85 MB。请使用公司 Wi-Fi，不要用手机流量。下载后，即使现场没有信号也能查看零件图。",
+    "Every parts diagram is now on this phone": "全部零件图已存入此手机",
+    "Stopped. What was downloaded is kept — tap Finish to carry on.":
+      "已停止。已下载的内容会保留 — 点击“继续下载”即可接着下载。",
+
     "Note": "备注",
     "Add this part anyway?": "仍要添加此零件吗？",
     "Part No.": "零件编号",

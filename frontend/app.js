@@ -2393,6 +2393,261 @@ function renderContext() {
   $("mm-who").innerHTML = bits.join(" · ");
 }
 
+// ============================================================================
+// CARRYING THE WHOLE PARTS CATALOGUE ON THE PHONE
+// ============================================================================
+// A technician on a customer's site has no office Wi-Fi and often no useful
+// signal either. The IPL is the thing they need there more than anything else,
+// and it does not need the office at all - it is 628 drawings and 72 small
+// book files, all static.
+//
+// The app has always cached a drawing once it has been LOOKED AT, which helps
+// the second time and not the first. This fetches the lot in one go, on
+// purpose, while they are still standing in the workshop.
+//
+// It writes into the same cache the service worker reads from, so nothing else
+// has to know this happened: a downloaded book opens by exactly the same path
+// as one that was cached by being viewed.
+const IPL_CACHE_NAME = "om-ipl-diagrams";
+
+// Everything the library is made of. The figure COUNT comes from index.json,
+// which carries one per book - checked against the folder when this was
+// written: 628 figures, 628 images, nothing spare and nothing missing. The
+// image NAMES come from the books themselves rather than being guessed from a
+// pattern, because a guessed filename fails silently and looks like a missing
+// drawing.
+function iplOfflineExpected(models) {
+  const figures = (models || []).reduce((n, m) => n + (Number(m.figures) || 0), 0);
+  const logos = new Set();
+  Object.keys(IPL_BRAND_COLOUR || {}).forEach((k) => {
+    const b = IPL_BRAND_COLOUR[k];
+    if (b && b.logo) logos.add(b.logo);
+  });
+  // index.json, one book file each, one drawing per figure, and the logos.
+  return 1 + (models || []).length + figures + logos.size;
+}
+
+function iplOfflineUrls(models) {
+  const books = (models || []).map((m) => `./ipl/${encodeURIComponent(m.id)}.json`);
+  const logos = [];
+  Object.keys(IPL_BRAND_COLOUR || {}).forEach((k) => {
+    const b = IPL_BRAND_COLOUR[k];
+    if (b && b.logo) logos.push(`./ipl/brands/${encodeURIComponent(b.logo)}.png`);
+  });
+  return { books, logos };
+}
+
+// What is already on the phone. Read as ONE list of cache keys rather than a
+// question per file: 708 separate cache.match calls take long enough to be
+// visible, and this runs every time the IPL screen is opened.
+async function iplOfflineHave() {
+  if (!("caches" in window)) return null;
+  try {
+    const cache = await caches.open(IPL_CACHE_NAME);
+    const keys = await cache.keys();
+    const have = new Set();
+    for (const req of keys) {
+      const path = new URL(req.url).pathname;
+      if (/\/ipl\/(?:brands\/)?[^/]+\.(?:png|json)$/.test(path)) have.add(path);
+    }
+    return have;
+  } catch (_) {
+    return null;
+  }
+}
+
+let iplDownloadStop = false;
+let iplDownloading = false;
+
+// Fetch one file and put it in the cache ourselves.
+//
+// The service worker would cache it too, on its way past - but its put()
+// settles on its own schedule, and this needs to KNOW the file is stored
+// before it counts it. Writing it here makes "done" mean done. Same cache,
+// same key, same bytes, so the two cannot disagree.
+async function iplCachePut(cache, url) {
+  const res = await fetch(url);
+  if (!res || !res.ok) throw new Error(`${res ? res.status : "no response"} on ${url}`);
+  await cache.put(url, res.clone());
+  return res;
+}
+
+// Run a list of jobs a few at a time.
+//
+// Not all at once: 628 simultaneous requests is how a phone browser starts
+// dropping them, and a dropped drawing looks exactly like one that was never
+// downloaded. Not one at a time either - that turns 84MB into a coffee break.
+async function iplPool(items, worker, width = 5) {
+  let next = 0;
+  const runners = new Array(Math.min(width, items.length)).fill(0).map(async () => {
+    for (;;) {
+      const i = next++;
+      if (i >= items.length || iplDownloadStop) return;
+      await worker(items[i], i);
+    }
+  });
+  await Promise.all(runners);
+}
+
+async function downloadIplLibrary(report) {
+  const cache = await caches.open(IPL_CACHE_NAME);
+  const have = (await iplOfflineHave()) || new Set();
+  const models = ipl.models || [];
+  const { books, logos } = iplOfflineUrls(models);
+
+  const missing = (url) => !have.has(new URL(url, location.href).pathname);
+  // Counted as they are PROCESSED, whether they had to be fetched or were
+  // already here - so a resume after a lost signal shows the bar filling from
+  // the start and finishing early, rather than sitting at nothing while it
+  // walks past everything it already has.
+  let done = 0, failed = 0;
+  const total = iplOfflineExpected(models);
+  const tick = () => report({ done, total, failed });
+
+  // Phase one: the index, the books, the logos. The books have to land first -
+  // they are what says which drawings exist.
+  const small = ["./ipl/index.json", ...books, ...logos];
+  const images = [];
+  await iplPool(small, async (url) => {
+    try {
+      if (missing(url)) {
+        const res = await iplCachePut(cache, url);
+        if (/\.json$/.test(url) && !/index\.json$/.test(url)) {
+          const doc = await res.json();
+          (doc.figures || []).forEach((f) => f.image && images.push(`./ipl/${f.image}`));
+        }
+      } else if (/\.json$/.test(url) && !/index\.json$/.test(url)) {
+        // Already stored - still has to be READ, or the drawings it names are
+        // never queued and the download quietly stops at the book files.
+        const hit = await cache.match(url);
+        const doc = hit ? await hit.json() : null;
+        if (doc) (doc.figures || []).forEach((f) => f.image && images.push(`./ipl/${f.image}`));
+      }
+      done++;
+    } catch (e) {
+      failed++;
+      console.warn("[ipl-offline]", e.message);
+    }
+    tick();
+  });
+
+  if (iplDownloadStop) return { done, total, failed, stopped: true };
+
+  // Phase two: the drawings, which are all but a few megabytes of it.
+  await iplPool(images, async (url) => {
+    try {
+      if (missing(url)) await iplCachePut(cache, url);
+      done++;
+    } catch (e) {
+      failed++;
+      console.warn("[ipl-offline]", e.message);
+    }
+    tick();
+  });
+
+  return { done, total, failed, stopped: iplDownloadStop };
+}
+
+// ---- The strip on the IPL screen -------------------------------------------
+function iplOfflineEls() {
+  return {
+    box: $("ipl-offline"), state: $("ipl-offline-state"), sub: $("ipl-offline-sub"),
+    go: $("ipl-offline-go"), bar: $("ipl-offline-bar"), fill: $("ipl-offline-fill"),
+  };
+}
+
+function iplOfflineProgress({ done, total, failed }) {
+  const el = iplOfflineEls();
+  if (!el.box) return;
+  el.bar.style.display = "";
+  el.fill.style.width = total ? Math.round((done / total) * 100) + "%" : "0%";
+  el.state.textContent = "Downloading…";
+  el.sub.textContent = `${done} of ${total} files${failed ? ` · ${failed} failed` : ""}`;
+}
+
+// What the strip says when nothing is happening.
+async function renderIplOffline() {
+  const el = iplOfflineEls();
+  if (!el.box || iplDownloading) return;
+  if (!("caches" in window)) { el.box.style.display = "none"; return; }
+
+  const models = ipl.models || [];
+  if (!models.length) { el.state.textContent = "Checking…"; el.sub.textContent = ""; return; }
+
+  const have = await iplOfflineHave();
+  const total = iplOfflineExpected(models);
+  const held = have ? have.size : 0;
+  const complete = have && held >= total;
+
+  el.bar.style.display = "none";
+  el.box.classList.toggle("is-done", !!complete);
+  el.go.disabled = false;
+  if (complete) {
+    el.state.textContent = "Available offline";
+    el.sub.textContent = `All ${models.length} books are on this phone. No signal needed.`;
+    el.go.textContent = "Check again";
+  } else if (held > 1) {
+    // More than ONE, because simply opening this screen caches index.json -
+    // and "partly downloaded, 1 of 708" to somebody who has not touched it yet
+    // reads as a download that went wrong.
+    el.state.textContent = "Partly downloaded";
+    el.sub.textContent = `${held} of ${total} files. The rest still need office Wi-Fi.`;
+    el.go.textContent = "Finish";
+  } else {
+    el.state.textContent = "Not on this phone yet";
+    el.sub.textContent = `${models.length} books · about 85 MB. Download before going on site.`;
+    el.go.textContent = "Download";
+  }
+}
+
+async function startIplDownload() {
+  const el = iplOfflineEls();
+  const models = ipl.models || [];
+  if (!models.length || iplDownloading) return;
+
+  // 85MB on somebody's own mobile data, without being asked, would be a poor
+  // way to repay them for trying to be prepared.
+  const ok = await confirmAction({
+    title: "Download every parts diagram?",
+    sub: `${models.length} books`,
+    detail: "About 85 MB. Do this on the office Wi-Fi, not on mobile data. " +
+            "Afterwards the IPL works on site with no signal at all.",
+    ok: "Download",
+  });
+  if (!ok) return;
+
+  // Ask the browser to treat this as worth keeping. iOS in particular clears
+  // caches when a phone runs short of space, and a library that vanishes the
+  // day it is needed is worse than one nobody downloaded. It can refuse, and
+  // refusing is not a reason to stop - it only means the library may need
+  // fetching again one day.
+  try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (_) {}
+
+  iplDownloading = true;
+  iplDownloadStop = false;
+  el.go.textContent = "Stop";
+  el.box.classList.remove("is-done");
+  el.go.onclick = () => { iplDownloadStop = true; el.go.disabled = true; };
+
+  let r;
+  try {
+    r = await downloadIplLibrary(iplOfflineProgress);
+  } catch (e) {
+    r = { failed: 1, stopped: false, error: e.message };
+  }
+
+  iplDownloading = false;
+  el.go.onclick = null;
+  el.go.disabled = false;
+  el.bar.style.display = "none";
+
+  if (r.stopped) toast("Stopped. What was downloaded is kept — tap Finish to carry on.", "ok");
+  else if (r.failed) toast(`${r.failed} file${r.failed === 1 ? "" : "s"} could not be downloaded. Tap Finish on office Wi-Fi to try again.`, "err");
+  else toast("Every parts diagram is now on this phone", "ok");
+
+  await renderIplOffline();
+}
+
 // ---- The machine the search is being made from -----------------------------
 // A technician on a Zenoah brushcutter typing "clutch" was getting Husqvarna
 // clutches mixed in with Zenoah ones. This works out what to tell the search
@@ -8415,6 +8670,11 @@ $("pr-go").addEventListener("click", makeMachinePrintout);
 $("pr-close").addEventListener("click", closePrintPicker);
 $("os-create-so").addEventListener("click", openConvertPicker);
 $("conv-go").addEventListener("click", createSalesOrder);
+$("ipl-offline-go").addEventListener("click", () => {
+  // While a download is running the button is a Stop, and startIplDownload
+  // has replaced its handler. This one only ever starts.
+  if (!iplDownloading) startIplDownload();
+});
 $("conv-close").addEventListener("click", closeConvertPicker);
 $("conv-modal").addEventListener("click", (e) => { if (e.target === $("conv-modal")) closeConvertPicker(); });
 
@@ -8844,6 +9104,9 @@ async function enterIpl() {
   if (!ipl.models) {
     try {
       ipl.models = await api("./ipl/index.json");
+      // The strip has nothing to say until the book list has landed - it
+      // counts against it.
+      renderIplOffline();
     } catch (_) {
       ipl.models = [];
     }

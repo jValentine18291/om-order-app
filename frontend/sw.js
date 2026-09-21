@@ -9,7 +9,7 @@
 // on EVERY open, and opens outnumber deploys a hundred to one. Now the cached
 // copy is served instantly and the fresh one is fetched behind it, so a
 // deploy shows one open later and startup does not touch the network at all.
-const CACHE = "om-order-v286";
+const CACHE = "om-order-v287";
 
 // IPL artwork lives in its own cache, deliberately NOT version-stamped.
 // They are large, they are already fetched only when a section is opened, and
@@ -82,12 +82,20 @@ self.addEventListener("fetch", (e) => {
   // Only manage GET requests; let the browser handle the rest normally.
   if (e.request.method !== "GET") return;
 
-  // IPL artwork - the parts diagrams and the brand logos: serve from cache
+  // IPL artwork AND the book files that describe it: serve from cache
   // immediately, then refresh in the background. A drawing appears instantly
   // on a second viewing and survives deploys, while a re-extracted model still
   // corrects itself on the next open rather than needing a cache bump. The
   // brand logos sit a folder deeper, hence the optional path segment.
-  if (/\/ipl\/(?:brands\/)?[^/]+\.png$/.test(url.pathname)) {
+  //
+  // The .json files were on the VERSIONED cache until the library could be
+  // downloaded for offline use. That was fine while every book was fetched on
+  // demand, and wrong the moment a technician carried the whole lot onto a
+  // job: every deploy wiped the books and left 80MB of drawings the app could
+  // no longer describe - offline, with no way to get them back until they were
+  // next on office Wi-Fi. Same cache, same stale-while-revalidate, so a
+  // re-imported book still corrects itself on the next open.
+  if (/\/ipl\/(?:brands\/)?[^/]+\.(?:png|json)$/.test(url.pathname)) {
     e.respondWith(
       caches.open(IPL_CACHE).then((cache) =>
         cache.match(e.request).then((hit) => {

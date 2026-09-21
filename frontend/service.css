@@ -1021,6 +1021,38 @@ select {
 .machine-btn-extras strong { color: #1f6f78; }
 .conv-row-extras { border-top: 1px solid var(--line, #e3e6e8); margin-top: 8px; padding-top: 12px; }
 
+/* Carrying the whole parts catalogue on the phone. A strip rather than a
+   card: it is read once before leaving and ignored the rest of the time. */
+.ipl-offline {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; margin-bottom: 10px;
+  border: 1px solid var(--line, #e3e6e8); border-radius: 10px;
+  background: #f7fbfb;
+}
+.ipl-offline-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ipl-offline-txt strong { font-size: 14px; }
+.ipl-offline-txt span { font-size: 12px; color: var(--ink-faint, #78868c); }
+.ipl-offline-btn {
+  appearance: none; flex: none;
+  border: 1px solid #cfdadd; background: #fff; border-radius: 8px;
+  padding: 8px 14px; font: inherit; font-weight: 700; font-size: 13px;
+  color: #1f6f78; cursor: pointer;
+}
+.ipl-offline-btn:disabled { opacity: .55; }
+.ipl-offline.is-done { background: #f2faf4; border-color: #cfe6d6; }
+.ipl-offline.is-done strong { color: #1d7a3f; }
+/* The progress bar only exists while something is happening, so it carries no
+   idle state and no label - the strip above it says what is going on. */
+.ipl-offline-bar {
+  height: 6px; border-radius: 3px; background: #e3e6e8;
+  overflow: hidden; margin: -4px 0 10px;
+}
+.ipl-offline-bar span {
+  display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, #1f8f6f, #1f6f78);
+  transition: width .2s linear;
+}
+
 /* Says who the note is for, right next to the word "Note". Quiet, but never
    hidden: somebody has to be able to tell at a glance that what they type here
    does not reach the customer. */
