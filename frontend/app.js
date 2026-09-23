@@ -8634,20 +8634,51 @@ async function renderOnOrder(itemCode) {
   box.textContent = "";
   try {
     const r = await api(`/api/part-on-order/${encodeURIComponent(itemCode)}`);
-    if (!r.supported) return;                       // nothing honest to say
-    if (!r.qty) {
-      box.className = "om-onorder om-onorder-none";
-      box.textContent = "Not on any Purchase Order at the moment.";
+    const blocks = [];
+
+    // ASKED FOR BUT NOT BOUGHT YET - first, because it is the more likely of
+    // the two and the easier to duplicate. A purchase order is Iris's and she
+    // knows what is on it; a request is one of nine people having typed the
+    // same part into the same box yesterday, which nothing here used to say.
+    //
+    // John asked for this in Sep 2026. The app already REFUSED a second
+    // request for the same part, but only after the quantity had been typed
+    // and sent - an error where a sentence would have done.
+    const reqs = r.requests || [];
+    if (reqs.length) {
+      const lines = reqs.map((q) =>
+        `${q.qty} — ${escapeHtml(q.requester || "someone")}${q.date ? `, ${escapeHtml(q.date)}` : ""}${
+          q.remarks ? ` · ${escapeHtml(q.remarks)}` : ""}`).join("<br>");
+      blocks.push(`<b>${Number(r.requested) || 0} waiting to be ordered</b>${lines}`);
+    }
+
+    // ON ORDER WITH A SUPPLIER. Only when the catalogue could actually be
+    // asked - "supported" is AutoCount's half of the answer and always has
+    // been. With it off or unreachable there is nothing honest to say here,
+    // which is not the same as having nothing to say at all.
+    if (r.supported && r.qty) {
+      const qty = Number.isInteger(r.qty) ? r.qty : Number(r.qty).toFixed(2);
+      const list = (r.orders || [])
+        .map((o) => `${escapeHtml(o.doc_no)}${o.date ? ` (${escapeHtml(o.date)})` : ""} — ${o.qty}${
+          onOrderStatus(o) ? ` · <span class="om-onorder-st">${escapeHtml(onOrderStatus(o))}</span>` : ""}`)
+        .join("<br>");
+      blocks.push(`<b>${qty} already on order</b>${list}`);
+    }
+
+    if (blocks.length) {
+      box.innerHTML = blocks.join(`<div class="om-onorder-rule"></div>`);
       box.style.display = "block";
       return;
     }
-    const qty = Number.isInteger(r.qty) ? r.qty : Number(r.qty).toFixed(2);
-    const list = (r.orders || [])
-      .map((o) => `${escapeHtml(o.doc_no)}${o.date ? ` (${escapeHtml(o.date)})` : ""} — ${o.qty}${
-        onOrderStatus(o) ? ` · <span class="om-onorder-st">${escapeHtml(onOrderStatus(o))}</span>` : ""}`)
-      .join("<br>");
-    box.innerHTML = `<b>${qty} already on order</b>${list}`;
-    box.style.display = "block";
+
+    // Nothing anywhere. Said plainly, and only when BOTH halves were actually
+    // answered - with AutoCount off, "not on any Purchase Order" would be a
+    // claim nobody checked.
+    if (r.supported) {
+      box.className = "om-onorder om-onorder-none";
+      box.textContent = "Nobody has asked for this, and it is not on any Purchase Order.";
+      box.style.display = "block";
+    }
   } catch (_) {
     // Context, not permission: a failure here leaves the popup as it was.
   }

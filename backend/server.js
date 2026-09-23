@@ -1044,12 +1044,38 @@ app.post("/api/part-location", async (req, res) => {
 // number that might be wrong. Run backend/inspect-po.js to see what is there.
 app.get("/api/part-on-order/:code", async (req, res) => {
   try {
-    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
-    if (itemsSource !== "autocount") return res.json({ supported: false, qty: 0, orders: [] });
-    const acRepo = require("./data/autocountRepo");
     const code = String(req.params.code || "").trim();
+
+    // WHAT THE WORKSHOP HAS ALREADY ASKED FOR, and nobody has bought yet.
+    //
+    // Worked out FIRST and separately, because it comes out of our own
+    // database and has nothing to do with AutoCount. The on-order half below
+    // answers "supported: false" whenever the catalogue is sqlite or
+    // unreachable, and the panel used to hide entirely on that answer - which
+    // would have hidden this too, on exactly the day a catalogue outage makes
+    // people most likely to order the same part twice.
+    let requests = [];
+    try {
+      requests = (data.requests.pendingRequestsFor(code) || []).map((r) => ({
+        qty: Number(r.qty_requested) || 0,
+        requester: r.requester || "",
+        // The date alone. Whoever is reading this wants "last Tuesday or this
+        // morning", not the second it was saved.
+        date: String(r.created_at || "").split(" ")[0],
+        remarks: r.remarks || "",
+      }));
+    } catch (e) {
+      console.error("[GET /api/part-on-order] pending requests:", e.message);
+    }
+    const requested = requests.reduce((n, r) => n + r.qty, 0);
+
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") {
+      return res.json({ supported: false, qty: 0, orders: [], requested, requests });
+    }
+    const acRepo = require("./data/autocountRepo");
     const map = await acRepo.getOnOrder([code]);
-    if (!map) return res.json({ supported: false, qty: 0, orders: [] });
+    if (!map) return res.json({ supported: false, qty: 0, orders: [], requested, requests });
     const hit = map.get(code) || { qty: 0, orders: [] };
 
     // Where each of those orders has actually got to - the same answer the
@@ -1081,7 +1107,7 @@ app.get("/api/part-on-order/:code", async (req, res) => {
       }
     }
 
-    res.json({ supported: true, qty: hit.qty, orders });
+    res.json({ supported: true, qty: hit.qty, orders, requested, requests });
   } catch (err) {
     console.error("[GET /api/part-on-order]", err.message);
     // Never block an order over this: it is context, not permission.

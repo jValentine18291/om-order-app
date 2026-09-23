@@ -130,5 +130,6 @@ module.exports = {
     updatePartRequestBatch: (...a) => sqliteRepo.partRequests.updatePartRequestBatch(...a),
     deletePartRequestBatch: (...a) => sqliteRepo.partRequests.deletePartRequestBatch(...a),
     countPendingPartRequests: (...a) => sqliteRepo.partRequests.countPendingPartRequests(...a),
+    pendingRequestsFor: (...a) => sqliteRepo.partRequests.pendingRequestsFor(...a),
   },
 };

@@ -2728,15 +2728,32 @@ function nextBatchId() {
   return "B" + row.n;
 }
 
-// The open request a part clashes with, if any. Shared by the single and bulk
-// paths so the guard cannot drift between them.
-function openRequestFor(code) {
-  const norm = String(code).replace(/\s+/g, "").toUpperCase();
+// Everything still waiting to be ordered for a part, oldest first.
+//
+// PENDING is exactly what is still on Iris's Orders list: it becomes ORDERED
+// the moment she raises the purchase order, so this is "asked for and not yet
+// bought" and nothing else.
+//
+// Matched with the spaces taken out and the case ignored, because the same
+// part is written "SZEN 848C006700" and "SZEN848C006700" by different people
+// and a request nobody can find is a part ordered twice.
+function pendingRequestsFor(code) {
+  const norm = String(code || "").replace(/\s+/g, "").toUpperCase();
+  if (!norm) return [];
   return db.prepare(
     `SELECT * FROM part_requests
       WHERE status = 'PENDING'
-        AND REPLACE(UPPER(item_code), ' ', '') = ?`
-  ).get(norm);
+        AND REPLACE(UPPER(item_code), ' ', '') = ?
+      ORDER BY id`
+  ).all(norm);
+}
+
+// The open request a part clashes with, if any. Shared by the single and bulk
+// paths so the guard cannot drift between them - and now with the panel that
+// warns about it BEFORE anybody types a quantity, so the warning and the
+// refusal can never disagree about what counts as an open request.
+function openRequestFor(code) {
+  return pendingRequestsFor(code)[0];
 }
 
 // A5-A8 and MISC codes stand for something not in the catalogue, so on an
@@ -2982,7 +2999,7 @@ function markPartRequestOrdered(id) {
   return { ok: true };
 }
 
-const partRequests = { createPartRequest, createPartRequestBatch, listPartRequests, markPartRequestOrdered, markPartRequestBatchOrdered, updatePartRequestBatch, deletePartRequestBatch };
+const partRequests = { createPartRequest, createPartRequestBatch, listPartRequests, markPartRequestOrdered, markPartRequestBatchOrdered, updatePartRequestBatch, deletePartRequestBatch, pendingRequestsFor };
 module.exports.partRequests = partRequests;
 
 // Fast count of pending reorder requests (for the Purchaser notification).

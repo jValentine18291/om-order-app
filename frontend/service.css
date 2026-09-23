@@ -2321,6 +2321,12 @@ body.signin-brand .topbar .pill {
 /* Where the order has got to. The one part of the line that is not a number,
    so it reads as a phrase rather than disappearing into the quantities. */
 .om-onorder-st { font-weight: 700; }
+/* Between "waiting to be ordered" and "already on order" - two different
+   answers to the same question, in one panel rather than two boxes competing
+   for the same amber. */
+.om-onorder-rule {
+  height: 1px; margin: 8px 0; background: currentColor; opacity: .22;
+}
 .pu-delete {
   flex: 0 0 auto; min-height: 40px; padding: 0 14px; border-radius: 999px;
   border: 1px solid #e6b0b0; background: var(--surface);
