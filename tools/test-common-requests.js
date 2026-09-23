@@ -52,7 +52,11 @@ check("and it is NOT on the quote list yet", onQuoteList(a.slip_number), false);
 // ---- the technician assesses one and sends it -------------------------------
 data.slips.setMachineState(a.slip_number, a.machines[0].id, "AWAITING_QUOTE", "WJ");
 const a2 = data.slips.getSlip(a.slip_number);
-check("now the slip needs a quote", a2.status, "NEED_QUOTE");
+// The slip stays In Progress through quoting now - a machine's state is not
+// the slip's. What changed is the MACHINE, and that is what to check.
+check("the machine is waiting to be quoted",
+  a2.machines.find((m) => m.id === a.machines[0].id).state, "AWAITING_QUOTE");
+check("and the slip is simply in progress", a2.status, "IN_PROGRESS");
 check("and now it IS on the quote list", onQuoteList(a.slip_number), true);
 
 // ---- repair only ------------------------------------------------------------

@@ -372,7 +372,18 @@ function listSlips(statusFilter = "active") {
   } else if (statusFilter === "need_quote") {
     // What the technicians have handed back for pricing. Oldest first: the one
     // waiting longest is the one the customer has been waiting on.
-    rows = db.prepare("SELECT * FROM service_slips WHERE status = 'NEED_QUOTE' ORDER BY slip_number").all();
+    //
+    // Asked of the MACHINES. It used to ask the slip - status = 'NEED_QUOTE' -
+    // which worked only while one machine's state was allowed to become the
+    // whole slip's. It no longer is, and this is the truer question in any
+    // case: what is on this screen is machines waiting to be quoted.
+    rows = db.prepare(
+      `SELECT * FROM service_slips s
+        WHERE s.status != 'CLOSED'
+          AND EXISTS (SELECT 1 FROM slip_machines m
+                       WHERE m.slip_id = s.id AND m.state = 'AWAITING_QUOTE')
+        ORDER BY s.slip_number`
+    ).all();
   } else if (statusFilter === "repaired" || statusFilter === "call_customer") {
     rows = db.prepare(`SELECT * FROM service_slips WHERE (
        status IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'PART_SO')
@@ -401,7 +412,25 @@ function listSlips(statusFilter = "active") {
   // Attach machine list (lightweight — descriptions only) for dropdown display.
   const getMachines = db.prepare("SELECT id, machine_desc, state, disposal, converted_at FROM slip_machines WHERE slip_id = ?");
   for (const r of rows) r.machines = getMachines.all(r.id);
-  return rows;
+  return rows.map(withQuoteCounts);
+}
+
+// How many machines on this slip are waiting on Sales, and how many on the
+// customer. What the lists put beside "In Progress", now that the status
+// itself no longer says.
+//
+// Counted per slip rather than joined into every query above, because those
+// queries are six different shapes and one of them would have been missed.
+const countStates = db.prepare(
+  `SELECT
+     SUM(CASE WHEN state = 'AWAITING_QUOTE' THEN 1 ELSE 0 END) AS to_quote,
+     SUM(CASE WHEN state = 'QUOTED'         THEN 1 ELSE 0 END) AS waiting
+   FROM slip_machines WHERE slip_id = ?`
+);
+function withQuoteCounts(slip) {
+  if (!slip) return slip;
+  const c = countStates.get(slip.id) || {};
+  return { ...slip, to_quote: Number(c.to_quote) || 0, quote_waiting: Number(c.waiting) || 0 };
 }
 
 // Full slip detail: slip + machines, and each machine's scanned parts.
@@ -2147,13 +2176,18 @@ function deriveSlipStatus(slipId) {
 
   const any = (f) => ms.some(f);
   let next;
-  if (any((m) => m.state === "AWAITING_QUOTE")) {
-    // Sales have to act, and that outranks anything already done elsewhere on
-    // the slip - otherwise a part-finished slip hides a machine nobody rang about.
-    next = "NEED_QUOTE";
-  } else if (any((m) => m.state === "QUOTED")) {
-    next = "QUOTED";                                   // waiting on the customer
-  } else if (ms.every(machineSettled) && !extrasLeft) {
+  // QUOTING IS A MACHINE'S BUSINESS, NOT THE SLIP'S. John's call, Sep 2026.
+  //
+  // The slip used to take on the state of whichever machine was furthest from
+  // done: one machine waiting to be quoted and the whole slip read "Need to
+  // Quote", even with three others on the bench being repaired. That is not
+  // what is happening to the slip - the slip is in progress - and it told the
+  // workshop a machine was blocked when it was not.
+  //
+  // Sales have not lost the queue. The Need to Quote screen asks the MACHINES
+  // now (see listSlips), which is a truer question anyway, and the slip lists
+  // carry a count beside the status - "In Progress · 2 to quote".
+  if (ms.every(machineSettled) && !extrasLeft) {
     next = "CONVERTED";                                // everything dealt with
   } else if (any((m) => m.converted_at)) {
     // Some of it is on a Sales Order. Which of the two this is depends on

@@ -57,11 +57,17 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
   check("work started, nothing to quote yet", slip.status, "IN_PROGRESS");
 
   slip = await data.slips.setMachineState(no, saw.id, "AWAITING_QUOTE", "WJ");
-  check("the technician's tick is what asks for a quote", slip.status, "NEED_QUOTE");
+  // The slip stays In Progress through quoting now - a machine's state is
+  // not the slip's. Sales find the work on the Need to Quote screen,
+  // which asks the machines; see tools/test-quote-statuses.js.
+  const stateNow = (sl, id) => sl.machines.find((m) => m.id === id).state;
+  check("the technician's tick moves the MACHINE", stateNow(slip, saw.id), "AWAITING_QUOTE");
+  check("and not the slip", slip.status, "IN_PROGRESS");
 
   // Sales quote it; the customer is now the one holding things up.
   slip = await data.slips.setMachineState(no, saw.id, "QUOTED", "Iris");
-  check("quoted, waiting on the customer", slip.status, "QUOTED");
+check("quoted: the machine waits on the customer", stateNow(slip, saw.id), "QUOTED");
+  check("and the slip carries on", slip.status, "IN_PROGRESS");
   check("who quoted it is recorded", slip.machines[0].decided_by, "Iris");
 
   // The customer says no.
@@ -137,7 +143,7 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
   check("nothing ticked: plain open slip", slip.status, "OPEN");
   slip = await data.slips.setAllMachineStates(n3, "AWAITING_QUOTE", "Iris");
   check("all sent for quoting", slip.machines.every((m) => m.state === "AWAITING_QUOTE"), true);
-  check("slip says so", slip.status, "NEED_QUOTE");
+  check("and the slip is in progress", slip.status, "IN_PROGRESS");
 
   // A machine already billed is not dragged back by a slip-wide button.
   await data.slips.setAllMachineStates(n3, "TO_REPAIR", "Iris");
@@ -166,7 +172,8 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
   // A quote outranks it. Sales have to act, and a slip that reads "Repaired"
   // while a machine waits on a price is how the customer never gets rung.
   slip = await data.slips.setMachineState(n4, r2, "AWAITING_QUOTE", "WJ");
-  check("one sent for quoting: quoting wins", slip.status, "NEED_QUOTE");
+// Quoting no longer "wins" over anything: it is the machine's business.
+  check("one sent for quoting leaves the slip in progress", slip.status, "IN_PROGRESS");
   slip = await data.slips.setMachineState(n4, r2, "REPAIRED", "WJ");
   check("and back to Repaired once it is settled", slip.status, "REPAIRED");
 

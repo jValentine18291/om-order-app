@@ -1079,6 +1079,14 @@ select {
 .pp-act:disabled { opacity: .5; }
 .pp-row-gone { opacity: .55; }
 
+/* The count beside a slip's status in the search results, where the status is
+   a coloured chip and cannot simply grow. Its own quiet line instead. */
+.sr-quote-tail {
+  display: block; margin-top: 3px;
+  font-size: 11px; font-weight: 600; color: var(--amber, #b8791a);
+  text-align: right;
+}
+
 /* The machine sheet's foot: the running total and Save, pinned so that a long
    part list never pushes the button out of reach. Sticky rather than fixed, so
    it stays inside the sheet and the rounded corners still work. */

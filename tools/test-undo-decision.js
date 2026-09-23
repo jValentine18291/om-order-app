@@ -67,9 +67,9 @@ const canUndo = async (no) => (await data.slips.getSlip(no)).machines[0].can_und
   // The two clicks.
   await data.slips.setMachineState(a.no, a.id, "AWAITING_QUOTE", "CY");
   check("after \u201cNeed to Quote\u201d, the slip is on Sales' list",
-    (await data.slips.getSlip(a.no)).status, "NEED_QUOTE");
+    (await data.slips.getSlip(a.no)).status, "IN_PROGRESS");
   await data.slips.setMachineState(a.no, a.id, "QUOTED", "CY");
-  check("after \u201cMark as Quoted\u201d", (await data.slips.getSlip(a.no)).status, "QUOTED");
+  check("after \u201cMark as Quoted\u201d", (await data.slips.getSlip(a.no)).status, "IN_PROGRESS");
 
   // The way back that did not exist.
   check("the app offers to put it back", await canUndo(a.no), true);
@@ -168,7 +168,10 @@ const canUndo = async (no) => (await data.slips.getSlip(no)).machines[0].can_und
     after.machines.find((m) => m.id === m1.id).state, "RECEIVED");
   check("the other one has not moved",
     after.machines.find((m) => m.id === m2.id).state, "AWAITING_QUOTE");
-  check("and the slip still says Sales have to ring about it", after.status, "NEED_QUOTE");
+  // The undo put ONE machine back; the other is still waiting to be quoted.
+  // The slip does not carry that any more - the machine above does, and the
+  // Need to Quote screen reads it there.
+  check("and the slip is in progress", after.status, "IN_PROGRESS");
 
   console.log(failures ? `\n${failures} FAILED` : "\nAll good.");
   process.exit(failures ? 1 : 0);

@@ -73,11 +73,14 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
   const hedge = slip.machines[0];
   await data.slips.setMachineComment(hedge.id, "stripped down to price the job");
   slip = await data.slips.setMachineState(slip.slip_number, hedge.id, "AWAITING_QUOTE", "WJ");
-  check("the slip is waiting on sales", slip.status, "NEED_QUOTE");
+  // The slip stays In Progress through quoting now - a machine's state is
+  // not the slip's. Sales find the work on the Need to Quote screen,
+  // which asks the machines; see tools/test-quote-statuses.js.
+  check("the slip is in progress, not waiting on sales", slip.status, "IN_PROGRESS");
   r = await data.slips.finishRepair(hedge.id, "WJ");
   check("Save leaves it where it is", r.moved, false);
   check("still awaiting a quote", stateOf(r.slip, hedge.id), "AWAITING_QUOTE");
-  check("and the slip still asks sales to ring", r.slip.status, "NEED_QUOTE");
+  check("and the slip is still in progress", r.slip.status, "IN_PROGRESS");
 
   console.log("\n-- a machine the customer has not answered on --");
   slip = await data.slips.setMachineState(slip.slip_number, hedge.id, "QUOTED", "KS");
