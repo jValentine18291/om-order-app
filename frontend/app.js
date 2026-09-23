@@ -367,11 +367,21 @@ async function signinSubmit() {
     chooseUser(signedInAs, { signedIn: true });
     return;
   } catch (e) {
-    // 409 means "you have no code yet, choose one" - an answer, not a refusal,
-    // and the screen turns into the one that asks for a new code.
-    if (e.status === 409) {
+    // The two ways the screen can be asking the wrong question, both of which
+    // mean this page's idea of the person is out of date. Neither is a refusal
+    // - they are the server saying "not that question, this one" - so the
+    // sheet turns into the right one rather than showing a dead end.
+    //
+    //   409 on a sign-in  they have no code yet: ask them to choose one.
+    //   403 on a first code  they already have one: ask for it.
+    if (e.status === 409 || e.status === 403) {
       signinBusy = false;
-      signinShowPad(signinFor, "first");
+      const wasFirst = signinMode === "first";
+      await loadAuthState();
+      signinShowPad(signinFor, wasFirst ? "code" : "first");
+      if (wasFirst) {
+        $("signin-msg").textContent = "You already have a code — enter it.";
+      }
       return;
     }
     $("signin-code").value = "";
@@ -410,6 +420,11 @@ function signedOutTo(why) {
   signinHidePad();
   showScreen("role");
   renderStaffPicker();
+  updateSignOutButton();
+  // The world may have moved while this device was signed in - somebody let
+  // in, somebody reset. Refreshed in the background; the picker does not wait
+  // for it, and pickStaff asks again anyway.
+  loadAuthState();
   if (why) toast(why, "err");
 }
 
@@ -473,7 +488,18 @@ function renderStaffPicker() {
 // Asking whoever has a code also makes the changeover gradual rather than a
 // cliff: each person starts using their code the moment they have one, and
 // the switch at the end only closes the door behind the last of them.
-function pickStaff(id) {
+async function pickStaff(id) {
+  // ASKED NOW, not once when the app started.
+  //
+  // The list used to be fetched at boot and believed for the life of the page.
+  // John set his code, signed out, tapped his name - and the page was still
+  // holding the answer from before he had one, so it offered to set a code he
+  // already had, and the server refused it with "this account is not waiting
+  // for a code". Correct, and no help at all.
+  //
+  // One small request on a tap nobody makes twice a minute.
+  await loadAuthState();
+
   const known = (authState.users || []).find((u) => u.id === id);
   const local = STAFF.find((u) => u.id === id);
   const who = known || (local ? { id: local.id, name: local.name } : null);

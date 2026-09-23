@@ -191,7 +191,43 @@ function start() {
     check("until the phone is revoked", (await api(READ, { token: kmToken })).status, 401);
     check("and john is unaffected", (await api(READ, { token: johnToken })).status, 200);
 
-    console.log("\n-- rule 6: the app itself is still served --");
+    console.log("\n-- the screen asks the server, not its own memory --");
+  // John chose his code, signed out, tapped his name, and was offered the
+  // chance to choose a code he already had - which the server then refused
+  // with "this account is not waiting for a code". Correct, and no help.
+  //
+  // The page had fetched the list of people once, at startup, and believed it
+  // for the life of the page. Nothing was wrong with the server's answer; the
+  // screen was asking a question it had worked out several minutes earlier.
+  //
+  // So pickStaff now asks when the name is TAPPED. This checks the endpoint it
+  // asks is telling the truth from one moment to the next, which is the half
+  // that can be checked here - the tap itself is checked in the browser.
+  {
+    await api("/api/admin/users/shirley/reset", { token: johnToken, method: "POST" });
+    const waiting = (await api("/api/auth/users")).json.users.find((u) => u.id === "shirley");
+    check("just opened: waiting to choose one",
+      [!!waiting.has_password, !!waiting.setup_open], [false, true]);
+
+    await api("/api/auth/first-code", {
+      method: "POST", body: { user_id: "shirley", password: "778899", device: "hers" } });
+
+    // The SAME endpoint, asked again a moment later. This is the difference
+    // the screen was missing.
+    const done = (await api("/api/auth/users")).json.users.find((u) => u.id === "shirley");
+    check("a moment later: has one", [!!done.has_password, !!done.setup_open], [true, false]);
+
+    // And the server refuses a second first-code, which is what the stale
+    // screen kept walking into.
+    check("so choosing again is refused",
+      (await api("/api/auth/first-code", {
+        method: "POST", body: { user_id: "shirley", password: "112233" } })).status, 403);
+    check("while her code still signs her in",
+      (await api("/api/auth/login", {
+        method: "POST", body: { user_id: "shirley", password: "778899" } })).status, 200);
+  }
+
+  console.log("\n-- rule 6: the app itself is still served --");
     // The sign-in screen is part of the app. Gating it would be a locked door
     // with the handle on the inside.
     const page = await fetch(BASE + "/index.html");
@@ -224,18 +260,25 @@ function start() {
   // because the whole failure was a rule that read correctly and did nothing.
   {
     const src = fs.readFileSync(path.join(root, "frontend", "app.js"), "utf8");
-    const start = src.indexOf("function pickStaff(");
+    let start = src.indexOf("function pickStaff(");
+    // Keep the "async": it asks the server when a name is tapped now, and a
+    // copy lifted without it is a function full of awaits that cannot run.
+    if (src.slice(start - 6, start) === "async ") start -= 6;
     const end = src.indexOf("\n}\n", start);
     const lifted = src.slice(start, end + 3);
 
     const ran = [];
     const make = (requireLogin, users) => new Function(
-      "authState", "STAFF", "chooseUser", "signinShowPad",
+      "authState", "STAFF", "chooseUser", "signinShowPad", "loadAuthState",
       lifted + "\nreturn pickStaff;")(
         { require_login: requireLogin, users },
         users.map((u) => ({ id: u.id, name: u.name, group: "admin" })),
         (id) => ran.push(["straight in", id]),
-        (who, mode) => ran.push([mode === "first" ? "choose a code" : "asked for a code", who.id]));
+        (who, mode) => ran.push([mode === "first" ? "choose a code" : "asked for a code", who.id]),
+        // The refresh it now does first. Answering with what it already has is
+        // right here: this is about the DECISION, and the refresh itself is
+        // checked in the section above.
+        async () => {});
 
     const PEOPLE = [
       { id: "nocode", name: "No Code", has_password: false, setup_open: false },
@@ -245,7 +288,7 @@ function start() {
 
     ran.length = 0;
     const off = make(false, PEOPLE);
-    off("nocode"); off("hascode"); off("waiting");
+    await off("nocode"); await off("hascode"); await off("waiting");
     check("with the switch OFF", ran, [
       ["straight in", "nocode"],          // exactly as the app always worked
       ["asked for a code", "hascode"],    // THE fix - this was "straight in"
@@ -254,7 +297,7 @@ function start() {
 
     ran.length = 0;
     const on = make(true, PEOPLE);
-    on("nocode"); on("hascode"); on("waiting");
+    await on("nocode"); await on("hascode"); await on("waiting");
     check("and with it ON, nobody walks past", ran, [
       ["asked for a code", "nocode"],
       ["asked for a code", "hascode"],
