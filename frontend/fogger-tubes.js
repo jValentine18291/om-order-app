@@ -37,7 +37,10 @@
   // buttons appear in.
   var TUBES = [
     { code: "SPUL KACC Z00126.03", type: "222",  unitQty: 0.04,  unitPrice: 25.00,  each: 1.00 },
-    { code: "SPUL KACC Z00126.03", type: "311",  unitQty: 0.075, unitPrice: 26.60,  each: 2.00 },
+    // $26.65, corrected 23 Sep 2026 on John's word. It was entered as $26.60
+    // off the scanned sheet, which is five cents light on the roll - about a
+    // tenth of a cent a piece, so nothing ever looked wrong.
+    { code: "SPUL KACC Z00126.03", type: "311",  unitQty: 0.075, unitPrice: 26.65,  each: 2.00 },
     { code: "SPUL KACC Z00126.03", type: "178",  unitQty: 0.085, unitPrice: 23.50,  each: 2.00 },
     { code: "SPUL KACC Z00126.03", type: "142",  unitQty: 0.265, unitPrice: 20.00,  each: 5.30 },
 
