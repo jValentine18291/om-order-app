@@ -164,7 +164,7 @@
     "← Someone else": "← 换一人",
     "Enter your 6-digit code": "请输入您的 6 位数密码",
     "Choose a 6-digit code. You will use it every time.":
-      "请设定一个 6 位数密码，以后每次登录都用它。",
+      "请设定 6 位数密码，每次登录都用它",
     // "Checking…" likewise: it is already there for the IPL download strip.
     "Signed in": "已登录",
     "That name and code do not match.": "姓名与密码不符。",

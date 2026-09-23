@@ -79,19 +79,22 @@
       <!-- The code, once a name has been tapped. A screen of its own rather
            than a box under the list: a phone keyboard covers half the screen,
            and the person needs to see whose code they are typing. -->
+      <!-- The card sits on the brand colour, which the whole screen turns
+           while this is up - see body.signin-brand. -->
       <div id="signin-pad" style="display:none">
-        <button type="button" class="signin-back" id="signin-back">&larr; Someone else</button>
-        <div class="signin-who">
+        <div class="signin-card">
           <span class="signin-initial" id="signin-initial"></span>
           <span class="signin-name" id="signin-name"></span>
+          <p class="signin-ask" id="signin-ask">Enter your 6-digit code</p>
+          <div class="signin-dots" id="signin-dots"></div>
+          <div class="signin-msg" id="signin-msg"></div>
+          <!-- ITS OWN NUMBER PAD, rather than the phone's. The phone's slides
+               up over the bottom half of the screen, including the dots the
+               person is watching fill - and its keys are smaller than these.
+               Filled in by renderSigninKeys(). -->
+          <div class="signin-keys" id="signin-keys"></div>
         </div>
-        <p class="signin-ask" id="signin-ask">Enter your 6-digit code</p>
-        <div class="signin-dots" id="signin-dots"></div>
-        <!-- A real input, off-screen, so the phone's own number pad opens and
-             the usual editing keys work. The dots above are what is seen. -->
-        <input id="signin-code" type="text" inputmode="numeric" pattern="[0-9]*"
-               autocomplete="off" maxlength="6" aria-label="6-digit code" />
-        <div class="signin-msg" id="signin-msg"></div>
+        <button type="button" class="signin-back" id="signin-back">&larr; Someone else</button>
       </div>
     </section>
 

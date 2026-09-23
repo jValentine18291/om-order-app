@@ -1059,41 +1059,101 @@ select {
 .pp-row-gone { opacity: .55; }
 
 /* ---- Signing in ---------------------------------------------------------
-   The code pad. Big, plain, and nothing on it but whose code is wanted: this
-   is the first thing anybody sees in the morning and the one screen where
-   being unsure costs a phone call. */
-.signin-back {
-  appearance: none; border: 0; background: none; padding: 6px 0;
-  font: inherit; font-size: 14px; color: #1f6f78; cursor: pointer;
+   The one screen that is not the app's usual grey. It is the first thing
+   anybody sees in the morning, it has exactly one job, and putting it on the
+   brand colour says so before a word is read.
+
+   The teal is the DARKENED brand teal, not the logo's. White text on the raw
+   pair fails at 2.3:1; this clears 4.5:1. See the note in styles.css. */
+/* Both, because the page's colour is painted on the .app wrapper as well as
+   on body - and the wrapper is the one that actually covers the screen. */
+body.signin-brand,
+body.signin-brand .app { background: var(--primary); }
+/* "Who is using this phone?" belongs to the list of names. With one name
+   chosen and its card up, the question has been answered. */
+body.signin-brand #screen-role .section-head { display: none; }
+/* Sits the card away from the top, the way it does on a lock screen. */
+#signin-pad { padding-top: 4vh; }
+/* The topbar sits above this screen, so it comes along. Transparent rather
+   than recoloured: the blur over a flat colour reads as a smear. */
+body.signin-brand .topbar {
+  background: transparent; border-bottom-color: transparent;
+  backdrop-filter: none; -webkit-backdrop-filter: none;
 }
-.signin-who { display: flex; align-items: center; gap: 12px; margin: 14px 0 6px; }
+body.signin-brand .topbar h1 { color: #fff; }
+body.signin-brand .topbar h1 span { color: rgba(255, 255, 255, .72); }
+body.signin-brand .topbar .pill {
+  background: transparent; border-color: rgba(255, 255, 255, .45); color: #fff;
+}
+
+.signin-card {
+  background: var(--surface);
+  border-radius: 26px;
+  padding: 26px 22px 22px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .18);
+  display: flex; flex-direction: column; align-items: center;
+}
 .signin-initial {
-  width: 44px; height: 44px; border-radius: 50%; flex: none;
+  width: 68px; height: 68px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  background: #1f6f78; color: #fff; font-weight: 700; font-size: 20px;
+  background: var(--primary-tint); color: var(--primary);
+  font-family: var(--display); font-size: 28px; font-weight: 600;
 }
-.signin-name { font-size: 20px; font-weight: 700; }
-.signin-ask { font-size: 14px; color: var(--ink-faint, #78868c); margin: 0 0 16px; }
+.signin-name {
+  font-family: var(--display); font-size: 24px; font-weight: 600;
+  color: var(--ink); margin-top: 12px; text-align: center;
+}
+.signin-ask {
+  font-size: 14px; color: var(--ink-soft); margin: 6px 0 0; text-align: center;
+  /* Two even lines rather than a long one and an orphan. The Chinese wording
+     was leaving its last two characters alone on a line of their own. */
+  text-wrap: balance;
+  max-width: 260px;
+}
 
 /* Six dots that fill as digits are typed. The digits themselves are never
    shown - a code read over somebody's shoulder is a code they have lost. */
-.signin-dots { display: flex; gap: 14px; margin-bottom: 18px; }
+.signin-dots { display: flex; gap: 14px; margin-top: 20px; }
 .signin-dots span {
   width: 16px; height: 16px; border-radius: 50%;
-  border: 2px solid #cfdadd; background: #fff;
+  border: 2px solid var(--border-2); background: #fff;
 }
-.signin-dots span.on { background: #1f6f78; border-color: #1f6f78; }
-.signin-dots.wrong span { border-color: #c0392b; animation: signin-shake .3s; }
+.signin-dots span.on { background: var(--primary); border-color: var(--primary); }
+.signin-dots.wrong span { border-color: var(--red, #c0392b); animation: signin-shake .3s; }
 @keyframes signin-shake {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-5px); }
   75% { transform: translateX(5px); }
 }
-/* The real input is off-screen rather than hidden: display:none would stop the
-   phone opening its keyboard for it, which is the whole reason it is there. */
-#signin-code { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
-.signin-msg { font-size: 14px; min-height: 22px; color: #c0392b; }
-.signin-msg.ok { color: #1d7a3f; }
+
+.signin-msg {
+  font-size: 13px; min-height: 20px; margin-top: 8px;
+  color: var(--red, #c0392b); text-align: center;
+}
+.signin-msg.ok { color: var(--green); }
+
+/* The pad. Three columns, and the keys are the biggest targets in the app on
+   purpose: this is pressed with a workshop hand. */
+.signin-keys {
+  width: 100%; margin-top: 8px;
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;
+}
+.signin-keys button {
+  appearance: none; border: 0; background: var(--bg); border-radius: 14px;
+  height: 54px; font-family: var(--display); font-size: 22px; font-weight: 500;
+  color: var(--ink); cursor: pointer;
+}
+.signin-keys button:active { background: var(--primary-tint); }
+.signin-keys button.signin-key-quiet {
+  background: transparent; font-size: 18px; color: var(--ink-soft);
+}
+.signin-keys button:disabled { opacity: 0; pointer-events: none; }
+
+.signin-back {
+  appearance: none; border: 0; background: none;
+  display: block; margin: 18px auto 0; padding: 8px;
+  font: inherit; font-size: 14px; color: rgba(255, 255, 255, .92); cursor: pointer;
+}
 
 /* Carrying the whole parts catalogue on the phone. A strip rather than a
    card: it is read once before leaving and ignored the rest of the time. */

@@ -298,47 +298,80 @@ async function loadAuthState() {
   return authState;
 }
 
+// What has been typed. A variable rather than an input's value, because the
+// pad below is ours: there is no field for a phone to open a keyboard against,
+// which is the whole point of having one.
+let signinCode = "";
+
 function signinShowPad(user, mode) {
   signinFor = user;
   signinMode = mode;
+  signinCode = "";
   $("staff-list").style.display = "none";
   $("signin-pad").style.display = "";
+  // The screen turns brand teal while this is up, topbar included.
+  document.body.classList.add("signin-brand");
   $("signin-initial").textContent = [...(user.name || "?")][0] || "?";
   $("signin-name").textContent = user.name || "";
   $("signin-ask").textContent = mode === "first"
     ? "Choose a 6-digit code. You will use it every time."
     : "Enter your 6-digit code";
+  $("signin-msg").className = "signin-msg";
   // A name with no code at all, once signing in is required. Saying "that name
   // and code do not match" to somebody who has never had one sends them off to
   // try harder at something that cannot work.
-  if (mode === "code" && user.has_password === false && !user.setup_open) {
-    $("signin-msg").textContent = "You have no code yet. Ask John to set you up.";
-  }
-  $("signin-msg").textContent = "";
-  $("signin-msg").className = "signin-msg";
-  const box = $("signin-code");
-  box.value = "";
+  $("signin-msg").textContent =
+    (mode === "code" && user.has_password === false && !user.setup_open)
+      ? "You have no code yet. Ask John to set you up."
+      : "";
+  renderSigninKeys();
   signinDots();
-  // A beat, or iOS opens the keyboard against a screen that is still moving.
-  setTimeout(() => box.focus(), 120);
 }
 
 function signinHidePad() {
   signinFor = null;
+  signinCode = "";
   $("signin-pad").style.display = "none";
   $("staff-list").style.display = "";
-  $("signin-code").blur();
+  document.body.classList.remove("signin-brand");
 }
 
 function signinDots() {
-  const n = $("signin-code").value.length;
+  const n = signinCode.length;
   $("signin-dots").innerHTML =
     [0, 1, 2, 3, 4, 5].map((i) => `<span class="${i < n ? "on" : ""}"></span>`).join("");
 }
 
+// The pad itself. Ten digits, a gap, and a delete - the shape of every phone
+// lock screen there is, so nobody has to be told what it is.
+function renderSigninKeys() {
+  const faces = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "\u232B"];
+  $("signin-keys").innerHTML = faces.map((f) => {
+    if (f === "") return `<button type="button" disabled aria-hidden="true"></button>`;
+    const del = f === "\u232B";
+    return `<button type="button" class="${del ? "signin-key-quiet" : ""}" ` +
+      `data-key="${del ? "back" : f}" aria-label="${del ? "Delete" : f}">${f}</button>`;
+  }).join("");
+}
+
+// One digit, or one deletion. Submits itself on the sixth - there is no Enter
+// on a number pad and nobody should have to look for one.
+function signinPress(k) {
+  if (signinBusy || !signinFor) return;
+  if (k === "back") {
+    signinCode = signinCode.slice(0, -1);
+    signinDots();
+    return;
+  }
+  if (signinCode.length >= 6) return;
+  signinCode += k;
+  signinDots();
+  if (signinCode.length === 6) signinSubmit();
+}
+
 async function signinSubmit() {
   if (signinBusy || !signinFor) return;
-  const code = $("signin-code").value;
+  const code = signinCode;
   if (code.length !== 6) return;
   signinBusy = true;
   const msg = $("signin-msg");
@@ -384,14 +417,13 @@ async function signinSubmit() {
       }
       return;
     }
-    $("signin-code").value = "";
+    signinCode = "";
     signinDots();
     const dots = $("signin-dots");
     dots.classList.add("wrong");
     setTimeout(() => dots.classList.remove("wrong"), 400);
     msg.className = "signin-msg";
     msg.textContent = e.message || "That did not work.";
-    setTimeout(() => $("signin-code").focus(), 120);
   }
   signinBusy = false;
 }
@@ -399,25 +431,31 @@ async function signinSubmit() {
 // Typed into the hidden input; the dots are what anybody sees. Digits only,
 // and it submits itself on the sixth - there is no Enter key on a number pad.
 function wireSigninPad() {
-  const box = $("signin-code");
-  if (!box) return;
-  box.addEventListener("input", () => {
-    box.value = box.value.replace(/\D/g, "").slice(0, 6);
-    signinDots();
-    if (box.value.length === 6) signinSubmit();
+  const keys = $("signin-keys");
+  if (!keys) return;
+  // One listener on the pad rather than twelve on the keys, because the keys
+  // are redrawn every time it opens.
+  keys.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-key]");
+    if (b) signinPress(b.dataset.key);
   });
-  box.addEventListener("keydown", (e) => { if (e.key === "Enter") signinSubmit(); });
   $("signin-back").addEventListener("click", signinHidePad);
-  // Tapping the dots puts the keyboard back, which is where everybody taps
-  // when it has closed itself.
-  $("signin-dots").addEventListener("click", () => box.focus());
+
+  // A real keyboard, for whoever is at the counter with one. The pad is for
+  // phones; nobody on a computer should have to aim a mouse at it.
+  document.addEventListener("keydown", (e) => {
+    if (!signinFor) return;
+    if (e.key >= "0" && e.key <= "9") { signinPress(e.key); e.preventDefault(); }
+    else if (e.key === "Backspace") { signinPress("back"); e.preventDefault(); }
+    else if (e.key === "Escape") signinHidePad();
+  });
 }
 
 // Back to the start, with a reason. Used when a token stops working - signed
 // out elsewhere, or the device revoked.
 function signedOutTo(why) {
   try { setUser(null); } catch (_) {}
-  signinHidePad();
+  signinHidePad();          // also takes the brand colour back off
   showScreen("role");
   renderStaffPicker();
   updateSignOutButton();
