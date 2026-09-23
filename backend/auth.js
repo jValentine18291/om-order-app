@@ -27,7 +27,11 @@
 // dealt with by revoking its row, which is why each one records what it is and
 // when it was last seen.
 const crypto = require("crypto");
+const path = require("path");
 const db = require("./db");
+// The one list of what the home screen has on it, shared with the browser -
+// the same arrangement service-items.js and machine-types.js use.
+const FN = require(path.join(__dirname, "..", "frontend", "app-functions.js"));
 
 // ---- Passwords -------------------------------------------------------------
 // Defaults from Node's own documentation. N is the work factor and the only
@@ -79,14 +83,14 @@ function createSession(userId, device) {
 function sessionUser(token) {
   if (!token) return null;
   const row = db.prepare(
-    `SELECT s.id AS session_id, u.id, u.name, u.role, u.tech, u.active
+    `SELECT s.id AS session_id, u.id, u.name, u.role, u.tech, u.active, u.functions
        FROM app_sessions s JOIN app_users u ON u.id = s.user_id
       WHERE s.token_hash = ? AND s.revoked_at IS NULL`
   ).get(tokenHash(token));
   if (!row || !row.active) return null;
   db.prepare("UPDATE app_sessions SET last_seen = datetime('now','localtime') WHERE id = ?")
     .run(row.session_id);
-  return row;
+  return withFunctions(row);
 }
 
 function revokeSession(token) {
@@ -119,11 +123,46 @@ function listSessions(userId) {
 // and a hash has no business travelling to a browser on either trip.
 function listUsers({ activeOnly = false } = {}) {
   return db.prepare(
-    `SELECT id, name, role, tech, active, setup_open,
+    `SELECT id, name, role, tech, active, setup_open, functions,
             CASE WHEN password_hash = '' OR password_hash IS NULL THEN 0 ELSE 1 END AS has_password,
             password_set_at
        FROM app_users ${activeOnly ? "WHERE active = 1" : ""} ORDER BY role, name`
-  ).all();
+  ).all().map(withFunctions);
+}
+
+// The stored JSON turned back into a list, plus what it works out to.
+//
+// A row that cannot be parsed - hand-edited, half-written - falls back to the
+// job rather than throwing. Somebody losing their buttons because of a stray
+// comma is a worse failure than the edit not taking.
+function withFunctions(row) {
+  if (!row) return row;
+  let own = null;
+  try { own = row.functions ? JSON.parse(row.functions) : null; } catch (_) { own = null; }
+  const user = { ...row, functions: Array.isArray(own) ? own : null };
+  return { ...user, effective_functions: FN.functionsFor(user), uses_default: FN.isDefault(user) };
+}
+
+// Give somebody their own list, or put them back on their job's.
+//
+// An empty list means "follow the job" rather than "no buttons at all": see
+// functionsFor() for why the two have to be tellable apart, and note that a
+// person with nothing ticked therefore gets their job's list back. That is the
+// safer way round - the alternative is a screen with nothing on it and no
+// explanation.
+function setUserFunctions(userId, list) {
+  const user = db.prepare("SELECT id, role FROM app_users WHERE id = ?").get(String(userId));
+  if (!user) { const e = new Error("No such person."); e.status = 404; throw e; }
+  const clean = FN.clean(list);
+  // Ticking exactly what the job gives is not a custom list, it is the job -
+  // so it is stored as nothing. That is how somebody is put BACK on their
+  // job's list: tick it to match and save. Without this the row would say
+  // "custom" forever, and a later change to what Technicians get would pass
+  // this person by without anybody noticing.
+  const same = clean.length && FN.isDefault({ role: user.role, functions: clean });
+  db.prepare("UPDATE app_users SET functions = ? WHERE id = ?")
+    .run(clean.length && !same ? JSON.stringify(clean) : null, String(userId));
+  return withFunctions(db.prepare("SELECT * FROM app_users WHERE id = ?").get(String(userId)));
 }
 
 // SIX DIGITS. John's call, and the right trade for a workshop: it is typed on
@@ -240,7 +279,14 @@ function login(userId, password, device) {
 
   failures.delete(id);
   const token = createSession(user.id, device);
-  return { token, user: { id: user.id, name: user.name, role: user.role, tech: user.tech || "" } };
+  const full = withFunctions(user);
+  return {
+    token,
+    user: {
+      id: user.id, name: user.name, role: user.role, tech: user.tech || "",
+      functions: full.effective_functions,
+    },
+  };
 }
 
 // ---- The switch ------------------------------------------------------------
@@ -261,7 +307,7 @@ function setRequireLogin(on) {
 module.exports = {
   hashPassword, verifyPassword,
   createSession, sessionUser, revokeSession, revokeSessionById, listSessions,
-  listUsers, setPassword, openForSetup, firstCode, login,
+  listUsers, setPassword, openForSetup, firstCode, login, setUserFunctions,
   requireLogin, setRequireLogin,
   // For the tests, which need to be able to put the lockout back.
   _resetFailures: () => failures.clear(),

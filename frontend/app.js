@@ -124,6 +124,31 @@ const GROUP_LABEL = {
 };
 
 const USER_KEY = "om_user";
+// WHAT THIS PERSON'S HOME SCREEN HAS ON IT, as the server last worked it out.
+//
+// Which buttons somebody gets is the server's answer, not the browser's: an
+// admin can change it from their own phone, and this one has to find out. But
+// the app also has to open on a lift with no signal, so the answer is kept
+// here and used until a fresher one arrives - from the picker, from signing
+// in, or from /api/auth/me at startup.
+//
+// Nothing when it has never been told, which is the ordinary case: the job's
+// own list in app-functions.js is then used, and that is what almost everybody
+// has anyway.
+const FUNCTIONS_KEY = "om_functions";
+function rememberFunctions(list) {
+  try {
+    if (Array.isArray(list) && list.length) localStorage.setItem(FUNCTIONS_KEY, JSON.stringify(list));
+    else localStorage.removeItem(FUNCTIONS_KEY);
+  } catch (_) {}
+}
+function rememberedFunctions() {
+  try {
+    const raw = localStorage.getItem(FUNCTIONS_KEY);
+    const list = raw ? JSON.parse(raw) : null;
+    return Array.isArray(list) && list.length ? list : null;
+  } catch (_) { return null; }
+}
 // The group is still stored under the old key. Everything that already keyed
 // off a role - the Chinese layer, the home buttons, the price permissions -
 // keeps working, and a phone that had only a role set simply picks a name once.
@@ -137,10 +162,14 @@ function getUser() {
 }
 function setUser(id) {
   const u = STAFF.find((s) => s.id === id) || null;
+  const changed = !u || (localStorage.getItem(USER_KEY) || "") !== u.id;
   try {
     if (u) { localStorage.setItem(USER_KEY, u.id); localStorage.setItem(ROLE_KEY, u.group); }
     else { localStorage.removeItem(USER_KEY); localStorage.removeItem(ROLE_KEY); }
   } catch (_) {}
+  // A different person on this phone starts from their job's list, not from
+  // whatever the last one had been given.
+  if (changed) rememberFunctions(null);
 }
 // The person's name, for anything that records who did something.
 function userName() {
@@ -194,21 +223,35 @@ async function renderPeople() {
         ? `<span class="pp-tag pp-tag-waiting">Waiting for them to choose one</span>`
         : `<span class="pp-tag pp-tag-none">Cannot sign in yet</span>`;
     const on = sessions.filter((sn) => sn.user_id === u.id && !sn.revoked_at).length;
+    // What is on their home screen. Said in one short line rather than eleven
+    // ticks: almost everybody is on their job's list, and the list only needs
+    // spelling out for the few who are not.
+    const fns = u.effective_functions || [];
+    const how = u.uses_default
+      ? `the usual ${escapeHtml(ROLE[u.role] || u.role)} buttons`
+      : `<strong>${fns.length} button${fns.length === 1 ? "" : "s"}, chosen</strong>`;
     return `
       <div class="pp-row${u.active ? "" : " pp-row-gone"}">
         <span class="pp-main">
           <span class="pp-name">${escapeHtml(u.name)}</span>
           <span class="pp-sub">${escapeHtml(ROLE[u.role] || u.role)}${
             on ? ` · signed in on ${on} device${on === 1 ? "" : "s"}` : ""}</span>
+          <span class="pp-sub pp-fns">Home screen: ${how}</span>
           ${tag}
         </span>
-        <button type="button" class="pp-act" data-reset="${escapeAttr(u.id)}">${
-          u.has_password ? "Reset" : "Let them in"}</button>
+        <span class="pp-acts">
+          <button type="button" class="pp-act" data-reset="${escapeAttr(u.id)}">${
+            u.has_password ? "Reset" : "Let them in"}</button>
+          <button type="button" class="pp-act pp-act-quiet" data-fns="${escapeAttr(u.id)}">Buttons</button>
+        </span>
       </div>`;
   }).join("");
 
   list.querySelectorAll("[data-reset]").forEach((b) =>
     b.addEventListener("click", () => resetPerson(b.dataset.reset, people))
+  );
+  list.querySelectorAll("[data-fns]").forEach((b) =>
+    b.addEventListener("click", () => editFunctions(b.dataset.fns, people))
   );
 
   devices.innerHTML = sessions.length
@@ -228,6 +271,75 @@ async function renderPeople() {
   devices.querySelectorAll("[data-revoke]").forEach((b) =>
     b.addEventListener("click", () => revokeDevice(b.dataset.revoke))
   );
+}
+
+// WHICH BUTTONS ONE PERSON GETS ON THEIR HOME SCREEN.
+//
+// John asked for this in September 2026: a technician who also does some of
+// the ordering should get that one extra button without being made a
+// Purchaser, and a new starter should be able to be given three buttons for a
+// fortnight rather than all of somebody's job at once.
+//
+// THIS IS WHAT THEY SEE, NOT WHAT THE SERVER ALLOWS. Untick "New Service" and
+// the button goes; the route behind it would still answer if something else
+// asked. That was said plainly before this was built, and it is worth saying
+// again here, because the screen looks like a lock and is not one. Making it
+// one is a separate job across the routes.
+//
+// PUTTING SOMEBODY BACK on their job's list is done by ticking it to match -
+// the server stores that as "no list of their own" rather than as a custom
+// list that happens to be identical. The sheet says so.
+async function editFunctions(id, people) {
+  const who = (people || []).find((u) => u.id === id);
+  if (!who || !window.OM_FUNCTIONS) return;
+  const ROLE = { sales: "Sales", tech: "Technician", purchaser: "Purchaser", admin: "Admin" };
+  const has = who.effective_functions || [];
+  const base = OM_FUNCTIONS.ROLE_DEFAULTS[who.role] || [];
+
+  const picked = await confirmAction({
+    title: `${who.name}'s home screen`,
+    sub: `Tick what ${who.name} can see. Everything else stays hidden for them.`,
+    detail: who.uses_default
+      ? `${who.name} is on the usual ${ROLE[who.role] || who.role} list. Change a tick ` +
+        `and it becomes theirs alone; tick it back to match and they go back on the ` +
+        `usual list. At least one has to stay ticked.`
+      : `${who.name} has their own list. The usual ${ROLE[who.role] || who.role} list is ` +
+        `${base.length} buttons — tick it to match and they go back on it. At least one ` +
+        `has to stay ticked.`,
+    ok: "Save",
+    choices: OM_FUNCTIONS.FUNCTIONS.map((f) => ({
+      id: f.id,
+      label: f.label,
+      // Names, not part numbers. See confirmAction.
+      mono: false,
+      // What the button does, plus whether it is one their job normally gets.
+      // Without the second half "Orders" ticked for a technician looks like a
+      // mistake rather than a decision.
+      sub: f.hint + (base.includes(f.id) ? "" : ` · not usually ${ROLE[who.role] || who.role}`),
+      checked: has.includes(f.id),
+    })),
+  });
+  // An empty answer is a cancel. It cannot be "nothing ticked" - the Save
+  // button greys out at zero, because a person with no buttons has no app and
+  // the way to stop somebody using it is to stop them signing in, not to
+  // leave them a blank screen with no explanation on it.
+  if (!picked.length) return;
+
+  try {
+    const r = await api(`/api/admin/users/${encodeURIComponent(id)}/functions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ functions: picked }),
+    });
+    toast(r.uses_default ? `${who.name} is back on the usual list`
+                         : `${who.name} now has ${(r.effective_functions || []).length} buttons`, "ok");
+    // If John has just changed his OWN, his home screen changes under him.
+    const me = getUser();
+    if (me && me.id === id) { rememberFunctions(r.effective_functions); applyRoleToHome(); }
+    renderPeople();
+  } catch (e) {
+    toast(e.message, "err");
+  }
 }
 
 async function resetPerson(id, people) {
@@ -290,6 +402,15 @@ async function loadAuthState() {
   try {
     const r = await api("/api/auth/users");
     authState = { require_login: !!r.require_login, users: r.users || [], asked: true };
+    // Every page load, and every tap on a name, is a chance to find out that
+    // an admin has changed what this person gets. Taken quietly: if the answer
+    // is the same as the one already held, nothing happens.
+    const me = getUser();
+    const mine = me && (authState.users || []).find((u) => u.id === me.id);
+    if (mine && Array.isArray(mine.functions)) {
+      rememberFunctions(mine.functions);
+      if (typeof applyRoleToHome === "function") applyRoleToHome();
+    }
   } catch (_) {
     // An old server, or none. Behave as the app always did rather than
     // stranding somebody on a screen that cannot be got past.
@@ -397,7 +518,7 @@ async function signinSubmit() {
     // setUser keeps the rest of the app working exactly as it did: it is what
     // every screen reads to know whose initials go on a part.
     signinBusy = false;
-    chooseUser(signedInAs, { signedIn: true });
+    chooseUser(signedInAs, { signedIn: true, functions: r.user && r.user.functions });
     return;
   } catch (e) {
     // The two ways the screen can be asking the wrong question, both of which
@@ -553,10 +674,16 @@ async function pickStaff(id) {
 function chooseUser(id, opts) {
   const next = STAFF.find((u) => u.id === id);
   if (!next) return;
+  const fns = opts && opts.functions;
   // The Chinese layer installs at page load, so moving into or out of the
   // technician group has to reload rather than re-translate a live page.
   const reload = (getRole() === "tech") !== (next.group === "tech");
   setUser(id);
+  // AFTER setUser, which clears the remembered list when the person changes.
+  // Before that line it would be wiped by the very call it is meant to
+  // accompany - and a phone signing in as somebody with an unusual set of
+  // buttons would show them the job's ordinary set until the next page load.
+  if (fns) rememberFunctions(fns);
   if (reload) { location.reload(); return; }
   applyRoleToHome();
   showScreen("home");
@@ -592,20 +719,19 @@ $("lang-toggle").addEventListener("click", () => {
 
 function applyRoleToHome() {
   const role = getRole();
-  // Which home functions each account sees (per John's mapping, 28 Jul 2026):
-  // "po" is on every list: what is on order and when it lands is the answer to
-  // a question anyone in the building gets asked. Only Iris can change it.
-  const ROLE_FUNCTIONS = {
-    sales: ["new", "close", "view", "find", "ipl", "quote", "bulk", "po", "ship"],
-    tech: ["open", "view", "find", "ipl", "po", "ship"],
-    // Purchaser is Sales plus the orders list, so it inherits the
-    // IPLs too rather than being a separate shorter list.
-    purchaser: ["new", "close", "view", "find", "ipl", "quote", "bulk", "requests", "po", "ship"],
-    admin: ["new", "open", "close", "view", "find", "ipl", "quote", "bulk", "requests", "po", "ship"],
-  };
+  // The list of functions and which job gets which now lives in
+  // app-functions.js, loaded just before this file and required by the server
+  // as well - so "what does a Technician see" has one answer instead of two
+  // that have to be kept in step by hand.
+  //
+  // What the server last said about THIS person wins over the job's list,
+  // because John can now change it per person on People & devices. The job's
+  // list is the fallback, and it is what almost everybody is on.
+  //
   // An unknown group shows nothing rather than defaulting to Sales - silently
   // handing out someone else's functions is worse than an empty screen.
-  const allowed = ROLE_FUNCTIONS[role] || [];
+  const allowed = rememberedFunctions()
+    || (window.OM_FUNCTIONS ? OM_FUNCTIONS.functionsFor({ role }) : []);
   document.querySelectorAll("#screen-home .home-btn").forEach((b) => {
     b.style.display = allowed.includes(b.dataset.go) ? "flex" : "none";
   });
@@ -1910,7 +2036,12 @@ function confirmAction({ title, sub = "", to = "", who = "", detail = "", ok = "
         <label class="ask-pick">
           <input type="checkbox" data-pick="${escapeAttr(c.id)}"${c.checked ? " checked" : ""}>
           <span>
-            <span class="ask-num mono">${escapeHtml(c.label)}</span>
+            <!-- Monospace unless the caller says otherwise. It is right for
+                 the thing this sheet was built for - a part number, where the
+                 digits have to line up and be read back over a phone - and
+                 quite wrong for a list of plain English names, which is what
+                 the permissions sheet puts in here. -->
+            <span class="ask-num${c.mono === false ? " ask-name" : " mono"}">${escapeHtml(c.label)}</span>
             ${c.sub ? `<span class="ask-who">${escapeHtml(c.sub)}</span>` : ""}
           </span>
         </label>`).join("")
@@ -9517,6 +9648,7 @@ wireSigninPad();
     // The server's answer, not the browser's memory: a phone whose person was
     // given a different job keeps working, under the job they have now.
     setUser(me.id);
+    rememberFunctions(me.functions);
     applyRoleToHome();
     showScreen("home");
   } else {

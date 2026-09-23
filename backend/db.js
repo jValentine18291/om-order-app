@@ -555,6 +555,10 @@ try {
       -- admin opens it, and opening it is one tap on the Users screen. It
       -- closes itself the moment a code is set.
       setup_open    INTEGER DEFAULT 0,
+      -- Which home buttons this person gets, as a JSON array, when their job's
+      -- own list is not what is wanted. NULL or empty means "follow the job",
+      -- which is how everybody starts and how most people stay.
+      functions     TEXT,
       created_at    TEXT DEFAULT (datetime('now','localtime')),
       password_set_at TEXT
     );
@@ -605,15 +609,21 @@ try {
   const after = db.prepare("SELECT COUNT(*) AS n FROM app_users").get().n;
   if (after > before) console.log(`[db] migrated: ${after - before} staff account(s) created, none with a password yet`);
 
-  // Older databases, which have the table but not the column.
+  // Older databases, which have the table but not the columns.
   try {
     const cols = db.prepare("PRAGMA table_info(app_users)").all().map((c) => c.name);
     if (!cols.includes("setup_open")) {
       db.exec("ALTER TABLE app_users ADD COLUMN setup_open INTEGER DEFAULT 0");
       console.log("[db] migrated: added setup_open to app_users");
     }
+    if (!cols.includes("functions")) {
+      // NULL, not '[]': nobody has chosen anything yet, and "follow the job"
+      // has to be tellable from "ticked down to nothing".
+      db.exec("ALTER TABLE app_users ADD COLUMN functions TEXT");
+      console.log("[db] migrated: added functions to app_users");
+    }
   } catch (e) {
-    console.error("[db] setup_open migration failed:", e.message);
+    console.error("[db] app_users column migration failed:", e.message);
   }
 
   // Off until somebody turns it on. See backend/require-login.js.

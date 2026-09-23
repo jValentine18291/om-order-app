@@ -133,7 +133,16 @@ app.get("/api/auth/users", (_req, res) => {
                      has_password: !!u.has_password,
                      // So the screen can say "choose your code" instead of
                      // asking for one they have not got.
-                     setup_open: !!u.setup_open })),
+                     setup_open: !!u.setup_open,
+                     // Which home buttons they get. Here, on the one route
+                     // that answers before anybody has signed in, because
+                     // signing in is still switched off on this server and
+                     // the home screen has to be right either way.
+                     //
+                     // It gives away no more than the role beside it already
+                     // does - the job's list is in a file the browser loads
+                     // anyway - and it is the person's own phone asking.
+                     functions: u.effective_functions })),
     require_login: auth.requireLogin(),
   });
 });
@@ -177,7 +186,12 @@ app.post("/api/auth/first-code", (req, res) => {
 // somebody tries to save something.
 app.get("/api/auth/me", (req, res) => {
   res.json({
-    user: req.user ? { id: req.user.id, name: req.user.name, role: req.user.role, tech: req.user.tech || "" } : null,
+    user: req.user ? {
+      id: req.user.id, name: req.user.name, role: req.user.role, tech: req.user.tech || "",
+      // Worked out on the server, so a browser cannot decide for itself which
+      // buttons it is entitled to.
+      functions: req.user.effective_functions,
+    } : null,
     require_login: auth.requireLogin(),
   });
 });
@@ -1255,6 +1269,22 @@ app.post("/api/admin/users/:id/reset", (req, res) => {
     if (err.status) return res.status(err.status).json({ error: err.message });
     console.error("[POST /api/admin/users/:id/reset]", err);
     res.status(500).json({ error: "Could not reset that person." });
+  }
+});
+
+// Which home buttons one person gets.
+//
+// The list is validated against app-functions.js on the way in - the same file
+// the home screen draws from - so a stored list can never name a button that
+// does not exist.
+app.post("/api/admin/users/:id/functions", (req, res) => {
+  if (!needAdmin(req, res)) return;
+  try {
+    res.json(auth.setUserFunctions(req.params.id, (req.body || {}).functions));
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/admin/users/:id/functions]", err);
+    res.status(500).json({ error: "Could not save that." });
   }
 });
 

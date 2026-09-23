@@ -116,6 +116,13 @@ function start() {
     check("a technician cannot set one either",
       (await api("/api/admin/users/john/password", {
         token: kmToken, method: "POST", body: { password: "654321" } })).status, 403);
+    check("a technician cannot change who sees which buttons",
+      (await api("/api/admin/users/kangmin/functions", {
+        token: kmToken, method: "POST", body: { functions: ["new", "close", "po"] } })).status, 403);
+    // The one that matters most of the three: this route is how somebody would
+    // give THEMSELVES the buttons they were not given.
+    check("nor can somebody with no token", (await api("/api/admin/users/kangmin/functions", {
+      method: "POST", body: { functions: ["new"] } })).status, 401);
     check("while a real admin gets in", (await api(ADMIN, { token: johnToken })).status, 200);
 
     console.log("\n-- choosing your own code, over HTTP --");

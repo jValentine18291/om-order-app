@@ -1041,6 +1041,9 @@ select {
 .ask-pick:last-child { margin-bottom: 0; }
 .ask-pick input { margin-top: 5px; flex: none; width: 18px; height: 18px; }
 .ask-to .ask-num { display: block; font-size: 20px; font-weight: 700; letter-spacing: .5px; }
+/* A plain name rather than a part number: the sheet's own font, and smaller,
+   because eleven of these at 20px is a list you scroll rather than read. */
+.ask-to .ask-name { font-size: 16px; letter-spacing: 0; }
 .ask-to .ask-who { display: block; font-size: 13px; margin-top: 2px; color: var(--ink-faint, #78868c); }
 /* The slip's own parts, on the slip screen and in the convert picker. Set
    apart from the machines rather than dressed as one: a technician scanning
@@ -1077,6 +1080,17 @@ select {
   font-size: 13px; color: #1f6f78; cursor: pointer;
 }
 .pp-act:disabled { opacity: .5; }
+/* Two of them now - Reset, and the one that says which buttons this person
+   gets. Stacked rather than side by side: a row on a phone has a name, a job,
+   a line about their home screen and a tag in it already, and two buttons
+   abreast pushed all of that into three words a line. */
+.pp-acts { flex: none; display: flex; flex-direction: column; gap: 6px; }
+.pp-act-quiet { color: var(--ink-soft, #55665f); }
+/* What their home screen has on it. Quieter than the job above it - it is the
+   answer to a question only asked occasionally - but "chosen" is bold, so the
+   few people who are not on their job's list stand out down a list of twelve. */
+.pp-fns { color: var(--ink-faint, #78868c); }
+.pp-fns strong { color: #9a6413; font-weight: 700; }
 .pp-row-gone { opacity: .55; }
 
 /* What is waiting on somebody, on a slip card.
