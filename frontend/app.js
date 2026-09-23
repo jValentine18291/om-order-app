@@ -308,6 +308,12 @@ function signinShowPad(user, mode) {
   $("signin-ask").textContent = mode === "first"
     ? "Choose a 6-digit code. You will use it every time."
     : "Enter your 6-digit code";
+  // A name with no code at all, once signing in is required. Saying "that name
+  // and code do not match" to somebody who has never had one sends them off to
+  // try harder at something that cannot work.
+  if (mode === "code" && user.has_password === false && !user.setup_open) {
+    $("signin-msg").textContent = "You have no code yet. Ask John to set you up.";
+  }
   $("signin-msg").textContent = "";
   $("signin-msg").className = "signin-msg";
   const box = $("signin-code");
@@ -446,15 +452,38 @@ function renderStaffPicker() {
 
 // Tapping a name. With signing in switched off this is what it always was;
 // with it on, it asks for the code first.
+// Tapping a name.
+//
+// WHO GETS ASKED FOR A CODE, and why it is not simply "everybody once the
+// switch is on":
+//
+//   has a code            asked for it, always. Switch or no switch.
+//   waiting to choose one asked to choose it.
+//   neither, switch off   straight in, exactly as the app has always worked.
+//   neither, switch on    asked, and told to see John - they cannot get in.
+//
+// The first line is the one that matters, and leaving it out was a mistake
+// that made the whole thing impossible to set up. The intended order was:
+// deploy with the switch off, give John a code, John signs in and lets
+// everybody else in, THEN the switch. But with the switch off the app never
+// offered a code box, and the screen for letting people in only appears to
+// somebody signed in - so there was no first step. John tapped his own name
+// twice and was simply let in, as before.
+//
+// Asking whoever has a code also makes the changeover gradual rather than a
+// cliff: each person starts using their code the moment they have one, and
+// the switch at the end only closes the door behind the last of them.
 function pickStaff(id) {
-  if (!authState.require_login) return chooseUser(id);
   const known = (authState.users || []).find((u) => u.id === id);
   const local = STAFF.find((u) => u.id === id);
   const who = known || (local ? { id: local.id, name: local.name } : null);
   if (!who) return;
-  // Somebody an admin has just opened goes straight to choosing a code, so
-  // they are not asked for one they have not got.
-  signinShowPad(who, known && known.setup_open && !known.has_password ? "first" : "code");
+
+  const hasCode = !!(known && known.has_password);
+  const waiting = !!(known && known.setup_open && !known.has_password);
+
+  if (!hasCode && !waiting && !authState.require_login) return chooseUser(id);
+  signinShowPad(who, waiting ? "first" : "code");
 }
 
 function chooseUser(id, opts) {
@@ -516,15 +545,17 @@ function applyRoleToHome() {
   document.querySelectorAll("#screen-home .home-btn").forEach((b) => {
     b.style.display = allowed.includes(b.dataset.go) ? "flex" : "none";
   });
-  // People & devices is admin's, and only where signing in is switched on -
-  // with it off there are no codes and no devices to manage.
+  // People & devices is admin's, and appears as soon as an admin is SIGNED
+  // IN - not only once the switch is on. That was the other half of the same
+  // mistake: the screen for handing out codes was hidden until the thing it
+  // sets up had already been turned on.
   //
   // AFTER the loop above, not before it. "people" is deliberately not in
   // ROLE_FUNCTIONS - it is not a job, it is an extra - so the loop hides it,
   // and setting it first meant setting it and then being overruled a line
   // later. It looked exactly like the permission check being wrong.
   const people = $("home-people");
-  if (people) people.style.display = (role === "admin" && authState.require_login) ? "flex" : "none";
+  if (people) people.style.display = (role === "admin" && !!authToken()) ? "flex" : "none";
   updateSignOutButton();
   updateLangToggle();
   // Declared further down; guard so this is safe during startup.
@@ -611,7 +642,8 @@ async function goHome() {
 function updateSignOutButton() {
   const btn = $("sign-out");
   if (!btn) return;
-  btn.style.display = (authState.require_login && authToken()) ? "" : "none";
+  // Whenever there is a session to end, whether or not one was compulsory.
+  btn.style.display = authToken() ? "" : "none";
 }
 
 // ---- API helpers -----------------------------------------------------------
@@ -9347,12 +9379,16 @@ $("cs-so").addEventListener("change", () => {
 wireSigninPad();
 (async () => {
   await loadAuthState();
-  if (!authState.require_login) {
-    // Exactly as the app has always behaved.
+  if (!authState.require_login && !authToken()) {
+    // Nobody signed in and nothing requiring it: exactly as the app has
+    // always behaved.
     if (getUser()) { applyRoleToHome(); showScreen("home"); }
     else { renderStaffPicker(); showScreen("role"); }
     return;
   }
+  // A device holding a token is asked about either way. Signing in while the
+  // switch is off is a real thing now - it is how the first admin gets to the
+  // screen that lets everybody else in.
   let me = null;
   try { me = (await api("/api/auth/me")).user; } catch (_) {}
   if (me) {

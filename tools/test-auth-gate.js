@@ -207,6 +207,61 @@ function start() {
     try { fs.rmSync(dir, { recursive: true, force: true }); } catch (_) {}
   }
 
+  console.log("\n-- WHO GETS ASKED FOR A CODE, which is how this is set up at all --");
+  // The bug this guards shipped, and John found it by tapping his own name
+  // twice and simply being let in.
+  //
+  // The intended order was: deploy with the switch off, give John a code, John
+  // signs in and lets everybody else in, then turn the switch on. But the app
+  // only offered a code box when the switch was ON, and the screen for letting
+  // people in only appeared to somebody signed IN. So there was no first step -
+  // the setup could not be started at all, and turning the switch on to start
+  // it would have locked out everybody who had no code yet, which was
+  // everybody.
+  //
+  // The rule that fixes it: anyone who HAS a code is asked for it, switch or
+  // no switch. Checked against the real function rather than described,
+  // because the whole failure was a rule that read correctly and did nothing.
+  {
+    const src = fs.readFileSync(path.join(root, "frontend", "app.js"), "utf8");
+    const start = src.indexOf("function pickStaff(");
+    const end = src.indexOf("\n}\n", start);
+    const lifted = src.slice(start, end + 3);
+
+    const ran = [];
+    const make = (requireLogin, users) => new Function(
+      "authState", "STAFF", "chooseUser", "signinShowPad",
+      lifted + "\nreturn pickStaff;")(
+        { require_login: requireLogin, users },
+        users.map((u) => ({ id: u.id, name: u.name, group: "admin" })),
+        (id) => ran.push(["straight in", id]),
+        (who, mode) => ran.push([mode === "first" ? "choose a code" : "asked for a code", who.id]));
+
+    const PEOPLE = [
+      { id: "nocode", name: "No Code", has_password: false, setup_open: false },
+      { id: "hascode", name: "Has Code", has_password: true, setup_open: false },
+      { id: "waiting", name: "Waiting", has_password: false, setup_open: true },
+    ];
+
+    ran.length = 0;
+    const off = make(false, PEOPLE);
+    off("nocode"); off("hascode"); off("waiting");
+    check("with the switch OFF", ran, [
+      ["straight in", "nocode"],          // exactly as the app always worked
+      ["asked for a code", "hascode"],    // THE fix - this was "straight in"
+      ["choose a code", "waiting"],       // somebody an admin just let in
+    ]);
+
+    ran.length = 0;
+    const on = make(true, PEOPLE);
+    on("nocode"); on("hascode"); on("waiting");
+    check("and with it ON, nobody walks past", ran, [
+      ["asked for a code", "nocode"],
+      ["asked for a code", "hascode"],
+      ["choose a code", "waiting"],
+    ]);
+  }
+
   console.log(failures ? `\n${failures} FAILED\n` : "\nall passed\n");
   process.exit(failures ? 1 : 0);
 })().catch((e) => {
