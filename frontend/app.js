@@ -64,7 +64,7 @@ function formatDate(ts) {
 // ---- Screen navigation -----------------------------------------------------
 // "purchase" is the part-requests list (Orders); "po" and "po-detail" are the
 // supplier purchase orders. Different things, named apart on purpose.
-const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip", "purchase", "quote", "ipl", "bulk", "po", "po-detail", "ship", "ship-detail", "ship-edit"];
+const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip", "purchase", "quote", "ipl", "bulk", "po", "po-detail", "ship", "ship-detail", "ship-edit", "people"];
 
 // ---- Who is using this phone ------------------------------------------------
 // Staff pick their name once per phone; the choice is remembered and decides
@@ -157,6 +157,268 @@ function setRole(role) {
   } catch (_) {}
 }
 
+// ============================================================================
+// PEOPLE AND DEVICES (admin)
+// ============================================================================
+// Two lists: who can sign in, and what is signed in. The first is where a new
+// starter is let in and a forgotten code is dealt with; the second is where a
+// lost phone is dealt with.
+//
+// THERE IS NOTHING HERE THAT SHOWS A CODE, and nothing anywhere else either.
+// What is stored is a scrypt hash, and the whole value of a hash is that it
+// cannot be turned back - so "remind me what Carmen's code is" has no answer,
+// by design. Reset is what stands in its place, and it is faster: one tap, and
+// she chooses a new one herself the next time she opens the app.
+async function renderPeople() {
+  const list = $("people-list");
+  const devices = $("devices-list");
+  list.innerHTML = `<div class="slip-result-empty">Loading…</div>`;
+  devices.innerHTML = "";
+
+  let people, sessions;
+  try {
+    people = (await api("/api/admin/users")).users || [];
+    sessions = (await api("/api/admin/sessions")).sessions || [];
+  } catch (e) {
+    list.innerHTML = `<div class="slip-result-empty">${escapeHtml(e.message)}</div>`;
+    return;
+  }
+
+  const ROLE = { sales: "Sales", tech: "Technician", purchaser: "Purchaser", admin: "Admin" };
+  list.innerHTML = people.map((u) => {
+    // Three states, and the one that matters is the middle one: somebody who
+    // has been let in but has not been to the app yet.
+    const tag = u.has_password
+      ? `<span class="pp-tag pp-tag-ready">Code set</span>`
+      : u.setup_open
+        ? `<span class="pp-tag pp-tag-waiting">Waiting for them to choose one</span>`
+        : `<span class="pp-tag pp-tag-none">Cannot sign in yet</span>`;
+    const on = sessions.filter((sn) => sn.user_id === u.id && !sn.revoked_at).length;
+    return `
+      <div class="pp-row${u.active ? "" : " pp-row-gone"}">
+        <span class="pp-main">
+          <span class="pp-name">${escapeHtml(u.name)}</span>
+          <span class="pp-sub">${escapeHtml(ROLE[u.role] || u.role)}${
+            on ? ` · signed in on ${on} device${on === 1 ? "" : "s"}` : ""}</span>
+          ${tag}
+        </span>
+        <button type="button" class="pp-act" data-reset="${escapeAttr(u.id)}">${
+          u.has_password ? "Reset" : "Let them in"}</button>
+      </div>`;
+  }).join("");
+
+  list.querySelectorAll("[data-reset]").forEach((b) =>
+    b.addEventListener("click", () => resetPerson(b.dataset.reset, people))
+  );
+
+  devices.innerHTML = sessions.length
+    ? sessions.map((sn) => `
+        <div class="pp-row${sn.revoked_at ? " pp-row-gone" : ""}">
+          <span class="pp-main">
+            <span class="pp-name">${escapeHtml(sn.device || "Unnamed device")}</span>
+            <span class="pp-sub">${escapeHtml(sn.name)} · ${
+              sn.revoked_at ? "signed out " + escapeHtml(String(sn.revoked_at).slice(0, 16))
+                            : "last used " + escapeHtml(String(sn.last_seen || "").slice(0, 16))}</span>
+          </span>
+          ${sn.revoked_at ? "" :
+            `<button type="button" class="pp-act" data-revoke="${sn.id}">Sign out</button>`}
+        </div>`).join("")
+    : `<div class="slip-result-empty">Nobody is signed in yet.</div>`;
+
+  devices.querySelectorAll("[data-revoke]").forEach((b) =>
+    b.addEventListener("click", () => revokeDevice(b.dataset.revoke))
+  );
+}
+
+async function resetPerson(id, people) {
+  const who = (people || []).find((u) => u.id === id) || { name: id, has_password: 0 };
+  const ok = await confirmAction({
+    title: who.has_password ? `Reset ${who.name}'s code?` : `Let ${who.name} set a code?`,
+    detail: who.has_password
+      ? "Their current code stops working straight away, and any phone they are " +
+        "signed in on stays signed in. They choose a new code the next time they " +
+        "sign in. You will not see it — nobody can."
+      : "They can then choose their own 6-digit code the next time they open the " +
+        "app. Tell them to do it now: until they have, nobody can use their name.",
+    ok: who.has_password ? "Reset" : "Let them in",
+  });
+  if (!ok) return;
+  try {
+    await api(`/api/admin/users/${encodeURIComponent(id)}/reset`, { method: "POST" });
+    toast(`${who.name} can now choose a code`, "ok");
+    renderPeople();
+  } catch (e) {
+    toast(e.message, "err");
+  }
+}
+
+async function revokeDevice(id) {
+  const ok = await confirmAction({
+    title: "Sign this device out?",
+    detail: "Whoever is holding it will have to enter their code again. Use this " +
+            "for a phone that has been lost.",
+    ok: "Sign it out",
+  });
+  if (!ok) return;
+  try {
+    await api(`/api/admin/sessions/${encodeURIComponent(id)}/revoke`, { method: "POST" });
+    toast("That device is signed out", "ok");
+    renderPeople();
+  } catch (e) {
+    toast(e.message, "err");
+  }
+}
+
+// ---- Signing in ------------------------------------------------------------
+// The picker was already the right shape: everybody taps their own name. All
+// that changes is what happens next - with signing in switched on, a code is
+// asked for; with it off, straight in, exactly as before.
+//
+// WHY THE PICKER STAYED. Typing a username on a phone with cold hands, in a
+// workshop, twenty times a day, is the thing that makes people share one
+// account. The names are already painted on the wall in there; hiding them
+// would buy nothing.
+let signinFor = null;            // the person whose code is being typed
+let signinMode = "code";         // "code" = sign in, "first" = choose one
+let signinBusy = false;
+
+// Whether this server wants a code at all, asked once and remembered for the
+// life of the page.
+let authState = { require_login: false, users: [], asked: false };
+
+async function loadAuthState() {
+  try {
+    const r = await api("/api/auth/users");
+    authState = { require_login: !!r.require_login, users: r.users || [], asked: true };
+  } catch (_) {
+    // An old server, or none. Behave as the app always did rather than
+    // stranding somebody on a screen that cannot be got past.
+    authState = { require_login: false, users: [], asked: true };
+  }
+  return authState;
+}
+
+function signinShowPad(user, mode) {
+  signinFor = user;
+  signinMode = mode;
+  $("staff-list").style.display = "none";
+  $("signin-pad").style.display = "";
+  $("signin-initial").textContent = [...(user.name || "?")][0] || "?";
+  $("signin-name").textContent = user.name || "";
+  $("signin-ask").textContent = mode === "first"
+    ? "Choose a 6-digit code. You will use it every time."
+    : "Enter your 6-digit code";
+  $("signin-msg").textContent = "";
+  $("signin-msg").className = "signin-msg";
+  const box = $("signin-code");
+  box.value = "";
+  signinDots();
+  // A beat, or iOS opens the keyboard against a screen that is still moving.
+  setTimeout(() => box.focus(), 120);
+}
+
+function signinHidePad() {
+  signinFor = null;
+  $("signin-pad").style.display = "none";
+  $("staff-list").style.display = "";
+  $("signin-code").blur();
+}
+
+function signinDots() {
+  const n = $("signin-code").value.length;
+  $("signin-dots").innerHTML =
+    [0, 1, 2, 3, 4, 5].map((i) => `<span class="${i < n ? "on" : ""}"></span>`).join("");
+}
+
+async function signinSubmit() {
+  if (signinBusy || !signinFor) return;
+  const code = $("signin-code").value;
+  if (code.length !== 6) return;
+  signinBusy = true;
+  const msg = $("signin-msg");
+  msg.className = "signin-msg";
+  msg.textContent = "Checking…";
+
+  try {
+    const where = signinMode === "first" ? "/api/auth/first-code" : "/api/auth/login";
+    const r = await api(where, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: signinFor.id, password: code, device: deviceName() }),
+    });
+    setAuthToken(r.token);
+    msg.className = "signin-msg ok";
+    msg.textContent = "Signed in";
+    // WHO, read before the pad is hidden. signinHidePad() clears signinFor,
+    // so reading it afterwards is reading null - which it did, once, and the
+    // sign-in silently bounced back to the picker with the token already
+    // saved. Nothing in the message said why.
+    const signedInAs = signinFor.id;
+    signinHidePad();
+    // setUser keeps the rest of the app working exactly as it did: it is what
+    // every screen reads to know whose initials go on a part.
+    signinBusy = false;
+    chooseUser(signedInAs, { signedIn: true });
+    return;
+  } catch (e) {
+    // 409 means "you have no code yet, choose one" - an answer, not a refusal,
+    // and the screen turns into the one that asks for a new code.
+    if (e.status === 409) {
+      signinBusy = false;
+      signinShowPad(signinFor, "first");
+      return;
+    }
+    $("signin-code").value = "";
+    signinDots();
+    const dots = $("signin-dots");
+    dots.classList.add("wrong");
+    setTimeout(() => dots.classList.remove("wrong"), 400);
+    msg.className = "signin-msg";
+    msg.textContent = e.message || "That did not work.";
+    setTimeout(() => $("signin-code").focus(), 120);
+  }
+  signinBusy = false;
+}
+
+// Typed into the hidden input; the dots are what anybody sees. Digits only,
+// and it submits itself on the sixth - there is no Enter key on a number pad.
+function wireSigninPad() {
+  const box = $("signin-code");
+  if (!box) return;
+  box.addEventListener("input", () => {
+    box.value = box.value.replace(/\D/g, "").slice(0, 6);
+    signinDots();
+    if (box.value.length === 6) signinSubmit();
+  });
+  box.addEventListener("keydown", (e) => { if (e.key === "Enter") signinSubmit(); });
+  $("signin-back").addEventListener("click", signinHidePad);
+  // Tapping the dots puts the keyboard back, which is where everybody taps
+  // when it has closed itself.
+  $("signin-dots").addEventListener("click", () => box.focus());
+}
+
+// Back to the start, with a reason. Used when a token stops working - signed
+// out elsewhere, or the device revoked.
+function signedOutTo(why) {
+  try { setUser(null); } catch (_) {}
+  signinHidePad();
+  showScreen("role");
+  renderStaffPicker();
+  if (why) toast(why, "err");
+}
+
+async function signOut() {
+  const ok = await confirmAction({
+    title: "Sign out of this device?",
+    detail: "You will need your 6-digit code to get back in.",
+    ok: "Sign out",
+  });
+  if (!ok) return;
+  try { await api("/api/auth/logout", { method: "POST" }); } catch (_) {}
+  setAuthToken("");
+  signedOutTo("");
+}
+
 // Draw the picker, grouped, so a long list stays scannable.
 function renderStaffPicker() {
   const box = $("staff-list");
@@ -178,11 +440,24 @@ function renderStaffPicker() {
       </div>`;
   }).join("");
   box.querySelectorAll(".staff-btn").forEach((b) =>
-    b.addEventListener("click", () => chooseUser(b.dataset.user))
+    b.addEventListener("click", () => pickStaff(b.dataset.user))
   );
 }
 
-function chooseUser(id) {
+// Tapping a name. With signing in switched off this is what it always was;
+// with it on, it asks for the code first.
+function pickStaff(id) {
+  if (!authState.require_login) return chooseUser(id);
+  const known = (authState.users || []).find((u) => u.id === id);
+  const local = STAFF.find((u) => u.id === id);
+  const who = known || (local ? { id: local.id, name: local.name } : null);
+  if (!who) return;
+  // Somebody an admin has just opened goes straight to choosing a code, so
+  // they are not asked for one they have not got.
+  signinShowPad(who, known && known.setup_open && !known.has_password ? "first" : "code");
+}
+
+function chooseUser(id, opts) {
   const next = STAFF.find((u) => u.id === id);
   if (!next) return;
   // The Chinese layer installs at page load, so moving into or out of the
@@ -241,6 +516,16 @@ function applyRoleToHome() {
   document.querySelectorAll("#screen-home .home-btn").forEach((b) => {
     b.style.display = allowed.includes(b.dataset.go) ? "flex" : "none";
   });
+  // People & devices is admin's, and only where signing in is switched on -
+  // with it off there are no codes and no devices to manage.
+  //
+  // AFTER the loop above, not before it. "people" is deliberately not in
+  // ROLE_FUNCTIONS - it is not a job, it is an extra - so the loop hides it,
+  // and setting it first meant setting it and then being overruled a line
+  // later. It looked exactly like the permission check being wrong.
+  const people = $("home-people");
+  if (people) people.style.display = (role === "admin" && authState.require_login) ? "flex" : "none";
+  updateSignOutButton();
   updateLangToggle();
   // Declared further down; guard so this is safe during startup.
   if (typeof refreshQuoteCount === "function") refreshQuoteCount();
@@ -322,14 +607,75 @@ async function goHome() {
   showScreen("home");
 }
 
+// Shown only where there is something to sign out OF.
+function updateSignOutButton() {
+  const btn = $("sign-out");
+  if (!btn) return;
+  btn.style.display = (authState.require_login && authToken()) ? "" : "none";
+}
+
 // ---- API helpers -----------------------------------------------------------
+// ---- Signed in, or not -----------------------------------------------------
+// The token this device holds. Kept in localStorage rather than a cookie: the
+// app is a home-screen PWA, it talks to one server, and a cookie would have to
+// be got right across two origins during the VPN work. It survives the app
+// being closed, which is the point - John's call was that a device stays
+// signed in until somebody signs it out.
+const TOKEN_KEY = "om_token";
+function authToken() {
+  try { return localStorage.getItem(TOKEN_KEY) || ""; } catch (_) { return ""; }
+}
+function setAuthToken(t) {
+  try {
+    if (t) localStorage.setItem(TOKEN_KEY, t);
+    else localStorage.removeItem(TOKEN_KEY);
+  } catch (_) {}
+}
+
+// What the phone calls itself, so a lost one can be told from the others on
+// the Devices screen. Nothing clever - the platform and a short random tag,
+// which is enough to tell two iPhones apart.
+const DEVICE_KEY = "om_device_name";
+function deviceName() {
+  try {
+    let d = localStorage.getItem(DEVICE_KEY);
+    if (!d) {
+      const kind = /iPad/.test(navigator.userAgent) ? "iPad"
+                 : /iPhone/.test(navigator.userAgent) ? "iPhone"
+                 : /Android/.test(navigator.userAgent) ? "Android"
+                 : "Computer";
+      d = `${kind} ${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+      localStorage.setItem(DEVICE_KEY, d);
+    }
+    return d;
+  } catch (_) { return "Unknown device"; }
+}
+
 async function api(path, opts) {
-  const res = await fetch(`${API}${path}`, opts);
+  const o = { ...(opts || {}) };
+  // The token goes on every request rather than on the ones that seemed to
+  // need it. A route that is forgotten is a route that breaks the day logins
+  // are switched on, and it would break for one person at the counter rather
+  // than in any test.
+  const token = authToken();
+  if (token) o.headers = { ...(o.headers || {}), Authorization: `Bearer ${token}` };
+
+  const res = await fetch(`${API}${path}`, o);
   let body = null;
   try { body = await res.json(); } catch (_) {}
   if (!res.ok) {
+    // Signed out, or revoked while the app was open. Back to the sign-in
+    // screen rather than a string of failures the person cannot act on.
+    if (res.status === 401 && body && body.login_required) {
+      setAuthToken("");
+      signedOutTo("Signed out. Please sign in again.");
+      throw new Error("Please sign in.");
+    }
     const msg = (body && body.error) || `Request failed (${res.status})`;
-    throw new Error(msg);
+    const e = new Error(msg);
+    e.status = res.status;
+    e.body = body;
+    throw e;
   }
   return body;
 }
@@ -6234,6 +6580,7 @@ document.querySelectorAll(".home-btn").forEach((b) =>
     else if (go === "ipl") { enterIpl(); }
     else if (go === "po") { enterPurchaseOrders(); }
     else if (go === "ship") { enterShipments(); }
+    else if (go === "people") { showScreen("people"); renderPeople(); }
   })
 );
 $("home-link").addEventListener("click", goHome);
@@ -8784,6 +9131,7 @@ $("pr-go").addEventListener("click", makeMachinePrintout);
 $("pr-close").addEventListener("click", closePrintPicker);
 $("os-create-so").addEventListener("click", openConvertPicker);
 $("conv-go").addEventListener("click", createSalesOrder);
+$("sign-out").addEventListener("click", signOut);
 $("ipl-offline-go").addEventListener("click", () => {
   // While a download is running the button is a Stop, and startIplDownload
   // has replaced its handler. This one only ever starts.
@@ -8985,8 +9333,45 @@ $("cs-so").addEventListener("change", () => {
 // ---- Boot ------------------------------------------------------------------
 // A phone that only ever had a role set (before names existed) has no user, so
 // it lands on the picker and chooses one - once.
-if (getUser()) { applyRoleToHome(); showScreen("home"); }
-else { renderStaffPicker(); showScreen("role"); }
+//
+// WITH SIGNING IN SWITCHED ON there is a second question: does the token this
+// device holds still work? It may not - somebody signed out elsewhere, or an
+// admin revoked the phone because it went missing. Asking here means the app
+// finds out as it opens, rather than the first time somebody tries to save a
+// slip with a customer waiting.
+//
+// Asked in the background rather than in front of the first screen. A phone
+// that is signed in should not stare at a blank page while the office server
+// is thought about, and one that is NOT signed in has nothing to lose by being
+// moved to the picker a moment later.
+wireSigninPad();
+(async () => {
+  await loadAuthState();
+  if (!authState.require_login) {
+    // Exactly as the app has always behaved.
+    if (getUser()) { applyRoleToHome(); showScreen("home"); }
+    else { renderStaffPicker(); showScreen("role"); }
+    return;
+  }
+  let me = null;
+  try { me = (await api("/api/auth/me")).user; } catch (_) {}
+  if (me) {
+    // The server's answer, not the browser's memory: a phone whose person was
+    // given a different job keeps working, under the job they have now.
+    setUser(me.id);
+    applyRoleToHome();
+    showScreen("home");
+  } else {
+    setAuthToken("");
+    setUser(null);
+    renderStaffPicker();
+    showScreen("role");
+  }
+})();
+// Something has to be on screen while that is answered, and the picker is the
+// safe thing to show: it gives nothing away and it is where a signed-out phone
+// belongs anyway.
+renderStaffPicker(); showScreen("role");
 // On the picker too, where nobody has a role yet. That is the first screen a
 // new phone shows, and it is a reasonable place to want the switch.
 updateLangToggle();

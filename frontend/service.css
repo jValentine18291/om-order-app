@@ -1032,6 +1032,69 @@ select {
 .machine-btn-extras strong { color: #1f6f78; }
 .conv-row-extras { border-top: 1px solid var(--line, #e3e6e8); margin-top: 8px; padding-top: 12px; }
 
+/* People and devices, for whoever runs the place. Rows rather than cards:
+   this is a list to scan down, and the thing being looked for is usually
+   "who has not set a code yet". */
+.pp-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px; margin-bottom: 8px;
+  border: 1px solid var(--line, #e3e6e8); border-radius: 10px; background: #fff;
+}
+.pp-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pp-name { font-weight: 700; font-size: 15px; }
+.pp-sub { font-size: 12px; color: var(--ink-faint, #78868c); }
+.pp-tag {
+  align-self: flex-start; font-size: 11px; font-weight: 700;
+  padding: 2px 7px; border-radius: 999px; margin-top: 2px;
+}
+.pp-tag-ready { background: #e8f5ec; color: #1d7a3f; }
+.pp-tag-waiting { background: #fff4e0; color: #9a6413; }
+.pp-tag-none { background: #f1f3f4; color: #6b7779; }
+.pp-act {
+  appearance: none; flex: none; border: 1px solid #cfdadd; background: #fff;
+  border-radius: 8px; padding: 8px 12px; font: inherit; font-weight: 700;
+  font-size: 13px; color: #1f6f78; cursor: pointer;
+}
+.pp-act:disabled { opacity: .5; }
+.pp-row-gone { opacity: .55; }
+
+/* ---- Signing in ---------------------------------------------------------
+   The code pad. Big, plain, and nothing on it but whose code is wanted: this
+   is the first thing anybody sees in the morning and the one screen where
+   being unsure costs a phone call. */
+.signin-back {
+  appearance: none; border: 0; background: none; padding: 6px 0;
+  font: inherit; font-size: 14px; color: #1f6f78; cursor: pointer;
+}
+.signin-who { display: flex; align-items: center; gap: 12px; margin: 14px 0 6px; }
+.signin-initial {
+  width: 44px; height: 44px; border-radius: 50%; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  background: #1f6f78; color: #fff; font-weight: 700; font-size: 20px;
+}
+.signin-name { font-size: 20px; font-weight: 700; }
+.signin-ask { font-size: 14px; color: var(--ink-faint, #78868c); margin: 0 0 16px; }
+
+/* Six dots that fill as digits are typed. The digits themselves are never
+   shown - a code read over somebody's shoulder is a code they have lost. */
+.signin-dots { display: flex; gap: 14px; margin-bottom: 18px; }
+.signin-dots span {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid #cfdadd; background: #fff;
+}
+.signin-dots span.on { background: #1f6f78; border-color: #1f6f78; }
+.signin-dots.wrong span { border-color: #c0392b; animation: signin-shake .3s; }
+@keyframes signin-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+/* The real input is off-screen rather than hidden: display:none would stop the
+   phone opening its keyboard for it, which is the whole reason it is there. */
+#signin-code { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.signin-msg { font-size: 14px; min-height: 22px; color: #c0392b; }
+.signin-msg.ok { color: #1d7a3f; }
+
 /* Carrying the whole parts catalogue on the phone. A strip rather than a
    card: it is read once before leaving and ignored the rest of the time. */
 .ipl-offline {

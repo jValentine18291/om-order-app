@@ -61,7 +61,13 @@ const auth = require("./auth");
 //              spelling of their own colleague.
 //   cert.pem   fetched by the device itself while trusting the server, before
 //              any of this exists.
-const OPEN = new Set(["/auth/login", "/auth/users", "/cert.pem"]);
+//   first-code somebody choosing their first code has no token yet - that is
+//              what they are here to get. Leaving it out meant nobody could
+//              ever set a code once logins were on, which is to say nobody
+//              could ever sign in. Missed by the first round of tests because
+//              they exercised it with the switch OFF, where everything is let
+//              through; found by doing it in a browser with the switch on.
+const OPEN = new Set(["/auth/login", "/auth/first-code", "/auth/users", "/cert.pem"]);
 
 app.use("/api", (req, res, next) => {
   const header = String(req.headers.authorization || "");

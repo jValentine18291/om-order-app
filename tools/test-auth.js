@@ -140,7 +140,7 @@ throws("locked out after eight tries", () => auth.login("carmen", PW, "x"), 429)
 check("even with the RIGHT password", true, true);
 // One message for every kind of failure. Three different ones would tell an
 // attacker which names are real and which have never signed in.
-check("and every refusal said the same thing", [...messages], ["That name and password do not match."]);
+check("and every refusal said the same thing", [...messages], ["That name and code do not match."]);
 throws("a name that does not exist says it too",
   () => auth.login("nobody", "whatever", "x"), 401);
 auth._resetFailures();

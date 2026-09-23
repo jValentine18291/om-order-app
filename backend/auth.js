@@ -229,7 +229,7 @@ function login(userId, password, device) {
     f.count += 1;
     f.until = Date.now() + LOCK_FOR_MS;
     failures.set(id, f);
-    const e = new Error("That name and password do not match.");
+    const e = new Error("That name and code do not match.");
     e.status = 401; throw e;
   }
 

@@ -59,6 +59,9 @@
         <button class="pill lang-toggle" id="lang-toggle" data-no-i18n style="display:none"></button>
         <button class="pill back-chip" id="top-back" style="display:none"><span id="top-back-txt">&larr; Slips</span></button>
         <button class="pill home-link" id="home-link" style="display:none">Home</button>
+        <!-- Only where there is something to sign out OF. A button that does
+             nothing is a button somebody taps to find out what it does. -->
+        <button class="pill" id="sign-out" style="display:none">Sign out</button>
       </div>
     </header>
 
@@ -68,9 +71,49 @@
         <p class="eyebrow">Service desk</p>
         <h2>Who is using this phone?</h2>
       </div>
-      <!-- Filled from the STAFF list in app.js, so there is one place to edit
-           when someone joins or leaves. -->
+      <!-- The names. Still the picker it always was - tapping one now asks
+           for a code instead of going straight in, but only when signing in
+           is switched on. -->
       <div id="staff-list"></div>
+
+      <!-- The code, once a name has been tapped. A screen of its own rather
+           than a box under the list: a phone keyboard covers half the screen,
+           and the person needs to see whose code they are typing. -->
+      <div id="signin-pad" style="display:none">
+        <button type="button" class="signin-back" id="signin-back">&larr; Someone else</button>
+        <div class="signin-who">
+          <span class="signin-initial" id="signin-initial"></span>
+          <span class="signin-name" id="signin-name"></span>
+        </div>
+        <p class="signin-ask" id="signin-ask">Enter your 6-digit code</p>
+        <div class="signin-dots" id="signin-dots"></div>
+        <!-- A real input, off-screen, so the phone's own number pad opens and
+             the usual editing keys work. The dots above are what is seen. -->
+        <input id="signin-code" type="text" inputmode="numeric" pattern="[0-9]*"
+               autocomplete="off" maxlength="6" aria-label="6-digit code" />
+        <div class="signin-msg" id="signin-msg"></div>
+      </div>
+    </section>
+
+    <!-- ============ SCREEN: PEOPLE (admin) ============ -->
+    <section id="screen-people" class="screen">
+      <div class="section-head">
+        <p class="eyebrow">Admin</p>
+        <h2>People &amp; devices</h2>
+      </div>
+      <p class="nsm-hint" data-no-i18n>Nobody's code can be read, here or anywhere
+        else — only reset. Tap Reset and they choose a new one the next time they
+        open the app.</p>
+
+      <div class="section-head" style="margin-top:14px;">
+        <p class="eyebrow">People</p>
+      </div>
+      <div id="people-list"></div>
+
+      <div class="section-head" style="margin-top:18px;">
+        <p class="eyebrow">Signed-in devices</p>
+      </div>
+      <div id="devices-list"></div>
     </section>
 
     <!-- ============ SCREEN: HOME ============ -->
@@ -86,6 +129,14 @@
         </div>
       </div>
       <div class="home-actions">
+        <!-- Admin only, and only where signing in is switched on: with it off
+             there are no codes to manage and no devices to revoke. -->
+        <button class="home-btn home-admin home-wide" data-go="people" id="home-people" style="display:none">
+          <span class="home-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </span>
+          <span class="home-txt"><strong>People &amp; devices</strong><small>Codes, resets and signed-in phones</small></span>
+        </button>
         <button class="home-btn home-sales home-wide" data-go="new">
           <span class="home-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>

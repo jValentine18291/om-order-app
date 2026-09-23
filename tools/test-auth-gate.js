@@ -163,9 +163,23 @@ function start() {
         token: johnToken, method: "PATCH", body: {} })).status, 404);
 
     console.log("\n-- rule 3: but the way in is still open --");
+    //
+    // EVERY step of getting in, not just the last one. The first round of
+    // these tests checked choosing a first code while the switch was OFF -
+    // where everything is let through - so it proved nothing about the case
+    // that matters. The gate did not have first-code on its allowlist, which
+    // meant that once logins were switched on, nobody could set a code, which
+    // meant nobody could ever sign in. Found in a browser, on the morning it
+    // would otherwise have been found by the whole workshop.
     check("the name list is readable", (await api("/api/auth/users")).status, 200);
     check("and signing in works",
       (await api("/api/auth/login", { method: "POST", body: { user_id: "john", password: PW } })).status, 200);
+    await api("/api/admin/users/chiuyan/reset", { token: johnToken, method: "POST" });
+    const lockedFirst = await api("/api/auth/first-code", {
+      method: "POST", body: { user_id: "chiuyan", password: "246813", device: "locked" } });
+    check("and so does choosing a first code, with no token at all",
+      lockedFirst.status, 200);
+    check("which signs them straight in", lockedFirst.json.user.id, "chiuyan");
 
     console.log("\n-- rule 4: a real token gets through, a revoked one does not --");
     check("john can read slips", (await api(READ, { token: johnToken })).status, 200);

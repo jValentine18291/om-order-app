@@ -155,6 +155,27 @@
     "Point at a QR code": "对准二维码",
     "Stop scanning": "停止扫描",
     "Order more": "申请补货",
+    // ---- Signing in ----
+    // The first screen anybody sees in the morning, and the one place where
+    // not understanding it costs a phone call.
+    // "Who is using this phone?" is already translated further down, with the
+    // picker it belongs to. One key, one meaning - tools/test-i18n.js refuses
+    // a second.
+    "← Someone else": "← 换一人",
+    "Enter your 6-digit code": "请输入您的 6 位数密码",
+    "Choose a 6-digit code. You will use it every time.":
+      "请设定一个 6 位数密码，以后每次登录都用它。",
+    // "Checking…" likewise: it is already there for the IPL download strip.
+    "Signed in": "已登录",
+    "That name and code do not match.": "姓名与密码不符。",
+    "Sign out": "登出",
+    "Sign out of this device?": "确定要在此设备登出吗？",
+    "You will need your 6-digit code to get back in.":
+      "下次登录需要再输入您的 6 位数密码。",
+    "Signed out. Please sign in again.": "已登出，请重新登录。",
+    "The code must be exactly 6 digits.": "密码必须是 6 位数字。",
+    "That code is too easy to guess. Pick another.": "这个密码太容易被猜中，请换一个。",
+
     // ---- A second person to reach about a slip ----
     "Second contact": "第二联络人",
     "Second contact name": "第二联络人姓名",
