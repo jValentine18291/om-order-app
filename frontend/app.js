@@ -9331,6 +9331,10 @@ let boCart = [];   // { item_code, description, qty }
 
 function enterBulkOrder() {
   boCart = [];
+  // Fresh every time the screen is opened. Somebody else may have requested
+  // one of these parts since this phone last looked, and the whole point of
+  // the lines under the cart is to say so.
+  clearBulkInfo();
   $("bo-q").value = "";
   $("bo-results").innerHTML = "";
   $("bo-remarks").value = "";
@@ -9368,6 +9372,75 @@ $("bo-q").addEventListener("input", () => {
     }
   }, 250);
 });
+
+// WHAT IS ALREADY WAITING OR ON ORDER, for the parts in the cart.
+//
+// Kept between renders because the cart is redrawn every time a part is added
+// or removed, and asking the server again for the nine parts that have not
+// changed would be nine answers nobody was waiting for.
+//
+// A code that has been asked about and has nothing to say is stored as an
+// empty answer rather than left out, so it is not asked about again on the
+// next render.
+const boInfo = new Map();     // code -> what came back
+const boAsked = new Set();    // code -> we have already sent a request for it
+
+async function refreshBulkInfo() {
+  // Placeholder rows are not asked about at all - see paintBulkInfo for why.
+  //
+  // Asked-for is tracked separately from answered so that a part added while
+  // an earlier request is still in flight gets its own, rather than being
+  // skipped by a busy flag and then never asked about again. Two requests
+  // overlapping is harmless; a part with no line under it for the life of the
+  // screen is not.
+  const want = boCart.filter((c) => !c.placeholder).map((c) => c.item_code)
+    .filter((code) => code && !boAsked.has(code));
+  if (!want.length) return;
+  want.forEach((code) => boAsked.add(code));
+  try {
+    const r = await api("/api/parts-on-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ codes: want }),
+    });
+    for (const code of want) boInfo.set(code, (r.parts || {})[code] || {});
+    paintBulkInfo();
+  } catch (_) {
+    // Let them be asked again on the next render rather than leaving those
+    // rows blank for the life of the screen. Context, not permission: a cart
+    // with no notes on it is the cart as it has always been.
+    want.forEach((code) => boAsked.delete(code));
+  }
+}
+
+// Forget everything. The answers go stale the moment somebody submits - every
+// part in that cart has just become a request - so the screen starts fresh
+// each time rather than showing yesterday's answer to today's question.
+function clearBulkInfo() { boInfo.clear(); boAsked.clear(); }
+
+// Fill in the line under each part. Separate from rendering the cart because
+// the answer arrives after the cart is on screen - and because redrawing the
+// cart to show it would take the cursor out of whichever remarks box somebody
+// is typing in.
+function paintBulkInfo() {
+  document.querySelectorAll("#bo-cart [data-warn]").forEach((node) => {
+    const info = boInfo.get(node.dataset.warn);
+    if (!info) { node.textContent = ""; node.className = "bo-warn"; return; }
+    const bits = [];
+    // ALREADY REQUESTED IS A REFUSAL, not a note: the server will reject the
+    // whole order for it, and it is better said here than after ten parts have
+    // been added and the button pressed.
+    if (info.requested) {
+      const who = (info.requests || [])
+        .map((q) => `${q.qty} by ${q.requester || "someone"}${q.date ? " on " + q.date : ""}`)
+        .join(", ");
+      bits.push(`<b>Already requested</b> — ${escapeHtml(who)}. Remove it, or the order will be refused.`);
+    }
+    if (info.qty) bits.push(`${info.qty} already on order with a supplier.`);
+    node.innerHTML = bits.join("<br>");
+    node.className = "bo-warn" + (info.requested ? " bo-warn-clash" : bits.length ? " bo-warn-note" : "");
+  });
+}
 
 function addToBulkCart(code, desc) {
   // A placeholder code needs naming as it goes in - and two of them are two
@@ -9413,8 +9486,19 @@ function renderBulkCart() {
         <input class="bo-qty" type="number" min="1" inputmode="numeric" value="${c.qty}" data-i="${i}" aria-label="Quantity" />
         <button type="button" class="bo-remove" data-i="${i}" aria-label="Remove">&#10005;</button>
       </div>
+      <!-- What is already waiting or on order for this part. Filled in after
+           the cart is drawn - see paintBulkInfo(). Not on a placeholder row:
+           every indent part shares one code, so two open requests against it
+           are two DIFFERENT things to buy, the server lets them through for
+           exactly that reason, and a warning here would be telling somebody
+           not to do something the app is perfectly happy with. -->
+      ${c.placeholder ? "" : `<div class="bo-warn" data-warn="${escapeAttr(c.item_code)}"></div>`}
       <textarea class="bo-line-remarks" data-i="${i}" placeholder="Remarks for this part (optional)">${escapeHtml(c.remarks || "")}</textarea>
     </div>`).join("");
+  // Whatever is already known goes on immediately; anything new is asked for
+  // and painted when it arrives.
+  paintBulkInfo();
+  refreshBulkInfo();
   wrap.querySelectorAll(".bo-line-remarks").forEach((ta) =>
     ta.addEventListener("input", () => { boCart[Number(ta.dataset.i)].remarks = ta.value; })
   );
@@ -9535,6 +9619,9 @@ $("bo-submit").addEventListener("click", async () => {
     });
     toast("Order submitted", "ok");
     boCart = [];
+    // Every part in that cart is now a pending request. Anything remembered
+    // about them says the opposite, so it goes.
+    clearBulkInfo();
     $("bo-remarks").value = "";
     renderBulkCart();
   } catch (e) {

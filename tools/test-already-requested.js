@@ -136,6 +136,28 @@ const sum = (list) => list.reduce((n, r) => n + Number(r.qty_requested), 0);
     (process.env.ITEMS_SOURCE || "sqlite").toLowerCase(), "sqlite");
   check("and the list still answered", pr.pendingRequestsFor(CODE).length, 1);
 
+  console.log("\n-- and the whole cart asked about at once --");
+  // Bulk Order asks about every part in the cart in one request. It must give
+  // the same answer, part for part, as asking about each one on its own -
+  // otherwise the cart says one thing and tapping the part says another.
+  pr.createPartRequest({ item_code: "SZEN 165151220", description: "Clutch Spring",
+                         qty_requested: 6, requester: "XL" });
+  const cart = ["SZEN 848C006700", "SZEN 165151220", "SZEN 591443601", "MISC"];
+  const oneByOne = {};
+  for (const code of cart) {
+    const list = pr.pendingRequestsFor(code);
+    oneByOne[code] = { n: list.length, qty: sum(list) };
+  }
+  check("each part answers the same whether asked alone or in a list", oneByOne, {
+    "SZEN 848C006700": { n: 1, qty: 4 },   // the fresh request made further up
+    "SZEN 165151220": { n: 1, qty: 6 },
+    "SZEN 591443601": { n: 0, qty: 0 },    // nothing waiting: no line in the cart
+    "MISC": { n: 2, qty: 3 },              // placeholders, which the cart skips
+  });
+  // A cart of parts nobody has asked for produces no noise at all.
+  check("a clean cart has nothing to say",
+    ["SZEN 591443601", "SZEN 140051111"].filter((c) => pr.pendingRequestsFor(c).length), []);
+
   console.log(failures ? `\n${failures} FAILED\n` : "\nall passed\n");
   process.exit(failures ? 1 : 0);
 })();

@@ -1042,6 +1042,64 @@ app.post("/api/part-location", async (req, res) => {
 // Answers { supported: false } when AutoCount's Purchase Orders cannot be
 // read in the shape expected - the app then shows nothing rather than a
 // number that might be wrong. Run backend/inspect-po.js to see what is there.
+// The same two facts for a whole cart, in one request.
+//
+// Bulk Order can hold a dozen parts and the answer is wanted for every one of
+// them, so asking the single route a dozen times would be a dozen round trips
+// and a dozen AutoCount queries. getOnOrder() already takes a list and chunks
+// it; this hands it the lot.
+//
+// LEANER THAN THE SINGLE ROUTE, deliberately. No purchase-order numbers, no
+// per-order status - a cart row has space for a sentence, and somebody who
+// wants the detail taps the part and gets the full panel. What it does carry
+// is the requests, because those are what will stop the order going through.
+app.post("/api/parts-on-order", async (req, res) => {
+  try {
+    const codes = [...new Set(((req.body || {}).codes || [])
+      .map((c) => String(c || "").trim()).filter(Boolean))].slice(0, 100);
+    const parts = {};
+    for (const code of codes) {
+      let requests = [];
+      try {
+        requests = (data.requests.pendingRequestsFor(code) || []).map((r) => ({
+          qty: Number(r.qty_requested) || 0,
+          requester: r.requester || "",
+          date: String(r.created_at || "").split(" ")[0],
+        }));
+      } catch (e) {
+        console.error("[POST /api/parts-on-order] pending requests:", e.message);
+      }
+      parts[code] = {
+        qty: 0,
+        requested: requests.reduce((n, r) => n + r.qty, 0),
+        requests,
+      };
+    }
+
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount" || !codes.length) {
+      return res.json({ supported: false, parts });
+    }
+    // The on-order half on its own, so a catalogue that is down costs the
+    // quantities and not the requests - the same split as the single route.
+    try {
+      const map = await require("./data/autocountRepo").getOnOrder(codes);
+      if (!map) return res.json({ supported: false, parts });
+      for (const code of codes) {
+        const hit = map.get(code);
+        if (hit) parts[code].qty = hit.qty;
+      }
+      return res.json({ supported: true, parts });
+    } catch (e) {
+      console.error("[POST /api/parts-on-order] on order:", e.message);
+      return res.json({ supported: false, parts });
+    }
+  } catch (err) {
+    console.error("[POST /api/parts-on-order]", err);
+    res.status(500).json({ supported: false, parts: {} });
+  }
+});
+
 app.get("/api/part-on-order/:code", async (req, res) => {
   try {
     const code = String(req.params.code || "").trim();

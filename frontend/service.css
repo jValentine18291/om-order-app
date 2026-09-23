@@ -2327,6 +2327,18 @@ body.signin-brand .topbar .pill {
 .om-onorder-rule {
   height: 1px; margin: 8px 0; background: currentColor; opacity: .22;
 }
+
+/* The line under a part in the Bulk Order cart. Two weights, because the two
+   things it can say are not the same kind of fact: one is a refusal waiting to
+   happen, the other is background. An empty one takes no space at all, which
+   matters on a cart of a dozen parts where most have nothing to report. */
+.bo-warn { font-size: .78rem; line-height: 1.45; }
+.bo-warn:empty { display: none; }
+.bo-warn-clash {
+  margin-top: 6px; padding: 7px 9px; border-radius: var(--radius-sm, 8px);
+  background: #FFF6E5; border-left: 3px solid #E0A22A; color: #8A5B00;
+}
+.bo-warn-note { margin-top: 6px; color: var(--ink-faint, #78868c); }
 .pu-delete {
   flex: 0 0 auto; min-height: 40px; padding: 0 14px; border-radius: 999px;
   border: 1px solid #e6b0b0; background: var(--surface);
