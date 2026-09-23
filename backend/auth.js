@@ -205,7 +205,7 @@ function login(userId, password, device) {
   const id = String(userId || "");
   const wait = lockedFor(id);
   if (wait) {
-    const e = new Error(`Too many wrong passwords. Try again in ${Math.ceil(wait / 60000)} minutes.`);
+    const e = new Error(`Too many wrong codes. Try again in ${Math.ceil(wait / 60000)} minutes.`);
     e.status = 429; throw e;
   }
 
@@ -223,7 +223,12 @@ function login(userId, password, device) {
   // Otherwise one message for everything: no such person, no code set, wrong
   // code. Three different messages would tell somebody which names are real
   // and which have never signed in - and the names are already on the screen.
-  const ok = user && user.password_hash && verifyPassword(password, user.password_hash);
+  // Trimmed on BOTH sides. setPassword trims what it stores, so checking the
+  // raw value would mean a code that was set and a code that was typed could
+  // disagree about their own whitespace - and the person typing would have no
+  // way of seeing why.
+  const ok = user && user.password_hash
+    && verifyPassword(String(password == null ? "" : password).trim(), user.password_hash);
   if (!ok) {
     const f = failures.get(id) || { count: 0, until: 0 };
     f.count += 1;

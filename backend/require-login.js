@@ -15,9 +15,10 @@
 // holding a password. So it deploys OFF, and the order of the day is:
 //
 //   1. deploy
-//   2. sign in yourself and give everybody a password (Admin -> Users)
-//   3. have one technician sign in on their own phone and do a real job
-//   4. THEN run this with "on"
+//   2. node let-me-in.js john, then choose your code in the app
+//   3. sign in and let everybody else in (Admin -> People & devices)
+//   4. have one technician sign in on their own phone and do a real job
+//   5. THEN run this with "on"
 //
 // And if something is wrong, "off" puts it back in one command - no deploy, no
 // git, no waiting. That is the whole reason it exists.
@@ -70,7 +71,7 @@ if (arg === "on") {
     console.log("  would lock everybody out of the app - including whoever would");
     console.log("  have to hand out the passwords.");
     console.log("");
-    console.log("  Set one first:   node set-password.js john");
+    console.log("  Let yourself in first:   node let-me-in.js john");
     console.log("");
     process.exit(1);
   }
