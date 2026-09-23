@@ -119,25 +119,69 @@ function listSessions(userId) {
 // and a hash has no business travelling to a browser on either trip.
 function listUsers({ activeOnly = false } = {}) {
   return db.prepare(
-    `SELECT id, name, role, tech, active,
+    `SELECT id, name, role, tech, active, setup_open,
             CASE WHEN password_hash = '' OR password_hash IS NULL THEN 0 ELSE 1 END AS has_password,
             password_set_at
        FROM app_users ${activeOnly ? "WHERE active = 1" : ""} ORDER BY role, name`
   ).all();
 }
 
+// SIX DIGITS. John's call, and the right trade for a workshop: it is typed on
+// a phone with gloves half off, twenty times a day, by people who will write a
+// long password on the back of the device rather than type it.
+//
+// Six digits is a million codes, which is not much - and the reason that is
+// acceptable here is the lockout above, not the code itself. Eight wrong tries
+// buys fifteen minutes, so working through a million takes about four years of
+// uninterrupted guessing. What it would NOT survive is somebody walking off
+// with the database file, where a million candidates is seconds of work; that
+// is an argument for looking after backups, and it is written down in
+// README so it is not rediscovered the hard way.
+const CODE = /^\d{6}$/;
+
 function setPassword(userId, password) {
-  const pw = String(password || "");
-  // Eight is the floor, not the advice. A workshop phone is typed on with
-  // gloves half off; a rule long enough to be resented is a rule answered with
-  // the same password everywhere.
-  if (pw.length < 8) { const e = new Error("A password must be at least 8 characters."); e.status = 400; throw e; }
+  const pw = String(password == null ? "" : password).trim();
+  if (!CODE.test(pw)) {
+    const e = new Error("The code must be exactly 6 digits."); e.status = 400; throw e;
+  }
+  // A code everybody guesses first is not a code. These four are the ones that
+  // turn up on every list of the commonest PINs there is.
+  if (["123456", "000000", "111111", "654321"].includes(pw)) {
+    const e = new Error("That code is too easy to guess. Pick another."); e.status = 400; throw e;
+  }
   const user = db.prepare("SELECT id FROM app_users WHERE id = ?").get(String(userId));
   if (!user) { const e = new Error("No such person."); e.status = 404; throw e; }
   db.prepare(
-    "UPDATE app_users SET password_hash = ?, password_set_at = datetime('now','localtime') WHERE id = ?"
+    `UPDATE app_users SET password_hash = ?, password_set_at = datetime('now','localtime'),
+            setup_open = 0 WHERE id = ?`
   ).run(hashPassword(pw), String(userId));
   return { id: String(userId) };
+}
+
+// Let somebody set their own code - for a new person, or one who has forgotten
+// theirs. This is what an admin taps; it does not reveal anything and it does
+// not choose anything. Their old code stops working immediately, which is what
+// makes it a reset rather than a suggestion.
+function openForSetup(userId) {
+  const user = db.prepare("SELECT id FROM app_users WHERE id = ?").get(String(userId));
+  if (!user) { const e = new Error("No such person."); e.status = 404; throw e; }
+  db.prepare(
+    "UPDATE app_users SET password_hash = '', password_set_at = NULL, setup_open = 1 WHERE id = ?"
+  ).run(String(userId));
+  return { id: String(userId), setup_open: true };
+}
+
+// The first code somebody chooses for themselves. Allowed only where an admin
+// has opened the account - see setup_open in db.js for what that stops.
+function firstCode(userId, password) {
+  const id = String(userId || "");
+  const user = db.prepare("SELECT * FROM app_users WHERE id = ? AND active = 1").get(id);
+  if (!user || !user.setup_open || user.password_hash) {
+    const e = new Error("This account is not waiting for a code. Ask John to open it for you.");
+    e.status = 403; throw e;
+  }
+  setPassword(id, password);
+  return { id };
 }
 
 // ---- Signing in ------------------------------------------------------------
@@ -166,9 +210,19 @@ function login(userId, password, device) {
   }
 
   const user = db.prepare("SELECT * FROM app_users WHERE id = ? AND active = 1").get(id);
-  // One message for "no such person", "no password set" and "wrong password".
-  // Three different messages would tell somebody which names are real and
-  // which of them have never signed in - and the names are already public.
+
+  // The one case worth saying out loud: this person has been opened for setup
+  // and has no code yet, so the screen should ask them to choose one rather
+  // than tell them they got it wrong. It gives nothing away that the Users
+  // screen has not already been told to give away - an admin opened it on
+  // purpose, moments ago, having told them to go and do this.
+  if (user && user.setup_open && !user.password_hash) {
+    const e = new Error("Choose your 6-digit code."); e.status = 409; e.setup = true; throw e;
+  }
+
+  // Otherwise one message for everything: no such person, no code set, wrong
+  // code. Three different messages would tell somebody which names are real
+  // and which have never signed in - and the names are already on the screen.
   const ok = user && user.password_hash && verifyPassword(password, user.password_hash);
   if (!ok) {
     const f = failures.get(id) || { count: 0, until: 0 };
@@ -202,7 +256,7 @@ function setRequireLogin(on) {
 module.exports = {
   hashPassword, verifyPassword,
   createSession, sessionUser, revokeSession, revokeSessionById, listSessions,
-  listUsers, setPassword, login,
+  listUsers, setPassword, openForSetup, firstCode, login,
   requireLogin, setRequireLogin,
   // For the tests, which need to be able to put the lockout back.
   _resetFailures: () => failures.clear(),

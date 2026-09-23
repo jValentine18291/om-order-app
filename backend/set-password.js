@@ -1,6 +1,6 @@
 // set-password.js
 // ============================================================================
-// Gives somebody a password, from the server.
+// Gives somebody a 6-digit code, from the server.
 //
 // HOW TO RUN (on the server, from the backend folder):
 //
@@ -73,8 +73,8 @@ function askHidden(question) {
   if (user.has_password) console.log("  They already have one. This replaces it.");
   console.log("");
 
-  const first = await askHidden("  New password (at least 8 characters): ");
-  const again = await askHidden("  Type it again:                        ");
+  const first = await askHidden("  New 6-digit code: ");
+  const again = await askHidden("  Type it again:    ");
 
   if (first !== again) {
     console.log("\n  Those two do not match. Nothing has been changed.\n");

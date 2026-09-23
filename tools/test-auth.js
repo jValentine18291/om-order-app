@@ -57,7 +57,7 @@ function throws(what, fn, wantStatus) {
 const db = require(path.resolve(__dirname, "..", "backend", "db"));
 const auth = require(path.resolve(__dirname, "..", "backend", "auth"));
 
-const PW = "correct horse battery";
+const PW = "481920";          // six digits, as the workshop asked for
 
 console.log("\n-- the staff who were already on the picker --");
 const users = auth.listUsers();
@@ -145,11 +145,50 @@ throws("a name that does not exist says it too",
   () => auth.login("nobody", "whatever", "x"), 401);
 auth._resetFailures();
 
-console.log("\n-- passwords have a floor --");
-throws("too short is refused", () => auth.setPassword("carmen", "short"), 400);
-throws("and so is nothing at all", () => auth.setPassword("carmen", ""), 400);
+console.log("\n-- the code is six digits, and not a famous one --");
+throws("five digits is refused", () => auth.setPassword("carmen", "12345"), 400);
+throws("seven is too", () => auth.setPassword("carmen", "1234567"), 400);
+throws("so are letters", () => auth.setPassword("carmen", "abcdef"), 400);
+throws("and nothing at all", () => auth.setPassword("carmen", ""), 400);
+// Six digits is a million codes. That is only enough because of the lockout
+// above - and not at all if everybody picks the same four.
+throws("123456 is not a code", () => auth.setPassword("carmen", "123456"), 400);
+throws("nor is 000000", () => auth.setPassword("carmen", "000000"), 400);
 throws("a person who does not exist cannot be given one",
   () => auth.setPassword("nobody", PW), 404);
+
+console.log("\n-- choosing your own code the first time --");
+// The hole this closes: without it, the first person to open the app could
+// pick somebody else's name and choose a code for them.
+throws("an account nobody opened refuses a first code",
+  () => auth.firstCode("shirley", "302010"), 403);
+auth.openForSetup("shirley");
+check("opening it says so", auth.listUsers().find((u) => u.id === "shirley").setup_open, 1);
+auth.firstCode("shirley", "302010");
+check("now she has one", auth.listUsers().find((u) => u.id === "shirley").has_password, 1);
+check("and the account closed itself behind her",
+  auth.listUsers().find((u) => u.id === "shirley").setup_open, 0);
+throws("so it cannot be used twice",
+  () => auth.firstCode("shirley", "999888"), 403);
+check("she can sign in with it", auth.login("shirley", "302010", "x").user.id, "shirley");
+
+console.log("\n-- a reset lets them choose again, and stops the old one at once --");
+auth.openForSetup("shirley");
+auth._resetFailures();
+throws("the old code no longer works", () => auth.login("shirley", "302010", "x"), 409);
+check("and the app is told to ask for a new one", true, true);
+auth._resetFailures();
+auth.firstCode("shirley", "775533");
+check("the new one works", auth.login("shirley", "775533", "x").user.id, "shirley");
+
+console.log("\n-- nothing anywhere can read a code back --");
+// The admin can RESET, not READ. Worth pinning down, because "let John see
+// them" is a reasonable-sounding request that would undo the hash entirely.
+const everything = JSON.stringify(auth.listUsers());
+check("the list of people does not carry one", everything.includes("775533"), false);
+const row = db.prepare("SELECT * FROM app_users WHERE id = 'shirley'").get();
+check("nor does the row itself",
+  Object.values(row).some((v) => String(v).includes("775533")), false);
 
 console.log("\n-- rule 6: the switch starts off --");
 check("nothing is enforced until somebody says so", auth.requireLogin(), false);

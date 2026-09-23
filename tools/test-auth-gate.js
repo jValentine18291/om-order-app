@@ -46,9 +46,10 @@ const BASE = `http://127.0.0.1:${PORT}`;
 process.env.OM_DB_PATH = DB;
 require(path.join(root, "backend", "db"));
 const auth = require(path.join(root, "backend", "auth"));
-const PW = "workshop password";
+const PW = "481920";      // six digits
 auth.setPassword("john", PW);          // admin
 auth.setPassword("kangmin", PW);       // technician
+auth.openForSetup("carmen");           // waiting to choose her own
 
 async function api(pathname, { token, method = "GET", body } = {}) {
   const res = await fetch(BASE + pathname, {
@@ -111,11 +112,37 @@ function start() {
     check("somebody with no token at all is refused", (await api(ADMIN)).status, 401);
     check("and setting a password needs an admin, not just a request",
       (await api("/api/admin/users/john/password", {
-        method: "POST", body: { password: "hijacked12345" } })).status, 401);
+        method: "POST", body: { password: "654321" } })).status, 401);
     check("a technician cannot set one either",
       (await api("/api/admin/users/john/password", {
-        token: kmToken, method: "POST", body: { password: "hijacked12345" } })).status, 403);
+        token: kmToken, method: "POST", body: { password: "654321" } })).status, 403);
     check("while a real admin gets in", (await api(ADMIN, { token: johnToken })).status, 200);
+
+    console.log("\n-- choosing your own code, over HTTP --");
+    // Open to anyone signed in or not, because somebody choosing their first
+    // code has no way to prove who they are yet. What stops it being a way
+    // into a colleague's account is that an admin had to open it first.
+    check("an account nobody opened refuses",
+      (await api("/api/auth/first-code", {
+        method: "POST", body: { user_id: "chiuyan", password: "302010" } })).status, 403);
+    const firstIn = await api("/api/auth/first-code", {
+      method: "POST", body: { user_id: "carmen", password: "302010", device: "counter" } });
+    check("an opened one is let through", firstIn.status, 200);
+    check("and signs her straight in", firstIn.json.user.id, "carmen");
+    check("it cannot be used a second time",
+      (await api("/api/auth/first-code", {
+        method: "POST", body: { user_id: "carmen", password: "111222" } })).status, 403);
+
+    console.log("\n-- a reset is a button, not a reveal --");
+    check("an admin can reset somebody",
+      (await api("/api/admin/users/carmen/reset", { token: johnToken, method: "POST" })).status, 200);
+    check("her old code stops at once",
+      (await api("/api/auth/login", {
+        method: "POST", body: { user_id: "carmen", password: "302010" } })).status, 409);
+    // The thing an admin CANNOT do, and the reason the reset button exists.
+    const whatAdminSees = JSON.stringify((await api(ADMIN, { token: johnToken })).json);
+    check("and nowhere does an admin see a code",
+      /302010|481920/.test(whatAdminSees), false);
 
     console.log("\n-- rule 2: with the switch on, the door is shut --");
     auth.setRequireLogin(true);

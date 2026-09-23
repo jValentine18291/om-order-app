@@ -546,6 +546,15 @@ try {
       tech          TEXT DEFAULT '',           -- WJ / XL / KM / R, where they have one
       password_hash TEXT DEFAULT '',           -- empty = no password set yet
       active        INTEGER DEFAULT 1,
+      -- May this person set themselves a code right now?
+      --
+      -- THE HOLE THIS CLOSES. Everybody picks their name from a list, and on
+      -- first sign-in they choose their own code. Without a flag, the first
+      -- person to open the app could pick "John" and choose a code for him -
+      -- and own the admin account. So an account cannot be claimed until an
+      -- admin opens it, and opening it is one tap on the Users screen. It
+      -- closes itself the moment a code is set.
+      setup_open    INTEGER DEFAULT 0,
       created_at    TEXT DEFAULT (datetime('now','localtime')),
       password_set_at TEXT
     );
@@ -595,6 +604,17 @@ try {
   for (const [id, name, role, tech] of STAFF) seedUser.run(id, name, role, tech);
   const after = db.prepare("SELECT COUNT(*) AS n FROM app_users").get().n;
   if (after > before) console.log(`[db] migrated: ${after - before} staff account(s) created, none with a password yet`);
+
+  // Older databases, which have the table but not the column.
+  try {
+    const cols = db.prepare("PRAGMA table_info(app_users)").all().map((c) => c.name);
+    if (!cols.includes("setup_open")) {
+      db.exec("ALTER TABLE app_users ADD COLUMN setup_open INTEGER DEFAULT 0");
+      console.log("[db] migrated: added setup_open to app_users");
+    }
+  } catch (e) {
+    console.error("[db] setup_open migration failed:", e.message);
+  }
 
   // Off until somebody turns it on. See backend/require-login.js.
   db.prepare("INSERT OR IGNORE INTO app_settings (key, value) VALUES ('require_login', 'off')").run();

@@ -123,7 +123,11 @@ function needAdmin(req, res) {
 app.get("/api/auth/users", (_req, res) => {
   res.json({
     users: auth.listUsers({ activeOnly: true })
-      .map((u) => ({ id: u.id, name: u.name, role: u.role, has_password: !!u.has_password })),
+      .map((u) => ({ id: u.id, name: u.name, role: u.role,
+                     has_password: !!u.has_password,
+                     // So the screen can say "choose your code" instead of
+                     // asking for one they have not got.
+                     setup_open: !!u.setup_open })),
     require_login: auth.requireLogin(),
   });
 });
@@ -134,11 +138,31 @@ app.post("/api/auth/login", (req, res) => {
     const r = auth.login(user_id, password, device);
     res.json(r);
   } catch (err) {
-    // 401 and 429 are answers, not faults, and the message is already written
-    // to give nothing away. Anything else is a bug and says so.
-    if (err.status) return res.status(err.status).json({ error: err.message });
+    // 401, 409 and 429 are answers, not faults, and the messages are already
+    // written to give nothing away. Anything else is a bug and says so.
+    if (err.status) return res.status(err.status).json({ error: err.message, setup: !!err.setup });
     console.error("[POST /api/auth/login]", err);
     res.status(500).json({ error: "Could not sign in." });
+  }
+});
+
+// The first code somebody chooses for themselves.
+//
+// Open to anybody, because the person using it has no way to prove who they
+// are yet - that is what it is for. What stops it being a way to walk into
+// somebody else's account is that an ADMIN has to have opened that account
+// first, on the Users screen, moments before. See setup_open in db.js.
+app.post("/api/auth/first-code", (req, res) => {
+  try {
+    const { user_id, password, device } = req.body || {};
+    auth.firstCode(user_id, password);
+    // Straight in, rather than made to sign in again with the code they typed
+    // ten seconds ago.
+    res.json(auth.login(user_id, password, device));
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/auth/first-code]", err);
+    res.status(500).json({ error: "Could not set the code." });
   }
 });
 
@@ -1208,6 +1232,23 @@ app.post("/api/admin/users/:id/password", (req, res) => {
     if (err.status) return res.status(err.status).json({ error: err.message });
     console.error("[POST /api/admin/users/:id/password]", err);
     res.status(500).json({ error: "Could not set the password." });
+  }
+});
+
+// Let somebody choose a new code - a new starter, or one who has forgotten.
+//
+// There is deliberately nothing here that READS a code, because nothing
+// stores one: what is kept is a scrypt hash, and the whole value of that is
+// that it cannot be turned back. This clears theirs and lets them pick a new
+// one the next time they open the app.
+app.post("/api/admin/users/:id/reset", (req, res) => {
+  if (!needAdmin(req, res)) return;
+  try {
+    res.json(auth.openForSetup(req.params.id));
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/admin/users/:id/reset]", err);
+    res.status(500).json({ error: "Could not reset that person." });
   }
 });
 
