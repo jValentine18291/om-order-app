@@ -810,6 +810,9 @@ function showScreen(name) {
     try { stopQrScanner(); } catch (_) {}
   }
   window.scrollTo(0, 0);
+  // A new version that was waiting for somebody to finish what they were
+  // doing. Declared below; guard so this is safe during startup.
+  if (typeof takeUpdateIfIdle === "function") takeUpdateIfIdle();
 }
 
 async function goHome() {
@@ -5005,10 +5008,15 @@ function renderQuoteMachines(q) {
   const list = $("quote-machines");
   if (!field || !list) return;
   const machines = q.machines_available || [];
-  // One machine is not a choice. A list of one, ticked, which cannot usefully
-  // be unticked, is a question nobody needs asking.
-  field.style.display = machines.length > 1 ? "" : "none";
-  if (machines.length < 2) { list.innerHTML = ""; return; }
+  // SHOWN EVEN FOR ONE MACHINE, though there is nothing to choose between.
+  //
+  // It was hidden below two at first, on the grounds that a list of one is not
+  // a question. But half the slips in the book have one machine on them, so
+  // the first thing John opened had no picker in it and no way to tell whether
+  // that was the rule or a broken deploy. A row saying what is being quoted,
+  // priced, is worth more than the line it saves.
+  field.style.display = machines.length ? "" : "none";
+  if (!machines.length) { list.innerHTML = ""; return; }
 
   list.innerHTML = machines.map((m) => {
     const sub = m.condemned
@@ -5037,9 +5045,8 @@ function renderQuoteMachines(q) {
 function quoteTotals(q, extrasSum) {
   const out = $("quote-total");
   if (!out) return;
-  // Nothing to weigh up on a slip with one machine and no loose parts: it has
-  // one possible total, and printing it here as well tells nobody anything.
-  const asked = (q.machines_available || []).length > 1 || Number(q.extras_available) > 0;
+  // Shown whenever there is a list above it to add up.
+  const asked = (q.machines_available || []).length > 0;
   out.style.display = asked ? "" : "none";
   if (!asked) { out.innerHTML = ""; return; }
 
@@ -9762,8 +9769,62 @@ renderStaffPicker(); showScreen("role");
 // new phone shows, and it is a reasonable place to want the switch.
 updateLangToggle();
 
+// ---- Taking a deploy ------------------------------------------------------
+// WHY THIS EXISTS. The worker serves the app shell from its cache first, so
+// the app opens instantly and works with no signal. The cost is that the first
+// open AFTER a deploy shows the OLD app: the new worker downloads in the
+// background, takes over - and the page already on screen is still the one
+// that was cached before it. The new screen only appears the time after.
+//
+// Which is how "Send Quotation doesn't let me pick machines" happened in
+// September 2026, on a server that had the picker on it. Nothing was broken;
+// the phone was one open behind, and there was nothing anywhere to say so.
+//
+// WHAT IT DOES NOT DO is reload while somebody is in the middle of something.
+// A technician typing a part code, a customer signing, a quotation half filled
+// in - a page that vanished under any of those would be a far worse bug than
+// the one this fixes. So the reload waits for the home screen, which is where
+// everybody is a few seconds after opening the app anyway.
+//
+// var, not let, and deliberately. showScreen() calls the function below, and
+// it does so during startup - before this line has run. A let would still be
+// in its dead zone at that moment and reading it would throw, taking the whole
+// first render with it. var is hoisted and undefined, which reads as "no
+// update waiting" and returns.
+var pendingUpdate = false;
+function takeUpdateIfIdle() {
+  if (!pendingUpdate) return;
+  // Only from the home screen or the picker, and only with nothing open over
+  // the top of them.
+  const screen = SCREENS.find((s) => $("screen-" + s).classList.contains("active"));
+  if (screen !== "home" && screen !== "role") return;
+  if ([...document.querySelectorAll(".modal-overlay")].some((m) => m.style.display !== "none")) return;
+  pendingUpdate = false;
+  location.reload();
+}
+
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./sw.js").catch(() => {});
+  // Whether this page is being served BY a worker right now. On a phone
+  // opening the app for the very first time there is none, and the claim that
+  // follows the first install would otherwise read as an update and reload a
+  // page that is already the newest there is.
+  const hadWorker = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!hadWorker) return;
+    pendingUpdate = true;
+    takeUpdateIfIdle();
+  });
+  navigator.serviceWorker.register("./sw.js").then((reg) => {
+    // Ask again whenever the app comes back to the front. A phone left on the
+    // bench all day, or a home-screen app that is never closed, would
+    // otherwise go on serving last week's screens until something else made
+    // the browser look.
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState !== "visible") return;
+      reg.update().catch(() => {});
+      takeUpdateIfIdle();
+    });
+  }).catch(() => {});
 }
 
 // ---- Customer signature pad (New Service) ----------------------------------
