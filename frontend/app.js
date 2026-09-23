@@ -4984,6 +4984,78 @@ function buildRepairQuotationPdf(q, terms) {
   return doc.output("blob");
 }
 
+// The machines ticked on the Send Quotation sheet, in the order they sit on
+// the slip. Read from the sheet rather than kept in a variable beside it: the
+// sheet is what the person is looking at, and a second copy of the answer is a
+// second thing to keep in step.
+function quoteChosenMachines() {
+  return [...document.querySelectorAll("#quote-machines input:checked")].map((c) => Number(c.value));
+}
+
+// One row per machine that could be quoted, priced, all ticked.
+//
+// The convert picker's rows, deliberately: that sheet asks the same question
+// about the same things a few taps away, and two pickers that looked different
+// would read as two different kinds of choice. One difference - a machine
+// already on a Sales Order is still offered here, because a quotation is a
+// statement of what a repair costs and is often re-sent after part of a slip
+// has been billed - so it is labelled rather than disabled.
+function renderQuoteMachines(q) {
+  const field = $("quote-machines-field");
+  const list = $("quote-machines");
+  if (!field || !list) return;
+  const machines = q.machines_available || [];
+  // One machine is not a choice. A list of one, ticked, which cannot usefully
+  // be unticked, is a question nobody needs asking.
+  field.style.display = machines.length > 1 ? "" : "none";
+  if (machines.length < 2) { list.innerHTML = ""; return; }
+
+  list.innerHTML = machines.map((m) => {
+    const sub = m.condemned
+      ? "Condemned — quoted at no charge"
+      : `${m.parts} part${m.parts === 1 ? "" : "s"}${m.labour > 0 ? " · labour " + money(m.labour) : ""}`;
+    return `
+      <label class="conv-row">
+        <input type="checkbox" value="${escapeAttr(String(m.id))}" checked>
+        <span class="conv-main">
+          <span class="conv-name">${escapeHtml(m.machine_desc)}</span>
+          ${m.serial_no ? `<span class="conv-serial">S/N ${escapeHtml(m.serial_no)}</span>` : ""}
+          <span class="conv-sub">${escapeHtml(sub)}${
+            m.so_number ? ` · already on ${escapeHtml(m.so_number)}` : ""}</span>
+        </span>
+        <span class="conv-amt">${money(m.amount)}</span>
+      </label>`;
+  }).join("");
+
+  list.querySelectorAll("input").forEach((c) =>
+    c.addEventListener("change", () => quoteTotals(q, Number(q.extras_total) || 0)));
+}
+
+// What the ticks come to. BEFORE GST, and it says so - the tax is the server's
+// arithmetic on the finished document, and a figure here that tried to match
+// it and drifted by a cent would be worse than no figure at all.
+function quoteTotals(q, extrasSum) {
+  const out = $("quote-total");
+  if (!out) return;
+  // Nothing to weigh up on a slip with one machine and no loose parts: it has
+  // one possible total, and printing it here as well tells nobody anything.
+  const asked = (q.machines_available || []).length > 1 || Number(q.extras_available) > 0;
+  out.style.display = asked ? "" : "none";
+  if (!asked) { out.innerHTML = ""; return; }
+
+  const chosen = quoteChosenMachines();
+  const machines = (q.machines_available || [])
+    .filter((m) => chosen.includes(Number(m.id)))
+    .reduce((n, m) => n + m.amount, 0);
+  const wantExtras = !$("quote-extras-row") || $("quote-extras-row").style.display === "none"
+    ? false : $("quote-extras").checked;
+  const n = chosen.length;
+  const total = machines + (wantExtras ? (Number(extrasSum) || 0) : 0);
+  out.innerHTML =
+    `<span>${n} machine${n === 1 ? "" : "s"}${wantExtras ? " + additional parts" : ""}</span>` +
+    `<strong>${money(total)}<span class="quote-total-note"> before GST</span></strong>`;
+}
+
 // Ask for the two terms, then build and send. Asked every time rather than
 // remembered: they are per customer, and a quotation that quietly carried the
 // last customer's payment terms would be wrong in a way nobody would notice
@@ -5031,21 +5103,32 @@ async function shareRepairQuotation(slipNumber) {
   // wrong.
   if (last && last.payment_term) $("quote-payment").value = last.payment_term;
   if (last && last.delivery_term) $("quote-delivery").value = last.delivery_term;
+  // WHICH MACHINES. Everything with work recorded starts ticked, which is
+  // exactly what went out before this choice existed - a sheet nobody touches
+  // behaves as it always did.
+  renderQuoteMachines(q);
+
   // What there is to decide about, in the customer's own money. A tick with
   // no figure beside it is a tick nobody can weigh.
   const exRow = $("quote-extras-row");
-  const exParts = (session.slip && session.slip.slip_number === q.slip_number
-                     ? (session.slip.extras || []) : []);
+  // The server's figure, not the browser's. This sheet opens from View Slips
+  // as often as from the slip itself, and there session.slip is somebody
+  // else's slip or nothing at all - so adding the parts up here showed no
+  // money beside the tick, and would have added none to the total below it.
+  const sum = Number(q.extras_total) || 0;
   if (exRow) {
     const n = Number(q.extras_available) || 0;
     exRow.style.display = n ? "flex" : "none";
     $("quote-extras").checked = true;
-    const sum = exParts.reduce((t, p) => t + p.unit_price * p.quantity, 0);
     $("quote-extras-sub").textContent = n
       ? `${n} part${n === 1 ? "" : "s"} not fitted to any machine${
           sum > 0 ? " · " + money(sum) : ""}. Untick to leave them off the customer's copy.`
       : "";
+    // The extras are part of the figure under the machines, so ticking them
+    // moves it.
+    $("quote-extras").onchange = () => quoteTotals(q, sum);
   }
+  quoteTotals(q, sum);
 
   $("quote-status").textContent = "";
   modal.style.display = "";
@@ -5065,6 +5148,14 @@ async function shareRepairQuotation(slipNumber) {
       // to the price.
       preparedBy: userName(),
     };
+    // Nothing ticked is not a quotation. Caught here so it is said beside the
+    // ticks rather than as a failure after a round trip.
+    const anyExtras = !$("quote-extras-row") || $("quote-extras-row").style.display === "none"
+      ? false : $("quote-extras").checked;
+    if (!quoteChosenMachines().length && !anyExtras) {
+      $("quote-status").textContent = "Tick at least one machine, or the additional parts.";
+      return;
+    }
     $("quote-go").disabled = true;
     $("quote-status").textContent = "Preparing…";
     try {
@@ -5081,6 +5172,11 @@ async function shareRepairQuotation(slipNumber) {
           // unless told not to, which is the safer default but only works if
           // the answer actually travels.
           extras: !$("quote-extras") || $("quote-extras").checked,
+          // Which machines. Sent every time, even when it is all of them, so
+          // the document that goes out is the one the screen was showing.
+          // "Everything" worked out twice - once here, once on the server - is
+          // two answers that can differ.
+          machines: quoteChosenMachines(),
         }),
       });
       const blob = buildRepairQuotationPdf(issued, terms);

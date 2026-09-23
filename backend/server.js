@@ -2247,7 +2247,11 @@ app.get("/api/slips/:slip/quotation", async (req, res) => {
     // extras=0 leaves the slip's loose parts off. The preview includes them
     // unless asked otherwise, so the screen opens showing what the Sales Order
     // will actually charge.
-    const q = await data.slips.quotationForSlip(req.params.slip, undefined,
+    // machines=3,7 quotes those two alone. Left off, every machine with work
+    // recorded on it is quoted, which is what the screen opens showing.
+    const chosen = String(req.query.machines || "").split(",")
+                     .map((s) => Number(s.trim())).filter((n) => n > 0);
+    const q = await data.slips.quotationForSlip(req.params.slip, chosen,
                     { service: String(req.query.service || ""),
                       extras: String(req.query.extras || "") !== "0" });
     q.debtor = null;
@@ -2276,9 +2280,14 @@ app.get("/api/slips/:slip/quotation", async (req, res) => {
 // whole of the numbering rule.
 app.post("/api/slips/:slip/quotation", async (req, res) => {
   try {
-    const { payment = "", delivery = "", who = "", service = "", extras } = req.body || {};
+    const { payment = "", delivery = "", who = "", service = "", extras, machines } = req.body || {};
     const issued = await data.slips.issueQuotation(req.params.slip,
-                       { payment, delivery, who, service, extras: extras !== false });
+                       { payment, delivery, who, service, extras: extras !== false,
+                         // Absent means every machine with work on it, which is
+                         // what this route did before the choice existed and
+                         // what an older phone still on a cached app will send.
+                         machines: Array.isArray(machines)
+                           ? machines.map(Number).filter((n) => n > 0) : undefined });
     issued.debtor = null;
     if (issued.debtor_code && (process.env.ITEMS_SOURCE || "sqlite").toLowerCase() === "autocount") {
       try {

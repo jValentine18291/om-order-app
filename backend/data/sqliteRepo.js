@@ -1109,7 +1109,11 @@ function setQuotationDrive(ref, fileId) {
 // quotation twice is not an error and does not raise the number - it hands
 // back the number that quotation already has, so a re-send is a re-send.
 function issueQuotation(slipNumber, terms) {
-  const q = quotationForSlip(slipNumber, undefined, terms);
+  // terms.machines, not a third argument: everything else the caller decided
+  // travels in terms, and the fingerprint below is taken over the lines those
+  // choices produce - so a quotation for two machines out of four is a
+  // different document from one for all four, and gets its own number.
+  const q = quotationForSlip(slipNumber, (terms || {}).machines, terms);
   const fp = quotationFingerprint(q.lines, terms);
   const last = db.prepare(
     "SELECT * FROM slip_quotations WHERE slip_number = ? ORDER BY seq DESC LIMIT 1"
@@ -1147,16 +1151,33 @@ function quotationForSlip(slipNumber, machineIds, opts) {
   // Everything with work recorded against it, whether or not it has been
   // converted. A quotation is a statement of what the repair costs, and it is
   // often re-sent after part of the slip has already gone onto an order.
-  const wanted = Array.isArray(machineIds) && machineIds.length
-    ? all.filter((m) => machineIds.map(Number).includes(Number(m.id)))
-    : all.filter((m) =>
-        m.state === "CONDEMNED" ||
-        (m.parts || []).length > 0 ||
-        Number(m.labour_charge) > 0 ||
-        String(m.repair_comment || "").trim());
+  //
+  // This is the CANDIDATE set - everything that could be quoted. It is worked
+  // out whether or not a choice was made, because the screen ticks this exact
+  // list: if the picker offered a machine the filter would then drop, or
+  // dropped one the picker never showed, nobody looking at either would be
+  // able to tell.
+  const quotable = all.filter((m) =>
+    m.state === "CONDEMNED" ||
+    (m.parts || []).length > 0 ||
+    Number(m.labour_charge) > 0 ||
+    String(m.repair_comment || "").trim());
+
+  // Sales can send a quotation for some of the machines on a slip - John asked
+  // for it in September 2026, because a customer with four machines in often
+  // wants a price for two of them now. Anything chosen that is not quotable is
+  // dropped rather than quoted empty.
+  const chose = Array.isArray(machineIds) && machineIds.length;
+  const wanted = chose
+    ? quotable.filter((m) => machineIds.map(Number).includes(Number(m.id)))
+    : quotable;
 
   if (!wanted.length && !extras.length) {
-    const e = new Error("No work recorded on this slip yet.");
+    // Two different problems, and telling them apart matters: one is a slip
+    // nobody has worked on yet, the other is a tick box nobody ticked.
+    const e = new Error(chose || (opts && opts.extras === false)
+      ? "Nothing chosen for this quotation."
+      : "No work recorded on this slip yet.");
     e.status = 400; throw e;
   }
 
@@ -1206,6 +1227,37 @@ function quotationForSlip(slipNumber, machineIds, opts) {
     // without fetching the slip a second time.
     extras_available: allExtras.length,
     extras_included: extras.length,
+    // What they come to, so the screen can put a figure beside the tick
+    // WITHOUT having the slip loaded. Send Quotation is reached from View
+    // Slips as often as from the slip itself, and there the browser has no
+    // copy of the parts to add up - it was quietly showing nothing, and once
+    // there was a running total beside it, quietly adding nothing to it.
+    extras_total: allExtras.reduce((n, p) => n + p.unit_price * p.quantity, 0),
+    // The same, for the machines: every one that could go on this quotation,
+    // with what it comes to, so the picker can put a price beside each tick.
+    // A tick with no figure beside it is a tick nobody can weigh.
+    machines_available: quotable.map((m) => {
+      // A condemned machine is quoted at nothing, exactly as slipBlockLines()
+      // bills it - the customer is collecting it and neither its parts nor its
+      // labour are charged.
+      const condemned = m.state === "CONDEMNED";
+      const parts = condemned ? [] : (m.parts || []);
+      const labour = condemned ? 0 : Number(m.labour_charge) || 0;
+      return {
+        id: m.id,
+        machine_desc: m.machine_desc,
+        serial_no: m.serial_no || "",
+        condemned,
+        parts: parts.length,
+        labour,
+        amount: parts.reduce((n, p) => n + p.unit_price * p.quantity, labour),
+        // Already billed, which does not stop it being quoted again - a
+        // quotation is often re-sent after part of a slip has gone onto an
+        // order - but is worth saying on the screen.
+        so_number: m.so_number || "",
+      };
+    }),
+    machines_included: wanted.map((m) => m.id),
     // John's call: the quotation is identified by the slip it came from, so
     // anyone holding either document can find the other.
     quotation_no: quotationRef(slip.slip_number, lastSeq || 1),

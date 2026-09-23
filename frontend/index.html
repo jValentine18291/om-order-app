@@ -813,6 +813,18 @@
         <button class="modal-x" id="quote-close" type="button" aria-label="Close">&#10005;</button>
       </div>
       <div class="modal-body">
+        <!-- WHICH MACHINES THIS QUOTATION IS FOR. A customer with four
+             machines in often wants a price for two of them now - John, Sep
+             2026. Everything with work recorded on it starts ticked, so a
+             sheet nobody touches sends exactly what it sent before this
+             existed. Hidden when the slip has only one machine to quote.
+
+             First in the sheet, because it is the first question: what is
+             being quoted, and only then on what terms. -->
+        <div class="field" id="quote-machines-field" style="display:none;margin-bottom:14px;">
+          <label>Machines on this quotation</label>
+          <div class="conv-list quote-machines" id="quote-machines"></div>
+        </div>
         <div class="field">
           <label for="quote-payment">Payment Term</label>
           <select id="quote-payment">
@@ -846,6 +858,7 @@
             <span class="quote-extras-sub" id="quote-extras-sub"></span>
           </span>
         </label>
+        <div class="quote-total" id="quote-total" style="display:none"></div>
         <p class="nsm-hint" id="quote-validity" style="margin-top:12px;"></p>
         <div class="scan-hint" id="quote-status" style="justify-content:flex-start;min-height:20px"></div>
         <button class="btn-primary" id="quote-go" type="button" style="width:100%">Create quotation</button>

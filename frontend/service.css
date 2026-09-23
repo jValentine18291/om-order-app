@@ -1080,6 +1080,38 @@ select {
   font-size: 13px; color: #1f6f78; cursor: pointer;
 }
 .pp-act:disabled { opacity: .5; }
+
+/* The machine picker on the Send Quotation sheet. The convert picker's own
+   rows, so the two read as the same question - see renderQuoteMachines(). Only
+   the height is its own: this sits inside a sheet that already has three
+   selects and a tick under it, so a slip of six machines scrolls rather than
+   pushing the Create button off the bottom. */
+.quote-machines { max-height: 40vh; overflow-y: auto; }
+/* The name takes the slack so the amount is pushed to the edge. Scoped to
+   this picker: the convert picker has no amount column and does not need its
+   rows relaid out to gain one. */
+.quote-machines .conv-main { flex: 1; }
+/* What each machine comes to, at the end of its row, where the eye adding the
+   sheet up is already looking. */
+.conv-row .conv-amt {
+  flex: none; margin-left: 10px;
+  font-weight: 700; font-size: 14px; color: var(--ink, #12211c);
+  /* Level with the machine's NAME, not floating in the middle of the row. A
+     row is three lines tall on a phone - the name wraps at that width - and a
+     figure sitting halfway down it reads as belonging to the serial number.
+     tabular-nums so a column of them lines up at the decimal point. */
+  align-self: flex-start; padding-top: 1px;
+  font-variant-numeric: tabular-nums;
+}
+/* And what the ticks come to together. A line rather than a box: it is the
+   consequence of the ticks above it, not another thing to decide. */
+.quote-total {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line, #e3e6e8);
+  font-size: 13px; color: var(--ink-soft, #55665f);
+}
+.quote-total strong { font-size: 17px; color: var(--ink, #12211c); }
+.quote-total-note { font-size: 11.5px; font-weight: 600; color: var(--ink-faint, #78868c); }
 /* Two of them now - Reset, and the one that says which buttons this person
    gets. Stacked rather than side by side: a row on a phone has a name, a job,
    a line about their home screen and a tag in it already, and two buttons
