@@ -28,7 +28,135 @@ app.use(cors());
 app.use(express.json({ limit: "1mb" }));
 
 // Serve the PWA frontend from ../frontend
+//
+// NOT behind the gate below. The sign-in screen is part of it, and a login
+// page you have to be logged in to see is a locked door with the handle on the
+// inside. The parts drawings sit here too; they are Husqvarna's published
+// artwork, not anybody's customer.
 app.use(express.static(path.join(__dirname, "..", "frontend")));
+
+// ---- Who is asking -------------------------------------------------------
+// THE GATE. Everything under /api goes through here, so a route cannot be
+// forgotten by being written later - which is exactly how the old role checks
+// ended up covering four routes out of seventy-five.
+//
+// It runs in one of two modes, and the mode is a row in the database rather
+// than a line in the code:
+//
+//   OFF  the app behaves exactly as it always has. A token is still read and
+//        honoured where one is sent, so passwords can be handed out and tried
+//        one person at a time while everybody else carries on working.
+//   ON   no valid token, no /api. That is the whole point.
+//
+// It ships OFF. A deploy that locks the counter out of its own app at ten past
+// nine is not a security improvement, it is an outage - and the people it
+// stops are the ones with a customer in front of them.
+const auth = require("./auth");
+
+// The handful of things that must work before anybody is signed in.
+//   login      obviously.
+//   users      the sign-in screen lists names to tap, exactly as the old
+//              picker did. The names are already on the wall of the workshop;
+//              hiding them would buy nothing and cost every technician the
+//              spelling of their own colleague.
+//   cert.pem   fetched by the device itself while trusting the server, before
+//              any of this exists.
+const OPEN = new Set(["/auth/login", "/auth/users", "/cert.pem"]);
+
+app.use("/api", (req, res, next) => {
+  const header = String(req.headers.authorization || "");
+  const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
+  // Always resolved, in both modes, so anything that records WHO did something
+  // records the person the server knows about rather than the name a browser
+  // sent about itself.
+  req.user = token ? auth.sessionUser(token) : null;
+
+  if (!auth.requireLogin()) return next();
+  if (OPEN.has(req.path)) return next();
+  if (req.user) return next();
+  res.status(401).json({ error: "Please sign in.", login_required: true });
+});
+
+// What a route says when somebody signed in asks for something their job does
+// not include. Used in place of the old checks, which read a role out of the
+// request body - a word the browser chose for itself.
+//
+// With the gate off there is nobody to check, and it lets the request through:
+// the app then behaves as it did before logins existed, which is the point of
+// being able to turn this on and off.
+function needRole(req, res, roles) {
+  if (!auth.requireLogin()) return true;
+  const role = (req.user && req.user.role) || "";
+  if (roles.includes(role)) return true;
+  res.status(403).json({ error: `This needs ${roles.join(" or ")}. You are signed in as ${role || "nobody"}.` });
+  return false;
+}
+
+// ADMIN ROUTES ARE NEVER PERMISSIVE, switch or no switch.
+//
+// needRole() above lets everything through while logins are off, so that
+// turning them on is the only thing that changes behaviour and nothing
+// regresses in the meantime. That reasoning does not hold here: these routes
+// did not exist before logins did, so there is no "how it behaved yesterday"
+// to preserve - and one of them SETS SOMEBODY'S PASSWORD.
+//
+// Written the permissive way first, and caught by tools/test-auth-gate.js
+// before it went anywhere: with the switch off, which is how this ships, any
+// caller at all could have set any password on the system. That would have
+// been worse than the nothing it replaced.
+//
+// Signing in works whether or not it is required, so an admin can always reach
+// these - they just have to be signed in, which is the point.
+function needAdmin(req, res) {
+  if (req.user && req.user.role === "admin") return true;
+  res.status(req.user ? 403 : 401).json({
+    error: req.user
+      ? "Only an admin can do this."
+      : "Sign in as an admin first.",
+  });
+  return false;
+}
+
+// ---- Signing in ----------------------------------------------------------
+// The names, for the screen that asks which one you are. No hashes, and only
+// people who are still here.
+app.get("/api/auth/users", (_req, res) => {
+  res.json({
+    users: auth.listUsers({ activeOnly: true })
+      .map((u) => ({ id: u.id, name: u.name, role: u.role, has_password: !!u.has_password })),
+    require_login: auth.requireLogin(),
+  });
+});
+
+app.post("/api/auth/login", (req, res) => {
+  try {
+    const { user_id, password, device } = req.body || {};
+    const r = auth.login(user_id, password, device);
+    res.json(r);
+  } catch (err) {
+    // 401 and 429 are answers, not faults, and the message is already written
+    // to give nothing away. Anything else is a bug and says so.
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/auth/login]", err);
+    res.status(500).json({ error: "Could not sign in." });
+  }
+});
+
+// Who the server thinks you are. The app asks on every start, so a revoked
+// device finds out the moment it is next opened rather than the next time
+// somebody tries to save something.
+app.get("/api/auth/me", (req, res) => {
+  res.json({
+    user: req.user ? { id: req.user.id, name: req.user.name, role: req.user.role, tech: req.user.tech || "" } : null,
+    require_login: auth.requireLogin(),
+  });
+});
+
+app.post("/api/auth/logout", (req, res) => {
+  const header = String(req.headers.authorization || "");
+  if (header.startsWith("Bearer ")) auth.revokeSession(header.slice(7).trim());
+  res.json({ ok: true });
+});
 
 // The site's own certificate, so a phone or tablet can be told to trust it.
 // Until it is trusted, iOS shows a warning on every visit and will not take the
@@ -549,9 +677,10 @@ app.post("/api/part-requests/bulk", async (req, res) => {
 app.patch("/api/part-requests/batch/:batchId", async (req, res) => {
   try {
     const body = req.body || {};
-    if (!["sales", "purchaser", "admin"].includes(String(body.role || "").toLowerCase())) {
-      return res.status(403).json({ error: "Only Sales, Purchaser and Admin can edit an order." });
-    }
+    // The role now comes from the session, not from the request. It used to be
+    // read off body.role - a word the browser wrote about itself, which any
+    // caller could have set to "admin".
+    if (!needRole(req, res, ["sales", "purchaser", "admin"])) return;
     res.json(await data.requests.updatePartRequestBatch(req.params.batchId, body));
   } catch (err) {
     if ([400, 404, 409].includes(err.status)) return res.status(err.status).json({ error: err.message });
@@ -568,10 +697,7 @@ app.patch("/api/part-requests/batch/:batchId", async (req, res) => {
 // backup is the way back.
 app.delete("/api/part-requests/batch/:batchId", async (req, res) => {
   try {
-    const role = String((req.query || {}).role || "").toLowerCase();
-    if (!["purchaser", "admin"].includes(role)) {
-      return res.status(403).json({ error: "Only the Purchaser and Admin can delete an order." });
-    }
+    if (!needRole(req, res, ["purchaser", "admin"])) return;
     res.json(await data.requests.deletePartRequestBatch(
       req.params.batchId, String((req.query || {}).who || "")
     ));
@@ -712,9 +838,9 @@ app.post("/api/part-prices", async (req, res) => {
         error: "Setting prices is switched off. Ask IT to enable AUTOCOUNT_PRICE_WRITEBACK.",
       });
     }
-    if (!["sales", "purchaser", "admin"].includes(String(role || "").toLowerCase())) {
+    if (!needRole(req, res, ["sales", "purchaser", "admin"])) {
       stamp("REFUSED - role not allowed");
-      return res.status(403).json({ error: "Only Sales, Purchaser and Admin can set a price." });
+      return;
     }
     if (!String(who || "").trim()) {
       return res.status(400).json({ error: "Enter your initials so the change can be traced." });
@@ -826,9 +952,9 @@ app.post("/api/part-location", async (req, res) => {
     // Who is asking comes first: it is the cheapest check, it needs no database,
     // and "Only Admin can change a location" is the honest answer to give a
     // technician - "AutoCount is not enabled" would send them to the wrong place.
-    if (!["purchaser", "admin"].includes(String(role || "").toLowerCase())) {
+    if (!needRole(req, res, ["purchaser", "admin"])) {
       stamp("REFUSED - not a purchaser or admin");
-      return res.status(403).json({ error: "Only Purchaser or Admin can change a part's location." });
+      return;
     }
     if (!String(who || "").trim()) {
       return res.status(400).json({ error: "Missing initials, so the change could not be traced." });
@@ -1058,6 +1184,45 @@ app.get("/api/parts-search", async (req, res) => {
     console.error("[GET /api/parts-search]", err.message);
     res.status(500).json({ results: [], error: `Part search failed: ${err.message}` });
   }
+});
+
+
+// ---- Accounts, for whoever runs the place ---------------------------------
+// Admin only, and checked the same way everything else is now - from the
+// session, not from a word in the request.
+app.get("/api/admin/users", (req, res) => {
+  if (!needAdmin(req, res)) return;
+  res.json({ users: auth.listUsers(), require_login: auth.requireLogin() });
+});
+
+// Give somebody a password, or replace the one they have forgotten.
+//
+// There is deliberately no way to READ one, and no default. A default password
+// is the one nobody changes, and a readable one is a password everybody in the
+// office eventually knows.
+app.post("/api/admin/users/:id/password", (req, res) => {
+  if (!needAdmin(req, res)) return;
+  try {
+    res.json(auth.setPassword(req.params.id, (req.body || {}).password));
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/admin/users/:id/password]", err);
+    res.status(500).json({ error: "Could not set the password." });
+  }
+});
+
+// Every device anybody is signed in on, newest first. This is the screen that
+// matters when a phone goes missing.
+app.get("/api/admin/sessions", (req, res) => {
+  if (!needAdmin(req, res)) return;
+  res.json({ sessions: auth.listSessions() });
+});
+
+app.post("/api/admin/sessions/:id/revoke", (req, res) => {
+  if (!needAdmin(req, res)) return;
+  const done = auth.revokeSessionById(req.params.id);
+  if (!done) return res.status(404).json({ error: "That device is already signed out." });
+  res.json({ ok: true });
 });
 
 // ---- Purchase orders --------------------------------------------------------
@@ -1711,9 +1876,7 @@ for (const path of ["/api/slips/:slip/machines/:id/quote", "/api/slips/:slip/mac
 app.patch("/api/slips/:slip/details", async (req, res) => {
   try {
     const body = req.body || {};
-    if (!["sales", "purchaser", "admin"].includes(String(body.role || "").toLowerCase())) {
-      return res.status(403).json({ error: "Only Sales, Purchaser and Admin can edit a slip." });
-    }
+    if (!needRole(req, res, ["sales", "purchaser", "admin"])) return;
     // A machine renamed here needs its type looked up again, or the documents
     // would go on naming it after the model it used to be.
     const machines = Array.isArray(body.machines)

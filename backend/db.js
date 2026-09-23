@@ -513,6 +513,95 @@ try {
   console.error("[db] machine_parts free_text migration check failed:", e.message);
 }
 
+// ---------------------------------------------------------------------------
+// WHO IS USING THE APP, and what they are allowed to do.
+//
+// Until now: nothing. The name on the first screen was a label the browser
+// chose for itself, and every one of the seventy-five routes believed it. That
+// was survivable only because the app could not be reached from outside the
+// office. It is about to be, over the company VPN, so it is not survivable any
+// more.
+//
+// THREE TABLES.
+//   app_users     one row per person. The password is never stored - only a
+//                 scrypt hash of it, with its own random salt.
+//   app_sessions  one row per signed-in DEVICE. John's call: a device stays
+//                 signed in until somebody signs it out, so these do not
+//                 expire on a timer. A lost phone is dealt with by revoking
+//                 its row, which is why each one records what it is.
+//   app_settings  one row: whether a login is required at all. It exists so
+//                 this can be deployed switched OFF, every password set up
+//                 calmly, and only then turned on - rather than a deploy that
+//                 locks the counter out of its own app at ten past nine.
+//
+// The session TOKEN is hashed too. A token is a password for the length of its
+// life, and a database that leaks its own live sessions is a database that
+// leaks every phone at once.
+try {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS app_users (
+      id            TEXT PRIMARY KEY,          -- 'kangmin', matches the old picker
+      name          TEXT NOT NULL,
+      role          TEXT NOT NULL,             -- sales | tech | purchaser | admin
+      tech          TEXT DEFAULT '',           -- WJ / XL / KM / R, where they have one
+      password_hash TEXT DEFAULT '',           -- empty = no password set yet
+      active        INTEGER DEFAULT 1,
+      created_at    TEXT DEFAULT (datetime('now','localtime')),
+      password_set_at TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS app_sessions (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id     TEXT NOT NULL,
+      token_hash  TEXT NOT NULL UNIQUE,
+      device      TEXT DEFAULT '',             -- what the phone says it is
+      created_at  TEXT DEFAULT (datetime('now','localtime')),
+      last_seen   TEXT DEFAULT (datetime('now','localtime')),
+      revoked_at  TEXT,
+      FOREIGN KEY (user_id) REFERENCES app_users(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_sessions_token ON app_sessions(token_hash);
+
+    CREATE TABLE IF NOT EXISTS app_settings (
+      key   TEXT PRIMARY KEY,
+      value TEXT
+    );
+  `);
+
+  // The people who were already on the picker, so nobody has to be typed in
+  // twice and the ids that are already recorded against work stay the same.
+  // No passwords: every one of these arrives unable to sign in, and John gives
+  // them a password from the Users screen. There is never a default password,
+  // because a default password is the one nobody changes.
+  const seedUser = db.prepare(
+    "INSERT OR IGNORE INTO app_users (id, name, role, tech) VALUES (?, ?, ?, ?)"
+  );
+  const STAFF = [
+    ["carmen", "Carmen", "sales", ""],
+    ["chiuyan", "Chiu Yan", "sales", ""],
+    ["iris", "Iris", "purchaser", ""],
+    ["wenjian", "\u6587\u5efa", "tech", "WJ"],
+    ["xiaoliu", "\u5c0f\u5218", "tech", "XL"],
+    ["kangmin", "\u5eb7\u6c11", "tech", "KM"],
+    ["ray", "Ray", "tech", "R"],
+    ["keeseng", "Kee Seng", "admin", ""],
+    ["chansing", "Chan Sing", "admin", ""],
+    ["khoon", "Uncle Khoon", "admin", ""],
+    ["shirley", "Shirley", "admin", ""],
+    ["john", "John", "admin", ""],
+    ["alvin", "Alvin", "admin", ""],
+  ];
+  const before = db.prepare("SELECT COUNT(*) AS n FROM app_users").get().n;
+  for (const [id, name, role, tech] of STAFF) seedUser.run(id, name, role, tech);
+  const after = db.prepare("SELECT COUNT(*) AS n FROM app_users").get().n;
+  if (after > before) console.log(`[db] migrated: ${after - before} staff account(s) created, none with a password yet`);
+
+  // Off until somebody turns it on. See backend/require-login.js.
+  db.prepare("INSERT OR IGNORE INTO app_settings (key, value) VALUES ('require_login', 'off')").run();
+} catch (e) {
+  console.error("[db] accounts migration failed:", e.message);
+}
+
 // Migration: a second contact person on a slip.
 try {
   const cols = db.prepare("PRAGMA table_info(service_slips)").all().map((c) => c.name);
