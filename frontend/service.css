@@ -981,8 +981,29 @@ select {
 }
 
 /* ---- Machine modal ---- */
+/* THE SHEET SITS IN WHAT IS VISIBLE, NOT IN THE SCREEN.
+//
+   A technician typing a part number could not reach Save: it was below the
+   bottom of the phone with no way to scroll to it, and the only way out was
+   to leave the machine and start the repair again.
+//
+   Here is why. On iOS the on-screen keyboard does not shrink the LAYOUT
+   viewport - `position: fixed; inset: 0` still covers the whole 812px screen,
+   and `92vh` is still 92% of 812. So this overlay, and the sheet bottom-
+   aligned in it, both end at the bottom of the SCREEN, which is several
+   hundred pixels behind the keyboard. Save is at the sheet's bottom. Nothing
+   scrolls it into view, because as far as the page is concerned it is already
+   exactly where it should be.
+//
+   visualViewport is the thing that knows: --vvh is what is actually visible
+   and --vvtop is where it starts, both kept up to date in app.js. Pinning the
+   overlay to those puts the sheet's bottom edge just above the keyboard, and
+   its own scrolling then reaches everything. The fallbacks are for a browser
+   with no visualViewport, which behaves exactly as before. */
 .modal-overlay {
-  position: fixed; inset: 0;
+  position: fixed; left: 0; right: 0;
+  top: var(--vvtop, 0px);
+  height: var(--vvh, 100vh);
   background: rgba(11, 31, 42, .55);
   display: flex; align-items: flex-end; justify-content: center;
   z-index: 60;
@@ -991,7 +1012,7 @@ select {
   background: var(--bg, #f4f6f7);
   width: 100%;
   max-width: 560px;
-  max-height: 92vh;
+  max-height: 100%;
   overflow-y: auto;
   border-radius: 18px 18px 0 0;
   padding: 16px 16px 20px;
@@ -1057,6 +1078,19 @@ select {
 }
 .pp-act:disabled { opacity: .5; }
 .pp-row-gone { opacity: .55; }
+
+/* The machine sheet's foot: the running total and Save, pinned so that a long
+   part list never pushes the button out of reach. Sticky rather than fixed, so
+   it stays inside the sheet and the rounded corners still work. */
+.mm-footer {
+  position: sticky;
+  bottom: -20px;                 /* the sheet's own bottom padding */
+  margin: 12px -16px -20px;      /* out to the sheet's edges */
+  padding: 12px 16px 20px;
+  background: var(--bg, #f4f6f7);
+  border-top: 1px solid var(--border);
+  z-index: 1;
+}
 
 /* ---- Signing in ---------------------------------------------------------
    The one screen that is not the app's usual grey. It is the first thing

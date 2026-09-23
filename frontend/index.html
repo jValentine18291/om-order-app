@@ -1212,11 +1212,16 @@
           <textarea id="os-comment" placeholder="e.g. Carburettor clogged — cleaned and replaced fuel line."></textarea>
         </div>
       </div>
-      <div class="summary-card" style="margin:12px 0 0;">
-        <div class="left"><span id="mm-total-label">Machine total</span></div>
-        <div class="total"><div class="val" id="mm-total">$0.00</div></div>
+      <!-- Stays at the bottom of the sheet while the parts above it scroll.
+           The running total belongs with it: it is the number somebody checks
+           immediately before pressing Save. -->
+      <div class="mm-footer">
+        <div class="summary-card" style="margin:0;">
+          <div class="left"><span id="mm-total-label">Machine total</span></div>
+          <div class="total"><div class="val" id="mm-total">$0.00</div></div>
+        </div>
+        <button class="btn-primary" id="mm-save" style="margin-top:10px;">Save</button>
       </div>
-      <button class="btn-primary" id="mm-save" style="margin-top:12px;">Save</button>
 
       <!-- Quoting, for this machine on its own. A slip with two machines is
            routinely half finished, and the slip-level button below covers the

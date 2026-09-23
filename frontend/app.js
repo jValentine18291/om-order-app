@@ -711,6 +711,33 @@ function updateSignOutButton() {
 }
 
 // ---- API helpers -----------------------------------------------------------
+// ---- What is actually on screen --------------------------------------------
+// Kept in two CSS variables, because CSS cannot ask.
+//
+// On iOS the keyboard does not shrink the layout viewport: 100vh and a fixed
+// element's inset: 0 both still describe the WHOLE screen, several hundred
+// pixels of which are behind the keyboard. A sheet pinned to that has its
+// bottom - and its Save button - somewhere nobody can reach or scroll to. A
+// technician lost a machine's worth of typing to it.
+//
+// visualViewport knows what is visible and where it starts. Sheets are pinned
+// to these instead; a browser without it falls back to the old behaviour.
+function trackVisibleViewport() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+  const root = document.documentElement;
+  const set = () => {
+    root.style.setProperty("--vvh", Math.round(vv.height) + "px");
+    root.style.setProperty("--vvtop", Math.round(vv.offsetTop) + "px");
+  };
+  // Both: resize is the keyboard opening, scroll is the page being nudged
+  // under it, which iOS also does.
+  vv.addEventListener("resize", set);
+  vv.addEventListener("scroll", set);
+  set();
+}
+trackVisibleViewport();
+
 // ---- Signed in, or not -----------------------------------------------------
 // The token this device holds. Kept in localStorage rather than a cookie: the
 // app is a home-screen PWA, it talks to one server, and a cookie would have to
