@@ -52,6 +52,16 @@
     // up to 2 with the stepper. Either reads the same on the Sales Order.
     { id: "PIPE", title: "Yellow Fuel Pipe",
       code: "A8 SPARE PARTS",      qty: 1, price: 3.00 },
+    // NOT A LINE. This one writes a comment and adds nothing to the bill -
+    // `comment` instead of a code and a price, which is what tells the two
+    // kinds apart everywhere below.
+    //
+    // It is here rather than somewhere of its own because it belongs to the
+    // same habit: a technician looks at a machine, decides it needs nothing,
+    // and has to say so on the paperwork. It comes out on the quotation and
+    // the Sales Order as "*No servicing", the same asterisk any other repair
+    // comment gets, because that is what it is.
+    { id: "NOSVC", title: "No Servicing", comment: "No servicing" },
   ];
 
   function byId(id) {
@@ -69,7 +79,10 @@
   function zeroIsDeliberate(part) {
     if (!part || Number(part.unit_price) > 0) return false;
     var job = byId(String(part.variant || ""));
-    return !!job && job.price === 0 && job.code === part.item_code;
+    // A comment job never becomes a part, so it can never be the answer here -
+    // and asking it about a price it has not got would say "yes" to any line
+    // with a blank code.
+    return !!job && !job.comment && job.price === 0 && job.code === part.item_code;
   }
 
   // A price typed wrong here reaches a customer's invoice with nothing in
@@ -80,13 +93,24 @@
     var bad = [], seen = {};
     for (var i = 0; i < JOBS.length; i++) {
       var j = JOBS[i];
-      if (!j.id || !j.title || !j.code) {
-        bad.push((j.title || j.id || "job " + (i + 1)) + " is missing an id, a title or a code");
-      }
+      var who = j.title || j.id || "job " + (i + 1);
+      // Every job, of either kind, needs these two.
+      if (!j.id || !j.title) bad.push(who + " is missing an id or a title");
       if (seen[j.id]) bad.push("two jobs share the id " + j.id);
       seen[j.id] = true;
-      if (!(j.price >= 0)) bad.push(j.title + " has no price");
-      if (!(j.qty > 0)) bad.push(j.title + " has no quantity");
+      // THE TWO KINDS ARE CHECKED DIFFERENTLY. A job that writes a comment has
+      // no code, no price and no quantity, and demanding them of it would put
+      // the "list looks wrong" banner up and take every button down with it.
+      // Which it did, the first time this file grew one.
+      if (j.comment) {
+        if (j.code || j.price !== undefined || j.qty !== undefined) {
+          bad.push(who + " both writes a comment and adds a line - it has to be one or the other");
+        }
+      } else {
+        if (!j.code) bad.push(who + " has no item code");
+        if (!(j.price >= 0)) bad.push(who + " has no price");
+        if (!(j.qty > 0)) bad.push(who + " has no quantity");
+      }
     }
     return bad;
   }

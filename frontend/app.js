@@ -1130,7 +1130,7 @@ function machinePill(m) {
 // Held here rather than read back off the form. Details are entered on a popup
 // and only land in this list once "Add" is pressed, so a half-typed machine
 // cannot be left sitting on the page and registered by accident.
-let nsMachines = [];      // [{ model, qty, serial, remarks }]
+let nsMachines = [];      // [{ model, qty, serial, site, remarks }]
 let nsEditIndex = -1;     // -1 = adding, otherwise the entry being edited
 
 function renderNsMachines() {
@@ -1145,6 +1145,7 @@ function renderNsMachines() {
         <span class="ns-machine-model">${escapeHtml(m.model)}</span>
         ${m.qty > 1 ? `<span class="ns-machine-qty-tag">&times;${m.qty}</span>` : ""}
         ${m.serial ? `<span class="ns-machine-serial">S/N ${escapeHtml(m.serial)}</span>` : ""}
+        ${m.site ? `<span class="ns-machine-site">${escapeHtml(m.site)}</span>` : ""}
         ${m.remarks ? `<span class="ns-machine-remarks">${escapeHtml(m.remarks)}</span>` : ""}
         ${m.quote ? `<span class="ns-machine-quote">Quote first</span>` : ""}
       </div>
@@ -1216,12 +1217,13 @@ function machineOptionHtml(r) {
 function openMachineForm(index = -1) {
   nsEditIndex = index;
   const m = index >= 0 ? nsMachines[index]
-          : { model: "", qty: 1, serial: "", remarks: "", code: "" };
+          : { model: "", qty: 1, serial: "", site: "", remarks: "", code: "" };
   $("nsm-title").textContent = index >= 0 ? "Edit machine" : "Add machine";
   $("nsm-add").textContent = index >= 0 ? "Save" : "Add";
   $("nsm-model").value = m.model;
   $("nsm-qty").value = m.qty;
   $("nsm-serial").value = m.serial;
+  $("nsm-site").value = m.site || "";
   $("nsm-remarks").value = m.remarks || "";
   $("nsm-status").innerHTML = "";
   nsmSerialHint();
@@ -1266,6 +1268,7 @@ function commitMachineForm() {
     // there is one.
     code: "",
     serial: $("nsm-serial").value.trim(),
+    site: $("nsm-site").value.trim(),
     remarks: $("nsm-remarks").value.trim(),
   };
   if (nsEditIndex >= 0) nsMachines[nsEditIndex] = entry;
@@ -1324,7 +1327,8 @@ async function submitNewService() {
   const machines = [];
   for (const m of nsMachines) {
     for (let n = 0; n < m.qty; n++) {
-      machines.push({ desc: m.model, machine_code: m.code || "", serial: m.serial, remarks: m.remarks || "" });
+      machines.push({ desc: m.model, machine_code: m.code || "", serial: m.serial,
+                      job_site: m.site || "", remarks: m.remarks || "" });
     }
   }
 
@@ -1771,9 +1775,14 @@ function buildSlipPdf(slip) {
     const serial = String(m.serial_no || "").trim();
     doc.setFontSize(8);
     const serialLines = serial ? doc.splitTextToSize("S/N " + serial, DESC_W - 26) : [];
+    // Under the serial and above the remarks, which is the order these are
+    // asked for at the counter and the order they read in.
+    const site = String(m.job_site || "").trim();
+    const siteLines = site ? doc.splitTextToSize("Job site: " + site, DESC_W - 26) : [];
     const remark = String(m.remarks || "").trim();
     const remarkLines = remark ? doc.splitTextToSize("Remarks: " + remark, DESC_W - 26) : [];
-    const rowH = Math.max(30, 16 + lines.length * 12 + serialLines.length * 10 + remarkLines.length * 10);
+    const rowH = Math.max(30, 16 + lines.length * 12
+                            + serialLines.length * 10 + siteLines.length * 10 + remarkLines.length * 10);
     if (need(rowH + 30)) drawTableHead();
 
     setDraw(BORDER); setFill(255); doc.setLineWidth(0.7);
@@ -1789,9 +1798,14 @@ function buildSlipPdf(slip) {
       doc.setFontSize(8); setText(125);
       doc.text(serialLines, LEFT + NO_W + 14, y + 19 + lines.length * 12);
     }
+    if (siteLines.length) {
+      doc.setFontSize(8); setText(125);
+      doc.text(siteLines, LEFT + NO_W + 14, y + 19 + lines.length * 12 + serialLines.length * 10);
+    }
     if (remarkLines.length) {
       doc.setFontSize(8); setText(125);
-      doc.text(remarkLines, LEFT + NO_W + 14, y + 19 + lines.length * 12 + serialLines.length * 10);
+      doc.text(remarkLines, LEFT + NO_W + 14,
+               y + 19 + lines.length * 12 + serialLines.length * 10 + siteLines.length * 10);
     }
     // Ticked by hand when the equipment goes back to the customer.
     setDraw(150); doc.setLineWidth(0.8); setFill(255);
@@ -3625,10 +3639,40 @@ function renderJobPicker() {
     return;
   }
   $("job-btns").innerHTML = window.OM_JOBS.list.map((j) => `
-    <button type="button" class="tube-btn job-btn" data-job="${escapeAttr(j.id)}">
+    <button type="button" class="tube-btn job-btn${j.comment ? " job-btn-note" : ""}" data-job="${escapeAttr(j.id)}">
       ${escapeHtml(j.title)}
-      <span class="tube-each">${j.price > 0 ? money(j.price) : "no charge"}</span>
+      <span class="tube-each">${j.comment ? "adds a comment"
+                                : j.price > 0 ? money(j.price) : "no charge"}</span>
     </button>`).join("");
+}
+
+// A job that is a comment: "No Servicing", and anything like it added later.
+//
+// ADDED TO WHAT IS ALREADY THERE, on a line of its own - John's call. A
+// technician may well have written what they found before deciding it needs
+// nothing, and a button that silently wiped that would be a button nobody
+// taps twice.
+//
+// Saved straight away rather than left pending like a part. A part waits for
+// Save because it is money and the technician may still change their mind; a
+// comment is already saved every time they stop typing, and leaving this one
+// hanging would be the odd one out.
+async function addCommentJob(job) {
+  const box = $("os-comment");
+  if (!box) return;
+  const was = box.value.trim();
+  const already = was.split(/\r?\n/).some(
+    (line) => line.trim().toLowerCase() === job.comment.toLowerCase());
+  // Tapping it twice is a tap, not a second decision.
+  if (already) { toast(`Already says "${job.comment}"`, "ok"); return; }
+  box.value = was ? `${was}\n${job.comment}` : job.comment;
+  try {
+    await saveCurrentComment();
+    toast(`Added "${job.comment}" to the repair comment`, "ok");
+  } catch (e) {
+    toast(e.message || "Could not save the comment", "err");
+  }
+  updateSlipFooter();
 }
 
 // Add one to the machine.
@@ -3642,6 +3686,10 @@ async function addJobToMachine(id) {
   if (!job || !session.machineId) return;
   const btn = document.querySelector(`[data-job="${CSS.escape(id)}"]`);
   if (btn) btn.disabled = true;
+  // The kind that writes a comment rather than adding a line. Nothing to look
+  // up in AutoCount, nothing to price, and nothing waiting for Save - the
+  // comment box saves itself, the way it does when it is typed into.
+  if (job.comment) { await addCommentJob(job); if (btn) btn.disabled = false; return; }
   try {
     const item = await lookupItem(job.code);
     if (!item || !item.item_code) throw new Error("not found");
@@ -4515,6 +4563,13 @@ function buildMachinePrintPdf(slip, machines) {
       doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(MUTED);
       doc.text(`S/N ${m.serial_no}`, LEFT, y); y += 11;
     }
+    // Which of the customer's sites this one came off. On the sheet the
+    // technicians work from, because it is how they tell four identical
+    // blowers apart when they are lined up on the bench.
+    if (String(m.job_site || "").trim()) {
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(MUTED);
+      doc.text(`Job site: ${m.job_site.trim()}`, LEFT, y); y += 11;
+    }
 
     if (parts.length) {
       // Part number, description, quantity, cost per item, line amount - the
@@ -4987,6 +5042,15 @@ function buildRepairQuotationPdf(q, terms) {
   return doc.output("blob");
 }
 
+// 2nd, 3rd, 4th. Written out because "the 2 quotation for this slip" is the
+// kind of wording that makes people distrust the number beside it.
+function ordinal(n) {
+  const i = Number(n) || 0;
+  const teen = i % 100 >= 11 && i % 100 <= 13;
+  const suffix = teen ? "th" : ({ 1: "st", 2: "nd", 3: "rd" })[i % 10] || "th";
+  return `${i}${suffix}`;
+}
+
 // The machines ticked on the Send Quotation sheet, in the order they sit on
 // the slip. Read from the sheet rather than kept in a variable beside it: the
 // sheet is what the person is looking at, and a second copy of the answer is a
@@ -5028,6 +5092,7 @@ function renderQuoteMachines(q) {
         <span class="conv-main">
           <span class="conv-name">${escapeHtml(m.machine_desc)}</span>
           ${m.serial_no ? `<span class="conv-serial">S/N ${escapeHtml(m.serial_no)}</span>` : ""}
+          ${m.job_site ? `<span class="conv-serial">${escapeHtml(m.job_site)}</span>` : ""}
           <span class="conv-sub">${escapeHtml(sub)}${
             m.so_number ? ` · already on ${escapeHtml(m.so_number)}` : ""}</span>
         </span>
@@ -5188,7 +5253,14 @@ async function shareRepairQuotation(slipNumber) {
       });
       const blob = buildRepairQuotationPdf(issued, terms);
       close();
-      if (issued.revision) toast(`Revision ${issued.quotation_no}`, "ok");
+      // NOT "Revision". That word says the earlier quotation has been
+      // corrected and no longer stands - and since machines can now be chosen
+      // one at a time, the second document is just as often a quotation for
+      // DIFFERENT machines, with the first one still live and still awaiting
+      // an answer. This says the one thing that is true either way.
+      if (issued.revision) {
+        toast(`Sent as ${issued.quotation_no} — the ${ordinal(issued.seq)} quotation for this slip`, "ok");
+      }
       // File the office copy before handing the sender theirs, so the two are
       // the same bytes. Filing is a convenience and must never stop a
       // quotation going out: a Drive that is off, unconfigured or unreachable
@@ -5782,6 +5854,9 @@ function renderSlipDetail(slip) {
     html += `${m.serial_no ? `<div class="vs-machine-serial">S/N ${escapeHtml(m.serial_no)}</div>` : ""}${
       m.remarks ? `<div class="vs-machine-remarks">“${escapeHtml(m.remarks)}”</div>` : ""}`;
 
+    if (String(m.job_site || "").trim()) {
+      html += `<div class="vs-site">Job site: ${escapeHtml(m.job_site.trim())}</div>`;
+    }
     if (m.repair_comment) {
       html += `<div class="vs-comment">${escapeHtml(m.repair_comment)}</div>`;
     }
@@ -5952,7 +6027,8 @@ function vseOriginal() {
   const m = {};
   for (const x of (vseSlip.machines || [])) {
     m[x.id] = { desc: x.machine_desc || "", code: x.machine_code || "",
-                serial: (x.serial_no || "").trim(), remarks: (x.remarks || "").trim() };
+                serial: (x.serial_no || "").trim(), site: (x.job_site || "").trim(),
+                remarks: (x.remarks || "").trim() };
   }
   return {
     company: vseSlip.company || "",
@@ -6023,6 +6099,10 @@ function openSlipEdit(slip) {
         <div class="field" data-f="serial">
           <div class="vse-lab"><label>Serial No.</label></div>
           <input class="vse-m-serial" type="text" value="${escapeAttr(m.serial_no || "")}" />
+        </div>
+        <div class="field" data-f="site">
+          <div class="vse-lab"><label>Job Site</label></div>
+          <input class="vse-m-site" type="text" maxlength="120" value="${escapeAttr(m.job_site || "")}" />
         </div>
         <div class="field" data-f="remarks">
           <div class="vse-lab"><label>Remarks</label></div>
@@ -6125,6 +6205,7 @@ function vseMarkAll() {
     if (vseMark(card.querySelector('[data-f="desc"]'), was.desc, get(".vse-m-desc"))) n++;
     if (vseMark(card.querySelector('[data-f="code"]'), was.code || "", card.dataset.code || "")) n++;
     if (vseMark(card.querySelector('[data-f="serial"]'), was.serial, get(".vse-m-serial"))) n++;
+    if (vseMark(card.querySelector('[data-f="site"]'), was.site, get(".vse-m-site"))) n++;
     if (vseMark(card.querySelector('[data-f="remarks"]'), was.remarks, get(".vse-m-remarks"))) n++;
   });
 
@@ -6236,6 +6317,7 @@ function vseAddOpen() {
   $("vsa-model").value = "";
   $("vsa-qty").value = "1";
   $("vsa-serial").value = "";
+  $("vsa-site").value = "";
   $("vsa-remarks").value = "";
   $("vsa-status").innerHTML = "";
   $("vsa-go").disabled = false;
@@ -6287,6 +6369,7 @@ $("vsa-go").addEventListener("click", async () => {
         role: getRole(), who: initialsFor(getUser()),
         desc, qty,
         serial: $("vsa-serial").value.trim(),
+        job_site: $("vsa-site").value.trim(),
         remarks: $("vsa-remarks").value.trim(),
       }),
     });
@@ -6351,7 +6434,8 @@ function vseCollect() {
     const desc = get(".vse-m-desc");
     if (!desc) { blank = true; return; }
     payload.machines.push({ id, machine_desc: desc, machine_code: card.dataset.code || "",
-                            serial_no: get(".vse-m-serial"), remarks: get(".vse-m-remarks") });
+                            serial_no: get(".vse-m-serial"), job_site: get(".vse-m-site"),
+                            remarks: get(".vse-m-remarks") });
     if (!was) return;
     const rows = [];
     if (was.desc !== desc) rows.push({ label: "Machine", before: was.desc, after: desc });
@@ -6363,6 +6447,7 @@ function vseCollect() {
       rows.push({ label: "Catalogue item", before: was.code || "", after: card.dataset.code || "" });
     }
     if (was.serial !== get(".vse-m-serial")) rows.push({ label: "Serial No.", before: was.serial, after: get(".vse-m-serial") });
+    if (was.site !== get(".vse-m-site")) rows.push({ label: "Job Site", before: was.site, after: get(".vse-m-site") });
     if (was.remarks !== get(".vse-m-remarks")) rows.push({ label: "Remarks", before: was.remarks, after: get(".vse-m-remarks") });
     // Named by what it was registered as, so the heading still matches the
     // machine when its name is the thing being corrected.
@@ -9451,7 +9536,8 @@ $("nsm-qty").addEventListener("change", () => {
 // Enter in the model box is the obvious way to move on, and on a phone
 // keyboard it is the only key that is not a character.
 $("nsm-model").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); $("nsm-serial").focus(); } });
-$("nsm-serial").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); commitMachineForm(); } });
+$("nsm-serial").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); $("nsm-site").focus(); } });
+$("nsm-site").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); commitMachineForm(); } });
 $("nsm-modal").addEventListener("click", (e) => { if (e.target === $("nsm-modal")) closeMachineForm(); });
 $("ns-submit").addEventListener("click", submitNewService);
 

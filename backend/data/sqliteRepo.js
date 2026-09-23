@@ -223,6 +223,10 @@ function signedShape(slip, machines) {
     machines: (machines || []).map((m) => ({
       machine_desc: m.machine_desc || "",
       serial_no: m.serial_no || "",
+      // On the slip they put their name to, so it belongs in the record of
+      // what they put their name to. Slips signed before this existed simply
+      // have no such key, which reads as blank.
+      job_site: m.job_site || "",
       remarks: m.remarks || "",
     })),
   };
@@ -251,6 +255,9 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
           // before we got here. Only used to name the machine on paper.
           type: String((m && m.machine_type) || "").trim().slice(0, 40),
           remarks: String((m && m.remarks) || "").trim().slice(0, 500),
+          // Where this machine works. Short by design: it goes on one line of
+          // a quotation beside the machine, not in a paragraph.
+          job_site: String((m && m.job_site) || "").trim().slice(0, 120),
           // Phones run a cached copy of the app for a shift after a deploy, so
           // this per-machine tick still arrives from the counter. It is folded
           // into the slip-wide flag below rather than honoured per machine.
@@ -276,7 +283,7 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'OPEN')`
   );
   const insertMachine = db.prepare(
-    "INSERT INTO slip_machines (slip_id, machine_desc, machine_code, serial_no, remarks, machine_type, state) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    "INSERT INTO slip_machines (slip_id, machine_desc, machine_code, serial_no, remarks, machine_type, job_site, state) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
   );
   const insertSignature = db.prepare(
     "INSERT INTO slip_signatures (slip_id, image, signed_content) VALUES (?, ?, ?)"
@@ -306,14 +313,15 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
     // anything, with no parts and no labour to quote. A machine reaches that
     // list when a technician sends it, which is when there is a figure to give.
     for (const m of machineList) {
-      insertMachine.run(slipId, m.desc, m.code, m.serial, m.remarks, m.type, "RECEIVED");
+      insertMachine.run(slipId, m.desc, m.code, m.serial, m.remarks, m.type, m.job_site || "", "RECEIVED");
     }
     if (sig) {
       // Written inside the same transaction as the slip, so a signature can
       // never exist without a record of what it was given for.
       insertSignature.run(slipId, sig, JSON.stringify(signedShape(
         { company: newCompanyName, contact_name, contact_number, whatsapp_number, notes },
-        machineList.map((m) => ({ machine_desc: m.desc, serial_no: m.serial, remarks: m.remarks }))
+        machineList.map((m) => ({ machine_desc: m.desc, serial_no: m.serial,
+                                  job_site: m.job_site || "", remarks: m.remarks }))
       )));
     }
     return { slipNumber, slipId };
@@ -931,6 +939,18 @@ function slipBlockLines(slip, wanted, all, extras = []) {
     if (comment) lines.push({ note: true, description: `*${comment}` });
     if (condemned) lines.push({ note: true, description: CONDEMNED_NOTE });
 
+    // Where the machine works, at the foot of its block and immediately above
+    // its SubTotal - John's placement, Sep 2026. It is the customer's own
+    // reference, not ours: a contractor with the same blower on four sites
+    // reads down the quotation looking for which one this is, and the machine
+    // heading at the top of the block is already carrying the model, the
+    // serial, the slip number and the position.
+    //
+    // No asterisk. That marks the technician's comment, and this is neither a
+    // comment nor ours to have written.
+    const site = String(m.job_site || "").trim();
+    if (site) lines.push({ note: true, description: `Job site: ${site}` });
+
     lines.push({ note: true, description: "SubTotal", line_amount: machineTotal });
     // Blank row between machines, as the keyed block has.
     if (n < wanted.length - 1) lines.push({ note: true, description: "" });
@@ -1247,6 +1267,7 @@ function quotationForSlip(slipNumber, machineIds, opts) {
         id: m.id,
         machine_desc: m.machine_desc,
         serial_no: m.serial_no || "",
+        job_site: m.job_site || "",
         condemned,
         parts: parts.length,
         labour,
@@ -1641,9 +1662,10 @@ function addMachineToSlip(slipNumber, machine, who = "") {
   const remarks = String(m.remarks || "").trim().slice(0, 500);
   const code = String(m.machine_code || m.code || "").trim();
   const type = String(m.machine_type || "").trim().slice(0, 40);
+  const jobSite = String(m.job_site || "").trim().slice(0, 120);
 
   const insertMachine = db.prepare(
-    "INSERT INTO slip_machines (slip_id, machine_desc, machine_code, serial_no, remarks, machine_type, state) VALUES (?, ?, ?, ?, ?, ?, 'RECEIVED')"
+    "INSERT INTO slip_machines (slip_id, machine_desc, machine_code, serial_no, remarks, machine_type, job_site, state) VALUES (?, ?, ?, ?, ?, ?, ?, 'RECEIVED')"
   );
   const insertAmendment = db.prepare(
     "INSERT INTO slip_amendments (slip_id, field, before, after, changed_by) VALUES (?, ?, ?, ?, ?)"
@@ -1655,7 +1677,7 @@ function addMachineToSlip(slipNumber, machine, who = "") {
   const added = [];
   const tx = db.transaction(() => {
     for (let i = 0; i < qty; i++) {
-      added.push(Number(insertMachine.run(slip.id, desc, code, serial, remarks, type).lastInsertRowid));
+      added.push(Number(insertMachine.run(slip.id, desc, code, serial, remarks, type, jobSite).lastInsertRowid));
     }
     renumberSlipMachines(slip.id);
     if (signed) {
@@ -1752,6 +1774,14 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
       code: rawCode === undefined ? undefined : String(rawCode || "").trim(),
       serial: String((m || {}).serial_no || "").trim(),
       remarks: String((m || {}).remarks || "").trim().slice(0, 500),
+      // The code's rule, NOT the serial's. Serial and remarks are cleared when
+      // they arrive empty, which is right for fields every version of the app
+      // has always sent. This one is new, so a phone still running yesterday's
+      // copy sends no job_site at all - and treating that as "clear it" would
+      // wipe the site off every machine on the slip the first time somebody
+      // corrected a spelling from an un-updated phone.
+      job_site: (m || {}).job_site === undefined
+        ? undefined : String((m || {}).job_site || "").trim().slice(0, 120),
     };
   });
 
@@ -1759,10 +1789,10 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
   // slip as it stands now rather than against the signature, so a field
   // corrected twice reads as two corrections instead of one confusing jump.
   const before = signedShape(slip, db.prepare(
-    "SELECT machine_desc, serial_no, remarks FROM slip_machines WHERE slip_id = ? ORDER BY id"
+    "SELECT machine_desc, serial_no, remarks, job_site FROM slip_machines WHERE slip_id = ? ORDER BY id"
   ).all(slip.id));
   const machineById = new Map(db.prepare(
-    "SELECT id, machine_desc, serial_no, remarks FROM slip_machines WHERE slip_id = ?"
+    "SELECT id, machine_desc, serial_no, remarks, job_site FROM slip_machines WHERE slip_id = ?"
   ).all(slip.id).map((m) => [m.id, m]));
 
   const changes = [];
@@ -1795,6 +1825,11 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
     const was = machineById.get(m.id) || {};
     note(`Machine "${was.machine_desc || ""}"`, was.machine_desc, m.desc);
     note(`${was.machine_desc || "Machine"} — serial`, was.serial_no, m.serial);
+    // Only when it was sent. An older phone leaves it undefined and nothing
+    // was changed, so nothing is logged.
+    if (m.job_site !== undefined) {
+      note(`${was.machine_desc || "Machine"} — job site`, was.job_site, m.job_site);
+    }
     note(`${was.machine_desc || "Machine"} — remarks`, was.remarks, m.remarks);
   }
 
@@ -1813,6 +1848,11 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
   );
   const updMachineWithCode = db.prepare(
     "UPDATE slip_machines SET machine_desc = ?, serial_no = ?, remarks = ?, machine_code = ? WHERE id = ?"
+  );
+  // Its own statement, run only when the field was sent, for the reason given
+  // where mEdits is built.
+  const updMachineSite = db.prepare(
+    "UPDATE slip_machines SET job_site = ? WHERE id = ?"
   );
   // A machine renamed on this screen is a different machine as far as naming
   // it goes, so the type is re-resolved by the route and written here.
@@ -1835,6 +1875,7 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
       if (m.code === undefined) updMachine.run(m.desc, m.serial, m.remarks, m.id);
       else updMachineWithCode.run(m.desc, m.serial, m.remarks, m.code, m.id);
       if (m.type !== undefined) updMachineType.run(m.type, m.id);
+      if (m.job_site !== undefined) updMachineSite.run(m.job_site, m.id);
     }
     // Only where the slip carries a signature. An unsigned slip - which the
     // app does not allow, but old data might - has nothing to be amended

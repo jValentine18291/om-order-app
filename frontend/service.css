@@ -1081,6 +1081,22 @@ select {
 }
 .pp-act:disabled { opacity: .5; }
 
+/* Where a machine works, on the registration card and on the slip. Quieter
+   than the machine's own name and louder than nothing: it is the customer's
+   reference, and most machines have none. */
+.ns-machine-site { font-size: .74rem; color: var(--ink-faint); }
+.vs-site { font-size: .8rem; color: var(--ink-soft, #55665f); margin-top: 2px; }
+
+/* A common job that writes a comment instead of adding a line. Set apart from
+   the priced buttons beside it, quietly: a technician reaching for "Change
+   Engine Oil" must not tap this one by muscle memory and wonder later why the
+   bill is short. */
+.job-btn-note {
+  border-style: dashed;
+  background: #f7f9fa;
+}
+.job-btn-note .tube-each { font-style: italic; }
+
 /* The machine picker on the Send Quotation sheet. The convert picker's own
    rows, so the two read as the same question - see renderQuoteMachines(). Only
    the height is its own: this sits inside a sheet that already has three

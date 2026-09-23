@@ -168,6 +168,12 @@ db.exec(`
     machine_desc   TEXT    NOT NULL,
     serial_no      TEXT    DEFAULT '',     -- as given by the customer; often blank
     remarks        TEXT    DEFAULT '',     -- what the customer reported at registration
+    -- WHERE THE MACHINE WORKS, when the customer has said. Optional, and blank
+    -- on most machines: a landscaping contractor with the same blower on four
+    -- sites needs to know which one came back, and nothing else on the slip
+    -- says. Printed on the customer's slip and on the quotation and the Sales
+    -- Order - John's call, Sep 2026 - so it is theirs, not an office note.
+    job_site       TEXT    DEFAULT '',
     converted_at   TEXT,                    -- when this machine went onto a Sales Order
     so_number      TEXT    DEFAULT '',      -- which Sales Order it went onto
     repair_comment TEXT    DEFAULT '',
@@ -315,6 +321,17 @@ db.exec(`
     FOREIGN KEY (slip_id) REFERENCES service_slips(id) ON DELETE CASCADE
   );
 `);
+
+// Migration: job_site on machines registered before there was one.
+try {
+  const cols = db.prepare("PRAGMA table_info(slip_machines)").all().map((c) => c.name);
+  if (!cols.includes("job_site")) {
+    db.exec("ALTER TABLE slip_machines ADD COLUMN job_site TEXT DEFAULT ''");
+    console.log("[db] migrated: added job_site to slip_machines");
+  }
+} catch (e) {
+  console.error("[db] job_site migration failed:", e.message);
+}
 
 // Migration: signed_content on slips that predate it.
 //

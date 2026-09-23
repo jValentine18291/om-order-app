@@ -1019,6 +1019,14 @@
           <input id="nsm-serial" type="text" autocomplete="off" placeholder="e.g. 20231100123" />
           <p class="nsm-hint" id="nsm-serial-hint" style="display:none"></p>
         </div>
+        <!-- Where the machine works, when the customer has said. Optional and
+             usually blank. A landscaping contractor with the same blower on
+             four sites needs to know which one came back, and nothing else on
+             the slip says. Prints on their slip and on the quotation. -->
+        <div class="field">
+          <label for="nsm-site">Job Site <span style="color:var(--ink-faint);font-weight:400;">(optional — where the machine works)</span></label>
+          <input id="nsm-site" type="text" autocomplete="off" placeholder="e.g. Marina Bay Sands" maxlength="120" />
+        </div>
         <div class="field">
           <label for="nsm-remarks">Remarks <span style="color:var(--ink-faint);font-weight:400;">(optional — what the customer reported)</span></label>
           <textarea id="nsm-remarks" rows="2" placeholder="e.g. Won't start, chain keeps slipping"></textarea>
@@ -1063,6 +1071,10 @@
           <label for="vsa-serial">Serial No. <span style="color:var(--ink-faint);font-weight:400;">(if applicable)</span></label>
           <input id="vsa-serial" type="text" autocomplete="off" placeholder="e.g. 20231100123" />
           <p class="nsm-hint" id="vsa-serial-hint" style="display:none"></p>
+        </div>
+        <div class="field">
+          <label for="vsa-site">Job Site <span style="color:var(--ink-faint);font-weight:400;">(optional &mdash; where the machine works)</span></label>
+          <input id="vsa-site" type="text" autocomplete="off" placeholder="e.g. Marina Bay Sands" maxlength="120" />
         </div>
         <div class="field">
           <label for="vsa-remarks">Remarks <span style="color:var(--ink-faint);font-weight:400;">(optional &mdash; what the customer reported)</span></label>

@@ -43,9 +43,24 @@ console.log("\n-- the table itself --");
 check("it checks out", J.check(), []);
 check("the jobs, in the order they were asked for",
   J.list.map((j) => j.title),
+  ["Welding", "Change Engine Oil", "Service Carburetor & Labour", "Yellow Fuel Pipe",
+   "No Servicing"]);
+
+// TWO KINDS, and the difference is the whole of what keeps one off a bill.
+// A priced job adds a line; a comment job writes a note and adds nothing.
+// Sorted here rather than asserted together, because a comment job has no
+// price and no quantity and listing it among them as null reads as a job whose
+// price somebody forgot to fill in.
+const priced = J.list.filter((j) => !j.comment);
+const notes = J.list.filter((j) => j.comment);
+check("four of them add a priced line", priced.map((j) => j.title),
   ["Welding", "Change Engine Oil", "Service Carburetor & Labour", "Yellow Fuel Pipe"]);
-check("at the prices given", J.list.map((j) => j.price), [30, 9, 0, 3]);
-check("one of each", J.list.map((j) => j.qty), [1, 1, 1, 1]);
+check("at the prices given", priced.map((j) => j.price), [30, 9, 0, 3]);
+check("one of each", priced.map((j) => j.qty), [1, 1, 1, 1]);
+check("and one writes a comment instead", notes.map((j) => [j.title, j.comment]),
+  [["No Servicing", "No servicing"]]);
+check("which carries no code, no price and no quantity to bill",
+  notes.map((j) => [j.code, j.price, j.qty]), [[undefined, undefined, undefined]]);
 check("two of them share the warehouse service code",
   J.list.filter((j) => j.code === "A7 SVR WAREHOUSE").map((j) => j.title),
   ["Welding", "Service Carburetor & Labour"]);
