@@ -1079,13 +1079,30 @@ select {
 .pp-act:disabled { opacity: .5; }
 .pp-row-gone { opacity: .55; }
 
-/* The count beside a slip's status in the search results, where the status is
-   a coloured chip and cannot simply grow. Its own quiet line instead. */
-.sr-quote-tail {
-  display: block; margin-top: 3px;
-  font-size: 11px; font-weight: 600; color: var(--amber, #b8791a);
-  text-align: right;
+/* What is waiting on somebody, on a slip card.
+//
+   These began as words on the end of the status chip, and the chip cannot
+   wrap - so four to quote and one waiting ran off the side of the card. Tags
+   of their own instead: they wrap, and the colour says who is being waited on
+   without anybody reading the words.
+//
+   Amber: ours to do. Grey: the customer's to answer. */
+.q-tags {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
 }
+.q-tag {
+  font-size: 11.5px; font-weight: 700;
+  padding: 3px 9px; border-radius: 6px;
+  white-space: nowrap;                 /* a tag stays whole; the ROW wraps */
+}
+.q-tag-do { background: var(--amber-tint, #fbf1dd); color: #9a6413; }
+.q-tag-wait { background: #eef2f7; color: var(--ink-soft, #55665f); }
+/* In the search results the row is one flex LINE, so the tags take a line of
+   their own beneath it rather than fighting the chip for the same space.
+   The company name keeps its ellipsis: letting it wrap instead turned a long
+   one into four lines and made every row in the list taller. */
+.slip-result { flex-wrap: wrap; }
+.slip-result .q-tags { flex-basis: 100%; margin-top: 2px; }
 
 /* The machine sheet's foot: the running total and Save, pinned so that a long
    part list never pushes the button out of reach. Sticky rather than fixed, so

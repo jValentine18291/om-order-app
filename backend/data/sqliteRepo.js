@@ -1548,7 +1548,10 @@ function searchSlips(query = "", scope = "all", limit = 20) {
   const getMachines = db.prepare("SELECT id, machine_desc, state, disposal, converted_at FROM slip_machines WHERE slip_id = ?");
   for (const r of trimmed) r.machines = getMachines.all(r.id);
 
-  return { results: trimmed, hasMore };
+  // The same two counts every other list carries. Through withQuoteCounts
+  // rather than tallied from r.machines here: one definition of what "to
+  // quote" means, in one place, however many lists come to show it.
+  return { results: trimmed.map(withQuoteCounts), hasMore };
 }
 
 // ---- A machine the counter forgot -------------------------------------------

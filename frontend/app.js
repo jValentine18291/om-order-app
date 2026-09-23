@@ -718,16 +718,25 @@ function updateSignOutButton() {
 // three other machines may be on the bench. So the fact moves here, where it
 // is a count rather than a claim about the slip.
 //
+// TAGS, NOT TEXT ON THE END OF THE CHIP. The first version of this stapled
+// the counts onto the status chip - and that chip cannot wrap, so a slip with
+// four to quote and one waiting ran clean off the side of the card. John sent
+// a photograph of it.
+//
+// Two colours, so a list can be read without reading it: amber is ours to do,
+// grey is the customer's to answer. They wrap onto a second line.
+//
 // The slip carries both numbers - to_quote and quote_waiting - from
 // withQuoteCounts() on the server, so nothing here has to fetch machines.
-function quoteTail(slip) {
+function quotePills(slip) {
   if (!slip) return "";
-  const bits = [];
   const n = Number(slip.to_quote) || 0;
   const w = Number(slip.quote_waiting) || 0;
-  if (n) bits.push(`${n} to quote`);
-  if (w) bits.push(`${w} waiting on customer`);
-  return bits.length ? " · " + bits.join(" · ") : "";
+  if (!n && !w) return "";
+  const tags = [];
+  if (n) tags.push(`<span class="q-tag q-tag-do">${n} to quote</span>`);
+  if (w) tags.push(`<span class="q-tag q-tag-wait">${w} waiting on customer</span>`);
+  return `<span class="q-tags">${tags.join("")}</span>`;
 }
 
 // ---- What is actually on screen --------------------------------------------
@@ -860,8 +869,8 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick }) {
         `<button type="button" class="slip-result" data-slip="${escapeAttr(s.slip_number)}">
            <span class="sr-num">${escapeHtml(s.slip_number)}</span>
            <span class="sr-co">${escapeHtml(s.company)}</span>
-           <span class="sr-status sr-${escapeAttr(s.status)}">${escapeHtml(STATUS_LABEL[s.status] || s.status)}</span>${
-             quoteTail(s) ? `<span class="sr-quote-tail">${escapeHtml(quoteTail(s).replace(/^ · /, ""))}</span>` : ""}
+           <span class="sr-status sr-${escapeAttr(s.status)}">${escapeHtml(STATUS_LABEL[s.status] || s.status)}</span>
+           ${quotePills(s)}
          </button>`
       ).join("") +
       (data.hasMore ? `<div class="slip-result-more">Keep typing to narrow results…</div>` : "");
@@ -2525,10 +2534,11 @@ function renderSlipList() {
     <button type="button" class="slip-card" data-slip="${escapeAttr(s.slip_number)}">
       <div class="slip-card-top">
         <strong>${escapeHtml(s.slip_number)}</strong>
-        <span class="vs-status vs-${escapeAttr(s.status)}">${escapeHtml((STATUS_LABEL[s.status] || s.status) + quoteTail(s))}</span>
+        <span class="vs-status vs-${escapeAttr(s.status)}">${escapeHtml(STATUS_LABEL[s.status] || s.status)}</span>
       </div>
       <div class="slip-card-co">${escapeHtml(s.company)}</div>
       <div class="slip-card-sub">${(s.machines || []).length} machine${(s.machines || []).length === 1 ? "" : "s"}${s.created_at ? " · " + escapeHtml(formatDate(s.created_at)) : ""}</div>
+      ${quotePills(s)}
     </button>`).join("");
   wrap.querySelectorAll(".slip-card").forEach((btn) =>
     btn.addEventListener("click", () => onSlipChosen(btn.dataset.slip))
@@ -2626,10 +2636,11 @@ function renderSlipScreen() {
           <div class="vs-company">${escapeHtml(slip.company)}</div>
           <div class="vs-sub">Slip ${escapeHtml(slip.slip_number)}${created ? " · Created " + escapeHtml(created) : ""}</div>
         </div>
-        <span class="vs-status vs-${escapeAttr(slip.status)}" id="os-status-badge">${escapeHtml((STATUS_LABEL[slip.status] || slip.status) + quoteTail(slip))}</span>
+        <span class="vs-status vs-${escapeAttr(slip.status)}" id="os-status-badge">${escapeHtml(STATUS_LABEL[slip.status] || slip.status)}</span>
       </div>
       ${slipSoLine(slip)}
       ${meta.length ? `<div class="vs-sub">${meta.join(" · ")}</div>` : ""}
+      ${quotePills(slip)}
       ${slip.notes ? `<div class="vs-notes">${escapeHtml(slip.notes)}</div>` : ""}
     </div>
     ${requestBadgesHtml(slip, "sd")}`;
@@ -4106,8 +4117,7 @@ function renderSlipStatusUI() {
   const status = session.slip ? session.slip.status : "";
   const badge = $("os-status-badge");
   if (badge) {
-    badge.textContent = (STATUS_LABEL[status] || status || "—")
-      + quoteTail(session.slip);
+    badge.textContent = STATUS_LABEL[status] || status || "—";
     badge.className = "vs-status vs-" + status;
   }
   const wrap = $("os-status-actions");
