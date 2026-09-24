@@ -1,5 +1,10 @@
 @echo off
-setlocal enabledelayedexpansion
+REM NO DELAYED EXPANSION, deliberately. With it on, cmd eats "!" and everything
+REM up to the next one out of any value assigned inside the loop below - so an
+REM AutoCount password containing "!" silently arrives short and the only
+REM symptom is a login that fails for no visible reason. Proved 24 Sep 2026:
+REM "p@ss=w0rd!x" came out as "p@ss=w0rdx". Nothing here needs !var! syntax.
+setlocal
 REM ===========================================================================
 REM backup-db.bat - makes a safe copy of the service slip database.
 REM
