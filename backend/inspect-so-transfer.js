@@ -194,7 +194,43 @@ async function main() {
   }
 
   // -------------------------------------------------------------------------
-  head(5, "WHAT THIS MEANS");
+  head(5, "THE APP'S OWN CHAIN WALKER, ON REAL DATA - reading only");
+  // -------------------------------------------------------------------------
+  // Not a re-implementation: this calls chainFrom() out of autocountRepo, the
+  // exact function the app uses. So if this prints the right documents, the
+  // feature's one untestable part - the AutoCount query - is proved against
+  // real data before it can change anything.
+  //
+  // It only reads. Nothing is written to AutoCount, and nothing is written to
+  // the app's own database either: recording and the automatic status change
+  // both live on the server route, not here.
+  try {
+    const ac = require("./data/autocountRepo");
+    const starts = await safe("the app's orders", () => query(
+      `SELECT TOP 5 DocNo FROM SO WHERE DocNo LIKE 'SO-%' ORDER BY DocKey DESC`));
+    const list = (starts || []).map((r) => String(r.DocNo));
+    if (!list.length) {
+      line("  No orders of the app's own to follow.");
+    } else {
+      for (const so of list) {
+        const found = await ac.chainFrom([so]);
+        if (!found.length) { line(`  ${so}  ->  (nothing yet)`); continue; }
+        const steps = found
+          .sort((a, b) => a.depth - b.depth)
+          .map((d) => `${d.kind} ${d.doc_no}${d.doc_date ? " " + d.doc_date : ""}`)
+          .join("  ->  ");
+        line(`  ${so}  ->  ${steps}`);
+      }
+      line("");
+      line("  Each line above is what the slip screen will show, and the LAST");
+      line("  invoice or cash sale on it is the number the app would fill in.");
+    }
+  } catch (e) {
+    line(`  The app's walker could not run: ${e.message}`);
+  }
+
+  // -------------------------------------------------------------------------
+  head(6, "WHAT THIS MEANS");
   // -------------------------------------------------------------------------
   if (anyLinked) {
     line("  AutoCount does record where a document came from, and this office");
