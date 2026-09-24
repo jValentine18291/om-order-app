@@ -69,6 +69,7 @@ module.exports = {
     addMachineToSlip: (...a) => dataRepo.slips.addMachineToSlip(...a),
     setMachineState: (...a) => dataRepo.slips.setMachineState(...a),
     undoMachineDecision: (...a) => dataRepo.slips.undoMachineDecision(...a),
+    correctMachine: (...a) => dataRepo.slips.correctMachine(...a),
     setAllMachineStates: (...a) => dataRepo.slips.setAllMachineStates(...a),
     finishRepair: (...a) => dataRepo.slips.finishRepair(...a),
     setMachineDisposal: (...a) => dataRepo.slips.setMachineDisposal(...a),

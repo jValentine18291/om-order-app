@@ -2409,6 +2409,67 @@ function undoMachineDecision(slipNumber, machineId, who = "") {
   return getSlip(slipNumber);
 }
 
+// PUT A MACHINE RIGHT, whatever state it is in and whatever is recorded
+// against it. The one thing in the app that overrules the workflow.
+//
+// setMachineState() moves a machine ALONG and undoMachineDecision() puts it
+// back only when nothing has been recorded. Neither could touch slip 00091: a
+// fogger still marked Received, with no parts and no labour, carrying the
+// comment "No servicing" - which counts as work, so the slip read In Progress
+// and nothing in the app could say otherwise. John asked for this on
+// 24 Sep 2026 after finding it.
+//
+// It refuses only on a CLOSED slip, which is a finished record, the same
+// refusal every other edit makes.
+//
+// EVERYTHING IT UNDOES IS WRITTEN DOWN FIRST. A cleared comment is a
+// technician's words being deleted by somebody else, and the amendment log is
+// what stops that being silent - the old text is kept there and shown on the
+// slip. Without it this would be the only destructive act in the app that
+// leaves no trace.
+function correctMachine(slipNumber, machineId, { state, clear_comment = false, clear_labour = false, who = "" } = {}) {
+  // machineOnSlip() refuses a closed slip and a machine that is not on this
+  // one, so neither is checked again here.
+  const { slip, machine } = machineOnSlip(slipNumber, machineId);
+  const st = String(state || machine.state).toUpperCase();
+  if (!MACHINE_STATES.has(st)) { const e = new Error("Invalid machine state."); e.status = 400; throw e; }
+
+  const name = machine.machine_desc || "Machine";
+  const comment = String(machine.repair_comment || "").trim();
+  const labour = Number(machine.labour_charge) || 0;
+  const changes = [];
+  if (st !== machine.state) changes.push([`${name} — status`, machine.state, st]);
+  if (clear_comment && comment) changes.push([`${name} — repair comment`, comment, ""]);
+  if (clear_labour && labour) changes.push([`${name} — labour charge`, labour.toFixed(2), "0.00"]);
+  if (!changes.length) {
+    const e = new Error("Nothing was changed."); e.status = 400; throw e;
+  }
+
+  // Leaving CONDEMNED clears the disposal with it, exactly as moving a machine
+  // the ordinary way does - the machine is staying, so how it was going to
+  // leave means nothing.
+  const clearDisposal = machine.state === "CONDEMNED" && st !== "CONDEMNED";
+  const insertAmendment = db.prepare(
+    `INSERT INTO slip_amendments (slip_id, field, before, after, changed_by) VALUES (?, ?, ?, ?, ?)`
+  );
+  const tx = db.transaction(() => {
+    db.prepare(
+      `UPDATE slip_machines
+          SET state = ?, decided_by = ?, decided_at = datetime('now','localtime')
+              ${clearDisposal ? ", disposal = '', disposal_at = '', disposal_by = ''" : ""}
+              ${clear_comment ? ", repair_comment = ''" : ""}
+              ${clear_labour ? ", labour_charge = 0" : ""}
+        WHERE id = ?`
+    ).run(st, String(who || "").trim(), machine.id);
+    for (const [field, before, after] of changes) {
+      insertAmendment.run(slip.id, field, String(before), String(after), String(who || "").trim());
+    }
+  });
+  tx();
+  deriveSlipStatus(slip.id);
+  return getSlip(slipNumber);
+}
+
 // Can this machine's status be put back? Answered here rather than in the app,
 // so the button and the rule behind it cannot drift apart.
 function canUndoMachine(machine) {
@@ -2525,7 +2586,7 @@ const slips = {
   poTracking, poStatus, setPoStatus, PO_STATUSES,
   listShipments, getShipment, createShipment, updateShipment,
   allocatedByPo, receivedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
-  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setSlipExtrasNote, slipContacts, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setSlipExtrasNote, slipContacts, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, correctMachine, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 
 // ---- One-off: read the status of every open slip again ---------------------

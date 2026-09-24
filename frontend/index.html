@@ -875,6 +875,33 @@
     </div>
   </div>
 
+  <!-- Correcting a machine whose status is wrong. John's alone - see
+       CORRECTORS in app-functions.js. The one sheet in the app that overrules
+       the workflow, so it says what it will undo before it does it. -->
+  <div class="modal-overlay" id="fix-modal" style="display:none">
+    <div class="modal-sheet modal-sheet-narrow">
+      <div class="modal-head">
+        <div>
+          <strong>Correct this machine</strong>
+          <div class="mm-sub" id="fix-sub"></div>
+        </div>
+        <button class="modal-x" id="fix-close" type="button" aria-label="Close">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label>Status</label>
+          <div class="fix-states" id="fix-states"></div>
+        </div>
+        <div id="fix-clears"></div>
+        <p class="nsm-hint">The slip&rsquo;s own status is worked out from its machines, so it
+          follows whatever you set here. Anything you clear is kept in the slip&rsquo;s
+          change log.</p>
+        <div class="scan-hint" id="fix-status" style="justify-content:flex-start;min-height:20px"></div>
+        <button class="btn-primary" id="fix-go" type="button" style="width:100%">Apply</button>
+      </div>
+    </div>
+  </div>
+
   <!-- The question asked before anything goes to a customer. Filled in by
        confirmAction() in app.js, which also explains why this is a sheet of
        our own rather than a confirm(). -->

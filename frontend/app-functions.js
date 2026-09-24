@@ -57,6 +57,21 @@
     admin:     ["new", "open", "close", "view", "find", "ipl", "quote", "bulk", "requests", "po", "ship"],
   };
 
+  // WHO MAY CORRECT A MACHINE'S STATUS BY HAND.
+  //
+  // John alone, by his own request on 24 Sep 2026. Not "admins": there are six
+  // of those, and this is the one screen in the app that can overwrite what a
+  // technician recorded and delete what they wrote. He wanted it to be him.
+  //
+  // A LIST rather than a comparison, so adding a second person is one word
+  // here and nothing else anywhere. The cost of it being one person is that
+  // nobody can fix a status while he is away - which is his call, and worth
+  // remembering the day somebody is waiting on one.
+  const CORRECTORS = ["john"];
+  function canCorrect(user) {
+    return !!user && CORRECTORS.includes(String(user.id || ""));
+  }
+
   // "People & devices" is deliberately NOT here. It is not a job function that
   // can be handed out - it is the screen that hands the others out, and it
   // belongs to admins by virtue of being an admin. Putting it on this list
@@ -94,5 +109,6 @@
     return IDS.filter((id) => list.includes(id));
   }
 
-  return { FUNCTIONS, IDS, ROLE_DEFAULTS, functionsFor, isDefault, clean };
+  return { FUNCTIONS, IDS, ROLE_DEFAULTS, functionsFor, isDefault, clean,
+           CORRECTORS, canCorrect };
 });

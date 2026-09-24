@@ -2359,6 +2359,37 @@ body.signin-brand .topbar .pill {
   color: var(--primary, #1f6f78);
 }
 .app-update-go:active { background: #e6f0f1; }
+
+/* ---- Correcting a machine's status (John only) --------------------------- */
+/* The link on each machine on the slip screen. Deliberately plain and small:
+   it is a repair tool, not a step in anybody's day, and it sits beside the
+   buttons that ARE. */
+.vs-fix {
+  appearance: none; cursor: pointer; margin-top: 8px;
+  border: 1px dashed #cfdadd; background: transparent; border-radius: 8px;
+  padding: 5px 11px; font: inherit; font-size: .76rem; font-weight: 600;
+  color: var(--ink-faint, #78868c);
+}
+.vs-fix:active { background: var(--surface-2, #f6f9fa); }
+/* One row per state, the same shape as every other pick-one list in the app. */
+.fix-state {
+  display: flex; align-items: flex-start; gap: 11px; padding: 10px 12px;
+  border: 1px solid var(--line, #e3e6e8); border-radius: 10px; margin-bottom: 8px;
+  background: var(--surface, #fff); cursor: pointer;
+}
+.fix-state input { margin-top: 3px; flex: none; width: 18px; height: 18px; }
+.fix-state-name { display: block; font-size: .92rem; font-weight: 600; }
+.fix-state-hint { display: block; font-size: .76rem; color: var(--ink-faint, #78868c); margin-top: 1px; }
+/* What will be deleted, and the words themselves. Amber, because this is the
+   half of the sheet that destroys something. */
+.fix-clear {
+  display: flex; align-items: flex-start; gap: 11px; margin-top: 12px;
+  padding: 10px 12px; border-radius: 10px;
+  background: #FFF6E5; border-left: 3px solid #E0A22A; color: #8A5B00;
+  font-size: .82rem; cursor: pointer;
+}
+.fix-clear input { margin-top: 3px; flex: none; width: 18px; height: 18px; }
+.fix-clear-was { display: block; margin-top: 3px; font-style: italic; opacity: .85; }
 .pu-delete {
   flex: 0 0 auto; min-height: 40px; padding: 0 14px; border-radius: 999px;
   border: 1px solid #e6b0b0; background: var(--surface);

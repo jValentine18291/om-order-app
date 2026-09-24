@@ -5683,6 +5683,10 @@ async function onViewSlipChosen(slipNumber) {
     wrap.innerHTML = renderSlipDetail(slip);
     wireVsStatusActions(slipNumber);
     wireDecideButtons(wrap, slipNumber);
+    // John's correction link, one per machine. The slip is already in hand, so
+    // the sheet is opened from it rather than fetching it a second time.
+    wrap.querySelectorAll("[data-fix]").forEach((b) =>
+      b.addEventListener("click", () => openFixMachine(slip, b.dataset.fix)));
     const editBtn = document.getElementById("vs-edit");
     if (editBtn) editBtn.addEventListener("click", () => openSlipEdit(slip));
     const repairBtn2 = document.getElementById("vs-repair");
@@ -5844,6 +5848,12 @@ function renderSlipDetail(slip) {
     // that has nothing to do with whether the customer wants it back.
     if (canCondemn() && live && CONDEMNABLE.includes(m.state)) {
       acts = acts.concat([["CONDEMNED", "Too expensive — condemn", "decide-condemn"]]);
+    }
+    // John's correction link. Offered on every machine including a closed
+    // slip's - where it opens and then refuses, which is a clearer answer than
+    // a link that is not there at all.
+    if (canCorrectMachines()) {
+      html += `<button type="button" class="vs-fix" data-fix="${m.id}">Correct status</button>`;
     }
     if (acts.length) {
       html += `<div class="decide-row" data-decide="${m.id}">${acts.map(([to, label, cls]) =>
@@ -6551,6 +6561,128 @@ $("vsr-confirm").addEventListener("click", async () => {
     toast(e.message || "Could not save the edit", "err");
     btn.disabled = false;
   }
+});
+
+// ---- Correcting a machine whose status is wrong -----------------------------
+// John's, and nobody else's - see CORRECTORS in app-functions.js, which the
+// server reads too so the button and the rule cannot drift apart.
+//
+// Everything else in the app moves a machine ALONG. This is the one thing that
+// can move it anywhere, and clear what is recorded against it, for the case
+// where the truth on the bench and the status on the screen have parted
+// company. Slip 00091 is why: a fogger still marked Received, carrying the
+// comment "No servicing" and nothing else, which made the slip read In
+// Progress with no way in the app to say otherwise.
+function canCorrectMachines() {
+  return !!(window.OM_FUNCTIONS && OM_FUNCTIONS.canCorrect(getUser()));
+}
+
+// The six a machine can be in, in the order it normally travels.
+const FIX_STATES = [
+  ["RECEIVED", "Received", "In the workshop, nothing decided"],
+  ["AWAITING_QUOTE", "Awaiting Quote", "Sales to price it and call the customer"],
+  ["QUOTED", "Quoted", "Waiting on the customer's answer"],
+  ["TO_REPAIR", "To Repair", "Go ahead — approved, or no quote needed"],
+  ["REPAIRED", "Repaired", "Finished"],
+  ["CONDEMNED", "Condemned", "The customer does not want it repaired"],
+];
+
+let fixMachine = null;
+
+function openFixMachine(slip, machineId) {
+  const m = (slip.machines || []).find((x) => x.id === Number(machineId));
+  if (!m) return;
+  fixMachine = { slip: slip.slip_number, id: m.id };
+  $("fix-sub").textContent = `${m.machine_desc}${m.serial_no ? " · S/N " + m.serial_no : ""}`;
+  $("fix-status").textContent = "";
+
+  $("fix-states").innerHTML = FIX_STATES.map(([id, label, hint]) => `
+    <label class="fix-state">
+      <input type="radio" name="fix-state" value="${escapeAttr(id)}"${m.state === id ? " checked" : ""}>
+      <span>
+        <span class="fix-state-name">${escapeHtml(label)}</span>
+        <span class="fix-state-hint">${escapeHtml(hint)}</span>
+      </span>
+    </label>`).join("");
+
+  // Only offered where there is something to clear, and it always says WHAT -
+  // "clear the repair comment" with the comment out of sight is somebody
+  // deleting a sentence they cannot read.
+  const comment = String(m.repair_comment || "").trim();
+  const labour = Number(m.labour_charge) || 0;
+  const clears = [];
+  if (comment) {
+    clears.push(`
+      <label class="fix-clear">
+        <input type="checkbox" id="fix-clear-comment">
+        <span><b>Also clear the repair comment</b>
+          <span class="fix-clear-was">“${escapeHtml(comment)}”</span></span>
+      </label>`);
+  }
+  if (labour > 0) {
+    clears.push(`
+      <label class="fix-clear">
+        <input type="checkbox" id="fix-clear-labour">
+        <span><b>Also clear the labour charge</b>
+          <span class="fix-clear-was">${money(labour)}</span></span>
+      </label>`);
+  }
+  // A machine with parts on it says so rather than offering to remove them:
+  // a part is a line on a customer's bill and belongs to the screen that can
+  // price and edit it, not to a status correction.
+  const parts = (m.parts || []).length;
+  if (parts) {
+    clears.push(`<p class="nsm-hint">${parts} part${parts === 1 ? "" : "s"} recorded against this
+      machine. Those are not touched here — remove them in Open Service if they are wrong.</p>`);
+  }
+  $("fix-clears").innerHTML = clears.join("");
+
+  $("fix-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+function closeFixMachine() {
+  $("fix-modal").style.display = "none";
+  document.body.style.overflow = "";
+  fixMachine = null;
+}
+$("fix-close").addEventListener("click", closeFixMachine);
+$("fix-modal").addEventListener("click", (e) => { if (e.target === $("fix-modal")) closeFixMachine(); });
+
+$("fix-go").addEventListener("click", async () => {
+  if (!fixMachine) return;
+  const picked = document.querySelector('input[name="fix-state"]:checked');
+  if (!picked) { $("fix-status").innerHTML = statusErr("Pick a status."); return; }
+  const clearComment = !!($("fix-clear-comment") && $("fix-clear-comment").checked);
+  const clearLabour = !!($("fix-clear-labour") && $("fix-clear-labour").checked);
+
+  const me = getUser();
+  const btn = $("fix-go");
+  btn.disabled = true;
+  $("fix-status").innerHTML = statusInfo("Saving…");
+  try {
+    await api(`/api/slips/${encodeURIComponent(fixMachine.slip)}/machines/${fixMachine.id}/correct`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        state: picked.value,
+        clear_comment: clearComment,
+        clear_labour: clearLabour,
+        who: initialsFor(me),
+        // Who is asking. Worth exactly what the browser is worth until the
+        // login switch is on, at which point the server reads the session and
+        // ignores this - see needCorrector().
+        user_id: me ? me.id : "",
+      }),
+    });
+    const n = fixMachine.slip;
+    closeFixMachine();
+    toast("Machine corrected", "ok");
+    onViewSlipChosen(n);
+  } catch (e) {
+    $("fix-status").innerHTML = statusErr(e.message || "Could not correct the machine");
+  }
+  btn.disabled = false;
 });
 
 // ---- Sales Order block ------------------------------------------------------

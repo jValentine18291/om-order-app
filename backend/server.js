@@ -1925,6 +1925,44 @@ async function handleMachineState(req, res) {
 }
 app.patch("/api/slips/:slip/machines/:id/state", handleMachineState);
 
+// CORRECTING A MACHINE'S STATUS BY HAND. John's, and nobody else's.
+//
+// HOW STRONG THIS IS, said plainly. With signing in switched ON the answer
+// comes from the session and is real - a phone cannot claim to be John. With
+// it OFF, which is how the server still runs, nothing can prove who is asking
+// and this falls back to what the browser says about itself. That is exactly
+// as strong as every other role check in the app today, and no stronger.
+// Turning the login switch on is what makes it a boundary rather than a
+// label; until then it keeps the button off everybody else's screen, which is
+// most of the point.
+function needCorrector(req, res) {
+  const FN = require("../frontend/app-functions.js");
+  if (auth.requireLogin()) {
+    if (FN.canCorrect(req.user)) return true;
+  } else if (FN.canCorrect({ id: String((req.body || {}).user_id || "") })) {
+    return true;
+  }
+  res.status(403).json({ error: "Only John can correct a machine's status." });
+  return false;
+}
+
+app.post("/api/slips/:slip/machines/:id/correct", (req, res) => {
+  if (!needCorrector(req, res)) return;
+  try {
+    const b = req.body || {};
+    res.json(data.slips.correctMachine(req.params.slip, Number(req.params.id), {
+      state: b.state,
+      clear_comment: !!b.clear_comment,
+      clear_labour: !!b.clear_labour,
+      who: b.who || "",
+    }));
+  } catch (err) {
+    if ([400, 404, 409].includes(err.status)) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/slips/:slip/machines/:id/correct]", err);
+    res.status(500).json({ error: err.message || "Could not correct the machine" });
+  }
+});
+
 // Put a machine's status back to where it started, for the decision nobody
 // meant to make. Its own route rather than a state of "RECEIVED" sent to the
 // one above, because that route moves a machine along and asks no questions -
