@@ -1168,6 +1168,20 @@
           <div class="job-btns" id="job-btns"></div>
         </div>
 
+        <!-- Jobs only a fogger gets: the HS-B6 plug and the core wire. Its
+             own block rather than more buttons under Common jobs, because
+             those apply to every machine and these two do not - the same
+             reason the tubes below have their own. Edit common-jobs.js to
+             change a price or add another; `foggers: true` is what puts a job
+             here instead of up there. -->
+        <div class="tube-pick" id="fjob-pick" style="display:none">
+          <div class="tube-pick-head">
+            <strong>Fogger parts</strong>
+            <span>Tap one to add it to this machine</span>
+          </div>
+          <div class="job-btns" id="fjob-btns"></div>
+        </div>
+
         <div class="tube-pick" id="tube-pick" style="display:none">
           <div class="tube-pick-head">
             <strong>Fogger tubes</strong>

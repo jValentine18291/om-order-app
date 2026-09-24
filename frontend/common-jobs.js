@@ -62,7 +62,53 @@
     // the Sales Order as "*No servicing", the same asterisk any other repair
     // comment gets, because that is what it is.
     { id: "NOSVC", title: "No Servicing", comment: "No servicing" },
+
+    // ---- Foggers only -----------------------------------------------------
+    // `foggers: true` keeps these two off every chainsaw and trimmer job. An
+    // HS-B6 plug belongs to a PulsFOG and nothing else, and the buttons above
+    // are already five wide.
+    //
+    // They are here rather than in fogger-tubes.js because they are ordinary
+    // jobs - one code, one price, one piece - and a tube is not: a tube is a
+    // FRACTION of a roll and that file exists to do that arithmetic. Two
+    // tables for "a button that adds a priced line" would be one table too
+    // many.
+    //
+    // THE SPARK PLUG IS A REAL CATALOGUE PART, the first of these that is.
+    // AutoCount holds it as M0815SK ESB7, "PC Spark Plug HS-B6" - so the line
+    // carries AutoCount's wording, not the button's, and is not a free-text
+    // line. John's call, 24 Sep 2026, and the right one: a technician who
+    // SCANS the same plug gets AutoCount's wording, and one part reading two
+    // ways on one document is the sort of thing a customer queries.
+    // addJobToMachine() works that out from the code rather than from a flag
+    // here - see isFreeTextPart().
+    //
+    // The price is ours, as it is for the tubes. $4.00 is what the workshop
+    // charges; whatever AutoCount has against the item is not.
+    { id: "PLUG", title: "HS-B6 Spark Plug",
+      code: "M0815SK ESB7",       qty: 1, price: 4.00, foggers: true },
+    // A8 SPARE PARTS - plural, as the catalogue holds it. John wrote "A8 SPARE
+    // PART"; the code that resolves is the plural one, which is also what the
+    // Yellow Fuel Pipe above uses. A placeholder code, so this line DOES carry
+    // the button's wording: AutoCount calls it "Spare Parts Of Equipment",
+    // which tells a customer nothing.
+    { id: "CORE", title: "Core Wire",
+      code: "A8 SPARE PARTS",     qty: 1, price: 3.00, foggers: true },
   ];
+
+  // The everyday buttons, and the ones only a fogger gets. Split here rather
+  // than in the screen, so "which machines is this on" is answered in the same
+  // file that says what it costs.
+  function everyday() {
+    var out = [];
+    for (var i = 0; i < JOBS.length; i++) if (!JOBS[i].foggers) out.push(JOBS[i]);
+    return out;
+  }
+  function foggerOnly() {
+    var out = [];
+    for (var i = 0; i < JOBS.length; i++) if (JOBS[i].foggers) out.push(JOBS[i]);
+    return out;
+  }
 
   function byId(id) {
     for (var i = 0; i < JOBS.length; i++) {
@@ -115,7 +161,8 @@
     return bad;
   }
 
-  var API = { list: JOBS, byId: byId, zeroIsDeliberate: zeroIsDeliberate, check: check };
+  var API = { list: JOBS, everyday: everyday, foggerOnly: foggerOnly,
+              byId: byId, zeroIsDeliberate: zeroIsDeliberate, check: check };
   if (typeof window !== "undefined") window.OM_JOBS = API;
   if (typeof module !== "undefined" && module.exports) module.exports = API;
 })();

@@ -44,7 +44,33 @@ check("it checks out", J.check(), []);
 check("the jobs, in the order they were asked for",
   J.list.map((j) => j.title),
   ["Welding", "Change Engine Oil", "Service Carburetor & Labour", "Yellow Fuel Pipe",
+   "No Servicing", "HS-B6 Spark Plug", "Core Wire"]);
+
+console.log("\n-- which machines each button is on --");
+// Two of them are fogger parts and must not appear on a chainsaw job. The
+// split is answered in this file rather than on the screen, so that "what does
+// it cost" and "who sees it" cannot drift apart.
+check("the everyday buttons, on every machine",
+  J.everyday().map((j) => j.title),
+  ["Welding", "Change Engine Oil", "Service Carburetor & Labour", "Yellow Fuel Pipe",
    "No Servicing"]);
+check("and the two only a fogger gets",
+  J.foggerOnly().map((j) => [j.title, j.code, j.price]),
+  [["HS-B6 Spark Plug", "M0815SK ESB7", 4], ["Core Wire", "A8 SPARE PARTS", 3]]);
+check("between them that is every job, counted once",
+  J.everyday().length + J.foggerOnly().length, J.list.length);
+// The plug is the first job on a REAL catalogue code rather than an A6-A8
+// placeholder, which is what decides whose description goes on the line -
+// see addJobToMachine(). A5-A8 and MISC are the placeholder codes.
+const placeholder = (c) => /^A[5-8]\b/.test(c) || c.startsWith("MISC");
+check("the plug is a real catalogue part, so the line takes AutoCount's wording",
+  placeholder(J.byId("PLUG").code), false);
+check("the core wire is a placeholder code, so the line takes the button's",
+  placeholder(J.byId("CORE").code), true);
+// A8 SPARE PARTS, plural - the spelling the catalogue actually holds, and the
+// same one the Yellow Fuel Pipe uses. Singular does not resolve.
+check("and it uses the same A8 code the fuel pipe does",
+  J.byId("CORE").code, J.byId("PIPE").code);
 
 // TWO KINDS, and the difference is the whole of what keeps one off a bill.
 // A priced job adds a line; a comment job writes a note and adds nothing.
@@ -53,10 +79,11 @@ check("the jobs, in the order they were asked for",
 // price somebody forgot to fill in.
 const priced = J.list.filter((j) => !j.comment);
 const notes = J.list.filter((j) => j.comment);
-check("four of them add a priced line", priced.map((j) => j.title),
-  ["Welding", "Change Engine Oil", "Service Carburetor & Labour", "Yellow Fuel Pipe"]);
-check("at the prices given", priced.map((j) => j.price), [30, 9, 0, 3]);
-check("one of each", priced.map((j) => j.qty), [1, 1, 1, 1]);
+check("six of them add a priced line", priced.map((j) => j.title),
+  ["Welding", "Change Engine Oil", "Service Carburetor & Labour", "Yellow Fuel Pipe",
+   "HS-B6 Spark Plug", "Core Wire"]);
+check("at the prices given", priced.map((j) => j.price), [30, 9, 0, 3, 4, 3]);
+check("one of each", priced.map((j) => j.qty), [1, 1, 1, 1, 1, 1]);
 check("and one writes a comment instead", notes.map((j) => [j.title, j.comment]),
   [["No Servicing", "No servicing"]]);
 check("which carries no code, no price and no quantity to bill",

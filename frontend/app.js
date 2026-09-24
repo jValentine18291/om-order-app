@@ -3626,6 +3626,12 @@ async function editPartDescription(partId, current) {
 // buttons lay themselves out to however many are in that table.
 function renderJobPicker() {
   const box = $("job-pick");
+  // Hidden FIRST, before anything that can return early. Two paths below do -
+  // no jobs table at all, and a jobs table that failed its own check - and
+  // either one leaving the previous machine's fogger buttons on screen would
+  // be live buttons sitting under a notice saying the prices are wrong.
+  const fbox = $("fjob-pick");
+  if (fbox) { fbox.style.display = "none"; $("fjob-btns").innerHTML = ""; }
   if (!box || !window.OM_JOBS) return;
   // Every machine, so there is nothing to decide about which - only whether
   // the table itself is sound. A price typed wrong here reaches a customer's
@@ -3638,12 +3644,27 @@ function renderJobPicker() {
         escapeHtml(bad.join("; "))}. Tell the office before using these.</div>`;
     return;
   }
-  $("job-btns").innerHTML = window.OM_JOBS.list.map((j) => `
+  // Only a fogger gets the second group. Same question the tube picker asks,
+  // asked of the same function, so a machine cannot be a fogger for one block
+  // and not the other.
+  const mine = window.OM_JOBS.foggerOnly();
+  if (fbox && mine.length && window.FOGGER_TUBES &&
+      window.FOGGER_TUBES.isFogger(currentMachine())) {
+    $("fjob-btns").innerHTML = mine.map(jobButtonHtml).join("");
+    fbox.style.display = "";
+  }
+
+  $("job-btns").innerHTML = window.OM_JOBS.everyday().map(jobButtonHtml).join("");
+}
+
+// One button, whichever group it is in.
+function jobButtonHtml(j) {
+  return `
     <button type="button" class="tube-btn job-btn${j.comment ? " job-btn-note" : ""}" data-job="${escapeAttr(j.id)}">
       ${escapeHtml(j.title)}
       <span class="tube-each">${j.comment ? "adds a comment"
                                 : j.price > 0 ? money(j.price) : "no charge"}</span>
-    </button>`).join("");
+    </button>`;
 }
 
 // A job that is a comment: "No Servicing", and anything like it added later.
@@ -3693,20 +3714,37 @@ async function addJobToMachine(id) {
   try {
     const item = await lookupItem(job.code);
     if (!item || !item.item_code) throw new Error("not found");
+    // WHOSE WORDS GO ON THE LINE depends on the code, not on the button.
+    //
+    // A6 to A8 and MISC stand for something the catalogue has no number for,
+    // so the button's title is the only thing that says what was done -
+    // "Warehouse Service" twice at two prices tells a customer nothing.
+    //
+    // A REAL part is the other way round. The HS-B6 plug is M0815SK ESB7 in
+    // AutoCount and a technician who scans it rather than tapping the button
+    // gets AutoCount's wording - so the button has to give the same, or one
+    // part reads two ways on one document. John's call, 24 Sep 2026.
+    //
+    // Asked of isFreeTextPart(), which is the rule the rest of the app already
+    // uses, rather than a second flag in the jobs table that could disagree
+    // with it.
+    const placeholder = isFreeTextPart(item.item_code, item.description);
     session.pendingParts.push({
       item_code: item.item_code,
-      // The job's own words, not AutoCount's - two of these share one code and
-      // "Warehouse Service" twice on an invoice says nothing. A6 to A8 are
-      // free-text codes, so this is the description the line is meant to have.
-      description: job.title,
+      description: placeholder ? job.title : (item.description || job.title),
       uom: item.uom || "NOS",
+      // The workshop's price either way. What AutoCount holds against the item
+      // is not what OM charges for fitting it - the same reason the tube
+      // buttons carry the sheet's roll price.
       unit_price: job.price,
       quantity: job.qty,
       // What keeps a $30 weld and a $0 carburettor service apart, both being
       // A7. Same field the tubes use.
       variant: job.id,
       technician: session.technician,
-      free_text: true,
+      // A real part is not a free-text line, and must not be treated as one:
+      // it has a catalogue description already and nobody needs to type it.
+      free_text: placeholder,
     });
     toast(`Added ${job.title} — tap Save when done`, "ok");
     renderMachineParts();
@@ -3718,6 +3756,11 @@ async function addJobToMachine(id) {
 }
 
 $("job-btns").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-job]");
+  if (b) addJobToMachine(b.dataset.job);
+});
+// The fogger block's buttons are the same buttons, handled the same way.
+$("fjob-btns").addEventListener("click", (e) => {
   const b = e.target.closest("[data-job]");
   if (b) addJobToMachine(b.dataset.job);
 });
