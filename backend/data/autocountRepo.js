@@ -1167,6 +1167,87 @@ module.exports.getPurchaseOrder = getPurchaseOrder;
 
 // Outstanding quantity per item code, plus the PO numbers it sits on.
 // Returns a Map, or null when Purchase Orders cannot be read.
+// WHAT A DOCUMENT TURNED INTO. One step of the chain.
+//
+// Given some document numbers, hand back every Delivery Order, Invoice and
+// Cash Sale whose lines say they came from one of them. AutoCount records that
+// on the TARGET's detail rows as FromDocType + FromDocNo, so this is a plain
+// lookup on a document NUMBER - no key joins, nothing to resolve.
+//
+// Measured on OM's own database, 24 Sep 2026: of 227,460 invoice lines,
+// 169,848 carry a FromDocNo. It is how the office works, not a feature nobody
+// uses.
+const CHAIN_DOCS = [
+  ["DO", "DODTL", "DO"],
+  ["IV", "IVDTL", "INV"],
+  ["CS", "CSDTL", "CS"],
+];
+
+async function documentsFrom(docNos) {
+  const list = [...new Set((docNos || []).map((d) => String(d || "").trim()).filter(Boolean))];
+  if (!list.length) return [];
+  const out = [];
+  // Chunked like getOnOrder, for the same reason: a parameter list has a
+  // ceiling and a slip could in principle name a lot of documents.
+  for (let i = 0; i < list.length; i += 100) {
+    const chunk = list.slice(i, i + 100);
+    const params = {};
+    chunk.forEach((c, j) => { params[`c${j}`] = c; });
+    const inList = chunk.map((_, j) => `@c${j}`).join(",");
+    const parts = CHAIN_DOCS.map(([master, detail, kind]) =>
+      `SELECT DISTINCT '${kind}' AS Kind, m.DocNo AS DocNo, m.DocDate AS DocDate,
+              d.FromDocNo AS FromNo, d.FromDocType AS FromType
+         FROM [${detail}] d JOIN [${master}] m ON m.DocKey = d.DocKey
+        WHERE d.FromDocNo IN (${inList})`);
+    const rows = await query(parts.join(" UNION ALL "), params);
+    for (const r of rows) {
+      out.push({
+        kind: String(r.Kind),
+        doc_no: String(r.DocNo || "").trim(),
+        doc_date: r.DocDate ? String(r.DocDate).slice(0, 10) : "",
+        from_doc_no: String(r.FromNo || "").trim(),
+        from_type: String(r.FromType || "").trim(),
+      });
+    }
+  }
+  return out;
+}
+
+// FOLLOW THE WHOLE CHAIN, not one step.
+//
+// THE THING THAT MAKES THIS NECESSARY: an invoice almost never points at the
+// Sales Order. It points at the DELIVERY ORDER. On OM's database 169,314
+// invoice lines came from a DO and 46 came straight from an SO. So a one-step
+// lookup would find delivery orders and silently miss nearly every invoice -
+// which is the document that matters most.
+//
+// SO-2609-048 -> DO-2609-229 -> INV-2609-0140
+//
+// The step function is passed in rather than called directly so the walking
+// can be tested without a database - see test-doc-chain.js. Everything
+// interesting here is the walk; the SQL above is one lookup.
+//
+// Depth is capped and everything seen is remembered, so a document that
+// somehow pointed back at its own source cannot loop.
+async function chainFrom(startDocNos, step = documentsFrom, maxDepth = 5) {
+  const seen = new Set((startDocNos || []).map((d) => String(d || "").trim()).filter(Boolean));
+  const found = [];
+  let frontier = [...seen];
+  for (let depth = 0; depth < maxDepth && frontier.length; depth++) {
+    const rows = await step(frontier);
+    const next = [];
+    for (const r of rows || []) {
+      const no = String((r && r.doc_no) || "").trim();
+      if (!no || seen.has(no)) continue;   // already have it, or it is a start
+      seen.add(no);
+      found.push({ ...r, depth: depth + 1 });
+      next.push(no);
+    }
+    frontier = next;
+  }
+  return found;
+}
+
 async function getOnOrder(codes) {
   const list = [...new Set((codes || []).map((c) => String(c || "").trim()).filter(Boolean))];
   if (!list.length) return new Map();
@@ -1216,6 +1297,8 @@ async function getOnOrder(codes) {
   return out;
 }
 
+module.exports.documentsFrom = documentsFrom;
+module.exports.chainFrom = chainFrom;
 module.exports.getOnOrder = getOnOrder;
 module.exports.purchaseOrderShape = purchaseOrderShape;
 

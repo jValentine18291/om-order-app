@@ -2390,6 +2390,25 @@ body.signin-brand .topbar .pill {
 }
 .fix-clear input { margin-top: 3px; flex: none; width: 18px; height: 18px; }
 .fix-clear-was { display: block; margin-top: 3px; font-style: italic; opacity: .85; }
+
+/* ---- What an order became in AutoCount ---------------------------------- */
+/* SO-2609-048 -> DO-2609-229 -> INV-2609-0140, under the Sales Order line.
+   Quiet: it is a record of what has already happened, not something to act on.
+   Wraps on a phone rather than running off the card. */
+.vs-chain:empty { display: none; }
+.vs-chain { margin-top: 6px; }
+.vs-chain-row {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+  font-size: .78rem; color: var(--ink-soft, #55665f); margin-top: 4px;
+}
+.vs-chain-so { font-weight: 700; color: var(--ink-faint, #78868c); }
+.vs-chain-doc {
+  font-weight: 700; color: var(--ink, #12211c);
+  background: var(--surface-2, #f6f9fa); border: 1px solid var(--line, #e3e6e8);
+  border-radius: 6px; padding: 2px 8px;
+}
+.vs-chain-date { font-weight: 600; color: var(--ink-faint, #78868c); margin-left: 6px; }
+.vs-chain-arrow { color: var(--ink-faint, #78868c); }
 .pu-delete {
   flex: 0 0 auto; min-height: 40px; padding: 0 14px; border-radius: 999px;
   border: 1px solid #e6b0b0; background: var(--surface);

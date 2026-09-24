@@ -1925,6 +1925,78 @@ async function handleMachineState(req, res) {
 }
 app.patch("/api/slips/:slip/machines/:id/state", handleMachineState);
 
+// WHAT THIS SLIP'S ORDERS BECAME IN AUTOCOUNT, refreshed.
+//
+// Called by the app when somebody opens a slip - John's choice of moment, and
+// the cheap one: it asks only about the slip being looked at, rather than
+// sweeping the whole book all day.
+//
+// ITS OWN ROUTE, not part of GET /api/slips/:slip. Reading a slip must stay
+// fast and must never fail because SQL Server is busy or off; this can take a
+// moment and is allowed to come back with nothing. The screen shows the slip
+// first and the chain when it arrives.
+//
+// EVERY FAILURE IS SILENT AND HARMLESS. No AutoCount, no answer, no change -
+// and Close Service still takes a number typed by hand exactly as it does
+// today.
+app.post("/api/slips/:slip/documents/refresh", async (req, res) => {
+  try {
+    const slipNumber = req.params.slip;
+    const orders = await data.slips.getSlipOrders(slipNumber);
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+
+    // Whatever is already known, so the screen has something either way.
+    const known = () => (orders || []).map((o) => ({
+      so_number: o.so_number,
+      autocount_doc_no: o.autocount_doc_no || "",
+      closing_ref: o.closing_ref || "",
+      documents: data.slips.orderDocuments(o.id),
+    }));
+
+    if (itemsSource !== "autocount") {
+      return res.json({ supported: false, orders: known(), filled: [] });
+    }
+
+    const acRepo = require("./data/autocountRepo");
+    let asked = 0;
+    for (const o of orders || []) {
+      const start = String(o.autocount_doc_no || "").trim();
+      if (!start) continue;                       // never reached AutoCount
+      try {
+        const found = await acRepo.chainFrom([start]);
+        data.slips.recordOrderDocuments(o.id, found);
+        asked++;
+      } catch (e) {
+        // One order failing is not the others failing.
+        console.error(`[documents/refresh] ${o.so_number}:`, e.message);
+      }
+    }
+
+    // Only after everything found is written down, so the number chosen is the
+    // best one available rather than the first one that happened to arrive.
+    const { filled } = asked
+      ? data.slips.autoInvoiceFromDocuments(slipNumber, "AutoCount")
+      : { filled: [] };
+
+    res.json({
+      supported: true,
+      orders: await (async () => {
+        const fresh = await data.slips.getSlipOrders(slipNumber);
+        return (fresh || []).map((o) => ({
+          so_number: o.so_number,
+          autocount_doc_no: o.autocount_doc_no || "",
+          closing_ref: o.closing_ref || "",
+          documents: data.slips.orderDocuments(o.id),
+        }));
+      })(),
+      filled,
+    });
+  } catch (err) {
+    console.error("[POST /api/slips/:slip/documents/refresh]", err);
+    res.json({ supported: false, orders: [], filled: [] });
+  }
+});
+
 // CORRECTING A MACHINE'S STATUS BY HAND. John's, and nobody else's.
 //
 // HOW STRONG THIS IS, said plainly. With signing in switched ON the answer

@@ -1414,6 +1414,129 @@ function strandedCondemned(slipId) {
 // created - so this is a person saying it did. Only after this does anyone
 // ring the customer to come and collect, which is why it is its own step and
 // not folded into closing.
+// The documents an order has turned into, oldest step first.
+function orderDocuments(orderId) {
+  return db.prepare(
+    `SELECT doc_type, doc_no, doc_date, from_doc_no, depth, first_seen
+       FROM order_documents WHERE order_id = ? ORDER BY depth, doc_no`
+  ).all(orderId);
+}
+
+// WHAT AUTOCOUNT SAYS THIS ORDER BECAME, written down.
+//
+// Called with whatever chainFrom() found. Purely additive: a document already
+// known is left alone, so this can run on every slip open for ever without
+// churning. Nothing is ever deleted here - a document that vanished from
+// AutoCount is a question for a person, not something to quietly forget.
+//
+// AND IT DOES NOT TOUCH closing_ref. That field is what somebody typed, or
+// what the automatic step below set, and syncing must never overwrite a
+// correction - John asked for the number to stay editable, and an edit that
+// is undone the next time the slip is opened is not editable.
+function recordOrderDocuments(orderId, docs) {
+  const ins = db.prepare(
+    `INSERT OR IGNORE INTO order_documents (order_id, doc_type, doc_no, doc_date, from_doc_no, depth)
+     VALUES (?, ?, ?, ?, ?, ?)`
+  );
+  let added = 0;
+  const tx = db.transaction(() => {
+    for (const d of docs || []) {
+      const no = String((d && d.doc_no) || "").trim();
+      if (!no) continue;
+      const r = ins.run(orderId, String(d.kind || d.doc_type || "").trim().toUpperCase(),
+                        no, String(d.doc_date || ""), String(d.from_doc_no || ""),
+                        Number(d.depth) || 1);
+      added += r.changes || 0;
+    }
+  });
+  tx();
+  return added;
+}
+
+// WHICH OF THEM CLOSES THE BILLING.
+//
+// John's answer, 24 Sep 2026: all three count - a Delivery Order, an Invoice
+// and a Cash Sale each mean the customer is being billed. The slip does not
+// CLOSE on any of them; that still waits for somebody to press "Collected &
+// Closed" when the machine actually leaves.
+//
+// The invoice wins where there is one, because it is the document the customer
+// pays against and the one Sales would have typed in by hand. A Delivery Order
+// stands in until the invoice catches up - deliveries are raised first and the
+// invoice often follows days later.
+const BILLING_RANK = { INV: 3, CS: 2, DO: 1 };
+function billingDocument(docs) {
+  let best = null;
+  for (const d of docs || []) {
+    const rank = BILLING_RANK[String(d.doc_type || "").toUpperCase()] || 0;
+    if (!rank) continue;
+    if (!best || rank > BILLING_RANK[best.doc_type] ||
+        (rank === BILLING_RANK[best.doc_type] && String(d.doc_no) > String(best.doc_no))) {
+      best = d;
+    }
+  }
+  return best;
+}
+
+// FILL IN A BILLING NUMBER NOBODY HAS TYPED, from what AutoCount said.
+//
+// Reads only this app's own table, which recordOrderDocuments() has already
+// filled from AutoCount - so everything below can be tested without a
+// database, and a catalogue outage costs the sync and not this.
+//
+// THE ONE RULE THAT MATTERS: it only ever fills a BLANK. An order that already
+// carries a closing reference is left exactly as it is, whether that number
+// was typed by Sales or put there by this function last week.
+//
+// John asked for automatic but still editable (24 Sep 2026), and those two
+// only hold together if the automatic half knows when to stop. setSlipInvoiced
+// overwrites unconditionally - correctly, because a person asked it to - so
+// calling that here would undo a correction every time somebody opened the
+// slip, and the number would appear to fix itself back to the wrong one.
+//
+// A CLOSED slip is finished and is never touched. A slip does not close on any
+// of these either: that waits for "Collected & Closed", when the machine has
+// actually gone back - John's call, and the two steps already worked that way.
+function autoInvoiceFromDocuments(slipNumber, who = "AutoCount") {
+  const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
+  if (!slip || slip.status === "CLOSED") return { filled: [] };
+
+  const orders = db.prepare(
+    "SELECT * FROM orders WHERE notes = ? ORDER BY id"
+  ).all(`S/S: ${slipNumber}`);
+
+  const filled = [];
+  const tx = db.transaction(() => {
+    for (const o of orders) {
+      if (String(o.closing_ref || "").trim()) continue;      // somebody has one already
+      const doc = billingDocument(orderDocuments(o.id));
+      if (!doc) continue;
+      db.prepare(
+        `UPDATE orders SET closing_ref = ?, invoiced_by = ?,
+                           invoiced_at = datetime('now','localtime')
+          WHERE id = ?`
+      ).run(doc.doc_no, String(who || "").trim(), o.id);
+      filled.push({ so_number: o.so_number, doc_type: doc.doc_type, doc_no: doc.doc_no });
+    }
+    if (!filled.length) return;
+    // The slip follows its orders, as it does when Sales type a number: one
+    // order billed is enough for "Invoice Created", because the customer is
+    // being called about that batch. Its own closing_ref is only set when it
+    // has none - the same rule, one level up.
+    const last = filled[filled.length - 1];
+    const keepRef = String(slip.closing_ref || "").trim();
+    db.prepare(
+      `UPDATE service_slips
+          SET status = CASE WHEN status = 'CLOSED' THEN status ELSE 'INVOICED' END,
+              closing_ref = ?, invoiced_by = ?,
+              invoiced_at = COALESCE(invoiced_at, datetime('now','localtime'))
+        WHERE id = ?`
+    ).run(keepRef || last.doc_no, keepRef ? String(slip.invoiced_by || "") : String(who || "").trim(), slip.id);
+  });
+  tx();
+  return { filled };
+}
+
 function setSlipInvoiced(slipNumber, ref, who = "", soNumber = "") {
   const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
@@ -2586,6 +2709,7 @@ const slips = {
   poTracking, poStatus, setPoStatus, PO_STATUSES,
   listShipments, getShipment, createShipment, updateShipment,
   allocatedByPo, receivedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
+  orderDocuments, recordOrderDocuments, billingDocument, autoInvoiceFromDocuments,
   createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setSlipExtrasNote, slipContacts, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, correctMachine, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 

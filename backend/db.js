@@ -98,6 +98,28 @@ db.exec(`
     created_at    TEXT    DEFAULT (datetime('now','localtime'))
   );
 
+  -- WHAT AN ORDER BECAME IN AUTOCOUNT: its Delivery Order, its Invoice, its
+  -- Cash Sale. One row per document found, so a chain is several rows and an
+  -- order that became two invoices is two rows rather than a lost one.
+  --
+  -- A CACHE, not a record. Everything here is read back from AutoCount, which
+  -- is the truth; this exists so the slip screen can show the chain without
+  -- waiting on SQL Server, and so a document is not forgotten the day the
+  -- catalogue is unreachable. Deleting the lot would cost nothing but a
+  -- refresh.
+  CREATE TABLE IF NOT EXISTS order_documents (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id      INTEGER NOT NULL,
+    doc_type      TEXT    NOT NULL,          -- DO, INV or CS
+    doc_no        TEXT    NOT NULL,          -- DO-2609-229
+    doc_date      TEXT    DEFAULT '',
+    from_doc_no   TEXT    DEFAULT '',        -- what it was made from
+    depth         INTEGER DEFAULT 1,         -- 1 = straight off the Sales Order
+    first_seen    TEXT    DEFAULT (datetime('now','localtime')),
+    UNIQUE (order_id, doc_no)
+  );
+  CREATE INDEX IF NOT EXISTS idx_order_documents_order ON order_documents(order_id);
+
   CREATE TABLE IF NOT EXISTS order_lines (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     order_id      INTEGER NOT NULL,

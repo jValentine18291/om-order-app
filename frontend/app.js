@@ -5683,6 +5683,10 @@ async function onViewSlipChosen(slipNumber) {
     wrap.innerHTML = renderSlipDetail(slip);
     wireVsStatusActions(slipNumber);
     wireDecideButtons(wrap, slipNumber);
+    // What the orders became in AutoCount. Asked for AFTER the slip is drawn,
+    // never as part of drawing it: this is a round trip to SQL Server and the
+    // slip must appear at once whether or not it answers.
+    refreshSlipDocuments(slipNumber);
     // John's correction link, one per machine. The slip is already in hand, so
     // the sheet is opened from it rather than fetching it a second time.
     wrap.querySelectorAll("[data-fix]").forEach((b) =>
@@ -5793,6 +5797,14 @@ function renderSlipDetail(slip) {
         <span class="vs-status vs-${escapeAttr(slip.status)}">${escapeHtml(STATUS_LABEL[slip.status] || slip.status)}</span>
       </div>
       ${slipSoLine(slip)}
+      <!-- What each order became in AutoCount: SO -> DO -> INV. Filled in
+           after the slip is on screen, by refreshSlipDocuments(), so a slow or
+           unreachable SQL Server cannot hold up the slip. Empty, and
+           invisible, until there is something to say.
+
+           On THIS screen and not the technician's: a billing document is
+           Sales' business, and this is where the closing reference is read. -->
+      <div class="vs-chain" id="vs-chain"></div>
       ${meta.length ? `<div class="vs-sub">${meta.join(" · ")}</div>` : ""}
       ${(slip.amendments || []).length ? `<div class="vs-amended"><b>Changed after the customer signed</b>${
         slip.amendments.map((a) => `<div>${escapeHtml(a.field)}: ${
@@ -6562,6 +6574,57 @@ $("vsr-confirm").addEventListener("click", async () => {
     btn.disabled = false;
   }
 });
+
+// ---- What an order became in AutoCount --------------------------------------
+// A Sales Order is converted in AutoCount into a Delivery Order, and that into
+// an Invoice. The app used to learn about it only when somebody typed the
+// number into Close Service; now it reads the trail itself.
+//
+// SO-2609-048  ->  DO-2609-229  ->  INV-2609-0140
+//
+// WHY A CHAIN AND NOT A LOOKUP. An invoice points at the DELIVERY ORDER, not
+// at the order: on OM's own database 169,314 invoice lines came from a DO and
+// 46 came straight from an SO. One step would find deliveries and miss almost
+// every invoice.
+//
+// Nothing here is allowed to matter. AutoCount off, unreachable or slow, and
+// the slip is exactly the slip it has always been - the block simply stays
+// empty and Close Service still takes a number typed by hand.
+const DOC_LABEL = { DO: "Delivery Order", INV: "Invoice", CS: "Cash Sale" };
+
+async function refreshSlipDocuments(slipNumber) {
+  const box = $("vs-chain");
+  if (!box) return;
+  let r;
+  try {
+    r = await api(`/api/slips/${encodeURIComponent(slipNumber)}/documents/refresh`, { method: "POST" });
+  } catch (_) {
+    return;                       // context, not permission
+  }
+  // The screen may have moved on while SQL Server was thinking.
+  if (!$("vs-chain") || $("vs-chain") !== box) return;
+
+  const withDocs = (r.orders || []).filter((o) => (o.documents || []).length);
+  if (withDocs.length) {
+    box.innerHTML = withDocs.map((o) => {
+      const steps = [`<span class="vs-chain-so">${escapeHtml(o.autocount_doc_no || o.so_number)}</span>`]
+        .concat((o.documents || []).map((d) =>
+          `<span class="vs-chain-doc" title="${escapeAttr(DOC_LABEL[d.doc_type] || d.doc_type)}">${
+            escapeHtml(d.doc_no)}${d.doc_date ? `<span class="vs-chain-date">${escapeHtml(d.doc_date)}</span>` : ""}</span>`));
+      return `<div class="vs-chain-row">${steps.join('<span class="vs-chain-arrow">&rarr;</span>')}</div>`;
+    }).join("");
+    box.style.display = "";
+  }
+
+  // A number was filled in, which means the slip has just moved to Invoice
+  // Created under the reader's feet. Redraw it rather than leaving a status on
+  // screen that is no longer true.
+  if ((r.filled || []).length) {
+    const what = r.filled.map((f) => f.doc_no).join(", ");
+    toast(`Found in AutoCount: ${what}`, "ok");
+    onViewSlipChosen(slipNumber);
+  }
+}
 
 // ---- Correcting a machine whose status is wrong -----------------------------
 // John's, and nobody else's - see CORRECTORS in app-functions.js, which the
