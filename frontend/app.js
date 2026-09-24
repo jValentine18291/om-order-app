@@ -10044,8 +10044,36 @@ function takeUpdateIfIdle() {
   // Only from the home screen or the picker, and only with nothing open over
   // the top of them.
   const screen = SCREENS.find((s) => $("screen-" + s).classList.contains("active"));
-  if (screen !== "home" && screen !== "role") return;
-  if ([...document.querySelectorAll(".modal-overlay")].some((m) => m.style.display !== "none")) return;
+  const safe = (screen === "home" || screen === "role") &&
+    ![...document.querySelectorAll(".modal-overlay")].some((m) => m.style.display !== "none");
+  // NOT YET. Say so, rather than leaving somebody on an old screen with no
+  // idea one is waiting - which is the whole of what a held-back reload looks
+  // like from the outside. John asked for this, 24 Sep 2026.
+  if (!safe) { showUpdateBanner(true); return; }
+  pendingUpdate = false;
+  showUpdateBanner(false);
+  location.reload();
+}
+
+function showUpdateBanner(on) {
+  const bar = $("app-update");
+  if (bar) bar.style.display = on ? "" : "none";
+}
+
+// "Load now", for somebody who would rather not wait.
+//
+// A reload throws away anything typed but not saved - parts scanned onto a
+// machine and not yet Saved, most of all - so it asks first when there is
+// something to lose, and names what. It does not simply disable itself: a
+// technician who has decided to take the update should be able to, and being
+// told what it costs is better than a button that does nothing.
+function takeUpdateNow() {
+  const waiting = (session && session.pendingParts ? session.pendingParts.length : 0);
+  if (waiting && !confirm(
+        `${waiting} part${waiting === 1 ? "" : "s"} on this machine ${
+          waiting === 1 ? "has" : "have"} not been saved yet, and will be lost. Load the new version anyway?`)) {
+    return;
+  }
   pendingUpdate = false;
   location.reload();
 }
@@ -10061,6 +10089,8 @@ if ("serviceWorker" in navigator) {
     pendingUpdate = true;
     takeUpdateIfIdle();
   });
+  const go = $("app-update-go");
+  if (go) go.addEventListener("click", takeUpdateNow);
   navigator.serviceWorker.register("./sw.js").then((reg) => {
     // Ask again whenever the app comes back to the front. A phone left on the
     // bench all day, or a home-screen app that is never closed, would

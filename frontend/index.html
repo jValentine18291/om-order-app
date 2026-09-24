@@ -65,6 +65,15 @@
       </div>
     </header>
 
+    <!-- A new version has arrived and is waiting for a safe moment to load.
+         Only ever shown when the reload has been HELD BACK - see
+         takeUpdateIfIdle() in app.js. On the home screen it reloads at once
+         and this never appears. -->
+    <div class="app-update" id="app-update" style="display:none">
+      <span class="app-update-txt">A new version is ready. It will load when you finish what you are doing.</span>
+      <button type="button" class="app-update-go" id="app-update-go">Load now</button>
+    </div>
+
     <!-- ============ SCREEN: ROLE (who is using the app) ============ -->
     <section id="screen-role" class="screen">
       <div class="section-head">

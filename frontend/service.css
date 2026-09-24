@@ -2339,6 +2339,26 @@ body.signin-brand .topbar .pill {
   background: #FFF6E5; border-left: 3px solid #E0A22A; color: #8A5B00;
 }
 .bo-warn-note { margin-top: 6px; color: var(--ink-faint, #78868c); }
+
+/* A new version waiting for a safe moment to load. Deliberately quiet: it is
+   information, not an alarm, and it appears while somebody is in the middle of
+   a repair. It sits in the flow under the topbar rather than floating over the
+   screen, so it can never cover the thing being worked on. */
+.app-update {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  margin: 0 0 12px; padding: 9px 14px;
+  border-radius: var(--radius-sm, 8px);
+  background: #eef4f5; border-left: 3px solid var(--primary, #1f6f78);
+  font-size: .82rem; color: var(--ink-soft, #55665f);
+}
+.app-update-txt { flex: 1; min-width: 180px; line-height: 1.45; }
+.app-update-go {
+  flex: none; appearance: none; cursor: pointer;
+  border: 1px solid #bcd2d5; background: #fff; border-radius: 999px;
+  padding: 6px 14px; font: inherit; font-size: .8rem; font-weight: 700;
+  color: var(--primary, #1f6f78);
+}
+.app-update-go:active { background: #e6f0f1; }
 .pu-delete {
   flex: 0 0 auto; min-height: 40px; padding: 0 14px; border-radius: 999px;
   border: 1px solid #e6b0b0; background: var(--surface);

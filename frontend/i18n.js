@@ -39,6 +39,10 @@
     "Close": "关闭",
     "Got it": "知道了",
     "Loading…": "加载中…",
+    // The banner that appears when a new version is waiting for a safe moment.
+    "A new version is ready. It will load when you finish what you are doing.":
+      "新版本已就绪，完成当前操作后会自动加载。",
+    "Load now": "立即加载",
 
     // ---- Role screen ----
     "Service desk": "服务台",
