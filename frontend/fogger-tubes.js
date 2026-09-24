@@ -37,10 +37,18 @@
   // buttons appear in.
   var TUBES = [
     { code: "SPUL KACC Z00126.03", type: "222",  unitQty: 0.04,  unitPrice: 25.00,  each: 1.00 },
-    // $26.65, corrected 23 Sep 2026 on John's word. It was entered as $26.60
-    // off the scanned sheet, which is five cents light on the roll - about a
-    // tenth of a cent a piece, so nothing ever looked wrong.
-    { code: "SPUL KACC Z00126.03", type: "311",  unitQty: 0.075, unitPrice: 26.65,  each: 2.00 },
+    // $26.67, and NOT the $26.60 the scanned sheet prints. John's call,
+    // 24 Sep 2026, and the extra seven cents is doing a job: at 0.075 of a
+    // roll per piece it is what makes every piece count come out at exactly
+    // $2.00 each on the customer's copy.
+    //
+    //    $26.60   1 pc $2.00   4 pcs $7.98    10 pcs $19.95
+    //    $26.65   1 pc $2.00   4 pcs $7.99    10 pcs $19.99
+    //    $26.67   1 pc $2.00   4 pcs $8.00    10 pcs $20.00
+    //
+    // So DO NOT "correct" this back to the sheet. It holds to the penny up to
+    // 19 pieces; 20 comes to $40.01 rather than $40.00, and nobody cuts 20.
+    { code: "SPUL KACC Z00126.03", type: "311",  unitQty: 0.075, unitPrice: 26.67,  each: 2.00 },
     { code: "SPUL KACC Z00126.03", type: "178",  unitQty: 0.085, unitPrice: 23.50,  each: 2.00 },
     { code: "SPUL KACC Z00126.03", type: "142",  unitQty: 0.265, unitPrice: 20.00,  each: 5.30 },
 

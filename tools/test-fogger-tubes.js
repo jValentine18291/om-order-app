@@ -51,13 +51,24 @@ check("four tube types share Z00126.03",
   ["222", "311", "178", "142"]);
 check("and they carry four different prices",
   [...new Set(T.list.filter((t) => t.code === "SPUL KACC Z00126.03").map((t) => t.unitPrice))],
-  [25, 26.65, 23.5, 20]);
-// 311's roll is $26.65. It was entered as $26.60 off the scanned sheet and
-// corrected on John's word, 23 Sep 2026. Pinned here because it is five cents
-// on a roll - a tenth of a cent a piece - which is exactly the size of error
-// that nothing downstream questions and nobody spots on an invoice.
-check("311 is priced per piece at 0.075 of a $26.65 roll",
-  [T.byType("311").unitQty, T.byType("311").unitPrice], [0.075, 26.65]);
+  [25, 26.67, 23.5, 20]);
+// 311's roll is $26.67, deliberately NOT the $26.60 the scanned sheet prints.
+// John's call, 24 Sep 2026: at 0.075 of a roll per piece, $26.67 is the figure
+// that puts every piece count on a whole $2.00 - the sheet's own price drifts
+// to $7.98 by four pieces and $19.95 by ten.
+//
+// Pinned by name, and the whole-dollar run checked below, because a price like
+// this looks like a typo to anyone holding the sheet. Without something that
+// says why, it gets "corrected" back.
+check("311 is priced per piece at 0.075 of a $26.67 roll",
+  [T.byType("311").unitQty, T.byType("311").unitPrice], [0.075, 26.67]);
+const t311 = T.byType("311");
+const money311 = (n) => Number((Number((n * t311.unitQty).toFixed(4)) * t311.unitPrice).toFixed(2));
+check("and every count a technician would ever cut comes to exactly $2 a piece",
+  [...Array(19).keys()].map((i) => i + 1).filter((n) => money311(n) !== n * 2), []);
+// Where it stops, stated rather than left to be discovered on an invoice.
+check("it is 20 pieces before the rounding shows, and nobody cuts 20",
+  money311(20), 40.01);
 
 console.log("\n-- which machines get the buttons --");
 for (const [desc, want] of [
@@ -181,10 +192,10 @@ console.log("\n-- two tubes off the SAME roll stay two lines --");
 parts = add("311", 1);
 check("222/311/142 all being Z00126.03 does not merge them", parts.length, 2);
 check("each keeps its own tube type", parts.map((p) => p.variant), ["142", "311"]);
-check("each keeps its own price", parts.map((p) => p.unit_price), [20, 26.65]);
-// 142 x 2 = 0.53 x $20.00 = $10.60, plus 311 x 1 = 0.075 x $26.65 = $1.99875.
+check("each keeps its own price", parts.map((p) => p.unit_price), [20, 26.67]);
+// 142 x 2 = 0.53 x $20.00 = $10.60, plus 311 x 1 = 0.075 x $26.67 = $2.00025.
 // Merged into one Z00126.03 line the old way it would have been 0.605 at
-// whichever price landed first - $12.10 at $20.00, or $16.12 at $26.65.
+// whichever price landed first - $12.10 at $20.00, or $16.14 at $26.67.
 // Neither is $12.60, and nothing downstream would have caught it.
 check("total is the sum of both, not a merged guess",
   Number(parts.reduce((n, p) => n + p.unit_price * p.quantity, 0).toFixed(2)),
