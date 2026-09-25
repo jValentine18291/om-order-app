@@ -3878,36 +3878,30 @@ $("ap-q").addEventListener("keydown", (e) => {
 // refused to let anyone write down. Stock is checked on the Sales end instead,
 // when the Sales Order becomes an invoice.
 //
-// It is still SAID, because a technician who knows the shelf is empty is the
-// person best placed to get one ordered - so an out-of-stock part goes on and
-// the offer to order it comes with it. Offered, not forced: some of these are
-// on quotes the customer will decline.
+// AN EMPTY SHELF IS A QUESTION, and it is asked BEFORE the part goes on -
+// John's call, 26 Sep 2026. It used to be a line of small print AFTER the
+// fact, which is the wrong moment and the wrong size: by then the technician
+// has moved on to the next part, and somebody who knows the shelf is empty is
+// the one person placed to get one ordered.
 //
-// One case still asks first: a row with no number on it at all. Nothing was
-// shown, so there is nothing the technician can be said to have seen.
+// So an out-of-stock part goes to the stock view, where the whole screen says
+// there is none and offers the two things that can be done about it: add and
+// order, or just add. BOTH ADD. The old rule that refused the part is gone -
+// the quote needs it either way - and ordering stays a choice, because some of
+// these sit on quotes the customer will decline.
+//
+// A row with no number on it goes the same way, for a different reason:
+// nothing was shown, so there is nothing the technician can be said to have
+// seen, and the view fetches the balance and asks.
 async function apPick(btn, part) {
   const bal = part.bal_qty;
   const known = bal !== undefined && bal !== null;
-  if (!known) { showApPart(part); return; }
+  if (!known || Number(bal) <= 0) { showApPart(part); return; }
 
   if (btn) btn.disabled = true;
   apChosen = { ...part };
-  await apAddChosen({ offerOrder: Number(bal) <= 0 });
+  await apAddChosen();
   if (btn) btn.disabled = false;
-}
-
-// Added, and the shelf was empty. Back on the search so the next part can be
-// looked up straight away, with the offer sitting under the box.
-function offerToOrder(part) {
-  $("ap-detail").style.display = "none";
-  $("ap-search").style.display = "";
-  $("ap-q").value = "";
-  $("ap-results").innerHTML = "";
-  $("ap-status").innerHTML =
-    `<span class="ap-added">Added \u2014 none in stock.</span>` +
-    `<button type="button" class="ap-order-now" id="ap-order-now">Order it</button>`;
-  const b = $("ap-order-now");
-  if (b) b.addEventListener("click", () => { apChosen = part; apOrderChosen(); });
 }
 
 // WHETHER WE HAVE IT. Reached when the list had no number to show, or showed a
@@ -3964,13 +3958,13 @@ async function showApPart(part) {
     $("ap-stock").className = "ap-stock ap-stock-zero";
     $("ap-stock").innerHTML =
       `<b>No stock</b>None on the shelf. It can still go on the machine.`;
-    // Adding is the PRIMARY action even here: the quote needs the part on the
-    // machine whether or not one is in the building.
+    // Both of these ADD. The question is only whether one gets ordered as
+    // well, and it is put plainly rather than left as a link to notice.
     $("ap-actions").innerHTML =
-      `<button type="button" class="btn-primary" id="ap-add">Add to this machine</button>
-       <button type="button" class="btn-secondary" id="ap-order">Order it</button>`;
-    $("ap-add").addEventListener("click", () => apAddChosen({ offerOrder: true }));
-    $("ap-order").addEventListener("click", apOrderChosen);
+      `<button type="button" class="btn-primary" id="ap-add-order">Add and order it</button>
+       <button type="button" class="btn-secondary" id="ap-add">Add without ordering</button>`;
+    $("ap-add-order").addEventListener("click", () => apAddChosen({ thenOrder: true }));
+    $("ap-add").addEventListener("click", () => apAddChosen());
   }
 }
 
@@ -3993,10 +3987,11 @@ function apSay(html) {
   $(onSearch ? "ap-status" : "ap-detail-status").innerHTML = html;
 }
 
-async function apAddChosen({ offerOrder = false } = {}) {
+async function apAddChosen({ thenOrder = false } = {}) {
   if (!apChosen) return;
-  const btn = $("ap-add");
-  if (btn) btn.disabled = true;
+  // Both buttons on the out-of-stock view, or the single one above it.
+  const btns = [...($("ap-actions") ? $("ap-actions").querySelectorAll("button") : [])];
+  btns.forEach((b) => { b.disabled = true; });
   apSay("");
 
   // addByCode() REPORTS ITS OWN FAILURES WITH A TOAST AND NEVER THROWS, so
@@ -4009,50 +4004,51 @@ async function apAddChosen({ offerOrder = false } = {}) {
   // The list getting longer is the only honest signal, so that is what is
   // checked.
   const before = apPieceCount();
-  const added = { ...apChosen };
-  await addByCode(apChosen.item_code);
-  if (apPieceCount() > before) {
-    if (offerOrder) offerToOrder(added);
-    else closeAddPart();
+  const part = { ...apChosen };
+  await addByCode(part.item_code);
+  if (apPieceCount() <= before) {
+    apSay(statusErr(
+      "That part was not added — the catalogue did not accept the code. Nothing has changed."
+    ));
+    btns.forEach((b) => { b.disabled = false; });
     return;
   }
 
-  apSay(statusErr(
-    "That part was not added — the catalogue did not accept the code. Nothing has changed."
-  ));
-  if (btn) btn.disabled = false;
+  if (thenOrder) {
+    try {
+      await raiseOrderFor(part);
+      toast("Added and ordered", "ok");
+    } catch (e) {
+      // THE PART IS ON THE MACHINE; only the order failed - most often because
+      // somebody already raised one. Closing here would say both worked, so it
+      // stays open and says which did. Nothing is added twice: the add is
+      // already done and this path does not repeat it.
+      apSay(statusErr(e.message || "Added, but the order could not be raised."));
+      btns.forEach((b) => { b.disabled = false; });
+      return;
+    }
+  }
+  closeAddPart();
 }
 
-// Just the order now. It used to hold the machine as well; that went with the
-// no-stock rule on 26 Sep 2026.
-async function apOrderChosen() {
-  if (!apChosen) return;
-  // Either the stock view's button or the one on the offer under the search
-  // box - ordering can be reached from both since the block went.
-  const btn = $("ap-order-now") || $("ap-order");
-  if (btn) btn.disabled = true;
-  apSay("");
-  try {
-    await api("/api/part-requests", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        item_code: apChosen.item_code,
-        description: apChosen.description || "",
-        qty_requested: 1,
-        requester: initialsFor(getUser()),
-        remarks: session.slipNumber ? `For slip ${session.slipNumber}` : "",
-      }),
-    });
-
-    toast("Ordered", "ok");
-    closeAddPart();
-  } catch (e) {
-    // Most often "this part already has an open request", which is worth
-    // reading rather than a toast that goes away.
-    apSay(statusErr(e.message || "That part could not be ordered."));
-    if (btn) btn.disabled = false;
-  }
+// The reorder request on its own. Kept separate from adding so "add and order"
+// is made of the two pieces rather than a second copy of either, and so a
+// failure here can be told apart from a failure to add.
+//
+// It throws rather than reporting: the caller knows whether the part made it
+// onto the machine, and that decides what there is to say.
+async function raiseOrderFor(part) {
+  await api("/api/part-requests", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      item_code: part.item_code,
+      description: part.description || "",
+      qty_requested: 1,
+      requester: initialsFor(getUser()),
+      remarks: session.slipNumber ? `For slip ${session.slipNumber}` : "",
+    }),
+  });
 }
 
 // ---- The customer signing for a condemned machine ---------------------------

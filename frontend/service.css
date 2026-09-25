@@ -2510,17 +2510,6 @@ body.signin-brand .topbar .pill {
 }
 .mm-condemn-head { font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
 .mm-condemn-body { margin-top: 5px; font-size: 12.5px; line-height: 1.45; }
-/* Added, but the shelf was empty. Sits under the search box so the next part
-   can be looked up without dismissing it. */
-.ap-added { flex-grow: 1; color: var(--ink-soft, #55665f); }
-.ap-order-now {
-  flex: none; cursor: pointer; font: inherit; font-size: 13px; font-weight: 700;
-  padding: 7px 12px; border-radius: 8px;
-  border: 1px solid var(--primary, #1f6f78);
-  background: var(--surface, #fff); color: var(--primary, #1f6f78);
-}
-.ap-order-now:disabled { opacity: .5; }
-
 .mm-condemn-btn {
   margin-top: 10px; width: 100%; cursor: pointer; font: inherit;
   font-size: 14px; font-weight: 700; padding: 11px; border-radius: 10px;

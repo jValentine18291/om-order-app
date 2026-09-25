@@ -442,9 +442,12 @@
     "Stock could not be checked for this part.": "无法查询此零件的库存。",
     "No stock": "没有库存",
     "None on the shelf. It can still go on the machine.": "库存为零。仍可以加入本机器。",
-    "Added — none in stock.": "已添加 — 没有库存。",
     "in stock": "有库存",
     "Add to this machine": "加入本机器",
+    "Add and order it": "加入并下单",
+    "Add without ordering": "只加入，不下单",
+    "Added and ordered": "已添加并下单",
+    "Added, but the order could not be raised.": "已添加，但未能下单。",
     "Order it": "下单",
     "Ordered": "已下单",
     "That part was not added — the catalogue did not accept the code. Nothing has changed.":
@@ -816,6 +819,21 @@
       function (_, s, d, m, y) { return "服务单 " + s + " · 创建于 " + cnDate(d, m, y); }],
     [new RegExp("^(\\d+) machines? · " + DATE + "$"),
       function (_, n, d, m, y) { return n + " 台机器 · " + cnDate(d, m, y); }],
+
+    // The server's refusal when somebody has already asked for this part. It
+    // carries a name and a date, so it can only be a pattern. It used to land
+    // mostly on the purchaser's screens; since "Add and order it" it lands on
+    // a technician's, where English is no use.
+    [/^This part already has an open request: (\d+) requested by (.+?) on (\d{4})-(\d{2})-(\d{2})\.$/,
+      function (_, n, who, y, m, d) {
+        return "此零件已有未完成的申请：" + who +
+               " 于 " + y + "-" + m + "-" + d + " 申请了 " + n + " 件。";
+      }],
+    [/^This part already has an open request: (\d+) requested by (.+?)\.$/,
+      function (_, n, who) {
+        return "此零件已有未完成的申请：" + who +
+               " 申请了 " + n + " 件。";
+      }],
 
     // "Tube 142" has to be settled BEFORE the filter-chip pattern below. That
     // one matches any "<Word> <number>", finds no dictionary entry for "Tube"
