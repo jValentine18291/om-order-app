@@ -98,6 +98,19 @@ check("line by line", d.lines.map((l) => l.status),
   ["PART_SHIPPED", "SHIPPED", "PART_SHIPPED", "ORDERED"]);
 check("and the order as a whole", d.status, "PART_SHIPPED");
 check("with words on it", d.label, "Partially shipped");
+
+// THE WORDING OF THE FIRST STEP. John, 25 Sep 2026: a part on this list is
+// already on a purchase order, and "Not ordered yet" told the workshop
+// something both alarming and untrue. What has not happened is the supplier
+// being told, which is the next step rather than the absence of one.
+//
+// Pinned because it is the only label that had to be argued about, and the
+// argument is invisible in a table of six strings.
+check("a purchase order nobody has sent yet reads Order Processing",
+  po.LABELS.NOT_ORDERED, "Order Processing");
+check("and the rest are unchanged",
+  ["ORDERED", "PART_SHIPPED", "SHIPPED", "PART_RECEIVED", "RECEIVED"].map((k) => po.LABELS[k]),
+  ["Ordered", "Partially shipped", "Shipped", "Partially received", "Received"]);
 check("counted for the screen", [d.counts.total, d.counts.shipped, d.counts.part_shipped], [4, 1, 2]);
 
 console.log("\n-- the allocation map is keyed on the LINE --");

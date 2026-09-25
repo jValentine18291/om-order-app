@@ -8587,7 +8587,10 @@ const PO_STATUS_LABEL = { NOT_ORDERED: "Not ordered yet", ORDERED: "Ordered" };
 // them out from AutoCount's outstanding, the app's shipments and the tick
 // above, every time the screen is read. See backend/poStatus.js.
 const PO_PROGRESS_LABEL = {
-  NOT_ORDERED: "Not ordered yet",
+  // Not "Not ordered yet" - see LABELS in backend/poStatus.js. A part here is
+  // on a purchase order already; what is outstanding is the supplier being
+  // told, which the row below this one asks about by name.
+  NOT_ORDERED: "Order Processing",
   ORDERED: "Ordered",
   PART_SHIPPED: "Partially shipped",
   SHIPPED: "Shipped",
@@ -8917,7 +8920,7 @@ function openOrderModal(part) {
 // the container and AutoCount has not been keyed yet, so the part is on the
 // shelf while the order still says it is owed.
 const ON_ORDER_STATUS = {
-  NOT_ORDERED: "Not ordered yet",
+  NOT_ORDERED: "Order Processing",
   ORDERED: "Ordered",
   PART_SHIPPED: "Partially shipped",
   SHIPPED: "Shipped",

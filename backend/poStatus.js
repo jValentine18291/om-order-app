@@ -25,8 +25,16 @@
 // along: a PO is only as finished as its least finished line.
 const LINE_STATUSES = ["NOT_ORDERED", "ORDERED", "PART_SHIPPED", "SHIPPED", "PART_RECEIVED", "RECEIVED"];
 
+// WHY THE FIRST ONE IS NOT "Not ordered yet". John, 25 Sep 2026: a part on
+// this list IS on a purchase order - Iris raised it - and telling the workshop
+// it has not been ordered is both alarming and untrue. What has not happened
+// yet is the order reaching the supplier, which is the NEXT step, not the
+// absence of one.
+//
+// Iris's own tick still says "Not ordered yet", and should: it is the answer
+// to "Sent to supplier?", where "Order Processing" would be no answer at all.
 const LABELS = {
-  NOT_ORDERED: "Not ordered yet",
+  NOT_ORDERED: "Order Processing",
   ORDERED: "Ordered",
   PART_SHIPPED: "Partially shipped",
   SHIPPED: "Shipped",

@@ -127,6 +127,10 @@
     "Outstanding": "未到货",
     "Its lines": "订单项目",
     "Status": "状态",
+    // Where a purchase order has got to. "Not ordered yet" is kept below it
+    // because Iris's own tick - the answer to "Sent to supplier?" - still
+    // reads that way, and should.
+    "Order Processing": "订单处理中",
     "Not ordered yet": "尚未下单",
     "Ordered": "已下单",
     // Where the order has got to, worked out rather than typed in.

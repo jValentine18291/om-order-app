@@ -172,7 +172,7 @@ async function onOrderPanel(docNo) {
   // container reaches Eunos; the stock goes into AutoCount later. In between,
   // the shipment has left the in-transit figure and AutoCount still shows
   // everything outstanding - so without her signature counting for something,
-  // an order with goods on the floor would read "Not ordered yet".
+  // an order with goods on the floor would read "Order Processing".
   const s1 = data.shipments.list({ scope: "all" }).find((x) => x.invoice_no === "INV-1");
   data.shipments.update(s1.id, { status: "RECEIVED" }, "I");
   list = await listing();
