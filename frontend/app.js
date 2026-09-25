@@ -3162,6 +3162,7 @@ function maybeShowEntry() {
   const ready = session.slipNumber && session.technician
                 && (session.machineId || session.extras);
   $("os-entry").style.display = ready ? "block" : "none";
+  applyEntryBar(ready);
   if (ready) {
     // Not awaited: the search is usable immediately and simply stops
     // reordering until the book has landed.
@@ -3663,6 +3664,53 @@ async function editPartDescription(partId, current) {
   }
 }
 
+// ---- The trial repair sheet ------------------------------------------------
+// THE TRIAL REPAIR SHEET: the part box in the bar at the bottom, next to Save.
+//
+// John asked for this on 25 Sep 2026, for himself first, because the keyboard
+// opens the moment a machine is tapped and buries the machine behind it.
+//
+// Most of it already existed. .mm-footer has been sticky at the bottom of the
+// sheet for months with the total and Save in it, and .modal-overlay is already
+// sized to --vvh, which visualViewport keeps equal to whatever the keyboard
+// leaves visible. The only thing missing was the part box being down there too.
+//
+// It MOVES the box rather than adding a second one. One input, one set of
+// handlers, one place a part gets added: two would be two things to keep in
+// step, and the second would be wrong within a month.
+//
+// `ready` is passed in rather than worked out again because the box must stay
+// hidden exactly when #os-entry is - the box lives inside #os-entry on the
+// ordinary sheet, so moving it out of there would otherwise hand it a life of
+// its own on a sheet with no machine chosen yet.
+
+// What the box says on the ordinary sheet, kept here so the bar can put it back
+// after swapping in its own shorter one.
+const FULL_CODE_PLACEHOLDER = "e.g. clutch, carburetor, SZEN 140\u2026";
+
+function applyEntryBar(ready) {
+  const modal = $("machine-modal");
+  const pane = $("manual-pane");
+  const home = $("entry-home");
+  const row = modal && modal.querySelector(".mm-footer-row");
+  if (!modal || !pane || !home || !row) return;
+
+  const on = !!(window.OM_FUNCTIONS && OM_FUNCTIONS.usesEntryBar(getUser()));
+  modal.classList.toggle("mm-bar", on);
+  modal.classList.toggle("mm-ready", !!ready);
+  // Idempotent: this runs on every open, and moving something that is already
+  // where it belongs is a no-op rather than a reshuffle.
+  if (on && pane.parentElement !== row) row.insertBefore(pane, row.firstChild);
+  if (!on && pane.parentElement === row) home.parentElement.insertBefore(pane, home);
+
+  // The ordinary sheet's placeholder is half a sentence and the bar cuts it off
+  // mid-word at "e.g. clutch, carburetor,". The label above it is hidden down
+  // here too, so the placeholder is the only thing saying what the box is for
+  // and it has to fit.
+  const ci = $("code-input");
+  if (ci) ci.placeholder = on ? "Part or description" : FULL_CODE_PLACEHOLDER;
+}
+
 // ---- Common jobs -----------------------------------------------------------
 // The same few buttons on every machine, whatever it is. See common-jobs.js,
 // which is the file to edit when a price changes or a job is added - the
@@ -3797,6 +3845,14 @@ async function addJobToMachine(id) {
   }
   if (btn) btn.disabled = false;
 }
+
+// The bar's scanner button. The Type code / Scan QR toggle is hidden in the
+// trial - there is no room for it beside the box - so this is the way to the
+// camera, and it toggles back, because a scanner with no way out would be a
+// trap on the one sheet that cannot be scrolled past.
+$("mm-scan").addEventListener("click", () => {
+  setMode(currentMode === "qr" ? "manual" : "qr");
+});
 
 $("job-btns").addEventListener("click", (e) => {
   const b = e.target.closest("[data-job]");
@@ -7400,7 +7456,19 @@ function setMode(mode) {
   if (mode === "qr") startQrScanner();
   else stopQrScanner();
   if (mode === "manual") {
-    const ci = $("code-input"); if (ci) { ci.value = ""; ci.focus(); }
+    const ci = $("code-input");
+    if (ci) {
+      ci.value = "";
+      // NOT FOCUSED on the trial sheet. The box is in the bar, in reach without
+      // any scrolling, so taking the keyboard the instant a machine opens would
+      // only bury the machine - which is the whole complaint. Tapping the box
+      // raises the keyboard, and the bar rides up with it.
+      //
+      // The ordinary sheet still focuses: there the box is halfway down the
+      // page, and somebody who picked "Type code" meant to type.
+      const modal = $("machine-modal");
+      if (!(modal && modal.classList.contains("mm-bar"))) ci.focus();
+    }
     const cr = $("code-results"); if (cr) cr.innerHTML = "";
   }
 }

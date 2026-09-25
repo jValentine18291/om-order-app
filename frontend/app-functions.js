@@ -78,6 +78,22 @@
   function canCorrect(user) { return isKeyholder(user); }
   function canDeleteSlips(user) { return isKeyholder(user); }
 
+  // WHO GETS THE NEW REPAIR SHEET - the one with the part box, the scanner
+  // and Save together in a bar along the bottom.
+  //
+  // John alone while he tries it on a real machine, his call on 25 Sep 2026:
+  // "allow me to test it before I give you the green light to commit it for
+  // the rest". Everybody else keeps exactly the sheet they have today.
+  //
+  // TO GIVE IT TO EVERYONE, make usesEntryBar() return true and delete the
+  // list. This is a trial, not a permission: there is no version of this where
+  // the bar stays John's for ever, and a flag nobody remembers how to turn off
+  // quietly becomes a second layout to maintain.
+  const ENTRY_BAR_TRIAL = ["john"];
+  function usesEntryBar(user) {
+    return !!user && ENTRY_BAR_TRIAL.includes(String(user.id || ""));
+  }
+
   // "People & devices" is deliberately NOT here. It is not a job function that
   // can be handed out - it is the screen that hands the others out, and it
   // belongs to admins by virtue of being an admin. Putting it on this list
@@ -116,5 +132,6 @@
   }
 
   return { FUNCTIONS, IDS, ROLE_DEFAULTS, functionsFor, isDefault, clean,
-           KEYHOLDERS, canCorrect, canDeleteSlips };
+           KEYHOLDERS, canCorrect, canDeleteSlips,
+           ENTRY_BAR_TRIAL, usesEntryBar };
 });
