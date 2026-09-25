@@ -362,6 +362,24 @@ db.exec(`
   );
 `);
 
+// Migration: which parts book a machine uses.
+//
+// The app guesses one from the machine's description, and gets it right most of
+// the time. This is where somebody's ANSWER goes when it does not - so the next
+// person to open that machine goes straight to the right book instead of
+// guessing again. On the machine rather than on the phone: it is a fact about
+// the machine, and the technician who picks it is rarely the one who comes back
+// to it.
+try {
+  const cols = db.prepare("PRAGMA table_info(slip_machines)").all().map((c) => c.name);
+  if (!cols.includes("ipl_model")) {
+    db.exec("ALTER TABLE slip_machines ADD COLUMN ipl_model TEXT DEFAULT ''");
+    console.log("[db] migrated: added ipl_model to slip_machines");
+  }
+} catch (e) {
+  console.error("[db] ipl_model migration failed:", e.message);
+}
+
 // Migration: job_site on machines registered before there was one.
 try {
   const cols = db.prepare("PRAGMA table_info(slip_machines)").all().map((c) => c.name);

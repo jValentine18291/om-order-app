@@ -459,6 +459,7 @@
         <div id="ipl-models"></div>
       </div>
 
+      <div id="ipl-home"></div>
       <div id="ipl-viewer" style="display:none;">
         <button type="button" class="mp-chosen" id="ipl-change">
           <span class="txt">
@@ -1184,6 +1185,11 @@
   </div>
 
   <div class="modal-overlay" id="machine-modal" style="display:none">
+    <!-- THE PARTS BOOK, on a tablet held landscape. A sibling of the sheet
+         rather than a child of it: the sheet scrolls, and a book that scrolled
+         away with it would be no use. #ipl-viewer is MOVED in here when the
+         split opens and put back when it closes - one IPL, not two. -->
+    <div class="mm-book" id="mm-book"></div>
     <div class="modal-sheet">
       <div class="modal-head">
         <div>

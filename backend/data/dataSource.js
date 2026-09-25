@@ -70,6 +70,8 @@ module.exports = {
     setMachineState: (...a) => dataRepo.slips.setMachineState(...a),
     undoMachineDecision: (...a) => dataRepo.slips.undoMachineDecision(...a),
     correctMachine: (...a) => dataRepo.slips.correctMachine(...a),
+    // Which parts book a machine uses, once somebody has said.
+    setMachineIplModel: (...a) => dataRepo.slips.setMachineIplModel(...a),
     // The customer's own signature on a machine being condemned.
     setCondemnSignature: (...a) => dataRepo.slips.setCondemnSignature(...a),
     getCondemnSignature: (...a) => dataRepo.slips.getCondemnSignature(...a),

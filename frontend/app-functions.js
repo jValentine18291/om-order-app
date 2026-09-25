@@ -83,6 +83,20 @@
   // left pointing at all of them: a flag nobody remembers how to turn off is a
   // second layout to maintain. The way back is the git history, not a switch.
 
+  // WHO GETS THE SPLIT REPAIR SCREEN - the parts book beside the machine, on a
+  // tablet held landscape.
+  //
+  // John alone while he tries it on his iPad, his call on 26 Sep 2026. It also
+  // needs the screen to be wide and landscape, which the app checks itself, so
+  // nobody on a phone sees it whatever this list says.
+  //
+  // TO GIVE IT TO EVERYONE, make usesSplitSheet() return true and delete the
+  // list - the same way the repair sheet itself went wide a day earlier.
+  const SPLIT_TRIAL = ["john"];
+  function usesSplitSheet(user) {
+    return !!user && SPLIT_TRIAL.includes(String(user.id || ""));
+  }
+
   // "People & devices" is deliberately NOT here. It is not a job function that
   // can be handed out - it is the screen that hands the others out, and it
   // belongs to admins by virtue of being an admin. Putting it on this list
@@ -121,5 +135,6 @@
   }
 
   return { FUNCTIONS, IDS, ROLE_DEFAULTS, functionsFor, isDefault, clean,
-           KEYHOLDERS, canCorrect, canDeleteSlips };
+           KEYHOLDERS, canCorrect, canDeleteSlips,
+           SPLIT_TRIAL, usesSplitSheet };
 });

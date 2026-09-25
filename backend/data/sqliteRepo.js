@@ -503,6 +503,19 @@ function getSlip(slipNumber, includeSignature = false) {
   return slip;
 }
 
+// WHICH PARTS BOOK THIS MACHINE USES, when somebody has had to say.
+//
+// Only ever written by a person correcting the guess, so it is stored as given
+// and never checked against the list of books here: the app holds that list,
+// the server does not, and a server that validated it would have to be
+// redeployed every time a book is added.
+function setMachineIplModel(slipNumber, machineId, model = "") {
+  const { machine } = machineOnSlip(slipNumber, machineId);
+  db.prepare("UPDATE slip_machines SET ipl_model = ? WHERE id = ?")
+    .run(String(model || "").trim(), machine.id);
+  return { ipl_model: String(model || "").trim() };
+}
+
 // ---- The customer signing for a condemned machine ---------------------------
 // A second decision, taken later than the slip's own signature and about one
 // machine: that it is beyond repair and they accept it. John asked for it on
@@ -2959,6 +2972,7 @@ const slips = {
   slipDeletable, deleteSlip,
   createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setSlipExtrasNote, slipContacts, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, correctMachine,
   setCondemnSignature, getCondemnSignature, unsignedCondemned,
+  setMachineIplModel,
   machineNeedsQuoteFirst, quoteAnswered, quoteBlockReason, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 

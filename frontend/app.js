@@ -2931,6 +2931,8 @@ function openMachineModal(machineId) {
   renderMachineParts();
   renderMachineQuoteRow();
   renderCondemnSig();
+  setSplit(splitWanted());
+  if (splitOn) openBookFor(m);
   renderMachineDecisionBanner();
   renderMachineBilledBanner();
   updateSlipFooter();
@@ -2979,6 +2981,9 @@ function openExtrasModal() {
 }
 
 async function closeMachineModal(save) {
+  // The IPL screen gets its own viewer back before anything else happens: a
+  // save that fails must not leave the book stranded inside a closed sheet.
+  setSplit(false);
   if (!save && session.pendingParts.length) {
     const ok = confirm(`${session.pendingParts.length} scanned part(s) haven't been saved. Discard them?`);
     if (!ok) return;
@@ -4055,6 +4060,184 @@ async function raiseOrderFor(part) {
       remarks: session.slipNumber ? `For slip ${session.slipNumber}` : "",
     }),
   });
+}
+
+
+// ---- The parts book beside the machine -------------------------------------
+// A tablet held landscape shows the book on the left and the repair on the
+// right, and tapping a part in the book puts it on the machine. John's, 26 Sep
+// 2026, on his iPad first.
+//
+// THE IPL IS MOVED, NOT REBUILT. #ipl-viewer carries a figure strip, a
+// pan-and-zoom stage, hotspots and a filtered list, all of it addressing its
+// own elements by id - so it goes on working wherever the nodes sit. A second
+// copy would be a second set of all of that to keep in step. It is put back
+// when the sheet closes, so the IPL screen is exactly as it was.
+//
+// THREE THINGS HAVE TO BE TRUE for the split to appear: the person is in the
+// trial, the screen is wide, and it is landscape. The last two are checked
+// here rather than in CSS because the JavaScript has to know as well - it
+// decides whether to move the IPL at all.
+const SPLIT_MIN_WIDTH = 900;
+
+// Turning the tablet mid-repair changes the answer, so the sheet follows. Only
+// while it is open: moving the IPL about behind a closed sheet would be work
+// nobody asked for, and the next open settles it anyway.
+window.addEventListener("resize", () => {
+  const modal = $("machine-modal");
+  if (!modal || modal.style.display !== "flex") return;
+  const want = splitWanted();
+  if (want === splitOn) return;
+  setSplit(want);
+  if (want) openBookFor(currentMachine());
+});
+
+function splitWanted() {
+  if (!(window.OM_FUNCTIONS && OM_FUNCTIONS.usesSplitSheet(getUser()))) return false;
+  const w = window.innerWidth || 0;
+  const h = window.innerHeight || 0;
+  return w >= SPLIT_MIN_WIDTH && w > h;
+}
+
+let splitOn = false;
+// True only while openBookFor() is opening the book the app GUESSED. A guess
+// is not an answer: storing it would turn "we think it is this one" into "a
+// technician said it is this one", and a later improvement to the matching
+// would never reach the machines it had already pinned.
+let splitAutoOpening = false;
+
+// Borrow the IPL, or give it back. Idempotent: called on every open and on
+// every rotation, and moving something already in place is a no-op.
+function setSplit(on) {
+  const modal = $("machine-modal");
+  const book = $("mm-book");
+  const home = $("ipl-home");
+  const viewer = $("ipl-viewer");
+  const picker = $("ipl-picker");
+  if (!modal || !book || !home || !viewer || !picker) return;
+
+  splitOn = !!on;
+  modal.classList.toggle("mm-split", splitOn);
+  if (splitOn) {
+    if (viewer.parentElement !== book) book.appendChild(viewer);
+    if (picker.parentElement !== book) book.appendChild(picker);
+  } else {
+    // Back in the order the IPL screen expects: picker first, then viewer.
+    if (picker.parentElement === book) home.parentElement.insertBefore(picker, home);
+    if (viewer.parentElement === book) home.parentElement.insertBefore(viewer, home);
+    // The IPL screen is not on show; leave it as its own code left it.
+  }
+}
+
+// Which book this machine uses: the one somebody chose for it, else the app's
+// guess from its description, else nothing and it asks.
+function bookForMachine(m) {
+  if (!m) return "";
+  const chosen = String(m.ipl_model || "").trim();
+  if (chosen) return chosen;
+  if (!window.MachineIpl || !ipl.models) return "";
+  try { return MachineIpl.matchIplModel(m, ipl.models) || ""; } catch (_) { return ""; }
+}
+
+// Open the book for the machine on screen. Never throws into the caller: the
+// repair sheet has to work whether or not a book can be found, and a machine
+// with no book is a normal machine.
+async function openBookFor(m) {
+  try {
+    if (!ipl.models) ipl.models = await api("./ipl/index.json");
+  } catch (_) {
+    $("mm-book").classList.add("mm-book-empty");
+    return;
+  }
+  const id = bookForMachine(m);
+  if (id && (ipl.models || []).some((e) => e.id === id)) {
+    splitAutoOpening = true;
+    try { await openIplModel(id); } finally { splitAutoOpening = false; }
+    $("ipl-picker").style.display = "none";
+    $("ipl-viewer").style.display = "";
+  } else {
+    // Nothing matched. Ask, rather than sitting empty - and the answer is kept
+    // against the machine, so this is asked once and not once per visit.
+    renderIplPicker();
+    $("ipl-viewer").style.display = "none";
+    $("ipl-picker").style.display = "";
+  }
+  syncSplitBookHead(m, id);
+}
+
+// The one line above the book saying which book it is, and the way to change
+// it. Drawn by us rather than the IPL screen, which has its own header for a
+// screen that fills the phone.
+function syncSplitBookHead(m, id) {
+  const book = $("mm-book");
+  if (!book) return;
+  let head = $("mm-book-head");
+  if (!head) {
+    head = document.createElement("div");
+    head.id = "mm-book-head";
+    head.className = "mm-book-head";
+    book.insertBefore(head, book.firstChild);
+  }
+  const entry = (ipl.models || []).find((e) => e.id === id);
+  head.innerHTML = `
+    <div class="mm-book-name">
+      <span class="nm">${escapeHtml(entry ? `${iplBrand(entry)} ${iplShort(entry)}`.trim() : "Which parts book?")}</span>
+      <span class="mt">${escapeHtml(entry ? "parts book" : "Nothing matched this machine on its own")}</span>
+    </div>
+    ${entry ? `<button type="button" class="mm-book-change" id="mm-book-change">Change book</button>` : ""}`;
+  const b = $("mm-book-change");
+  if (b) b.addEventListener("click", () => {
+    renderIplPicker();
+    $("ipl-viewer").style.display = "none";
+    $("ipl-picker").style.display = "";
+    syncSplitBookHead(m, "");
+  });
+}
+
+// Somebody picked a book for this machine. Remembered on the MACHINE, so the
+// next person to open it goes straight there - it is a fact about the machine,
+// and the technician who picks it is rarely the one who comes back.
+async function rememberBookForMachine(id) {
+  if (!splitOn || session.extras || !session.machineId || !session.slipNumber) return;
+  try {
+    await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/machines/${session.machineId}/ipl-model`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: id }),
+    });
+    const m = currentMachine();
+    if (m) m.ipl_model = id;
+    syncSplitBookHead(m, id);
+  } catch (_) { /* the book is open either way; remembering is a convenience */ }
+}
+
+// TAPPING A PART IN THE BOOK. The book's number is not an AutoCount item, so
+// it is resolved the same way the IPL sheet resolves it - its own number, then
+// the maker's - and then handed to the SAME code a searched part goes through.
+// Nothing about stock or ordering is decided here; that belongs in one place.
+async function addIplPartToMachine(part) {
+  if (!part) return;
+  try {
+    let data = await api(`/api/parts-search?q=${encodeURIComponent(part.search)}`);
+    let list = data.results || [];
+    if (!list.length && part.search_alt && part.search_alt !== part.search) {
+      data = await api(`/api/parts-search?q=${encodeURIComponent(part.search_alt)}`);
+      list = data.results || [];
+    }
+    // One match is the ordinary case: straight through the rules a tapped
+    // search row goes through - in stock it lands, out of stock it asks.
+    if (list.length === 1) {
+      openAddPart({ focus: false });
+      apPick(null, list[0]);
+      return;
+    }
+    // None, or several. Both are questions the IPL sheet already answers -
+    // "not in AutoCount, order it?" and "which of these did you mean?" - so it
+    // opens, rather than a third screen being invented for them.
+    openIplPart(ipl.figure.parts.indexOf(part));
+  } catch (e) {
+    toast(e.message || "That part could not be looked up", "err");
+  }
 }
 
 // ---- The customer signing for a condemned machine ---------------------------
@@ -11471,6 +11654,9 @@ async function openIplModel(id) {
   const ok = await loadIplModel(id);
   if (!ok) return;
   iplRemember(id);
+  // Beside a machine, a book somebody PICKED is the answer to "which book?"
+  // and is kept against the machine. One the app guessed is not.
+  if (splitOn && !splitAutoOpening) rememberBookForMachine(id);
   $("ipl-chosen-name").textContent = `${iplBrand(entry)} ${iplShort(entry)}`.trim();
   $("ipl-chosen-meta").textContent =
     [iplCategory(entry), `${entry.figures} figure${entry.figures === 1 ? "" : "s"}`]
@@ -11601,7 +11787,10 @@ function renderIplList() {
   $("ipl-list").querySelectorAll(".ipl-row").forEach((b) =>
     b.addEventListener("click", () => {
       selectIplKey(b.dataset.key, false);
-      openIplPart(Number(b.dataset.index));
+      // Beside a machine, tapping a part PUTS IT ON THE MACHINE. On the IPL
+      // screen on its own it opens the part, as it always has.
+      if (splitOn) addIplPartToMachine(ipl.figure.parts[Number(b.dataset.index)]);
+      else openIplPart(Number(b.dataset.index));
     })
   );
   markIplListReplacements();
@@ -11673,7 +11862,11 @@ function selectIplKey(key, fromDiagram) {
     const matches = ipl.figure.parts
       .map((p, i) => ({ p, i }))
       .filter((x) => x.p.key === key);
-    if (matches.length === 1) openIplPart(matches[0].i);
+    if (matches.length === 1) {
+      // Same rule as the list: beside a machine a tap ADDS, on its own it opens.
+      if (splitOn) addIplPartToMachine(matches[0].p);
+      else openIplPart(matches[0].i);
+    }
     else if (matches.length > 1) {
       toast(`${matches.length} versions of ${key} — pick one from the list`, "ok");
     } else {

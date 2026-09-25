@@ -1621,6 +1621,20 @@ app.get("/api/parts-by-model", async (req, res) => {
   }
 });
 
+// WHICH PARTS BOOK THIS MACHINE USES. Written when the app's guess was wrong
+// and somebody picked the right one, so the next person does not guess again.
+app.post("/api/slips/:slip/machines/:id/ipl-model", async (req, res) => {
+  try {
+    const out = await data.slips.setMachineIplModel(
+      req.params.slip, Number(req.params.id), (req.body || {}).model || ""
+    );
+    res.json(out);
+  } catch (err) {
+    console.error("[POST ipl-model]", err.message);
+    res.status(err.status || 500).json({ error: err.message });
+  }
+});
+
 // THE CUSTOMER SIGNING FOR A CONDEMNED MACHINE. A second decision, taken in
 // person and later than the slip's own signature: that this machine is beyond
 // repair and they accept it.
