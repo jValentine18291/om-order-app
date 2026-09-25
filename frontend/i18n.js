@@ -431,6 +431,7 @@
     "e.g. 525IB": "例如：525IB",
     "Parts on this machine": "本机器的零件",
     "Scan or type a part to add it to this machine.": "扫描或输入零件编号，添加到本机器。",
+    "Tap “Add a part” below.": "点击下方“添加零件”。",
     "No parts yet": "暂无零件",
     // ---- Fogger tubes ----
     // Cut to length from a roll, so the technician picks a type and a number of

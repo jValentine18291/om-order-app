@@ -2898,6 +2898,7 @@ function openMachineModal(machineId) {
   $("os-tech").value = session.technician;
   $("os-tech-field").style.display = "none";
   $("os-entry").style.display = "none";
+  resetTrialEntry();
   const m = currentMachine();
   $("mm-title").textContent = m ? machineLabel(session.slip, m) : "Machine";
   // Which machine this is decides whether the tube buttons belong here at all.
@@ -2945,6 +2946,7 @@ function openExtrasModal() {
   $("os-tech").value = session.technician;
   $("os-tech-field").style.display = "none";
   $("os-entry").style.display = "none";
+  resetTrialEntry();
   $("mm-title").textContent = "Additional parts";
   $("mm-sub").textContent = `Slip ${session.slipNumber} · ${session.slip.company}`;
   $("mm-who").innerHTML = "";
@@ -3162,7 +3164,7 @@ function maybeShowEntry() {
   const ready = session.slipNumber && session.technician
                 && (session.machineId || session.extras);
   $("os-entry").style.display = ready ? "block" : "none";
-  applyEntryBar(ready);
+  applyTrialSheet();
   if (ready) {
     // Not awaited: the search is usable immediately and simply stops
     // reordering until the book has landed.
@@ -3665,50 +3667,50 @@ async function editPartDescription(partId, current) {
 }
 
 // ---- The trial repair sheet ------------------------------------------------
-// THE TRIAL REPAIR SHEET: the part box in the bar at the bottom, next to Save.
+// THE MACHINE FIRST, and the keyboard only when it is asked for.
 //
-// John asked for this on 25 Sep 2026, for himself first, because the keyboard
-// opens the moment a machine is tapped and buries the machine behind it.
+// The sheet used to open on the part box with the keyboard already up, because
+// setMode() focuses the box and the box is near the top. That buried the
+// machine, its remarks and the common jobs behind a keyboard before the
+// technician had read any of them. John asked for this on 25 Sep 2026.
 //
-// Most of it already existed. .mm-footer has been sticky at the bottom of the
-// sheet for months with the total and Save in it, and .modal-overlay is already
-// sized to --vvh, which visualViewport keeps equal to whatever the keyboard
-// leaves visible. The only thing missing was the part box being down there too.
+// Now the sheet opens on what is already ON the machine - its parts, its
+// labour - and the box waits behind "Add a part". Tapping that is the moment
+// the keyboard is wanted, so that is the moment it comes up.
 //
-// It MOVES the box rather than adding a second one. One input, one set of
-// handlers, one place a part gets added: two would be two things to keep in
-// step, and the second would be wrong within a month.
-//
-// `ready` is passed in rather than worked out again because the box must stay
-// hidden exactly when #os-entry is - the box lives inside #os-entry on the
-// ordinary sheet, so moving it out of there would otherwise hand it a life of
-// its own on a sheet with no machine chosen yet.
+// THE REORDERING IS CSS, not DOM surgery. #os-entry becomes a flex column and
+// each child gets an `order`, so nothing is moved, nothing has to be moved
+// back, and dropping the class restores the ordinary sheet exactly. See
+// "the trial repair sheet" in service.css.
+function trialSheetOn() {
+  return !!(window.OM_FUNCTIONS && OM_FUNCTIONS.usesTrialSheet(getUser()));
+}
 
-// What the box says on the ordinary sheet, kept here so the bar can put it back
-// after swapping in its own shorter one.
-const FULL_CODE_PLACEHOLDER = "e.g. clutch, carburetor, SZEN 140\u2026";
-
-function applyEntryBar(ready) {
+function applyTrialSheet() {
   const modal = $("machine-modal");
-  const pane = $("manual-pane");
-  const home = $("entry-home");
-  const row = modal && modal.querySelector(".mm-footer-row");
-  if (!modal || !pane || !home || !row) return;
+  if (!modal) return;
+  modal.classList.toggle("mm-b", trialSheetOn());
+}
 
-  const on = !!(window.OM_FUNCTIONS && OM_FUNCTIONS.usesEntryBar(getUser()));
-  modal.classList.toggle("mm-bar", on);
-  modal.classList.toggle("mm-ready", !!ready);
-  // Idempotent: this runs on every open, and moving something that is already
-  // where it belongs is a no-op rather than a reshuffle.
-  if (on && pane.parentElement !== row) row.insertBefore(pane, row.firstChild);
-  if (!on && pane.parentElement === row) home.parentElement.insertBefore(pane, home);
+// EVERY SHEET STARTS CLOSED, so a machine somebody opened the box on does not
+// decide how the next one greets them. Called from the two functions that open
+// a sheet rather than from maybeShowEntry(), which also runs on other
+// occasions and would snatch the box back mid-use.
+function resetTrialEntry() {
+  const modal = $("machine-modal");
+  if (modal) modal.classList.remove("mm-b-open");
+}
 
-  // The ordinary sheet's placeholder is half a sentence and the bar cuts it off
-  // mid-word at "e.g. clutch, carburetor,". The label above it is hidden down
-  // here too, so the placeholder is the only thing saying what the box is for
-  // and it has to fit.
+// Asking for the part box IS asking for the keyboard, so this is the one place
+// the trial sheet focuses it. The class goes on first: setMode() checks it
+// before deciding whether to focus.
+function openTrialEntry() {
+  const modal = $("machine-modal");
+  if (!modal) return;
+  modal.classList.add("mm-b-open");
+  setMode(currentMode || "manual");
   const ci = $("code-input");
-  if (ci) ci.placeholder = on ? "Part or description" : FULL_CODE_PLACEHOLDER;
+  if (ci) ci.focus();
 }
 
 // ---- Common jobs -----------------------------------------------------------
@@ -3846,13 +3848,7 @@ async function addJobToMachine(id) {
   if (btn) btn.disabled = false;
 }
 
-// The bar's scanner button. The Type code / Scan QR toggle is hidden in the
-// trial - there is no room for it beside the box - so this is the way to the
-// camera, and it toggles back, because a scanner with no way out would be a
-// trap on the one sheet that cannot be scrolled past.
-$("mm-scan").addEventListener("click", () => {
-  setMode(currentMode === "qr" ? "manual" : "qr");
-});
+$("mm-addpart").addEventListener("click", openTrialEntry);
 
 $("job-btns").addEventListener("click", (e) => {
   const b = e.target.closest("[data-job]");
@@ -4097,9 +4093,11 @@ function renderMachineParts() {
           <svg viewBox="0 0 24 24" fill="none" stroke="#1f6f78" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
         </div>
         <strong>No parts yet</strong>
-        <span>${session.extras
-          ? "Scan or type a part to add it to this slip."
-          : "Scan or type a part to add it to this machine."}</span>
+        <span>${trialSheetOn()
+          ? "Tap “Add a part” below."
+          : session.extras
+            ? "Scan or type a part to add it to this slip."
+            : "Scan or type a part to add it to this machine."}</span>
       </div>`;
     return;
   }
@@ -7459,15 +7457,17 @@ function setMode(mode) {
     const ci = $("code-input");
     if (ci) {
       ci.value = "";
-      // NOT FOCUSED on the trial sheet. The box is in the bar, in reach without
-      // any scrolling, so taking the keyboard the instant a machine opens would
-      // only bury the machine - which is the whole complaint. Tapping the box
-      // raises the keyboard, and the bar rides up with it.
+      // NOT FOCUSED on the trial sheet until the box has been asked for. The
+      // box is hidden behind "Add a part" there, and taking the keyboard for
+      // something nobody can see is the whole complaint. openTrialEntry() does
+      // the focusing at the moment it is wanted.
       //
-      // The ordinary sheet still focuses: there the box is halfway down the
-      // page, and somebody who picked "Type code" meant to type.
+      // The ordinary sheet still focuses: there the box is on screen from the
+      // start, and somebody who picked "Type code" meant to type.
       const modal = $("machine-modal");
-      if (!(modal && modal.classList.contains("mm-bar"))) ci.focus();
+      const waiting = modal && modal.classList.contains("mm-b")
+                      && !modal.classList.contains("mm-b-open");
+      if (!waiting) ci.focus();
     }
     const cr = $("code-results"); if (cr) cr.innerHTML = "";
   }

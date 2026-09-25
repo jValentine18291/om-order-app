@@ -78,20 +78,20 @@
   function canCorrect(user) { return isKeyholder(user); }
   function canDeleteSlips(user) { return isKeyholder(user); }
 
-  // WHO GETS THE NEW REPAIR SHEET - the one with the part box, the scanner
-  // and Save together in a bar along the bottom.
+  // WHO GETS THE TRIAL REPAIR SHEET - the one that opens on the machine's own
+  // parts, with the part box behind an "Add a part" button instead of in front
+  // of the technician with the keyboard already up.
   //
-  // John alone while he tries it on a real machine, his call on 25 Sep 2026:
-  // "allow me to test it before I give you the green light to commit it for
-  // the rest". Everybody else keeps exactly the sheet they have today.
+  // John alone while he tries it on a real machine, his call on 25 Sep 2026.
+  // Everybody else keeps exactly the sheet they have today.
   //
-  // TO GIVE IT TO EVERYONE, make usesEntryBar() return true and delete the
-  // list. This is a trial, not a permission: there is no version of this where
-  // the bar stays John's for ever, and a flag nobody remembers how to turn off
-  // quietly becomes a second layout to maintain.
-  const ENTRY_BAR_TRIAL = ["john"];
-  function usesEntryBar(user) {
-    return !!user && ENTRY_BAR_TRIAL.includes(String(user.id || ""));
+  // TO GIVE IT TO EVERYONE, make usesTrialSheet() return true and delete the
+  // list. It is a trial, not a permission: there is no version of this where
+  // the layout stays John's for ever, and a flag nobody remembers how to turn
+  // off quietly becomes a second layout to maintain.
+  const TRIAL_SHEET = ["john"];
+  function usesTrialSheet(user) {
+    return !!user && TRIAL_SHEET.includes(String(user.id || ""));
   }
 
   // "People & devices" is deliberately NOT here. It is not a job function that
@@ -133,5 +133,5 @@
 
   return { FUNCTIONS, IDS, ROLE_DEFAULTS, functionsFor, isDefault, clean,
            KEYHOLDERS, canCorrect, canDeleteSlips,
-           ENTRY_BAR_TRIAL, usesEntryBar };
+           TRIAL_SHEET, usesTrialSheet };
 });

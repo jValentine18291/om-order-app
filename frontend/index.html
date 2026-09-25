@@ -1272,10 +1272,14 @@
           </div>
           <div class="scan-hint" id="manual-status" style="justify-content:flex-start; min-height:20px;"></div>
         </div>
-        <!-- Where the entry above belongs on the ordinary sheet. The trial
-             layout moves #manual-pane down into the footer bar, and this is the
-             marker it is put back in front of - see applyEntryBar(). -->
-        <div id="entry-home"></div>
+
+        <!-- Hidden for everyone but the trial sheet, where it is what brings the
+             part box out. "Add a part" is already in i18n.js, so it reads
+             添加零件 for the technicians when this goes wider. -->
+        <button type="button" id="mm-addpart">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Add a part
+        </button>
 
         <div class="section-head" style="margin-top:2px;">
           <p class="eyebrow" id="mm-parts-head">Parts on this machine</p>
@@ -1312,15 +1316,7 @@
           <div class="left"><span id="mm-total-label">Machine total</span></div>
           <div class="total"><div class="val" id="mm-total">$0.00</div></div>
         </div>
-        <!-- One row, so the trial layout can lay the part box, the scanner and
-             Save out side by side. On the ordinary sheet it is a plain block
-             and Save sits full width under the total, exactly as before. -->
-        <div class="mm-footer-row">
-          <button type="button" class="mm-scan" id="mm-scan" aria-label="Scan QR code">
-            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 21v.01M21 14v.01M14 21v.01"/></svg>
-          </button>
-          <button class="btn-primary" id="mm-save" style="margin-top:10px;">Save</button>
-        </div>
+        <button class="btn-primary" id="mm-save" style="margin-top:10px;">Save</button>
       </div>
 
       <!-- Quoting, for this machine on its own. A slip with two machines is
