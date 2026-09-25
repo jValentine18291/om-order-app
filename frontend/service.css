@@ -999,31 +999,34 @@ select {
    overlay to those puts the sheet's bottom edge just above the keyboard, and
    its own scrolling then reaches everything. The fallbacks are for a browser
    with no visualViewport, which behaves exactly as before. */
+/* THE OVERLAY COVERS THE WHOLE SCREEN, and the keyboard is kept clear with
+   padding rather than by shrinking the box.
+
+   It used to be sized to --vvh - the visible strip - so its sheet would land
+   above the keyboard. That left the band between the bottom of that strip and
+   the top of the keyboard with no overlay over it at all: the page showed
+   through at full brightness AND took taps, so a touch there reached the
+   machine buttons on the slip screen behind. John's screenshot, 25 Sep 2026,
+   and the scrolling he could do behind the Add a part sheet.
+
+   A first attempt put the dimming on a ::before at inset 0 with z-index: -1.
+   It works in Chrome and DOES NOT WORK on iOS, which is the only place the
+   bug exists - negative-z-index pseudo-elements are exactly where Safari
+   differs. Nothing here depends on that any more: this is a plain full-screen
+   element with a background, which every browser treats the same.
+
+   inset: 0 on a fixed element is the LAYOUT viewport, which iOS does not
+   shrink for the keyboard, so the overlay reaches behind it. padding-bottom
+   then reserves the keyboard's height, and align-items: flex-end drops the
+   sheet onto the top of that padding - above the keyboard, with the dimming
+   still covering everything. --kbd is measured in app.js. */
 .modal-overlay {
-  position: fixed; left: 0; right: 0;
-  top: var(--vvtop, 0px);
-  height: var(--vvh, 100vh);
-  /* The dimming lives on ::before, NOT here - see below. */
-  background: transparent;
+  position: fixed; inset: 0;
+  box-sizing: border-box;
+  padding-bottom: var(--kbd, 0px);
+  background: rgba(11, 31, 42, .55);
   display: flex; align-items: flex-end; justify-content: center;
   z-index: 60;
-}
-/* THE SCRIM COVERS THE WHOLE SCREEN, the overlay box only the visible strip.
-   They are two different jobs and one box cannot do both.
-
-   The overlay is sized to --vvh so the sheet lands ABOVE the keyboard rather
-   than behind it. But while the dimming was on the overlay it stopped there
-   too, and the band between the bottom of that strip and the top of the
-   keyboard showed the page underneath at full brightness - John's screenshot,
-   25 Sep 2026: the slip screen visible below the Add a part sheet.
-
-   position: fixed; inset: 0 is the LAYOUT viewport, which iOS does not shrink
-   for the keyboard, so this reaches behind it. z-index: -1 keeps it behind the
-   sheet; the overlay's own z-index: 60 is a stacking context, so it cannot
-   fall behind the page. */
-.modal-overlay::before {
-  content: ""; position: fixed; inset: 0; z-index: -1;
-  background: rgba(11, 31, 42, .55);
 }
 .modal-sheet {
   background: var(--bg, #f4f6f7);

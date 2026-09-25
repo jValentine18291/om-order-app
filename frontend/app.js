@@ -893,6 +893,13 @@ function trackVisibleViewport() {
   const set = () => {
     root.style.setProperty("--vvh", Math.round(vv.height) + "px");
     root.style.setProperty("--vvtop", Math.round(vv.offsetTop) + "px");
+    // HOW MUCH OF THE SCREEN THE KEYBOARD IS EATING. The layout viewport does
+    // not shrink for it, so the difference between the two IS the keyboard.
+    // .modal-overlay reserves it as padding so a sheet lands above the keys
+    // while the overlay itself still covers the whole screen.
+    const layout = window.innerHeight || root.clientHeight || 0;
+    const kbd = Math.max(0, Math.round(layout - vv.height - vv.offsetTop));
+    root.style.setProperty("--kbd", kbd + "px");
   };
   // Both: resize is the keyboard opening, scroll is the page being nudged
   // under it, which iOS also does.
@@ -3737,6 +3744,9 @@ function openAddPart() {
     ? `Slip ${session.slipNumber} · additional parts`
     : $("mm-title").textContent;
   $("addpart-modal").style.display = "flex";
+  // Every other sheet in the app does this and this one did not, which is the
+  // other half of what John saw: the machine sheet behind it still scrolled.
+  document.body.style.overflow = "hidden";
   // Asking for the box IS asking for the keyboard - this is the one place the
   // trial sheet wants it up.
   setTimeout(() => $("ap-q").focus(), 60);
@@ -3745,6 +3755,10 @@ function openAddPart() {
 function closeAddPart() {
   $("addpart-modal").style.display = "none";
   apChosen = null;
+  // The machine sheet is almost always still open behind this, and it wants
+  // the page locked. Only release it when nothing is left.
+  const mm = $("machine-modal");
+  if (!(mm && mm.style.display === "flex")) document.body.style.overflow = "";
 }
 
 $("ap-close").addEventListener("click", closeAddPart);
