@@ -106,8 +106,8 @@ check("with words on it", d.label, "Partially shipped");
 //
 // Pinned because it is the only label that had to be argued about, and the
 // argument is invisible in a table of six strings.
-check("a purchase order nobody has sent yet reads Order Processing",
-  po.LABELS.NOT_ORDERED, "Order Processing");
+check("a purchase order nobody has sent yet reads Factory Processing",
+  po.LABELS.NOT_ORDERED, "Factory Processing");
 check("and the rest are unchanged",
   ["ORDERED", "PART_SHIPPED", "SHIPPED", "PART_RECEIVED", "RECEIVED"].map((k) => po.LABELS[k]),
   ["Ordered", "Partially shipped", "Shipped", "Partially received", "Received"]);

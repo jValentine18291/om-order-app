@@ -32,9 +32,9 @@ const LINE_STATUSES = ["NOT_ORDERED", "ORDERED", "PART_SHIPPED", "SHIPPED", "PAR
 // absence of one.
 //
 // Iris's own tick still says "Not ordered yet", and should: it is the answer
-// to "Sent to supplier?", where "Order Processing" would be no answer at all.
+// to "Sent to supplier?", where "Factory Processing" would be no answer at all.
 const LABELS = {
-  NOT_ORDERED: "Order Processing",
+  NOT_ORDERED: "Factory Processing",
   ORDERED: "Ordered",
   PART_SHIPPED: "Partially shipped",
   SHIPPED: "Shipped",
