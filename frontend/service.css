@@ -2247,6 +2247,17 @@ body.signin-brand .topbar .pill {
    so which one wins is decided by document order, and the IPL sheet is written
    further down the page: the order popup opened behind it and only appeared
    once the part sheet was closed. Lift it above the rest. */
+/* THE PART SHEET OPENS OVER THE REPAIR, beside a machine on a tablet: a part
+   with two article numbers under one callout, or one the catalogue does not
+   hold, opens this on top of the machine sheet. Both were .modal-overlay's
+   shared z-index 60, and the machine sheet sits later in the document, so it
+   won and this opened invisibly behind it - John's, 26 Sep 2026, and the same
+   trap #tube-qty-modal and #addpart-modal each document.
+
+   65, not 70: #order-modal below opens FROM this sheet ("Order more"), and at
+   70 it sits above this rather than under it. The gap is what 65 is for. */
+#ipl-modal { z-index: 65; }
+
 #order-modal { z-index: 70; }
 /* Same reason as the line above: every .modal-overlay shares z-index 60, so
    without this the location popup opens BEHIND the IPL part sheet it was

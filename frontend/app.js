@@ -11950,8 +11950,6 @@ function selectIplKey(key, fromDiagram) {
     r.classList.toggle("on", r.dataset.key === key)
   );
   if (fromDiagram) {
-    const row = document.querySelector('.ipl-row[data-key="' + CSS.escape(key) + '"]');
-    if (row) row.scrollIntoView({ behavior: "smooth", block: "center" });
     // Husqvarna IPLs list variants under one callout — the same number with a
     // different article number per machine SKU or serial range. Only the list
     // shows what distinguishes them, so offer the choice rather than silently
@@ -11959,6 +11957,19 @@ function selectIplKey(key, fromDiagram) {
     const matches = ipl.figure.parts
       .map((p, i) => ({ p, i }))
       .filter((x) => x.p.key === key);
+
+    // SCROLLING THE LIST IS FOR WHEN THE LIST IS THE ANSWER. Beside a machine
+    // a single match goes straight onto the repair, so dragging the book to a
+    // row nobody is going to read just moves the page under them - John's, 26
+    // Sep 2026. Every other case still scrolls, because every other case ends
+    // with somebody looking at that row: several variants to choose between, a
+    // number the book does not list, or the IPL screen on its own.
+    const willAdd = splitOn && matches.length === 1;
+    if (!willAdd) {
+      const row = document.querySelector('.ipl-row[data-key="' + CSS.escape(key) + '"]');
+      if (row) row.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
     if (matches.length === 1) {
       // Same rule as the list: beside a machine a tap ADDS, on its own it opens.
       if (splitOn) addIplPartToMachine(matches[0].p);
