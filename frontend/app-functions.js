@@ -78,21 +78,10 @@
   function canCorrect(user) { return isKeyholder(user); }
   function canDeleteSlips(user) { return isKeyholder(user); }
 
-  // WHO GETS THE TRIAL REPAIR SHEET - the one that opens on the machine's own
-  // parts, with the part box behind an "Add a part" button instead of in front
-  // of the technician with the keyboard already up.
-  //
-  // John alone while he tries it on a real machine, his call on 25 Sep 2026.
-  // Everybody else keeps exactly the sheet they have today.
-  //
-  // TO GIVE IT TO EVERYONE, make usesTrialSheet() return true and delete the
-  // list. It is a trial, not a permission: there is no version of this where
-  // the layout stays John's for ever, and a flag nobody remembers how to turn
-  // off quietly becomes a second layout to maintain.
-  const TRIAL_SHEET = ["john"];
-  function usesTrialSheet(user) {
-    return !!user && TRIAL_SHEET.includes(String(user.id || ""));
-  }
+  // The repair sheet was behind a per-person list while John tried it, 25 to
+  // 26 Sep 2026. He green-lit it for everyone, so the list is gone rather than
+  // left pointing at all of them: a flag nobody remembers how to turn off is a
+  // second layout to maintain. The way back is the git history, not a switch.
 
   // "People & devices" is deliberately NOT here. It is not a job function that
   // can be handed out - it is the screen that hands the others out, and it
@@ -132,6 +121,5 @@
   }
 
   return { FUNCTIONS, IDS, ROLE_DEFAULTS, functionsFor, isDefault, clean,
-           KEYHOLDERS, canCorrect, canDeleteSlips,
-           TRIAL_SHEET, usesTrialSheet };
+           KEYHOLDERS, canCorrect, canDeleteSlips };
 });

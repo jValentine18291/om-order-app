@@ -3691,14 +3691,12 @@ async function editPartDescription(partId, current) {
 // each child gets an `order`, so nothing is moved, nothing has to be moved
 // back, and dropping the class restores the ordinary sheet exactly. See
 // "the trial repair sheet" in service.css.
-function trialSheetOn() {
-  return !!(window.OM_FUNCTIONS && OM_FUNCTIONS.usesTrialSheet(getUser()));
-}
-
 function applyTrialSheet() {
   const modal = $("machine-modal");
   if (!modal) return;
-  modal.classList.toggle("mm-b", trialSheetOn());
+  // Everybody, since 26 Sep 2026. The class stays because every rule for this
+  // layout hangs off it; it is simply always on now.
+  modal.classList.add("mm-b");
 }
 
 // EVERY SHEET STARTS CLOSED, so a machine somebody opened the box on does not
@@ -3734,6 +3732,7 @@ let apDebounce = null;
 function openAddPart() {
   if (!(session.machineId || session.extras)) { toast("Open a machine first", "err"); return; }
   apChosen = null;
+  apStopScan();
   $("ap-q").value = "";
   $("ap-results").innerHTML = "";
   $("ap-status").innerHTML = "";
@@ -3753,6 +3752,9 @@ function openAddPart() {
 }
 
 function closeAddPart() {
+  // A camera left running is a camera left running, whichever way the popup
+  // was closed.
+  apStopScan();
   $("addpart-modal").style.display = "none";
   apChosen = null;
   // The machine sheet is almost always still open behind this, and it wants
@@ -3762,6 +3764,33 @@ function closeAddPart() {
 }
 
 $("ap-close").addEventListener("click", closeAddPart);
+
+// SCANNING, which came across with the part box. A scanned code carries no
+// balance, so it goes the same way as a typed one: look the stock up, then
+// either add it or offer to order it. The no-stock rule is not something a
+// technician can get past by scanning instead of typing.
+$("ap-scan").addEventListener("click", () => {
+  $("ap-scan").style.display = "none";
+  $("ap-scan-area").style.display = "flex";
+  $("ap-results").innerHTML = "";
+  $("ap-status").innerHTML = "";
+  startQrScanner({
+    videoId: "ap-video",
+    statusId: "ap-scan-status",
+    onCode: (code) => {
+      apStopScan();
+      showApPart({ item_code: String(code || "").trim() });
+    },
+  });
+});
+$("ap-scan-stop").addEventListener("click", apStopScan);
+
+function apStopScan() {
+  try { stopQrScanner(); } catch (_) {}
+  const area = $("ap-scan-area"), btn = $("ap-scan");
+  if (area) area.style.display = "none";
+  if (btn) btn.style.display = "";
+}
 $("ap-back").addEventListener("click", () => {
   $("ap-detail").style.display = "none";
   $("ap-search").style.display = "";
@@ -3841,6 +3870,7 @@ async function apPick(btn, part) {
 // zero. The balance is fetched fresh here because this is where a decision
 // gets made on it.
 async function showApPart(part) {
+  apStopScan();
   apChosen = { ...part };
   $("ap-search").style.display = "none";
   $("ap-detail").style.display = "";
@@ -4497,11 +4527,7 @@ function renderMachineParts() {
           <svg viewBox="0 0 24 24" fill="none" stroke="#1f6f78" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
         </div>
         <strong>No parts yet</strong>
-        <span>${trialSheetOn()
-          ? "Tap “Add a part” below."
-          : session.extras
-            ? "Scan or type a part to add it to this slip."
-            : "Scan or type a part to add it to this machine."}</span>
+        <span>Tap “Add a part” below.</span>
       </div>`;
     return;
   }

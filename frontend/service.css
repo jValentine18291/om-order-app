@@ -2472,7 +2472,10 @@ body.signin-brand .topbar .pill {
   flex: 1 1 auto; min-height: 0; overflow-y: auto;
   overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
 }
-#ap-status { flex: none; }
+#ap-status, #ap-scan, #ap-scan-area { flex: none; }
+/* The camera gets the room the list would have taken, rather than both
+   fighting over it. */
+#ap-scan-area { overflow-y: auto; min-height: 0; }
 
 .ap-back {
   border: 0; background: none; padding: 2px 0 10px; cursor: pointer;
