@@ -746,12 +746,11 @@ select {
 .machine-untouched { font-size: .75rem; font-weight: 600; color: #A85B00; background: #FDF0E0; padding: 4px 10px; border-radius: 999px; }
 .machine-btn-sub { margin-top: 4px; font-size: .82rem; color: var(--ink-faint); }
 /* What the customer reported at registration, wherever the machine shows. */
-.machine-btn-remarks, .vs-machine-remarks, .mm-remarks, .ns-machine-remarks {
+.machine-btn-remarks, .vs-machine-remarks, .ns-machine-remarks {
   margin-top: 4px; font-size: .84rem; font-style: italic; color: var(--ink-soft);
   overflow-wrap: anywhere;
 }
 .ns-machine-remarks { display: block; width: 100%; }
-.mm-remarks { margin-top: 2px; }
 
 /* Where a machine stands on quoting. Shown per machine, on the slip list and
    in View Slips, because a slip is routinely half finished. */
@@ -2410,26 +2409,25 @@ body.signin-brand .topbar .pill {
 .vs-chain-date { font-weight: 600; color: var(--ink-faint, #78868c); margin-left: 6px; }
 .vs-chain-arrow { color: var(--ink-faint, #78868c); }
 
-/* ---- Sales' note, at the top of a machine -------------------------------- */
-/* The first thing a technician sees when they open a machine. Louder than the
-   machine's own remarks below it, because it was being scrolled past.
-   Labelled, because it belongs to the SLIP: the same words show on all four
-   machines of a four-machine slip and must not read as being about the one in
-   front of them. */
-.mm-notes {
+/* ---- What the customer reported, at the top of a machine ----------------- */
+/* The first thing a technician sees when they open a machine, and the thing
+   they were scrolling past when it was a quiet line of italics like the ones
+   on the lists behind. It is the whole reason the machine is on the bench. */
+.mm-remarks {
   display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;
   margin: 8px 0 2px; padding: 9px 12px;
   border-radius: var(--radius-sm, 8px);
   background: #FFF6E5; border-left: 3px solid #E0A22A;
   color: #8A5B00; font-size: .84rem; line-height: 1.5;
+  overflow-wrap: anywhere;
 }
-.mm-notes-tag {
+.mm-remarks-tag {
   flex: none; font-size: .68rem; font-weight: 800; letter-spacing: .04em;
   text-transform: uppercase; padding-top: 2px; opacity: .8;
 }
-/* Sales write more than one line - a reference number, then a site. Kept as
-   they typed it rather than run together. */
-.mm-notes-txt { flex: 1; min-width: 140px; font-weight: 600; white-space: pre-line; }
+/* Kept as it was typed: Sales write "Add pipe end, hose chg, Band Strap chg"
+   as one line and sometimes across several. */
+.mm-remarks-txt { flex: 1; min-width: 140px; font-weight: 600; white-space: pre-line; }
 .pu-delete {
   flex: 0 0 auto; min-height: 40px; padding: 0 14px; border-radius: 999px;
   border: 1px solid #e6b0b0; background: var(--surface);

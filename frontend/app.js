@@ -2899,19 +2899,15 @@ function openMachineModal(machineId) {
   try { renderTubePicker(); } catch (_) {}
   try { renderJobPicker(); } catch (_) {}
   $("mm-sub").textContent = `Slip ${session.slipNumber} · ${session.slip.company}`;
-  // What Sales wrote on the slip, above everything else on the sheet. It is
-  // the slip's note rather than this machine's, so it carries a label: the
-  // same words appear on all four machines of a four-machine slip and must not
-  // read as being about the one in front of the technician.
-  const mmn = $("mm-notes");
-  const slipNote = String((session.slip && session.slip.notes) || "").trim();
-  if (mmn) {
-    $("mm-notes-txt").textContent = slipNote;
-    mmn.style.display = slipNote ? "flex" : "none";
-  }
+  // What the customer said about THIS machine, at the top and highlighted.
+  // The technician's starting point, and the thing they were scrolling past
+  // when it was a quiet line of italics.
   const mmr = $("mm-remarks");
-  if (m && m.remarks) { mmr.textContent = `“${m.remarks}”`; mmr.style.display = "block"; }
-  else { mmr.style.display = "none"; mmr.textContent = ""; }
+  const remarks = String((m && m.remarks) || "").trim();
+  if (mmr) {
+    $("mm-remarks-txt").textContent = remarks;
+    mmr.style.display = remarks ? "flex" : "none";
+  }
   // The same thing the machine's paper tag says. Shown on every machine of the
   // slip, because the quotation was agreed for the job, not for one machine.
   const ask = $("mm-ask-quote");
@@ -2949,16 +2945,10 @@ function openExtrasModal() {
   $("mm-who").innerHTML = "";
   // Nothing on this sheet belongs to a machine, so none of the machine's
   // furniture belongs on it either.
-  // mm-notes is NOT in this list. It is the slip's note, and the slip's parts
-  // are as much part of the slip as any machine on it - "SS36973, Site: 312
-  // Anchorvale" is just as worth seeing here.
   ["mm-remarks", "mm-ask-quote", "mm-decision", "mm-billed", "job-pick",
    "tube-pick", "mm-quote-row"].forEach((id) => {
     const el = $(id); if (el) el.style.display = "none";
   });
-  const xn = $("mm-notes");
-  const xNote = String((session.slip && session.slip.notes) || "").trim();
-  if (xn) { $("mm-notes-txt").textContent = xNote; xn.style.display = xNote ? "flex" : "none"; }
   $("os-labour-field").style.display = "none";
   $("os-comment-field").style.display = "none";
   $("ex-note-field").style.display = "";
