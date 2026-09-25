@@ -47,6 +47,15 @@
     // part is - see zeroIsDeliberate().
     { id: "CARB", title: "Service Carburetor & Labour",
       code: "A7 SVR WAREHOUSE",    qty: 1, price: 0.00 },
+    // The same service WITHOUT the labour, John's ask on 26 Sep 2026. Its own
+    // id because it shares "A7 SVR WAREHOUSE" with the weld and the one above:
+    // the server merges lines matching on code alone, and a $30 weld, a carb
+    // service and this would collapse into one line at a figure that is none
+    // of them. Priced at nothing on purpose like its neighbour, and the
+    // technician types what it came to - zeroIsDeliberate() reads this table,
+    // so it is not flagged as a line waiting for a price.
+    { id: "CARBSVC", title: "Service Carburetor",
+      code: "A7 SVR WAREHOUSE",    qty: 1, price: 0.00 },
     // One pipe per tap. These lines never merge - see addPartToMachine - so a
     // machine that took two gets two lines, or one line the technician steps
     // up to 2 with the stepper. Either reads the same on the Sales Order.

@@ -43,8 +43,8 @@ console.log("\n-- the table itself --");
 check("it checks out", J.check(), []);
 check("the jobs, in the order they were asked for",
   J.list.map((j) => j.title),
-  ["Welding", "Change Engine Oil", "Service Carburetor & Labour", "Yellow Fuel Pipe",
-   "No Servicing", "HS-B6 Spark Plug", "Core Wire"]);
+  ["Welding", "Change Engine Oil", "Service Carburetor & Labour", "Service Carburetor",
+   "Yellow Fuel Pipe", "No Servicing", "HS-B6 Spark Plug", "Core Wire"]);
 
 console.log("\n-- which machines each button is on --");
 // Two of them are fogger parts and must not appear on a chainsaw job. The
@@ -52,8 +52,8 @@ console.log("\n-- which machines each button is on --");
 // it cost" and "who sees it" cannot drift apart.
 check("the everyday buttons, on every machine",
   J.everyday().map((j) => j.title),
-  ["Welding", "Change Engine Oil", "Service Carburetor & Labour", "Yellow Fuel Pipe",
-   "No Servicing"]);
+  ["Welding", "Change Engine Oil", "Service Carburetor & Labour", "Service Carburetor",
+   "Yellow Fuel Pipe", "No Servicing"]);
 check("and the two only a fogger gets",
   J.foggerOnly().map((j) => [j.title, j.code, j.price]),
   [["HS-B6 Spark Plug", "M0815SK ESB7", 4], ["Core Wire", "A8 SPARE PARTS", 3]]);
@@ -79,18 +79,22 @@ check("and it uses the same A8 code the fuel pipe does",
 // price somebody forgot to fill in.
 const priced = J.list.filter((j) => !j.comment);
 const notes = J.list.filter((j) => j.comment);
-check("six of them add a priced line", priced.map((j) => j.title),
-  ["Welding", "Change Engine Oil", "Service Carburetor & Labour", "Yellow Fuel Pipe",
-   "HS-B6 Spark Plug", "Core Wire"]);
-check("at the prices given", priced.map((j) => j.price), [30, 9, 0, 3, 4, 3]);
-check("one of each", priced.map((j) => j.qty), [1, 1, 1, 1, 1, 1]);
+check("seven of them add a priced line", priced.map((j) => j.title),
+  ["Welding", "Change Engine Oil", "Service Carburetor & Labour", "Service Carburetor",
+   "Yellow Fuel Pipe", "HS-B6 Spark Plug", "Core Wire"]);
+check("at the prices given", priced.map((j) => j.price), [30, 9, 0, 0, 3, 4, 3]);
+check("one of each", priced.map((j) => j.qty), [1, 1, 1, 1, 1, 1, 1]);
 check("and one writes a comment instead", notes.map((j) => [j.title, j.comment]),
   [["No Servicing", "No servicing"]]);
 check("which carries no code, no price and no quantity to bill",
   notes.map((j) => [j.code, j.price, j.qty]), [[undefined, undefined, undefined]]);
-check("two of them share the warehouse service code",
+// THREE of them now, since "Service Carburetor" joined on 26 Sep 2026. That is
+// the whole reason each job carries an id: the server merges lines matching on
+// code alone, and a $30 weld and two $0 carburettor lines would otherwise
+// collapse into one line at a figure that is none of them.
+check("three of them share the warehouse service code",
   J.list.filter((j) => j.code === "A7 SVR WAREHOUSE").map((j) => j.title),
-  ["Welding", "Service Carburetor & Labour"]);
+  ["Welding", "Service Carburetor & Labour", "Service Carburetor"]);
 check("and every job has an id of its own",
   new Set(J.list.map((j) => j.id)).size, J.list.length);
 

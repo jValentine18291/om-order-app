@@ -3570,6 +3570,7 @@ async function addByCode(code) {
       existing.quantity += 1;
     } else {
       let description = item.description;
+      let unitPrice = Number(item.unit_price) || 0;
       // Judged on what the CATALOGUE says, before any renaming - and recorded
       // on the line, because the rename is the whole point and would otherwise
       // erase the evidence.
@@ -3585,12 +3586,36 @@ What is this part? It will appear on the Sales Order.`,
         );
         if (typed === null) return;                  // changed their mind
         if (typed.trim()) description = typed.trim();
+
+        // AND WHAT IT COMES TO. John's ask, 26 Sep 2026, for the MISC codes and
+        // so for A5-A8 with them: these carry no catalogue price, because the
+        // catalogue does not know what the line IS. Whoever is holding the part
+        // and has just named it is the one person who knows - and the moment
+        // they walk away it becomes a $0 line somebody else has to chase.
+        //
+        // CANCELLING OR LEAVING IT BLANK IS ALLOWED, and keeps whatever price
+        // the code came with. The part has already been named by this point,
+        // and throwing that away because somebody was not ready to price it
+        // would cost more than the missing figure - the pencil in the list
+        // sets it later either way.
+        const asked = prompt(
+          `${description}
+
+How much does it cost? Leave blank to price it later.`,
+          unitPrice > 0 ? String(unitPrice) : ""
+        );
+        const n = parseTypedPrice(asked);
+        if (n === NOT_A_PRICE) {
+          toast("That price was not clear — set it in the list", "err");
+        } else if (n !== null) {
+          unitPrice = n;
+        }
       }
       session.pendingParts.push({
         item_code: item.item_code,
         description,
         uom: item.uom,
-        unit_price: item.unit_price,
+        unit_price: unitPrice,
         quantity: 1,
         technician: session.technician,
         free_text: freeText,
@@ -3653,6 +3678,32 @@ function currentPartHolder() {
 // entry, and whether AutoCount carries that as the code or as the description
 // of some other code, it is the same kind of line. Kept identical to the
 // backend copy in data/sqliteRepo.js - if one changes, change both.
+// WHAT SOMEBODY TYPED, AS A PRICE - or a refusal to guess.
+//
+// null means they left it blank; NOT_A_PRICE means it could not be read and
+// they are told so. Anything else is the number.
+//
+// STRIPPING PUNCTUATION AND HOPING IS NOT GOOD ENOUGH. The first version of
+// this did `replace(/[^0-9.]/g, "")`, which turned "$ 7,50" into 750 - a
+// hundredfold error on its way to a customer's invoice, with nothing in
+// between to question it. A comma is a thousands separator here and a decimal
+// point in half the world, and the app cannot tell which one a technician
+// meant. So it reads the unambiguous cases and refuses the rest.
+const NOT_A_PRICE = Symbol("not a price");
+
+function parseTypedPrice(raw) {
+  if (raw === null || raw === undefined) return null;       // cancelled
+  let t = String(raw).trim().replace(/[$\s]/g, "");
+  if (!t) return null;                                      // left blank
+  // 1,250 and 1,250.00: commas in thousands position are separators.
+  if (/^\d{1,3}(,\d{3})+(\.\d{1,2})?$/.test(t)) t = t.replace(/,/g, "");
+  // Any other comma is the ambiguous case. Refused rather than guessed.
+  if (t.includes(",")) return NOT_A_PRICE;
+  if (!/^\d+(\.\d{1,2})?$/.test(t)) return NOT_A_PRICE;
+  const n = Number(t);
+  return Number.isFinite(n) && n >= 0 ? n : NOT_A_PRICE;
+}
+
 function isFreeTextPart(itemCode, description = "") {
   const norm = (v) => String(v || "").trim().toUpperCase();
   const code = norm(itemCode);
