@@ -1183,6 +1183,26 @@ const CHAIN_DOCS = [
   ["CS", "CSDTL", "CS"],
 ];
 
+// A document's date as YYYY-MM-DD.
+//
+// The driver hands back a Date, whose String() is "Fri Sep 18 2026 00:00:00
+// GMT+0800" - so slicing ten characters off it gives "Fri Sep 18" and loses
+// the year entirely. Caught on the live server, 25 Sep 2026, on the first real
+// call.
+//
+// Built from the LOCAL parts, not toISOString(): AutoCount dates these at
+// midnight Singapore time, which in UTC is the previous afternoon, and a
+// delivery order would come back dated the day before it was raised. The same
+// eight hours that once put Sales Orders out of step with their slips.
+function docDate(v) {
+  if (!v) return "";
+  if (v instanceof Date && !isNaN(v)) {
+    const p = (n) => String(n).padStart(2, "0");
+    return `${v.getFullYear()}-${p(v.getMonth() + 1)}-${p(v.getDate())}`;
+  }
+  return String(v).slice(0, 10);
+}
+
 async function documentsFrom(docNos) {
   const list = [...new Set((docNos || []).map((d) => String(d || "").trim()).filter(Boolean))];
   if (!list.length) return [];
@@ -1204,7 +1224,7 @@ async function documentsFrom(docNos) {
       out.push({
         kind: String(r.Kind),
         doc_no: String(r.DocNo || "").trim(),
-        doc_date: r.DocDate ? String(r.DocDate).slice(0, 10) : "",
+        doc_date: docDate(r.DocDate),
         from_doc_no: String(r.FromNo || "").trim(),
         from_type: String(r.FromType || "").trim(),
       });
@@ -1298,6 +1318,9 @@ async function getOnOrder(codes) {
 }
 
 module.exports.documentsFrom = documentsFrom;
+// Exported for the tests: it is the one piece of documentsFrom() that can be
+// checked without SQL Server, and it is where the first live bug was.
+module.exports.docDate = docDate;
 module.exports.chainFrom = chainFrom;
 module.exports.getOnOrder = getOnOrder;
 module.exports.purchaseOrderShape = purchaseOrderShape;

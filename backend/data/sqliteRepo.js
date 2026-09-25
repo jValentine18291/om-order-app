@@ -1443,15 +1443,24 @@ function recordOrderDocuments(orderId, docs) {
     `INSERT OR IGNORE INTO order_documents (order_id, doc_type, doc_no, doc_date, from_doc_no, depth)
      VALUES (?, ?, ?, ?, ?, ?)`
   );
+  // The date is the one thing about a document that can arrive wrong and then
+  // be corrected - it did, on the first live call, when a driver Date came
+  // through as "Fri Sep 18". INSERT OR IGNORE would have kept that for ever,
+  // so a row already known has its date put right.
+  const fixDate = db.prepare(
+    `UPDATE order_documents SET doc_date = ?
+      WHERE order_id = ? AND doc_no = ? AND IFNULL(doc_date,'') <> ?`
+  );
   let added = 0;
   const tx = db.transaction(() => {
     for (const d of docs || []) {
       const no = String((d && d.doc_no) || "").trim();
       if (!no) continue;
+      const when = String(d.doc_date || "");
       const r = ins.run(orderId, String(d.kind || d.doc_type || "").trim().toUpperCase(),
-                        no, String(d.doc_date || ""), String(d.from_doc_no || ""),
-                        Number(d.depth) || 1);
+                        no, when, String(d.from_doc_no || ""), Number(d.depth) || 1);
       added += r.changes || 0;
+      if (!r.changes && when) fixDate.run(when, orderId, no, when);
     }
   });
   tx();

@@ -219,6 +219,8 @@ async function main() {
           .sort((a, b) => a.depth - b.depth)
           .map((d) => `${d.kind} ${d.doc_no}${d.doc_date ? " " + d.doc_date : ""}`)
           .join("  ->  ");
+        // doc_date is YYYY-MM-DD from documentsFrom(), which formats the
+        // driver's Date properly - the raw one reads "Fri Sep 18" with no year.
         line(`  ${so}  ->  ${steps}`);
       }
       line("");

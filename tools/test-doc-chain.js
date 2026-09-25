@@ -105,6 +105,32 @@ async function stub(docNos) {
     data.slips.orderDocuments(orderId).map((d) => [d.doc_type, d.doc_no, d.from_doc_no]),
     [["DO", "DO-2609-229", "SO-2609-048"], ["INV", "INV-2609-0140", "DO-2609-229"]]);
 
+  console.log("\n-- a document's date --");
+  // The driver hands back a Date, and slicing ten characters off its String()
+  // gives "Fri Sep 18" with no year. That shipped, and was caught on the first
+  // live call, 25 Sep 2026.
+  check("a driver Date becomes a real date", ac.docDate(new Date(2026, 8, 18)), "2026-09-18");
+  // Built from LOCAL parts, not toISOString(): AutoCount dates documents at
+  // midnight Singapore time, which in UTC is the previous afternoon, so a
+  // delivery order would come back dated the day before it was raised.
+  check("and not the day before, which UTC would have given",
+    [ac.docDate(new Date(2026, 8, 18)), new Date(2026, 8, 18).toISOString().slice(0, 10)],
+    ["2026-09-18", "2026-09-17"]);
+  check("a string is left alone", ac.docDate("2026-09-18 00:00:00"), "2026-09-18");
+  check("and nothing is nothing", [ac.docDate(null), ac.docDate("")], ["", ""]);
+
+  console.log("\n-- a date written down wrong does not stay wrong --");
+  // INSERT OR IGNORE would have kept the bad one for ever, so a document
+  // already known has its date corrected on the next sync.
+  data.slips.recordOrderDocuments(orderId, [
+    { kind: "DO", doc_no: "DO-2609-229", doc_date: "Fri Sep 24", from_doc_no: "SO-2609-048", depth: 1 }]);
+  check("the wrong one is what got stored",
+    data.slips.orderDocuments(orderId).find((d) => d.doc_no === "DO-2609-229").doc_date, "Fri Sep 24");
+  data.slips.recordOrderDocuments(orderId, [
+    { kind: "DO", doc_no: "DO-2609-229", doc_date: "2026-09-24", from_doc_no: "SO-2609-048", depth: 1 }]);
+  check("and the next sync put it right",
+    data.slips.orderDocuments(orderId).find((d) => d.doc_no === "DO-2609-229").doc_date, "2026-09-24");
+
   console.log("\n-- rule 4: running it again changes nothing --");
   check("nothing added the second time", data.slips.recordOrderDocuments(orderId, chain), 0);
   check("and still two documents", data.slips.orderDocuments(orderId).length, 2);
