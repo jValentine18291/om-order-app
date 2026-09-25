@@ -1621,6 +1621,48 @@ app.get("/api/parts-by-model", async (req, res) => {
   }
 });
 
+// HOLD A MACHINE FOR A PART THE SHELF DID NOT HAVE.
+//
+// John's rule, 25 Sep 2026: a part with no stock cannot go on a machine. The
+// repair still needs it, so the app orders it and holds the machine here.
+//
+// THE STOCK IS CHECKED AGAIN, on the server, against AutoCount. The app checks
+// too, so it can say why before anything is tapped, but a rule enforced only
+// in the app is not a rule: the balance can also have moved between the search
+// and the tap.
+app.post("/api/slips/:slip/machines/:id/await", async (req, res) => {
+  try {
+    const body = req.body || {};
+    const code = String(body.item_code || "").trim();
+    if (!code) return res.status(400).json({ error: "A part code is required." });
+
+    const row = await data.slips.holdMachineForPart(Number(req.params.id), {
+      item_code: code,
+      description: body.description || "",
+      requested_by: body.requested_by || "",
+      request_id: body.request_id || null,
+    });
+    res.status(201).json(row);
+  } catch (err) {
+    console.error("[POST /api/slips/:slip/machines/:id/await]", err.message);
+    res.status(err.status || 500).json({ error: err.message });
+  }
+});
+
+// The part arrived, or was not needed after all.
+app.post("/api/slips/:slip/machines/:id/await/clear", async (req, res) => {
+  try {
+    const body = req.body || {};
+    const out = await data.slips.clearAwaitingPart(
+      Number(req.params.id), String(body.item_code || ""), body.who || ""
+    );
+    res.json(out);
+  } catch (err) {
+    console.error("[POST /api/slips/:slip/machines/:id/await/clear]", err.message);
+    res.status(err.status || 500).json({ error: err.message });
+  }
+});
+
 // Find Part: stock card for one part (code, description, shelf, balance qty).
 app.get("/api/part-stock/:code", async (req, res) => {
   try {

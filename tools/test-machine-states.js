@@ -77,6 +77,14 @@ check("quoted: the machine waits on the customer", stateNow(slip, saw.id), "QUOT
 
   // The blower is billed. The slip is NOT finished: the condemned machine is
   // still physically in the workshop.
+  //
+  // The go-ahead first. This slip is marked "quote first", and since 25 Sep
+  // 2026 that holds EVERY machine on it off a Sales Order until the customer
+  // has been told the price and said to proceed - including one like this that
+  // nobody ever got round to sending for quoting, which is the case the flag
+  // exists for. See test-quote-before-so.js. Before that rule the line below
+  // billed it straight from RECEIVED.
+  await data.slips.setMachineState(no, blower.id, "TO_REPAIR", "Iris");
   await data.slips.createSlipOrder(no, [blower.id]);
   slip = await data.slips.getSlip(no);
   // Not "All Repaired": the condemned one is still sitting in the workshop.

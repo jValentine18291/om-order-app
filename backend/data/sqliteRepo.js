@@ -461,6 +461,12 @@ function getSlip(slipNumber, includeSignature = false) {
   const getParts = db.prepare("SELECT * FROM machine_parts WHERE machine_id = ? ORDER BY id");
   for (const m of machines) {
     m.parts = getParts.all(m.id);
+    // What it is short of. Always present, even when empty, so every screen
+    // can ask without checking whether the field is there.
+    m.awaiting = awaitingForMachine(m.id);
+    // Why it cannot go on a Sales Order yet, or "". The picker greys the box
+    // with this and the server refuses with it, so they cannot drift apart.
+    m.quote_block = quoteBlockReason(slip, m);
     // Whether its status can be put back - see undoMachineDecision(). Decided
     // here rather than in the app so the button and the rule that refuses it
     // are the same sentence; the app only has to read the answer.
@@ -493,6 +499,55 @@ function getSlip(slipNumber, includeSignature = false) {
   return slip;
 }
 
+// ---- Parts the shelf did not have ------------------------------------------
+// John's rule, 25 Sep 2026: a part with no stock cannot go on a machine. The
+// repair still needs it, so it is ordered and the machine is held here until
+// it arrives. See machine_awaiting_parts in db.js.
+
+// Still outstanding, oldest first. Cleared rows are history and stay out of it.
+function awaitingForMachine(machineId) {
+  return db.prepare(
+    `SELECT id, item_code, description, requested_by, request_id, created_at
+       FROM machine_awaiting_parts
+      WHERE machine_id = ? AND cleared_at IS NULL
+      ORDER BY id`
+  ).all(machineId);
+}
+
+// Put a machine on hold for a part.
+//
+// One row per part, not per asking: a technician who taps the same
+// out-of-stock part twice has told us one thing, and two rows would hold the
+// machine twice and need clearing twice.
+function holdMachineForPart(machineId, { item_code, description = "", requested_by = "", request_id = null } = {}) {
+  const code = String(item_code || "").trim();
+  if (!code) { const e = new Error("A part code is required."); e.status = 400; throw e; }
+  const machine = db.prepare("SELECT id FROM slip_machines WHERE id = ?").get(machineId);
+  if (!machine) { const e = new Error("Machine not found."); e.status = 404; throw e; }
+
+  const open = db.prepare(
+    `SELECT id FROM machine_awaiting_parts
+      WHERE machine_id = ? AND item_code = ? AND cleared_at IS NULL`
+  ).get(machineId, code);
+  if (open) return { ...open, already: true };
+
+  const info = db.prepare(
+    `INSERT INTO machine_awaiting_parts (machine_id, item_code, description, requested_by, request_id)
+     VALUES (?, ?, ?, ?, ?)`
+  ).run(machineId, code, String(description || ""), String(requested_by || ""), request_id || null);
+  return { id: Number(info.lastInsertRowid), already: false };
+}
+
+// The part turned up, or was never needed after all.
+function clearAwaitingPart(machineId, itemCode, who = "") {
+  const info = db.prepare(
+    `UPDATE machine_awaiting_parts
+        SET cleared_at = datetime('now', 'localtime'), cleared_by = ?
+      WHERE machine_id = ? AND item_code = ? AND cleared_at IS NULL`
+  ).run(String(who || ""), machineId, String(itemCode || "").trim());
+  return { cleared: info.changes };
+}
+
 // The signature on its own, for the one caller that draws it.
 function getSlipSignature(slipNumber) {
   const slip = db.prepare("SELECT id FROM service_slips WHERE slip_number = ?").get(slipNumber);
@@ -507,6 +562,10 @@ function getSlipSignature(slipNumber) {
 }
 
 // Add a scanned part to a specific machine (or bump qty if same part+technician).
+//
+// Fitting a part the machine was held for LIFTS THE HOLD, in addPartToMachine
+// below - the arrival and the fitting are the same event, and a hold that had
+// to be cleared by hand would outlive the part sitting in the machine.
 //
 // variant tells two lines apart that share an item code. It exists for the
 // PulsFOG tubes, where Z00126.03 is four tube types at four different prices:
@@ -664,6 +723,9 @@ function addPartToMachine(machineId, { item_code, description, uom = "UNIT", uni
           // code ourselves so an old client that sends nothing still works.
           freeText ? 1 : 0);
   }
+  // The part the machine was held for has arrived and gone in, so the hold
+  // lifts here rather than waiting for somebody to remember a button.
+  clearAwaitingPart(machineId, item_code, technician);
   deriveSlipStatus(machine.slip_id);      // work recorded: OPEN -> IN_PROGRESS
   return db.prepare("SELECT * FROM machine_parts WHERE machine_id = ? ORDER BY id").all(machineId);
 }
@@ -785,6 +847,44 @@ function phoneForOrder(raw) {
 // every one, and the customer would be charged for the same filter three
 // times. Each line carries its own converted_at for the same reason a machine
 // does, and an already-converted line is simply not offered again.
+// ---- A quote has to be answered before the machine is billed ----------------
+//
+// John's rule, 25 Sep 2026: a machine that needs quoting cannot go on a Sales
+// Order until the customer has been told the price and said to go ahead.
+//
+// NEEDS QUOTING is both the flag and the state, his call:
+//   - the slip is marked "Customer wants a quote first", which covers a machine
+//     nobody ever got round to sending for quoting - the case the flag exists
+//     for, and the one a state-only rule would let straight through; or
+//   - the machine is actually out for quoting right now.
+//
+// ANSWERED is TO_REPAIR ("they said go ahead") or REPAIRED, which is past it.
+//
+// CONDEMNED IS EXEMPT. A machine beyond repair is not being quoted for a
+// repair, and it still leaves the building on an order at nothing - so holding
+// it back would strand the machine, not protect the customer.
+function machineNeedsQuoteFirst(slip, machine) {
+  if (!slip || !machine) return false;
+  if (machine.state === "CONDEMNED") return false;
+  const outForQuote = machine.state === "AWAITING_QUOTE" || machine.state === "QUOTED";
+  return !!slip.quote_first || outForQuote;
+}
+
+function quoteAnswered(machine) {
+  return machine.state === "TO_REPAIR" || machine.state === "REPAIRED";
+}
+
+// Why this machine cannot go on an order yet, in the words the app shows, or
+// "" when it can. One sentence, one source: the picker greys the box with it
+// and the server refuses with it.
+function quoteBlockReason(slip, machine) {
+  if (!machineNeedsQuoteFirst(slip, machine)) return "";
+  if (quoteAnswered(machine)) return "";
+  if (machine.state === "QUOTED") return "Quoted — waiting for the customer to say go ahead.";
+  if (machine.state === "AWAITING_QUOTE") return "Still waiting to be quoted.";
+  return "This slip is marked quote first. Quote it and get the customer's go-ahead.";
+}
+
 function createSlipOrder(slipNumber, machineIds, opts) {
   const slip = getSlip(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
@@ -817,6 +917,19 @@ function createSlipOrder(slipNumber, machineIds, opts) {
     const e = new Error("Nothing selected for the Sales Order.");
     e.status = 400; throw e;
   }
+  // A QUOTE THAT HAS NOT BEEN ANSWERED. Named machine by machine, because a
+  // slip of four is routinely three confirmed and one still with the customer,
+  // and "one of these is not ready" is not something anybody can act on.
+  const unanswered = wanted
+    .map((m) => ({ m, why: quoteBlockReason(slip, m) }))
+    .filter((x) => x.why);
+  if (unanswered.length) {
+    const e = new Error(
+      unanswered.map((x) => `${x.m.machine_desc}: ${x.why}`).join(" ")
+    );
+    e.status = 409; throw e;
+  }
+
   const already = wanted.filter((m) => m.converted_at);
   if (already.length) {
     const e = new Error(
@@ -2580,6 +2693,28 @@ function setMachineState(slipNumber, machineId, state, who = "") {
   if (!MACHINE_STATES.has(st)) { const e = new Error("Invalid machine state."); e.status = 400; throw e; }
   const { slip, machine } = machineOnSlip(slipNumber, machineId);
 
+  // A MACHINE WAITING ON A PART IS NOT REPAIRED. This is the hold half of
+  // John's no-stock rule: the part was refused and ordered instead, so saying
+  // the repair is finished would be saying it was done without the part that
+  // was the reason for ordering.
+  //
+  // Only REPAIRED is blocked. Condemning it, quoting it, or putting it back to
+  // TO_REPAIR are all still open - a machine can perfectly well turn out to be
+  // beyond repair WHILE waiting for a part, and that is the moment somebody
+  // most wants to say so.
+  if (st === "REPAIRED") {
+    const waiting = awaitingForMachine(machine.id);
+    if (waiting.length) {
+      const e = new Error(
+        "This machine is waiting for " +
+        waiting.map((w) => w.description || w.item_code).join(", ") +
+        ". Fit the part, or say it is no longer needed, before marking it repaired."
+      );
+      e.status = 409;
+      throw e;
+    }
+  }
+
   // Leaving CONDEMNED clears the disposal with it: the machine is staying
   // after all, so how it was going to leave no longer means anything.
   const clearDisposal = machine.state === "CONDEMNED" && st !== "CONDEMNED";
@@ -2826,7 +2961,9 @@ const slips = {
   allocatedByPo, receivedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
   orderDocuments, recordOrderDocuments, billingDocument, autoInvoiceFromDocuments,
   slipDeletable, deleteSlip,
-  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setSlipExtrasNote, slipContacts, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, correctMachine, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
+  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setSlipExtrasNote, slipContacts, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, correctMachine,
+  awaitingForMachine, holdMachineForPart, clearAwaitingPart,
+  machineNeedsQuoteFirst, quoteAnswered, quoteBlockReason, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 
 // ---- One-off: read the status of every open slip again ---------------------

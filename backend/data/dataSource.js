@@ -70,6 +70,13 @@ module.exports = {
     setMachineState: (...a) => dataRepo.slips.setMachineState(...a),
     undoMachineDecision: (...a) => dataRepo.slips.undoMachineDecision(...a),
     correctMachine: (...a) => dataRepo.slips.correctMachine(...a),
+    // Parts the shelf did not have, and the machines held waiting for them.
+    awaitingForMachine: (...a) => dataRepo.slips.awaitingForMachine(...a),
+    holdMachineForPart: (...a) => dataRepo.slips.holdMachineForPart(...a),
+    clearAwaitingPart: (...a) => dataRepo.slips.clearAwaitingPart(...a),
+    // Why a machine cannot go on a Sales Order yet - the picker and the server
+    // refuse with the same sentence.
+    quoteBlockReason: (...a) => dataRepo.slips.quoteBlockReason(...a),
     slipDeletable: (...a) => dataRepo.slips.slipDeletable(...a),
     deleteSlip: (...a) => dataRepo.slips.deleteSlip(...a),
     orderDocuments: (...a) => dataRepo.slips.orderDocuments(...a),

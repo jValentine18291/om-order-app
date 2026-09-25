@@ -1088,6 +1088,35 @@ if (partCount === 0) {
 // Reorder requests raised from the Find Part screen ("Order more"), consumed
 // by the Purchaser screen.
 db.exec(`
+  -- A PART THE MACHINE NEEDS AND THE SHELF DOES NOT HAVE.
+  --
+  -- John's rule, 25 Sep 2026: a technician cannot put a part with no stock on
+  -- a machine. But the repair still needs it, so refusing and saying nothing
+  -- would leave the need in somebody's head. The part is ordered instead, and
+  -- the machine is held here until it arrives.
+  --
+  -- A ROW PER PART, not a flag on the machine: a machine can be short of two
+  -- things, and the second one arriving is not the same event as the first.
+  --
+  -- cleared_at rather than deleting the row, because "this machine waited
+  -- three weeks for a carburettor" is the answer to why a slip took so long,
+  -- and a deleted row cannot answer it.
+  CREATE TABLE IF NOT EXISTS machine_awaiting_parts (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    machine_id   INTEGER NOT NULL,
+    item_code    TEXT NOT NULL,
+    description  TEXT DEFAULT '',
+    requested_by TEXT DEFAULT '',
+    request_id   INTEGER,          -- the part_requests row, when one was raised
+    created_at   TEXT DEFAULT (datetime('now', 'localtime')),
+    cleared_at   TEXT,             -- set when the part is finally fitted
+    cleared_by   TEXT DEFAULT '',
+    FOREIGN KEY (machine_id) REFERENCES slip_machines(id) ON DELETE CASCADE
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_awaiting_machine
+    ON machine_awaiting_parts(machine_id);
+
   CREATE TABLE IF NOT EXISTS part_requests (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     item_code     TEXT NOT NULL,
