@@ -2906,6 +2906,7 @@ function openMachineModal(machineId) {
   $("os-tech-field").style.display = "none";
   $("os-entry").style.display = "none";
   resetTrialEntry();
+  stopMachineScan();
   const m = currentMachine();
   $("mm-title").textContent = m ? machineLabel(session.slip, m) : "Machine";
   // Which machine this is decides whether the tube buttons belong here at all.
@@ -3729,10 +3730,9 @@ function resetTrialEntry() {
 let apChosen = null;       // the part on screen in the detail view
 let apDebounce = null;
 
-function openAddPart() {
+function openAddPart({ focus = true } = {}) {
   if (!(session.machineId || session.extras)) { toast("Open a machine first", "err"); return; }
   apChosen = null;
-  apStopScan();
   $("ap-q").value = "";
   $("ap-results").innerHTML = "";
   $("ap-status").innerHTML = "";
@@ -3747,14 +3747,12 @@ function openAddPart() {
   // other half of what John saw: the machine sheet behind it still scrolled.
   document.body.style.overflow = "hidden";
   // Asking for the box IS asking for the keyboard - this is the one place the
-  // trial sheet wants it up.
-  setTimeout(() => $("ap-q").focus(), 60);
+  // sheet wants it up. A scan is the exception: it arrives with an answer
+  // already, and there is nothing to type.
+  if (focus) setTimeout(() => $("ap-q").focus(), 60);
 }
 
 function closeAddPart() {
-  // A camera left running is a camera left running, whichever way the popup
-  // was closed.
-  apStopScan();
   $("addpart-modal").style.display = "none";
   apChosen = null;
   // The machine sheet is almost always still open behind this, and it wants
@@ -3765,32 +3763,57 @@ function closeAddPart() {
 
 $("ap-close").addEventListener("click", closeAddPart);
 
-// SCANNING, which came across with the part box. A scanned code carries no
-// balance, so it goes the same way as a typed one: look the stock up, then
-// either add it or offer to order it. The no-stock rule is not something a
-// technician can get past by scanning instead of typing.
-$("ap-scan").addEventListener("click", () => {
-  $("ap-scan").style.display = "none";
-  $("ap-scan-area").style.display = "flex";
-  $("ap-results").innerHTML = "";
-  $("ap-status").innerHTML = "";
+// ---- Scanning, on the machine sheet ----------------------------------------
+// A button UNDER "Add a part" that opens the camera in place when it is
+// tapped, and nothing before then - John's call, 26 Sep 2026.
+//
+// The camera is #qr-pane, which has been in this section all along; it is
+// shown where it sits rather than moved, so nothing has to be put back.
+//
+// A SCANNED CODE GOES THROUGH THE STOCK VIEW, where a part tapped in the
+// search list does not. Not an inconsistency: the list showed a description
+// and a balance and the technician picked it, while a scan shows them nothing
+// at all before it fires. What comes up afterwards says WHICH part the code
+// turned out to be - something they have not seen - rather than repeating a
+// number they were just looking at. The no-stock rule is not something anyone
+// can get past by scanning instead of typing, either.
+function machineScanning() {
+  const m = $("machine-modal");
+  return !!(m && m.classList.contains("mm-scanning"));
+}
+
+function stopMachineScan() {
+  try { stopQrScanner(); } catch (_) {}
+  const m = $("machine-modal");
+  if (m) m.classList.remove("mm-scanning");
+  const label = $("mm-scan-label");
+  // English is the source of truth; i18n.js swaps it for the technicians.
+  if (label) label.textContent = "Scan QR Code";
+}
+
+function startMachineScan() {
+  const m = $("machine-modal");
+  if (m) m.classList.add("mm-scanning");
+  const label = $("mm-scan-label");
+  if (label) label.textContent = "Stop scanning";
   startQrScanner({
-    videoId: "ap-video",
-    statusId: "ap-scan-status",
+    videoId: "qr-video",
+    statusId: "qr-status",
     onCode: (code) => {
-      apStopScan();
+      stopMachineScan();
+      // Straight to what the code turned out to be. Not focused: a scan is the
+      // one way in here that did not involve the keyboard, and raising it over
+      // the answer would be the old complaint again.
+      openAddPart({ focus: false });
       showApPart({ item_code: String(code || "").trim() });
     },
   });
-});
-$("ap-scan-stop").addEventListener("click", apStopScan);
-
-function apStopScan() {
-  try { stopQrScanner(); } catch (_) {}
-  const area = $("ap-scan-area"), btn = $("ap-scan");
-  if (area) area.style.display = "none";
-  if (btn) btn.style.display = "";
 }
+
+$("mm-scan-btn").addEventListener("click", () => {
+  if (machineScanning()) stopMachineScan();
+  else startMachineScan();
+});
 $("ap-back").addEventListener("click", () => {
   $("ap-detail").style.display = "none";
   $("ap-search").style.display = "";
@@ -3870,7 +3893,6 @@ async function apPick(btn, part) {
 // zero. The balance is fetched fresh here because this is where a decision
 // gets made on it.
 async function showApPart(part) {
-  apStopScan();
   apChosen = { ...part };
   $("ap-search").style.display = "none";
   $("ap-detail").style.display = "";

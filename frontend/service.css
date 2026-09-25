@@ -2472,10 +2472,7 @@ body.signin-brand .topbar .pill {
   flex: 1 1 auto; min-height: 0; overflow-y: auto;
   overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
 }
-#ap-status, #ap-scan, #ap-scan-area { flex: none; }
-/* The camera gets the room the list would have taken, rather than both
-   fighting over it. */
-#ap-scan-area { overflow-y: auto; min-height: 0; }
+#ap-status { flex: none; }
 
 .ap-back {
   border: 0; background: none; padding: 2px 0 10px; cursor: pointer;
@@ -2558,25 +2555,39 @@ body.signin-brand .topbar .pill {
    it adds to, so it reads as the way to add a part rather than a stray control
    between two other sections - and labour, which is typed once, moves below. */
 .mm-b #mm-addpart       { order: 3; }
-.mm-b #os-labour-field  { order: 4; }
-.mm-b #mode-toggle      { order: 5; }
-.mm-b #qr-pane          { order: 6; }
-.mm-b #manual-pane      { order: 7; }
-.mm-b #job-pick         { order: 8; }
-.mm-b #fjob-pick        { order: 9; }
-.mm-b #tube-pick        { order: 10; }
-.mm-b #ex-note-field    { order: 11; }
-.mm-b #os-comment-field { order: 12; }
+.mm-b #mm-scan-btn      { order: 4; }
+.mm-b #qr-pane          { order: 5; }   /* the camera, in place under it */
+.mm-b #os-labour-field  { order: 6; }
+.mm-b #job-pick         { order: 7; }
+.mm-b #fjob-pick        { order: 8; }
+.mm-b #tube-pick        { order: 9; }
+.mm-b #ex-note-field    { order: 10; }
+.mm-b #os-comment-field { order: 11; }
+.mm-b #mode-toggle      { order: 12; }
+.mm-b #manual-pane      { order: 13; }
 
-/* THE PART BOX WAITS TO BE ASKED FOR. setMode() writes display straight onto
-   these three, which is why hiding them takes !important rather than a class
-   they would fight over. */
-.mm-b:not(.mm-b-open) #mode-toggle,
-.mm-b:not(.mm-b-open) #qr-pane,
-.mm-b:not(.mm-b-open) #manual-pane { display: none !important; }
-/* Once it is out there is nothing left for the button to do, and no dead end:
-   the box stays for the rest of the machine. */
-.mm-b.mm-b-open #mm-addpart { display: none; }
+/* The old inline part box is never shown: adding a part goes through the
+   popup. setMode() writes display straight onto these, which is why hiding
+   them takes !important rather than a class they would fight over. */
+.mm-b #mode-toggle,
+.mm-b #manual-pane { display: none !important; }
+
+/* THE CAMERA WAITS TO BE ASKED FOR, and opens where it sits. Same reason for
+   the !important: setMode() sets its display too. */
+.mm-b #qr-pane { display: none !important; }
+.mm-b.mm-scanning #qr-pane { display: flex !important; }
+
+/* Secondary to Add a part, and deliberately so: typing finds a part by name,
+   scanning only works with the code already in your hand. */
+#mm-scan-btn { display: none; }
+.mm-b #mm-scan-btn {
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  width: 100%; box-sizing: border-box; margin-top: 8px; padding: 13px;
+  border: 1px solid var(--primary, #1f6f78); border-radius: 12px;
+  background: var(--surface, #fff); color: var(--primary, #1f6f78);
+  font: inherit; font-size: 15px; font-weight: 700; cursor: pointer;
+}
+.mm-b #mm-scan-btn:active { background: var(--surface-2, #f6f9fa); }
 
 /* SOLID, not outlined. Outlined read as the secondary thing on a sheet whose
    other button is a filled green Save, when it is the one tapped most. Tight

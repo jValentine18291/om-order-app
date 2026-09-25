@@ -430,6 +430,54 @@
     "Part number or barcode": "零件编号或条码",
     "e.g. 525IB": "例如：525IB",
     "Parts on this machine": "本机器的零件",
+
+    // ---- Adding a part: the popup, and what a machine is waiting for ----
+    // Everything below arrived with the new repair sheet in Sep 2026 and was
+    // English on a screen the technicians use all day. The walker matches one
+    // TEXT NODE at a time, so "<b>No stock</b>This part cannot..." is two
+    // entries, not one, and "<b>6</b> in stock" needs only the tail.
+    "← Back to search": "← 返回搜索",
+    "Back to search": "返回搜索",
+    "Checking stock…": "正在查询库存…",
+    "Stock could not be checked for this part.": "无法查询此零件的库存。",
+    "No stock": "没有库存",
+    "This part cannot go on the machine until we have one.": "有货之前，此零件不能加入本机器。",
+    "in stock": "有库存",
+    "Add to this machine": "加入本机器",
+    "Order it and hold this machine": "下单并暂停本机器",
+    "Order it": "下单",
+    "Ordered": "已下单",
+    "Ordered — this machine is on hold for it": "已下单 — 本机器暂停等待",
+    "That part was not added — the catalogue did not accept the code. Nothing has changed.":
+      "未能添加此零件 — 系统不接受此编号。没有任何改动。",
+    "That part could not be added.": "未能添加此零件。",
+    "That part could not be ordered.": "未能下单。",
+    "Open a machine first": "请先选择机器",
+
+    // The machine is short of something and is held until it turns up.
+    "Waiting for a part": "等待零件",
+    "Waiting for parts": "等待零件",
+    "Not needed": "不需要了",
+    "No longer waiting for it": "已取消等待",
+    "On order. This machine cannot be marked repaired until it arrives — fit the part and the hold lifts by itself.":
+      "已下单。零件到之前，本机器不能标记为已维修 — 装上零件后会自动解除。",
+    "On order. This machine cannot be marked repaired until they arrive — fit the part and the hold lifts by itself.":
+      "已下单。零件到之前，本机器不能标记为已维修 — 装上零件后会自动解除。",
+
+    // The customer signing, in person, that a machine is beyond repair.
+    "Customer signature needed": "需要客户签名",
+    "Signed for condemning": "已签名报废",
+    "The customer signs in person to confirm they want this machine condemned. The slip cannot be closed until they have.":
+      "客户须本人签名确认同意报废本机器。未签名前，服务单不能结束。",
+    "The customer has signed to confirm this machine is beyond repair.":
+      "客户已签名确认本机器无法维修。",
+    "Take the signature": "请客户签名",
+    "Sign again": "重新签名",
+    "Customer signature — condemning": "客户签名 — 报废",
+    "Signed": "已签名",
+    "Ask the customer to sign first": "请先请客户签名",
+    "That signature could not be saved": "未能保存签名",
+    "That could not be changed": "未能修改",
     "Scan or type a part to add it to this machine.": "扫描或输入零件编号，添加到本机器。",
     "Tap “Add a part” below.": "点击下方“添加零件”。",
     "No parts yet": "暂无零件",

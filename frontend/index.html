@@ -944,23 +944,6 @@
           <label for="ap-q">Search by description or part no.</label>
           <input id="ap-q" type="text" inputmode="text" autocomplete="off" placeholder="e.g. clutch, carburetor, SZEN 140&hellip;" />
         </div>
-        <!-- THE CAMERA. The machine sheet used to carry its own scanner beside
-             the part box; the box moved into this popup and the scanner has to
-             come with it, or a technician holding a part with a QR code on it
-             has nowhere to scan it. -->
-        <button class="fp-scan-btn" id="ap-scan" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 21v.01M21 14v.01M14 21v.01"/></svg>
-          Scan QR Code
-        </button>
-        <div id="ap-scan-area" style="display:none; flex-direction:column; gap:14px; margin-top:12px;">
-          <div class="scanner-frame">
-            <video id="ap-video" playsinline muted></video>
-            <div class="reticle"><span class="corner bl"></span><span class="corner br"></span></div>
-          </div>
-          <div class="scan-hint" id="ap-scan-status"><span class="led"></span> Point at a QR code</div>
-          <button class="fp-scan-stop" id="ap-scan-stop" type="button">Stop scanning</button>
-        </div>
-
         <div class="ap-results" id="ap-results"></div>
         <div class="scan-hint" id="ap-status" style="justify-content:flex-start; min-height:20px;"></div>
       </div>
@@ -1344,6 +1327,14 @@
         <button type="button" id="mm-addpart">
           <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
           Add a part
+        </button>
+
+        <!-- The scanner sits UNDER Add a part and opens the camera only when
+             it is tapped - John's call, 26 Sep 2026. The camera itself is the
+             #qr-pane further down this section, which is shown in place. -->
+        <button type="button" id="mm-scan-btn">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 21v.01M21 14v.01M14 21v.01"/></svg>
+          <span id="mm-scan-label">Scan QR Code</span>
         </button>
 
         <div class="section-head" style="margin-top:2px;">
