@@ -1034,6 +1034,10 @@ select {
   max-width: 560px;
   max-height: 100%;
   overflow-y: auto;
+  /* A sheet that has run out of scroll does NOT pass the rest of the gesture
+     to whatever is behind it. Without this, a flick inside a sheet keeps
+     going into the page underneath, which is half of what a modal is for. */
+  overscroll-behavior: contain;
   border-radius: 18px 18px 0 0;
   padding: 16px 16px 20px;
   -webkit-overflow-scrolling: touch;
@@ -2433,12 +2437,42 @@ body.signin-brand .topbar .pill {
    documents further down, and exactly what happened the first time. */
 #addpart-modal { z-index: 70; }
 
-.ap-sheet { max-width: 520px; }
+/* FULL SCREEN, John's call on 25 Sep 2026.
+
+   A sheet covering PART of the screen leaves the rest visible and reachable
+   behind it, and each attempt to police that band was its own bug: first the
+   page showing through undimmed, then the machine sheet still scrolling
+   behind. Covering the whole screen removes the band rather than guarding it
+   - there is nothing left to bleed through and nothing left to scroll.
+
+   The overlay still reserves the keyboard with padding-bottom, so "the whole
+   screen" means the whole of what the keyboard leaves: the search box sits at
+   the top, out of its way, and the results take everything below. */
+.ap-sheet {
+  width: 100%; max-width: none;
+  height: 100%; max-height: 100%;
+  box-sizing: border-box;
+  border-radius: 0;
+  /* viewport-fit=cover, so the notch and the home indicator are ours to miss. */
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 16px
+           calc(16px + env(safe-area-inset-bottom, 0px));
+  display: flex; flex-direction: column;
+  /* The sheet itself does not scroll; the list inside it does. */
+  overflow: hidden;
+}
+.ap-sheet > .modal-head { flex: none; }
+
+#ap-search, #ap-detail { min-height: 0; }
+#ap-search { display: flex; flex-direction: column; flex: 1 1 auto; }
+#ap-search > .field { flex: none; }
+#ap-detail { display: block; flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; }
 
 .ap-results {
   display: flex; flex-direction: column; gap: 4px;
-  max-height: 46vh; overflow-y: auto;
+  flex: 1 1 auto; min-height: 0; overflow-y: auto;
+  overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
 }
+#ap-status { flex: none; }
 
 .ap-back {
   border: 0; background: none; padding: 2px 0 10px; cursor: pointer;
