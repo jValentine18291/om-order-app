@@ -2730,6 +2730,11 @@ async function onSlipChosen(slipNumber, from = "open") {
     slipScreenFrom = from;
     showScreen("slip");
     renderSlipScreen();
+    // Ask AutoCount what this slip's orders became, here as well as on View
+    // Slips. There is nothing on this screen to draw a chain on, but the
+    // answer moves the slip to Invoice Created - and John opened a converted
+    // slip from here and found nothing had happened.
+    refreshSlipDocuments(slipNumber, session.slip);
   } catch (e) {
     toast(e.message, "err");
   }
@@ -5733,7 +5738,7 @@ async function onViewSlipChosen(slipNumber) {
     // What the orders became in AutoCount. Asked for AFTER the slip is drawn,
     // never as part of drawing it: this is a round trip to SQL Server and the
     // slip must appear at once whether or not it answers.
-    refreshSlipDocuments(slipNumber);
+    refreshSlipDocuments(slipNumber, slip);
     // John's correction link, one per machine. The slip is already in hand, so
     // the sheet is opened from it rather than fetching it a second time.
     wrap.querySelectorAll("[data-fix]").forEach((b) =>
@@ -6639,9 +6644,23 @@ $("vsr-confirm").addEventListener("click", async () => {
 // empty and Close Service still takes a number typed by hand.
 const DOC_LABEL = { DO: "Delivery Order", INV: "Invoice", CS: "Cash Sale" };
 
-async function refreshSlipDocuments(slipNumber) {
+async function refreshSlipDocuments(slipNumber, slip) {
+  // NOTHING TO ASK ABOUT. A slip whose orders never reached AutoCount - or
+  // that has no order at all, which is most of them - has no document to
+  // follow, and asking SQL Server about it is a round trip for a certain
+  // "no". Checked from the slip already in hand; no slip, and it asks anyway
+  // rather than guessing.
+  if (slip && !((slip.orders || []).some((o) => o.autocount_doc_no))) return;
   const box = $("vs-chain");
-  if (!box) return;
+  // The chain is drawn on the View Slips screen only. From Open Service there
+  // is nowhere to put it - but the ASKING still matters there, because that is
+  // where a technician or John opens a slip, and the answer sets the slip's
+  // status whether or not anything is on screen to show it.
+  //
+  // Which is the bug John found on 25 Sep 2026: he converted SO-2609-050 to
+  // CS-2609-0164 in AutoCount, opened the slip, and nothing happened. The
+  // route was right, the app was simply not calling it from the screen he was
+  // on.
   let r;
   try {
     r = await api(`/api/slips/${encodeURIComponent(slipNumber)}/documents/refresh`, { method: "POST" });
@@ -6649,10 +6668,10 @@ async function refreshSlipDocuments(slipNumber) {
     return;                       // context, not permission
   }
   // The screen may have moved on while SQL Server was thinking.
-  if (!$("vs-chain") || $("vs-chain") !== box) return;
+  const stillThere = box && $("vs-chain") === box;
 
   const withDocs = (r.orders || []).filter((o) => (o.documents || []).length);
-  if (withDocs.length) {
+  if (stillThere && withDocs.length) {
     box.innerHTML = withDocs.map((o) => {
       const steps = [`<span class="vs-chain-so">${escapeHtml(o.autocount_doc_no || o.so_number)}</span>`]
         .concat((o.documents || []).map((d) =>
@@ -6664,12 +6683,13 @@ async function refreshSlipDocuments(slipNumber) {
   }
 
   // A number was filled in, which means the slip has just moved to Invoice
-  // Created under the reader's feet. Redraw it rather than leaving a status on
-  // screen that is no longer true.
+  // Created under the reader's feet. Redraw whichever screen they are on
+  // rather than leaving a status showing that is no longer true.
   if ((r.filled || []).length) {
     const what = r.filled.map((f) => f.doc_no).join(", ");
     toast(`Found in AutoCount: ${what}`, "ok");
-    onViewSlipChosen(slipNumber);
+    if (stillThere) onViewSlipChosen(slipNumber);
+    else if (session.slipNumber === slipNumber) refreshSlip().then(() => renderSlipScreen()).catch(() => {});
   }
 }
 
