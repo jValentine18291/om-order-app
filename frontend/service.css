@@ -1003,9 +1003,27 @@ select {
   position: fixed; left: 0; right: 0;
   top: var(--vvtop, 0px);
   height: var(--vvh, 100vh);
-  background: rgba(11, 31, 42, .55);
+  /* The dimming lives on ::before, NOT here - see below. */
+  background: transparent;
   display: flex; align-items: flex-end; justify-content: center;
   z-index: 60;
+}
+/* THE SCRIM COVERS THE WHOLE SCREEN, the overlay box only the visible strip.
+   They are two different jobs and one box cannot do both.
+
+   The overlay is sized to --vvh so the sheet lands ABOVE the keyboard rather
+   than behind it. But while the dimming was on the overlay it stopped there
+   too, and the band between the bottom of that strip and the top of the
+   keyboard showed the page underneath at full brightness - John's screenshot,
+   25 Sep 2026: the slip screen visible below the Add a part sheet.
+
+   position: fixed; inset: 0 is the LAYOUT viewport, which iOS does not shrink
+   for the keyboard, so this reaches behind it. z-index: -1 keeps it behind the
+   sheet; the overlay's own z-index: 60 is a stacking context, so it cannot
+   fall behind the page. */
+.modal-overlay::before {
+  content: ""; position: fixed; inset: 0; z-index: -1;
+  background: rgba(11, 31, 42, .55);
 }
 .modal-sheet {
   background: var(--bg, #f4f6f7);
@@ -2496,8 +2514,11 @@ body.signin-brand .topbar .pill {
 .mm-b #os-entry { display: flex !important; flex-direction: column; }
 .mm-b #os-entry > .section-head { order: 1; }   /* "Parts on this machine" */
 .mm-b #machine-parts    { order: 2; }
-.mm-b #os-labour-field  { order: 3; }
-.mm-b #mm-addpart       { order: 4; }
+/* DIRECTLY UNDER THE PARTS LIST, John's pick of 25 Sep 2026. Next to the thing
+   it adds to, so it reads as the way to add a part rather than a stray control
+   between two other sections - and labour, which is typed once, moves below. */
+.mm-b #mm-addpart       { order: 3; }
+.mm-b #os-labour-field  { order: 4; }
 .mm-b #mode-toggle      { order: 5; }
 .mm-b #qr-pane          { order: 6; }
 .mm-b #manual-pane      { order: 7; }
@@ -2517,14 +2538,18 @@ body.signin-brand .topbar .pill {
    the box stays for the rest of the machine. */
 .mm-b.mm-b-open #mm-addpart { display: none; }
 
+/* SOLID, not outlined. Outlined read as the secondary thing on a sheet whose
+   other button is a filled green Save, when it is the one tapped most. Tight
+   under the list rather than a section away from it. */
 .mm-b #mm-addpart {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  width: 100%; box-sizing: border-box; margin-top: 14px; padding: 13px;
-  border: 1px solid var(--primary, #1f6f78); border-radius: 12px;
-  background: var(--surface, #fff); color: var(--primary, #1f6f78);
-  font: inherit; font-size: 15px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  width: 100%; box-sizing: border-box; margin-top: 8px; padding: 16px;
+  border: 0; border-radius: 12px;
+  background: var(--primary, #1f6f78); color: #fff;
+  font: inherit; font-size: 16px; font-weight: 700; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(31, 111, 120, .28);
 }
-.mm-b #mm-addpart:active { background: var(--surface-2, #f6f9fa); }
+.mm-b #mm-addpart:active { background: var(--primary-dark, #175258); }
 
 /* ---- What an order became in AutoCount ---------------------------------- */
 /* SO-2609-048 -> DO-2609-229 -> INV-2609-0140, under the Sales Order line.
