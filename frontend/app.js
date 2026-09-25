@@ -3795,7 +3795,7 @@ $("ap-q").addEventListener("input", () => {
       box.innerHTML = list.map((p) => partOptionHtml(p)).join("");
       box.querySelectorAll(".company-option").forEach((btn) => {
         const part = list.find((p) => p.item_code === btn.dataset.code);
-        btn.addEventListener("click", () => showApPart(part || { item_code: btn.dataset.code }));
+        btn.addEventListener("click", () => apPick(btn, part || { item_code: btn.dataset.code }));
       });
     } catch (_) { box.innerHTML = `<div class="fp-empty">Part search is not available.</div>`; }
   }, 250);
@@ -3803,15 +3803,43 @@ $("ap-q").addEventListener("input", () => {
 
 // Enter on an exact code goes straight to the same place, for a scanner gun or
 // somebody who knows the number.
+// Enter on an exact code, for a scanner gun or somebody who knows the number.
+// It carries no balance, so it goes the asking way - which is showApPart.
 $("ap-q").addEventListener("keydown", (e) => {
   if (e.key !== "Enter") return;
   const code = $("ap-q").value.trim();
   if (code) showApPart({ item_code: code });
 });
 
-// WHETHER WE HAVE IT. The balance is fetched fresh rather than taken from the
-// search row: the row may have been on screen for a while, and this is the
-// number the decision gets made on.
+// TAPPING A PART IS ADDING IT. John's call, 26 Sep 2026: every row in the list
+// already shows what is on the shelf beside it, so a second screen showing the
+// same number and asking "add it?" was a step that told nobody anything.
+//
+// It adds on the NUMBER THE TECHNICIAN SAW. Re-fetching the balance a moment
+// after drawing it would only be ceremony, and it would put a pause between
+// the tap and the part appearing, which is the thing being removed. The rule
+// that actually matters is not enforced here anyway: a machine short of a part
+// cannot be marked repaired, and the server checks that itself.
+//
+// TWO CASES STILL STOP, because neither is a confirmation:
+//   - no stock, which is a decision - the part cannot go on the machine and
+//     something else has to happen instead (order it, hold the machine);
+//   - a row with no number on it at all, where nothing was shown, so there is
+//     nothing the technician can be said to have seen. That one goes and asks.
+async function apPick(btn, part) {
+  const bal = part.bal_qty;
+  const known = bal !== undefined && bal !== null;
+  if (!known || Number(bal) <= 0) { showApPart(part); return; }
+
+  if (btn) btn.disabled = true;
+  apChosen = { ...part };
+  await apAddChosen();
+  if (btn) btn.disabled = false;
+}
+
+// WHETHER WE HAVE IT. Reached when the list had no number to show, or showed a
+// zero. The balance is fetched fresh here because this is where a decision
+// gets made on it.
 async function showApPart(part) {
   apChosen = { ...part };
   $("ap-search").style.display = "none";
@@ -3828,6 +3856,13 @@ async function showApPart(part) {
     const r = await api(`/api/part-stock/${encodeURIComponent(part.item_code)}`);
     stock = r || null;
   } catch (_) { stock = null; }
+
+  // A REPLY WITH NO BALANCE IN IT IS NOT A BALANCE OF ZERO. The check below
+  // used to be `!stock` alone, so a stock card that came back without a figure
+  // fell through to Number(undefined) || 0 and was announced as "No stock" -
+  // refusing a part that may well be on the shelf. Unknown is its own answer.
+  if (stock && stock.bal_qty === undefined) stock = null;
+  if (stock && stock.bal_qty === null) stock = null;
 
   if (!stock) {
     // Not the same as "none on the shelf", and must not be treated as it: a
@@ -3875,11 +3910,19 @@ function apPieceCount() {
   return n;
 }
 
+// Whichever half of the popup is on screen. Adding now happens from the list
+// as well as from the stock view, and an error written to the hidden one is an
+// error nobody reads.
+function apSay(html) {
+  const onSearch = getComputedStyle($("ap-search")).display !== "none";
+  $(onSearch ? "ap-status" : "ap-detail-status").innerHTML = html;
+}
+
 async function apAddChosen() {
   if (!apChosen) return;
   const btn = $("ap-add");
   if (btn) btn.disabled = true;
-  $("ap-detail-status").innerHTML = "";
+  apSay("");
 
   // addByCode() REPORTS ITS OWN FAILURES WITH A TOAST AND NEVER THROWS, so
   // awaiting it tells us nothing about whether the part landed. The first
@@ -3894,9 +3937,9 @@ async function apAddChosen() {
   await addByCode(apChosen.item_code);
   if (apPieceCount() > before) { closeAddPart(); return; }
 
-  $("ap-detail-status").innerHTML = statusErr(
+  apSay(statusErr(
     "That part was not added — the catalogue did not accept the code. Nothing has changed."
-  );
+  ));
   if (btn) btn.disabled = false;
 }
 
