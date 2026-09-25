@@ -923,6 +923,45 @@
     </div>
   </div>
 
+  <!-- ADD A PART.
+       John's flow, 25 Sep 2026: search, pick, see whether there is stock, and
+       only then does it go on the machine. A part with nothing on the shelf
+       cannot be added at all - it is ordered instead and the machine is held
+       until it arrives. -->
+  <div class="modal-overlay" id="addpart-modal" style="display:none">
+    <div class="modal-sheet ap-sheet">
+      <div class="modal-head">
+        <div>
+          <div class="mm-title" id="ap-title">Add a part</div>
+          <div class="mm-sub" id="ap-sub"></div>
+        </div>
+        <button class="modal-x" id="ap-close" type="button" aria-label="Close">&#10005;</button>
+      </div>
+
+      <!-- Searching. -->
+      <div id="ap-search">
+        <div class="field">
+          <label for="ap-q">Search by description or part no.</label>
+          <input id="ap-q" type="text" inputmode="text" autocomplete="off" placeholder="e.g. clutch, carburetor, SZEN 140&hellip;" />
+        </div>
+        <div class="ap-results" id="ap-results"></div>
+        <div class="scan-hint" id="ap-status" style="justify-content:flex-start; min-height:20px;"></div>
+      </div>
+
+      <!-- The one that was picked, and whether we have it. -->
+      <div id="ap-detail" style="display:none">
+        <button type="button" class="ap-back" id="ap-back">&#8592; Back to search</button>
+        <div class="ap-part">
+          <div class="ap-part-desc" id="ap-desc"></div>
+          <div class="ap-part-code mono" id="ap-code"></div>
+        </div>
+        <div class="ap-stock" id="ap-stock"></div>
+        <div class="scan-hint" id="ap-detail-status" style="justify-content:flex-start; min-height:20px;"></div>
+        <div class="ap-actions" id="ap-actions"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="conv-modal" style="display:none">
     <div class="modal-sheet">
       <div class="modal-head">
@@ -1276,6 +1315,11 @@
         <!-- Hidden for everyone but the trial sheet, where it is what brings the
              part box out. "Add a part" is already in i18n.js, so it reads
              添加零件 for the technicians when this goes wider. -->
+        <!-- What this machine is short of. Sits with the entry rather than
+             the header banners because it is the technician's own business:
+             they ordered it, and they are the one waiting. -->
+        <div class="mm-awaiting" id="mm-awaiting" style="display:none"></div>
+
         <button type="button" id="mm-addpart">
           <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
           Add a part

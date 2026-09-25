@@ -2922,6 +2922,7 @@ function openMachineModal(machineId) {
   loadLabourForCurrentMachine();
   renderMachineParts();
   renderMachineQuoteRow();
+  renderAwaiting();
   renderMachineDecisionBanner();
   renderMachineBilledBanner();
   updateSlipFooter();
@@ -3701,16 +3702,279 @@ function resetTrialEntry() {
   if (modal) modal.classList.remove("mm-b-open");
 }
 
-// Asking for the part box IS asking for the keyboard, so this is the one place
-// the trial sheet focuses it. The class goes on first: setMode() checks it
-// before deciding whether to focus.
-function openTrialEntry() {
-  const modal = $("machine-modal");
-  if (!modal) return;
-  modal.classList.add("mm-b-open");
-  setMode(currentMode || "manual");
-  const ci = $("code-input");
-  if (ci) ci.focus();
+// The trial sheet's part box now lives in its own popup - see openAddPart() -
+// so the inline entry stays put away on that sheet for good. Everybody else's
+// sheet is unchanged and still uses it.
+
+
+// ---- Add a part -------------------------------------------------------------
+// John's flow, 25 Sep 2026: search, pick one, see whether there is stock, and
+// only then does it go on the machine.
+//
+// A PART WITH NO STOCK CANNOT BE ADDED. The repair still needs it, so this
+// orders it - the same request Iris sees on her Orders list - and holds the
+// machine until it arrives. Refusing and saying nothing would leave the need
+// in somebody's head, which is the one outcome worse than a wrong parts list.
+//
+// The server checks the balance again before it will hold anything. This check
+// is here so the reason can be shown before anything is tapped, not instead of
+// that one: the balance can move between the search and the tap.
+
+let apChosen = null;       // the part on screen in the detail view
+let apDebounce = null;
+
+function openAddPart() {
+  if (!(session.machineId || session.extras)) { toast("Open a machine first", "err"); return; }
+  apChosen = null;
+  $("ap-q").value = "";
+  $("ap-results").innerHTML = "";
+  $("ap-status").innerHTML = "";
+  $("ap-detail-status").innerHTML = "";
+  $("ap-search").style.display = "";
+  $("ap-detail").style.display = "none";
+  $("ap-sub").textContent = session.extras
+    ? `Slip ${session.slipNumber} · additional parts`
+    : $("mm-title").textContent;
+  $("addpart-modal").style.display = "flex";
+  // Asking for the box IS asking for the keyboard - this is the one place the
+  // trial sheet wants it up.
+  setTimeout(() => $("ap-q").focus(), 60);
+}
+
+function closeAddPart() {
+  $("addpart-modal").style.display = "none";
+  apChosen = null;
+}
+
+$("ap-close").addEventListener("click", closeAddPart);
+$("ap-back").addEventListener("click", () => {
+  $("ap-detail").style.display = "none";
+  $("ap-search").style.display = "";
+  apChosen = null;
+  setTimeout(() => $("ap-q").focus(), 40);
+});
+
+// The same search the sheet has always used, so a technician who knows the
+// screen knows this one.
+$("ap-q").addEventListener("input", () => {
+  clearTimeout(apDebounce);
+  const q = $("ap-q").value.trim();
+  const box = $("ap-results");
+  if (q.length < 2) { box.innerHTML = ""; return; }
+  apDebounce = setTimeout(async () => {
+    try {
+      const data = await api(`/api/parts-search?q=${encodeURIComponent(q)}${fitQuery(q)}`);
+      const list = data.results || [];
+      if (!list.length) {
+        const machines = await machineMatches(q);
+        box.innerHTML = machines.length
+          ? `<div class="fp-machine-note">Not a spare part — this is a machine:</div>` +
+            machines.map((m) => `
+              <div class="fp-machine-row">
+                <span class="fp-opt-desc">${escapeHtml(m.description)}</span>
+                <span class="fp-opt-code mono">${escapeHtml(m.item_code)}</span>
+              </div>`).join("")
+          : `<div class="fp-empty">No matching parts</div>`;
+        return;
+      }
+      box.innerHTML = list.map((p) => partOptionHtml(p)).join("");
+      box.querySelectorAll(".company-option").forEach((btn) => {
+        const part = list.find((p) => p.item_code === btn.dataset.code);
+        btn.addEventListener("click", () => showApPart(part || { item_code: btn.dataset.code }));
+      });
+    } catch (_) { box.innerHTML = `<div class="fp-empty">Part search is not available.</div>`; }
+  }, 250);
+});
+
+// Enter on an exact code goes straight to the same place, for a scanner gun or
+// somebody who knows the number.
+$("ap-q").addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
+  const code = $("ap-q").value.trim();
+  if (code) showApPart({ item_code: code });
+});
+
+// WHETHER WE HAVE IT. The balance is fetched fresh rather than taken from the
+// search row: the row may have been on screen for a while, and this is the
+// number the decision gets made on.
+async function showApPart(part) {
+  apChosen = { ...part };
+  $("ap-search").style.display = "none";
+  $("ap-detail").style.display = "";
+  $("ap-detail-status").innerHTML = "";
+  $("ap-desc").textContent = part.description || part.item_code;
+  $("ap-code").textContent = part.item_code;
+  $("ap-stock").className = "ap-stock ap-stock-wait";
+  $("ap-stock").textContent = "Checking stock\u2026";
+  $("ap-actions").innerHTML = "";
+
+  let stock = null;
+  try {
+    const r = await api(`/api/part-stock/${encodeURIComponent(part.item_code)}`);
+    stock = r || null;
+  } catch (_) { stock = null; }
+
+  if (!stock) {
+    // Not the same as "none on the shelf", and must not be treated as it: a
+    // part the catalogue has never heard of is a wrong code, and a search that
+    // failed is a search that failed.
+    $("ap-stock").className = "ap-stock ap-stock-unknown";
+    $("ap-stock").textContent = "Stock could not be checked for this part.";
+    $("ap-actions").innerHTML = `<button type="button" class="btn-secondary" id="ap-cancel">Back to search</button>`;
+    $("ap-cancel").addEventListener("click", () => $("ap-back").click());
+    return;
+  }
+
+  apChosen = { ...apChosen, ...stock };
+  const bal = Number(stock.bal_qty) || 0;
+  const nice = Number.isInteger(bal) ? String(bal) : bal.toFixed(2);
+  if (stock.description) $("ap-desc").textContent = stock.description;
+  if (stock.shelf) $("ap-code").textContent = `${stock.shelf} · ${stock.item_code}`;
+
+  if (bal > 0) {
+    $("ap-stock").className = "ap-stock ap-stock-ok";
+    $("ap-stock").innerHTML = `<b>${escapeHtml(nice)}</b> in stock`;
+    $("ap-actions").innerHTML =
+      `<button type="button" class="btn-primary" id="ap-add">Add to this machine</button>`;
+    $("ap-add").addEventListener("click", apAddChosen);
+  } else {
+    $("ap-stock").className = "ap-stock ap-stock-zero";
+    $("ap-stock").innerHTML =
+      `<b>No stock</b>This part cannot go on the machine until we have one.`;
+    $("ap-actions").innerHTML =
+      `<button type="button" class="btn-primary" id="ap-order">Order it${session.extras ? "" : " and hold this machine"}</button>
+       <button type="button" class="btn-secondary" id="ap-cancel">Back to search</button>`;
+    $("ap-order").addEventListener("click", apOrderChosen);
+    $("ap-cancel").addEventListener("click", () => $("ap-back").click());
+  }
+}
+
+// How much is on the machine right now, counted in PIECES rather than lines.
+// A part that merges into a line already there bumps its quantity and adds no
+// row, so counting rows would read a successful add as a failure.
+function apPieceCount() {
+  const holder = currentPartHolder();
+  let n = 0;
+  for (const p of ((holder && holder.parts) || [])) n += Number(p.quantity) || 0;
+  for (const p of session.pendingParts) n += Number(p.quantity) || 0;
+  return n;
+}
+
+async function apAddChosen() {
+  if (!apChosen) return;
+  const btn = $("ap-add");
+  if (btn) btn.disabled = true;
+  $("ap-detail-status").innerHTML = "";
+
+  // addByCode() REPORTS ITS OWN FAILURES WITH A TOAST AND NEVER THROWS, so
+  // awaiting it tells us nothing about whether the part landed. The first
+  // version of this closed the popup on the strength of the call returning,
+  // and a part the catalogue could not find disappeared without a word: the
+  // popup shut, the list was unchanged, and the technician had no reason to
+  // think anything had gone wrong.
+  //
+  // The list getting longer is the only honest signal, so that is what is
+  // checked.
+  const before = apPieceCount();
+  await addByCode(apChosen.item_code);
+  if (apPieceCount() > before) { closeAddPart(); return; }
+
+  $("ap-detail-status").innerHTML = statusErr(
+    "That part was not added — the catalogue did not accept the code. Nothing has changed."
+  );
+  if (btn) btn.disabled = false;
+}
+
+// ORDER IT, AND HOLD THE MACHINE. Two things, deliberately in this order: the
+// order is the one that has to happen, and a hold on a machine nobody ordered
+// a part for is a machine stuck for no reason.
+async function apOrderChosen() {
+  if (!apChosen) return;
+  const btn = $("ap-order");
+  if (btn) btn.disabled = true;
+  $("ap-detail-status").innerHTML = "";
+  try {
+    const req = await api("/api/part-requests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        item_code: apChosen.item_code,
+        description: apChosen.description || "",
+        qty_requested: 1,
+        requester: initialsFor(getUser()),
+        remarks: session.slipNumber ? `For slip ${session.slipNumber}` : "",
+      }),
+    });
+
+    // The slip's own loose parts belong to no machine, so there is nothing to
+    // hold. The part is still ordered.
+    if (!session.extras && session.machineId) {
+      await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/machines/${session.machineId}/await`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          item_code: apChosen.item_code,
+          description: apChosen.description || "",
+          requested_by: initialsFor(getUser()),
+          request_id: req && req.id ? req.id : null,
+        }),
+      });
+      await refreshSlip();
+      renderAwaiting();
+    }
+    toast(session.extras ? "Ordered" : "Ordered — this machine is on hold for it", "ok");
+    closeAddPart();
+  } catch (e) {
+    $("ap-detail-status").innerHTML = statusErr(e.message || "That part could not be ordered.");
+    if (btn) btn.disabled = false;
+  }
+}
+
+// ---- What this machine is waiting for ---------------------------------------
+// Shown on the machine's own sheet, because the person who ordered it is the
+// person who comes back to it. The hold itself lives on the server: a machine
+// waiting for a part cannot be marked repaired, and the refusal names it.
+function renderAwaiting() {
+  const box = $("mm-awaiting");
+  if (!box) return;
+  const m = currentMachine();
+  const waiting = (m && m.awaiting) || [];
+  if (session.extras || !waiting.length) {
+    box.style.display = "none"; box.innerHTML = ""; return;
+  }
+  box.innerHTML = `
+    <div class="mm-awaiting-head">Waiting for ${waiting.length === 1 ? "a part" : "parts"}</div>
+    ${waiting.map((w) => `
+      <div class="mm-awaiting-row">
+        <span class="mm-awaiting-main">
+          <span class="mm-awaiting-desc">${escapeHtml(w.description || w.item_code)}</span>
+          <span class="mm-awaiting-code mono">${escapeHtml(w.item_code)}</span>
+        </span>
+        <button type="button" class="mm-awaiting-drop" data-drop="${escapeAttr(w.item_code)}">Not needed</button>
+      </div>`).join("")}
+    <div class="mm-awaiting-foot">On order. This machine cannot be marked repaired until ${
+      waiting.length === 1 ? "it arrives" : "they arrive"} — fit the part and the hold lifts by itself.</div>`;
+  box.querySelectorAll("[data-drop]").forEach((b) =>
+    b.addEventListener("click", () => dropAwaiting(b, b.dataset.drop)));
+  box.style.display = "block";
+}
+
+async function dropAwaiting(btn, code) {
+  if (!confirm("Say this part is no longer needed?\n\nThe machine stops waiting for it. Anything already ordered stays ordered.")) return;
+  btn.disabled = true;
+  try {
+    await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/machines/${session.machineId}/await/clear`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ item_code: code, who: initialsFor(getUser()) }),
+    });
+    await refreshSlip();
+    renderAwaiting();
+    toast("No longer waiting for it", "ok");
+  } catch (e) {
+    btn.disabled = false;
+    toast(e.message || "That could not be changed", "err");
+  }
 }
 
 // ---- Common jobs -----------------------------------------------------------
@@ -3848,7 +4112,7 @@ async function addJobToMachine(id) {
   if (btn) btn.disabled = false;
 }
 
-$("mm-addpart").addEventListener("click", openTrialEntry);
+$("mm-addpart").addEventListener("click", openAddPart);
 
 $("job-btns").addEventListener("click", (e) => {
   const b = e.target.closest("[data-job]");
@@ -4569,16 +4833,23 @@ function openConvertPicker() {
     // building. Nothing was recorded on it and nothing has to be.
     const condemned = m.state === "CONDEMNED";
     const billable = condemned || parts > 0 || labour > 0 || String(m.repair_comment || "").trim();
+    // A QUOTE NOBODY HAS ANSWERED. The server refuses this machine with the
+    // same sentence, so the box is greyed with the reason rather than the
+    // order failing after the button is pressed. See quoteBlockReason().
+    const quoteBlock = done ? "" : String(m.quote_block || "");
+    const stopped = !done && (!billable || quoteBlock);
     const sub = done
       ? `On ${escapeHtml(m.so_number || "a Sales Order")}`
-      : condemned
-        ? "Condemned — goes on at no charge"
-        : billable
-          ? `${parts} part${parts === 1 ? "" : "s"}${labour > 0 ? " · labour " + money(labour) : ""}`
-          : "No work recorded yet";
+      : quoteBlock
+        ? escapeHtml(quoteBlock)
+        : condemned
+          ? "Condemned — goes on at no charge"
+          : billable
+            ? `${parts} part${parts === 1 ? "" : "s"}${labour > 0 ? " · labour " + money(labour) : ""}`
+            : "No work recorded yet";
     return `
-      <label class="conv-row${done ? " conv-done" : ""}${!done && !billable ? " conv-blocked" : ""}">
-        <input type="checkbox" value="${m.id}" ${done || !billable ? "disabled" : "checked"}>
+      <label class="conv-row${done ? " conv-done" : ""}${stopped ? " conv-blocked" : ""}">
+        <input type="checkbox" value="${m.id}" ${done || stopped ? "disabled" : "checked"}>
         <span class="conv-main">
           <span class="conv-name">${escapeHtml(machineLabel(session.slip, m))}</span>
           ${m.serial_no ? `<span class="conv-serial">S/N ${escapeHtml(m.serial_no)}</span>` : ""}
@@ -7459,8 +7730,8 @@ function setMode(mode) {
       ci.value = "";
       // NOT FOCUSED on the trial sheet until the box has been asked for. The
       // box is hidden behind "Add a part" there, and taking the keyboard for
-      // something nobody can see is the whole complaint. openTrialEntry() does
-      // the focusing at the moment it is wanted.
+      // something nobody can see is the whole complaint. The popup that "Add a
+      // part" opens does the focusing, at the moment it is wanted.
       //
       // The ordinary sheet still focuses: there the box is on screen from the
       // start, and somebody who picked "Type code" meant to type.
