@@ -3960,11 +3960,17 @@ async function showApPart(part) {
       `<b>No stock</b>None on the shelf. It can still go on the machine.`;
     // Both of these ADD. The question is only whether one gets ordered as
     // well, and it is put plainly rather than left as a link to notice.
+    //
+    // ADDING WITHOUT ORDERING IS THE HIGHLIGHTED ONE - John's call, 26 Sep
+    // 2026, and it is the one taken most: most of these are on a quote the
+    // customer has not agreed to yet, and ordering against those buys parts
+    // nobody asked for. The button that gets pressed by habit should be the
+    // one that is right by habit.
     $("ap-actions").innerHTML =
-      `<button type="button" class="btn-primary" id="ap-add-order">Add and order it</button>
-       <button type="button" class="btn-secondary" id="ap-add">Add without ordering</button>`;
-    $("ap-add-order").addEventListener("click", () => apAddChosen({ thenOrder: true }));
+      `<button type="button" class="btn-primary" id="ap-add">Add without ordering</button>
+       <button type="button" class="btn-secondary" id="ap-add-order">Add and order it</button>`;
     $("ap-add").addEventListener("click", () => apAddChosen());
+    $("ap-add-order").addEventListener("click", () => apAddChosen({ thenOrder: true }));
   }
 }
 
