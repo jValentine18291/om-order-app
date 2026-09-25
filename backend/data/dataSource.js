@@ -70,10 +70,6 @@ module.exports = {
     setMachineState: (...a) => dataRepo.slips.setMachineState(...a),
     undoMachineDecision: (...a) => dataRepo.slips.undoMachineDecision(...a),
     correctMachine: (...a) => dataRepo.slips.correctMachine(...a),
-    // Parts the shelf did not have, and the machines held waiting for them.
-    awaitingForMachine: (...a) => dataRepo.slips.awaitingForMachine(...a),
-    holdMachineForPart: (...a) => dataRepo.slips.holdMachineForPart(...a),
-    clearAwaitingPart: (...a) => dataRepo.slips.clearAwaitingPart(...a),
     // The customer's own signature on a machine being condemned.
     setCondemnSignature: (...a) => dataRepo.slips.setCondemnSignature(...a),
     getCondemnSignature: (...a) => dataRepo.slips.getCondemnSignature(...a),

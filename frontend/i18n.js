@@ -441,13 +441,12 @@
     "Checking stock…": "正在查询库存…",
     "Stock could not be checked for this part.": "无法查询此零件的库存。",
     "No stock": "没有库存",
-    "This part cannot go on the machine until we have one.": "有货之前，此零件不能加入本机器。",
+    "None on the shelf. It can still go on the machine.": "库存为零。仍可以加入本机器。",
+    "Added — none in stock.": "已添加 — 没有库存。",
     "in stock": "有库存",
     "Add to this machine": "加入本机器",
-    "Order it and hold this machine": "下单并暂停本机器",
     "Order it": "下单",
     "Ordered": "已下单",
-    "Ordered — this machine is on hold for it": "已下单 — 本机器暂停等待",
     "That part was not added — the catalogue did not accept the code. Nothing has changed.":
       "未能添加此零件 — 系统不接受此编号。没有任何改动。",
     "That part could not be added.": "未能添加此零件。",
@@ -455,14 +454,6 @@
     "Open a machine first": "请先选择机器",
 
     // The machine is short of something and is held until it turns up.
-    "Waiting for a part": "等待零件",
-    "Waiting for parts": "等待零件",
-    "Not needed": "不需要了",
-    "No longer waiting for it": "已取消等待",
-    "On order. This machine cannot be marked repaired until it arrives — fit the part and the hold lifts by itself.":
-      "已下单。零件到之前，本机器不能标记为已维修 — 装上零件后会自动解除。",
-    "On order. This machine cannot be marked repaired until they arrive — fit the part and the hold lifts by itself.":
-      "已下单。零件到之前，本机器不能标记为已维修 — 装上零件后会自动解除。",
 
     // The customer signing, in person, that a machine is beyond repair.
     "Customer signature needed": "需要客户签名",

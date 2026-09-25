@@ -2498,28 +2498,6 @@ body.signin-brand .topbar .pill {
 .ap-actions { display: flex; flex-direction: column; gap: 8px; }
 .ap-actions button { width: 100%; }
 
-/* What the machine is short of. Amber rather than red: it is a wait, not a
-   mistake, and the sheet already uses red for things that are wrong. */
-.mm-awaiting {
-  margin: 14px 0 0; padding: 12px 14px;
-  border-radius: 10px; border-left: 3px solid #E0A22A; background: #FFF6E5;
-  color: #8A5B00;
-}
-.mm-awaiting-head { font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
-.mm-awaiting-row {
-  display: flex; align-items: center; gap: 10px; margin-top: 8px;
-}
-.mm-awaiting-main { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; }
-.mm-awaiting-desc { font-size: 13.5px; font-weight: 700; }
-.mm-awaiting-code { font-size: 11.5px; opacity: .8; }
-.mm-awaiting-drop {
-  flex: none; cursor: pointer; font: inherit; font-size: 12px; font-weight: 700;
-  padding: 6px 10px; border-radius: 8px;
-  border: 1px solid rgba(138, 91, 0, .35); background: transparent; color: #8A5B00;
-}
-.mm-awaiting-drop:disabled { opacity: .5; }
-.mm-awaiting-foot { margin-top: 9px; font-size: 12px; line-height: 1.45; opacity: .95; }
-
 /* The customer's own signature on condemning a machine. Red while it is
    missing: the slip cannot close without it, and a machine nobody signed for
    is a machine that cannot leave. Green once it is done. */
@@ -2532,6 +2510,17 @@ body.signin-brand .topbar .pill {
 }
 .mm-condemn-head { font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
 .mm-condemn-body { margin-top: 5px; font-size: 12.5px; line-height: 1.45; }
+/* Added, but the shelf was empty. Sits under the search box so the next part
+   can be looked up without dismissing it. */
+.ap-added { flex-grow: 1; color: var(--ink-soft, #55665f); }
+.ap-order-now {
+  flex: none; cursor: pointer; font: inherit; font-size: 13px; font-weight: 700;
+  padding: 7px 12px; border-radius: 8px;
+  border: 1px solid var(--primary, #1f6f78);
+  background: var(--surface, #fff); color: var(--primary, #1f6f78);
+}
+.ap-order-now:disabled { opacity: .5; }
+
 .mm-condemn-btn {
   margin-top: 10px; width: 100%; cursor: pointer; font: inherit;
   font-size: 14px; font-weight: 700; padding: 11px; border-radius: 10px;

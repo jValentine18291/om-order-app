@@ -2930,7 +2930,6 @@ function openMachineModal(machineId) {
   loadLabourForCurrentMachine();
   renderMachineParts();
   renderMachineQuoteRow();
-  renderAwaiting();
   renderCondemnSig();
   renderMachineDecisionBanner();
   renderMachineBilledBanner();
@@ -3873,20 +3872,42 @@ $("ap-q").addEventListener("keydown", (e) => {
 // that actually matters is not enforced here anyway: a machine short of a part
 // cannot be marked repaired, and the server checks that itself.
 //
-// TWO CASES STILL STOP, because neither is a confirmation:
-//   - no stock, which is a decision - the part cannot go on the machine and
-//     something else has to happen instead (order it, hold the machine);
-//   - a row with no number on it at all, where nothing was shown, so there is
-//     nothing the technician can be said to have seen. That one goes and asks.
+// AN EMPTY SHELF NO LONGER STOPS IT. John's call, 26 Sep 2026, after his
+// technician pointed out what the old rule missed: the part has to be ON the
+// machine to be QUOTED, and a customer cannot be quoted for what the app
+// refused to let anyone write down. Stock is checked on the Sales end instead,
+// when the Sales Order becomes an invoice.
+//
+// It is still SAID, because a technician who knows the shelf is empty is the
+// person best placed to get one ordered - so an out-of-stock part goes on and
+// the offer to order it comes with it. Offered, not forced: some of these are
+// on quotes the customer will decline.
+//
+// One case still asks first: a row with no number on it at all. Nothing was
+// shown, so there is nothing the technician can be said to have seen.
 async function apPick(btn, part) {
   const bal = part.bal_qty;
   const known = bal !== undefined && bal !== null;
-  if (!known || Number(bal) <= 0) { showApPart(part); return; }
+  if (!known) { showApPart(part); return; }
 
   if (btn) btn.disabled = true;
   apChosen = { ...part };
-  await apAddChosen();
+  await apAddChosen({ offerOrder: Number(bal) <= 0 });
   if (btn) btn.disabled = false;
+}
+
+// Added, and the shelf was empty. Back on the search so the next part can be
+// looked up straight away, with the offer sitting under the box.
+function offerToOrder(part) {
+  $("ap-detail").style.display = "none";
+  $("ap-search").style.display = "";
+  $("ap-q").value = "";
+  $("ap-results").innerHTML = "";
+  $("ap-status").innerHTML =
+    `<span class="ap-added">Added \u2014 none in stock.</span>` +
+    `<button type="button" class="ap-order-now" id="ap-order-now">Order it</button>`;
+  const b = $("ap-order-now");
+  if (b) b.addEventListener("click", () => { apChosen = part; apOrderChosen(); });
 }
 
 // WHETHER WE HAVE IT. Reached when the list had no number to show, or showed a
@@ -3942,12 +3963,14 @@ async function showApPart(part) {
   } else {
     $("ap-stock").className = "ap-stock ap-stock-zero";
     $("ap-stock").innerHTML =
-      `<b>No stock</b>This part cannot go on the machine until we have one.`;
+      `<b>No stock</b>None on the shelf. It can still go on the machine.`;
+    // Adding is the PRIMARY action even here: the quote needs the part on the
+    // machine whether or not one is in the building.
     $("ap-actions").innerHTML =
-      `<button type="button" class="btn-primary" id="ap-order">Order it${session.extras ? "" : " and hold this machine"}</button>
-       <button type="button" class="btn-secondary" id="ap-cancel">Back to search</button>`;
+      `<button type="button" class="btn-primary" id="ap-add">Add to this machine</button>
+       <button type="button" class="btn-secondary" id="ap-order">Order it</button>`;
+    $("ap-add").addEventListener("click", () => apAddChosen({ offerOrder: true }));
     $("ap-order").addEventListener("click", apOrderChosen);
-    $("ap-cancel").addEventListener("click", () => $("ap-back").click());
   }
 }
 
@@ -3970,7 +3993,7 @@ function apSay(html) {
   $(onSearch ? "ap-status" : "ap-detail-status").innerHTML = html;
 }
 
-async function apAddChosen() {
+async function apAddChosen({ offerOrder = false } = {}) {
   if (!apChosen) return;
   const btn = $("ap-add");
   if (btn) btn.disabled = true;
@@ -3986,8 +4009,13 @@ async function apAddChosen() {
   // The list getting longer is the only honest signal, so that is what is
   // checked.
   const before = apPieceCount();
+  const added = { ...apChosen };
   await addByCode(apChosen.item_code);
-  if (apPieceCount() > before) { closeAddPart(); return; }
+  if (apPieceCount() > before) {
+    if (offerOrder) offerToOrder(added);
+    else closeAddPart();
+    return;
+  }
 
   apSay(statusErr(
     "That part was not added — the catalogue did not accept the code. Nothing has changed."
@@ -3995,16 +4023,17 @@ async function apAddChosen() {
   if (btn) btn.disabled = false;
 }
 
-// ORDER IT, AND HOLD THE MACHINE. Two things, deliberately in this order: the
-// order is the one that has to happen, and a hold on a machine nobody ordered
-// a part for is a machine stuck for no reason.
+// Just the order now. It used to hold the machine as well; that went with the
+// no-stock rule on 26 Sep 2026.
 async function apOrderChosen() {
   if (!apChosen) return;
-  const btn = $("ap-order");
+  // Either the stock view's button or the one on the offer under the search
+  // box - ordering can be reached from both since the block went.
+  const btn = $("ap-order-now") || $("ap-order");
   if (btn) btn.disabled = true;
-  $("ap-detail-status").innerHTML = "";
+  apSay("");
   try {
-    const req = await api("/api/part-requests", {
+    await api("/api/part-requests", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -4016,77 +4045,15 @@ async function apOrderChosen() {
       }),
     });
 
-    // The slip's own loose parts belong to no machine, so there is nothing to
-    // hold. The part is still ordered.
-    if (!session.extras && session.machineId) {
-      await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/machines/${session.machineId}/await`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          item_code: apChosen.item_code,
-          description: apChosen.description || "",
-          requested_by: initialsFor(getUser()),
-          request_id: req && req.id ? req.id : null,
-        }),
-      });
-      await refreshSlip();
-      renderAwaiting();
-    }
-    toast(session.extras ? "Ordered" : "Ordered — this machine is on hold for it", "ok");
+    toast("Ordered", "ok");
     closeAddPart();
   } catch (e) {
-    $("ap-detail-status").innerHTML = statusErr(e.message || "That part could not be ordered.");
+    // Most often "this part already has an open request", which is worth
+    // reading rather than a toast that goes away.
+    apSay(statusErr(e.message || "That part could not be ordered."));
     if (btn) btn.disabled = false;
   }
 }
-
-// ---- What this machine is waiting for ---------------------------------------
-// Shown on the machine's own sheet, because the person who ordered it is the
-// person who comes back to it. The hold itself lives on the server: a machine
-// waiting for a part cannot be marked repaired, and the refusal names it.
-function renderAwaiting() {
-  const box = $("mm-awaiting");
-  if (!box) return;
-  const m = currentMachine();
-  const waiting = (m && m.awaiting) || [];
-  if (session.extras || !waiting.length) {
-    box.style.display = "none"; box.innerHTML = ""; return;
-  }
-  box.innerHTML = `
-    <div class="mm-awaiting-head">Waiting for ${waiting.length === 1 ? "a part" : "parts"}</div>
-    ${waiting.map((w) => `
-      <div class="mm-awaiting-row">
-        <span class="mm-awaiting-main">
-          <span class="mm-awaiting-desc">${escapeHtml(w.description || w.item_code)}</span>
-          <span class="mm-awaiting-code mono">${escapeHtml(w.item_code)}</span>
-        </span>
-        <button type="button" class="mm-awaiting-drop" data-drop="${escapeAttr(w.item_code)}">Not needed</button>
-      </div>`).join("")}
-    <div class="mm-awaiting-foot">On order. This machine cannot be marked repaired until ${
-      waiting.length === 1 ? "it arrives" : "they arrive"} — fit the part and the hold lifts by itself.</div>`;
-  box.querySelectorAll("[data-drop]").forEach((b) =>
-    b.addEventListener("click", () => dropAwaiting(b, b.dataset.drop)));
-  box.style.display = "block";
-}
-
-async function dropAwaiting(btn, code) {
-  if (!confirm("Say this part is no longer needed?\n\nThe machine stops waiting for it. Anything already ordered stays ordered.")) return;
-  btn.disabled = true;
-  try {
-    await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/machines/${session.machineId}/await/clear`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ item_code: code, who: initialsFor(getUser()) }),
-    });
-    await refreshSlip();
-    renderAwaiting();
-    toast("No longer waiting for it", "ok");
-  } catch (e) {
-    btn.disabled = false;
-    toast(e.message || "That could not be changed", "err");
-  }
-}
-
 
 // ---- The customer signing for a condemned machine ---------------------------
 // John's ask, 25 Sep 2026: the customer comes in person to sign that a machine
