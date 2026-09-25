@@ -2923,6 +2923,7 @@ function openMachineModal(machineId) {
   renderMachineParts();
   renderMachineQuoteRow();
   renderAwaiting();
+  renderCondemnSig();
   renderMachineDecisionBanner();
   renderMachineBilledBanner();
   updateSlipFooter();
@@ -3975,6 +3976,88 @@ async function dropAwaiting(btn, code) {
     btn.disabled = false;
     toast(e.message || "That could not be changed", "err");
   }
+}
+
+
+// ---- The customer signing for a condemned machine ---------------------------
+// John's ask, 25 Sep 2026: the customer comes in person to sign that a machine
+// is beyond repair. NOT the signature they gave at the counter - that one was
+// them accepting the terms on the way in, and cannot speak for a decision
+// taken weeks later about one machine.
+//
+// The pad is the one the registration form uses. It is reused rather than
+// rebuilt because it has been through three rounds of canvas-sizing bugs
+// (see openSigModal) and a second copy would get all of them again.
+
+let sigPurpose = "register";     // "register" | "condemn"
+let condemnSigMachine = null;
+
+function renderCondemnSig() {
+  const box = $("mm-condemn-sig");
+  if (!box) return;
+  const m = currentMachine();
+  if (session.extras || !m || m.state !== "CONDEMNED") {
+    box.style.display = "none"; box.innerHTML = ""; return;
+  }
+  const signed = !!m.has_condemn_signature;
+  box.className = "mm-condemn-sig" + (signed ? " mm-condemn-signed" : "");
+  box.innerHTML = `
+    <div class="mm-condemn-head">${signed ? "Signed for condemning" : "Customer signature needed"}</div>
+    <div class="mm-condemn-body">${signed
+      ? "The customer has signed to confirm this machine is beyond repair."
+      : "The customer signs in person to confirm they want this machine condemned. The slip cannot be closed until they have."}</div>
+    <button type="button" class="mm-condemn-btn" id="mm-condemn-go">${
+      signed ? "Sign again" : "Take the signature"}</button>`;
+  $("mm-condemn-go").addEventListener("click", openCondemnSignature);
+  box.style.display = "block";
+}
+
+function openCondemnSignature() {
+  const m = currentMachine();
+  if (!m) return;
+  sigPurpose = "condemn";
+  condemnSigMachine = m.id;
+  sigPadClear();
+  $("sig-heading").textContent = "Customer signature — condemning";
+  $("sig-hint").textContent =
+    `By signing, the customer confirms ${machineLabel(session.slip, m)} is beyond repair and they accept it being condemned.`;
+  openSigModal();
+}
+
+// Done means something different depending on what is being signed. On the
+// registration form the signature is read off the pad later, when the slip is
+// created; here there is no later, so it is saved now.
+async function sigDone() {
+  if (sigPurpose !== "condemn") { closeSigModal(); return; }
+  const image = sigPadData();
+  if (!image) { toast("Ask the customer to sign first", "err"); return; }
+  const btn = $("sig-done");
+  btn.disabled = true;
+  try {
+    await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/machines/${condemnSigMachine}/condemn-signature`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image, who: initialsFor(getUser()) }),
+    });
+    await refreshSlip();
+    renderCondemnSig();
+    closeSigModal();
+    toast("Signed", "ok");
+  } catch (e) {
+    toast(e.message || "That signature could not be saved", "err");
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// Whatever it was opened for, it goes back to the registration form's pad when
+// it closes - otherwise the next slip registered would be signed "condemning".
+function resetSigPurpose() {
+  sigPurpose = "register";
+  condemnSigMachine = null;
+  const h = $("sig-heading"), t = $("sig-hint");
+  if (h) h.textContent = "Customer signature";
+  if (t) t.textContent = "By signing, the customer accepts the terms printed on the slip.";
 }
 
 // ---- Common jobs -----------------------------------------------------------
@@ -10846,7 +10929,7 @@ function sigPadSetup() {
   window.addEventListener("resize", sigPadResize);
   $("ns-sig-open").addEventListener("click", openSigModal);
   $("sig-close").addEventListener("click", closeSigModal);
-  $("sig-done").addEventListener("click", closeSigModal);
+  $("sig-done").addEventListener("click", sigDone);
   // Tapping the backdrop closes it, but only the backdrop - a stray touch that
   // lands on the pad is a signature, not a dismissal.
   $("sig-modal").addEventListener("click", (e) => { if (e.target === $("sig-modal")) closeSigModal(); });
@@ -10920,8 +11003,14 @@ function sizeSigPadWhenVisible(tries = 20) {
 
 function closeSigModal() {
   $("sig-modal").style.display = "none";
-  document.body.style.overflow = "";
-  renderSigPreview();
+  // The machine sheet is itself a modal and wants the page locked; only the
+  // registration form is behind this when nothing else is.
+  document.body.style.overflow =
+    $("machine-modal") && $("machine-modal").style.display === "flex" ? "hidden" : "";
+  // Only the registration form has a preview to update, and only its own
+  // signature belongs in it.
+  if (sigPurpose === "register") renderSigPreview();
+  resetSigPurpose();
 }
 
 // Show what was signed on the form itself, so nobody has to reopen the pad to

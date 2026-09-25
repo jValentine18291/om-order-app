@@ -1621,6 +1621,31 @@ app.get("/api/parts-by-model", async (req, res) => {
   }
 });
 
+// THE CUSTOMER SIGNING FOR A CONDEMNED MACHINE. A second decision, taken in
+// person and later than the slip's own signature: that this machine is beyond
+// repair and they accept it.
+app.post("/api/slips/:slip/machines/:id/condemn-signature", async (req, res) => {
+  try {
+    const body = req.body || {};
+    const slip = await data.slips.setCondemnSignature(req.params.slip, Number(req.params.id), {
+      image: body.image, who: body.who || "",
+    });
+    res.status(201).json(slip);
+  } catch (err) {
+    console.error("[POST condemn-signature]", err.message);
+    res.status(err.status || 500).json({ error: err.message });
+  }
+});
+
+app.get("/api/slips/:slip/machines/:id/condemn-signature", async (req, res) => {
+  try {
+    res.json(await data.slips.getCondemnSignature(req.params.slip, Number(req.params.id)));
+  } catch (err) {
+    console.error("[GET condemn-signature]", err.message);
+    res.status(err.status || 500).json({ error: err.message });
+  }
+});
+
 // HOLD A MACHINE FOR A PART THE SHELF DID NOT HAVE.
 //
 // John's rule, 25 Sep 2026: a part with no stock cannot go on a machine. The

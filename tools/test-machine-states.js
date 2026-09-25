@@ -100,6 +100,12 @@ check("quoted: the machine waits on the customer", stateNow(slip, saw.id), "QUOT
   slip = await data.slips.setSlipInvoiced(no, "DO-1234", "KS");
   check("invoiced", slip.status, "INVOICED");
 
+  // The customer signs that the saw is beyond repair. Required before any slip
+  // with a condemned machine can close, since 25 Sep 2026 - see
+  // test-condemn-signature.js. Without it, closing stops one gate EARLIER than
+  // the one this check is about.
+  await data.slips.setCondemnSignature(no, saw.id, { image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==", who: "KS" });
+
   // Closing is still refused while nobody has said where the condemned one
   // went. It is the last moment anyone looks at the slip.
   let err = "";

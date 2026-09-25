@@ -150,7 +150,7 @@ const refs = (slip) => (slip.orders || []).map((o) => `${o.so_number}=${o.closin
   // billed - and closing names whichever it reaches first.
   await refuse("it still will not close",
     () => data.slips.closeSlip(no7, "", "KS"),
-    /Condemned but not yet accounted for|Not on a Sales Order yet/);
+    /Condemned but not signed for|Condemned but not yet accounted for|Not on a Sales Order yet/);
 
   console.log("\n-- and once the workshop finishes, it is All Repaired --");
   // The other half of the split. Checked on a slip nobody has invoiced, since

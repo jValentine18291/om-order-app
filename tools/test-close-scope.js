@@ -68,6 +68,8 @@ const make = async (company, descs) => data.slips.createSlip({
   s = await make("D CONDEMNED ONLY", ["M1"]);
   await data.slips.setMachineState(s.slip_number, s.machines[0].id, "CONDEMNED", "IR");
   check("condemned-only slip is offered", await offered(s.slip_number), true);
+  await data.slips.setCondemnSignature(s.slip_number, s.machines[0].id,
+    { image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==", who: "KS" });
   await data.slips.setMachineDisposal(s.slip_number, s.machines[0].id, "COLLECTED", "JT");
   s = await data.slips.closeSlip(s.slip_number, "CS-1");
   check("  and closes once accounted for", s.status, "CLOSED");
@@ -77,6 +79,8 @@ const make = async (company, descs) => data.slips.createSlip({
   // it: there is no document, so there is no number to record.
   s = await make("E CONDEMNED ONLY, NO REF", ["M1"]);
   await data.slips.setMachineState(s.slip_number, s.machines[0].id, "CONDEMNED", "IR");
+  await data.slips.setCondemnSignature(s.slip_number, s.machines[0].id,
+    { image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==", who: "KS" });
   await data.slips.setMachineDisposal(s.slip_number, s.machines[0].id, "DISPOSED", "JT");
   s = await data.slips.closeSlip(s.slip_number, "");
   check("an unbilled slip closes with no document number", s.status, "CLOSED");

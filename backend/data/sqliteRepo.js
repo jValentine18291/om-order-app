@@ -464,6 +464,11 @@ function getSlip(slipNumber, includeSignature = false) {
     // What it is short of. Always present, even when empty, so every screen
     // can ask without checking whether the field is there.
     m.awaiting = awaitingForMachine(m.id);
+    // Whether the customer has signed for condemning it, WITHOUT the image -
+    // the picture is hundreds of kilobytes and only what draws it needs it.
+    m.has_condemn_signature = !!db.prepare(
+      "SELECT 1 FROM machine_condemn_signatures WHERE machine_id = ?"
+    ).get(m.id);
     // Why it cannot go on a Sales Order yet, or "". The picker greys the box
     // with this and the server refuses with it, so they cannot drift apart.
     m.quote_block = quoteBlockReason(slip, m);
@@ -497,6 +502,56 @@ function getSlip(slipNumber, includeSignature = false) {
     slip.signature = sig ? sig.image : "";
   }
   return slip;
+}
+
+// ---- The customer signing for a condemned machine ---------------------------
+// A second decision, taken later than the slip's own signature and about one
+// machine: that it is beyond repair and they accept it. John asked for it on
+// 25 Sep 2026 - the customer comes in to sign.
+
+function setCondemnSignature(slipNumber, machineId, { image, who = "" } = {}) {
+  const { machine } = machineOnSlip(slipNumber, machineId);
+  const img = String(image || "").trim();
+  if (!img) { const e = new Error("A signature is required."); e.status = 400; throw e; }
+  // Only for a machine that IS condemned. A signature saying "I accept this is
+  // beyond repair" against a machine being repaired is a document that says
+  // something nobody agreed to.
+  if (machine.state !== "CONDEMNED") {
+    const e = new Error("This machine is not condemned, so there is nothing to sign for.");
+    e.status = 409; throw e;
+  }
+  db.prepare(
+    `INSERT INTO machine_condemn_signatures (machine_id, image, signed_by)
+     VALUES (?, ?, ?)
+     ON CONFLICT(machine_id) DO UPDATE SET
+       image = excluded.image,
+       signed_by = excluded.signed_by,
+       signed_at = datetime('now', 'localtime')`
+  ).run(machine.id, img, String(who || "").trim());
+  return getSlip(slipNumber);
+}
+
+function getCondemnSignature(slipNumber, machineId) {
+  const { machine } = machineOnSlip(slipNumber, machineId);
+  const row = db.prepare(
+    "SELECT image, signed_at, signed_by FROM machine_condemn_signatures WHERE machine_id = ?"
+  ).get(machine.id);
+  return row || { image: "", signed_at: "", signed_by: "" };
+}
+
+// Leaving CONDEMNED throws the signature away with it - see both callers below.
+function dropCondemnSignature(machineId) {
+  db.prepare("DELETE FROM machine_condemn_signatures WHERE machine_id = ?").run(machineId);
+}
+
+// Condemned machines nobody has signed for. The close gate reads this.
+function unsignedCondemned(slipId) {
+  return db.prepare(
+    `SELECT m.machine_desc
+       FROM slip_machines m
+       LEFT JOIN machine_condemn_signatures g ON g.machine_id = m.id
+      WHERE m.slip_id = ? AND m.state = 'CONDEMNED' AND g.machine_id IS NULL`
+  ).all(slipId).map((r) => r.machine_desc);
 }
 
 // ---- Parts the shelf did not have ------------------------------------------
@@ -1776,6 +1831,17 @@ function closeSlip(slipNumber, closingRef, who = "") {
   if (!ref && orderCount) {
     const e = new Error("Record the DO/CS/INV number first."); e.status = 400; throw e;
   }
+  // THE CUSTOMER HAS TO HAVE SIGNED for each condemned machine. Checked before
+  // the disposal question below because it is the earlier one: they sign that
+  // it is beyond repair, and only then does where it goes mean anything.
+  const unsigned = unsignedCondemned(slip.id);
+  if (unsigned.length) {
+    const e = new Error(
+      `Condemned but not signed for: ${unsigned.join(", ")}. ` +
+      "The customer signs in person to confirm they want it condemned."
+    );
+    e.status = 400; throw e;
+  }
   const stranded = strandedCondemned(slip.id);
   if (stranded.length) {
     const e = new Error(
@@ -2718,6 +2784,10 @@ function setMachineState(slipNumber, machineId, state, who = "") {
   // Leaving CONDEMNED clears the disposal with it: the machine is staying
   // after all, so how it was going to leave no longer means anything.
   const clearDisposal = machine.state === "CONDEMNED" && st !== "CONDEMNED";
+  // The customer signed that THIS machine was beyond repair. Repairing it after
+  // all is not what they put their name to, so the signature goes with the
+  // decision rather than sitting there attesting to something untrue.
+  if (clearDisposal) dropCondemnSignature(machine.id);
   db.prepare(
     `UPDATE slip_machines
         SET state = ?, decided_by = ?, decided_at = datetime('now','localtime')
@@ -2822,6 +2892,10 @@ function correctMachine(slipNumber, machineId, { state, clear_comment = false, c
   // the ordinary way does - the machine is staying, so how it was going to
   // leave means nothing.
   const clearDisposal = machine.state === "CONDEMNED" && st !== "CONDEMNED";
+  // The customer signed that THIS machine was beyond repair. Repairing it after
+  // all is not what they put their name to, so the signature goes with the
+  // decision rather than sitting there attesting to something untrue.
+  if (clearDisposal) dropCondemnSignature(machine.id);
   const insertAmendment = db.prepare(
     `INSERT INTO slip_amendments (slip_id, field, before, after, changed_by) VALUES (?, ?, ?, ?, ?)`
   );
@@ -2963,6 +3037,7 @@ const slips = {
   slipDeletable, deleteSlip,
   createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setSlipExtrasNote, slipContacts, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, correctMachine,
   awaitingForMachine, holdMachineForPart, clearAwaitingPart,
+  setCondemnSignature, getCondemnSignature, unsignedCondemned,
   machineNeedsQuoteFirst, quoteAnswered, quoteBlockReason, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 

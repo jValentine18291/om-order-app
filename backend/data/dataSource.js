@@ -74,6 +74,9 @@ module.exports = {
     awaitingForMachine: (...a) => dataRepo.slips.awaitingForMachine(...a),
     holdMachineForPart: (...a) => dataRepo.slips.holdMachineForPart(...a),
     clearAwaitingPart: (...a) => dataRepo.slips.clearAwaitingPart(...a),
+    // The customer's own signature on a machine being condemned.
+    setCondemnSignature: (...a) => dataRepo.slips.setCondemnSignature(...a),
+    getCondemnSignature: (...a) => dataRepo.slips.getCondemnSignature(...a),
     // Why a machine cannot go on a Sales Order yet - the picker and the server
     // refuse with the same sentence.
     quoteBlockReason: (...a) => dataRepo.slips.quoteBlockReason(...a),

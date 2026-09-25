@@ -1165,7 +1165,7 @@
   <div class="modal-overlay" id="sig-modal" style="display:none">
     <div class="modal-sheet">
       <div class="modal-head">
-        <div><strong>Customer signature</strong></div>
+        <div><strong id="sig-heading">Customer signature</strong></div>
         <button class="modal-x" id="sig-close" type="button" aria-label="Close">&#10005;</button>
       </div>
       <div class="modal-body">
@@ -1174,7 +1174,7 @@
           <span class="sigpad-hint" id="ns-sig-hint">Sign here</span>
           <span class="sigpad-baseline"></span>
         </div>
-        <p class="nsm-hint">By signing, the customer accepts the terms printed on the slip.</p>
+        <p class="nsm-hint" id="sig-hint">By signing, the customer accepts the terms printed on the slip.</p>
         <div class="sig-modal-actions">
           <button type="button" class="btn-secondary" id="ns-sig-clear">Clear</button>
           <button type="button" class="btn-primary" id="sig-done">Done</button>
@@ -1319,6 +1319,10 @@
              the header banners because it is the technician's own business:
              they ordered it, and they are the one waiting. -->
         <div class="mm-awaiting" id="mm-awaiting" style="display:none"></div>
+
+        <!-- The customer's own signature on condemning THIS machine, which is
+             not the one they gave at the counter when they dropped it off. -->
+        <div class="mm-condemn-sig" id="mm-condemn-sig" style="display:none"></div>
 
         <button type="button" id="mm-addpart">
           <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>

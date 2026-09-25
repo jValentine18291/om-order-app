@@ -132,6 +132,9 @@ const seen = async (scope, no) =>
   check("the condemned machine holds the slip open", slip.status, "PART_SO");
   slip = await data.slips.setSlipInvoiced(noC, "INV-77", "KS");
   check("and the rest can still be invoiced", slip.status, "INVOICED");
+  // The customer signs that the mower is beyond repair - the earlier of the two
+  // gates on a condemned machine since 25 Sep 2026.
+  await data.slips.setCondemnSignature(noC, mow, { image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==", who: "KS" });
   await refuse("but it cannot be closed with a machine still in the workshop",
     () => data.slips.closeSlip(noC, "", "KS"), /Condemned but not yet accounted for/);
   await data.slips.setMachineDisposal(noC, mow, "COLLECTED", "KS");

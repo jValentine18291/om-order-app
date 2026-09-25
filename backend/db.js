@@ -1088,6 +1088,26 @@ if (partCount === 0) {
 // Reorder requests raised from the Find Part screen ("Order more"), consumed
 // by the Purchaser screen.
 db.exec(`
+  -- THE CUSTOMER'S OWN SIGNATURE ON A CONDEMNED MACHINE.
+  --
+  -- John's ask, 25 Sep 2026: "the customer will come in person to sign, which
+  -- confirms that they want to condemn it."
+  --
+  -- SEPARATE FROM THE SLIP'S SIGNATURE, which is the customer accepting the
+  -- terms when they drop the machine off. This one is a second decision, taken
+  -- later, about one machine: that it is beyond repair and they accept it. A
+  -- signature taken at the counter on day one cannot say that.
+  --
+  -- One per machine, so signing again replaces it - a customer who signs twice
+  -- has not condemned the machine twice.
+  CREATE TABLE IF NOT EXISTS machine_condemn_signatures (
+    machine_id INTEGER PRIMARY KEY,
+    image      TEXT NOT NULL,
+    signed_at  TEXT DEFAULT (datetime('now', 'localtime')),
+    signed_by  TEXT DEFAULT '',        -- the staff member who held the phone
+    FOREIGN KEY (machine_id) REFERENCES slip_machines(id) ON DELETE CASCADE
+  );
+
   -- A PART THE MACHINE NEEDS AND THE SHELF DOES NOT HAVE.
   --
   -- John's rule, 25 Sep 2026: a technician cannot put a part with no stock on

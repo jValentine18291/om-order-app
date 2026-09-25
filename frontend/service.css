@@ -2465,6 +2465,24 @@ body.signin-brand .topbar .pill {
 .mm-awaiting-drop:disabled { opacity: .5; }
 .mm-awaiting-foot { margin-top: 9px; font-size: 12px; line-height: 1.45; opacity: .95; }
 
+/* The customer's own signature on condemning a machine. Red while it is
+   missing: the slip cannot close without it, and a machine nobody signed for
+   is a machine that cannot leave. Green once it is done. */
+.mm-condemn-sig {
+  margin: 14px 0 0; padding: 12px 14px; border-radius: 10px;
+  border-left: 3px solid #b3261e; background: #fdecec; color: #8c2018;
+}
+.mm-condemn-sig.mm-condemn-signed {
+  border-left-color: #1f8a5f; background: #eaf6ef; color: #17693f;
+}
+.mm-condemn-head { font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.mm-condemn-body { margin-top: 5px; font-size: 12.5px; line-height: 1.45; }
+.mm-condemn-btn {
+  margin-top: 10px; width: 100%; cursor: pointer; font: inherit;
+  font-size: 14px; font-weight: 700; padding: 11px; border-radius: 10px;
+  border: 1px solid currentColor; background: rgba(255, 255, 255, .7); color: inherit;
+}
+
 /* ---- The trial repair sheet ---------------------------------------------- */
 /* Every rule here is under .mm-b, a class only the people in TRIAL_SHEET get,
    so the ordinary sheet is untouched down to the pixel.
