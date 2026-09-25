@@ -3704,6 +3704,32 @@ function parseTypedPrice(raw) {
   return Number.isFinite(n) && n >= 0 ? n : NOT_A_PRICE;
 }
 
+// A CODE THAT IS NOT A PART ON A SHELF. A1 to A12 are AutoCount's service and
+// sundry codes and MISC is the catch-all; none of them is stocked, so AutoCount
+// reports nothing against them and always will.
+//
+// John's, 26 Sep 2026: a balance of zero on one of these is not news and must
+// not be treated as any. The old behaviour asked "no stock - add without
+// ordering, or add and order it?" on every welding line and every MISC part,
+// when there is nothing to order: nobody restocks "A7 SVR WAREHOUSE".
+//
+// NOT called isServiceCode: OM_SERVICE_ITEMS.isServiceCode already exists and
+// means something narrower - the four per-machine service items, A1 A2 A3 A12.
+// Two functions of one name meaning two things is how somebody later reads the
+// wrong rule and cannot tell.
+//
+// WIDER THAN THE FREE-TEXT RULE ON PURPOSE. A5 to A8 and MISC are the codes
+// that need NAMING, because the catalogue does not say what the line is. A1 to
+// A12 and MISC are the codes that carry NO STOCK. The two overlap and are not
+// the same question, so they are two rules.
+function isUnstockedCode(itemCode) {
+  // A1..A12 and nothing beyond: the \b stops A13 and A120 matching, and the
+  // alternation tries the two-digit form when the one-digit form leaves a
+  // digit stranded.
+  return /^A(?:[1-9]|1[0-2])\b/.test(String(itemCode || "").trim().toUpperCase())
+      || String(itemCode || "").trim().toUpperCase().startsWith("MISC");
+}
+
 function isFreeTextPart(itemCode, description = "") {
   const norm = (v) => String(v || "").trim().toUpperCase();
   const code = norm(itemCode);
@@ -3952,7 +3978,11 @@ $("ap-q").addEventListener("keydown", (e) => {
 async function apPick(btn, part) {
   const bal = part.bal_qty;
   const known = bal !== undefined && bal !== null;
-  if (!known || Number(bal) <= 0) { showApPart(part); return; }
+  // A service or MISC code is never in stock and never will be, so there is
+  // nothing to ask and nothing to order. Straight on, and the naming and
+  // pricing prompts in addByCode do the rest.
+  const stocked = !isUnstockedCode(part.item_code);
+  if (stocked && (!known || Number(bal) <= 0)) { showApPart(part); return; }
 
   if (btn) btn.disabled = true;
   apChosen = { ...part };
@@ -3973,6 +4003,19 @@ async function showApPart(part) {
   $("ap-stock").className = "ap-stock ap-stock-wait";
   $("ap-stock").textContent = "Checking stock\u2026";
   $("ap-actions").innerHTML = "";
+
+  // Reached by a scan, or by a row with no figure on it. A service code has no
+  // figure to fetch and no question to answer: say what it is and offer to add
+  // it, with none of the out-of-stock machinery.
+  if (isUnstockedCode(part.item_code)) {
+    $("ap-stock").className = "ap-stock ap-stock-service";
+    $("ap-stock").innerHTML =
+      `<b>Not a stocked part</b>A service or sundry code &mdash; there is no stock figure for it.`;
+    $("ap-actions").innerHTML =
+      `<button type="button" class="btn-primary" id="ap-add">Add to this machine</button>`;
+    $("ap-add").addEventListener("click", () => apAddChosen());
+    return;
+  }
 
   let stock = null;
   try {
@@ -8280,7 +8323,10 @@ $("fp-scan-stop").addEventListener("click", stopFindScan);
 // mid-deploy). Missing is not zero, and showing a confident "0" for "I don't
 // know" would send someone to a shelf for nothing.
 function partOptionHtml(p, { extraClass = "" } = {}) {
-  const known = p.bal_qty !== undefined && p.bal_qty !== null;
+  // A nought against "A7 SVR WAREHOUSE" says nothing true - it is not stocked
+  // and never was - so the column is left empty for these rather than red.
+  const known = p.bal_qty !== undefined && p.bal_qty !== null
+                && !isUnstockedCode(p.item_code);
   const n = Number(p.bal_qty) || 0;
   const qty = Number.isInteger(n) ? String(n) : n.toFixed(2);
   const sub = p.shelf ? `${escapeHtml(p.shelf)} · ${escapeHtml(p.item_code)}` : escapeHtml(p.item_code);
