@@ -21,11 +21,26 @@ const end = src.indexOf("\nfunction addPickedLines", start);
 const fn = src.slice(start, end);
 
 let html = "";
+// A DOM that is enough to render into and nothing more. The renderer wires up
+// checkboxes after writing its markup; here those lookups come back empty, so
+// what this file checks is the MARKUP - which is where the ticks are decided.
+const el = () => ({
+  set innerHTML(v) { html = v; },
+  set textContent(v) { /* the Add and Select all labels */ },
+  set disabled(v) {},
+  addEventListener() {},
+  querySelector: () => null,
+  querySelectorAll: () => [],
+});
+const escapeHtml = (t) => String(t == null ? "" : t).replace(/[&<>"']/g, (c) =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const sandbox = {
-  escapeHtml: (t) => String(t == null ? "" : t).replace(/[&<>"']/g, (c) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])),
+  escapeHtml,
+  // The renderer labels each checkbox with the part description.
+  escapeAttr: (t) => escapeHtml(t).replace(/"/g, "&quot;"),
   trimNum: (n) => String(Number(n)),
-  $: () => ({ set innerHTML(v) { html = v; }, addEventListener() {} }),
+  $: () => el(),
+  document: { querySelectorAll: () => [] },
   spkPo: null, shipDraft: null, spkShowAll: false,
 };
 vm.createContext(sandbox);
@@ -37,9 +52,17 @@ function check(what, got, want) {
   if (!ok) failures++;
   console.log(`${ok ? "  ok  " : " FAIL "} ${what}: ${JSON.stringify(got)}${ok ? "" : ` (expected ${JSON.stringify(want)})`}`);
 }
-// Which PO lines the picker offered, by the index it sends back to addPickedLines.
-const offered = () => [...html.matchAll(/data-line="(\d+)"/g)].map((m) => Number(m[1]));
-const filled = () => [...html.matchAll(/data-line="\d+"[\s\S]*?value="([^"]*)"/g)].map((m) => m[1]);
+// Which PO lines the picker offered, by the index it sends back to
+// addPickedLines. Read off the QUANTITY input: since the picker grew
+// checkboxes, data-line appears on the row, the tick and the box alike, and
+// counting all three would report every line three times.
+const qtyInputs = () => [...html.matchAll(/<input class="spk-qty"[\s\S]*?\/>/g)].map((m) => m[0]);
+const offered = () => qtyInputs().map((t) => Number(/data-line="(\d+)"/.exec(t)[1]));
+const filled = () => qtyInputs().map((t) => /value="([^"]*)"/.exec(t)[1]);
+// Which of them arrive ticked, and which boxes are live.
+const ticks = () => [...html.matchAll(/<input type="checkbox" class="spk-pick"[\s\S]*?\/>/g)]
+  .map((m) => /checked/.test(m[0]));
+const enabled = () => qtyInputs().map((t) => !/disabled/.test(t));
 
 // PO-2609-016 as John described it, half of it already on an earlier shipment.
 sandbox.spkPo = { doc_no: "PO-2609-016", items: [
@@ -55,6 +78,11 @@ sandbox.spkShowAll = false;
 sandbox.renderPickerLines();
 check("only what is still unspoken for", offered(), [2, 3]);
 check("filled in with what is left", filled(), ["2", "10"]);
+// Iris's change, 26 Sep 2026. Nothing is ticked, so adding one part off an
+// order of thirty is one tap rather than twenty-nine deletions - and a
+// quantity nothing is going to use is greyed out.
+check("nothing is ticked to start with", ticks(), [false, false]);
+check("and their quantity boxes are off", enabled(), [false, false]);
 check("and it offers the rest back", /Show 2 lines already on a shipment/.test(html), true);
 check("and the ones shown say what is claimed", /8 on another shipment/.test(html), true);
 
@@ -77,6 +105,10 @@ sandbox.spkShowAll = false;
 sandbox.renderPickerLines();
 check("it is there", offered().includes(0), true);
 check("showing what is on it", filled()[0], "2");
+// A line already on this shipment arrives TICKED at what it is on for: that
+// is how it stays on, and un-ticking it is how it comes off.
+check("and ticked, because it is already going", ticks()[0], true);
+check("with its box live so it can be corrected", enabled()[0], true);
 check("and says so, in the colour that means look at me",
   /<b class="spk-on-this">2 already on this one<\/b>/.test(html), true);
 

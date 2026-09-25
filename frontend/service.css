@@ -3215,6 +3215,17 @@ body.signin-brand .topbar .pill {
 .po-line-qty{flex:0 0 auto;text-align:right;font-weight:700;font-size:15px;line-height:1.1;
   font-variant-numeric:tabular-nums}
 .po-line-of{display:block;font-weight:500;font-size:10.5px;color:var(--ink-faint,#78868c)}
+
+/* The tick that decides whether a PO line goes on the ship. Iris's ask,
+   26 Sep 2026: adding one part off an order of thirty used to mean emptying
+   twenty-nine boxes by hand. Big enough to hit on a phone in a warehouse, and
+   the whole row is a target too. */
+.spk-row{align-items:center;gap:10px;cursor:pointer}
+.spk-pick{flex:none;width:22px;height:22px;margin:0;cursor:pointer;
+  accent-color:var(--primary,#1f6f78)}
+.spk-row .po-line-main{flex:1;min-width:0}
+/* A quantity that is not going anywhere should not look like one that is. */
+.spk-qty:disabled{opacity:.45;background:var(--surface-2,#f6f9fa)}
 .po-foot{font-size:11px;color:var(--ink-faint,#78868c);margin:7px 2px 0}
 
 

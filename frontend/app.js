@@ -9065,6 +9065,20 @@ async function openPickerLines(docNo) {
 // And "show every line" puts the rest back, because a supplier who ships more
 // than was ordered is a thing that happens and the app refusing to record it
 // would help nobody.
+// TICK WHAT IS GOING ON THE SHIP, rather than zeroing what is not.
+//
+// Iris's ask, 26 Sep 2026: adding one part off a purchase order of thirty
+// meant emptying twenty-nine boxes by hand, because every line arrived
+// pre-filled with its outstanding quantity. Now nothing is ticked and the
+// quantity only matters on a line she has ticked.
+//
+// A line ALREADY ON THIS SHIPMENT arrives ticked, at the quantity it is on for.
+// That keeps the old way of correcting one - open the picker, change the
+// number - and makes un-ticking it the way to take it off, which is what
+// emptying its box used to mean.
+//
+// "Select all" is not a nicety: receiving a whole order in one go was a single
+// tap before this change, and without it that becomes thirty.
 function renderPickerLines() {
   const rows = (spkPo.items || []).map((it, i) => {
     const onThis = shipDraft
@@ -9078,21 +9092,25 @@ function renderPickerLines() {
 
   const list = show.length
     ? `<div class="lines-box">` + show.map(({ it, i, onThis, left }) => `
-      <div class="po-line">
+      <div class="po-line spk-row" data-line="${i}">
+        <input type="checkbox" class="spk-pick" data-line="${i}" ${onThis ? "checked" : ""}
+               aria-label="Put ${escapeAttr(it.description)} on this shipment" />
         <span class="po-line-main">
           <span class="po-line-desc">${escapeHtml(it.description)}</span>
           <span class="po-line-code mono">${escapeHtml(it.item_code)}</span>
           <span class="po-line-code">${trimNum(it.outstanding)} outstanding${
-            it.allocated > 0 ? ` · ${trimNum(it.allocated)} on another shipment` : ""}${
-            onThis ? ` · <b class="spk-on-this">${trimNum(onThis.qty)} already on this one</b>` : ""}</span>
+            it.allocated > 0 ? ` &middot; ${trimNum(it.allocated)} on another shipment` : ""}${
+            onThis ? ` &middot; <b class="spk-on-this">${trimNum(onThis.qty)} already on this one</b>` : ""}</span>
         </span>
         <input class="spk-qty" type="number" min="0" step="any" inputmode="decimal"
                data-line="${i}" value="${onThis ? trimNum(onThis.qty) : (left > 0 ? trimNum(left) : "")}"
-               placeholder="0" />
+               placeholder="0" ${onThis ? "" : "disabled"} />
       </div>`).join("") + `</div>`
     : `<div class="fp-empty">Everything on this order is already on a shipment</div>`;
 
-  $("spk-lines").innerHTML = list + (hidden > 0
+  $("spk-lines").innerHTML = (show.length
+      ? `<button type="button" class="spk-showall" id="spk-all"></button>`
+      : "") + list + (hidden > 0
     ? `<button type="button" class="spk-showall" id="spk-showall">Show ${hidden} line${
         hidden === 1 ? "" : "s"} already on a shipment</button>`
     : (spkShowAll && rows.length
@@ -9100,6 +9118,62 @@ function renderPickerLines() {
         : ""));
   const t = $("spk-showall");
   if (t) t.addEventListener("click", () => { spkShowAll = !spkShowAll; renderPickerLines(); });
+
+  // Ticking a line turns its quantity box on and fills it with what is left to
+  // come, which is the number wanted nine times out of ten. Un-ticking greys
+  // the box but KEEPS what was typed, so a mis-tap does not lose it.
+  const wire = (i) => {
+    const pick = $("spk-lines").querySelector(`.spk-pick[data-line="${i}"]`);
+    const qty = $("spk-lines").querySelector(`.spk-qty[data-line="${i}"]`);
+    if (!pick || !qty) return;
+    const sync = () => {
+      qty.disabled = !pick.checked;
+      if (pick.checked && !String(qty.value).trim()) {
+        const r = show.find((x) => x.i === i);
+        if (r && r.left > 0) qty.value = trimNum(r.left);
+      }
+      paintPickerCount();
+    };
+    pick.addEventListener("change", sync);
+    sync();
+  };
+  show.forEach(({ i }) => wire(i));
+
+  // Anywhere on the row except the quantity box toggles it: the checkbox alone
+  // is a small target on a phone held in a warehouse.
+  $("spk-lines").querySelectorAll(".spk-row").forEach((row) => {
+    row.addEventListener("click", (e) => {
+      if (e.target.closest(".spk-qty") || e.target.closest(".spk-pick")) return;
+      const pick = row.querySelector(".spk-pick");
+      if (!pick) return;
+      pick.checked = !pick.checked;
+      pick.dispatchEvent(new Event("change"));
+    });
+  });
+
+  const all = $("spk-all");
+  if (all) {
+    all.addEventListener("click", () => {
+      const picks = [...$("spk-lines").querySelectorAll(".spk-pick")];
+      const turnOn = picks.some((p) => !p.checked);
+      picks.forEach((p) => { p.checked = turnOn; p.dispatchEvent(new Event("change")); });
+    });
+  }
+  paintPickerCount();
+}
+
+// What pressing Add will actually do, on the button that does it. The whole
+// point of the change is that the list no longer says so by itself.
+function paintPickerCount() {
+  const picks = [...document.querySelectorAll("#spk-lines .spk-pick")];
+  const n = picks.filter((p) => p.checked).length;
+  const btn = $("spk-add");
+  if (btn) {
+    btn.textContent = n ? `Add ${n} line${n === 1 ? "" : "s"} to shipment` : "Add to shipment";
+    btn.disabled = false;
+  }
+  const all = $("spk-all");
+  if (all) all.textContent = picks.every((p) => p.checked) && picks.length ? "Clear all" : "Select all";
 }
 
 function addPickedLines() {
@@ -9108,10 +9182,13 @@ function addPickedLines() {
   document.querySelectorAll("#spk-lines .spk-qty").forEach((input) => {
     const it = spkPo.items[Number(input.dataset.line)];
     if (!it) return;
-    const qty = Number(input.value);
-    // Emptying the box on a line that is on the shipment takes it off. Only
-    // for lines the picker actually showed: one it filtered out was never
-    // offered, and reading its absence as "remove" would delete work.
+    const pick = document.querySelector(`#spk-lines .spk-pick[data-line="${input.dataset.line}"]`);
+    const ticked = !!(pick && pick.checked);
+    const qty = ticked ? Number(input.value) : 0;
+    // An un-ticked line, or a ticked one with nothing in its box, is not going
+    // on the ship - and if it was on it, it comes off. Only for lines the
+    // picker actually showed: one it filtered out was never offered, and
+    // reading its absence as "remove" would delete work.
     if (!Number.isFinite(qty) || qty <= 0) {
       const at = shipDraft.lines.findIndex((l) => l.po_no === spkPo.doc_no && l.po_seq === it.seq);
       if (at >= 0) shipDraft.lines.splice(at, 1);
@@ -11672,6 +11749,9 @@ async function openIplPart(index) {
   // AutoCount item, because that decides what the replacement is recorded
   // against.
   $("ipl-part-repl").innerHTML = "";
+  // The label is changed for a part the catalogue does not hold, so it has to
+  // be put back for the next part, which probably is in it.
+  $("ipl-order-more").textContent = "Order more";
   // Prices are per part and hidden until asked for, so reset the panel rather
   // than leaving the previous part's figures showing.
   //
@@ -11706,6 +11786,22 @@ async function openIplPart(index) {
     if (!list.length) {
       $("ipl-part-stock").innerHTML =
         `<div class="fp-empty">Not found in AutoCount under this number.</div>`;
+      // ORDERING IT ANYWAY. John's ask, 26 Sep 2026: the book is the only place
+      // some parts exist, and until now finding one here was a dead end - the
+      // screen said the catalogue does not have it and stopped, leaving the
+      // technician to write the number on paper and find Iris.
+      //
+      // The request names THE BOOK'S OWN NUMBER. That is a real manufacturer
+      // part number, not a placeholder: it is what Iris orders against, and
+      // using it means the one-open-request-per-part check works, so two
+      // technicians finding the same missing part do not order it twice.
+      iplOrderPart = {
+        item_code: part.part_number,
+        description: part.description || part.part_number,
+        not_in_autocount: true,
+      };
+      $("ipl-order-more").textContent = "Order this part";
+      $("ipl-order-more").style.display = "block";
       // A part the catalogue does not hold is the one most likely to have been
       // replaced by something else, so this is where a note earns its keep.
       // It is keyed to the book's own number rather than an item code, since
@@ -11791,7 +11887,21 @@ async function renderIplStock(itemCode) {
   }
 }
 
-$("ipl-order-more").addEventListener("click", () => openOrderModal(iplOrderPart));
+$("ipl-order-more").addEventListener("click", () => {
+  openOrderModal(iplOrderPart);
+  // A part AutoCount has never heard of arrives on Iris's list as a code she
+  // cannot look up, with no stock figure beside it, and nothing to say why.
+  // This is where it came from, filled in for her and still editable: the
+  // machine, the figure and the key are how anyone checks the number is right.
+  if (iplOrderPart && iplOrderPart.not_in_autocount) {
+    const bits = ["Not in AutoCount"];
+    if (ipl.model) bits.push(ipl.model.name || ipl.model.id);
+    if (ipl.figure) bits.push(ipl.figure.label || `Fig.${ipl.figure.number} ${ipl.figure.title}`);
+    if (iplDiagramPart && iplDiagramPart.key) bits.push(`Key ${iplDiagramPart.key}`);
+    const box = $("om-remarks");
+    if (box && !box.value.trim()) box.value = bits.join(" \u00b7 ");
+  }
+});
 $("push-toggle").addEventListener("click", () => togglePush("quote"));
 $("push-toggle-tech").addEventListener("click", () => togglePush("tech"));
 
