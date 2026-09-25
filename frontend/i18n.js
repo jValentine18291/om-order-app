@@ -43,6 +43,8 @@
     "A new version is ready. It will load when you finish what you are doing.":
       "新版本已就绪，完成当前操作后会自动加载。",
     "Load now": "立即加载",
+    // The label on Sales' note at the top of a machine.
+    "Note from Sales": "销售备注",
 
     // ---- Role screen ----
     "Service desk": "服务台",

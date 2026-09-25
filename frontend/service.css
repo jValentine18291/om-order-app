@@ -2409,6 +2409,27 @@ body.signin-brand .topbar .pill {
 }
 .vs-chain-date { font-weight: 600; color: var(--ink-faint, #78868c); margin-left: 6px; }
 .vs-chain-arrow { color: var(--ink-faint, #78868c); }
+
+/* ---- Sales' note, at the top of a machine -------------------------------- */
+/* The first thing a technician sees when they open a machine. Louder than the
+   machine's own remarks below it, because it was being scrolled past.
+   Labelled, because it belongs to the SLIP: the same words show on all four
+   machines of a four-machine slip and must not read as being about the one in
+   front of them. */
+.mm-notes {
+  display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;
+  margin: 8px 0 2px; padding: 9px 12px;
+  border-radius: var(--radius-sm, 8px);
+  background: #FFF6E5; border-left: 3px solid #E0A22A;
+  color: #8A5B00; font-size: .84rem; line-height: 1.5;
+}
+.mm-notes-tag {
+  flex: none; font-size: .68rem; font-weight: 800; letter-spacing: .04em;
+  text-transform: uppercase; padding-top: 2px; opacity: .8;
+}
+/* Sales write more than one line - a reference number, then a site. Kept as
+   they typed it rather than run together. */
+.mm-notes-txt { flex: 1; min-width: 140px; font-weight: 600; white-space: pre-line; }
 .pu-delete {
   flex: 0 0 auto; min-height: 40px; padding: 0 14px; border-radius: 999px;
   border: 1px solid #e6b0b0; background: var(--surface);

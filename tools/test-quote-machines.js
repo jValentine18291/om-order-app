@@ -95,6 +95,11 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
   check("the condemned one is marked as such, and quoted at nothing",
     q.machines_available.filter((m) => m.condemned).map((m) => [m.machine_desc, m.amount]),
     [["K770 Power Cutter", 0]]);
+  // Its place on the SLIP, so three identical blowers can be told apart on the
+  // picker. Counted over every machine, not over this list - the list holds
+  // only what can be quoted, and the customer is holding a slip of four.
+  check("each carries its position on the slip, not in this list",
+    q.machines_available.map((m) => [m.position, m.of]), [[1, 4], [2, 4], [3, 4]]);
   check("their parts and labour, for the line under each name",
     q.machines_available.map((m) => [m.parts, m.labour]), [[1, 50], [1, 30], [0, 0]]);
   check("and what this quotation actually covers",

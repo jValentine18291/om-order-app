@@ -13,7 +13,14 @@ const API = ""; // same origin
 
 // ---- State -----------------------------------------------------------------
 let scanCooldown = false;
-let currentMode = "qr";
+// Type code, not the scanner. John's call, 25 Sep 2026: the workshop types
+// far more often than it scans, and opening on the scanner meant the camera
+// starting on every machine whether or not anybody wanted it.
+//
+// It still remembers within a session - a technician who switches to scanning
+// gets the scanner on the next machine too - so this is where they START, not
+// a rule about what they may use.
+let currentMode = "manual";
 
 // Open Service session state
 const session = {
@@ -2748,6 +2755,31 @@ function slipSoNumbers(slip) {
 
 // The line that carries them, for the top of either slip screen. Empty until
 // there is an order, so a slip still being worked on gains no clutter.
+// THE MACHINE'S NAME WITH ITS PLACE ON THE SLIP: "EBZ5100 Blower - 1/4".
+//
+// John asked for this on 25 Sep 2026 after opening slip 00034, which has three
+// identical EBZ5100 Blowers on it and no way to tell which was which.
+//
+// WORKED OUT, NOT READ. The registration form writes a "- 1/4" tail into the
+// machine's name, but only since September and only for slips registered
+// through it - 00034 predates it and has none, and no amount of looking at
+// that field would have found one. Counting the slip works on every slip there
+// has ever been, and needs nothing migrated.
+//
+// Any tail already stored is stripped first, or a slip that has one would read
+// "EBZ5100 Blower - 1/4 - 1/4". Same expression the server uses in
+// slipBlockLines(), which has always numbered the documents this way - so the
+// app now says what the quotation and the Sales Order have said all along.
+function machineLabel(slip, m) {
+  const base = String((m && m.machine_desc) || "").replace(/\s-\s\d+\/\d+$/, "").trim();
+  const all = (slip && slip.machines) || [];
+  // One machine is not a position. "- 1/1" is noise, which is the rule the
+  // registration form follows too.
+  if (all.length < 2) return base;
+  const pos = all.findIndex((x) => Number(x.id) === Number(m.id)) + 1;
+  return pos ? `${base} - ${pos}/${all.length}` : base;
+}
+
 function slipSoLine(slip) {
   // Each order with the DO/CS/INV recorded against it, because that pairing is
   // the thing anyone comes to this screen to read: which batch went out on
@@ -2806,7 +2838,7 @@ function renderSlipScreen() {
     return `
       <button type="button" class="machine-btn ${worked ? "machine-btn-worked" : ""}" data-machine="${m.id}">
         <div class="machine-btn-top">
-          <strong>${escapeHtml(m.machine_desc)}</strong>
+          <strong>${escapeHtml(machineLabel(session.slip, m))}</strong>
           ${qTag || (worked ? `<span class="machine-tick">✓</span>` : `<span class="machine-untouched">Need Repair</span>`)}
         </div>
         <div class="machine-btn-sub">${m.serial_no ? "S/N " + escapeHtml(m.serial_no) + " · " : ""}${parts.length} part${parts.length === 1 ? "" : "s"}${hasComment ? " · has comment" : ""}${total > 0 ? " · " + money(total) : ""}</div>
@@ -2862,11 +2894,21 @@ function openMachineModal(machineId) {
   $("os-tech-field").style.display = "none";
   $("os-entry").style.display = "none";
   const m = currentMachine();
-  $("mm-title").textContent = m ? m.machine_desc : "Machine";
+  $("mm-title").textContent = m ? machineLabel(session.slip, m) : "Machine";
   // Which machine this is decides whether the tube buttons belong here at all.
   try { renderTubePicker(); } catch (_) {}
   try { renderJobPicker(); } catch (_) {}
   $("mm-sub").textContent = `Slip ${session.slipNumber} · ${session.slip.company}`;
+  // What Sales wrote on the slip, above everything else on the sheet. It is
+  // the slip's note rather than this machine's, so it carries a label: the
+  // same words appear on all four machines of a four-machine slip and must not
+  // read as being about the one in front of the technician.
+  const mmn = $("mm-notes");
+  const slipNote = String((session.slip && session.slip.notes) || "").trim();
+  if (mmn) {
+    $("mm-notes-txt").textContent = slipNote;
+    mmn.style.display = slipNote ? "flex" : "none";
+  }
   const mmr = $("mm-remarks");
   if (m && m.remarks) { mmr.textContent = `“${m.remarks}”`; mmr.style.display = "block"; }
   else { mmr.style.display = "none"; mmr.textContent = ""; }
@@ -2907,10 +2949,16 @@ function openExtrasModal() {
   $("mm-who").innerHTML = "";
   // Nothing on this sheet belongs to a machine, so none of the machine's
   // furniture belongs on it either.
+  // mm-notes is NOT in this list. It is the slip's note, and the slip's parts
+  // are as much part of the slip as any machine on it - "SS36973, Site: 312
+  // Anchorvale" is just as worth seeing here.
   ["mm-remarks", "mm-ask-quote", "mm-decision", "mm-billed", "job-pick",
    "tube-pick", "mm-quote-row"].forEach((id) => {
     const el = $(id); if (el) el.style.display = "none";
   });
+  const xn = $("mm-notes");
+  const xNote = String((session.slip && session.slip.notes) || "").trim();
+  if (xn) { $("mm-notes-txt").textContent = xNote; xn.style.display = xNote ? "flex" : "none"; }
   $("os-labour-field").style.display = "none";
   $("os-comment-field").style.display = "none";
   $("ex-note-field").style.display = "";
@@ -3123,7 +3171,7 @@ function maybeShowEntry() {
     // Not awaited: the search is usable immediately and simply stops
     // reordering until the book has landed.
     loadMachineFit();
-    setMode(currentMode || "qr");
+    setMode(currentMode || "manual");
     renderContext();
     renderMachineParts();
     updateSlipFooter();
@@ -4483,7 +4531,7 @@ function openConvertPicker() {
       <label class="conv-row${done ? " conv-done" : ""}${!done && !billable ? " conv-blocked" : ""}">
         <input type="checkbox" value="${m.id}" ${done || !billable ? "disabled" : "checked"}>
         <span class="conv-main">
-          <span class="conv-name">${escapeHtml(m.machine_desc)}</span>
+          <span class="conv-name">${escapeHtml(machineLabel(session.slip, m))}</span>
           ${m.serial_no ? `<span class="conv-serial">S/N ${escapeHtml(m.serial_no)}</span>` : ""}
           <span class="conv-sub">${sub}</span>
         </span>
@@ -4542,7 +4590,7 @@ function openPrintPicker() {
       <label class="conv-row">
         <input type="checkbox" value="${m.id}" ${worked ? "checked" : ""}>
         <span class="conv-main">
-          <span class="conv-name">${escapeHtml(m.machine_desc)}</span>
+          <span class="conv-name">${escapeHtml(machineLabel(session.slip, m))}</span>
           ${m.serial_no ? `<span class="conv-serial">S/N ${escapeHtml(m.serial_no)}</span>` : ""}
           <span class="conv-sub">${worked ? escapeHtml(bits.join(" · ") + " · " + money(total)) : "Nothing recorded yet"}</span>
         </span>
@@ -4600,7 +4648,7 @@ function buildMachinePrintPdf(slip, machines) {
 
     need(46);
     doc.setFont("helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(INK);
-    doc.text(doc.splitTextToSize(m.machine_desc || "", W), LEFT, y);
+    doc.text(doc.splitTextToSize(machineLabel(slip, m), W), LEFT, y);
     y += 13;
     if (m.serial_no) {
       doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(MUTED);
@@ -5110,6 +5158,15 @@ function quoteChosenMachines() {
 // already on a Sales Order is still offered here, because a quotation is a
 // statement of what a repair costs and is often re-sent after part of a slip
 // has been billed - so it is labelled rather than disabled.
+// The same "- 1/4" the rest of the app shows, but counted by the SERVER: this
+// list holds only the machines that can be quoted, so counting it here would
+// say "1 of 2" about a slip of four. An older server sends no position and the
+// name reads as it always did.
+function quoteMachineName(m) {
+  const base = String(m.machine_desc || "").replace(/\s-\s\d+\/\d+$/, "").trim();
+  return (m.position && m.of > 1) ? `${base} - ${m.position}/${m.of}` : base;
+}
+
 function renderQuoteMachines(q) {
   const field = $("quote-machines-field");
   const list = $("quote-machines");
@@ -5133,7 +5190,7 @@ function renderQuoteMachines(q) {
       <label class="conv-row">
         <input type="checkbox" value="${escapeAttr(String(m.id))}" checked>
         <span class="conv-main">
-          <span class="conv-name">${escapeHtml(m.machine_desc)}</span>
+          <span class="conv-name">${escapeHtml(quoteMachineName(m))}</span>
           ${m.serial_no ? `<span class="conv-serial">S/N ${escapeHtml(m.serial_no)}</span>` : ""}
           ${m.job_site ? `<span class="conv-serial">${escapeHtml(m.job_site)}</span>` : ""}
           <span class="conv-sub">${escapeHtml(sub)}${
@@ -5834,7 +5891,7 @@ function renderSlipDetail(slip) {
 
     html += `
       <div class="vs-machine">
-        <div class="vs-machine-name">${escapeHtml(m.machine_desc)}${pill}</div>`;
+        <div class="vs-machine-name">${escapeHtml(machineLabel(slip, m))}${pill}</div>`;
 
     // Sales quote the machine, ring the customer, and come back with one of two
     // answers. Each step is offered only from where the machine actually is,
@@ -6144,7 +6201,7 @@ function openSlipEdit(slip) {
     <div class="vse-card vse-machine" data-machine="${m.id}" data-code="${escapeAttr(m.machine_code || "")}">
       <div class="vse-m-head">
         <span class="vse-m-num">${i + 1}</span>
-        <span class="vse-m-name">${escapeHtml(m.machine_desc)}</span>
+        <span class="vse-m-name">${escapeHtml(machineLabel(vseSlip, m))}</span>
         ${machinePill(m)}
       </div>
       <div class="vse-card-body">
@@ -6656,7 +6713,7 @@ function openFixMachine(slip, machineId) {
   const m = (slip.machines || []).find((x) => x.id === Number(machineId));
   if (!m) return;
   fixMachine = { slip: slip.slip_number, id: m.id };
-  $("fix-sub").textContent = `${m.machine_desc}${m.serial_no ? " · S/N " + m.serial_no : ""}`;
+  $("fix-sub").textContent = `${machineLabel(slip, m)}${m.serial_no ? " · S/N " + m.serial_no : ""}`;
   $("fix-status").textContent = "";
 
   $("fix-states").innerHTML = FIX_STATES.map(([id, label, hint]) => `

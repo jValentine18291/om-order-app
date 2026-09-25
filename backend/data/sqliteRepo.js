@@ -1266,6 +1266,11 @@ function quotationForSlip(slipNumber, machineIds, opts) {
       return {
         id: m.id,
         machine_desc: m.machine_desc,
+        // Its place on the SLIP, not in this list. The list holds only the
+        // machines that can be quoted, so counting it would say "1 of 2" about
+        // a slip of four - and the customer is holding a slip of four.
+        position: all.findIndex((x) => Number(x.id) === Number(m.id)) + 1,
+        of: all.length,
         serial_no: m.serial_no || "",
         job_site: m.job_site || "",
         condemned,
