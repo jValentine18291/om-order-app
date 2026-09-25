@@ -5743,6 +5743,8 @@ async function onViewSlipChosen(slipNumber) {
     // the sheet is opened from it rather than fetching it a second time.
     wrap.querySelectorAll("[data-fix]").forEach((b) =>
       b.addEventListener("click", () => openFixMachine(slip, b.dataset.fix)));
+    const del = document.getElementById("vs-delete");
+    if (del) del.addEventListener("click", () => deleteSlipFlow(slipNumber));
     const editBtn = document.getElementById("vs-edit");
     if (editBtn) editBtn.addEventListener("click", () => openSlipEdit(slip));
     const repairBtn2 = document.getElementById("vs-repair");
@@ -6042,6 +6044,14 @@ function renderSlipDetail(slip) {
   if (slip.status === "ALL_REPAIRED" || slip.status === "CLOSED") {
     html += `
       <button class="btn-secondary" id="vs-so" style="margin-top:10px;width:100%;">View Sales Order</button>`;
+  }
+
+  // John's, and at the very bottom - it is the one thing on this screen that
+  // cannot be undone from the app, and it should not sit near anything anybody
+  // taps in the ordinary course of a day.
+  if (canDeleteSlips()) {
+    html += `
+      <button type="button" class="vs-delete" id="vs-delete">Delete this slip</button>`;
   }
 
   return html;
@@ -6693,8 +6703,76 @@ async function refreshSlipDocuments(slipNumber, slip) {
   }
 }
 
+// ---- Deleting a slip (John only) -------------------------------------------
+// For the one registered twice. John double-tapped Register on 25 Sep 2026 and
+// got 00095 and 00096, the same customer and the same four machines, ten
+// seconds apart.
+//
+// IT ASKS THE SERVER WHAT IT WOULD COST before offering anything, rather than
+// working it out here: the refusals are the server's and the confirmation has
+// to name the same facts the refusal would. A slip that cannot go says why,
+// and the button never becomes a dead end.
+function canDeleteSlips() {
+  return !!(window.OM_FUNCTIONS && OM_FUNCTIONS.canDeleteSlips(getUser()));
+}
+
+async function deleteSlipFlow(slipNumber) {
+  const me = getUser();
+  let view;
+  try {
+    view = await api(`/api/slips/${encodeURIComponent(slipNumber)}/deletable?user_id=${
+      encodeURIComponent(me ? me.id : "")}`);
+  } catch (e) {
+    toast(e.message || "Could not check that slip", "err");
+    return;
+  }
+
+  if (!view.can_delete) {
+    // Not a confirmation - there is nothing to confirm. Just the reason.
+    await confirmAction({
+      title: `Slip ${slipNumber} cannot be deleted`,
+      sub: view.company || "",
+      detail: view.reasons.join("\n\n"),
+      ok: "I see",
+    });
+    return;
+  }
+
+  const bits = [`${view.machines} machine${view.machines === 1 ? "" : "s"}`];
+  if (view.parts) bits.push(`${view.parts} part line${view.parts === 1 ? "" : "s"}`);
+  if (view.signed) bits.push("the customer's signature");
+
+  const ok = await confirmAction({
+    title: `Delete slip ${slipNumber}?`,
+    sub: view.company || "",
+    detail:
+      `This removes ${bits.join(", ")}. It cannot be undone from the app - a copy is kept ` +
+      `in the database, but getting it back is a job for Claude.\n\n` +
+      (view.frees_number
+        ? `${slipNumber} was the last slip registered, so the number goes back: the next slip will be ${slipNumber}.`
+        : `The number stays used and a gap is left where this slip was - a later slip already has a higher number.`),
+    ok: "Delete it",
+  });
+  if (!ok) return;
+
+  try {
+    const out = await api(`/api/slips/${encodeURIComponent(slipNumber)}/delete`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ who: initialsFor(me), user_id: me ? me.id : "" }),
+    });
+    toast(out.next_slip_will_be
+      ? `Slip ${slipNumber} deleted — the next one will be ${out.next_slip_will_be}`
+      : `Slip ${slipNumber} deleted`, "ok");
+    // There is no slip to go back to, so go back to the list.
+    enterViewSlips();
+  } catch (e) {
+    toast(e.message || "Could not delete the slip", "err");
+  }
+}
+
 // ---- Correcting a machine whose status is wrong -----------------------------
-// John's, and nobody else's - see CORRECTORS in app-functions.js, which the
+// John's, and nobody else's - see KEYHOLDERS in app-functions.js, which the
 // server reads too so the button and the rule cannot drift apart.
 //
 // Everything else in the app moves a machine ALONG. This is the one thing that

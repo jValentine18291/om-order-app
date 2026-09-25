@@ -1830,6 +1830,107 @@ function addMachineToSlip(slipNumber, machine, who = "") {
   return { ...getSlip(slipNumber), added_machine_ids: added };
 }
 
+// WHAT WOULD BE LOST, and whether it may go at all.
+//
+// Asked separately from the deleting so the screen can say it before anybody
+// agrees to it, and so the button and the refusal cannot drift apart - the
+// same reason canUndoMachine() sits beside undoMachineDecision().
+function slipDeletable(slipNumber) {
+  const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
+  if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
+
+  const machines = db.prepare(
+    "SELECT * FROM slip_machines WHERE slip_id = ? ORDER BY id").all(slip.id);
+  const parts = machines.length
+    ? db.prepare(`SELECT COUNT(*) AS n FROM machine_parts
+                   WHERE machine_id IN (${machines.map(() => "?").join(",")})`)
+        .get(...machines.map((m) => m.id)).n
+    : 0;
+  const extras = db.prepare(
+    "SELECT COUNT(*) AS n FROM machine_parts WHERE slip_id = ? AND machine_id IS NULL").get(slip.id).n;
+  const quotations = db.prepare(
+    "SELECT ref FROM slip_quotations WHERE slip_number = ? ORDER BY seq").all(slipNumber).map((q) => q.ref);
+  const onOrder = machines.filter((m) => m.so_number || m.converted_at);
+
+  // THE THREE REFUSALS. Each one is something that exists OUTSIDE this
+  // database, which deleting the slip would leave pointing at nothing.
+  const reasons = [];
+  if (onOrder.length) {
+    reasons.push(`Its work is on ${[...new Set(onOrder.map((m) => m.so_number).filter(Boolean))].join(", ") || "a Sales Order"}. ` +
+      `That order may already be in AutoCount - deal with it first.`);
+  }
+  if (quotations.length) {
+    reasons.push(`${quotations.join(", ")} went to the customer. A quotation number pointing at a slip that ` +
+      `no longer exists is worse than the slip.`);
+  }
+  if (slip.status === "INVOICED" || slip.status === "CLOSED") {
+    reasons.push(`It has been ${slip.status === "CLOSED" ? "closed" : "invoiced"}, which is a finished record.`);
+  }
+
+  // Only the LAST slip can hand its number straight back. Wound back past a
+  // higher slip, the counter would spend the next few registrations filling
+  // old gaps, and a slip registered on Friday would come out numbered before
+  // one from Tuesday.
+  const highest = db.prepare("SELECT MAX(slip_number) AS n FROM service_slips").get().n;
+  return {
+    slip_number: slip.slip_number,
+    company: slip.company,
+    status: slip.status,
+    machines: machines.length,
+    parts: parts + extras,
+    signed: !!db.prepare("SELECT 1 AS n FROM slip_signatures WHERE slip_id = ?").get(slip.id),
+    quotations,
+    reasons,
+    can_delete: reasons.length === 0,
+    frees_number: String(highest) === String(slip.slip_number),
+  };
+}
+
+// DELETE ONE SLIP, and hand its number back where that is safe.
+//
+// John asked for this on 25 Sep 2026, having registered slip 00096 ten seconds
+// after 00095 by double-tapping Register - the same customer, the same four
+// machines, twice.
+//
+// A COPY IS KEPT FIRST. The command-line delete-slip.js backs up the whole
+// database before it removes anything and says so - "it is the only way back
+// from this". A delete from a phone cannot stop and back the database up, so
+// the whole slip goes into deleted_slips as JSON instead. Nothing reads that
+// table. It is there for the day somebody wishes it were.
+function deleteSlip(slipNumber, who = "") {
+  const check = slipDeletable(slipNumber);
+  if (!check.can_delete) {
+    const e = new Error(check.reasons.join(" ")); e.status = 409; throw e;
+  }
+  const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
+  const full = getSlip(slipNumber);          // everything, before it goes
+
+  const tx = db.transaction(() => {
+    db.prepare(
+      `INSERT INTO deleted_slips (slip_number, company, payload, deleted_by) VALUES (?, ?, ?, ?)`
+    ).run(slip.slip_number, slip.company || "", JSON.stringify(full), String(who || "").trim());
+
+    // slip_quotations is keyed by slip_number, not by slip id, so it does not
+    // cascade and has to go by hand - otherwise QT-00096 stays reserved
+    // against a slip that no longer exists. Everything else follows the
+    // foreign keys, which db.js turns on for every connection.
+    db.prepare("DELETE FROM slip_quotations WHERE slip_number = ?").run(slipNumber);
+    db.prepare("DELETE FROM service_slips WHERE id = ?").run(slip.id);
+
+    // The number goes back only when this was the last slip registered. Then
+    // it is simply an undo, and the next registration takes it. Anywhere else
+    // it stays a gap - a gap explains itself, and a counter wound back past
+    // live slips does not.
+    if (check.frees_number) {
+      const n = Number(slipNumber);
+      if (n > 0) db.prepare("UPDATE counters SET value = ? WHERE name = 'slip_number'").run(n - 1);
+    }
+  });
+  tx();
+
+  return { ...check, deleted: true, next_slip_will_be: check.frees_number ? slip.slip_number : null };
+}
+
 // Renumber the "- 1/3" tails after the slip's machine count changes.
 //
 // The counter writes these at registration so five machines on one slip can be
@@ -2724,6 +2825,7 @@ const slips = {
   listShipments, getShipment, createShipment, updateShipment,
   allocatedByPo, receivedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
   orderDocuments, recordOrderDocuments, billingDocument, autoInvoiceFromDocuments,
+  slipDeletable, deleteSlip,
   createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setSlipExtrasNote, slipContacts, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, correctMachine, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
 };
 

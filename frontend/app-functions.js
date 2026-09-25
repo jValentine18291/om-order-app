@@ -57,20 +57,26 @@
     admin:     ["new", "open", "close", "view", "find", "ipl", "quote", "bulk", "requests", "po", "ship"],
   };
 
-  // WHO MAY CORRECT A MACHINE'S STATUS BY HAND.
+  // WHO MAY DO THE THINGS THAT OVERRULE THE WORKFLOW.
   //
-  // John alone, by his own request on 24 Sep 2026. Not "admins": there are six
-  // of those, and this is the one screen in the app that can overwrite what a
-  // technician recorded and delete what they wrote. He wanted it to be him.
+  // John alone, by his own request - correcting a machine's status on
+  // 24 Sep 2026, deleting a slip on the 25th. Not "admins": there are six of
+  // those, and these are the two places in the app that can overwrite what a
+  // technician recorded, or remove a customer's slip outright.
   //
   // A LIST rather than a comparison, so adding a second person is one word
   // here and nothing else anywhere. The cost of it being one person is that
-  // nobody can fix a status while he is away - which is his call, and worth
-  // remembering the day somebody is waiting on one.
-  const CORRECTORS = ["john"];
-  function canCorrect(user) {
-    return !!user && CORRECTORS.includes(String(user.id || ""));
-  }
+  // nobody can do either while he is away - his call, and worth remembering
+  // the day somebody is waiting.
+  //
+  // TWO FUNCTIONS OVER ONE LIST, not one function. They are different powers
+  // that happen to belong to the same person today, and the day they do not,
+  // splitting them is a second list rather than an untangling.
+  const KEYHOLDERS = ["john"];
+  const isKeyholder = (user) => !!user && KEYHOLDERS.includes(String(user.id || ""));
+
+  function canCorrect(user) { return isKeyholder(user); }
+  function canDeleteSlips(user) { return isKeyholder(user); }
 
   // "People & devices" is deliberately NOT here. It is not a job function that
   // can be handed out - it is the screen that hands the others out, and it
@@ -110,5 +116,5 @@
   }
 
   return { FUNCTIONS, IDS, ROLE_DEFAULTS, functionsFor, isDefault, clean,
-           CORRECTORS, canCorrect };
+           KEYHOLDERS, canCorrect, canDeleteSlips };
 });

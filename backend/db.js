@@ -107,6 +107,24 @@ db.exec(`
   -- waiting on SQL Server, and so a document is not forgotten the day the
   -- catalogue is unreachable. Deleting the lot would cost nothing but a
   -- refresh.
+  -- EVERY SLIP THAT HAS BEEN DELETED, whole, as JSON.
+  --
+  -- The command-line delete-slip.js takes a full database backup before it
+  -- removes anything, and says so: "it is the only way back from this". A
+  -- delete from the app cannot stop and back up the database, so it keeps the
+  -- slip instead - company, machines, parts, signature, the lot - and a slip
+  -- removed by mistake can be read back out of here by hand.
+  --
+  -- Nothing reads this table. It exists for the day somebody wishes it did.
+  CREATE TABLE IF NOT EXISTS deleted_slips (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    slip_number  TEXT NOT NULL,
+    company      TEXT DEFAULT '',
+    payload      TEXT NOT NULL,          -- the whole slip as getSlip() saw it
+    deleted_by   TEXT DEFAULT '',
+    deleted_at   TEXT DEFAULT (datetime('now','localtime'))
+  );
+
   CREATE TABLE IF NOT EXISTS order_documents (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     order_id      INTEGER NOT NULL,

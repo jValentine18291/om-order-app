@@ -2390,6 +2390,18 @@ body.signin-brand .topbar .pill {
 .fix-clear input { margin-top: 3px; flex: none; width: 18px; height: 18px; }
 .fix-clear-was { display: block; margin-top: 3px; font-style: italic; opacity: .85; }
 
+/* Deleting a slip. Red, plain and at the very bottom of the screen: the one
+   thing here that cannot be undone from the app, kept well away from anything
+   tapped in the ordinary course of a day. Outlined rather than filled, so it
+   never looks like the thing to press. */
+.vs-delete {
+  appearance: none; cursor: pointer; width: 100%; margin-top: 22px;
+  border: 1px solid #e6b0b0; background: var(--surface, #fff); border-radius: 10px;
+  padding: 11px 14px; font: inherit; font-size: .86rem; font-weight: 700;
+  color: #A32020;
+}
+.vs-delete:active { background: #fbe9e9; }
+
 /* ---- What an order became in AutoCount ---------------------------------- */
 /* SO-2609-048 -> DO-2609-229 -> INV-2609-0140, under the Sales Order line.
    Quiet: it is a record of what has already happened, not something to act on.

@@ -2008,15 +2008,52 @@ app.post("/api/slips/:slip/documents/refresh", async (req, res) => {
 // label; until then it keeps the button off everybody else's screen, which is
 // most of the point.
 function needCorrector(req, res) {
+  return needKeyholder(req, res, "canCorrect", "Only John can correct a machine's status.");
+}
+
+// The same question for deleting a slip. Its own capability over the same list
+// of people - see KEYHOLDERS in app-functions.js.
+function needDeleter(req, res) {
+  return needKeyholder(req, res, "canDeleteSlips", "Only John can delete a service slip.");
+}
+
+function needKeyholder(req, res, fn, refusal) {
   const FN = require("../frontend/app-functions.js");
   if (auth.requireLogin()) {
-    if (FN.canCorrect(req.user)) return true;
-  } else if (FN.canCorrect({ id: String((req.body || {}).user_id || "") })) {
+    if (FN[fn](req.user)) return true;
+  } else if (FN[fn]({ id: String((req.query || {}).user_id || (req.body || {}).user_id || "") })) {
     return true;
   }
-  res.status(403).json({ error: "Only John can correct a machine's status." });
+  res.status(403).json({ error: refusal });
   return false;
 }
+
+// What deleting this slip would cost, asked before anybody agrees to it.
+app.get("/api/slips/:slip/deletable", (req, res) => {
+  if (!needDeleter(req, res)) return;
+  try {
+    res.json(data.slips.slipDeletable(req.params.slip));
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    console.error("[GET /api/slips/:slip/deletable]", err);
+    res.status(500).json({ error: "Could not read that slip." });
+  }
+});
+
+// And doing it.
+app.post("/api/slips/:slip/delete", (req, res) => {
+  if (!needDeleter(req, res)) return;
+  try {
+    const out = data.slips.deleteSlip(req.params.slip, (req.body || {}).who || "");
+    console.log(`[delete-slip] ${req.params.slip} deleted by ${(req.body || {}).who || "?"}` +
+      (out.frees_number ? ` - the number goes back` : ` - a gap is left`));
+    res.json(out);
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/slips/:slip/delete]", err);
+    res.status(500).json({ error: "Could not delete that slip." });
+  }
+});
 
 app.post("/api/slips/:slip/machines/:id/correct", (req, res) => {
   if (!needCorrector(req, res)) return;

@@ -43,6 +43,7 @@
     "A new version is ready. It will load when you finish what you are doing.":
       "新版本已就绪，完成当前操作后会自动加载。",
     "Load now": "立即加载",
+    "Delete this slip": "删除此服务单",
     // The label on what the customer reported, at the top of a machine.
     "Customer reported": "客户反映",
 
