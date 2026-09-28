@@ -955,6 +955,10 @@ async function api(path, opts) {
   if (token) o.headers = { ...(o.headers || {}), Authorization: `Bearer ${token}` };
 
   const res = await fetch(`${API}${path}`, o);
+  // Every reply says which app the server is holding. See "Noticing a deploy"
+  // at the bottom of this file - this is where a phone that has been open for
+  // days finds out it is behind, without a single extra request.
+  try { noteAppVersion(res.headers.get("X-App-Version")); } catch (_) {}
   let body = null;
   try { body = await res.json(); } catch (_) {}
   if (!res.ok) {
@@ -11340,9 +11344,117 @@ if ("serviceWorker" in navigator) {
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState !== "visible") return;
       reg.update().catch(() => {});
+      checkAppVersion();
       takeUpdateIfIdle();
     });
   }).catch(() => {});
+}
+
+// ---- Noticing a deploy without waiting for the browser to ------------------
+// WHY THIS EXISTS AS WELL. Everything above waits for the BROWSER to re-check
+// sw.js and hand over a new worker. On the phones this app runs on, that does
+// not always happen: iOS keeps a home-screen app's page alive for days, so
+// there is no "next open" for a new worker to arrive on, and the update check
+// that should run when the app comes back to the front can be skipped or fail
+// quietly on workshop Wi-Fi. John, 28 Sep 2026: "not everyone receives the
+// notification ... especially when they didn't close the app for a few days".
+//
+// So the phone stops waiting to be told and compares two numbers instead:
+//
+//   the server's   X-App-Version, on every /api reply (and /api/version for a
+//                  phone with nothing else to ask).
+//   its own        the version its service worker says it is serving, asked
+//                  for down the same channel.
+//
+// Different means this phone is behind, whatever the browser thinks, and two
+// things are done about it. reg.update() is the clean path - if the browser
+// takes the new worker, it claims the page and controllerchange above does the
+// rest, exactly as before. And the shell is re-fetched from the network into
+// the cache already being served from, which is what makes this work on a
+// phone whose browser will not re-check the worker at all: the reload
+// afterwards finds new files in the old cache. The worker does that part,
+// because the worker is what knows which files the shell is made of.
+//
+// The reload still goes through takeUpdateIfIdle(), so nobody loses a part
+// they were halfway through scanning.
+//
+// ONCE PER DEPLOY PER DEVICE, remembered in localStorage. If a phone is still
+// behind after all this - a worker that will not budge, a version it cannot
+// reach - it must not sit reloading itself every time an API call comes back.
+//
+// var, not let, for the same reason pendingUpdate above is: api() can reach
+// noteAppVersion() and these would still be in their dead zone.
+var SHELL_REFRESH_KEY = "om_shell_refreshed_for";
+var swVersion = "";          // what this phone's worker is serving
+var versionChasing = false;  // one attempt at a time
+var chasingVersion = "";     // the server version that attempt is for
+
+function askSwVersion() {
+  const sw = ("serviceWorker" in navigator) && navigator.serviceWorker.controller;
+  if (sw) sw.postMessage({ type: "version" });
+}
+
+// Called with the X-App-Version off every API reply, and by the poll below.
+function noteAppVersion(server) {
+  server = String(server || "").trim();
+  if (!server) return;
+  // No worker in front of this page, so it came off the server as it is now.
+  // Nothing cached, nothing stale, nothing to do.
+  if (!("serviceWorker" in navigator) || !navigator.serviceWorker.controller) return;
+  if (!swVersion) { askSwVersion(); return; }   // ask now, decide next time
+  if (server === swVersion) return;
+  chaseUpdate(server);
+}
+
+function chaseUpdate(server) {
+  if (versionChasing) return;
+  versionChasing = true;
+
+  // The clean path. Costs one request and usually settles it.
+  if (navigator.serviceWorker.getRegistration) {
+    navigator.serviceWorker.getRegistration()
+      .then((reg) => { if (reg) reg.update().catch(() => {}); })
+      .catch(() => {});
+  }
+
+  let done = "";
+  try { done = localStorage.getItem(SHELL_REFRESH_KEY) || ""; } catch (_) {}
+  if (done === server) { versionChasing = false; return; }
+
+  const sw = navigator.serviceWorker.controller;
+  if (!sw) { versionChasing = false; return; }
+  chasingVersion = server;
+  sw.postMessage({ type: "refresh-shell" });
+}
+
+function checkAppVersion() {
+  fetch(`${API}/api/version`, { cache: "no-store" })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((j) => { if (j) noteAppVersion(j.version); })
+    .catch(() => {});
+}
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.addEventListener("message", (e) => {
+    const d = e.data || {};
+    if (d.type === "version") { swVersion = String(d.version || ""); return; }
+    if (d.type === "refresh-shell") {
+      versionChasing = false;
+      // Offline, or the server was mid-deploy. Nothing was replaced, so the
+      // app carries on with what it has and tries again on the next reply.
+      if (!d.ok) return;
+      try { localStorage.setItem(SHELL_REFRESH_KEY, chasingVersion); } catch (_) {}
+      pendingUpdate = true;
+      takeUpdateIfIdle();
+    }
+  });
+  navigator.serviceWorker.ready.then(askSwVersion).catch(() => {});
+  askSwVersion();
+  // A phone that is open but idle - nobody scanning, no API calls - would
+  // otherwise never see the header. Quarter-hourly is far below the cost of
+  // somebody working a full day on last week's app.
+  setInterval(checkAppVersion, 15 * 60 * 1000);
+  setTimeout(checkAppVersion, 5000);
 }
 
 // ---- Customer signature pad (New Service) ----------------------------------

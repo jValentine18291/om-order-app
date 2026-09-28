@@ -21,6 +21,31 @@ const data = require("./data/dataSource");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ---- Which version this server is holding ----------------------------------
+// Read out of the service worker, which is the one place a deploy is stamped,
+// so there is no second number to remember to bump. Read once: deploy.bat
+// restarts the service, so the file cannot change under a running copy.
+//
+// It goes back on every /api reply as X-App-Version, and the app compares it
+// with the version its own worker is serving. That comparison is what lets a
+// phone that has been open for days find out it is behind - see "Noticing a
+// deploy" in app.js. A header on a reply the app already wanted costs nothing;
+// asking would have been a request per phone per few minutes, all day.
+const APP_VERSION = (() => {
+  try {
+    // require("fs") inline: this runs at load, and the file's own `const fs`
+    // is declared further down, where reading it here would throw.
+    const sw = require("fs")
+      .readFileSync(path.join(__dirname, "..", "frontend", "sw.js"), "utf8");
+    const m = sw.match(/const\s+CACHE\s*=\s*"([^"]+)"/);
+    return (m && m[1]) || "";
+  } catch (_) {
+    // Not fatal. Without it the app falls back to waiting for the browser to
+    // notice a new worker, which is what it did before this existed.
+    return "";
+  }
+})();
+
 app.use(cors());
 // 1mb, not the 100kb default: registration posts the customer's signature as a
 // PNG data URL. A trimmed signature is a few KB, but a large tablet screen can
@@ -67,9 +92,20 @@ const auth = require("./auth");
 //              could ever sign in. Missed by the first round of tests because
 //              they exercised it with the switch OFF, where everything is let
 //              through; found by doing it in a browser with the switch on.
-const OPEN = new Set(["/auth/login", "/auth/first-code", "/auth/users", "/cert.pem"]);
+//   version    which app the server is holding. Asked by a phone that has been
+//              sitting on the sign-in screen, and by one that has been open for
+//              hours without touching anything else. Nothing in it is anybody's
+//              business but the app's own.
+const OPEN = new Set(["/auth/login", "/auth/first-code", "/auth/users", "/cert.pem", "/version"]);
 
 app.use("/api", (req, res, next) => {
+  // On every reply, including the failures: a phone that is behind is still
+  // talking to the API, and being signed out or refused is no reason to leave
+  // it on last week's screens. Exposed by name because cors() is on.
+  if (APP_VERSION) {
+    res.setHeader("X-App-Version", APP_VERSION);
+    res.setHeader("Access-Control-Expose-Headers", "X-App-Version");
+  }
   const header = String(req.headers.authorization || "");
   const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
   // Always resolved, in both modes, so anything that records WHO did something
@@ -81,6 +117,14 @@ app.use("/api", (req, res, next) => {
   if (OPEN.has(req.path)) return next();
   if (req.user) return next();
   res.status(401).json({ error: "Please sign in.", login_required: true });
+});
+
+// Which app this server is holding. The header above already says so on every
+// other reply; this is for a phone with nothing else to ask - one left open on
+// the sign-in screen, or on the home screen all afternoon.
+app.get("/api/version", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  res.json({ version: APP_VERSION });
 });
 
 // What a route says when somebody signed in asks for something their job does

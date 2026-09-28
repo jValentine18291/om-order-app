@@ -9,7 +9,7 @@
 // on EVERY open, and opens outnumber deploys a hundred to one. Now the cached
 // copy is served instantly and the fresh one is fetched behind it, so a
 // deploy shows one open later and startup does not touch the network at all.
-const CACHE = "om-order-v340";
+const CACHE = "om-order-v341";
 
 // IPL artwork lives in its own cache, deliberately NOT version-stamped.
 // They are large, they are already fetched only when a section is opened, and
@@ -153,6 +153,61 @@ self.addEventListener("fetch", (e) => {
       return hit || fresh;
     })
   );
+});
+
+// ---- Answering the app -----------------------------------------------------
+// TWO QUESTIONS THE APP ASKS, both of them about deploys.
+//
+// Everything about taking an update used to depend on the BROWSER deciding to
+// re-check this file. A phone that has been open on the bench since Tuesday may
+// never do it: iOS keeps the app's page alive for days, so there is no "next
+// open" for a new worker to arrive on. John, 28 Sep 2026 - "especially when
+// they didn't close the app for a few days, they don't receive the update".
+//
+//   version        which shell this worker is serving. The app compares it with
+//                  the version the SERVER says it is holding.
+//   refresh-shell  fetch every shell file from the network, past every cache,
+//                  and put it in. The app reloads afterwards and gets the new
+//                  screens - WITHOUT this worker ever having been replaced,
+//                  which is the whole point, because on the phones this is for,
+//                  it is the worker that will not budge.
+self.addEventListener("message", (e) => {
+  const msg = e.data || {};
+  const reply = (payload) => {
+    if (e.source && e.source.postMessage) e.source.postMessage(payload);
+  };
+
+  if (msg.type === "version") {
+    reply({ type: "version", version: CACHE });
+    return;
+  }
+
+  if (msg.type === "refresh-shell") {
+    e.waitUntil(
+      (async () => {
+        try {
+          // EVERY file first, and only then put any of them in. A shell that
+          // is half new is worse than a shell that is entirely old: last
+          // week's app.js against this week's index.html is a broken screen
+          // nobody can explain, and it would survive until the next deploy.
+          const fetched = await Promise.all(
+            SHELL.map(async (u) => {
+              const res = await fetch(new Request(u, { cache: "reload" }));
+              if (!res || res.status !== 200) throw new Error("not 200: " + u);
+              return [u, res];
+            })
+          );
+          const cache = await caches.open(CACHE);
+          for (const [u, res] of fetched) await cache.put(u, res);
+          reply({ type: "refresh-shell", ok: true });
+        } catch (_) {
+          // Offline, or the server mid-deploy. Nothing has been touched, so
+          // the app carries on with the shell it has and asks again later.
+          reply({ type: "refresh-shell", ok: false });
+        }
+      })()
+    );
+  }
 });
 
 // ---- Push notifications ----------------------------------------------------
