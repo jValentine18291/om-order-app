@@ -3223,14 +3223,25 @@ function renderContext() {
 // as one that was cached by being viewed.
 const IPL_CACHE_NAME = "om-ipl-diagrams";
 
-// Everything the library is made of. The figure COUNT comes from index.json,
-// which carries one per book - checked against the folder when this was
-// written: 628 figures, 628 images, nothing spare and nothing missing. The
-// image NAMES come from the books themselves rather than being guessed from a
-// pattern, because a guessed filename fails silently and looks like a missing
-// drawing.
+// Everything the library is made of. Counted from index.json, which carries a
+// tally per book - checked against the folder when this was written: 628
+// figures, 628 images, nothing spare and nothing missing. The image NAMES come
+// from the books themselves rather than being guessed from a pattern, because
+// a guessed filename fails silently and looks like a missing drawing.
+//
+// `images`, NOT `figures`, since 26 Sep 2026. A book can now show a figure
+// BORROWED from another book - the PHT750/1200/1500 carries the LHTZ-A and
+// SHTZ-A trimmer heads, which the technicians asked for - and a borrowed
+// figure brings no drawing of its own: the file already belongs to the book it
+// came from. Counting figures made this expect two files that do not exist,
+// so a phone with every drawing on it would have read "not downloaded" for
+// ever, with two phantoms it could never fetch.
+//
+// Books written before that field exists fall back to their figure count,
+// which is the same number for every book that borrows nothing.
 function iplOfflineExpected(models) {
-  const figures = (models || []).reduce((n, m) => n + (Number(m.figures) || 0), 0);
+  const figures = (models || []).reduce(
+    (n, m) => n + (Number(m.images != null ? m.images : m.figures) || 0), 0);
   const logos = new Set();
   Object.keys(IPL_BRAND_COLOUR || {}).forEach((k) => {
     const b = IPL_BRAND_COLOUR[k];

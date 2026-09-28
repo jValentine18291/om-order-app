@@ -393,8 +393,9 @@
   "short": "PHT750 / PHT1200 / PHT1500",
   "brand": "Zenoah",
   "category": "Pole Hedge Trimmer",
-  "figures": 4,
-  "parts": 149
+  "figures": 6,
+  "parts": 282,
+  "images": 4
  },
  {
   "id": "psj2600",

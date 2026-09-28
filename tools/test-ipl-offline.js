@@ -51,10 +51,19 @@ console.log("\n-- what the library is made of --");
 check("books in the index", index.length > 0, true);
 check("one book file each, plus the index", jsons.length, index.length + 1);
 
+// DRAWINGS, NOT FIGURES. A book can show a figure BORROWED from another book -
+// the PHT750/1200/1500 carries the LHTZ-A and SHTZ-A trimmer heads, which the
+// technicians asked for on 26 Sep 2026 - and a borrowed figure brings no
+// drawing of its own: the file belongs to the book it came from. `images` is
+// the count of drawings a book brings; a book that borrows nothing has not got
+// the field and its figure count is the same number.
+const drawings = index.reduce(
+  (n, m) => n + (Number(m.images != null ? m.images : m.figures) || 0), 0);
 const figures = index.reduce((n, m) => n + (Number(m.figures) || 0), 0);
 // The app adds this up exactly this way - see iplOfflineExpected() in app.js.
-// If the two ever part company the strip stops being able to say "all of it".
-const expected = 1 + index.length + figures + logos.length;
+// If the two ever part company the strip stops being able to say "all of it",
+// and it was counting figures until a borrowed one made that two files short.
+const expected = 1 + index.length + drawings + logos.length;
 const actual = pngs.length + jsons.length + logos.length;
 check("the app's total matches the folder", expected, actual);
 check("and that is what it is", actual, 708);
@@ -73,9 +82,18 @@ for (const m of index) {
   }
 }
 check("nothing a book asks for is absent", missing, []);
-// One drawing per figure, which is what lets the count above be worked out
-// from index.json alone rather than by opening all 72 books.
-check("one drawing per figure", named.size, figures);
+// One drawing per figure a book OWNS, which is what lets the count above be
+// worked out from index.json alone rather than by opening all 72 books.
+check("one drawing per figure a book owns", named.size, drawings);
+// And the difference is real: every figure beyond that is one borrowed from
+// somewhere else, and says so in the book.
+let borrowed = 0;
+for (const m of index) {
+  const doc = JSON.parse(read(path.join(iplDir, `${m.id}.json`)));
+  borrowed += (doc.figures || []).filter((f) => f.merged_from).length;
+}
+check("the extra figures are borrowed ones, each naming its source",
+  figures - drawings, borrowed);
 const orphans = pngs.filter((f) => !named.has(f));
 check("and nothing spare on disk", orphans, []);
 
