@@ -2742,6 +2742,18 @@ body.signin-brand .topbar .pill {
 /* Amber, like "already on order": something to read before acting, not an
    error. It sits at the TOP of the card because a superseded part is the
    first thing worth knowing about it. */
+/* RECORDING A REPLACEMENT OPENS OVER THE PART SHEET, so it has to outrank it.
+   It sits later in the document than #ipl-modal, which was enough while both
+   were on .modal-overlay's shared 60 - later wins at equal z-index. Raising
+   the part sheet to 65 on 26 Sep 2026, so it would come out in front of the
+   machine sheet on a tablet, quietly took that away and put this behind it:
+   John could only fill the form in after closing the sheet he opened it from.
+
+   70 puts it with #note-modal and #order-modal, which are its siblings - all
+   three open from the same part sheet, and #peek-modal at 75 still opens over
+   any of them. */
+#repl-modal { z-index: 70; }
+
 #note-modal { z-index: 70; }
 /* Above the note popup as well: a replacement can be opened from a note that
    is itself being read on top of the IPL sheet. */
