@@ -5012,7 +5012,13 @@ function renderMachineQuoteRow() {
   let text, actions;
   if (m.state === "AWAITING_QUOTE") {
     text = `<span class="machine-quote mq-need">Waiting to quote</span> Sales have been told about this machine.`;
-    actions = [["TO_REPAIR", "Undo — no quote needed", "btn-secondary"]];
+    // The answer, in the workshop's words: the customer either goes ahead or
+    // the machine is condemned. Both tell the technicians who worked on THIS
+    // machine - see notifyStateChange() - which is the point of asking here.
+    //
+    // "Mark as quoted" stays as well, for Sales: it records that the quotation
+    // actually went out, which is a different fact from the answer to it.
+    actions = [["TO_REPAIR", "Proceed with repair", "btn-secondary"]];
     if (decide) actions.unshift(["QUOTED", "Mark as quoted", "btn-secondary"]);
   } else if (m.state === "QUOTED") {
     text = `<span class="machine-quote mq-done">Waiting on customer</span> Quoted; waiting for their answer.`;
@@ -5038,7 +5044,10 @@ function renderMachineQuoteRow() {
     actions = [["TO_REPAIR", "Repair it after all", "btn-secondary"]];
   } else {
     text = "This machine has not been sent for quoting.";
-    actions = [["AWAITING_QUOTE", "Send this machine for quoting", "btn-secondary"]];
+    // "Send for quoting" throughout, and 报价 in Chinese - the technicians'
+    // own word for it, asked for on 28 Sep 2026. One label in both states, so
+    // the button does not rename itself depending where the machine is.
+    actions = [["AWAITING_QUOTE", "Send for quoting", "btn-primary"]];
     // A machine nobody needed to quote for is repaired straight from here.
     if (canMarkRepaired()) actions.unshift(["REPAIRED", "Mark as repaired", "btn-secondary"]);
   }

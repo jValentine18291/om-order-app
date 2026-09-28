@@ -380,7 +380,10 @@
     "Mark as quoted": "标记为已报价",
     "They said go ahead": "客户同意维修",
     "They said no — condemn": "客户不修 — 报废",
-    "Send for quoting": "送去报价",
+    // 报价 on its own, the technicians' own word - asked for 28 Sep 2026.
+    // The longer "把这台机器送去报价" labelled a button nobody could find.
+    "Send for quoting": "报价",
+    "Proceed with repair": "继续维修",
     "Repair it after all": "还是维修这台",
     "Still here — record where it goes before the slip can close.": "机器仍在店内 — 结单前请记录去向。",
     // Where a condemned machine went. The slip will not close until this is
