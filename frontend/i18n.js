@@ -340,6 +340,10 @@
     "Waiting on Customer": "等待客户回复",
     "Waiting on customer": "等待客户回复",
     "Marked as quoted": "已标记为已报价",
+    // The toast when a machine goes back to being worked on - the customer
+    // said go ahead, no quote was needed, or somebody took back a finished
+    // tick. It used to say 已确认维修 for all three. John's, 28 Sep 2026.
+    "Marked In Progress": "已标记为进行中",
 
     // ---- Machine modal ----
     "Machine": "机器",
@@ -355,6 +359,10 @@
     "The customer does not want this machine repaired. Stop work on it.": "客户不维修这台机器。请停止作业。",
     "Repair": "维修",
     "Condemn": "报废",
+    // KEPT FOR THE OLD CACHE. Nothing produces this any more - TO_REPAIR reads
+    // "In Progress" since 28 Sep 2026 - but a phone runs its cached copy of the
+    // app until its second open, so for a shift after a deploy this is still
+    // being asked for. Delete it once nobody is on v339.
     "Repair confirmed": "已确认维修",
     "Condemned": "已报废",
     "Tell me what the customer said": "客户回复时通知我",

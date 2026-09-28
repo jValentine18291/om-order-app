@@ -1093,7 +1093,13 @@ const MACHINE_STATE = {
   RECEIVED:       { label: "Need Repair",        cls: "mq-none"    },
   AWAITING_QUOTE: { label: "Waiting to quote",   cls: "mq-need"    },
   QUOTED:         { label: "Waiting on customer",cls: "mq-done"    },
-  TO_REPAIR:      { label: "Repair confirmed",   cls: "mq-repair"  },
+  // "In Progress", not "Repair confirmed". John's, 28 Sep 2026: he pressed
+  // "Not finished after all" on a repaired machine and it came back saying the
+  // repair was CONFIRMED, which nobody had done. This state is reached three
+  // ways - the customer said go ahead, nobody needed a quote, or a technician
+  // took the finished tick back - and "being worked on" is the only thing true
+  // of all three. Same words as the slip's own IN_PROGRESS above, on purpose.
+  TO_REPAIR:      { label: "In Progress",        cls: "mq-repair"  },
   REPAIRED:       { label: "Repaired",           cls: "mq-repaired"},
   CONDEMNED:      { label: "Condemned",          cls: "mq-condemn" },
 };
@@ -5030,7 +5036,7 @@ function renderMachineQuoteRow() {
          ["AWAITING_QUOTE", "Send for quoting", "btn-secondary"]]
       : [["AWAITING_QUOTE", "Send for quoting", "btn-secondary"]];
   } else if (m.state === "TO_REPAIR") {
-    text = `<span class="machine-quote mq-repair">Repair confirmed</span> Carry on with the repair.`;
+    text = `<span class="machine-quote mq-repair">In Progress</span> Carry on with the repair.`;
     actions = [["AWAITING_QUOTE", "Send for quoting", "btn-secondary"]];
     if (canMarkRepaired()) actions.unshift(["REPAIRED", "Mark as repaired", "btn-secondary"]);
   } else if (m.state === "REPAIRED") {
@@ -5139,7 +5145,10 @@ const MOVE_TOAST = {
   AWAITING_QUOTE: "Sent for quoting",
   QUOTED: "Marked as quoted",
   REPAIRED: "Marked as repaired",
-  TO_REPAIR: "Repair confirmed",
+  // Not "Repair confirmed": this toast fires for all three ways into the
+  // state, including a technician taking back a finished tick, and two of them
+  // confirm nothing.
+  TO_REPAIR: "Marked In Progress",
   CONDEMNED: "Condemned — technician notified",
 };
 
