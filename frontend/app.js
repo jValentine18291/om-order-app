@@ -5022,9 +5022,13 @@ function renderMachineQuoteRow() {
     if (decide) actions.unshift(["QUOTED", "Mark as quoted", "btn-secondary"]);
   } else if (m.state === "QUOTED") {
     text = `<span class="machine-quote mq-done">Waiting on customer</span> Quoted; waiting for their answer.`;
+    // Sales get the answer AND a way to quote it again - a revised figure
+    // after the customer pushes back is an ordinary thing, and before this the
+    // only person who could re-send was somebody who could not answer.
     actions = decide
-      ? [["TO_REPAIR", "They said go ahead", "btn-secondary"]]
-      : [["AWAITING_QUOTE", "Send for quoting again", "btn-secondary"]];
+      ? [["TO_REPAIR", "Proceed with repair", "btn-secondary"],
+         ["AWAITING_QUOTE", "Send for quoting", "btn-secondary"]]
+      : [["AWAITING_QUOTE", "Send for quoting", "btn-secondary"]];
   } else if (m.state === "TO_REPAIR") {
     text = `<span class="machine-quote mq-repair">Repair confirmed</span> Carry on with the repair.`;
     actions = [["AWAITING_QUOTE", "Send for quoting", "btn-secondary"]];
@@ -5034,13 +5038,26 @@ function renderMachineQuoteRow() {
     // Always reversible, and by anyone who could tick it. A tick that could not
     // be taken back would be a machine stuck as finished on a slip that has
     // left nobody able to say otherwise.
-    actions = canMarkRepaired()
-      ? [["TO_REPAIR", "Not finished after all", "btn-secondary"]]
-      : [];
+    // AND STILL QUOTABLE. John's, 28 Sep 2026: a machine finished at the bench
+    // is exactly when somebody looks at the total and wants the customer to
+    // agree it before Sales raise an invoice. This was the one state with no
+    // way to ask - his screenshot showed a repaired machine offering nothing
+    // but "not finished after all".
+    actions = [["AWAITING_QUOTE", "Send for quoting", "btn-secondary"]];
+    if (canMarkRepaired()) {
+      actions.unshift(["TO_REPAIR", "Not finished after all", "btn-secondary"]);
+    }
   } else if (m.state === "CONDEMNED") {
     const d = DISPOSAL_LABEL[m.disposal];
     text = `<span class="machine-quote mq-condemn">Condemned</span> <span>${escapeHtml(
       d || "Still here — record where it goes before the slip can close.")}</span>`;
+    // NO QUOTE BUTTON HERE, deliberately, and it is the one exception to
+    // "available all the time". Leaving CONDEMNED clears the disposal and
+    // DELETES the customer's signature - they signed that this machine was
+    // beyond repair, and that is not a thing a quote button should quietly
+    // throw away. The way out is "Repair it after all", which is a decision
+    // somebody takes on purpose; 报价 is offered again the moment it lands in
+    // TO_REPAIR.
     actions = [["TO_REPAIR", "Repair it after all", "btn-secondary"]];
   } else {
     text = "This machine has not been sent for quoting.";
