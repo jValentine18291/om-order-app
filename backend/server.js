@@ -2391,7 +2391,15 @@ async function writeSlipPricesToAutoCount(parts, source) {
         // has-price skips are the normal case for every ordinarily priced part
         // and would flood the log. The other two are rare and each means a
         // price the staff expected to save did not, so they are worth a line.
-        if (r.status === "skipped_not_found" || r.status === "skipped_no_uom_row") {
+        if (r.status === "skipped_placeholder") {
+          // Not a failure - the price was meant to stay on the slip. Logged so
+          // that "why is MISC still blank in AutoCount" has an answer.
+          logPriceEvent({
+            source, itemCode: part.item_code, tier: "Contractor Price",
+            oldPrice: null, newPrice: part.unit_price, who: part.technician,
+            outcome: "not written - placeholder code, priced per job",
+          });
+        } else if (r.status === "skipped_not_found" || r.status === "skipped_no_uom_row") {
           logPriceEvent({
             source, itemCode: part.item_code, tier: "Contractor Price",
             oldPrice: null, newPrice: part.unit_price, who: part.technician,

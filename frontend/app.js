@@ -3734,11 +3734,10 @@ function parseTypedPrice(raw) {
 // A12 and MISC are the codes that carry NO STOCK. The two overlap and are not
 // the same question, so they are two rules.
 function isUnstockedCode(itemCode) {
-  // A1..A12 and nothing beyond: the \b stops A13 and A120 matching, and the
-  // alternation tries the two-digit form when the one-digit form leaves a
-  // digit stranded.
-  return /^A(?:[1-9]|1[0-2])\b/.test(String(itemCode || "").trim().toUpperCase())
-      || String(itemCode || "").trim().toUpperCase().startsWith("MISC");
+  // The rule itself lives in service-items.js, which the SERVER loads too: it
+  // decides both what the app shows and what the server will write into
+  // AutoCount, and a second copy here would be a second thing to keep in step.
+  return !!(window.OM_SERVICE_ITEMS && OM_SERVICE_ITEMS.isUnstockedCode(itemCode));
 }
 
 function isFreeTextPart(itemCode, description = "") {

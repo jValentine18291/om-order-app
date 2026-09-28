@@ -107,6 +107,27 @@
     return ITEMS[keyFor(machine, isFogger)];
   }
 
+  // A CODE WITH NO STANDING PRICE OF ITS OWN. A1 to A12 are AutoCount's
+  // service and sundry codes and MISC is the catch-all; each is ONE item that
+  // stands for a different thing on every job, so the figure a technician
+  // types against one belongs to that job and to nothing else.
+  //
+  // It lives here, in the file both sides load, because two places act on it
+  // and they must not drift: the app leaves the stock column empty for these
+  // (there is nothing on a shelf to count), and the server refuses to write
+  // their price into AutoCount's item master (there is no price that would
+  // still be true tomorrow).
+  //
+  // WIDER THAN isServiceCode BELOW, which is the four per-machine service
+  // items - A1, A2, A3, A12 - and answers a different question.
+  function isUnstockedCode(code) {
+    var c = String(code || "").trim().toUpperCase();
+    // A1..A12 and nothing past it: the \b stops A13 and A120, and the
+    // alternation catches the two-digit form when the one-digit form would
+    // leave a digit stranded.
+    return /^A(?:[1-9]|1[0-2])\b/.test(c) || c.indexOf("MISC") === 0;
+  }
+
   // Is this one of ours? Used when a quotation overrides the choice, so an
   // override can only ever swap one service line for another.
   function isServiceCode(code) {
@@ -123,5 +144,6 @@
     keyFor: keyFor,
     itemFor: itemFor,
     isServiceCode: isServiceCode,
+    isUnstockedCode: isUnstockedCode,
   };
 });

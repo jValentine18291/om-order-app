@@ -117,9 +117,32 @@ function writebackEnabled() {
 // Update the base-UOM price for itemCode IF its current price is 0/NULL.
 // Returns { status: "updated" | "skipped_has_price" | "skipped_not_found",
 //           item_code, old_price, new_price }
+const UNSTOCKED = require(require("path").join(
+  __dirname, "..", "..", "frontend", "service-items.js"));
+
 async function updateItemPriceIfMissing(itemCode, newPrice) {
   // Used by the Sales Order path: fills the Contractor price from what a
   // technician keyed on the slip, when AutoCount has no price for that part.
+  //
+  // NEVER A PLACEHOLDER CODE. John's call, 28 Sep 2026. A1 to A12 and MISC are
+  // each ONE item standing for a different thing on every job, so the figure a
+  // technician types against one is true for that job and nothing else. This
+  // write never overwrites, so the FIRST technician to price a MISC line would
+  // have set MISC's Contractor Price for good - and every later MISC part
+  // would have come pre-priced at whatever that one happened to be.
+  //
+  // It became a live hazard on 26 Sep 2026, when these codes started asking
+  // for a price: before that they arrived at 0 and the caller skipped them.
+  //
+  // Only the AUTOMATIC path is guarded. A person setting a price deliberately
+  // on the Parts Diagram still can - A6 engine oil has a standing price and
+  // that is a real thing to want - and this is not the function they use.
+  if (UNSTOCKED.isUnstockedCode(itemCode)) {
+    return {
+      status: "skipped_placeholder", item_code: itemCode,
+      old_price: null, new_price: Number(newPrice),
+    };
+  }
   //
   // The slip carries AutoCount's OWN item code, so resolving it is an exact
   // match on the full code and cannot land on the wrong variant the way a bare

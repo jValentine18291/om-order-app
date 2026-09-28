@@ -98,6 +98,45 @@ function listFrom(src, name) {
   // away from the deliberate one. What matters is that it still hands off THERE.
   check("the automatic write delegates to setMissingPrice", /setMissingPrice\s*\(/.test(autoFn), true);
   check("and never to overwritePrice", /overwritePrice/.test(autoFn), false);
+
+  console.log("\n-- and it refuses the codes that have no standing price --");
+  // A1 to A12 and MISC are each ONE item standing for a different thing on
+  // every job. This write never overwrites, so the FIRST technician to price a
+  // MISC line would set MISC's Contractor Price for good and every later MISC
+  // part would arrive pre-priced at whatever that one happened to be. John's
+  // call, 28 Sep 2026, once the hazard was pointed out.
+  //
+  // Run against a query() that RECORDS being called: the test is not that the
+  // status says skipped, it is that the database was never touched at all.
+  const SHARED = require(path.resolve(__dirname, "..", "frontend", "service-items.js"));
+  let touched = [];
+  const autoOnly = new Function("UNSTOCKED", "query", "setMissingPrice",
+    autoFn + "; return updateItemPriceIfMissing;")(
+      SHARED,
+      async () => { touched.push("query"); return [{ ItemCode: "X" }]; },
+      async () => { touched.push("write"); return { status: "updated", item_code: "X", old_price: 0, new_price: 1 }; });
+
+  for (const code of ["MISC 001", "A1 SVR GENERAL", "A6 SVR ENGINE OIL",
+                      "A7 SVR WAREHOUSE", "A12 SVR AUTOMOWER"]) {
+    touched = [];
+    const r = await autoOnly(code, 18.5);
+    check(`${code} is not written`, r.status, "skipped_placeholder");
+    check(`  and AutoCount was never asked about it`, touched, []);
+  }
+  // The ones that ARE real parts must still go through, or the guard has eaten
+  // the feature it was meant to protect.
+  for (const code of ["SZEN 140051111", "SHUQ 577317601"]) {
+    touched = [];
+    const r = await autoOnly(code, 9.5);
+    check(`${code} still reaches AutoCount`, r.status, "updated");
+    check(`  having actually queried and written`, touched, ["query", "write"]);
+  }
+  // Codes that only look like placeholders.
+  for (const code of ["A13 SOMETHING", "A120 SOMETHING", "AMISC 1"]) {
+    touched = [];
+    const r = await autoOnly(code, 5);
+    check(`${code} is an ordinary part, not a placeholder`, r.status, "updated");
+  }
   check("overwritePrice is a separate function, not a flag",
     /async function overwritePrice/.test(acSrc) && !/setMissingPrice\s*\([^)]*overwrite/.test(acSrc), true);
 
