@@ -982,6 +982,59 @@ async function lookupItem(code) {
   return api(`/api/items/${encodeURIComponent(code)}`);
 }
 
+// ---- Asking before anything moves ------------------------------------------
+// John's, 28 Sep 2026: "ensure that everything that saves or changes a state
+// has a confirmation window before the official change."
+//
+// The app's confirm() is already wrapped by i18n.js, but only for whole
+// messages it holds word for word. These are built a line at a time - a
+// machine's name, a count, a status - so each PIECE is translated here and the
+// message assembled after. A technician reads the question in Chinese and the
+// machine's name as it is written on the machine.
+function tr(s) {
+  try {
+    if (window.OM_I18N && OM_I18N.text) return OM_I18N.text(String(s == null ? "" : s));
+  } catch (_) {}
+  return String(s == null ? "" : s);
+}
+
+// "Now: In Progress" in English, "目前：进行中" in Chinese. A halfwidth colon
+// against Chinese text reads as a typo to the people who read Chinese, and
+// these boxes are mostly read by them.
+function trLabel(key, value) {
+  let zh = false;
+  try { zh = !!(window.OM_I18N && OM_I18N.language && OM_I18N.language() === "zh"); } catch (_) {}
+  return `${tr(key)}${zh ? "：" : ": "}${tr(value)}`;
+}
+
+// Every one of these reads the same way: the question, a blank line, then what
+// is about to happen in plain words. Nobody has to work out what a button did
+// after the fact, which is the whole point of asking.
+function confirmLines(question, lines) {
+  const body = (lines || []).filter(Boolean).join("\n");
+  return confirm(tr(question) + (body ? "\n\n" + body : ""));
+}
+
+// A machine on its way from one status to another.
+function confirmStateChange(machine, to) {
+  const from = (MACHINE_STATE[machine && machine.state] || {}).label || "";
+  const next = (MACHINE_STATE[to] || {}).label || to;
+  return confirmLines("Change this machine's status?", [
+    machineTitle(machine),
+    from ? trLabel("Now", from) : "",
+    trLabel("Change to", next),
+  ]);
+}
+
+// What to call the machine in a question about it. The description is what is
+// written on the machine itself; the serial is what tells two of them apart.
+function machineTitle(m) {
+  if (!m) return "";
+  const desc = String(m.machine_desc || m.desc || "").trim();
+  const serial = String(m.serial_no || "").trim();
+  return serial ? `${desc} · S/N ${serial}` : desc;
+}
+
 // ============================================================================
 // REUSABLE SLIP SEARCH (used by Open, Close, View)
 // Wires a text input + results container to the search endpoint, debounced.
@@ -2990,6 +3043,34 @@ function openExtrasModal() {
   maybeShowEntry();
 }
 
+// What Save is about to do, in the words somebody would use to describe it.
+// Counts the parts ALREADY on the machine as well as the ones scanned and not
+// yet saved: the question is what the machine will read afterwards, not what
+// this particular tap is carrying.
+function confirmSave() {
+  const m = session.extras ? null : currentMachine();
+  const already = ((m && m.parts) || (session.extras && session.slip ? session.slip.extras || [] : []) || []).length;
+  const parts = already + (session.pendingParts ? session.pendingParts.length : 0);
+  const labour = Number(currentLabourValue ? currentLabourValue() : 0) || 0;
+  const note = String(($("os-comment") || {}).value || "").trim();
+
+  const lines = [];
+  if (parts) lines.push(`${parts} ${tr(parts === 1 ? "part" : "parts")}`);
+  if (!session.extras && labour > 0) lines.push(tr("a labour charge"));
+  if (!session.extras && note) lines.push(tr("a repair note"));
+  if (!lines.length) lines.push(tr("Nothing has been recorded on it yet."));
+
+  // The status change hidden inside Save. finishRepair() on the server moves a
+  // machine only from these two states and only with something recorded on it,
+  // so this promises exactly what it will do - see sqliteRepo.js.
+  if (!session.extras && m && ["RECEIVED", "TO_REPAIR"].includes(m.state) &&
+      (parts || labour > 0 || note)) {
+    lines.push(tr("It will also be marked as Repaired."));
+  }
+
+  return confirmLines(session.extras ? "Save these parts?" : "Save this machine?", lines);
+}
+
 async function closeMachineModal(save) {
   // The IPL screen gets its own viewer back before anything else happens: a
   // save that fails must not leave the book stranded inside a closed sheet.
@@ -2999,6 +3080,12 @@ async function closeMachineModal(save) {
     if (!ok) return;
   }
   try { stopQrScanner(); } catch (_) {}
+  // ASKED BEFORE ANYTHING IS WRITTEN, and told what it is about to write.
+  // John's, 28 Sep 2026. Save is the one button here that changes a machine's
+  // status without saying so - it is what marks a machine Repaired - and a
+  // technician who meant to close the sheet should find that out before it
+  // happens rather than from the pill afterwards.
+  if (save && !confirmSave()) return;
   if (save && session.extras) {
     // Nothing here is "repaired", so there is nothing to mark. The parts, and
     // the note that goes with them.
@@ -5079,6 +5166,26 @@ function renderMachineQuoteRow() {
     if (canMarkRepaired()) actions.unshift(["REPAIRED", "Mark as repaired", "btn-secondary"]);
   }
 
+  // A TECHNICIAN MAY ASK, NOT DECIDE. John's, 28 Sep 2026. 报价 survives -
+  // it moves the machine onto Sales' list and settles nothing - and every
+  // button that says what is to BECOME of the machine goes to Sales and Admin.
+  //
+  // Done here, over the finished list, rather than at each of the six branches
+  // above: a branch added later is covered by this without anybody having to
+  // remember, and forgetting would hand a technician the very button this is
+  // about.
+  if (!canDecide()) {
+    const kept = actions.filter(([to]) => to === "AWAITING_QUOTE");
+    // A line saying where the buttons went, but only to somebody who would
+    // otherwise have had one. A technician who looks for "Mark as repaired" and
+    // finds nothing reports the app as broken; this answers them on the screen
+    // they are already on.
+    if (kept.length < actions.length) {
+      text += ` <span class="mm-quote-note">Only Sales and Admin can change this. Tap 报价 to ask for it.</span>`;
+    }
+    actions = kept;
+  }
+
   // Too expensive to repair, said on the phone or at the bench. Added last so
   // it sits at the bottom, away from the buttons that carry the job forward,
   // and coloured so it is never the one tapped by mistake.
@@ -5120,10 +5227,18 @@ async function moveMachine(btn, to) {
       await saveCurrentComment();
     } catch (e) { toast(e.message, "err"); return; }
   }
-  if (to === "CONDEMNED" && !confirm(
-    "Condemn this machine?\n\nThe customer is not paying to have it repaired. "
-    + "Work on it stops, and you will be asked whether they collect it or we dispose of it."
-  )) return;
+  if (to === "CONDEMNED") {
+    // Its own question, kept: condemning is the one move that stops the work
+    // and asks where the machine goes, and that deserves saying rather than a
+    // status name.
+    if (!confirm(
+      "Condemn this machine?\n\nThe customer is not paying to have it repaired. "
+      + "Work on it stops, and you will be asked whether they collect it or we dispose of it."
+    )) return;
+  } else if (!confirmStateChange(m, to)) {
+    // Everything else says which machine, where it is, and where it is going.
+    return;
+  }
 
   btn.disabled = true;
   try {
@@ -5157,6 +5272,9 @@ const MOVE_TOAST = {
 };
 
 async function recordDisposal(btn, machineId, disposal) {
+  // Not a status change, but it is what holds the slip open, and getting it
+  // wrong says a customer took a machine they never took.
+  if (!confirmLines("Record where this machine went?", [tr(DISPOSAL_LABEL[disposal] || "")])) return;
   btn.disabled = true;
   try {
     await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/machines/${machineId}/disposal`, {
@@ -5205,9 +5323,16 @@ function renderSlipStatusUI() {
     ? (status === "NEED_QUOTE" ? "Quote the rest too" : "Quote all machines")
     : "Need to Quote";
   quoteBtn.style.display = showQuote ? "inline-flex" : "none";
-  $("os-mark-quoted").style.display = showQuoted ? "inline-flex" : "none";
-  $("os-no-quote").style.display = showNoQuote ? "inline-flex" : "none";
-  wrap.style.display = (showQuote || showQuoted || showNoQuote) ? "flex" : "none";
+  // The same rule as the per-machine buttons: asking for a quotation is open to
+  // everybody, saying what the customer decided is not. "Need to Quote" above
+  // stays; these two move every machine on the slip on somebody's say-so.
+  const decide = canDecide();
+  $("os-mark-quoted").style.display = (showQuoted && decide) ? "inline-flex" : "none";
+  $("os-no-quote").style.display = (showNoQuote && decide) ? "inline-flex" : "none";
+  // An empty row of buttons is a strip of padding nobody can explain, so the
+  // row goes when everything in it has.
+  wrap.style.display = (showQuote || (showQuoted && decide) || (showNoQuote && decide))
+    ? "flex" : "none";
 }
 
 // The slip-wide buttons move every machine at once. They post the same states
@@ -5215,6 +5340,13 @@ function renderSlipStatusUI() {
 // difference.
 async function changeSlipStatus(newState, confirmMsg) {
   if (!session.slipNumber) return;
+  // EVERY machine at once, which is the one here worth reading twice.
+  const machines = ((session.slip && session.slip.machines) || [])
+    .filter((m) => !m.converted_at);
+  if (!confirmLines("Change every machine on this service request?", [
+    tr(`${machines.length} machine${machines.length === 1 ? "" : "s"}`),
+    trLabel("Change to", (MACHINE_STATE[newState] || {}).label || newState),
+  ])) return;
   try {
     await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/state`, {
       method: "PATCH",
@@ -6542,7 +6674,9 @@ async function onViewSlipChosen(slipNumber) {
     const slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
     wrap.innerHTML = renderSlipDetail(slip);
     wireVsStatusActions(slipNumber);
-    wireDecideButtons(wrap, slipNumber);
+    // The slip goes in as well: the confirmation before each move names the
+    // machine and says where it is now, and that is read off here.
+    wireDecideButtons(wrap, slipNumber, slip);
     // What the orders became in AutoCount. Asked for AFTER the slip is drawn,
     // never as part of drawing it: this is a round trip to SQL Server and the
     // slip must appear at once whether or not it answers.
@@ -6868,15 +7002,22 @@ function renderSlipDetail(slip) {
 // Moving a machine along from the sales screen, and telling the technician who
 // did the work. Condemn is confirmed first: it tells someone to stop work on a
 // machine, and it sits one tap away from Confirm Repair.
-function wireDecideButtons(wrap, slipNumber) {
+function wireDecideButtons(wrap, slipNumber, slip) {
+  const machineById = (id) => ((slip && slip.machines) || []).find((m) => m.id === id) || null;
   wrap.querySelectorAll(".decide-row [data-state]").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const row = btn.closest(".decide-row");
       const machineId = Number(row.dataset.decide);
       const state = btn.dataset.state;
-      if (state === "CONDEMNED" && !confirm(
-        "Condemn this machine?\n\nThe technicians who worked on it will be told to stop."
-      )) return;
+      if (state === "CONDEMNED") {
+        if (!confirm(
+          "Condemn this machine?\n\nThe technicians who worked on it will be told to stop."
+        )) return;
+      } else if (!confirmStateChange(machineById(machineId), state)) {
+        // The same question as the machine sheet asks, for the same reason.
+        // "Confirm Repair" and "Too expensive — condemn" sit one tap apart.
+        return;
+      }
 
       row.querySelectorAll("button").forEach((b) => { b.disabled = true; });
       try {
@@ -6930,6 +7071,7 @@ function wireDecideButtons(wrap, slipNumber) {
       const row = btn.closest(".decide-disposal");
       const machineId = Number(row.dataset.dispose);
       const disposal = btn.dataset.disposal;
+      if (!confirmLines("Record where this machine went?", [tr(DISPOSAL_LABEL[disposal] || "")])) return;
       row.querySelectorAll("button").forEach((b) => { b.disabled = true; });
       try {
         await api(`/api/slips/${encodeURIComponent(slipNumber)}/machines/${machineId}/disposal`, {
@@ -8551,27 +8693,39 @@ async function showPartStock(code) {
   }
 }
 
-// Whether a machine is finished is the technician's call - they did the work.
-// Everyone else can tick it too, so a missed tick at six o'clock does not have
-// to wait for the technician to come back in the morning. Purchaser is in here
-// with Sales and Admin, the same as every other counter job in the app.
-function canMarkRepaired() {
-  return ["tech", "sales", "purchaser", "admin"].includes(getRole());
-}
+// WHO MAY MOVE A MACHINE. John's, 28 Sep 2026 - "in case the technicians
+// accidentally clicked the wrong button".
+//
+// Sales and Admin, which is John and the five other admins plus Carmen and
+// Chiu Yan. Technicians keep ONE button, 报价, and it decides nothing: it puts
+// the machine on Sales' list and tells them there is something to price. They
+// record the work; somebody else records what is to become of it.
+//
+// THREE FUNCTIONS OVER ONE RULE, deliberately, and not collapsed into one.
+// They were three different answers until today - a technician could tick a
+// machine repaired because they did the work, and could condemn one because
+// the customer said so at the bench - and the day either comes back, it is a
+// line here rather than an untangling of every caller.
+//
+// PURCHASER IS NO LONGER IN THESE. Iris had them by virtue of sharing the
+// sales screens; she is not who John named, and this is a narrowing. If she
+// needs to record a customer's answer while Sales are out, adding "purchaser"
+// to DECIDE_ROLES is the whole change.
+const DECIDE_ROLES = ["sales", "admin"];
 
-// Sales take the call, so Sales record the answer. Purchaser and Admin share
-// the sales screens and cover for them, the same as everywhere else in the app.
 function canDecide() {
-  return ["sales", "purchaser", "admin"].includes(getRole());
+  return DECIDE_ROLES.includes(getRole());
 }
 
-// Condemning is not a sales decision the way quoting is. The customer says the
-// repair costs too much, and whoever is holding the phone or standing at the
-// bench when they say it should be able to record it - otherwise it waits for
-// somebody else to be free, and in the meantime a technician carries on
-// working on a machine nobody is going to pay for.
+// Whether a machine is finished. Was the technician's own call until today.
+function canMarkRepaired() {
+  return canDecide();
+}
+
+// Condemning. Was offered to whoever was holding the phone or standing at the
+// bench when the customer balked at the price, technicians included.
 function canCondemn() {
-  return ["tech", "sales", "purchaser", "admin"].includes(getRole());
+  return canDecide();
 }
 
 // The states a machine can be condemned FROM. Everything except a machine

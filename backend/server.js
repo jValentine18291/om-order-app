@@ -1985,10 +1985,24 @@ async function notifyStateChange(slip, machineId, before, state) {
   }
 }
 
+// WHO MAY MOVE A MACHINE, on the server as well as on the screen. John's,
+// 28 Sep 2026. The app stopped drawing the buttons for technicians the same
+// day; this is the half that still holds when somebody has an old copy of the
+// app cached, or types the request themselves.
+//
+// AWAITING_QUOTE is deliberately open to everybody. It is the technicians' one
+// button - 报价 - and it settles nothing: it puts the machine on Sales' list.
+//
+// Inert while logins are off, like every other needRole() in this file: with
+// nobody signed in there is nobody to check, and the screen is the only gate
+// there is. It becomes real the day require-login goes on.
+const CAN_DECIDE_MACHINE = ["sales", "admin"];
+
 async function handleMachineState(req, res) {
   try {
     const machineId = Number(req.params.id);
     const state = String((req.body || {}).state || "").toUpperCase();
+    if (state !== "AWAITING_QUOTE" && !needRole(req, res, CAN_DECIDE_MACHINE)) return;
     // Read the machine before the change: what to send, and to whom, depends
     // on where it was, and afterwards that is gone.
     const prev = await data.slips.getSlip(req.params.slip);
@@ -2183,6 +2197,8 @@ app.post("/api/slips/:slip/machines/:id/undo", async (req, res) => {
 async function handleSlipState(req, res) {
   try {
     const state = String((req.body || {}).state || "").toUpperCase();
+    // Every machine at once, so the same rule, and more so.
+    if (state !== "AWAITING_QUOTE" && !needRole(req, res, CAN_DECIDE_MACHINE)) return;
     const prev = await data.slips.getSlip(req.params.slip);
     const slip = await data.slips.setAllMachineStates(
       req.params.slip, state, (req.body || {}).who || ""

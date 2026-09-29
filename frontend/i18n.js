@@ -340,6 +340,29 @@
     "Waiting on Customer": "等待客户回复",
     "Waiting on customer": "等待客户回复",
     "Marked as quoted": "已标记为已报价",
+
+    // ---- Asking before anything moves ----
+    // John's, 28 Sep 2026: a technician pressing the wrong button should not be
+    // able to change a machine without being asked first. Built a line at a
+    // time in app.js, so each line is its own entry here.
+    "Change this machine's status?": "确定要更改这台机器的状态吗？",
+    "Change every machine on this service request?": "确定要更改此服务单上的所有机器吗？",
+    "Save this machine?": "确定要保存这台机器吗？",
+    "Save these parts?": "确定要保存这些零件吗？",
+    "Record where this machine went?": "确定要记录这台机器的去向吗？",
+    // "Now" and "Change to" are not repeated here: the part-location box
+    // already has both, saying exactly this, and the i18n test refuses a key
+    // that appears twice - two entries drift, and the second one wins silently.
+    "It will also be marked as Repaired.": "这台机器也将被标记为已修好。",
+    "Nothing has been recorded on it yet.": "这台机器还没有任何记录。",
+    "part": "个零件",
+    "parts": "个零件",
+    "a labour charge": "工时费",
+    "a repair note": "维修说明",
+    // Why a technician's buttons went away, said where they would look for
+    // them. Not an error - the machine is fine, this is simply not their call.
+    "Only Sales and Admin can change this. Tap 报价 to ask for it.":
+      "只有销售和管理员可以更改。请点击「报价」提出申请。",
     // The toast when a machine goes back to being worked on - the customer
     // said go ahead, no quote was needed, or somebody took back a finished
     // tick. It used to say 已确认维修 for all three. John's, 28 Sep 2026.
@@ -1143,6 +1166,16 @@
     // about which language the app is in.
     language: language,
     refresh: function () { apply(document.body); },
+    // ONE LINE AT A TIME, for text that never reaches the page as a text node.
+    // The confirmation boxes are built a line at a time in app.js - a machine's
+    // name, a status, a count - and the whole message is never a phrase this
+    // file could hold. Each piece is looked up here instead. Returns the
+    // English back when there is no translation, so a caller can use it
+    // unconditionally.
+    text: function (s) {
+      var out = translate(s);
+      return out === null ? s : out;
+    },
     dict: DICT
   };
 

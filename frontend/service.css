@@ -978,6 +978,9 @@ select {
   font-size: .85rem; color: var(--ink-faint);
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
 }
+/* Why a technician's buttons are not there. Quieter than the status beside it:
+   it is an explanation, not news about the machine. */
+.mm-quote-note { display: block; width: 100%; font-size: .78rem; opacity: .75; }
 
 /* ---- Machine modal ---- */
 /* THE SHEET SITS IN WHAT IS VISIBLE, NOT IN THE SCREEN.
