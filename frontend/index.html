@@ -224,6 +224,27 @@
           <span class="home-txt"><strong>Orders</strong><small>Part orders and their status</small></span>
         </button>
       </div>
+      <!-- NOTIFICATIONS LIVE HERE, on the screen everybody starts on.
+           John, 29 Sep 2026: "the only way to turn on push notifications is on
+           the Need to Quote page, which technicians don't have access to."
+           There WAS a second one on the slip picker for technicians, which is
+           worse than none: a setting in two places nobody can find is still
+           nobody finding it, and he could not see theirs at all to check.
+
+           Below the buttons, because it is a setting and not a job - the work
+           should not be pushed down the screen by it - and worded for whoever
+           is looking at it. See PUSH_ROWS in app.js. -->
+      <div class="push-row" id="push-row-home" style="display:none;">
+        <div class="push-txt">
+          <strong id="push-title-home">Notifications</strong>
+          <small id="push-sub-home"></small>
+        </div>
+        <button type="button" class="btn-secondary push-btn" id="push-toggle-home">Turn on</button>
+      </div>
+      <!-- Once the phone has been told "Don't allow", no website can ask again -
+           so the button explains where to undo it rather than vanishing, which
+           read as the feature having disappeared. -->
+      <div class="push-help" id="push-help-home" style="display:none;"></div>
       <button class="switch-role" id="switch-role">Switch role</button>
     </section>
 
@@ -495,19 +516,9 @@
         <p class="eyebrow">Sales</p>
         <h2>Need to Quote</h2>
       </div>
-      <!-- Per device, not per person: turning it on here asks THIS phone for
-           permission. Hidden entirely where the browser cannot do it. -->
-      <div class="push-row" id="push-row" style="display:none;">
-        <div class="push-txt">
-          <strong>Tell me when one arrives</strong>
-          <small id="push-sub">Notify this device as soon as a technician finishes a repair</small>
-        </div>
-        <button type="button" class="btn-secondary push-btn" id="push-toggle">Turn on</button>
-      </div>
-      <!-- Once the phone has been told "Don't allow", no website can ask again -
-           so the button explains where to undo it rather than vanishing, which
-           read as the feature having disappeared. -->
-      <div class="push-help" id="push-help" style="display:none;"></div>
+      <!-- The notifications switch used to be here, and on the slip picker,
+           and nowhere else. It is on the home screen now, where everybody can
+           find it - 29 Sep 2026. -->
       <div id="q-list"></div>
     </section>
 
@@ -647,16 +658,6 @@
         <p class="eyebrow">Open service</p>
         <h2>Pick a service slip</h2>
       </div>
-      <!-- Same row as the one on Need to Quote, for the other direction:
-           Sales decide, and the technician who did the work is told. -->
-      <div class="push-row" id="push-row-tech" style="display:none;">
-        <div class="push-txt">
-          <strong>Tell me what the customer said</strong>
-          <small id="push-sub-tech">Notify this device when Sales confirm a repair or condemn a machine</small>
-        </div>
-        <button type="button" class="btn-secondary push-btn" id="push-toggle-tech">Turn on</button>
-      </div>
-      <div class="push-help" id="push-help-tech" style="display:none;"></div>
       <div class="field">
         <label for="os-search">Search</label>
         <input id="os-search" type="text" autocomplete="off" placeholder="Slip number or company&hellip;" />

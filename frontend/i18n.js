@@ -403,6 +403,16 @@
     "Repair confirmed": "已确认维修",
     "Condemned": "已报废",
     "Tell me what the customer said": "客户回复时通知我",
+    // The title on the home screen's notifications row for Sales, Purchaser
+    // and Admin. The technicians' one is the line above.
+    "Tell me when a repair is ready to quote": "有维修可以报价时通知我",
+    "Notifications": "通知",
+    // How many other phones are being told. Its own span in app.js, so it
+    // can be seen here at all - glued to the sentence before it, nothing
+    // matched and the whole line stayed English.
+    "no devices are being notified yet": "目前没有设备会收到通知",
+    "Blocked on this device — this can only be undone in the phone's own settings":
+      "本机已禁止通知 — 只能在手机设置中恢复",
     "Notify this device when Sales confirm a repair or condemn a machine": "销售确认维修或报废时通知本机",
     "On for this device": "本机已开启",
     "Turn on": "开启",
@@ -1014,7 +1024,8 @@
     // because nothing here had ever been asked to translate them.
     [/^(\d+) to quote$/, "$1 台待报价"],
     [/^(\d+) waiting on customer$/, "$1 台等待客户回复"],
-    [/^(\d+) of (\d+)$/, "$1 / $2"]
+    [/^(\d+) of (\d+)$/, "$1 / $2"],
+    [/^(\d+) devices? being notified$/, "$1 台设备会收到通知"]
   ];
 
   // Attributes that hold text a person reads.

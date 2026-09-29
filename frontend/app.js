@@ -766,6 +766,10 @@ $("lang-toggle").addEventListener("click", () => {
 
 function applyRoleToHome() {
   const role = getRole();
+  // The notifications switch, drawn with the rest of home. Here rather than in
+  // showScreen() because it is the job that decides what it says, and this is
+  // the one function that runs whenever the job might have changed.
+  renderPushRow("home");
   // The list of functions and which job gets which now lives in
   // app-functions.js, loaded just before this file and required by the server
   // as well - so "what does a Technician see" has one answer instead of two
@@ -2881,11 +2885,6 @@ function statusOk(m) { return `<span class="led" style="background:#38A32A;box-s
 // ---- Open Service: slip list -> slip detail -> machine modal ---------------
 async function enterOpenService() {
   showScreen("open");
-  // Technicians only: this row tells THEM what the customer said. Sales have
-  // their own on Need to Quote, pointing the other way. Anyone else opening a
-  // slip does not need a second notifications control.
-  if (getRole() === "tech") renderPushRow("tech");
-  else { const r = $("push-row-tech"); if (r) r.style.display = "none"; }
   session.slipNumber = null; session.slip = null; session.machineId = null;
   session.technician = ""; session.pendingParts = [];
   slipScreenFrom = "open";
@@ -10380,7 +10379,6 @@ $("om-submit").addEventListener("click", async () => {
 // the list of them, so nothing sits waiting because nobody knew.
 async function enterNeedToQuote() {
   showScreen("quote");
-  renderPushRow("quote");
   const wrap = $("q-list");
   wrap.innerHTML = `<div class="fp-loading">Loading…</div>`;
   try {
@@ -10511,28 +10509,66 @@ async function currentPushSubscription() {
 // work is told what the customer said. One set of behaviour, two sets of
 // elements - a second copy would drift, and the blocked-permission handling
 // took long enough to get right once.
-const PUSH_ROWS = {
-  quote: {
-    row: "push-row", btn: "push-toggle", sub: "push-sub", help: "push-help",
-    group: "", screen: "screen-quote",
-    off: "Notify this device when a technician finishes a repair",
-  },
+// ONE SWITCH, ON THE HOME SCREEN. John, 29 Sep 2026: "the only way to turn on
+// push notifications is on the Need to Quote page, which technicians don't
+// have access to."
+//
+// There had been two - one on Need to Quote for Sales, one on the slip picker
+// for technicians - and two buried switches are worse than one. Neither was
+// anywhere a person would look for a setting, John could not see the
+// technicians' one at all to check whether it was on, and anybody who found
+// both would reasonably think they were two different things. They never were:
+// a device has ONE subscription, and the only difference between the two rows
+// was the sentence under the title.
+//
+// So there is one row, on the screen everybody starts on, and the sentence is
+// chosen from the job of whoever is looking at it.
+const PUSH_AUDIENCE = {
+  // What each job is actually told about - see QUOTE_NOTIFY_ROLES and
+  // notifyTechs() in server.js. The wording promises exactly that and nothing
+  // more: a notification people do not get is how they learn to ignore the
+  // ones they do.
   tech: {
-    row: "push-row-tech", btn: "push-toggle-tech", sub: "push-sub-tech", help: "push-help-tech",
-    group: "tech", screen: "screen-open",
+    group: "tech",
+    title: "Tell me what the customer said",
     off: "Notify this device when Sales confirm a repair or condemn a machine",
+  },
+  sales: {
+    group: "",
+    title: "Tell me when a repair is ready to quote",
+    off: "Notify this device as soon as a technician finishes a repair",
+  },
+};
+PUSH_AUDIENCE.purchaser = PUSH_AUDIENCE.sales;
+PUSH_AUDIENCE.admin = PUSH_AUDIENCE.sales;
+
+const PUSH_ROWS = {
+  home: {
+    row: "push-row-home", btn: "push-toggle-home", sub: "push-sub-home",
+    title: "push-title-home", help: "push-help-home", screen: "screen-home",
   },
 };
 
-async function renderPushRow(which = "quote") {
-  const ids = PUSH_ROWS[which] || PUSH_ROWS.quote;
+// Which sentence this person gets. An unknown job gets the technician's, on
+// the grounds that somebody with no job in this app is not Sales.
+function pushAudience() {
+  return PUSH_AUDIENCE[getRole()] || PUSH_AUDIENCE.tech;
+}
+
+async function renderPushRow(which = "home") {
+  const ids = PUSH_ROWS[which] || PUSH_ROWS.home;
   const row = $(ids.row);
   if (!row) return;
+  // Nobody has said who they are yet, so there is no telling what to promise.
+  if (!getRole()) { row.style.display = "none"; return; }
   if (!pushSupported()) { row.style.display = "none"; return; }
   row.style.display = "flex";
 
   const btn = $(ids.btn);
   const sub = $(ids.sub);
+  const audience = pushAudience();
+  const title = $(ids.title);
+  if (title) title.textContent = audience.title;
   btn.dataset.push = which;
 
   // Checked first, and without awaiting: it is the one answer that settles the
@@ -10559,19 +10595,19 @@ async function renderPushRow(which = "quote") {
   // of the ways this looks broken - everyone assumes someone else turned it on.
   let devices = null;
   try {
-    devices = (await api(`/api/push/status${ids.group ? "?group=" + ids.group : ""}`)).devices;
+    devices = (await api(`/api/push/status${audience.group ? "?group=" + audience.group : ""}`)).devices;
   } catch (_) {}
   const across = devices === null ? ""
-    : devices === 0 ? " · no devices are being notified yet"
-    : ` · ${devices} device${devices === 1 ? "" : "s"} being notified`;
+    : devices === 0 ? "no devices are being notified yet"
+    : `${devices} device${devices === 1 ? "" : "s"} being notified`;
 
-  if (existing) {
-    btn.textContent = "Turn off";
-    sub.textContent = "On for this device" + across;
-  } else {
-    btn.textContent = "Turn on";
-    sub.textContent = ids.off + across;
-  }
+  // TWO SPANS, NOT ONE SENTENCE. i18n.js translates a whole text node at a
+  // time, so a sentence with a count glued onto the end of it matches nothing
+  // in the dictionary and the WHOLE line stays English on a Chinese phone.
+  // That is what was happening here.
+  btn.textContent = existing ? "Turn off" : "Turn on";
+  sub.innerHTML = `<span>${escapeHtml(existing ? "On for this device" : audience.off)}</span>` +
+    (across ? ` · <span>${escapeHtml(across)}</span>` : "");
 }
 
 // Where to undo a "Don't allow". The steps differ enough between the two that
@@ -10637,8 +10673,8 @@ document.addEventListener("visibilitychange", () => {
 });
 window.addEventListener("focus", recheckPushRow);
 
-async function togglePush(which = "quote") {
-  const ids = PUSH_ROWS[which] || PUSH_ROWS.quote;
+async function togglePush(which = "home") {
+  const ids = PUSH_ROWS[which] || PUSH_ROWS.home;
   const btn = $(ids.btn);
   // Asking again would do nothing visible: the browser resolves a blocked
   // request immediately without showing anything, so the tap would look broken.
@@ -12697,8 +12733,7 @@ $("ipl-order-more").addEventListener("click", () => {
     if (box && !box.value.trim()) box.value = bits.join(" \u00b7 ");
   }
 });
-$("push-toggle").addEventListener("click", () => togglePush("quote"));
-$("push-toggle-tech").addEventListener("click", () => togglePush("tech"));
+$("push-toggle-home").addEventListener("click", () => togglePush("home"));
 
 function closeIplPart() {
   $("ipl-modal").style.display = "none";
