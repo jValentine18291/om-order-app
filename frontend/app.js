@@ -2699,13 +2699,37 @@ async function shareSlipPdf(slipIn) {
 // that is what puts it in front of a printer, or WhatsApp, or mail - and a
 // plain download everywhere else. Extracted so the workshop printout and the
 // customer's slip cannot drift apart in how they are handed over.
+//
+// THE FILE AND NOTHING ELSE. `title` is deliberately NOT passed to
+// navigator.share, and putting it back is how the bug below returns.
+//
+// John, 28 Sep 2026: a quotation sent from an iPhone arrived in the customer's
+// WhatsApp correctly attached, followed by a line reading
+// "blob:https://192.168.1.7:8443/<...>". The PDF is fine; the second line is
+// iOS handing the target a URL for the same data alongside the file, which it
+// does when the share carries anything besides the files themselves. WhatsApp
+// renders that URL as a message. It is an address on the office network, so to
+// a customer it is a line of gibberish that goes nowhere.
+//
+// The parameter stays because every caller has a sensible title and a platform
+// that uses one may come back; it simply is not sent while sharing a file.
 async function deliverPdf(blob, filename, title) {
   const file = new File([blob], filename, { type: "application/pdf" });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
-      await navigator.share({ files: [file], title });
+      await navigator.share({ files: [file] });
       return;
-    } catch (_) { /* cancelled, or the share failed - fall through to download */ }
+    } catch (e) {
+      // CANCELLING IS NOT FAILING. Tapping outside the share sheet used to
+      // fall through to the download below, which on an iPhone puts the app on
+      // a blob: address - the same string, arriving a second way. Somebody who
+      // changed their mind gets nothing, which is what they asked for.
+      //
+      // AbortError alone. NotAllowedError looks similar and is not the same
+      // thing - it is the browser refusing a share that did not come from a
+      // tap - and that one does want the download.
+      if (e && e.name === "AbortError") return;
+    }
   }
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
