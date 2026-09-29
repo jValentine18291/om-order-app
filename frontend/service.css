@@ -719,6 +719,11 @@ select {
 .slip-card-top strong { font-size: 1.05rem; }
 .slip-card-co { margin-top: 4px; font-weight: 600; color: var(--ink); }
 .slip-card-sub { margin-top: 2px; font-size: .82rem; color: var(--ink-faint); }
+/* HOW LONG IT HAS BEEN SITTING. Plain by default - an age is context, not news
+   - and marked only once it is past the threshold in app.js, so the marking
+   still means something when half the list is not wearing it. */
+.slip-age { font-variant-numeric: tabular-nums; }
+.slip-age-late { color: var(--amber, #B26B00); font-weight: 600; }
 
 /* ---- Slip detail: back link + machine buttons ---- */
 

@@ -26,6 +26,8 @@
 const fs = require("fs");
 const path = require("path");
 const webpush = require("web-push");
+// What each notification says, in the language of the phone it lands on.
+const notifyI18n = require("./notify-i18n");
 
 const KEY_FILE = path.join(__dirname, "vapid.json");
 
@@ -67,6 +69,7 @@ function init(db) {
       user_id    TEXT NOT NULL DEFAULT '',
       role       TEXT NOT NULL DEFAULT '',
       tech       TEXT NOT NULL DEFAULT '',
+      lang       TEXT NOT NULL DEFAULT '',
       created_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
     )
   `);
@@ -77,12 +80,20 @@ function init(db) {
       db.exec("ALTER TABLE push_subscriptions ADD COLUMN tech TEXT NOT NULL DEFAULT ''");
       console.log("[push] migrated: added tech to push_subscriptions");
     }
+    // Which language this phone is in. Empty on every row that existed before
+    // this, which reads as English - the language every notification was
+    // written in until now, so nobody's notifications change until their phone
+    // next subscribes and says otherwise.
+    if (!cols.includes("lang")) {
+      db.exec("ALTER TABLE push_subscriptions ADD COLUMN lang TEXT NOT NULL DEFAULT ''");
+      console.log("[push] migrated: added lang to push_subscriptions");
+    }
   } catch (e) {
     console.error("[push] tech migration check failed:", e.message);
   }
 }
 
-function subscribe(db, { subscription, user_id = "", role = "", tech = "" }) {
+function subscribe(db, { subscription, user_id = "", role = "", tech = "", lang = "" }) {
   const s = subscription || {};
   const keysIn = s.keys || {};
   if (!s.endpoint || !keysIn.p256dh || !keysIn.auth) {
@@ -94,12 +105,14 @@ function subscribe(db, { subscription, user_id = "", role = "", tech = "" }) {
   // back the same endpoint, and the person or role attached to it may have
   // changed since.
   db.prepare(
-    `INSERT INTO push_subscriptions (endpoint, p256dh, auth, user_id, role, tech)
-     VALUES (?, ?, ?, ?, ?, ?)
+    `INSERT INTO push_subscriptions (endpoint, p256dh, auth, user_id, role, tech, lang)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(endpoint) DO UPDATE SET
        p256dh = excluded.p256dh, auth = excluded.auth,
-       user_id = excluded.user_id, role = excluded.role, tech = excluded.tech`
-  ).run(s.endpoint, keysIn.p256dh, keysIn.auth, String(user_id), String(role), String(tech));
+       user_id = excluded.user_id, role = excluded.role, tech = excluded.tech,
+       lang = excluded.lang`
+  ).run(s.endpoint, keysIn.p256dh, keysIn.auth, String(user_id), String(role), String(tech),
+        String(lang || "").toLowerCase());
   return { ok: true };
 }
 
@@ -158,9 +171,14 @@ async function sendTo(db, rows, payload) {
 
   await Promise.all(rows.map(async (row) => {
     try {
+      // PER DEVICE, not per message. Two technicians can be told the same
+      // thing in two languages, and the one who reads Chinese should not have
+      // to work out what "the customer says go ahead with the repair" means
+      // on a lock screen. A row with no language is English, which is what
+      // every notification was until this existed.
       await webpush.sendNotification(
         { endpoint: row.endpoint, keys: { p256dh: row.p256dh, auth: row.auth } },
-        JSON.stringify(payload),
+        JSON.stringify(notifyI18n.localise(payload, row.lang)),
         SEND_OPTS
       );
       sent++;

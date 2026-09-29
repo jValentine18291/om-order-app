@@ -310,8 +310,10 @@ app.get("/api/push/key", (_req, res) => res.json({ key: push.publicKey }));
 
 app.post("/api/push/subscribe", (req, res) => {
   try {
-    const { subscription, user_id, role, tech } = req.body || {};
-    res.json(push.subscribe(pushDb, { subscription, user_id, role, tech }));
+    // lang comes from the app, which is the only thing that knows which way
+    // the switch in the topbar is set on this particular phone.
+    const { subscription, user_id, role, tech, lang } = req.body || {};
+    res.json(push.subscribe(pushDb, { subscription, user_id, role, tech, lang }));
   } catch (err) {
     res.status(err.status || 500).json({ error: err.message || "Could not subscribe" });
   }

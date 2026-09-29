@@ -418,7 +418,10 @@ function listSlips(statusFilter = "active") {
     rows = db.prepare("SELECT * FROM service_slips WHERE status != 'CLOSED' ORDER BY slip_number").all();
   }
   // Attach machine list (lightweight — descriptions only) for dropdown display.
-  const getMachines = db.prepare("SELECT id, machine_desc, state, disposal, converted_at FROM slip_machines WHERE slip_id = ?");
+  // decided_at comes along so a list can say how long a machine has been
+  // waiting - it is when the machine last moved, which for one sitting on
+  // Sales' list is when it was sent to them.
+  const getMachines = db.prepare("SELECT id, machine_desc, state, disposal, converted_at, decided_at FROM slip_machines WHERE slip_id = ?");
   for (const r of rows) r.machines = getMachines.all(r.id);
   return rows.map(withQuoteCounts);
 }
@@ -1922,7 +1925,10 @@ function searchSlips(query = "", scope = "all", limit = 20) {
   const hasMore = rows.length > cap;
   const trimmed = hasMore ? rows.slice(0, cap) : rows;
 
-  const getMachines = db.prepare("SELECT id, machine_desc, state, disposal, converted_at FROM slip_machines WHERE slip_id = ?");
+  // decided_at comes along so a list can say how long a machine has been
+  // waiting - it is when the machine last moved, which for one sitting on
+  // Sales' list is when it was sent to them.
+  const getMachines = db.prepare("SELECT id, machine_desc, state, disposal, converted_at, decided_at FROM slip_machines WHERE slip_id = ?");
   for (const r of trimmed) r.machines = getMachines.all(r.id);
 
   // The same two counts every other list carries. Through withQuoteCounts

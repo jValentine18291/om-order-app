@@ -710,6 +710,46 @@ function chooseUser(id, opts) {
 function currentLang() {
   return window.OM_I18N ? OM_I18N.language() : "en";
 }
+// What the server should write against this device's push subscription. Its
+// own function, so the one place that answers "which language is this phone
+// in" is the same one the topbar reads.
+function currentPushLang() {
+  return currentLang() === "zh" ? "zh" : "en";
+}
+
+// KEEP THE SERVER'S COPY IN STEP. A push notification is composed on the
+// server while the app is closed, from the person, the job and the language
+// recorded against this device when it subscribed. All three can change after
+// that - somebody hands their phone over, John changes a role, the language
+// switch is tapped - and until this existed, none of it reached the server
+// until notifications were turned off and on again.
+//
+// Re-registering an existing subscription is an upsert on its endpoint, so
+// this is one small POST on open and never a second subscription. It does
+// nothing at all on a phone that has never turned notifications on.
+async function syncPushRegistration() {
+  try {
+    if (!pushSupported() || !getUser()) return;
+    const reg = await navigator.serviceWorker.getRegistration();
+    const sub = reg && await reg.pushManager.getSubscription();
+    if (!sub) return;
+    await api("/api/push/subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        subscription: sub.toJSON(),
+        user_id: (getUser() || {}).id || "",
+        role: getRole(),
+        tech: (getUser() || {}).tech || "",
+        lang: currentPushLang(),
+      }),
+    });
+  } catch (_) {
+    // Nothing here is worth interrupting anybody for: the subscription that is
+    // already on the server still works, it is only out of date.
+  }
+}
+
 function updateLangToggle() {
   const btn = $("lang-toggle");
   if (!btn) return;
@@ -1023,6 +1063,99 @@ function confirmStateChange(machine, to) {
     machineTitle(machine),
     from ? trLabel("Now", from) : "",
     trLabel("Change to", next),
+  ]);
+}
+
+// ---- How long something has been sitting ------------------------------------
+// John, 29 Sep 2026, after a sweep of the live book: twelve machines waiting to
+// be quoted, the oldest twenty days; thirty-six slips where nobody had touched
+// a single machine, the oldest twenty-eight days. None of those numbers were
+// anywhere in the app. A backlog nobody can see is a backlog nobody works.
+//
+// THE THRESHOLDS ARE HERE, in one place, and they are John's to move. Three
+// days for a quotation, because a price the customer is waiting on is the
+// thing that goes stale fastest. Fourteen for a slip nobody has started, which
+// on the day this was written flagged eleven of thirty-six - enough to act on,
+// not so many that the marking means nothing.
+const QUOTE_STALE_DAYS = 3;
+const SLIP_STALE_DAYS = 14;
+
+// Whole days, never negative. A clock a few minutes ahead on one phone should
+// not produce "-1 days".
+function daysSince(when) {
+  if (!when) return null;
+  const t = new Date(String(when).replace(" ", "T"));
+  if (isNaN(t)) return null;
+  const d = Math.floor((Date.now() - t.getTime()) / 86400000);
+  return d < 0 ? 0 : d;
+}
+
+// "today", "1 day", "8 days" - each one its own phrase, because Chinese does
+// not build them the way English does. See i18n.js.
+function ageLabel(days) {
+  if (days === null) return "";
+  if (days <= 0) return "today";
+  return days === 1 ? "1 day" : `${days} days`;
+}
+
+// The age, marked when it has gone on too long. Returns the markup, or "" when
+// there is no date to go on.
+function ageHtml(days, late) {
+  const text = ageLabel(days);
+  if (!text) return "";
+  return `<span class="slip-age${late ? " slip-age-late" : ""}">${escapeHtml(text)}</span>`;
+}
+
+// "Waiting 20 days", for the one screen where the waiting IS the subject. Its
+// own phrase rather than the bare age, and its own entry in i18n.js, because
+// Chinese puts it together differently.
+function waitedHtml(days) {
+  if (days === null || days === undefined) return "";
+  const text = days <= 0 ? "Waiting since today"
+             : days === 1 ? "Waiting 1 day"
+             : `Waiting ${days} days`;
+  return `<span class="slip-age${days >= QUOTE_STALE_DAYS ? " slip-age-late" : ""}">${escapeHtml(text)}</span>`;
+}
+
+// Nobody has started this slip: every machine on it is exactly as it came in.
+function slipUntouched(s) {
+  const ms = (s && s.machines) || [];
+  return ms.length > 0 && ms.every((m) => m.state === "RECEIVED");
+}
+
+// ---- Nothing to quote -------------------------------------------------------
+// Three of the thirteen machines sitting on Sales' list had no parts, no
+// labour and no note on them - two of those for eighteen days. Sales open it,
+// find nothing to price, and put it back down; the customer waits.
+//
+// A WARNING, NOT A REFUSAL. A machine can legitimately go for quoting with
+// nothing on it - a customer who wants a price before anybody touches it - and
+// a hard block would stop that with no way round. This makes it a decision
+// instead of an accident.
+function machineHasSomethingToQuote(m) {
+  const saved = ((m && m.parts) || []).length;
+  // Parts scanned and not yet committed count: moveMachine() saves them on the
+  // way past, so by the time Sales see it they are on the machine.
+  const pending = (session && session.pendingParts ? session.pendingParts.length : 0);
+  const labour = Number(m && m.labour_charge) || 0;
+  const note = String((m && m.repair_comment) || "").trim();
+  return (saved + pending) > 0 || labour > 0 || !!note;
+}
+
+// The same question for the machine open on screen, where the labour and the
+// note may be typed but not yet saved.
+function openMachineHasSomethingToQuote(m) {
+  if (machineHasSomethingToQuote(m)) return true;
+  const labour = typeof currentLabourValue === "function" ? currentLabourValue() : 0;
+  const note = String(($("os-comment") || {}).value || "").trim();
+  return labour > 0 || !!note;
+}
+
+function confirmQuotingEmpty(names) {
+  if (!names.length) return true;
+  return confirmLines("Send for quoting with nothing recorded?", [
+    names.join("\n"),
+    tr("Sales will have no parts, no labour and no note to price."),
   ]);
 }
 
@@ -2786,7 +2919,16 @@ function renderSlipList() {
         <span class="vs-status vs-${escapeAttr(s.status)}">${escapeHtml(STATUS_LABEL[s.status] || s.status)}</span>
       </div>
       <div class="slip-card-co">${escapeHtml(s.company)}</div>
-      <div class="slip-card-sub">${(s.machines || []).length} machine${(s.machines || []).length === 1 ? "" : "s"}${s.created_at ? " · " + escapeHtml(formatDate(s.created_at)) : ""}</div>
+      <div class="slip-card-sub"><span>${(s.machines || []).length} machine${(s.machines || []).length === 1 ? "" : "s"}</span>${s.created_at ? " · " + escapeHtml(formatDate(s.created_at)) : ""}${
+        // How long it has been here. Marked only when nobody has started it:
+        // an eight-day-old slip being worked on is an ordinary repair, and
+        // marking those too would make the marking mean nothing.
+        (() => {
+          const age = daysSince(s.created_at);
+          const html = ageHtml(age, slipUntouched(s) && age !== null && age >= SLIP_STALE_DAYS);
+          return html ? " · " + html : "";
+        })()
+      }</div>
       ${quotePills(s)}
     </button>`).join("");
   wrap.querySelectorAll(".slip-card").forEach((btn) =>
@@ -5251,6 +5393,11 @@ async function moveMachine(btn, to) {
       await saveCurrentComment();
     } catch (e) { toast(e.message, "err"); return; }
   }
+  // Asked BEFORE the status question, because it is the one that might change
+  // somebody's mind: there is nothing on this machine for Sales to price.
+  if (to === "AWAITING_QUOTE" && !openMachineHasSomethingToQuote(m) &&
+      !confirmQuotingEmpty([machineTitle(m)])) return;
+
   if (to === "CONDEMNED") {
     // Its own question, kept: condemning is the one move that stops the work
     // and asks where the machine goes, and that deserves saying rather than a
@@ -5367,6 +5514,12 @@ async function changeSlipStatus(newState, confirmMsg) {
   // EVERY machine at once, which is the one here worth reading twice.
   const machines = ((session.slip && session.slip.machines) || [])
     .filter((m) => !m.converted_at);
+  // Sending the whole slip is where an empty machine slips through easiest:
+  // one of four has nothing on it and nobody notices until Sales open it.
+  if (newState === "AWAITING_QUOTE") {
+    const empty = machines.filter((m) => !machineHasSomethingToQuote(m)).map(machineTitle);
+    if (!confirmQuotingEmpty(empty)) return;
+  }
   if (!confirmLines("Change every machine on this service request?", [
     tr(`${machines.length} machine${machines.length === 1 ? "" : "s"}`),
     trLabel("Change to", (MACHINE_STATE[newState] || {}).label || newState),
@@ -7033,6 +7186,12 @@ function wireDecideButtons(wrap, slipNumber, slip) {
       const row = btn.closest(".decide-row");
       const machineId = Number(row.dataset.decide);
       const state = btn.dataset.state;
+      const subject = machineById(machineId);
+      // The same warning the repair sheet gives, because this screen can send
+      // a machine for quoting too.
+      if (state === "AWAITING_QUOTE" && subject && !machineHasSomethingToQuote(subject) &&
+          !confirmQuotingEmpty([machineTitle(subject)])) return;
+
       if (state === "CONDEMNED") {
         if (!confirm(
           "Condemn this machine?\n\nThe technicians who worked on it will be told to stop."
@@ -10231,6 +10390,20 @@ async function enterNeedToQuote() {
       refreshQuoteCount();
       return;
     }
+    // OLDEST FIRST, by how long a machine has actually been waiting rather
+    // than by slip number. The server has said "oldest first" since this
+    // screen was written and ordered by slip number, which is only the same
+    // thing while nobody sends a machine back a second time. The one the
+    // customer has been waiting on longest belongs at the top.
+    const waitDays = (s) => {
+      const times = (s.machines || [])
+        .filter((m) => m.state === "AWAITING_QUOTE")
+        .map((m) => daysSince(m.decided_at || s.created_at))
+        .filter((d) => d !== null);
+      return times.length ? Math.max(...times) : (daysSince(s.created_at) || 0);
+    };
+    rows.sort((a, b) => waitDays(b) - waitDays(a));
+
     wrap.innerHTML = rows.map((s) => {
       const all = s.machines || [];
       // Machines are quoted one at a time now, so the count on its own would be
@@ -10239,6 +10412,7 @@ async function enterNeedToQuote() {
       const list = (waiting.length ? waiting : all).map((m) => m.machine_desc);
       const machines = all.length;
       const created = formatDate(s.created_at);
+      const waited = waitDays(s);
       return `
       <button type="button" class="slip-card" data-slip="${escapeAttr(s.slip_number)}">
         <div class="slip-card-top">
@@ -10247,8 +10421,17 @@ async function enterNeedToQuote() {
         </div>
         <div class="slip-card-co">${escapeHtml(s.company)}</div>
         <div class="slip-card-sub">${escapeHtml(list.join(", "))}${
-          waiting.length && waiting.length < machines ? ` · ${waiting.length} of ${machines}` : ""
+          // Its own span, like the count on the slip card: the translator works
+          // one whole text node at a time, and glued to a machine's name and a
+          // date this could never be seen.
+          waiting.length && waiting.length < machines
+            ? ` · <span>${waiting.length} of ${machines}</span>` : ""
         }${created ? " · " + escapeHtml(created) : ""}</div>
+        <div class="slip-card-sub">${
+          // The number this screen exists for. Marked past QUOTE_STALE_DAYS,
+          // because a customer waiting on a price is what goes stale fastest.
+          waitedHtml(waited)
+        }</div>
       </button>`;
     }).join("");
     // Straight into View Slips, which already lists every part with its price
@@ -10512,6 +10695,10 @@ async function togglePush(which = "quote") {
           user_id: (getUser() || {}).id || "",
           role: getRole(),
           tech: (getUser() || {}).tech || "",
+          // Which language THIS phone is in. A notification is composed on the
+          // server and shown while the app is closed, so it is the one piece
+          // of wording i18n.js cannot reach - the server has to be told.
+          lang: currentPushLang(),
         }),
       });
       toast("Notifications on for this device", "ok");
@@ -11628,6 +11815,9 @@ if ("serviceWorker" in navigator) {
   });
   navigator.serviceWorker.ready.then(askSwVersion).catch(() => {});
   askSwVersion();
+  // And tell the server who this phone belongs to and which language it is in,
+  // so the notifications it sends are readable by whoever is holding it.
+  setTimeout(syncPushRegistration, 3000);
   // A phone that is open but idle - nobody scanning, no API calls - would
   // otherwise never see the header. Quarter-hourly is far below the cost of
   // somebody working a full day on last week's app.

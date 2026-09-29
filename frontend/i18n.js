@@ -368,6 +368,20 @@
     // tick. It used to say 已确认维修 for all three. John's, 28 Sep 2026.
     "Marked In Progress": "已标记为进行中",
 
+    // ---- How long something has been sitting ----
+    // The lists say the age of a slip and how long a machine has been waiting
+    // on Sales. Whole phrases, not words glued together: "20 days" is "20 天"
+    // and "Waiting 20 days" is "已等待 20 天", and building either from parts
+    // gets the order wrong. The numbered ones are patterns further down.
+    "today": "今天",
+    "1 day": "1 天",
+    "Waiting since today": "今天送来",
+    "Waiting 1 day": "已等待 1 天",
+    // The warning before a machine goes to Sales with nothing on it.
+    "Send for quoting with nothing recorded?": "这台机器没有任何记录，确定要送去报价吗？",
+    "Sales will have no parts, no labour and no note to price.":
+      "销售将没有零件、工时或维修说明可以报价。",
+
     // ---- Machine modal ----
     "Machine": "机器",
     // The second header line on the machine screen: who is on it, and when the
@@ -991,7 +1005,16 @@
     [/^Couldn't read (\d+) of (\d+) photo\(s\)$/, "共 $2 张，有 $1 张无法读取"],
     [/^(\d+) scanned part\(s\) (?:have not|haven't) been saved\. Discard them\?$/, "有 $1 个已扫描的零件尚未保存。要放弃吗？"],
     [/^(\d+) prices? saved to AutoCount$/, "$1 个价格已保存到 AutoCount"],
-    [/^Price save to AutoCount failed for: (.+)$/, "价格保存到 AutoCount 失败：$1"]
+    [/^Price save to AutoCount failed for: (.+)$/, "价格保存到 AutoCount 失败：$1"],
+    // Ages on the lists. "1 day" and "today" are whole entries above - only
+    // the plural needs a pattern, and it must not match "1 day".
+    [/^(\d+) days$/, "$1 天"],
+    [/^Waiting (\d+) days$/, "已等待 $1 天"],
+    // The pills on a slip card. They were English on a technician's screen
+    // because nothing here had ever been asked to translate them.
+    [/^(\d+) to quote$/, "$1 台待报价"],
+    [/^(\d+) waiting on customer$/, "$1 台等待客户回复"],
+    [/^(\d+) of (\d+)$/, "$1 / $2"]
   ];
 
   // Attributes that hold text a person reads.
@@ -1173,6 +1196,13 @@
     // English back when there is no translation, so a caller can use it
     // unconditionally.
     text: function (s) {
+      // ENABLED FIRST, and this is not a detail. translate() below is a
+      // dictionary lookup that knows nothing about which language the app is
+      // in - `enabled` is what says that, and everything else in this file goes
+      // through it. This function did not, so from 28 to 29 Sep 2026 every
+      // confirmation box built in app.js came out in Chinese for somebody
+      // reading the app in English. John found it the day after.
+      if (!enabled) return s;
       var out = translate(s);
       return out === null ? s : out;
     },
