@@ -5278,9 +5278,35 @@ function renderMachineQuoteRow() {
   if (!row) return;
   const m = currentMachine();
   const slipStatus = session.slip ? session.slip.status : "";
-  // A closed or fully billed slip has left all of this behind.
+  // A closed slip has left all of this behind.
   const live = slipStatus !== "CLOSED" && slipStatus !== "CONVERTED";
-  if (!m || !live || m.converted_at) { row.style.display = "none"; return; }
+  if (!m || !live) { row.style.display = "none"; return; }
+
+  // A MACHINE ON A SALES ORDER HAS NO DECISIONS LEFT - with ONE exception, and
+  // slip 00007 is why. Two of its machines were condemned and then put on the
+  // order at nothing, which is how a condemned machine leaves the building.
+  // converted_at hid every control on them, including the two the slip cannot
+  // close without: the customer's signature, and where the machine went.
+  //
+  // So the slip sat at Invoice Created for twenty days with nothing in the app
+  // able to move it, and John found it from the other end - "slip 00007
+  // doesn't have any buttons to state that the customer has already collected
+  // the two condemned units", 29 Sep 2026.
+  //
+  // Being billed settles what the customer PAYS. It says nothing about whether
+  // they have signed, or whether the machine is still in the workshop.
+  if (m.converted_at) {
+    if (m.state !== "CONDEMNED") { row.style.display = "none"; return; }
+    row.style.display = "flex";
+    $("mm-quote-state").innerHTML =
+      `<span class="machine-quote mq-condemn">Condemned</span> <span>${escapeHtml(
+        DISPOSAL_LABEL[m.disposal] ||
+        "Still here — record where it goes before the slip can close.")}</span>`;
+    const box = $("mm-quote-btns");
+    box.innerHTML = "";
+    renderDisposalButtons(box, m);
+    return;
+  }
 
   const state = $("mm-quote-state");
   const btns = $("mm-quote-btns");
@@ -5385,16 +5411,21 @@ function renderMachineQuoteRow() {
 
   // Where a condemned machine went. Asked here because this is the screen
   // someone is on when the customer turns up for it.
-  if (m.state === "CONDEMNED") {
-    btns.insertAdjacentHTML("beforeend", `
-      <div class="mm-disposal">
-        <div class="mm-disposal-q">What happened to it?</div>
-        <button type="button" class="btn-secondary" data-disposal="COLLECTED"${m.disposal === "COLLECTED" ? " disabled" : ""}>Customer collected it</button>
-        <button type="button" class="btn-secondary" data-disposal="DISPOSED"${m.disposal === "DISPOSED" ? " disabled" : ""}>We disposed of it</button>
-      </div>`);
-    btns.querySelectorAll("[data-disposal]").forEach((b) =>
-      b.addEventListener("click", () => recordDisposal(b, m.id, b.dataset.disposal)));
-  }
+  if (m.state === "CONDEMNED") renderDisposalButtons(btns, m);
+}
+
+// Its own function because two places ask it now: a condemned machine being
+// worked through, and one already on a Sales Order, which has nothing else
+// left to decide but still has to be accounted for.
+function renderDisposalButtons(btns, m) {
+  btns.insertAdjacentHTML("beforeend", `
+    <div class="mm-disposal">
+      <div class="mm-disposal-q">What happened to it?</div>
+      <button type="button" class="btn-secondary" data-disposal="COLLECTED"${m.disposal === "COLLECTED" ? " disabled" : ""}>Customer collected it</button>
+      <button type="button" class="btn-secondary" data-disposal="DISPOSED"${m.disposal === "DISPOSED" ? " disabled" : ""}>We disposed of it</button>
+    </div>`);
+  btns.querySelectorAll("[data-disposal]").forEach((b) =>
+    b.addEventListener("click", () => recordDisposal(b, m.id, b.dataset.disposal)));
 }
 
 async function moveMachine(btn, to) {
@@ -7043,6 +7074,15 @@ function renderSlipDetail(slip) {
     // it. Condemning is not: the customer says the repair costs too much to
     // whoever happens to be on the phone or at the bench.
     const live = slip.status !== "CLOSED" && !m.converted_at;
+    // THE TWO QUESTIONS A SALES ORDER DOES NOT SETTLE: has the customer signed
+    // for the machine being condemned, and where has it gone. Both are
+    // required before the slip can close - see closeSlip() - and both were
+    // hidden the moment the machine went on an order, which is how a condemned
+    // machine leaves the building in the first place.
+    //
+    // Slip 00007: two condemned machines on SO-2609-007, the slip stuck at
+    // Invoice Created since 9 Sep with nothing in the app able to move it.
+    const accountable = slip.status !== "CLOSED";
     let acts = [];
     if (canDecide() && live && m.state !== "RECEIVED") {
       acts =
@@ -7115,7 +7155,7 @@ function renderSlipDetail(slip) {
     //
     // Above "where did it go", because it is the earlier question: they sign
     // that the machine is beyond repair, and then say what becomes of it.
-    if (live && m.state === "CONDEMNED") {
+    if (accountable && m.state === "CONDEMNED") {
       const signed = !!m.has_condemn_signature;
       html += `<div class="decide-row decide-sign${signed ? " decide-signed" : ""}" data-sign="${m.id}">
           <span class="decide-q">${signed ? "Signed for condemning" : "Customer signature needed"}</span>
@@ -7123,7 +7163,7 @@ function renderSlipDetail(slip) {
         </div>`;
     }
 
-    if (live && m.state === "CONDEMNED") {
+    if (accountable && m.state === "CONDEMNED") {
       html += `<div class="decide-row decide-disposal" data-dispose="${m.id}">
           <span class="decide-q">${m.disposal ? "Recorded:" : "Where did it go?"}</span>
           <button type="button" class="decide-btn"${m.disposal === "COLLECTED" ? " disabled" : ""} data-disposal="COLLECTED">Customer collected</button>
