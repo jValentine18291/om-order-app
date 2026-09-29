@@ -2941,6 +2941,13 @@ body.signin-brand .topbar .pill {
 .decide-q {
   flex: 1 0 100%; font-size: .8rem; font-weight: 700; color: var(--ink-faint);
 }
+/* The customer signing that a machine is beyond repair. Amber while it is
+   outstanding, because the slip cannot close until it is done and nothing else
+   on this screen says so; plain once it has been signed, since a finished job
+   should stop asking for attention. */
+.decide-sign { align-items: center; }
+.decide-sign .decide-q { color: #8a5a00; }
+.decide-signed .decide-q { color: var(--ink-faint); font-weight: 600; }
 .mm-quote-btns { display: flex; flex-direction: column; gap: 8px; }
 .mm-disposal {
   margin-top: 6px; padding-top: 10px; border-top: 1px dashed var(--line, #eef1f3);

@@ -4618,6 +4618,13 @@ async function addIplPartToMachine(part) {
 
 let sigPurpose = "register";     // "register" | "condemn"
 let condemnSigMachine = null;
+// WHICH SLIP, and WHAT TO REDRAW AFTERWARDS. Both were the machine sheet's own
+// - session.slipNumber and renderCondemnSig() - which is why this could only
+// ever be signed from that one screen. Sales condemn a machine from View
+// Slips, and since 28 Sep 2026 Sales are the only people who CAN condemn one,
+// so the one screen with the box was the one screen they were not on.
+let condemnSigSlip = "";
+let condemnSigAfter = null;
 
 function renderCondemnSig() {
   const box = $("mm-condemn-sig");
@@ -4640,14 +4647,22 @@ function renderCondemnSig() {
 }
 
 function openCondemnSignature() {
-  const m = currentMachine();
-  if (!m) return;
+  openCondemnSignatureFor(session.slip, currentMachine());
+}
+
+// The same pad, from wherever the machine is being looked at. `after` is what
+// to redraw once it is saved: the machine sheet redraws its own box, the sales
+// screen redraws the whole slip.
+function openCondemnSignatureFor(slip, m, after) {
+  if (!slip || !m) return;
   sigPurpose = "condemn";
   condemnSigMachine = m.id;
+  condemnSigSlip = slip.slip_number;
+  condemnSigAfter = after || null;
   sigPadClear();
   $("sig-heading").textContent = "Customer signature — condemning";
   $("sig-hint").textContent =
-    `By signing, the customer confirms ${machineLabel(session.slip, m)} is beyond repair and they accept it being condemned.`;
+    `By signing, the customer confirms ${machineLabel(slip, m)} is beyond repair and they accept it being condemned.`;
   openSigModal();
 }
 
@@ -4661,13 +4676,17 @@ async function sigDone() {
   const btn = $("sig-done");
   btn.disabled = true;
   try {
-    await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/machines/${condemnSigMachine}/condemn-signature`, {
+    await api(`/api/slips/${encodeURIComponent(condemnSigSlip)}/machines/${condemnSigMachine}/condemn-signature`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ image, who: initialsFor(getUser()) }),
     });
-    await refreshSlip();
-    renderCondemnSig();
+    if (condemnSigAfter) {
+      await condemnSigAfter();
+    } else {
+      await refreshSlip();
+      renderCondemnSig();
+    }
     closeSigModal();
     toast("Signed", "ok");
   } catch (e) {
@@ -5420,6 +5439,13 @@ async function moveMachine(btn, to) {
     await refreshSlip();
     renderMachineParts();
     renderMachineQuoteRow();
+    // THE SIGNATURE BOX. Missing from this list, so condemning a machine from
+    // the sheet it is open on drew every other part of the screen again and
+    // not the one thing the condemning had just created. It appeared on the
+    // NEXT open, which is indistinguishable from not existing - John, 29 Sep
+    // 2026: "there doesn't seem to be a box to sign when a machine is
+    // condemned". Five condemned machines on the live book, none signed.
+    renderCondemnSig();
     renderMachineDecisionBanner();
     updateSlipFooter();
     refreshQuoteCount();
@@ -7081,6 +7107,22 @@ function renderSlipDetail(slip) {
     // Not gated on canDecide, unlike the decisions above: where a machine went
     // is a fact rather than a customer's answer, the workshop often knows it
     // first, and the slip cannot close until somebody records it.
+    // THE CUSTOMER'S SIGNATURE, on the screen Sales actually condemn from.
+    // It existed only on the technician's machine sheet, and since 28 Sep 2026
+    // technicians cannot condemn a machine at all - so the box lived on the
+    // one screen the people doing it were never looking at. Five condemned
+    // machines on the live book, not one of them signed.
+    //
+    // Above "where did it go", because it is the earlier question: they sign
+    // that the machine is beyond repair, and then say what becomes of it.
+    if (live && m.state === "CONDEMNED") {
+      const signed = !!m.has_condemn_signature;
+      html += `<div class="decide-row decide-sign${signed ? " decide-signed" : ""}" data-sign="${m.id}">
+          <span class="decide-q">${signed ? "Signed for condemning" : "Customer signature needed"}</span>
+          <button type="button" class="decide-btn">${signed ? "Sign again" : "Take the signature"}</button>
+        </div>`;
+    }
+
     if (live && m.state === "CONDEMNED") {
       html += `<div class="decide-row decide-disposal" data-dispose="${m.id}">
           <span class="decide-q">${m.disposal ? "Recorded:" : "Where did it go?"}</span>
@@ -7245,6 +7287,17 @@ function wireDecideButtons(wrap, slipNumber, slip) {
         toast(e.message || "Could not put the status back", "err");
         btn.disabled = false;
       }
+    });
+  });
+
+  wrap.querySelectorAll(".decide-sign button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = Number(btn.closest(".decide-sign").dataset.sign);
+      // Redraw the whole slip afterwards rather than this row: the signature
+      // is what lets the slip close, and the closing screen reads it.
+      openCondemnSignatureFor(slip, machineById(id), async () => {
+        onViewSlipChosen(slipNumber);
+      });
     });
   });
 
