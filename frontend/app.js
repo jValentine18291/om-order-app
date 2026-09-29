@@ -1022,6 +1022,38 @@ async function api(path, opts) {
   return body;
 }
 
+// ---- Which line leads on a part -------------------------------------------
+// John, 29 Sep 2026: "whenever a part is shown, we would like the Part No. to
+// be on top in black, while the description below and greyed out." A part
+// number is what somebody is actually looking for - on a shelf, in AutoCount,
+// against an IPL drawing - so it is the line that should be findable.
+//
+// EXCEPT WHERE THE CODE MEANS NOTHING ON ITS OWN, which is his call, asked at
+// the time. A1 to A12, MISC and a free-typed line all carry a placeholder: the
+// code is the same on every job and the description is the whole content.
+// "A7 SVR WAREHOUSE" in black over a greyed "Service Carburetor & Labour"
+// would bury the only words that say what was done.
+//
+// The markup order is swapped at each site, and the stylesheets style
+// whichever of the two lines came FIRST - so there is one mechanism rather
+// than an order and a flag that can disagree, and every list keeps its own
+// sizing. See "PART NUMBER FIRST" in service.css and styles.css.
+function partLeadsWithCode(p) {
+  const code = String((p && p.item_code) || "").trim();
+  if (!code) return false;
+  if (p && p.free_text) return false;
+  try {
+    if (typeof isFreeTextPart === "function" &&
+        isFreeTextPart(code, (p && p.description) || "")) return false;
+  } catch (_) {}
+  return !(window.OM_SERVICE_ITEMS && OM_SERVICE_ITEMS.isUnstockedCode(code));
+}
+
+// The two lines themselves, in the order that part decides.
+function partTwoLines(p, descHtml, codeHtml) {
+  return partLeadsWithCode(p) ? codeHtml + descHtml : descHtml + codeHtml;
+}
+
 async function lookupItem(code) {
   return api(`/api/items/${encodeURIComponent(code)}`);
 }
@@ -1399,9 +1431,10 @@ function machineOptionHtml(r) {
   // does not, which for a machine with no override it usually does.
   const full = r.description && r.description !== short ? r.description : "";
   return `<button type="button" class="company-option" data-code="${escapeAttr(r.item_code)}" data-desc="${escapeAttr(short)}">
-      <span class="fp-opt-desc">${escapeHtml(short)}${
-        r.desc2 ? ` <span class="fp-opt-model">· ${escapeHtml(r.desc2)}</span>` : ""}</span>
-      <span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>
+      ${partTwoLines(r,
+        `<span class="fp-opt-desc">${escapeHtml(short)}${
+          r.desc2 ? ` <span class="fp-opt-model">· ${escapeHtml(r.desc2)}</span>` : ""}</span>`,
+        `<span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>`)}
       ${full ? `<span class="ns-opt-full">${escapeHtml(full)}</span>` : ""}
     </button>`;
 }
@@ -2615,8 +2648,9 @@ async function showModelParts(model) {
       : `${r.total} part${r.total === 1 ? "" : "s"}`;
     $("fits-body").innerHTML = list.map((x) =>
       `<button type="button" class="company-option" data-code="${escapeAttr(x.item_code)}">
-         <span class="fp-opt-desc">${escapeHtml(x.description)}</span>
-         <span class="fp-opt-code mono">${escapeHtml(x.item_code)}</span>
+         ${partTwoLines(x,
+           `<span class="fp-opt-desc">${escapeHtml(x.description)}</span>`,
+           `<span class="fp-opt-code mono">${escapeHtml(x.item_code)}</span>`)}
        </button>`).join("") +
       (r.truncated ? `<div class="fp-empty">Showing the first ${list.length}. Search the part number to find a specific one.</div>` : "");
     // Straight into the part peek, which already shows stock, shelf and notes -
@@ -5051,12 +5085,13 @@ function renderMachineParts() {
         <div class="line line-pending">
           <div class="head">
             <div class="info">
-              <div class="desc">${escapeHtml(p.description)}${
-                p.free_text
-                  ? ` <button type="button" class="desc-edit" data-pdesc="${i}" aria-label="Edit description">${PENCIL}</button>`
-                  : ""
-              }</div>
-              <div class="sku mono">${escapeHtml(p.item_code)} · ${escapeHtml(p.technician)}</div>
+              ${partTwoLines(p,
+                `<div class="desc">${escapeHtml(p.description)}${
+                  p.free_text
+                    ? ` <button type="button" class="desc-edit" data-pdesc="${i}" aria-label="Edit description">${PENCIL}</button>`
+                    : ""
+                }${p.technician ? ` · ${escapeHtml(p.technician)}` : ""}</div>`,
+                `<div class="sku mono">${escapeHtml(p.item_code)}</div>`)}
               ${tubeQtyDisplay(p) ? `<div class="tube-frac${tubeQtyDisplay(p).wrong ? " tube-frac-bad" : ""}">${escapeHtml(tubeQtyDisplay(p).frac)}</div>` : ""}
             </div>
             <div class="price-col">
@@ -5104,12 +5139,13 @@ function renderMachineParts() {
     el.innerHTML = `
       <div class="head">
         <div class="info">
-          <div class="desc">${escapeHtml(p.description)}${
-            (p.free_text || isFreeTextPart(p.item_code, p.description))
-              ? ` <button type="button" class="desc-edit" data-desc="${p.id}" aria-label="Edit description">${PENCIL}</button>`
-              : ""
-          }</div>
-          <div class="sku mono">${escapeHtml(p.item_code)} · ${escapeHtml(p.technician || "")}</div>
+          ${partTwoLines(p,
+            `<div class="desc">${escapeHtml(p.description)}${
+              (p.free_text || isFreeTextPart(p.item_code, p.description))
+                ? ` <button type="button" class="desc-edit" data-desc="${p.id}" aria-label="Edit description">${PENCIL}</button>`
+                : ""
+            }${p.technician ? ` · ${escapeHtml(p.technician)}` : ""}</div>`,
+            `<div class="sku mono">${escapeHtml(p.item_code)}</div>`)}
           ${tubeQtyDisplay(p) ? `<div class="tube-frac${tubeQtyDisplay(p).wrong ? " tube-frac-bad" : ""}">${escapeHtml(tubeQtyDisplay(p).frac)}</div>` : ""}
           ${noPrice ? `<div class="no-price-tag">No price — enter one</div>` : ""}
         </div>
@@ -7190,8 +7226,10 @@ function renderSlipDetail(slip) {
         html += `
           <div class="vs-part">
             <div class="vs-part-info">
-              <div class="vs-part-desc">${escapeHtml(p.description)}</div>
-              <div class="vs-part-sku mono">${escapeHtml(p.item_code)}${p.technician ? " · " + escapeHtml(p.technician) : ""}</div>
+              ${partTwoLines(p,
+                `<div class="vs-part-desc">${escapeHtml(p.description)}${
+                  p.technician ? " · " + escapeHtml(p.technician) : ""}</div>`,
+                `<div class="vs-part-sku mono">${escapeHtml(p.item_code)}</div>`)}
             </div>
             <div class="vs-part-amt">
               <div>${escapeHtml(String(p.quantity))} × ${money(p.unit_price)}</div>
@@ -8727,8 +8765,9 @@ function renderRecentParts() {
     `<p class="eyebrow fp-recent-head">Recently looked up</p>` +
     list.map((r) =>
       `<button type="button" class="company-option" data-recent="${escapeAttr(r.item_code)}">
-         <span class="fp-opt-desc">${escapeHtml(r.description)}</span>
-         <span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>
+         ${partTwoLines(r,
+           `<span class="fp-opt-desc">${escapeHtml(r.description)}</span>`,
+           `<span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>`)}
        </button>`).join("");
   box.style.display = "block";
   box.querySelectorAll("[data-recent]").forEach((b) =>
@@ -8802,9 +8841,10 @@ function partOptionHtml(p, { extraClass = "" } = {}) {
   const mine = p.fit === 0 ? `<span class="fp-opt-fit">This machine</span>` : "";
   return `<button type="button" class="company-option fp-opt-row ${extraClass}" data-code="${escapeAttr(p.item_code)}">
       <span class="fp-opt-main">
-        <span class="fp-opt-desc">${escapeHtml(p.description)}${
-          p.desc2 ? ` <span class="fp-opt-model">· ${escapeHtml(p.desc2)}</span>` : ""}${mine}</span>
-        <span class="fp-opt-code mono">${sub}</span>
+        ${partTwoLines(p,
+          `<span class="fp-opt-desc">${escapeHtml(p.description)}${
+            p.desc2 ? ` <span class="fp-opt-model">· ${escapeHtml(p.desc2)}</span>` : ""}${mine}</span>`,
+          `<span class="fp-opt-code mono">${sub}</span>`)}
       </span>
       ${known ? `<span class="fp-opt-qty ${n > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${escapeHtml(qty)}${
         p.uom ? `<span class="fp-opt-uom">${escapeHtml(p.uom)}</span>` : ""}</span>` : ""}
@@ -9126,8 +9166,9 @@ async function peekAtPart(code) {
       $("peek-sub").textContent = `${list.length} parts match that number`;
       $("peek-body").innerHTML = list.map((r) =>
         `<button type="button" class="company-option" data-code="${escapeAttr(r.item_code)}">
-           <span class="fp-opt-desc">${escapeHtml(r.description)}</span>
-           <span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>
+           ${partTwoLines(r,
+             `<span class="fp-opt-desc">${escapeHtml(r.description)}</span>`,
+             `<span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>`)}
          </button>`).join("");
       $("peek-body").querySelectorAll(".company-option").forEach((b) =>
         b.addEventListener("click", () => peekAtPart(b.dataset.code))
@@ -9378,8 +9419,9 @@ $("repl-q").addEventListener("input", () => {
       $("repl-results").innerHTML = list.length
         ? list.map((r) => `
             <button type="button" class="company-option" data-code="${escapeAttr(r.item_code)}">
-              <span class="fp-opt-desc">${escapeHtml(r.description)}</span>
-              <span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>
+              ${partTwoLines(r,
+                `<span class="fp-opt-desc">${escapeHtml(r.description)}</span>`,
+                `<span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>`)}
             </button>`).join("")
         : `<div class="fp-empty">No part in AutoCount matches that.</div>`;
       $("repl-results").querySelectorAll(".company-option").forEach((b) =>
@@ -9564,8 +9606,9 @@ function renderShipment(x) {
   $("shd-lines").innerHTML = `<div class="lines-box">` + (x.lines || []).map((l) => `
     <div class="po-line">
       <span class="po-line-main">
-        <span class="po-line-desc">${escapeHtml(l.description || l.item_code)}</span>
-        <span class="po-line-code mono">${escapeHtml(l.item_code)} · ${escapeHtml(l.po_no)}</span>
+        ${partTwoLines(l,
+          `<span class="po-line-desc">${escapeHtml(l.description || l.item_code)}</span>`,
+          `<span class="po-line-code mono">${escapeHtml(l.item_code)} · ${escapeHtml(l.po_no)}</span>`)}
       </span>
       <span class="po-line-qty">${escapeHtml(shipQty(l))}${l.uom ? `<span class="po-line-of">${escapeHtml(l.uom)}</span>` : ""}</span>
     </div>`).join("") + `</div>`;
@@ -9663,8 +9706,9 @@ function renderDraftLines() {
   box.innerHTML = `<div class="lines-box">` + shipDraft.lines.map((l, i) => `
     <div class="po-line">
       <span class="po-line-main">
-        <span class="po-line-desc">${escapeHtml(l.description || l.item_code)}</span>
-        <span class="po-line-code mono">${escapeHtml(l.item_code)} · ${escapeHtml(l.po_no)}</span>
+        ${partTwoLines(l,
+          `<span class="po-line-desc">${escapeHtml(l.description || l.item_code)}</span>`,
+          `<span class="po-line-code mono">${escapeHtml(l.item_code)} · ${escapeHtml(l.po_no)}</span>`)}
       </span>
       <span class="po-line-qty">${escapeHtml(shipQty(l))}</span>
       <button type="button" class="remove" data-dropline="${i}" aria-label="Remove">${TRASH}</button>
@@ -10917,8 +10961,9 @@ async function loadPartRequests() {
         return `
         <div class="pu-line">
           <div class="pu-line-main">
-            <div class="pu-desc">${escapeHtml(r.description || r.item_code)}</div>
-            <div class="pu-code mono">${escapeHtml(r.item_code)}</div>
+            ${partTwoLines(r,
+              `<div class="pu-desc">${escapeHtml(r.description || r.item_code)}</div>`,
+              `<div class="pu-code mono">${escapeHtml(r.item_code)}</div>`)}
             ${r.remarks ? `<div class="pu-remarks">“${escapeHtml(r.remarks)}”</div>` : ""}
           </div>
           <div class="pu-line-qty">
@@ -11019,9 +11064,11 @@ function renderOrderEditCard(b) {
     <div class="pu-edit-line" data-line="${r.id}"${r.free_text ? ' data-placeholder="1"' : ""} data-was="${escapeAttr(r.description || "")}">
       <div class="pu-line-main">
         ${r.free_text
-          ? `<input class="pu-edesc" type="text" value="${escapeAttr(r.description || "")}" aria-label="What this part is" />`
-          : `<div class="pu-desc">${escapeHtml(r.description || r.item_code)}</div>`}
-        <div class="pu-code mono">${escapeHtml(r.item_code)}</div>
+          ? `<input class="pu-edesc" type="text" value="${escapeAttr(r.description || "")}" aria-label="What this part is" />
+             <div class="pu-code mono">${escapeHtml(r.item_code)}</div>`
+          : partTwoLines(r,
+              `<div class="pu-desc">${escapeHtml(r.description || r.item_code)}</div>`,
+              `<div class="pu-code mono">${escapeHtml(r.item_code)}</div>`)}
       </div>
       <input class="pu-eqty" type="number" min="1" inputmode="numeric" value="${r.qty_requested}" aria-label="Quantity" />
       <button type="button" class="pu-eremove" aria-label="Remove line">&#10005;</button>
@@ -11138,8 +11185,9 @@ $("bo-q").addEventListener("input", () => {
       if (!list.length) { box.innerHTML = `<div class="fp-empty">No matching parts</div>`; return; }
       box.innerHTML = list.map((r) => `
         <button type="button" class="company-option" data-code="${escapeAttr(r.item_code)}" data-desc="${escapeAttr(r.description)}">
-          <span class="fp-opt-desc">${escapeHtml(r.description)}${r.desc2 ? ` <span class="fp-val-model">${escapeHtml(r.desc2)}</span>` : ""}</span>
-          <span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>
+          ${partTwoLines(r,
+            `<span class="fp-opt-desc">${escapeHtml(r.description)}${r.desc2 ? ` <span class="fp-val-model">${escapeHtml(r.desc2)}</span>` : ""}</span>`,
+            `<span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>`)}
         </button>`).join("");
       box.querySelectorAll(".company-option").forEach((b) =>
         b.addEventListener("click", () => {
@@ -11258,12 +11306,13 @@ function renderBulkCart() {
     <div class="bo-item">
       <div class="bo-line">
         <div class="bo-line-main">
-          <div class="pu-desc">${escapeHtml(c.description)}${
-            c.placeholder
-              ? ` <button type="button" class="desc-edit" data-bdesc="${i}" aria-label="Edit description">${PENCIL}</button>`
-              : ""
-          }</div>
-          <div class="pu-code mono">${escapeHtml(c.item_code)}</div>
+          ${partTwoLines({ item_code: c.item_code, description: c.description, free_text: c.placeholder },
+            `<div class="pu-desc">${escapeHtml(c.description)}${
+              c.placeholder
+                ? ` <button type="button" class="desc-edit" data-bdesc="${i}" aria-label="Edit description">${PENCIL}</button>`
+                : ""
+            }</div>`,
+            `<div class="pu-code mono">${escapeHtml(c.item_code)}</div>`)}
         </div>
         <input class="bo-qty" type="number" min="1" inputmode="numeric" value="${c.qty}" data-i="${i}" aria-label="Quantity" />
         <button type="button" class="bo-remove" data-i="${i}" aria-label="Remove">&#10005;</button>
@@ -12751,8 +12800,9 @@ async function openIplPart(index) {
       // the user pick rather than guessing which one they meant.
       $("ipl-part-stock").innerHTML = list.map((r) =>
         `<button type="button" class="company-option" data-code="${escapeAttr(r.item_code)}">
-           <span class="fp-opt-desc">${escapeHtml(r.description)}</span>
-           <span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>
+           ${partTwoLines(r,
+             `<span class="fp-opt-desc">${escapeHtml(r.description)}</span>`,
+             `<span class="fp-opt-code mono">${escapeHtml(r.item_code)}</span>`)}
          </button>`).join("");
       $("ipl-part-stock").querySelectorAll(".company-option").forEach((b) =>
         b.addEventListener("click", () => renderIplStock(b.dataset.code))

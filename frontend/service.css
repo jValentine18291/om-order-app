@@ -3367,3 +3367,62 @@ input.spk-qty{width:84px;flex:0 0 auto;text-align:right;
   font:inherit;font-size:12.5px;font-weight:600;
   color:var(--primary,#0a7f86);text-decoration:underline;
 }
+
+/* ===========================================================================
+   PART NUMBER FIRST
+   ---------------------------------------------------------------------------
+   John, 29 Sep 2026: "whenever a part is shown, we would like the Part No. to
+   be on top in black, while the description below and greyed out."
+
+   app.js decides WHICH way round by the order it writes the two lines - see
+   partLeadsWithCode(), which keeps the description on top for A1..A12, MISC
+   and free-typed lines, whose code is a placeholder that means nothing on its
+   own. These rules only say what the two lines look like once that is decided,
+   by styling whichever of them came first. One mechanism: an order and a
+   separate flag could disagree, a first-child rule cannot.
+
+   Each list keeps its own sizes, so the part number reads as that list's
+   heading rather than every list suddenly agreeing on one size.
+   =========================================================================== */
+
+/* View Slips */
+.vs-part-info > .vs-part-sku:first-child {
+  margin-top: 0; color: var(--ink); font-size: .95rem; font-weight: 600;
+}
+.vs-part-info > .vs-part-sku:first-child + .vs-part-desc {
+  color: var(--ink-faint); font-size: .78rem; margin-top: 2px;
+}
+
+/* Every part search: New Service, Find Part, Bulk Order, the IPL sheet, the
+   replacement picker, "what else fits", and the recent list. */
+.company-option > .fp-opt-code:first-child {
+  margin-top: 0; color: var(--ink); font-size: .95rem; font-weight: 600;
+}
+.company-option > .fp-opt-code:first-child + .fp-opt-desc {
+  display: block; color: var(--ink-faint); font-size: .78rem; margin-top: 2px;
+}
+/* Find Part's own rows, where the code line also carries the shelf. */
+.fp-opt-main > .fp-opt-code:first-child {
+  margin-top: 0; color: var(--ink); font-size: .95rem; font-weight: 600;
+}
+.fp-opt-main > .fp-opt-code:first-child + .fp-opt-desc {
+  color: var(--ink-faint); font-size: .8rem; margin-top: 2px;
+}
+
+/* Orders, and the Bulk Order cart */
+.pu-line-main > .pu-code:first-child,
+.bo-line-main > .pu-code:first-child {
+  margin-top: 0; font-size: .95rem; font-weight: 700; color: var(--ink);
+}
+.pu-line-main > .pu-code:first-child + .pu-desc,
+.bo-line-main > .pu-code:first-child + .pu-desc {
+  font-weight: 400; font-size: .8rem; color: var(--ink-faint); margin-top: 2px;
+}
+
+/* Purchase Orders and Shipments */
+.po-line-main > .po-line-code:first-child {
+  margin-top: 0; font-size: .95rem; font-weight: 600; color: var(--ink);
+}
+.po-line-main > .po-line-code:first-child + .po-line-desc {
+  font-size: 11px; color: var(--ink-faint, #78868c); margin-top: 2px;
+}

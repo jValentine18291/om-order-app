@@ -486,3 +486,12 @@ button { font-family: inherit; cursor: pointer; border: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* PART NUMBER FIRST - the parts list on a machine. See the block of the same
+   name in service.css for why, and app.js for what decides it. */
+.line .info > .sku:first-child {
+  margin-top: 0; font-size: 15px; font-weight: 600; color: var(--ink); letter-spacing: 0;
+}
+.line .info > .sku:first-child + .desc {
+  margin-top: 3px; font-weight: 500; font-size: 12.5px; color: var(--ink-soft);
+}
