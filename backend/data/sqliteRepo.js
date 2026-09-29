@@ -1676,6 +1676,37 @@ function autoInvoiceFromDocuments(slipNumber, who = "AutoCount") {
   return { filled };
 }
 
+// THE SLIPS WORTH ASKING AUTOCOUNT ABOUT.
+//
+// A Sales Order that reached AutoCount and has nothing recorded against it
+// yet: no Delivery Order, no invoice, no cash sale. Those are the ones where
+// the office may have transferred the order since anybody last looked.
+//
+// John, 29 Sep 2026: he transferred SO-2609-059 and SO-2609-062 to delivery
+// orders and the app went on showing neither. Nothing was broken - the lookup
+// found both the moment it was asked - but it was only ever asked when
+// somebody opened that particular slip, and nobody had. Fourteen slips were
+// sitting in exactly that state when this was written.
+//
+// Orders hang off a slip by their notes line, which is how every other query
+// here finds them.
+//
+// A slip whose closing_ref is already filled is left out on purpose. Once a
+// document is recorded, autoInvoiceFromDocuments() will not replace it, so
+// asking again would cost a query and change nothing.
+function slipsAwaitingDocuments(limit = 200) {
+  return db.prepare(
+    `SELECT DISTINCT s.slip_number AS slip_number
+       FROM service_slips s
+       JOIN orders o ON o.notes = 'S/S: ' || s.slip_number
+      WHERE s.status != 'CLOSED'
+        AND TRIM(IFNULL(o.autocount_doc_no, '')) != ''
+        AND TRIM(IFNULL(o.closing_ref, '')) = ''
+      ORDER BY s.id DESC
+      LIMIT ?`
+  ).all(Number(limit) || 200).map((r) => r.slip_number);
+}
+
 function setSlipInvoiced(slipNumber, ref, who = "", soNumber = "") {
   const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
@@ -2969,6 +3000,7 @@ const slips = {
   listShipments, getShipment, createShipment, updateShipment,
   allocatedByPo, receivedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
   orderDocuments, recordOrderDocuments, billingDocument, autoInvoiceFromDocuments,
+  slipsAwaitingDocuments,
   slipDeletable, deleteSlip,
   createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setSlipExtrasNote, slipContacts, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, correctMachine,
   setCondemnSignature, getCondemnSignature, unsignedCondemned,

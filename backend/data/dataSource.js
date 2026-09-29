@@ -84,6 +84,7 @@ module.exports = {
     billingDocument: (...a) => dataRepo.slips.billingDocument(...a),
     recordOrderDocuments: (...a) => dataRepo.slips.recordOrderDocuments(...a),
     autoInvoiceFromDocuments: (...a) => dataRepo.slips.autoInvoiceFromDocuments(...a),
+    slipsAwaitingDocuments: (...a) => dataRepo.slips.slipsAwaitingDocuments(...a),
     setAllMachineStates: (...a) => dataRepo.slips.setAllMachineStates(...a),
     finishRepair: (...a) => dataRepo.slips.finishRepair(...a),
     setMachineDisposal: (...a) => dataRepo.slips.setMachineDisposal(...a),

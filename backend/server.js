@@ -2036,63 +2036,142 @@ app.patch("/api/slips/:slip/machines/:id/state", handleMachineState);
 // EVERY FAILURE IS SILENT AND HARMLESS. No AutoCount, no answer, no change -
 // and Close Service still takes a number typed by hand exactly as it does
 // today.
-app.post("/api/slips/:slip/documents/refresh", async (req, res) => {
-  try {
-    const slipNumber = req.params.slip;
-    const orders = await data.slips.getSlipOrders(slipNumber);
-    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+// ONE IMPLEMENTATION, two callers: the route below, which runs when somebody
+// opens a slip, and the sweep further down, which runs on a timer because
+// nobody opening a slip is exactly the case that was going wrong.
+async function refreshSlipDocuments(slipNumber) {
+  const orders = await data.slips.getSlipOrders(slipNumber);
+  const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
 
-    // Whatever is already known, so the screen has something either way.
-    const known = () => (orders || []).map((o) => ({
+  // Whatever is already known, so the screen has something either way.
+  const known = () => (orders || []).map((o) => ({
+    so_number: o.so_number,
+    autocount_doc_no: o.autocount_doc_no || "",
+    closing_ref: o.closing_ref || "",
+    documents: data.slips.orderDocuments(o.id),
+  }));
+
+  if (itemsSource !== "autocount") {
+    return { supported: false, orders: known(), filled: [] };
+  }
+
+  const acRepo = require("./data/autocountRepo");
+  let asked = 0;
+  for (const o of orders || []) {
+    const start = String(o.autocount_doc_no || "").trim();
+    if (!start) continue;                       // never reached AutoCount
+    try {
+      const found = await acRepo.chainFrom([start]);
+      data.slips.recordOrderDocuments(o.id, found);
+      asked++;
+    } catch (e) {
+      // One order failing is not the others failing.
+      console.error(`[documents/refresh] ${o.so_number}:`, e.message);
+    }
+  }
+
+  // Only after everything found is written down, so the number chosen is the
+  // best one available rather than the first one that happened to arrive.
+  const { filled } = asked
+    ? data.slips.autoInvoiceFromDocuments(slipNumber, "AutoCount")
+    : { filled: [] };
+
+  const fresh = await data.slips.getSlipOrders(slipNumber);
+  return {
+    supported: true,
+    orders: (fresh || []).map((o) => ({
       so_number: o.so_number,
       autocount_doc_no: o.autocount_doc_no || "",
       closing_ref: o.closing_ref || "",
       documents: data.slips.orderDocuments(o.id),
-    }));
+    })),
+    filled,
+  };
+}
 
-    if (itemsSource !== "autocount") {
-      return res.json({ supported: false, orders: known(), filled: [] });
-    }
-
-    const acRepo = require("./data/autocountRepo");
-    let asked = 0;
-    for (const o of orders || []) {
-      const start = String(o.autocount_doc_no || "").trim();
-      if (!start) continue;                       // never reached AutoCount
-      try {
-        const found = await acRepo.chainFrom([start]);
-        data.slips.recordOrderDocuments(o.id, found);
-        asked++;
-      } catch (e) {
-        // One order failing is not the others failing.
-        console.error(`[documents/refresh] ${o.so_number}:`, e.message);
-      }
-    }
-
-    // Only after everything found is written down, so the number chosen is the
-    // best one available rather than the first one that happened to arrive.
-    const { filled } = asked
-      ? data.slips.autoInvoiceFromDocuments(slipNumber, "AutoCount")
-      : { filled: [] };
-
-    res.json({
-      supported: true,
-      orders: await (async () => {
-        const fresh = await data.slips.getSlipOrders(slipNumber);
-        return (fresh || []).map((o) => ({
-          so_number: o.so_number,
-          autocount_doc_no: o.autocount_doc_no || "",
-          closing_ref: o.closing_ref || "",
-          documents: data.slips.orderDocuments(o.id),
-        }));
-      })(),
-      filled,
-    });
+app.post("/api/slips/:slip/documents/refresh", async (req, res) => {
+  try {
+    res.json(await refreshSlipDocuments(req.params.slip));
   } catch (err) {
     console.error("[POST /api/slips/:slip/documents/refresh]", err);
     res.json({ supported: false, orders: [], filled: [] });
   }
 });
+
+// ---- Asking without being asked --------------------------------------------
+// The route above is called when somebody OPENS a slip. That was John's choice
+// and it is the cheap one - but it means a slip nobody opens is a slip nobody
+// asks about, and the office transfers orders in AutoCount all day without
+// touching this app.
+//
+// John, 29 Sep 2026: SO-2609-059 and SO-2609-062 had both become delivery
+// orders and the app showed neither. The lookup found them the instant it was
+// asked; it had simply never been asked. Fourteen slips were behind in exactly
+// that way.
+//
+// So the server asks by itself, for the slips where the answer could have
+// changed: a Sales Order in AutoCount with no document recorded against it
+// yet. There were fourteen of those against eighty-six slips, and each is one
+// chain walk, so a sweep is a handful of queries rather than a scan of the
+// book.
+//
+// OFF BY DEFAULT IT IS NOT - a sweep that has to be switched on is a sweep
+// nobody switches on, and this is the whole of what John asked for. Set
+// AUTOCOUNT_DOC_SWEEP_MINUTES=0 to stop it.
+//
+// It never runs two at once. A sweep that overlaps itself would ask SQL Server
+// the same questions twice and could record the same document from both.
+const SWEEP_MINUTES = (() => {
+  const raw = process.env.AUTOCOUNT_DOC_SWEEP_MINUTES;
+  if (raw === undefined || raw === "") return 10;
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? n : 10;
+})();
+let sweeping = false;
+
+async function sweepSlipDocuments() {
+  if (sweeping) return { skipped: true };
+  if ((process.env.ITEMS_SOURCE || "sqlite").toLowerCase() !== "autocount") return { skipped: true };
+  sweeping = true;
+  const started = Date.now();
+  let asked = 0;
+  const filled = [];
+  try {
+    const slips = await data.slips.slipsAwaitingDocuments(200);
+    for (const slipNumber of slips) {
+      try {
+        const r = await refreshSlipDocuments(slipNumber);
+        asked++;
+        for (const f of (r && r.filled) || []) filled.push({ slip: slipNumber, ...f });
+      } catch (e) {
+        // One slip failing is not the rest failing - the same rule the route
+        // uses for one order among several.
+        console.error(`[doc-sweep] ${slipNumber}:`, e.message);
+      }
+    }
+    // Only when something actually changed. A line every ten minutes saying
+    // nothing happened is a log nobody reads.
+    if (filled.length) {
+      console.log(`[doc-sweep] ${filled.length} recorded from AutoCount: ` +
+        filled.map((f) => `${f.slip} ${f.so_number} -> ${f.doc_type} ${f.doc_no}`).join("; "));
+    }
+  } catch (e) {
+    console.error("[doc-sweep]", e.message);
+  } finally {
+    sweeping = false;
+  }
+  return { asked, filled, ms: Date.now() - started };
+}
+
+if (SWEEP_MINUTES > 0) {
+  // Not at startup. A deploy restarts the service, and the first thing it does
+  // should be answering the phones in the workshop, not a round of queries to
+  // SQL Server.
+  setTimeout(() => {
+    sweepSlipDocuments();
+    setInterval(sweepSlipDocuments, SWEEP_MINUTES * 60 * 1000);
+  }, 60 * 1000);
+}
 
 // CORRECTING A MACHINE'S STATUS BY HAND. John's, and nobody else's.
 //
