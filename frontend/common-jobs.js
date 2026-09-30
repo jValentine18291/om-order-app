@@ -56,6 +56,12 @@
     // so it is not flagged as a line waiting for a price.
     { id: "CARBSVC", title: "Service Carburetor",
       code: "A7 SVR WAREHOUSE",    qty: 1, price: 0.00 },
+    // Rethreading, the technicians' ask on 30 Sep 2026. A fourth job on "A7
+    // SVR WAREHOUSE", kept apart from the others by its id for the same
+    // reason as the two above. $8 is its standing price, and like every line
+    // the technician can change it on the sheet.
+    { id: "RETHREAD", title: "Rethread",
+      code: "A7 SVR WAREHOUSE",    qty: 1, price: 8.00 },
     // One pipe per tap. These lines never merge - see addPartToMachine - so a
     // machine that took two gets two lines, or one line the technician steps
     // up to 2 with the stepper. Either reads the same on the Sales Order.
