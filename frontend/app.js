@@ -7170,8 +7170,14 @@ function renderSlipDetail(slip) {
             slip.created_by ? ` · Registered by ${escapeHtml(slip.created_by)}` : ""}</div>
         </div>
         <span class="vs-status vs-${escapeAttr(slip.status)}">${escapeHtml(STATUS_LABEL[slip.status] || slip.status)}</span>
-        ${quotePills(slip)}
       </div>
+      ${
+        // On a line of their own, under the header. Inside it they were a
+        // third item in a row that never wraps, and "0 of 1 collected" was
+        // pushed clean out of the card's edge on a phone - John's screenshot,
+        // 30 Sep 2026. Same as the slip cards, where they already sit below.
+        quotePills(slip)
+      }
       ${slipSoLine(slip)}
       <!-- What each order became in AutoCount: SO -> DO -> INV. Filled in
            after the slip is on screen, by refreshSlipDocuments(), so a slow or
