@@ -1201,14 +1201,16 @@ select {
 /* The machine sheet's foot: the running total and Save, pinned so that a long
    part list never pushes the button out of reach. Sticky rather than fixed, so
    it stays inside the sheet and the rounded corners still work. */
+/* NOT STICKY. John, 30 Sep 2026: with three Save buttons the pinned footer
+   ate a third of a phone screen, and the technicians want the space for the
+   parts. It sits at the end of the sheet and scrolls with it - Save is one
+   flick away, and every part above it is on screen. It keeps the sheet-edge
+   margins and the rule so it still reads as the end of the sheet. */
 .mm-footer {
-  position: sticky;
-  bottom: -20px;                 /* the sheet's own bottom padding */
   margin: 12px -16px -20px;      /* out to the sheet's edges */
   padding: 12px 16px 20px;
   background: var(--bg, #f4f6f7);
   border-top: 1px solid var(--border);
-  z-index: 1;
 }
 
 /* ---- Signing in ---------------------------------------------------------
