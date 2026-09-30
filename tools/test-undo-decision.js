@@ -92,8 +92,8 @@ const canUndo = async (no) => (await data.slips.getSlip(no)).machines[0].can_und
   // same rule setMachineState follows when a machine stops being condemned.
   const c = await freshMachine("CONDEMNED THEN NOT PTE LTD");
   await data.slips.setMachineState(c.no, c.id, "CONDEMNED", "CY");
-  await data.slips.setMachineDisposal(c.no, c.id, "COLLECTED", "CY");
-  check("the disposal is on it", (await data.slips.getSlip(c.no)).machines[0].disposal, "COLLECTED");
+  await data.slips.setMachineDisposal(c.no, c.id, "DISPOSED", "CY");
+  check("the disposal is on it", (await data.slips.getSlip(c.no)).machines[0].disposal, "DISPOSED");
   // A disposal IS something recorded, so it has to be taken off first - the
   // undo will not quietly discard a fact about where a machine went.
   await refuses("and it will not be discarded quietly",
@@ -126,7 +126,7 @@ const canUndo = async (no) => (await data.slips.getSlip(no)).machines[0].can_und
     409, "a repair comment");
 
   const o = await freshMachine("ON AN ORDER PTE LTD");
-  await data.slips.setMachineState(o.no, o.id, "TO_REPAIR", "CY");
+  await data.slips.setMachineState(o.no, o.id, "REPAIRED", "CY");
   await data.slips.setMachineLabour(o.id, 30);
   await data.slips.createSlipOrder(o.no, [o.id]);
   check("a machine already on a Sales Order is not offered it", await canUndo(o.no), false);
@@ -146,6 +146,7 @@ const canUndo = async (no) => (await data.slips.getSlip(no)).machines[0].can_und
   // uses - a finished record is a finished record.
   const d = await freshMachine("FINISHED PTE LTD");
   await data.slips.setMachineLabour(d.id, 30);
+  await data.slips.setMachineState(d.no, d.id, "REPAIRED", "WJ");
   await data.slips.createSlipOrder(d.no, [d.id]);
   await data.slips.setSlipInvoiced(d.no, "INV-9101", "JT");
   await data.slips.closeSlip(d.no, "DO-9101", "JT");

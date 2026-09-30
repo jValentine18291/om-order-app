@@ -112,6 +112,7 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
   console.log("\n-- and it is the SAME block the Sales Order uses --");
   // The one that matters. Raise the order and compare line for line.
   const q2 = await data.slips.quotationForSlip(no);
+  for (const id of [blower.id, trimmer.id]) await data.slips.setMachineState(no, id, "REPAIRED", "WJ");
   const so = await data.slips.createSlipOrder(no, [blower.id, trimmer.id]);
   const order = await data.slips.getSlipOrder(no);
   const shape = (l) => [l.item_code || "", l.description || "",
@@ -218,6 +219,7 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
     [`QT-${on}`, `QT-${on}-2`]);
   check("and the revision carries the forced code", o2.lines[0].item_code, "A3 SVR RIDE-ON EQUIPT");
 
+  await data.slips.setMachineState(on, om, "REPAIRED", "WJ");
   const ovOrder = await data.slips.createSlipOrder(on, [om]);
   const ovLines = (await data.slips.getSlipOrder(on)).lines;
   check("but the Sales Order still says what the machine is",
@@ -239,6 +241,7 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
   check("the Ferris opens with A3", rdq.lines[0].item_code, "A3 SVR RIDE-ON EQUIPT");
   check("the Automower with A12",
     rdq.lines.filter((l) => !l.note)[1].item_code, "A12 SVR AUTOMOWER");
+  for (const m of rd.machines) await data.slips.setMachineState(rdn, m.id, "REPAIRED", "WJ");
   await data.slips.createSlipOrder(rdn, rd.machines.map((m) => m.id));
   const rdLines = (await data.slips.getSlipOrder(rdn)).lines.filter((l) => l.item_code);
   check("and the Sales Order agrees, without anyone choosing",
@@ -266,6 +269,7 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
   check("somebody who already said it is left alone",
     named[2], "ZENOAH EBZ5100(AS) Backpack Leaf Blower 50.2cc");
 
+  for (const m of bare.machines) await data.slips.setMachineState(bn, m.id, "REPAIRED", "WJ");
   await data.slips.createSlipOrder(bn, bare.machines.map((m) => m.id));
   const bLines = (await data.slips.getSlipOrder(bn)).lines
     .filter((l) => !l.item_code && /S\/S:/.test(l.description || ""))

@@ -137,7 +137,9 @@ const seen = async (scope, no) =>
   await data.slips.setCondemnSignature(noC, mow, { image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==", who: "KS" });
   await refuse("but it cannot be closed with a machine still in the workshop",
     () => data.slips.closeSlip(noC, "", "KS"), /Condemned but not yet accounted for/);
-  await data.slips.setMachineDisposal(noC, mow, "COLLECTED", "KS");
+  // Disposed of, rather than collected: collecting it would need its own $0
+  // order first (30 Sep 2026), and this test is about the closing gate.
+  await data.slips.setMachineDisposal(noC, mow, "DISPOSED", "KS");
   slip = await data.slips.closeSlip(noC, "", "KS");
   check("and once it has left, it closes", slip.status, "CLOSED");
 

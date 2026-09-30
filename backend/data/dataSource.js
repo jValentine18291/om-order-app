@@ -87,6 +87,7 @@ module.exports = {
     slipsAwaitingDocuments: (...a) => dataRepo.slips.slipsAwaitingDocuments(...a),
     setAllMachineStates: (...a) => dataRepo.slips.setAllMachineStates(...a),
     finishRepair: (...a) => dataRepo.slips.finishRepair(...a),
+    saveMachineWork: (...a) => dataRepo.slips.saveMachineWork(...a),
     setMachineDisposal: (...a) => dataRepo.slips.setMachineDisposal(...a),
     techniciansForMachine: (...a) => dataRepo.slips.techniciansForMachine(...a),
     createSlipOrder: (...a) => dataRepo.slips.createSlipOrder(...a),

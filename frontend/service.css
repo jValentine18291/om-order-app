@@ -3426,3 +3426,25 @@ input.spk-qty{width:84px;flex:0 0 auto;text-align:right;
 .po-line-main > .po-line-code:first-child + .po-line-desc {
   font-size: 11px; color: var(--ink-faint, #78868c); margin-top: 2px;
 }
+
+
+/* ===========================================================================
+   THE SAVE BAR - three ways to close a machine sheet. John, 30 Sep 2026.
+   Two green, because both are the ordinary end of a session at the bench;
+   one orange, because sending a machine to Sales is a different kind of act
+   and should not be tapped by reflex. Greyed with a reason beside it when the
+   slip says the customer wants a quote before anything is called repaired.
+   =========================================================================== */
+.mm-save-row { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.mm-save-btn { width: 100%; }
+.mm-save-quote { background: #C97A00; border-color: #C97A00; }
+.mm-save-quote:active { background: #A86300; }
+.mm-save-btn:disabled { opacity: .45; cursor: not-allowed; }
+.mm-save-hint {
+  margin-top: 6px; font-size: .8rem; line-height: 1.4; color: #8a5a00;
+}
+
+/* "2 of 5 collected" on a slip card and the slip header - the answer to what
+   is still in the building, per slip. Its own colour: it is neither the quote
+   question nor a status. */
+.q-tag-collected { background: #E7F5EC; color: #135A31; }

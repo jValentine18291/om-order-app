@@ -46,6 +46,7 @@ const { salesOrderMessage: messageFor } =
     item_code: "SZEN 848BE058B2", description: "GASKET", unit_price: 12.5, quantity: 2, technician: "WJ",
   });
   await data.slips.setMachineLabour(m.id, 40);
+  await data.slips.setMachineState(slip.slip_number, m.id, "REPAIRED", "WJ");
   let result = await data.slips.createSlipOrder(slip.slip_number, [m.id]);
   let msg = messageFor(data.slips.getSlip(slip.slip_number), result, result.so_number);
   check("names the machine when there is only one", msg.body.includes("BK3410 (Thick)"), true);
@@ -61,7 +62,10 @@ const { salesOrderMessage: messageFor } =
                { desc: "K10SP", serial: "B3" }],
   });
   let ms = data.slips.getSlip(slip.slip_number).machines;
-  for (const one of ms.slice(0, 2)) await data.slips.setMachineLabour(one.id, 10);
+  for (const one of ms.slice(0, 2)) {
+    await data.slips.setMachineLabour(one.id, 10);
+    await data.slips.setMachineState(slip.slip_number, one.id, "REPAIRED", "WJ");
+  }
   result = await data.slips.createSlipOrder(slip.slip_number, [ms[0].id, ms[1].id]);
   msg = messageFor(data.slips.getSlip(slip.slip_number), result, result.so_number);
   check("counts the machines rather than naming them", msg.body.includes("2 machines"), true);
@@ -80,6 +84,7 @@ const { salesOrderMessage: messageFor } =
   m = data.slips.getSlip(slip.slip_number).machines[0];
   // A comment counts as work, which is what lets this convert at all.
   await data.slips.setMachineComment(m.id, "Checked, nothing needed");
+  await data.slips.setMachineState(slip.slip_number, m.id, "REPAIRED", "WJ");
   result = await data.slips.createSlipOrder(slip.slip_number, [m.id]);
   msg = messageFor(data.slips.getSlip(slip.slip_number), result, result.so_number);
   check("no money in the message", /\$/.test(msg.body), false);

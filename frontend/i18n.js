@@ -677,6 +677,32 @@
     "Pick a slip first.": "请先选择服务单。",
     // Pressing Save on a machine is what marks it repaired.
     "Saved · marked as Repaired": "已保存 · 已标记为已修好",
+    // ---- The three Save buttons ----
+    // John, 30 Sep 2026: short enough to fit on one line of a phone, and
+    // meaning exactly what the English says. 未完成 is "not finished", 已修好
+    // is the same word the status pill uses, 送去报价 is "send for quotation".
+    "Save – not done yet": "保存 · 未完成",
+    "Save – fully repaired": "保存 · 已修好",
+    "Save – send for quotation": "保存 · 送去报价",
+    "Save and keep it in progress?": "确定保存，并保持进行中？",
+    "Save and mark it fully repaired?": "确定保存，并标记为已修好？",
+    "Save and send it for quotation?": "确定保存，并送去报价？",
+    "It stays In Progress - nobody is told.": "机器保持进行中，不会通知任何人。",
+    "Sales will be told there is a machine to price.": "将通知销售有机器需要报价。",
+    "Saved · not done yet": "已保存 · 未完成",
+    "Saved · sent for quotation": "已保存 · 已送去报价",
+    "Customer wants a quote first - send it for quotation, and mark it repaired once they have said yes.":
+      "客户要求先报价 — 请先送去报价，客户同意后再标记已修好。",
+    "Already on a Sales Order - only the parts can change.": "已在销售订单上 — 只能修改零件。",
+    "Condemned - Sales can put it back to repair.": "已报废 — 销售可以改回维修。",
+    "Only Sales and Admin can change this. The Save buttons below are yours.":
+      "只有销售和管理员可以更改。下面的保存按钮是你的。",
+    // ---- Collecting, machine by machine ----
+    "Collected?": "已收回？",
+    // The Sales Order picker, on a machine still being worked on.
+    "Not finished yet — mark it repaired first": "尚未完成 — 请先标记为已修好",
+    "Still here": "还在这里",
+    "Still here — tick it off when the customer collects it.": "还在这里 — 客户收回时请勾选。",
     "Send Quotation": "发送报价单",
     // Back to the bench from View Slips, for a slip the workshop's own list no
     // longer shows.
@@ -1025,7 +1051,11 @@
     [/^(\d+) to quote$/, "$1 台待报价"],
     [/^(\d+) waiting on customer$/, "$1 台等待客户回复"],
     [/^(\d+) of (\d+)$/, "$1 / $2"],
-    [/^(\d+) devices? being notified$/, "$1 台设备会收到通知"]
+    [/^(\d+) devices? being notified$/, "$1 台设备会收到通知"],
+    // Collection, per slip: "2 of 5 collected" on the cards and the header,
+    // and the date a machine was handed back on the sales screen.
+    [/^(\d+) of (\d+) collected$/, "已收回 $1 / $2"],
+    [/^Collected · (.+)$/, "已收回 · $1"]
   ];
 
   // Attributes that hold text a person reads.

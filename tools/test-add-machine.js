@@ -107,6 +107,7 @@ const descs = (slip) => (slip.machines || []).map((m) => m.machine_desc);
   // The one that matters: the customer approves the quotation, then the order
   // is raised from the same slip. If the two disagreed about the machine that
   // was added, they would be billed for a repair they never approved.
+  await data.slips.setMachineState(no, added.id, "REPAIRED", "WJ");   // only a finished machine goes on an order
   await data.slips.createSlipOrder(no, [added.id]);
   const so = await data.slips.getSlipOrder(no);
   check("and the Sales Order says exactly the same thing",
@@ -143,6 +144,7 @@ const descs = (slip) => (slip.machines || []).map((m) => m.machine_desc);
     company: "FINISHED PTE LTD", machines: [{ desc: "345BT" }], signature: sig,
   });
   await data.slips.setMachineLabour(done.machines[0].id, 30);
+  await data.slips.setMachineState(done.slip_number, done.machines[0].id, "REPAIRED", "WJ");
   await data.slips.createSlipOrder(done.slip_number, [done.machines[0].id]);
   await data.slips.setSlipInvoiced(done.slip_number, "INV-9001", "JT");
   await data.slips.closeSlip(done.slip_number, "DO-9001", "JT");
@@ -159,6 +161,7 @@ const descs = (slip) => (slip.machines || []).map((m) => m.machine_desc);
     company: "ALREADY BILLED PTE LTD", machines: [{ desc: "531RB" }], signature: sig,
   });
   await data.slips.setMachineLabour(billed.machines[0].id, 30);
+  await data.slips.setMachineState(billed.slip_number, billed.machines[0].id, "REPAIRED", "WJ");
   await data.slips.createSlipOrder(billed.slip_number, [billed.machines[0].id]);
   await data.slips.setSlipInvoiced(billed.slip_number, "INV-9002", "JT");
   const late = await data.slips.addMachineToSlip(billed.slip_number, { desc: "125B" }, "JT");

@@ -113,6 +113,7 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
     });
     const id = s.machines[0].id;
     await data.slips.setMachineLabour(id, 10);
+    await data.slips.setMachineState(s.slip_number, id, "REPAIRED", "WJ");
     await data.slips.createSlipOrder(s.slip_number, [id], "KS");
     const ls = (await data.slips.getSlipOrder(s.slip_number)).lines;
     return ls[ls.length - 1].description;

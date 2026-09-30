@@ -912,11 +912,26 @@ function quotePills(slip) {
   if (!slip) return "";
   const n = Number(slip.to_quote) || 0;
   const w = Number(slip.quote_waiting) || 0;
-  if (!n && !w) return "";
+  const c = collectedCount(slip);
+  if (!n && !w && !c) return "";
   const tags = [];
   if (n) tags.push(`<span class="q-tag q-tag-do">${n} to quote</span>`);
   if (w) tags.push(`<span class="q-tag q-tag-wait">${w} waiting on customer</span>`);
+  // What is still in the building, per slip. Shown from the first billed
+  // machine onward, so "0 of 5 collected" is itself a fact worth reading.
+  if (c) tags.push(`<span class="q-tag q-tag-collected">${c.collected} of ${c.of} collected</span>`);
   return `<span class="q-tags">${tags.join("")}</span>`;
+}
+
+// How many of a slip's machines the customer has taken, out of how many they
+// could: a machine is collectable once it is finished and on its Sales Order.
+// Worked out from the machines on the row rather than asked of the server,
+// because every list already carries state, disposal and converted_at.
+function collectedCount(slip) {
+  const ms = (slip && slip.machines) || [];
+  const able = ms.filter((m) => (m.state === "REPAIRED" || m.state === "CONDEMNED") && String(m.converted_at || "").trim());
+  if (!able.length) return null;
+  return { collected: able.filter((m) => String(m.disposal || "").trim()).length, of: able.length };
 }
 
 // ---- What is actually on screen --------------------------------------------
@@ -3246,7 +3261,15 @@ function openExtrasModal() {
 // Counts the parts ALREADY on the machine as well as the ones scanned and not
 // yet saved: the question is what the machine will read afterwards, not what
 // this particular tap is carrying.
-function confirmSave() {
+// What each of the three buttons promises, in the confirmation and in the
+// toast afterwards. One table, so the two cannot drift.
+const SAVE_OUTCOME = {
+  progress: { ask: "Save and keep it in progress?", will: "It stays In Progress - nobody is told.", done: "Saved · not done yet" },
+  repaired: { ask: "Save and mark it fully repaired?", will: "It will be marked as Repaired.", done: "Saved · marked as Repaired" },
+  quote:    { ask: "Save and send it for quotation?", will: "Sales will be told there is a machine to price.", done: "Saved · sent for quotation" },
+};
+
+function confirmSave(outcome) {
   const m = session.extras ? null : currentMachine();
   const already = ((m && m.parts) || (session.extras && session.slip ? session.slip.extras || [] : []) || []).length;
   const parts = already + (session.pendingParts ? session.pendingParts.length : 0);
@@ -3259,18 +3282,48 @@ function confirmSave() {
   if (!session.extras && note) lines.push(tr("a repair note"));
   if (!lines.length) lines.push(tr("Nothing has been recorded on it yet."));
 
-  // The status change hidden inside Save. finishRepair() on the server moves a
-  // machine only from these two states and only with something recorded on it,
-  // so this promises exactly what it will do - see sqliteRepo.js.
-  if (!session.extras && m && ["RECEIVED", "TO_REPAIR"].includes(m.state) &&
-      (parts || labour > 0 || note)) {
-    lines.push(tr("It will also be marked as Repaired."));
-  }
+  // What the button pressed will do, said in the question. No guessing from
+  // the state any more: the technician chose it.
+  const o = SAVE_OUTCOME[outcome];
+  if (!session.extras && o) lines.push(tr(o.will));
 
-  return confirmLines(session.extras ? "Save these parts?" : "Save this machine?", lines);
+  return confirmLines(session.extras ? "Save these parts?" : (o ? o.ask : "Save this machine?"), lines);
 }
 
-async function closeMachineModal(save) {
+// WHICH SAVE BUTTONS THIS SHEET GETS, and whether "fully repaired" is allowed.
+//
+// The slip's own parts have no status: one plain Save. A machine gets the
+// three. And on a slip the customer marked "quote first", fully repaired is
+// greyed until the quote has been answered - quote_approved_at is that
+// answer, set by Sales recording the go-ahead, and a technician's own "not
+// done yet" does not set it. The server refuses the same thing; this is so
+// the refusal is read before the tap rather than after it.
+function renderSaveBar() {
+  const plain = $("mm-save"), row = $("mm-save-row"), hint = $("mm-save-hint");
+  if (!plain || !row) return;
+  const m = session.extras ? null : currentMachine();
+  if (!m) {
+    plain.style.display = ""; row.style.display = "none"; if (hint) hint.style.display = "none";
+    return;
+  }
+  plain.style.display = "none"; row.style.display = "";
+  const done = $("mm-save-done"), quote = $("mm-save-quote");
+  const billed = !!String(m.converted_at || "").trim();
+  const quoteFirst = !!(session.slip && session.slip.quote_first) && !String(m.quote_approved_at || "").trim();
+  const past = m.state === "CONDEMNED" || billed;
+  done.disabled = past || quoteFirst;
+  quote.disabled = past || m.state === "AWAITING_QUOTE";
+  let why = "";
+  if (past) why = billed ? "Already on a Sales Order - only the parts can change." : "Condemned - Sales can put it back to repair.";
+  else if (quoteFirst) why = "Customer wants a quote first - send it for quotation, and mark it repaired once they have said yes.";
+  if (hint) { hint.textContent = why; hint.style.display = why ? "" : "none"; }
+}
+
+// `outcome` is false to close without saving, "extras" for the slip's own
+// parts, or one of progress / repaired / quote for a machine - the three
+// buttons. See SAVE_OUTCOME and renderSaveBar().
+async function closeMachineModal(outcome) {
+  const save = !!outcome;
   // The IPL screen gets its own viewer back before anything else happens: a
   // save that fails must not leave the book stranded inside a closed sheet.
   setSplit(false);
@@ -3284,7 +3337,7 @@ async function closeMachineModal(save) {
   // status without saying so - it is what marks a machine Repaired - and a
   // technician who meant to close the sheet should find that out before it
   // happens rather than from the pill afterwards.
-  if (save && !confirmSave()) return;
+  if (save && !confirmSave(outcome)) return;
   if (save && session.extras) {
     // Nothing here is "repaired", so there is nothing to mark. The parts, and
     // the note that goes with them.
@@ -3300,38 +3353,41 @@ async function closeMachineModal(save) {
     }
     $("mm-save").disabled = false;
   } else if (save) {
-    $("mm-save").disabled = true;
+    const btns = [...document.querySelectorAll(".mm-save-btn")];
+    btns.forEach((b) => { b.dataset.was = b.disabled ? "1" : ""; b.disabled = true; });
+    const restore = () => btns.forEach((b) => { b.disabled = b.dataset.was === "1"; });
     try {
       await commitPendingParts();
       await saveCurrentLabour();
       await saveCurrentComment();
-      // Save is the technician saying they are done with this machine, so it
-      // is what marks it Repaired. The server decides whether it actually
-      // moves - a machine sales are still ringing about, or one with nothing
-      // recorded on it, stays where it is. See finishRepair in sqliteRepo.js.
-      let moved = false;
+      // The work is on the server now. What happens to the machine's status
+      // is whatever the button said - see saveMachineWork in sqliteRepo.js -
+      // and the server is the one that refuses: a quote-first slip with no
+      // answer yet, a machine out for quoting, one already billed.
       try {
-        const r = await api(`/api/machines/${session.machineId}/finish`, {
+        await api(`/api/machines/${session.machineId}/save`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ who: initialsFor(getUser()) }),
+          body: JSON.stringify({ outcome, who: initialsFor(getUser()) }),
         });
-        moved = !!(r && r.moved);
       } catch (e) {
-        // The work IS saved by this point. Failing the whole Save over the
-        // tick would send the technician back to a screen whose parts are
-        // already on the server, and they would scan them again.
-        toast("Saved, but couldn't mark it repaired: " + e.message, "err");
-        $("mm-save").disabled = false;
+        // The parts ARE saved by this point. Failing the whole Save over the
+        // status would send the technician back to a screen whose parts are
+        // already on the server, and they would scan them again. So: say
+        // what did not happen, and stay open so they can choose again.
+        toast("Saved, but: " + e.message, "err");
+        await refreshSlip();
+        renderMachineQuoteRow();
+        restore();
         return;
       }
-      toast(moved ? "Saved · marked as Repaired" : "Saved", "ok");
+      toast((SAVE_OUTCOME[outcome] || {}).done || "Saved", "ok");
     } catch (e) {
       toast(e.message, "err");
-      $("mm-save").disabled = false;
+      restore();
       return; // keep the modal open so nothing scanned is lost
     }
-    $("mm-save").disabled = false;
+    restore();
   }
   $("machine-modal").style.display = "none";
   document.body.style.overflow = "";
@@ -3353,7 +3409,10 @@ async function closeMachineModal(save) {
 // Labour feeds the machine total, so recompute as it is typed.
 $("os-labour").addEventListener("input", () => updateSlipFooter());
 
-$("mm-save").addEventListener("click", () => closeMachineModal(true));
+$("mm-save").addEventListener("click", () => closeMachineModal("extras"));
+$("mm-save-progress").addEventListener("click", () => closeMachineModal("progress"));
+$("mm-save-done").addEventListener("click", () => closeMachineModal("repaired"));
+$("mm-save-quote").addEventListener("click", () => closeMachineModal("quote"));
 $("mm-close").addEventListener("click", () => closeMachineModal(false));
 
 // POST every pending part to the server, in order. Stops on first failure
@@ -5265,6 +5324,14 @@ function renderMachineDecisionBanner() {
   if (st !== "TO_REPAIR" && st !== "CONDEMNED" && st !== "QUOTED") {
     box.style.display = "none"; box.innerHTML = ""; return;
   }
+  // IN PROGRESS IS NOT A GO-AHEAD. Since 30 Sep 2026 a technician's own "Save
+  // - not done yet" puts a machine in TO_REPAIR, and this banner used to read
+  // every TO_REPAIR as "the customer has confirmed this repair" - signed off
+  // by the technician who saved it. quote_approved_at is the customer's
+  // actual answer, recorded by Sales; without it there is nothing to announce.
+  if (st === "TO_REPAIR" && !String(m.quote_approved_at || "").trim()) {
+    box.style.display = "none"; box.innerHTML = ""; return;
+  }
   const who = m.decided_by ? ` ${escapeHtml(m.decided_by)}` : "";
   const when = m.decided_at ? ` · ${escapeHtml(formatDate(m.decided_at) || m.decided_at)}` : "";
   if (st === "QUOTED") {
@@ -5310,6 +5377,9 @@ function renderMachineBilledBanner() {
 // where the machine is, so a technician is never offered a step that makes no
 // sense from here.
 function renderMachineQuoteRow() {
+  // The Save bar follows the same facts - which machine, what state, whether
+  // the slip wants a quote first - so it is drawn whenever this is.
+  renderSaveBar();
   const row = $("mm-quote-row");
   if (!row) return;
   const m = currentMachine();
@@ -5332,12 +5402,17 @@ function renderMachineQuoteRow() {
   // Being billed settles what the customer PAYS. It says nothing about whether
   // they have signed, or whether the machine is still in the workshop.
   if (m.converted_at) {
-    if (m.state !== "CONDEMNED") { row.style.display = "none"; return; }
+    // And since 30 Sep 2026 a REPAIRED one too: the customer collects a slip
+    // in portions, and "which of these five is still here" is answered
+    // machine by machine, against its Sales Order.
+    if (m.state !== "CONDEMNED" && m.state !== "REPAIRED") { row.style.display = "none"; return; }
     row.style.display = "flex";
+    const condemned = m.state === "CONDEMNED";
     $("mm-quote-state").innerHTML =
-      `<span class="machine-quote mq-condemn">Condemned</span> <span>${escapeHtml(
+      `<span class="machine-quote ${condemned ? "mq-condemn" : "mq-repaired"}">${condemned ? "Condemned" : "Repaired"}</span> <span>${escapeHtml(
         DISPOSAL_LABEL[m.disposal] ||
-        "Still here — record where it goes before the slip can close.")}</span>`;
+        (condemned ? "Still here — record where it goes before the slip can close."
+                   : "Still here — tick it off when the customer collects it."))}</span>`;
     const box = $("mm-quote-btns");
     box.innerHTML = "";
     renderDisposalButtons(box, m);
@@ -5420,16 +5495,20 @@ function renderMachineQuoteRow() {
   // above: a branch added later is covered by this without anybody having to
   // remember, and forgetting would hand a technician the very button this is
   // about.
+  // THE SAVE BAR ASKS FOR QUOTES NOW. Since 30 Sep 2026 "Save - send for
+  // quotation" is the way a machine goes to Sales from this sheet, so the
+  // same button is not offered twice on one screen. It stays on the sales
+  // screen, where there is no Save bar.
+  actions = actions.filter(([to]) => to !== "AWAITING_QUOTE");
   if (!canDecide()) {
-    const kept = actions.filter(([to]) => to === "AWAITING_QUOTE");
     // A line saying where the buttons went, but only to somebody who would
     // otherwise have had one. A technician who looks for "Mark as repaired" and
     // finds nothing reports the app as broken; this answers them on the screen
     // they are already on.
-    if (kept.length < actions.length) {
-      text += ` <span class="mm-quote-note">Only Sales and Admin can change this. Tap 报价 to ask for it.</span>`;
+    if (actions.length) {
+      text += ` <span class="mm-quote-note">Only Sales and Admin can change this. The Save buttons below are yours.</span>`;
     }
-    actions = kept;
+    actions = [];
   }
 
   // Too expensive to repair, said on the phone or at the bench. Added last so
@@ -5454,11 +5533,13 @@ function renderMachineQuoteRow() {
 // worked through, and one already on a Sales Order, which has nothing else
 // left to decide but still has to be accounted for.
 function renderDisposalButtons(btns, m) {
+  // A repaired machine only ever gets "collected": it is never disposed of.
+  const condemned = m.state === "CONDEMNED";
   btns.insertAdjacentHTML("beforeend", `
     <div class="mm-disposal">
-      <div class="mm-disposal-q">What happened to it?</div>
+      <div class="mm-disposal-q">${condemned ? "What happened to it?" : "Collected?"}</div>
       <button type="button" class="btn-secondary" data-disposal="COLLECTED"${m.disposal === "COLLECTED" ? " disabled" : ""}>Customer collected it</button>
-      <button type="button" class="btn-secondary" data-disposal="DISPOSED"${m.disposal === "DISPOSED" ? " disabled" : ""}>We disposed of it</button>
+      ${condemned ? `<button type="button" class="btn-secondary" data-disposal="DISPOSED"${m.disposal === "DISPOSED" ? " disabled" : ""}>We disposed of it</button>` : ""}
     </div>`);
   btns.querySelectorAll("[data-disposal]").forEach((b) =>
     b.addEventListener("click", () => recordDisposal(b, m.id, b.dataset.disposal)));
@@ -5721,16 +5802,22 @@ function openConvertPicker() {
     // same sentence, so the box is greyed with the reason rather than the
     // order failing after the button is pressed. See quoteBlockReason().
     const quoteBlock = done ? "" : String(m.quote_block || "");
-    const stopped = !done && (!billable || quoteBlock);
+    // ONLY A FINISHED MACHINE. John, 30 Sep 2026: repaired or condemned, and
+    // nothing else goes on a Sales Order. The server refuses the same thing;
+    // greying it here is so the refusal is read before the tap, not after.
+    const finished = condemned || m.state === "REPAIRED";
+    const stopped = !done && (!billable || quoteBlock || !finished);
     const sub = done
       ? `On ${escapeHtml(m.so_number || "a Sales Order")}`
       : quoteBlock
         ? escapeHtml(quoteBlock)
-        : condemned
-          ? "Condemned — goes on at no charge"
-          : billable
-            ? `${parts} part${parts === 1 ? "" : "s"}${labour > 0 ? " · labour " + money(labour) : ""}`
-            : "No work recorded yet";
+        : !finished
+          ? "Not finished yet — mark it repaired first"
+          : condemned
+            ? "Condemned — goes on at no charge"
+            : billable
+              ? `${parts} part${parts === 1 ? "" : "s"}${labour > 0 ? " · labour " + money(labour) : ""}`
+              : "No work recorded yet";
     return `
       <label class="conv-row${done ? " conv-done" : ""}${stopped ? " conv-blocked" : ""}">
         <input type="checkbox" value="${m.id}" ${done || stopped ? "disabled" : "checked"}>
@@ -7060,6 +7147,7 @@ function renderSlipDetail(slip) {
             slip.created_by ? ` · Registered by ${escapeHtml(slip.created_by)}` : ""}</div>
         </div>
         <span class="vs-status vs-${escapeAttr(slip.status)}">${escapeHtml(STATUS_LABEL[slip.status] || slip.status)}</span>
+        ${quotePills(slip)}
       </div>
       ${slipSoLine(slip)}
       <!-- What each order became in AutoCount: SO -> DO -> INV. Filled in
@@ -7204,6 +7292,16 @@ function renderSlipDetail(slip) {
           <span class="decide-q">${m.disposal ? "Recorded:" : "Where did it go?"}</span>
           <button type="button" class="decide-btn"${m.disposal === "COLLECTED" ? " disabled" : ""} data-disposal="COLLECTED">Customer collected</button>
           <button type="button" class="decide-btn"${m.disposal === "DISPOSED" ? " disabled" : ""} data-disposal="DISPOSED">We disposed of it</button>
+        </div>`;
+    }
+    // A REPAIRED machine on its Sales Order: the customer may take it today
+    // and the other four next week. John, 30 Sep 2026. Only once it is
+    // billed - a machine is collected against its paperwork - and only
+    // "collected": a repaired machine is never disposed of.
+    if (accountable && m.state === "REPAIRED" && m.converted_at) {
+      html += `<div class="decide-row decide-disposal decide-collect" data-dispose="${m.id}">
+          <span class="decide-q">${m.disposal === "COLLECTED" ? "Collected" + (m.disposal_at ? " · " + escapeHtml(formatDate(m.disposal_at)) : "") : "Still here"}</span>
+          <button type="button" class="decide-btn"${m.disposal === "COLLECTED" ? " disabled" : ""} data-disposal="COLLECTED">Customer collected</button>
         </div>`;
     }
     html += `${m.serial_no ? `<div class="vs-machine-serial">S/N ${escapeHtml(m.serial_no)}</div>` : ""}${

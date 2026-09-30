@@ -945,6 +945,21 @@ function createSlipOrder(slipNumber, machineIds, opts) {
     e.status = 409; throw e;
   }
 
+  // ONLY A FINISHED MACHINE. John, 30 Sep 2026: a Sales Order is for a machine
+  // that is repaired or condemned, and nothing else - a machine still being
+  // worked on has a bill that is not finished either. Checked after the quote
+  // block above, which already names the ones out with the customer, so this
+  // catches the ones still on the bench.
+  const unfinished = wanted
+    .filter((m) => m.state !== "REPAIRED" && m.state !== "CONDEMNED")
+    .map((m) => m.machine_desc);
+  if (unfinished.length) {
+    const e = new Error(
+      `Not finished yet: ${unfinished.join(", ")}. Only a repaired or condemned machine can go on a Sales Order.`
+    );
+    e.status = 409; throw e;
+  }
+
   const already = wanted.filter((m) => m.converted_at);
   if (already.length) {
     const e = new Error(
@@ -1849,9 +1864,10 @@ function closeSlip(slipNumber, closingRef, who = "") {
   // every list anyone looks at. Closing is the last moment anybody reads a
   // slip, so it is where every machine has to be accounted for: billed, or
   // condemned and gone.
-  const unfinished = db.prepare(
-    "SELECT machine_desc, state, disposal, converted_at FROM slip_machines WHERE slip_id = ?"
-  ).all(slip.id).filter((m) => !machineSettled(m)).map((m) => m.machine_desc);
+  const everyMachine = db.prepare(
+    "SELECT id, machine_desc, state, disposal, converted_at FROM slip_machines WHERE slip_id = ?"
+  ).all(slip.id);
+  const unfinished = everyMachine.filter((m) => !machineSettled(m)).map((m) => m.machine_desc);
   if (unfinished.length) {
     const e = new Error(
       `Not on a Sales Order yet: ${unfinished.join(", ")}. ` +
@@ -1859,11 +1875,28 @@ function closeSlip(slipNumber, closingRef, who = "") {
     );
     e.status = 400; throw e;
   }
-  db.prepare(
-    `UPDATE service_slips
-        SET status = 'CLOSED', closing_ref = ?, closed_by = ?, closed_at = datetime('now','localtime')
-      WHERE id = ?`
-  ).run(ref, String(who || "").trim(), slip.id);
+  // THE FAST PATH. "Collected & Closed" is one tap for the ordinary slip where
+  // the customer takes everything at once, and it records exactly that: any
+  // billed machine not already ticked off one at a time is collected now, by
+  // whoever is closing. A condemned machine is not swept up by this - it was
+  // named above, because for it the answer could have been "we disposed of
+  // it", and nobody should have that decided for them by a Close button.
+  const closeAll = db.transaction(() => {
+    const tick = db.prepare(
+      `UPDATE slip_machines
+          SET disposal = 'COLLECTED', disposal_by = ?, disposal_at = datetime('now','localtime')
+        WHERE id = ? AND TRIM(IFNULL(disposal, '')) = ''`
+    );
+    for (const m of everyMachine) {
+      if (m.state !== "CONDEMNED" && String(m.converted_at || "").trim()) tick.run(String(who || "").trim(), m.id);
+    }
+    db.prepare(
+      `UPDATE service_slips
+          SET status = 'CLOSED', closing_ref = ?, closed_by = ?, closed_at = datetime('now','localtime')
+        WHERE id = ?`
+    ).run(ref, String(who || "").trim(), slip.id);
+  });
+  closeAll();
   return getSlip(slipNumber);
 }
 
@@ -2760,10 +2793,19 @@ function setMachineState(slipNumber, machineId, state, who = "") {
   // all is not what they put their name to, so the signature goes with the
   // decision rather than sitting there attesting to something untrue.
   if (clearDisposal) dropCondemnSignature(machine.id);
+  // THE CUSTOMER SAID GO AHEAD, or took it back. A quoted machine moving to
+  // TO_REPAIR is the customer's answer, and it is remembered on the machine
+  // because "In Progress" is reached two other ways as well - a technician
+  // saving half-done work, or taking back a finished tick - and on a
+  // quote-first slip only the answered kind may be marked fully repaired.
+  const approved = (machine.state === "QUOTED" || machine.state === "AWAITING_QUOTE") && st === "TO_REPAIR";
+  const unapproved = st === "AWAITING_QUOTE" || st === "RECEIVED";
   db.prepare(
     `UPDATE slip_machines
         SET state = ?, decided_by = ?, decided_at = datetime('now','localtime')
             ${clearDisposal ? ", disposal = '', disposal_at = '', disposal_by = ''" : ""}
+            ${approved ? ", quote_approved_at = datetime('now','localtime')" : ""}
+            ${unapproved ? ", quote_approved_at = ''" : ""}
       WHERE id = ?`
   ).run(st, String(who || "").trim(), machine.id);
   deriveSlipStatus(slip.id);
@@ -2939,6 +2981,86 @@ function finishRepair(machineId, who = "") {
   return { slip: setMachineState(slip.slip_number, machine.id, "REPAIRED", who), moved: true };
 }
 
+// SAVE, SAID THREE WAYS. John, 30 Sep 2026: the one Save button, which marked
+// a machine repaired by itself, becomes three - not done yet, fully repaired,
+// send for quotation - so the technician says what the save means instead of
+// the app guessing from it.
+//
+//   progress  RECEIVED -> TO_REPAIR, once there is work on it. "In Progress"
+//             finally means somebody has started: until now it was reached
+//             only by the customer's go-ahead or by un-ticking a finished
+//             machine, and 0 of 148 live machines were in it.
+//   repaired  finishRepair() as before - with ONE new refusal. On a slip the
+//             customer marked "quote first", a machine may not be called fully
+//             repaired until the quote has been answered. quote_approved_at is
+//             that answer; a technician's own "not done yet" does not set it.
+//   quote     off to Sales, the same as the 报价 button always was.
+//
+// Returns { slip, moved, state } - moved says whether anything changed, since
+// Save is pressed far more often than a machine moves.
+const SAVE_OUTCOMES = new Set(["progress", "repaired", "quote"]);
+
+function saveMachineWork(machineId, outcome, who = "") {
+  const how = String(outcome || "").toLowerCase();
+  if (!SAVE_OUTCOMES.has(how)) { const e = new Error("Say what the save means."); e.status = 400; throw e; }
+  const machine = db.prepare("SELECT * FROM slip_machines WHERE id = ?").get(machineId);
+  if (!machine) { const e = new Error("Machine not found."); e.status = 404; throw e; }
+  const slip = db.prepare("SELECT * FROM service_slips WHERE id = ?").get(machine.slip_id);
+  if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
+  if (slip.status === "CLOSED") { const e = new Error("Slip is already closed."); e.status = 400; throw e; }
+  const billed = !!String(machine.converted_at || "").trim();
+
+  if (how === "quote") {
+    if (machine.state === "CONDEMNED" || billed) {
+      const e = new Error("This machine is past quoting."); e.status = 409; throw e;
+    }
+    const moved = machine.state !== "AWAITING_QUOTE";
+    return {
+      slip: moved ? setMachineState(slip.slip_number, machine.id, "AWAITING_QUOTE", who) : getSlip(slip.slip_number),
+      moved, state: "AWAITING_QUOTE",
+    };
+  }
+
+  if (how === "repaired") {
+    // OUT LOUD, where the old Save was silent. finishRepair() quietly leaves a
+    // machine alone when it cannot finish it, which was right for a button
+    // that only meant "save": pressed on a machine out for quoting, it saved.
+    // A button that SAYS "fully repaired" and then does nothing is a lie the
+    // technician walks away believing.
+    if (machine.state === "AWAITING_QUOTE" || machine.state === "QUOTED") {
+      const e = new Error("This machine is out for quoting. Sales record the customer's answer first.");
+      e.status = 409; throw e;
+    }
+    if (machine.state === "CONDEMNED") {
+      const e = new Error("This machine is condemned. Sales can put it back to repair if the customer changed their mind.");
+      e.status = 409; throw e;
+    }
+    if (billed) {
+      const e = new Error("This machine is already on a Sales Order.");
+      e.status = 409; throw e;
+    }
+    if (slip.quote_first && !String(machine.quote_approved_at || "").trim()) {
+      const e = new Error(
+        "The customer asked for a quote first. Send it for quotation, and mark it repaired once they have said yes."
+      );
+      e.status = 409; throw e;
+    }
+    if (machine.state !== "REPAIRED" && !machineHasWork(machine.id)) {
+      const e = new Error("Nothing has been recorded on this machine - add the parts, labour or a note first.");
+      e.status = 409; throw e;
+    }
+    const r = finishRepair(machine.id, who);
+    return { ...r, state: "REPAIRED" };
+  }
+
+  // progress
+  const start = machine.state === "RECEIVED" && !billed && machineHasWork(machine.id);
+  return {
+    slip: start ? setMachineState(slip.slip_number, machine.id, "TO_REPAIR", who) : getSlip(slip.slip_number),
+    moved: start, state: start ? "TO_REPAIR" : machine.state,
+  };
+}
+
 // Something to show for the visit: a part, a labour charge, or a note. Same
 // three things slipHasWork asks about, for one machine.
 function machineHasWork(machineId) {
@@ -2973,13 +3095,32 @@ function setAllMachineStates(slipNumber, state, who = "") {
 }
 
 // What happened to a condemned machine: back to the customer, or scrapped.
+// WHERE A MACHINE WENT - now for every finished machine, not only condemned
+// ones. John, 30 Sep 2026: customers collect a slip in portions, two of five,
+// and until this the only record of a repaired machine leaving the building
+// was the whole slip closing. 52 billed machines were sitting on the live
+// book with no way to say which were still here.
+//
+// COLLECTED needs the Sales Order to exist: "customers should only be able to
+// collect machines that are done, meaning their SO has been created already".
+// DISPOSED stays what it was - a condemned machine we scrapped ourselves has
+// no customer to hand it to and needs no order first.
 function setMachineDisposal(slipNumber, machineId, disposal, who = "") {
   const d = String(disposal || "").toUpperCase();
   if (!DISPOSALS.has(d)) { const e = new Error("Invalid disposal."); e.status = 400; throw e; }
   const { slip, machine } = machineOnSlip(slipNumber, machineId);
-  if (machine.state !== "CONDEMNED") {
-    const e = new Error("Only a condemned machine is collected or disposed of.");
+  const finished = machine.state === "CONDEMNED" || machine.state === "REPAIRED";
+  if (!finished) {
+    const e = new Error("Only a repaired or condemned machine can be collected.");
     e.status = 400; throw e;
+  }
+  if (d === "DISPOSED" && machine.state !== "CONDEMNED") {
+    const e = new Error("Only a condemned machine is disposed of.");
+    e.status = 400; throw e;
+  }
+  if (d === "COLLECTED" && !String(machine.converted_at || "").trim()) {
+    const e = new Error("Put it on a Sales Order first - a machine is collected against its paperwork.");
+    e.status = 409; throw e;
   }
   db.prepare(
     `UPDATE slip_machines
@@ -3008,7 +3149,7 @@ const slips = {
   orderDocuments, recordOrderDocuments, billingDocument, autoInvoiceFromDocuments,
   slipsAwaitingDocuments,
   slipDeletable, deleteSlip,
-  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setSlipExtrasNote, slipContacts, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, setMachineDisposal, deriveSlipStatus, correctMachine,
+  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setSlipExtrasNote, slipContacts, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, saveMachineWork, setMachineDisposal, deriveSlipStatus, correctMachine,
   setCondemnSignature, getCondemnSignature, unsignedCondemned,
   setMachineIplModel,
   machineNeedsQuoteFirst, quoteAnswered, quoteBlockReason, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,

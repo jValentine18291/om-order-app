@@ -1388,7 +1388,21 @@
           <div class="left"><span id="mm-total-label">Machine total</span></div>
           <div class="total"><div class="val" id="mm-total">$0.00</div></div>
         </div>
+        <!-- ONE SAVE for the slip's own parts, which have no status to speak
+             of. THREE for a machine - John, 30 Sep 2026 - so the technician
+             says what the save means instead of the app guessing from it:
+             not done yet, fully repaired, or send it for quotation. Which set
+             shows is decided in renderSaveBar(). -->
         <button class="btn-primary" id="mm-save" style="margin-top:10px;">Save</button>
+        <div class="mm-save-row" id="mm-save-row" style="display:none">
+          <button type="button" class="btn-primary mm-save-btn" id="mm-save-progress">Save &ndash; not done yet</button>
+          <button type="button" class="btn-primary mm-save-btn" id="mm-save-done">Save &ndash; fully repaired</button>
+          <button type="button" class="btn-primary mm-save-btn mm-save-quote" id="mm-save-quote">Save &ndash; send for quotation</button>
+        </div>
+        <!-- Why a button is greyed, said next to it: "quote first" is a fact
+             about the slip that the technician did not set and cannot see
+             from the sheet otherwise. -->
+        <div class="mm-save-hint" id="mm-save-hint" style="display:none"></div>
       </div>
 
     </div>

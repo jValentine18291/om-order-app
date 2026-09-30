@@ -318,6 +318,7 @@ const mixed = data.slips.createSlip({
 });
 const mm = data.slips.getSlip(mixed.slip_number).machines;
 for (const m of mm) data.slips.setMachineLabour(m.id, 50);
+for (const m of mm) data.slips.setMachineState(mixed.slip_number, m.id, "REPAIRED", "KS");
 data.slips.createSlipOrder(mixed.slip_number, mm.map((m) => m.id), "KS");
 const openers = (data.slips.getSlipOrder(mixed.slip_number).lines || [])
   .filter((l) => /^A\d+\s+SVR/i.test(String(l.item_code || "")))

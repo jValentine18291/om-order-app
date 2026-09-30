@@ -36,6 +36,7 @@ const make = async (company, descs) => data.slips.createSlip({
   // A: everything billed - the ordinary case Close Service has always shown.
   let s = await make("A ALL BILLED", ["M1"]);
   await data.slips.setMachineLabour(s.machines[0].id, 50);
+  await data.slips.setMachineState(s.slip_number, s.machines[0].id, "REPAIRED", "WJ");
   await data.slips.createSlipOrder(s.slip_number, [s.machines[0].id]);
   check("everything billed is offered", await offered(s.slip_number), true);
 
@@ -43,6 +44,7 @@ const make = async (company, descs) => data.slips.createSlip({
   // but it cannot close yet. It must still be FOUND, or staff hit a dead end.
   s = await make("B BLOCKED", ["M1", "M2"]);
   await data.slips.setMachineLabour(s.machines[0].id, 50);
+  await data.slips.setMachineState(s.slip_number, s.machines[0].id, "REPAIRED", "WJ");
   await data.slips.createSlipOrder(s.slip_number, [s.machines[0].id]);
   await data.slips.setMachineState(s.slip_number, s.machines[1].id, "CONDEMNED", "IR");
   check("blocked by a condemned machine is offered", await offered(s.slip_number), true);
@@ -56,6 +58,7 @@ const make = async (company, descs) => data.slips.createSlip({
   // change - so it is recorded here as existing behaviour, not endorsed.
   s = await make("C UNFINISHED", ["M1", "M2"]);
   await data.slips.setMachineLabour(s.machines[0].id, 50);
+  await data.slips.setMachineState(s.slip_number, s.machines[0].id, "REPAIRED", "WJ");
   await data.slips.createSlipOrder(s.slip_number, [s.machines[0].id]);
   check("part-billed slip still offered (unchanged)", await offered(s.slip_number), true);
   check("  and a machine on it is untouched", (await data.slips.getSlip(s.slip_number)).machines[1].state, "RECEIVED");
@@ -70,6 +73,10 @@ const make = async (company, descs) => data.slips.createSlip({
   check("condemned-only slip is offered", await offered(s.slip_number), true);
   await data.slips.setCondemnSignature(s.slip_number, s.machines[0].id,
     { image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==", who: "KS" });
+  // Collected against its paperwork, since 30 Sep 2026: the $0 order and its
+  // number come first. E below is the slip with no order at all.
+  await data.slips.createSlipOrder(s.slip_number, [s.machines[0].id]);
+  await data.slips.setSlipInvoiced(s.slip_number, "CS-1", "JT");
   await data.slips.setMachineDisposal(s.slip_number, s.machines[0].id, "COLLECTED", "JT");
   s = await data.slips.closeSlip(s.slip_number, "CS-1");
   check("  and closes once accounted for", s.status, "CLOSED");
@@ -88,6 +95,7 @@ const make = async (company, descs) => data.slips.createSlip({
   // But the moment something IS billed, both steps come back.
   s = await make("F BILLED, NOT INVOICED", ["M1"]);
   await data.slips.setMachineLabour(s.machines[0].id, 50);
+  await data.slips.setMachineState(s.slip_number, s.machines[0].id, "REPAIRED", "WJ");
   await data.slips.createSlipOrder(s.slip_number, [s.machines[0].id]);
   let refused = "";
   try { await data.slips.closeSlip(s.slip_number, ""); }

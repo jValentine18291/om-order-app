@@ -370,6 +370,22 @@ db.exec(`
 // guessing again. On the machine rather than on the phone: it is a fact about
 // the machine, and the technician who picks it is rarely the one who comes back
 // to it.
+// WHEN THE CUSTOMER SAID GO AHEAD. Set the moment a quoted machine moves to
+// TO_REPAIR, cleared if it goes back for quoting. It is what lets "Save -
+// fully repaired" be refused on a quote-first slip until the quote has actually
+// been answered: without it, "In Progress" reached by a technician saving
+// half-done work is indistinguishable from "In Progress" reached by the
+// customer approving a price. John's rule, 30 Sep 2026.
+try {
+  const cols = db.prepare("PRAGMA table_info(slip_machines)").all().map((c) => c.name);
+  if (!cols.includes("quote_approved_at")) {
+    db.exec("ALTER TABLE slip_machines ADD COLUMN quote_approved_at TEXT DEFAULT ''");
+    console.log("[db] migrated: added quote_approved_at to slip_machines");
+  }
+} catch (e) {
+  console.error("[db] quote_approved_at migration failed:", e.message);
+}
+
 try {
   const cols = db.prepare("PRAGMA table_info(slip_machines)").all().map((c) => c.name);
   if (!cols.includes("ipl_model")) {

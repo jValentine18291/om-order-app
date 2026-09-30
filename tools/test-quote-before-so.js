@@ -90,6 +90,9 @@ repo.setMachineState(qf.slip_number, a, "TO_REPAIR", "KM");
 check("once they say go ahead it is clear", repo.getSlip(qf.slip_number).machines[0].quote_block, "");
 
 // ---- one machine clear does not carry the other ----------------------------
+// And repaired: the go-ahead lets work start, and only a finished machine
+// goes on an order (30 Sep 2026).
+repo.setMachineState(qf.slip_number, a, "REPAIRED", "KM");
 refuses("the other machine is still named on its own",
   () => repo.createSlipOrder(qf.slip_number, [a, b]), "EBZ8500 Blower");
 allows("but the confirmed one goes on an order by itself",
@@ -111,6 +114,7 @@ const plain = repo.createSlip({
 const p = repo.getSlip(plain.slip_number).machines[0].id;
 work(p);
 check("an ordinary machine is not blocked", repo.getSlip(plain.slip_number).machines[0].quote_block, "");
+repo.setMachineState(plain.slip_number, p, "REPAIRED", "KM");
 allows("and goes straight on an order", () => repo.createSlipOrder(plain.slip_number, [p]));
 
 // ---- but sending an ordinary machine for quoting DOES block it --------------
@@ -127,6 +131,7 @@ check("a machine out for quoting is blocked even off a quote-first slip",
   "Quoted — waiting for the customer to say go ahead.");
 refuses("and refused", () => repo.createSlipOrder(plain2.slip_number, [p2]), "waiting for the customer");
 repo.setMachineState(plain2.slip_number, p2, "TO_REPAIR", "KM");
+repo.setMachineState(plain2.slip_number, p2, "REPAIRED", "KM");
 allows("cleared once they say go ahead", () => repo.createSlipOrder(plain2.slip_number, [p2]));
 
 console.log(failures ? `\n${failures} FAILED\n` : "\nAll good.\n");

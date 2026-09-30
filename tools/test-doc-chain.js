@@ -94,6 +94,7 @@ async function stub(docNos) {
   });
   const no = slip.slip_number;
   await data.slips.setMachineLabour(slip.machines[0].id, 50);
+  await data.slips.setMachineState(no, slip.machines[0].id, "REPAIRED", "WJ");
   const so = await data.slips.createSlipOrder(no, [slip.machines[0].id]);
   const orders = await data.slips.getSlipOrders(no);
   const orderId = orders[0].id;
@@ -191,6 +192,7 @@ async function stub(docNos) {
     machines: [{ desc: "525LK Combi Trimmer", serial: "T1", remarks: "service" }], signature: sig,
   });
   await data.slips.setMachineLabour(fresh.machines[0].id, 20);
+  await data.slips.setMachineState(fresh.slip_number, fresh.machines[0].id, "REPAIRED", "WJ");
   await data.slips.createSlipOrder(fresh.slip_number, [fresh.machines[0].id]);
   check("stays where it was", data.slips.autoInvoiceFromDocuments(fresh.slip_number, "AutoCount").filled, []);
   check("and is not invoiced", (await data.slips.getSlip(fresh.slip_number)).status !== "INVOICED", true);

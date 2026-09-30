@@ -84,7 +84,9 @@ check("quoted: the machine waits on the customer", stateNow(slip, saw.id), "QUOT
   // nobody ever got round to sending for quoting, which is the case the flag
   // exists for. See test-quote-before-so.js. Before that rule the line below
   // billed it straight from RECEIVED.
-  await data.slips.setMachineState(no, blower.id, "TO_REPAIR", "Iris");
+  // And finished: since 30 Sep 2026 only a repaired or condemned machine goes
+  // on an order, so the go-ahead alone is no longer enough.
+  await data.slips.setMachineState(no, blower.id, "REPAIRED", "WJ");
   await data.slips.createSlipOrder(no, [blower.id]);
   slip = await data.slips.getSlip(no);
   // Not "All Repaired": the condemned one is still sitting in the workshop.
@@ -113,9 +115,11 @@ check("quoted: the machine waits on the customer", stateNow(slip, saw.id), "QUOT
   check("closing blocked", /Condemned but not yet accounted for/.test(err), true);
   console.log(`        ↳ "${err}"`);
 
-  // The customer collects it. Now everything is accounted for.
-  slip = await data.slips.setMachineDisposal(no, saw.id, "COLLECTED", "John");
-  check("disposal recorded", slip.machines[0].disposal, "COLLECTED");
+  // It is disposed of. Now everything is accounted for. (Collecting it would
+  // need its own order first, since 30 Sep 2026 - test-condemned-accounting.js
+  // walks that path; the point here is the gate.)
+  slip = await data.slips.setMachineDisposal(no, saw.id, "DISPOSED", "John");
+  check("disposal recorded", slip.machines[0].disposal, "DISPOSED");
   check("nothing outstanding", slip.status, "INVOICED");
   slip = await data.slips.closeSlip(no, "", "KS");
   check("closes", slip.status, "CLOSED");
@@ -141,7 +145,7 @@ check("quoted: the machine waits on the customer", stateNow(slip, saw.id), "QUOT
   // Only a condemned machine can be collected or scrapped.
   err = "";
   try { await data.slips.setMachineDisposal(n2, m2, "COLLECTED", "John"); } catch (e) { err = e.message; }
-  check("disposal refused on a live machine", /Only a condemned machine/.test(err), true);
+  check("disposal refused on a live machine", /Only a repaired or condemned machine/.test(err), true);
 
   // A rubbish state is refused rather than stored.
   err = "";
@@ -160,11 +164,11 @@ check("quoted: the machine waits on the customer", stateNow(slip, saw.id), "QUOT
   check("and the slip is in progress", slip.status, "IN_PROGRESS");
 
   // A machine already billed is not dragged back by a slip-wide button.
-  await data.slips.setAllMachineStates(n3, "TO_REPAIR", "Iris");
+  await data.slips.setAllMachineStates(n3, "REPAIRED", "Iris");
   await data.slips.setMachineLabour(slip.machines[0].id, 80);   // something to bill
   await data.slips.createSlipOrder(n3, [slip.machines[0].id]);
   slip = await data.slips.setAllMachineStates(n3, "AWAITING_QUOTE", "Iris");
-  check("billed machine left alone", slip.machines[0].state, "TO_REPAIR");
+  check("billed machine left alone", slip.machines[0].state, "REPAIRED");
   check("the other one moved", slip.machines[1].state, "AWAITING_QUOTE");
 
   // ---- Repaired: the workshop saying it is finished --------------------------
@@ -214,7 +218,9 @@ check("quoted: the machine waits on the customer", stateNow(slip, saw.id), "QUOT
   await data.slips.setMachineState(n5, r3, "REPAIRED", "WJ");
   slip = await data.slips.setMachineState(n5, r4, "CONDEMNED", "WJ");
   check("condemned and still here: not Repaired", slip.status, "IN_PROGRESS");
-  slip = await data.slips.setMachineDisposal(n5, r4, "COLLECTED", "John");
+  // Disposed of, since collecting it would first need its $0 order (30 Sep
+  // 2026). The point here is what the slip reads once the machine has gone.
+  slip = await data.slips.setMachineDisposal(n5, r4, "DISPOSED", "John");
   check("once it has left, the slip is Repaired", slip.status, "REPAIRED");
 
   console.log(failures ? `\n${failures} FAILED\n` : "\nall passed\n");

@@ -100,6 +100,7 @@ const SITE = "Marina Bay Sands";
     plainBlock.filter((d) => d === "").length, 0);
 
   console.log("\n-- and the Sales Order says the same, being the same block --");
+  await data.slips.setMachineState(no, one.id, "REPAIRED", "WJ");
   await data.slips.createSlipOrder(no, [one.id]);
   const order = await data.slips.getSlipOrder(no);
   const oDescs = (order.lines || []).map((l) => l.description);

@@ -131,6 +131,7 @@ async function fresh(company, opts) {
   console.log("\n-- and the ordinary guards still apply --");
   const d = await fresh("CLOSED PTE LTD");
   await data.slips.setMachineLabour(d.machines[0].id, 30);
+  await data.slips.setMachineState(d.slip_number, d.machines[0].id, "REPAIRED", "WJ");
   await data.slips.createSlipOrder(d.slip_number, [d.machines[0].id]);
   await data.slips.setSlipInvoiced(d.slip_number, "INV-9201", "JT");
   await data.slips.closeSlip(d.slip_number, "DO-9201", "JT");

@@ -245,6 +245,7 @@ const descs = (lines) => lines.map((l) => l.description);
     });
     const mid = data.slips.getSlip(fresh.slip_number).machines[0].id;
     data.slips.setMachineLabour(mid, 30);
+    data.slips.setMachineState(fresh.slip_number, mid, "REPAIRED", "WJ");
     const all = data.slips.createSlipOrder(fresh.slip_number, undefined, {});
     check("the machine went on without being named", all.machines_converted.length, 1);
   }
@@ -259,6 +260,7 @@ const descs = (lines) => lines.map((l) => l.description);
     data.slips.setMachineLabour(mid, 20);
   }
   // Convert every machine but NOT the loose parts.
+  for (const id of [m1, m2]) data.slips.setMachineState(SLIP, id, "REPAIRED", "WJ");
   const so1 = data.slips.createSlipOrder(SLIP, [m1, m2], { extras: false });
   check("both machines are on it", so1.machines_converted.length, 2);
   check("and none of the loose parts", so1.extras_converted, 0);
@@ -361,6 +363,7 @@ const descs = (lines) => lines.map((l) => l.description);
     const mid = data.slips.getSlip(fresh.slip_number).machines[0].id;
     data.slips.setMachineComment(mid, "Carburettor cleaned");
     data.slips.setMachineLabour(mid, 20);
+    data.slips.setMachineState(fresh.slip_number, mid, "REPAIRED", "WJ");
     const so2 = data.slips.createSlipOrder(fresh.slip_number, [mid], {});
     const order2 = data.slips.getSlipOrder(fresh.slip_number, so2.so_number);
     check("a MACHINE's comment still prints, as it always has",
@@ -417,6 +420,7 @@ const descs = (lines) => lines.map((l) => l.description);
     // line is who the office rings, not who the slip was messaged to.
     const mid = got.machines[0].id;
     data.slips.setMachineLabour(mid, 40);
+    data.slips.setMachineState(two.slip_number, mid, "REPAIRED", "WJ");
     const so = data.slips.createSlipOrder(two.slip_number, [mid], {});
     const lines = data.slips.getSlipOrder(two.slip_number, so.so_number).lines;
     const tail = lines.slice(-2).map((l) => l.description);
@@ -436,6 +440,7 @@ const descs = (lines) => lines.map((l) => l.description);
     check("one person to reach", data.slips.slipContacts(got).map((c) => c.number), ["61112222"]);
     const mid = got.machines[0].id;
     data.slips.setMachineLabour(mid, 25);
+    data.slips.setMachineState(one.slip_number, mid, "REPAIRED", "WJ");
     const so = data.slips.createSlipOrder(one.slip_number, [mid], {});
     const lines = data.slips.getSlipOrder(one.slip_number, so.so_number).lines;
     check("one contact line, as before", lines[lines.length - 1].description, "Mr Lim 6111 2222");

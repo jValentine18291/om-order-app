@@ -1910,6 +1910,49 @@ app.post("/api/machines/:machineId/finish", async (req, res) => {
   }
 });
 
+// SAVE, SAID THREE WAYS. John, 30 Sep 2026: the sheet's one Save button became
+// three, so the technician says what the save means - not done yet, fully
+// repaired, or send for quotation - instead of the app deciding from it.
+// See saveMachineWork() in sqliteRepo.js for what each one does and refuses.
+//
+// NO ROLE GATE, deliberately, where handleMachineState has one. "Fully
+// repaired" is the technician's own statement about their own work, and
+// "not done yet" moves nothing anybody decides. Quoting was always theirs.
+// The decisions - the customer's answer, condemning - stay with Sales and
+// Admin on the state route.
+//
+// /finish above stays for a phone still running the previous app: a Save from
+// it means what it always meant.
+app.post("/api/machines/:machineId/save", async (req, res) => {
+  try {
+    const machineId = Number(req.params.machineId);
+    const { outcome = "", who = "" } = req.body || {};
+    const result = await data.slips.saveMachineWork(machineId, outcome, who);
+    res.json(result);
+
+    const slip = result && result.slip;
+    if (!slip) return;
+    // Any price the technician had to look up goes into AutoCount now - the
+    // same as /finish, and for the same reason: a part added to a machine is
+    // worth its price whichever button closed the sheet.
+    const machine = ((slip.machines || []).find((m) => m.id === machineId)) || {};
+    if (!String(machine.converted_at || "").trim()) {
+      writeSlipPricesToAutoCount(machine.parts || [], `Slip ${slip.slip_number}`)
+        .catch((e) => console.error("[price-writeback] on save:", e.message));
+    }
+    // Sent for quoting: Sales are told, exactly as the 报价 button told them.
+    // `moved` is only true when the machine was NOT already waiting, which is
+    // the one thing notifyStateChange needs to know about where it came from.
+    if (result.moved && result.state === "AWAITING_QUOTE") {
+      notifyStateChange(slip, machineId, "", "AWAITING_QUOTE");
+    }
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/machines/:machineId/save]", err);
+    res.status(500).json({ error: "Could not save that machine." });
+  }
+});
+
 app.patch("/api/machines/:machineId/labour", async (req, res) => {
   try {
     const machineId = Number(req.params.machineId);

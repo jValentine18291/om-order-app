@@ -110,6 +110,7 @@ const newSlip = (company, machines) => data.slips.createSlip({
   // On a Sales Order.
   const onOrder = await newSlip("ON AN ORDER PTE LTD", ["EBZ5100"]);
   await data.slips.setMachineLabour(onOrder.machines[0].id, 50);
+  await data.slips.setMachineState(onOrder.slip_number, onOrder.machines[0].id, "REPAIRED", "WJ");
   await data.slips.createSlipOrder(onOrder.slip_number, [onOrder.machines[0].id]);
   const v1 = data.slips.slipDeletable(onOrder.slip_number);
   check("a slip whose work is on an order cannot go", v1.can_delete, false);
