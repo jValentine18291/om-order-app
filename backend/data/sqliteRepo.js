@@ -2956,6 +2956,19 @@ function correctMachine(slipNumber, machineId, { state, clear_comment = false, c
   const { slip, machine } = machineOnSlip(slipNumber, machineId);
   const st = String(state || machine.state).toUpperCase();
   if (!MACHINE_STATES.has(st)) { const e = new Error("Invalid machine state."); e.status = 400; throw e; }
+  // A MACHINE ON A SALES ORDER IS FINISHED - repaired or condemned - since 30
+  // Sep 2026, when only those could be put on one. Correcting it to anything
+  // else is how slip 00080's EBZ3000 came to be billed AND "In Progress", with
+  // no button anywhere to move it on (1 Oct 2026). So a billed machine is
+  // corrected to one of the two, and the others are refused by name.
+  if (String(machine.converted_at || "").trim() && st !== machine.state &&
+      st !== "REPAIRED" && st !== "CONDEMNED") {
+    const e = new Error(
+      `${machine.machine_desc || "This machine"} is on ${machine.so_number || "a Sales Order"}, ` +
+      "so it can only be Repaired or Condemned."
+    );
+    e.status = 400; throw e;
+  }
 
   const name = machine.machine_desc || "Machine";
   const comment = String(machine.repair_comment || "").trim();
@@ -3084,6 +3097,18 @@ function saveMachineWork(machineId, outcome, who = "") {
     return {
       slip: moved ? setMachineState(slip.slip_number, machine.id, "AWAITING_QUOTE", who) : getSlip(slip.slip_number),
       moved, state: "AWAITING_QUOTE",
+    };
+  }
+
+  if (how === "repaired" && billed && machine.state !== "REPAIRED" && machine.state !== "CONDEMNED") {
+    // BILLED BUT NOT FINISHED - three machines on the live book on 1 Oct 2026,
+    // all put on an order before 30 Sep, when only a finished machine could
+    // be. The order is already there, so the quote-first gate below has
+    // nothing left to protect, and finishRepair() refuses anything billed.
+    // Straight to Repaired: this is the button slip 00080 was missing.
+    return {
+      slip: setMachineState(slip.slip_number, machine.id, "REPAIRED", who),
+      moved: true, state: "REPAIRED",
     };
   }
 

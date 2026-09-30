@@ -3362,12 +3362,17 @@ function renderSaveBar() {
   plain.style.display = "none"; row.style.display = "";
   const done = $("mm-save-done"), quote = $("mm-save-quote");
   const billed = !!String(m.converted_at || "").trim();
-  const quoteFirst = !!(session.slip && session.slip.quote_first) && !String(m.quote_approved_at || "").trim();
-  const past = m.state === "CONDEMNED" || billed;
+  // Billed but not finished: put on an order before 30 Sep, when that was
+  // allowed. The order exists, so "fully repaired" is the way on and the
+  // quote-first gate no longer applies. Slip 00080, 1 Oct 2026.
+  const billedUnfinished = billed && m.state !== "REPAIRED" && m.state !== "CONDEMNED";
+  const quoteFirst = !billed && !!(session.slip && session.slip.quote_first) && !String(m.quote_approved_at || "").trim();
+  const past = m.state === "CONDEMNED" || (billed && !billedUnfinished);
   done.disabled = past || quoteFirst;
-  quote.disabled = past || m.state === "AWAITING_QUOTE";
+  quote.disabled = past || billedUnfinished || m.state === "AWAITING_QUOTE";
   let why = "";
-  if (past) why = billed ? "Already on a Sales Order - only the parts can change." : "Condemned - Sales can put it back to repair.";
+  if (billedUnfinished) why = "Already on a Sales Order - mark it fully repaired when the work is done.";
+  else if (past) why = billed ? "Already on a Sales Order - only the parts can change." : "Condemned - Sales can put it back to repair.";
   else if (quoteFirst) why = "Customer wants a quote first - send it for quotation, and mark it repaired once they have said yes.";
   if (hint) { hint.textContent = why; hint.style.display = why ? "" : "none"; }
 }
@@ -5626,9 +5631,12 @@ function renderMachineQuoteRow() {
   if (!row) return;
   const m = currentMachine();
   const slipStatus = session.slip ? session.slip.status : "";
-  // A closed slip has left all of this behind.
-  const live = slipStatus !== "CLOSED" && slipStatus !== "CONVERTED";
-  if (!m || !live) { row.style.display = "none"; return; }
+  // A closed slip has left all of this behind. A fully CONVERTED one has not,
+  // quite: every machine on it is billed, and a billed machine can still be
+  // unfinished (slip 00080's shape) or waiting to be collected - both handled
+  // in the billed branch below. Hiding the row on CONVERTED as well, as this
+  // did until 1 Oct 2026, hid exactly those.
+  if (!m || slipStatus === "CLOSED") { row.style.display = "none"; return; }
 
   // A MACHINE ON A SALES ORDER HAS NO DECISIONS LEFT - with ONE exception, and
   // slip 00007 is why. Two of its machines were condemned and then put on the
@@ -5647,7 +5655,23 @@ function renderMachineQuoteRow() {
     // And since 30 Sep 2026 a REPAIRED one too: the customer collects a slip
     // in portions, and "which of these five is still here" is answered
     // machine by machine, against its Sales Order.
-    if (m.state !== "CONDEMNED" && m.state !== "REPAIRED") { row.style.display = "none"; return; }
+    if (m.state !== "CONDEMNED" && m.state !== "REPAIRED") {
+      // BILLED BUT NOT FINISHED - put on an order before 30 Sep, when that was
+      // allowed. This used to hide the row, which left the machine with no
+      // way on at all (slip 00080, 1 Oct 2026). Sales and Admin get the
+      // button; a technician has "Save - fully repaired" below.
+      const st = MACHINE_STATE[m.state] || { label: m.state, cls: "mq-none" };
+      row.style.display = "flex";
+      $("mm-quote-state").innerHTML =
+        `<span class="machine-quote ${st.cls}">${escapeHtml(st.label)}</span> <span>${escapeHtml(
+          `On ${m.so_number || "a Sales Order"} already - mark it repaired when the work is done.`)}</span>`;
+      const box = $("mm-quote-btns");
+      box.innerHTML = canMarkRepaired()
+        ? `<button type="button" class="btn-secondary" data-to="REPAIRED">Mark as repaired</button>` : "";
+      box.querySelectorAll("[data-to]").forEach((b) =>
+        b.addEventListener("click", () => moveMachine(b, b.dataset.to)));
+      return;
+    }
     row.style.display = "flex";
     const condemned = m.state === "CONDEMNED";
     $("mm-quote-state").innerHTML =
@@ -7641,6 +7665,15 @@ function renderSlipDetail(slip) {
           <button type="button" class="decide-btn"${m.disposal === "DISPOSED" ? " disabled" : ""} data-disposal="DISPOSED">We disposed of it</button>
         </div>`;
     }
+    // BILLED BUT NOT FINISHED: put on an order before 30 Sep, when that was
+    // allowed, and so shown no decisions at all above. The one way on is
+    // Repaired. Slip 00080, 1 Oct 2026.
+    if (accountable && m.converted_at && m.state !== "REPAIRED" && m.state !== "CONDEMNED" && canMarkRepaired()) {
+      html += `<div class="decide-row" data-decide="${m.id}">
+          <span class="decide-q">On ${escapeHtml(m.so_number || "a Sales Order")} already</span>
+          <button type="button" class="decide-btn decide-repaired" data-state="REPAIRED">Mark as repaired</button>
+        </div>`;
+    }
     // A REPAIRED machine on its Sales Order: the customer may take it today
     // and the other four next week. John, 30 Sep 2026. Only once it is
     // billed - a machine is collected against its paperwork - and only
@@ -8512,7 +8545,13 @@ function openFixMachine(slip, machineId) {
   $("fix-sub").textContent = `${machineLabel(slip, m)}${m.serial_no ? " · S/N " + m.serial_no : ""}`;
   $("fix-status").textContent = "";
 
-  $("fix-states").innerHTML = FIX_STATES.map(([id, label, hint]) => `
+  // A billed machine is finished, one way or the other - so only those two
+  // are offered for it. The server refuses the rest; see correctMachine().
+  const billed = !!String(m.converted_at || "").trim();
+  const offered = billed
+    ? FIX_STATES.filter(([id]) => id === "REPAIRED" || id === "CONDEMNED" || id === m.state)
+    : FIX_STATES;
+  $("fix-states").innerHTML = offered.map(([id, label, hint]) => `
     <label class="fix-state">
       <input type="radio" name="fix-state" value="${escapeAttr(id)}"${m.state === id ? " checked" : ""}>
       <span>

@@ -705,8 +705,10 @@
     "Mark ticked as collected": "将勾选的标记为已取回",
     "Mark these machines as collected by the customer?": "确定将这些机器标记为客户已取回吗？",
     "Tick the machines the customer is taking.": "请勾选客户要取回的机器。",
-    "Disposed of": "已处理掉",
     "1 machine collected": "1 台机器已取回",
+    // A machine billed before it was finished (slip 00080, 1 Oct 2026).
+    "Already on a Sales Order - mark it fully repaired when the work is done.":
+      "已在销售订单上 — 完工后请点「保存 · 已修好」。",
     // ---- The slip number dropdown on Register (30 Sep 2026) ----
     "Slip number": "服务单号",
     "Next number": "下一个号码",
@@ -1082,6 +1084,8 @@
     // written - it is the customer's name.
     [/^Next number — (\d+)$/, "下一个号码 — $1"],
     [/^(\d+) machines collected$/, "$1 台机器已取回"],
+    [/^On (.+) already - mark it repaired when the work is done\.$/, "已在 $1 上 — 完工后请标记为已修好。"],
+    [/^On (.+) already$/, "已在 $1 上"],
     [/^(\d+) — unused \(deleted (.+?), was (.+)\)$/, "$1 — 未使用（$2 已删除，原为 $3）"],
     [/^(\d+) — unused \(deleted, was (.+)\)$/, "$1 — 未使用（已删除，原为 $2）"],
     [/^(\d+) — unused$/, "$1 — 未使用"]
