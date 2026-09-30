@@ -441,18 +441,32 @@ async function withMachineTypes(machines) {
   }));
 }
 
+// The numbers Register can offer: the next one, and any unused ones behind it
+// with what each was. Its own path, not /api/slips/..., which would read
+// "free-numbers" as a slip number. See freeSlipNumbers() in sqliteRepo.js.
+app.get("/api/slip-numbers", (req, res) => {
+  try {
+    res.set("Cache-Control", "no-store");
+    res.json(data.slips.freeSlipNumbers());
+  } catch (err) {
+    console.error("[GET /api/slip-numbers]", err.message);
+    res.status(500).json({ error: "Could not read the slip numbers." });
+  }
+});
+
 app.post("/api/slips", async (req, res) => {
   try {
     // Named one by one rather than spread, so nothing a client invents reaches
     // the database - which also means a new field has to be added HERE as well
     // as to the form and the table. contact2 was added in three places and
     // arrived empty until it was added in the fourth.
-    const { company, debtor_code, contact_name, contact_number, whatsapp_number, contact2_name, contact2_number, check_service, repair_only, quote_first, notes, machines, signature, created_by } = req.body || {};
+    // slip_number: "" for the next number, or one picked from the unused list.
+    const { company, debtor_code, contact_name, contact_number, whatsapp_number, contact2_name, contact2_number, check_service, repair_only, quote_first, notes, machines, signature, created_by, slip_number } = req.body || {};
     const withTypes = await withMachineTypes(machines);
-    const slip = await data.slips.createSlip({ company, debtor_code, contact_name, contact_number, whatsapp_number, contact2_name, contact2_number, check_service, repair_only, quote_first, notes, machines: withTypes, signature, created_by });
+    const slip = await data.slips.createSlip({ company, debtor_code, contact_name, contact_number, whatsapp_number, contact2_name, contact2_number, check_service, repair_only, quote_first, notes, machines: withTypes, signature, created_by, slip_number });
     res.status(201).json(slip);
   } catch (err) {
-    if (err.status === 400) return res.status(400).json({ error: err.message });
+    if (err.status === 400 || err.status === 409) return res.status(err.status).json({ error: err.message });
     console.error("[POST /api/slips]", err);
     res.status(err.status || 500).json({ error: err.message || "Failed to create slip" });
   }

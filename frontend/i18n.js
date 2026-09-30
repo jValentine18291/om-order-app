@@ -699,6 +699,9 @@
       "只有销售和管理员可以更改。下面的保存按钮是你的。",
     // ---- Collecting, machine by machine ----
     "Collected?": "已收回？",
+    // ---- The slip number dropdown on Register (30 Sep 2026) ----
+    "Slip number": "服务单号",
+    "Next number": "下一个号码",
     // The Sales Order picker, on a machine still being worked on.
     "Not finished yet — mark it repaired first": "尚未完成 — 请先标记为已修好",
     // ---- The four confirmations added on 30 Sep 2026 ----
@@ -1066,7 +1069,13 @@
     // Collection, per slip: "2 of 5 collected" on the cards and the header,
     // and the date a machine was handed back on the sales screen.
     [/^(\d+) of (\d+) collected$/, "已收回 $1 / $2"],
-    [/^Collected · (.+)$/, "已收回 · $1"]
+    [/^Collected · (.+)$/, "已收回 · $1"],
+    // The slip number dropdown. The company a number belonged to is left as
+    // written - it is the customer's name.
+    [/^Next number — (\d+)$/, "下一个号码 — $1"],
+    [/^(\d+) — unused \(deleted (.+?), was (.+)\)$/, "$1 — 未使用（$2 已删除，原为 $3）"],
+    [/^(\d+) — unused \(deleted, was (.+)\)$/, "$1 — 未使用（已删除，原为 $2）"],
+    [/^(\d+) — unused$/, "$1 — 未使用"]
   ];
 
   // Attributes that hold text a person reads.

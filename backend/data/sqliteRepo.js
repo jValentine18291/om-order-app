@@ -195,6 +195,68 @@ function nextSlipNumber() {
   return db.transaction(allocateSlipNumber)();
 }
 
+// ---- Unused slip numbers, offered at registration ---------------------------
+// John, 30 Sep 2026: he deleted 00108 and remade it, and it came out 00114 -
+// because 00109 to 00113 already existed, and a number is only handed back
+// automatically when the deleted slip was the LAST one (see deleteSlip). His
+// answer was a dropdown at the top of Register: defaulted to the next number,
+// and listing any unused ones below it.
+//
+// Each free number carries what it WAS, read from the deleted_slips backup,
+// so nobody reuses a number for a different customer by accident: a deleted
+// slip's number may already be on a machine tag or in a customer's WhatsApp.
+//
+// `next` is what allocateSlipNumber() would give right now. It is shown, not
+// reserved - the form sends "" for it, so somebody registering at the same
+// moment cannot make the default clash.
+function freeSlipNumbers(limit = 50) {
+  const counter = Number((db.prepare("SELECT value FROM counters WHERE name = 'slip_number'").get() || {}).value) || 0;
+  const taken = new Set(db.prepare("SELECT slip_number FROM service_slips").all().map((r) => String(r.slip_number)));
+  let n = counter + 1;
+  while (taken.has(String(n).padStart(5, "0"))) n++;
+  const next = String(n).padStart(5, "0");
+
+  const was = db.prepare(
+    "SELECT company, deleted_at FROM deleted_slips WHERE slip_number = ? ORDER BY id DESC LIMIT 1"
+  );
+  const free = [];
+  // Newest first: a slip deleted this morning is the one somebody is about to
+  // re-register, and it should not be at the bottom of a long list.
+  for (let i = counter; i >= 1 && free.length < limit; i--) {
+    const num = String(i).padStart(5, "0");
+    if (taken.has(num)) continue;
+    const w = was.get(num);
+    free.push({ slip_number: num, was: w ? w.company : "", deleted_at: w ? w.deleted_at : "" });
+  }
+  return { next, free };
+}
+
+// A number the person registering chose from that list. Checked HERE, inside
+// the registration's own transaction, rather than trusted from the dropdown:
+// the list is a picture of a moment ago, and two people can pick the same
+// gap. The counter is not moved - a filled gap is behind it already.
+//
+// MUST BE CALLED INSIDE A TRANSACTION, like allocateSlipNumber().
+function claimSlipNumber(wanted) {
+  const digits = String(wanted || "").trim();
+  if (!/^\d{1,5}$/.test(digits)) {
+    const e = new Error("That is not a slip number."); e.status = 400; throw e;
+  }
+  const num = digits.padStart(5, "0");
+  const counter = Number((db.prepare("SELECT value FROM counters WHERE name = 'slip_number'").get() || {}).value) || 0;
+  // Only a gap BEHIND the counter. A number ahead of it is not unused, it is
+  // future - and taking it would make the counter walk into it later.
+  if (Number(num) < 1 || Number(num) > counter) {
+    const e = new Error(`${num} is not an unused slip number. Pick from the list, or leave it on the next number.`);
+    e.status = 400; throw e;
+  }
+  if (db.prepare("SELECT 1 FROM service_slips WHERE slip_number = ?").get(num)) {
+    const e = new Error(`Slip ${num} was just taken by somebody else. Pick again.`);
+    e.status = 409; throw e;
+  }
+  return num;
+}
+
 // Create a new service slip with its machines. Returns the created slip (with machines).
 // A signature is a PNG data URL drawn on the phone. Cap it so a malformed or
 // oversized payload can't bloat the database — a trimmed signature is a few KB,
@@ -232,7 +294,7 @@ function signedShape(slip, machines) {
   };
 }
 
-function createSlip({ company, debtor_code = "", contact_name = "", contact_number = "", whatsapp_number = "", contact2_name = "", contact2_number = "", check_service = false, repair_only = false, quote_first = false, notes = "", machines = [], signature = "", created_by = "" } = {}) {
+function createSlip({ company, debtor_code = "", contact_name = "", contact_number = "", whatsapp_number = "", contact2_name = "", contact2_number = "", check_service = false, repair_only = false, quote_first = false, notes = "", machines = [], signature = "", created_by = "", slip_number = "" } = {}) {
   const newCompanyName = String(company || "").trim();
   if (!company || !String(company).trim()) {
     const e = new Error("Company is required to register a service slip.");
@@ -304,7 +366,11 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
   const tx = db.transaction(() => {
     // Already inside a transaction, so the bare allocator rather than
     // nextSlipNumber() - that one opens its own, and SQLite forbids nesting.
-    const slipNumber = allocateSlipNumber();
+    // A number chosen from the unused list is claimed instead, and checked
+    // here, inside the same transaction as the insert - see claimSlipNumber().
+    const slipNumber = String(slip_number || "").trim()
+      ? claimSlipNumber(slip_number)
+      : allocateSlipNumber();
     const info = insertSlip.run(slipNumber, String(company).trim(), String(debtor_code || "").trim(), contact_name, contact_number, whatsapp_number, String(contact2_name || "").trim(), String(contact2_number || "").trim(), checkService ? 1 : 0, repair_only ? 1 : 0, wantsQuote ? 1 : 0, notes, String(created_by || "").trim().slice(0, 60));
     const slipId = info.lastInsertRowid;
     // Every machine starts RECEIVED, even when the customer asked for a quote.
@@ -3149,7 +3215,7 @@ const slips = {
   orderDocuments, recordOrderDocuments, billingDocument, autoInvoiceFromDocuments,
   slipsAwaitingDocuments,
   slipDeletable, deleteSlip,
-  createSlip, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setSlipExtrasNote, slipContacts, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, saveMachineWork, setMachineDisposal, deriveSlipStatus, correctMachine,
+  createSlip, freeSlipNumbers, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setSlipExtrasNote, slipContacts, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, saveMachineWork, setMachineDisposal, deriveSlipStatus, correctMachine,
   setCondemnSignature, getCondemnSignature, unsignedCondemned,
   setMachineIplModel,
   machineNeedsQuoteFirst, quoteAnswered, quoteBlockReason, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,

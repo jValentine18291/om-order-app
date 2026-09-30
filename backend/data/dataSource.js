@@ -58,6 +58,7 @@ module.exports = {
   },
   slips: {
     createSlip: (...a) => dataRepo.slips.createSlip(...a),
+    freeSlipNumbers: (...a) => dataRepo.slips.freeSlipNumbers(...a),
     listSlips: (...a) => dataRepo.slips.listSlips(...a),
     searchSlips: (...a) => dataRepo.slips.searchSlips(...a),
     getSlip: (...a) => dataRepo.slips.getSlip(...a),

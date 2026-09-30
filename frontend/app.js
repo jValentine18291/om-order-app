@@ -1564,7 +1564,32 @@ function commitMachineForm() {
     });
   }));
 
+// THE SLIP NUMBER DROPDOWN. John, 30 Sep 2026. The first option is always
+// "the next number", sent as "" so the server allocates it at the moment of
+// registering - showing it does not reserve it. The rest are the unused
+// numbers behind it, each with what it was.
+async function loadSlipNumberChoices() {
+  const sel = $("ns-slipno");
+  if (!sel) return;
+  sel.innerHTML = `<option value="">${escapeHtml(tr("Next number"))}</option>`;
+  try {
+    const r = await api("/api/slip-numbers");
+    const opts = [`<option value="">${escapeHtml(tr(`Next number — ${r.next}`))}</option>`];
+    for (const f of r.free || []) {
+      const when = f.deleted_at ? formatDate(f.deleted_at) : "";
+      const label = f.was
+        ? `${f.slip_number} — unused (deleted${when ? " " + when : ""}, was ${f.was})`
+        : `${f.slip_number} — unused`;
+      opts.push(`<option value="${escapeAttr(f.slip_number)}">${escapeHtml(tr(label))}</option>`);
+    }
+    sel.innerHTML = opts.join("");
+  } catch (_) {
+    // No list is no harm: the next number is still what it would have been.
+  }
+}
+
 function resetNewServiceForm() {
+  loadSlipNumberChoices();
   ["ns-company", "ns-contact-name", "ns-contact-number", "ns-whatsapp",
    "ns-contact2-name", "ns-contact2-number", "ns-notes"].forEach((id) => ($(id).value = ""));
   const same = $("ns-whatsapp-same"); if (same) same.checked = true;
@@ -1652,12 +1677,17 @@ async function submitNewService() {
         notes: $("ns-notes").value.trim(),
         machines,
         signature,
+        // "" is the next number; anything else was picked from the unused list.
+        slip_number: ($("ns-slipno") || {}).value || "",
       }),
     });
     toast(`Service slip ${slip.slip_number} created`, "ok");
     showSlipCreated(slip);
   } catch (e) {
     $("ns-status").innerHTML = statusErr(e.message);
+    // Somebody else took the number picked: redraw the list so what is on
+    // screen is true again. Nothing else on the form is touched.
+    if (e.status === 409) loadSlipNumberChoices();
   } finally {
     $("ns-submit").disabled = false;
   }

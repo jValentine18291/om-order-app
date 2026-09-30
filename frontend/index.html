@@ -650,6 +650,15 @@
         <p class="lede">Enter the customer's details and the machines brought in.</p>
       </div>
 
+      <!-- THE SLIP NUMBER. John, 30 Sep 2026: defaulted to the next number,
+           and listing any unused ones behind it - a slip deleted and being
+           registered again gets its number back. Each unused one says what it
+           was, so a number is not handed to a different customer by accident. -->
+      <div class="field">
+        <label for="ns-slipno">Slip number</label>
+        <select id="ns-slipno"></select>
+      </div>
+
       <div class="field">
         <label for="ns-company">Company <span class="req">*</span></label>
         <input id="ns-company" type="text" autocomplete="off" placeholder="e.g. Tan Landscaping" />
