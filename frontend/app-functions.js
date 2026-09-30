@@ -77,6 +77,10 @@
 
   function canCorrect(user) { return isKeyholder(user); }
   function canDeleteSlips(user) { return isKeyholder(user); }
+  // The common jobs strip - what the buttons are, cost, and which machines
+  // they are on. John alone, his call on 30 Sep 2026 ("mine alone for now").
+  // A price typed here reaches a customer's invoice with nothing in between.
+  function canEditCommonJobs(user) { return isKeyholder(user); }
 
   // The repair sheet was behind a per-person list while John tried it, 25 to
   // 26 Sep 2026. He green-lit it for everyone, so the list is gone rather than
@@ -135,6 +139,6 @@
   }
 
   return { FUNCTIONS, IDS, ROLE_DEFAULTS, functionsFor, isDefault, clean,
-           KEYHOLDERS, canCorrect, canDeleteSlips,
+           KEYHOLDERS, canCorrect, canDeleteSlips, canEditCommonJobs,
            SPLIT_TRIAL, usesSplitSheet };
 });

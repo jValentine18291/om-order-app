@@ -370,6 +370,51 @@ db.exec(`
 // guessing again. On the machine rather than on the phone: it is a fact about
 // the machine, and the technician who picks it is rarely the one who comes back
 // to it.
+// THE COMMON JOBS, as a table John edits from the app. Until 30 Sep 2026 they
+// were a list in frontend/common-jobs.js and adding one meant a deploy; the
+// list is still there, and it is what fills this table the first time the
+// server starts with it empty - so the first thing John sees on his screen is
+// exactly the strip the technicians already have.
+//
+// `families` is which machines a job is for, comma-separated, empty meaning
+// all of them. `hidden` keeps a job out of the strip without deleting it: a
+// line already on a slip carries the job's id, and a deleted id would make
+// that line unreadable to zeroIsDeliberate().
+try {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS common_jobs (
+      id         TEXT PRIMARY KEY,
+      title      TEXT NOT NULL,
+      item_code  TEXT NOT NULL DEFAULT '',
+      price      REAL NOT NULL DEFAULT 0,
+      qty        REAL NOT NULL DEFAULT 1,
+      comment    TEXT NOT NULL DEFAULT '',
+      families   TEXT NOT NULL DEFAULT '',
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      hidden     INTEGER NOT NULL DEFAULT 0,
+      updated_by TEXT NOT NULL DEFAULT '',
+      updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+    )
+  `);
+  const n = db.prepare("SELECT COUNT(*) AS n FROM common_jobs").get().n;
+  if (n === 0) {
+    const JOBS = require(require("path").join(__dirname, "..", "frontend", "common-jobs.js"));
+    const ins = db.prepare(
+      `INSERT INTO common_jobs (id, title, item_code, price, qty, comment, families, sort_order, updated_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'seed')`
+    );
+    const seed = JOBS.seed();
+    for (let i = 0; i < seed.length; i++) {
+      const j = seed[i];
+      ins.run(j.id, j.title, j.code || "", Number(j.price) || 0, Number(j.qty) || 1,
+              j.comment || "", (j.families || []).join(","), i + 1);
+    }
+    console.log(`[db] migrated: seeded common_jobs with ${seed.length} job(s) from common-jobs.js`);
+  }
+} catch (e) {
+  console.error("[db] common_jobs migration failed:", e.message);
+}
+
 // WHEN THE CUSTOMER SAID GO AHEAD. Set the moment a quoted machine moves to
 // TO_REPAIR, cleared if it goes back for quoting. It is what lets "Save -
 // fully repaired" be refused on a quote-first slip until the quote has actually

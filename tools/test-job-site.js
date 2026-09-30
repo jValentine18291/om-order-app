@@ -172,8 +172,10 @@ const SITE = "Marina Bay Sands";
   // The table the button is built from, checked the way the app checks it
   // before drawing any of them.
   global.window = global;
-  const JOBS = require(path.resolve(__dirname, "..", "frontend", "common-jobs.js")) || global.OM_JOBS;
-  const J = global.OM_JOBS;
+  // What require() returns, not window.OM_JOBS: since 30 Sep 2026 db.js
+  // requires this file first, to seed the common_jobs table, and Node hands
+  // back that cached copy - which set module.exports and not the window.
+  const J = require(path.resolve(__dirname, "..", "frontend", "common-jobs.js")) || global.OM_JOBS;
   check("the common jobs list is sound with a comment job in it", J.check(), []);
   const nosvc = J.byId("NOSVC");
   check("No Servicing writes this", nosvc.comment, "No servicing");

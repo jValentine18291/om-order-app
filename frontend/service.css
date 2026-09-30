@@ -3450,3 +3450,32 @@ input.spk-qty{width:84px;flex:0 0 auto;text-align:right;
    is still in the building, per slip. Its own colour: it is neither the quote
    question nor a status. */
 .q-tag-collected { background: #E7F5EC; color: #135A31; }
+
+/* ===========================================================================
+   COMMON JOBS - the screen John edits the strip on. John, 30 Sep 2026.
+   A list in the strip's order, then one form for adding or editing.
+   =========================================================================== */
+.cj-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--card, #fff); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
+}
+.cj-hidden { opacity: .55; }
+.cj-main { flex: 1; min-width: 0; }
+.cj-title { font-weight: 700; color: var(--ink); }
+.cj-sub { font-size: .8rem; color: var(--ink-faint); margin-top: 2px; }
+.cj-for { font-size: .78rem; color: var(--ink-soft); margin-top: 4px; }
+.cj-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.cj-btns .btn-secondary { padding: 6px 10px; font-size: .8rem; min-width: 44px; }
+.cj-form {
+  background: var(--card, #fff); border: 1px solid var(--border);
+  border-radius: 12px; padding: 4px 14px 14px;
+}
+.cj-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cj-two .btn-secondary, .cj-two .btn-primary { margin-top: 12px; width: 100%; }
+.cj-families { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.cj-fam {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: .85rem; padding: 6px 10px; border: 1px solid var(--border);
+  border-radius: 8px; background: var(--bg, #f4f6f7);
+}

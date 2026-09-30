@@ -2238,6 +2238,90 @@ function needDeleter(req, res) {
   return needKeyholder(req, res, "canDeleteSlips", "Only John can delete a service slip.");
 }
 
+// And for the common jobs strip. Same list of people, its own capability.
+function needJobsEditor(req, res) {
+  return needKeyholder(req, res, "canEditCommonJobs", "Only John can change the common jobs.");
+}
+
+// ---- The common jobs ---------------------------------------------------------
+// The strip of buttons on every machine sheet, as a table John edits from the
+// app - no deploy. Everybody reads it; the machine sheet fetches it on open
+// and hands it to common-jobs.js, which keeps drawing the strip exactly as it
+// did from the file. See setList() there, and the table in db.js.
+app.get("/api/common-jobs", (req, res) => {
+  try {
+    res.set("Cache-Control", "no-store");
+    res.json({ jobs: data.jobs.list(false) });
+  } catch (err) {
+    console.error("[GET /api/common-jobs]", err.message);
+    res.status(500).json({ error: "Could not read the common jobs." });
+  }
+});
+
+app.get("/api/admin/common-jobs", (req, res) => {
+  if (!needJobsEditor(req, res)) return;
+  try {
+    res.set("Cache-Control", "no-store");
+    res.json({ jobs: data.jobs.list(true), families: data.jobs.families() });
+  } catch (err) {
+    console.error("[GET /api/admin/common-jobs]", err.message);
+    res.status(500).json({ error: "Could not read the common jobs." });
+  }
+});
+
+// Saving a job checks its item code against the catalogue first, when the
+// catalogue is there to ask: a code that does not resolve would be found by
+// a technician tapping the button, and told to "tell the office" - which is
+// this screen, so it is told here. The scratch items table is not the
+// catalogue, so a server reading items from SQLite does not refuse on it.
+app.post("/api/admin/common-jobs", async (req, res) => {
+  if (!needJobsEditor(req, res)) return;
+  try {
+    const body = req.body || {};
+    const code = String(body.code || "").trim();
+    if (code && !String(body.comment || "").trim() &&
+        (process.env.ITEMS_SOURCE || "sqlite").toLowerCase() === "autocount") {
+      const item = await data.items.findItem(code);
+      if (!item || !item.item_code) {
+        return res.status(400).json({ error: `"${code}" is not an item code in AutoCount. Check the spelling.` });
+      }
+      // The code as AutoCount spells it, so the line it adds resolves the
+      // same way a scanned part does.
+      body.code = item.item_code;
+    }
+    const job = data.jobs.save(body, String(body.who || ""));
+    res.json({ job, jobs: data.jobs.list(true) });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/admin/common-jobs]", err);
+    res.status(500).json({ error: "Could not save that job." });
+  }
+});
+
+app.post("/api/admin/common-jobs/:id/hidden", (req, res) => {
+  if (!needJobsEditor(req, res)) return;
+  try {
+    const body = req.body || {};
+    data.jobs.setHidden(req.params.id, !!body.hidden, String(body.who || ""));
+    res.json({ jobs: data.jobs.list(true) });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/admin/common-jobs/:id/hidden]", err);
+    res.status(500).json({ error: "Could not change that job." });
+  }
+});
+
+app.post("/api/admin/common-jobs/order", (req, res) => {
+  if (!needJobsEditor(req, res)) return;
+  try {
+    res.json({ jobs: data.jobs.reorder((req.body || {}).ids) });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/admin/common-jobs/order]", err);
+    res.status(500).json({ error: "Could not reorder the jobs." });
+  }
+});
+
 function needKeyholder(req, res, fn, refusal) {
   const FN = require("../frontend/app-functions.js");
   if (auth.requireLogin()) {

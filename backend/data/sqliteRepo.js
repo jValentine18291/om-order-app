@@ -3238,6 +3238,135 @@ function setPartNote(itemCode, note, who = "") {
 const partNotes = { getPartNote, getPartNotes, setPartNote };
 module.exports.partNotes = partNotes;
 
+// ---- The common jobs, as John keeps them ------------------------------------
+// The strip of buttons on every machine sheet. Seeded from common-jobs.js by
+// db.js; edited here and nowhere else, from a screen only John has. See the
+// note on the table in db.js for what each column is for.
+//
+// A job is one of two kinds, and a row is exactly one of them: a LINE (a code,
+// a price, a quantity) or a COMMENT (words written into the repair note).
+// common-jobs.js's check() holds the strip to the same rule, so a row this
+// accepts is a row the strip will draw.
+const JOB_FAMILIES = (() => {
+  const MT = require(require("path").join(__dirname, "..", "..", "frontend", "machine-types.js"));
+  return Object.keys(MT.BY_TYPE).concat(["Fogger"]);
+})();
+// The ids share a column with the fogger tube types, so a job may not take
+// one of theirs - see the note above zeroIsDeliberate() in common-jobs.js.
+const TUBE_TYPES = (() => {
+  try {
+    const FT = require(require("path").join(__dirname, "..", "..", "frontend", "fogger-tubes.js"));
+    return new Set((FT.list || []).map((t) => String(t.type)));
+  } catch (_) { return new Set(); }
+})();
+
+function jobRow(r) {
+  const out = {
+    id: r.id, title: r.title,
+    families: String(r.families || "").split(",").map((s) => s.trim()).filter(Boolean),
+    hidden: !!r.hidden, sort_order: r.sort_order,
+    updated_by: r.updated_by || "", updated_at: r.updated_at || "",
+  };
+  if (String(r.comment || "").trim()) out.comment = r.comment;
+  else { out.code = r.item_code; out.price = Number(r.price); out.qty = Number(r.qty); }
+  return out;
+}
+
+function listCommonJobs(includeHidden = false) {
+  return db.prepare(
+    `SELECT * FROM common_jobs ${includeHidden ? "" : "WHERE hidden = 0"} ORDER BY sort_order, id`
+  ).all().map(jobRow);
+}
+
+// An id from a title: letters and digits, upper-cased, and unique - a second
+// "Rethread" becomes RETHREAD2 rather than colliding with the first.
+function jobIdFor(title) {
+  const base = String(title || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 24) || "JOB";
+  let id = base, n = 1;
+  const taken = (x) => TUBE_TYPES.has(x) || !!db.prepare("SELECT 1 FROM common_jobs WHERE id = ?").get(x);
+  while (taken(id)) id = `${base}${++n}`;
+  return id;
+}
+
+function saveCommonJob(input, who = "") {
+  const inp = input || {};
+  const title = String(inp.title || "").trim();
+  if (!title) { const e = new Error("Give the job a title - it is what the button says."); e.status = 400; throw e; }
+  const comment = String(inp.comment || "").trim();
+  const code = String(inp.code || inp.item_code || "").trim().toUpperCase().replace(/\s+/g, " ");
+  const price = Number(inp.price), qty = Number(inp.qty);
+  if (!comment) {
+    if (!code) { const e = new Error("Give the job an item code, or make it a comment."); e.status = 400; throw e; }
+    if (!(price >= 0)) { const e = new Error("The price has to be a number, zero or more."); e.status = 400; throw e; }
+    if (!(qty > 0)) { const e = new Error("The quantity has to be more than zero."); e.status = 400; throw e; }
+  }
+  const fams = (Array.isArray(inp.families) ? inp.families : String(inp.families || "").split(","))
+    .map((s) => String(s || "").trim()).filter(Boolean);
+  const unknown = fams.filter((f) => JOB_FAMILIES.indexOf(f) === -1);
+  if (unknown.length) {
+    const e = new Error(`Not a machine family: ${unknown.join(", ")}.`); e.status = 400; throw e;
+  }
+
+  const id = String(inp.id || "").trim();
+  const existing = id ? db.prepare("SELECT * FROM common_jobs WHERE id = ?").get(id) : null;
+  if (id && !existing) { const e = new Error("That job no longer exists."); e.status = 404; throw e; }
+  // One button per wording. Two jobs called the same thing would be two
+  // identical buttons, and the technician has no way to tell which is which.
+  const clash = db.prepare(
+    "SELECT id FROM common_jobs WHERE LOWER(title) = LOWER(?) AND id != ?"
+  ).get(title, id || "");
+  if (clash) { const e = new Error(`There is already a job called "${title}".`); e.status = 409; throw e; }
+
+  const cols = {
+    title, item_code: comment ? "" : code, price: comment ? 0 : price, qty: comment ? 1 : qty,
+    comment, families: fams.join(","), updated_by: String(who || "").trim(),
+  };
+  if (existing) {
+    db.prepare(
+      `UPDATE common_jobs SET title = @title, item_code = @item_code, price = @price, qty = @qty,
+              comment = @comment, families = @families, updated_by = @updated_by,
+              updated_at = datetime('now','localtime')
+        WHERE id = @id`
+    ).run({ ...cols, id });
+    return jobRow(db.prepare("SELECT * FROM common_jobs WHERE id = ?").get(id));
+  }
+  const newId = jobIdFor(title);
+  const next = (db.prepare("SELECT MAX(sort_order) AS m FROM common_jobs").get().m || 0) + 1;
+  db.prepare(
+    `INSERT INTO common_jobs (id, title, item_code, price, qty, comment, families, sort_order, updated_by)
+     VALUES (@id, @title, @item_code, @price, @qty, @comment, @families, @sort_order, @updated_by)`
+  ).run({ ...cols, id: newId, sort_order: next });
+  return jobRow(db.prepare("SELECT * FROM common_jobs WHERE id = ?").get(newId));
+}
+
+// Hidden, never deleted: lines on slips carry the id.
+function setCommonJobHidden(id, hidden, who = "") {
+  const r = db.prepare("SELECT * FROM common_jobs WHERE id = ?").get(String(id || ""));
+  if (!r) { const e = new Error("That job no longer exists."); e.status = 404; throw e; }
+  db.prepare(
+    "UPDATE common_jobs SET hidden = ?, updated_by = ?, updated_at = datetime('now','localtime') WHERE id = ?"
+  ).run(hidden ? 1 : 0, String(who || "").trim(), r.id);
+  return jobRow(db.prepare("SELECT * FROM common_jobs WHERE id = ?").get(r.id));
+}
+
+// The strip's order is the list's order. Ids not named keep their place
+// after the named ones, so a stale screen cannot lose a job.
+function reorderCommonJobs(ids) {
+  const wanted = (Array.isArray(ids) ? ids : []).map((x) => String(x || "").trim()).filter(Boolean);
+  const all = db.prepare("SELECT id FROM common_jobs ORDER BY sort_order, id").all().map((r) => r.id);
+  const order = wanted.filter((x) => all.indexOf(x) !== -1).concat(all.filter((x) => wanted.indexOf(x) === -1));
+  const upd = db.prepare("UPDATE common_jobs SET sort_order = ? WHERE id = ?");
+  const tx = db.transaction(() => { order.forEach((x, i) => upd.run(i + 1, x)); });
+  tx();
+  return listCommonJobs(true);
+}
+
+const commonJobs = {
+  list: listCommonJobs, save: saveCommonJob, setHidden: setCommonJobHidden,
+  reorder: reorderCommonJobs, FAMILIES: JOB_FAMILIES,
+};
+module.exports.commonJobs = commonJobs;
+
 // ---- Replacement parts ------------------------------------------------------
 // "The book says this part; we fit that one instead." Written by anyone,
 // including technicians - they are the ones who find out at the bench, and a

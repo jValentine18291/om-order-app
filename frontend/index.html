@@ -149,6 +149,15 @@
           </span>
           <span class="home-txt"><strong>People &amp; devices</strong><small>Codes, resets and signed-in phones</small></span>
         </button>
+        <!-- John alone - see canEditCommonJobs in app-functions.js. Shown
+             whether or not sign-in is on, unlike People above: the jobs are
+             the workshop's, and nothing about them waits on the login switch. -->
+        <button class="home-btn home-admin home-wide" data-go="jobs" id="home-jobs" style="display:none">
+          <span class="home-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          </span>
+          <span class="home-txt"><strong>Common jobs</strong><small>The buttons on every machine sheet</small></span>
+        </button>
         <button class="home-btn home-sales home-wide" data-go="new">
           <span class="home-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -246,6 +255,72 @@
            read as the feature having disappeared. -->
       <div class="push-help" id="push-help-home" style="display:none;"></div>
       <button class="switch-role" id="switch-role">Switch role</button>
+    </section>
+
+    <!-- ============ SCREEN: COMMON JOBS (John) ============ -->
+    <!-- The strip of buttons on every machine sheet, as a list he edits. A
+         job is either a LINE - code, price, quantity - or a COMMENT written
+         into the repair note, and the form shows the fields for whichever
+         kind is picked. "For" is by machine family; nothing ticked means
+         every machine. -->
+    <section id="screen-jobs" class="screen">
+      <div class="section-head">
+        <p class="eyebrow">Admin</p>
+        <h2>Common jobs</h2>
+      </div>
+      <p class="nsm-hint" data-no-i18n>What the technicians see on every machine sheet, in this
+        order. A change shows the next time anyone opens a sheet &mdash; nothing to deploy.
+        Hiding a job keeps its history; nothing here is ever deleted.</p>
+      <div id="cj-list"></div>
+      <button class="btn-primary" id="cj-add" type="button" style="width:100%;margin-top:12px">Add a job</button>
+
+      <div class="cj-form" id="cj-form" style="display:none">
+        <div class="section-head" style="margin-top:18px;">
+          <p class="eyebrow" id="cj-form-title">New job</p>
+        </div>
+        <div class="field">
+          <label for="cj-title">Title &mdash; what the button says, and the wording on the Sales Order</label>
+          <input id="cj-title" type="text" autocomplete="off" placeholder="e.g. Rethread" />
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Kind</label>
+          <div class="toggle" id="cj-kind">
+            <button type="button" data-kind="line" class="on">Adds a line</button>
+            <button type="button" data-kind="comment">Writes a comment</button>
+          </div>
+        </div>
+        <div id="cj-line-fields">
+          <div class="field" style="margin-top:12px;">
+            <label for="cj-code">Item code &mdash; as AutoCount has it</label>
+            <input id="cj-code" type="text" autocomplete="off" placeholder="e.g. A7 SVR WAREHOUSE" />
+          </div>
+          <div class="cj-two">
+            <div class="field" style="margin-top:12px;">
+              <label for="cj-price">Price $</label>
+              <input id="cj-price" type="number" step="0.01" min="0" inputmode="decimal" value="0" />
+            </div>
+            <div class="field" style="margin-top:12px;">
+              <label for="cj-qty">Quantity</label>
+              <input id="cj-qty" type="number" step="1" min="1" inputmode="numeric" value="1" />
+            </div>
+          </div>
+        </div>
+        <div id="cj-comment-fields" style="display:none">
+          <div class="field" style="margin-top:12px;">
+            <label for="cj-comment">The comment it writes</label>
+            <input id="cj-comment" type="text" autocomplete="off" placeholder="e.g. No servicing" />
+          </div>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>For which machines &mdash; nothing ticked means all of them</label>
+          <div class="cj-families" id="cj-families"></div>
+        </div>
+        <div class="scan-hint" id="cj-status" style="justify-content:flex-start;min-height:20px"></div>
+        <div class="cj-two">
+          <button class="btn-secondary" id="cj-cancel" type="button">Cancel</button>
+          <button class="btn-primary" id="cj-save" type="button">Save job</button>
+        </div>
+      </div>
     </section>
 
     <!-- ============ SCREEN: SHIPMENTS ============ -->

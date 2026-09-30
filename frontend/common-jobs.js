@@ -125,6 +125,60 @@
     return out;
   }
 
+  // ---- The table is the source now; this list is the seed --------------------
+  // John, 30 Sep 2026: he adds and changes jobs himself, from a screen of his
+  // own, with no deploy. The rows live in the common_jobs table (db.js seeds
+  // it from the list above on first run), the browser fetches them on open,
+  // and setList() below swaps them in HERE - so byId(), zeroIsDeliberate() and
+  // the strip all keep reading the one array they always read. The list above
+  // still loads when the fetch fails, which is what a phone with no signal
+  // gets, and the tests still read it as written.
+  //
+  // WHICH MACHINES A JOB IS FOR is a list of families - the ones in
+  // machine-types.js, plus "Fogger" - and an empty list means every machine.
+  // Family-level, not model-level: John's call, 30 Sep 2026. The old
+  // `foggers: true` is read as the one-family list ["Fogger"].
+  var FOGGER_FAMILY = "Fogger";
+
+  function normalise(row) {
+    var r = row || {};
+    var fams = r.families;
+    if (typeof fams === "string") fams = fams.split(",");
+    if (!Array.isArray(fams)) fams = r.foggers ? [FOGGER_FAMILY] : [];
+    var out = { id: String(r.id || ""), title: String(r.title || ""), families: [] };
+    for (var i = 0; i < fams.length; i++) {
+      var f = String(fams[i] || "").trim();
+      if (f) out.families.push(f);
+    }
+    if (r.comment) { out.comment = String(r.comment); return out; }
+    out.code = String(r.code || r.item_code || "");
+    out.qty = Number(r.qty);
+    out.price = Number(r.price);
+    if (out.families.length === 1 && out.families[0] === FOGGER_FAMILY) out.foggers = true;
+    return out;
+  }
+
+  // Replace every job with these rows, in place, so anything holding the
+  // array sees the change. Rows are normalised on the way in.
+  function setList(rows) {
+    JOBS.length = 0;
+    for (var i = 0; i < (rows || []).length; i++) JOBS.push(normalise(rows[i]));
+  }
+
+  // The jobs for one machine: every job for all machines, plus those for its
+  // family, plus the fogger ones when it is one. `family` is what
+  // machine-types.js says the machine is, or "" when it does not know.
+  function forMachine(family, isFogger) {
+    var out = [];
+    for (var i = 0; i < JOBS.length; i++) {
+      var f = JOBS[i].families || [];
+      if (!f.length) { out.push(JOBS[i]); continue; }
+      if (family && f.indexOf(family) !== -1) { out.push(JOBS[i]); continue; }
+      if (isFogger && f.indexOf(FOGGER_FAMILY) !== -1) out.push(JOBS[i]);
+    }
+    return out;
+  }
+
   function byId(id) {
     for (var i = 0; i < JOBS.length; i++) {
       if (JOBS[i].id === id) return JOBS[i];
@@ -176,8 +230,21 @@
     return bad;
   }
 
+  // The list as written in this file, kept before anything can replace it,
+  // normalised - what db.js writes into an empty common_jobs table, so the
+  // first thing John sees on his screen is exactly the strip the technicians
+  // already have. It must be the FILE's jobs, not whatever setList() put in.
+  var SEED = JOBS.slice();
+  function seedList() {
+    var out = [];
+    for (var i = 0; i < SEED.length; i++) out.push(normalise(SEED[i]));
+    return out;
+  }
+
   var API = { list: JOBS, everyday: everyday, foggerOnly: foggerOnly,
-              byId: byId, zeroIsDeliberate: zeroIsDeliberate, check: check };
+              byId: byId, zeroIsDeliberate: zeroIsDeliberate, check: check,
+              setList: setList, forMachine: forMachine, normalise: normalise,
+              seed: seedList, FOGGER_FAMILY: FOGGER_FAMILY };
   if (typeof window !== "undefined") window.OM_JOBS = API;
   if (typeof module !== "undefined" && module.exports) module.exports = API;
 })();

@@ -43,6 +43,15 @@ module.exports = {
     findItem: (...a) => itemsRepo.findItem(...a),
     listItems: (...a) => itemsRepo.listItems(...a),
   },
+  // The common jobs John keeps. Always the SQLite side: they are the
+  // workshop's own table, whatever the catalogue is read from.
+  jobs: {
+    list: (...a) => dataRepo.commonJobs.list(...a),
+    save: (...a) => dataRepo.commonJobs.save(...a),
+    setHidden: (...a) => dataRepo.commonJobs.setHidden(...a),
+    reorder: (...a) => dataRepo.commonJobs.reorder(...a),
+    families: () => dataRepo.commonJobs.FAMILIES,
+  },
   orders: {
     createOrder: (...a) => dataRepo.createOrder(...a),
     getOrder: (...a) => dataRepo.getOrder(...a),

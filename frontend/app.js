@@ -71,7 +71,7 @@ function formatDate(ts) {
 // ---- Screen navigation -----------------------------------------------------
 // "purchase" is the part-requests list (Orders); "po" and "po-detail" are the
 // supplier purchase orders. Different things, named apart on purpose.
-const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip", "purchase", "quote", "ipl", "bulk", "po", "po-detail", "ship", "ship-detail", "ship-edit", "people"];
+const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip", "purchase", "quote", "ipl", "bulk", "po", "po-detail", "ship", "ship-detail", "ship-edit", "people", "jobs"];
 
 // ---- Who is using this phone ------------------------------------------------
 // Staff pick their name once per phone; the choice is remembered and decides
@@ -797,6 +797,14 @@ function applyRoleToHome() {
   // later. It looked exactly like the permission check being wrong.
   const people = $("home-people");
   if (people) people.style.display = (role === "admin" && !!authToken()) ? "flex" : "none";
+  // The common jobs, John's alone - and NOT behind the login switch the way
+  // People is: the jobs are the workshop's, and the strip needs editing
+  // whether or not anybody signs in yet. Same "after the loop" reason as above.
+  const jobsTile = $("home-jobs");
+  if (jobsTile) {
+    const mine = !!(window.OM_FUNCTIONS && OM_FUNCTIONS.canEditCommonJobs(getUser()));
+    jobsTile.style.display = mine ? "flex" : "none";
+  }
   updateSignOutButton();
   updateLangToggle();
   // Declared further down; guard so this is safe during startup.
@@ -3189,6 +3197,8 @@ function openMachineModal(machineId) {
   // Which machine this is decides whether the tube buttons belong here at all.
   try { renderTubePicker(); } catch (_) {}
   try { renderJobPicker(); } catch (_) {}
+  // Then the live list, and redraw only if it differs from what was drawn.
+  loadCommonJobs().then((changed) => { if (changed) { try { renderJobPicker(); } catch (_) {} } });
   $("mm-sub").textContent = `Slip ${session.slipNumber} · ${session.slip.company}`;
   // What the customer said about THIS machine, at the top and highlighted.
   // The technician's starting point, and the thing they were scrolling past
@@ -4823,17 +4833,38 @@ function renderJobPicker() {
         escapeHtml(bad.join("; "))}. Tell the office before using these.</div>`;
     return;
   }
-  // Only a fogger gets the second group. Same question the tube picker asks,
-  // asked of the same function, so a machine cannot be a fogger for one block
-  // and not the other.
-  const mine = window.OM_JOBS.foggerOnly();
-  if (fbox && mine.length && window.FOGGER_TUBES &&
-      window.FOGGER_TUBES.isFogger(currentMachine())) {
-    $("fjob-btns").innerHTML = mine.map(jobButtonHtml).join("");
-    fbox.style.display = "";
-  }
+  // WHICH JOBS THIS MACHINE GETS is answered by family now - John, 30 Sep
+  // 2026 - in the one strip. A job for all machines, a job for this machine's
+  // family, and the fogger ones when it is one. The family is what
+  // machine-types.js makes of the machine's name; "Fogger" is the same
+  // question the tube picker asks, asked of the same function, so a machine
+  // cannot be a fogger for one block and not the other. The second block
+  // above stays hidden: a fogger's jobs are simply among the rest.
+  const m = currentMachine();
+  const MT = window.OM_MACHINE_TYPES;
+  const family = MT ? (MT.typeFor((m && m.machine_desc) || "") || MT.typeFor((m && m.machine_code) || "")) : "";
+  const fogger = !!(window.FOGGER_TUBES && m && window.FOGGER_TUBES.isFogger(m));
+  $("job-btns").innerHTML = window.OM_JOBS.forMachine(family, fogger).map(jobButtonHtml).join("");
+}
 
-  $("job-btns").innerHTML = window.OM_JOBS.everyday().map(jobButtonHtml).join("");
+// ---- The jobs come from the server now ---------------------------------------
+// Fetched on open and handed to common-jobs.js, which swaps them into the one
+// array everything reads. Failing quietly keeps the file's own list, which is
+// what a phone with no signal gets and is never wrong, only possibly a day
+// old. Re-asked every few minutes, and the moment John saves a change.
+let jobsFetchedAt = 0;
+async function loadCommonJobs(force) {
+  if (!window.OM_JOBS || !window.OM_JOBS.setList) return false;
+  if (!force && Date.now() - jobsFetchedAt < 5 * 60 * 1000) return false;
+  try {
+    const r = await api("/api/common-jobs");
+    if (r && Array.isArray(r.jobs)) {
+      window.OM_JOBS.setList(r.jobs);
+      jobsFetchedAt = Date.now();
+      return true;
+    }
+  } catch (_) {}
+  return false;
 }
 
 // One button, whichever group it is in.
@@ -4944,6 +4975,174 @@ $("job-btns").addEventListener("click", (e) => {
 $("fjob-btns").addEventListener("click", (e) => {
   const b = e.target.closest("[data-job]");
   if (b) addJobToMachine(b.dataset.job);
+});
+
+// ---- Common jobs, the screen John edits them on ---------------------------
+// The list in the strip's order, each with Edit / Hide / Up / Down, and one
+// form for adding or editing. John's alone - see canEditCommonJobs - and the
+// server refuses anybody else regardless of what the screen shows.
+//
+// user_id rides on every request while sign-in is off, which is how the
+// keyholder gate knows who is asking until then - the same as Correct and
+// Delete. Once sign-in is on, the server reads the session and ignores it.
+let cjJobs = [], cjFamilies = [], cjEditing = null;
+
+function cjWho() {
+  const u = getUser() || {};
+  return { user_id: u.id || "", who: initialsFor(u) };
+}
+
+async function renderJobsAdmin() {
+  const list = $("cj-list");
+  if (!list) return;
+  cjHideForm();
+  list.innerHTML = `<div class="slip-result-empty">Loading…</div>`;
+  try {
+    const r = await api(`/api/admin/common-jobs?user_id=${encodeURIComponent(cjWho().user_id)}`);
+    cjJobs = r.jobs || [];
+    cjFamilies = r.families || [];
+  } catch (e) {
+    list.innerHTML = `<div class="slip-result-empty">${escapeHtml(e.message)}</div>`;
+    return;
+  }
+  cjDrawList();
+}
+
+function cjDrawList() {
+  const list = $("cj-list");
+  if (!cjJobs.length) { list.innerHTML = `<div class="slip-result-empty">No jobs yet.</div>`; return; }
+  list.innerHTML = cjJobs.map((j, i) => `
+    <div class="cj-row${j.hidden ? " cj-hidden" : ""}" data-id="${escapeAttr(j.id)}">
+      <div class="cj-main">
+        <div class="cj-title">${escapeHtml(j.title)}${j.hidden ? ` <span class="pp-tag pp-tag-none">Hidden</span>` : ""}</div>
+        <div class="cj-sub mono">${j.comment
+          ? `writes "${escapeHtml(j.comment)}"`
+          : `${escapeHtml(j.code)} · ${money(j.price)} × ${escapeHtml(String(j.qty))}`}</div>
+        <div class="cj-for">${(j.families || []).length ? "For: " + escapeHtml(j.families.join(", ")) : "All machines"}</div>
+      </div>
+      <div class="cj-btns">
+        <button type="button" class="btn-secondary" data-cj-up="${i}"${i === 0 ? " disabled" : ""} aria-label="Move up">▲</button>
+        <button type="button" class="btn-secondary" data-cj-down="${i}"${i === cjJobs.length - 1 ? " disabled" : ""} aria-label="Move down">▼</button>
+        <button type="button" class="btn-secondary" data-cj-edit="${i}">Edit</button>
+        <button type="button" class="btn-secondary" data-cj-hide="${i}">${j.hidden ? "Show" : "Hide"}</button>
+      </div>
+    </div>`).join("");
+}
+
+function cjHideForm() {
+  cjEditing = null;
+  const f = $("cj-form"); if (f) f.style.display = "none";
+  const add = $("cj-add"); if (add) add.style.display = "";
+}
+
+function cjSetKind(kind) {
+  $("cj-kind").querySelectorAll("[data-kind]").forEach((b) => b.classList.toggle("on", b.dataset.kind === kind));
+  $("cj-line-fields").style.display = kind === "line" ? "" : "none";
+  $("cj-comment-fields").style.display = kind === "comment" ? "" : "none";
+}
+function cjKind() {
+  const on = $("cj-kind").querySelector("[data-kind].on");
+  return on ? on.dataset.kind : "line";
+}
+
+// Open the form, blank or filled from a job.
+function cjOpenForm(job) {
+  cjEditing = job || null;
+  $("cj-form-title").textContent = job ? `Editing: ${job.title}` : "New job";
+  $("cj-title").value = job ? job.title : "";
+  $("cj-code").value = job && !job.comment ? job.code : "";
+  $("cj-price").value = job && !job.comment ? String(job.price) : "0";
+  $("cj-qty").value = job && !job.comment ? String(job.qty) : "1";
+  $("cj-comment").value = job && job.comment ? job.comment : "";
+  cjSetKind(job && job.comment ? "comment" : "line");
+  const chosen = new Set((job && job.families) || []);
+  $("cj-families").innerHTML = cjFamilies.map((f) => `
+    <label class="cj-fam"><input type="checkbox" value="${escapeAttr(f)}"${chosen.has(f) ? " checked" : ""}> ${escapeHtml(f)}</label>`).join("");
+  $("cj-status").innerHTML = "";
+  $("cj-form").style.display = "";
+  $("cj-add").style.display = "none";
+  $("cj-title").focus();
+}
+
+async function cjSave() {
+  const kind = cjKind();
+  const body = {
+    ...cjWho(),
+    id: cjEditing ? cjEditing.id : "",
+    title: $("cj-title").value.trim(),
+    families: [...$("cj-families").querySelectorAll("input:checked")].map((c) => c.value),
+  };
+  if (kind === "comment") body.comment = $("cj-comment").value.trim();
+  else {
+    body.code = $("cj-code").value.trim();
+    body.price = Number($("cj-price").value);
+    body.qty = Number($("cj-qty").value);
+  }
+  // A price typed here reaches a customer's invoice with nothing in between,
+  // so this asks like every other change that does.
+  const forWho = body.families.length ? body.families.join(", ") : tr("All machines");
+  if (!confirmLines(cjEditing ? "Save the changes to this job?" : "Add this job to every machine sheet?", [
+    body.title,
+    kind === "comment" ? `"${body.comment}"` : `${body.code} · ${money(body.price || 0)} × ${body.qty || 1}`,
+    `${tr("For")}: ${forWho}`,
+  ])) return;
+  $("cj-save").disabled = true;
+  $("cj-status").innerHTML = statusInfo("Saving…");
+  try {
+    const r = await api("/api/admin/common-jobs", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+    });
+    cjJobs = r.jobs || cjJobs;
+    cjHideForm();
+    cjDrawList();
+    toast(cjEditing ? "Job updated" : "Job added", "ok");
+    loadCommonJobs(true);           // the strip on this phone follows at once
+  } catch (e) {
+    $("cj-status").innerHTML = statusErr(e.message);
+  } finally {
+    $("cj-save").disabled = false;
+  }
+}
+
+async function cjPost(path, body) {
+  try {
+    const r = await api(path, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...cjWho(), ...body }),
+    });
+    cjJobs = r.jobs || cjJobs;
+    cjDrawList();
+    loadCommonJobs(true);
+  } catch (e) {
+    toast(e.message, "err");
+  }
+}
+
+$("cj-add").addEventListener("click", () => cjOpenForm(null));
+$("cj-cancel").addEventListener("click", cjHideForm);
+$("cj-save").addEventListener("click", cjSave);
+$("cj-kind").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-kind]");
+  if (b) cjSetKind(b.dataset.kind);
+});
+$("cj-list").addEventListener("click", (e) => {
+  const edit = e.target.closest("[data-cj-edit]");
+  if (edit) return cjOpenForm(cjJobs[Number(edit.dataset.cjEdit)]);
+  const hide = e.target.closest("[data-cj-hide]");
+  if (hide) {
+    const j = cjJobs[Number(hide.dataset.cjHide)];
+    if (!confirmLines(j.hidden ? "Show this job on the strip again?" : "Hide this job from the strip?", [j.title])) return;
+    return cjPost(`/api/admin/common-jobs/${encodeURIComponent(j.id)}/hidden`, { hidden: !j.hidden });
+  }
+  const up = e.target.closest("[data-cj-up]"), down = e.target.closest("[data-cj-down]");
+  if (up || down) {
+    const i = Number((up || down).dataset.cjUp ?? (up || down).dataset.cjDown);
+    const j = up ? i - 1 : i + 1;
+    if (j < 0 || j >= cjJobs.length) return;
+    const ids = cjJobs.map((x) => x.id);
+    [ids[i], ids[j]] = [ids[j], ids[i]];
+    return cjPost("/api/admin/common-jobs/order", { ids });
+  }
 });
 
 // ---- The tube picker -------------------------------------------------------
@@ -8850,6 +9049,7 @@ document.querySelectorAll(".home-btn").forEach((b) =>
     else if (go === "po") { enterPurchaseOrders(); }
     else if (go === "ship") { enterShipments(); }
     else if (go === "people") { showScreen("people"); renderPeople(); }
+    else if (go === "jobs") { showScreen("jobs"); renderJobsAdmin(); }
   })
 );
 $("home-link").addEventListener("click", goHome);
