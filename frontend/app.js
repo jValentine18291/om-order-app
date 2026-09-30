@@ -6723,6 +6723,15 @@ async function createSalesOrder() {
     $("conv-status").innerHTML = statusErr("Pick at least one machine or the additional parts.");
     return;
   }
+  // ASKED FIRST. John, 30 Sep 2026: every button that changes a status asks.
+  // This one changes the most - each machine can only ever be converted once,
+  // and the block goes into AutoCount - so it names what is going on the order.
+  const going = ((session.slip && session.slip.machines) || [])
+    .filter((m) => chosen.includes(m.id)).map(machineTitle);
+  if (wantExtras) going.push(tr("Additional parts"));
+  if (!confirmLines("Create the Sales Order?", going.concat([
+    tr("Each machine can only be put on a Sales Order once."),
+  ]))) return;
   $("conv-go").disabled = true;
   $("os-create-so").disabled = true;
   // Persist the current machine's comment first (per the agreed save-on-SO behaviour).
@@ -6893,6 +6902,14 @@ async function submitInvoiced() {
   const ref = $("cs-ref").value.trim();
   if (!slipNumber) { $("cs-status").innerHTML = statusErr("Pick a slip first."); return; }
   if (!ref) { $("cs-status").innerHTML = statusErr("Enter the DO/CS/INV number."); return; }
+  // Asked first: this is what moves the slip to Invoice Created, and a
+  // mistyped number here is the one that ends up on the customer's record.
+  const soPicked = $("cs-so-field").style.display === "none" ? "" : $("cs-so").value;
+  if (!confirmLines("Record this document number?", [
+    `${tr("Slip")} ${slipNumber}${soPicked ? ` · ${soPicked}` : ""}`,
+    ref,
+    tr("The slip will read Invoice Created."),
+  ])) return;
 
   $("cs-submit").disabled = true;
   $("cs-status").innerHTML = statusInfo("Saving…");
@@ -7105,6 +7122,12 @@ function wireVsStatusActions(slipNumber) {
         return;
       }
       const state = action === "NO_QUOTE" ? "TO_REPAIR" : action;
+      // The same question the slip screen's own buttons ask: this moves
+      // EVERY machine on the slip at once.
+      if (!confirmLines("Change every machine on this service request?", [
+        `${tr("Slip")} ${slipNumber}`,
+        trLabel("Change to", (MACHINE_STATE[state] || {}).label || state),
+      ])) return;
       try {
         await api(`/api/slips/${encodeURIComponent(slipNumber)}/state`, {
           method: "PATCH",
@@ -8224,6 +8247,15 @@ $("fix-go").addEventListener("click", async () => {
   if (!picked) { $("fix-status").innerHTML = statusErr("Pick a status."); return; }
   const clearComment = !!($("fix-clear-comment") && $("fix-clear-comment").checked);
   const clearLabour = !!($("fix-clear-labour") && $("fix-clear-labour").checked);
+
+  // Asked first, like every other status change - and this is the one that
+  // overrules the workflow, so it names what it is about to overwrite.
+  if (!confirmLines("Correct this machine's status?", [
+    $("fix-sub").textContent,
+    trLabel("Change to", (MACHINE_STATE[picked.value] || {}).label || picked.value),
+    clearComment ? tr("The repair note will be cleared.") : "",
+    clearLabour ? tr("The labour charge will be cleared.") : "",
+  ])) return;
 
   const me = getUser();
   const btn = $("fix-go");

@@ -701,6 +701,17 @@
     "Collected?": "已收回？",
     // The Sales Order picker, on a machine still being worked on.
     "Not finished yet — mark it repaired first": "尚未完成 — 请先标记为已修好",
+    // ---- The four confirmations added on 30 Sep 2026 ----
+    // Every button that changes a slip's or a machine's status asks first.
+    // These were the ones that did not.
+    "Create the Sales Order?": "确定要生成销售订单吗？",
+    "Each machine can only be put on a Sales Order once.": "每台机器只能放到销售订单上一次。",
+    "Additional parts": "额外零件",
+    "Correct this machine's status?": "确定要更正这台机器的状态吗？",
+    "The repair note will be cleared.": "维修说明将被清除。",
+    "The labour charge will be cleared.": "工时费将被清除。",
+    "Record this document number?": "确定要记录这个单据号码吗？",
+    "The slip will read Invoice Created.": "服务单将显示为已开发票。",
     "Still here": "还在这里",
     "Still here — tick it off when the customer collects it.": "还在这里 — 客户收回时请勾选。",
     "Send Quotation": "发送报价单",
