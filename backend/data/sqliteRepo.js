@@ -3433,6 +3433,56 @@ const commonJobs = {
 };
 module.exports.commonJobs = commonJobs;
 
+// ---- Closed slips: every machine on them is with the customer ---------------
+// John, 1 Oct 2026: a slip that reads "Collected & Closed" means the customer
+// has everything on it, so its machines should say "Repaired - With
+// Customer". Since 30 Sep closeSlip() records exactly that as it closes; the
+// slips closed BEFORE then never had it recorded - 29 repaired machines on the
+// live book, slip 00015 among them.
+//
+// And four more that never reached Repaired at all: billed, and their slips
+// closed, while their status still read Need Repair (00009, twice) or Waiting
+// to quote (00033, 00040) - billed before only a finished machine could go on
+// an order. They were billed and went home, so they are set to Repaired too;
+// John's call.
+//
+// Dated and signed with the SLIP'S OWN closing, not today and not "system":
+// the slip closed is the moment the machines left, and whoever closed it is
+// who handed them over. Condemned machines are left alone - closing has
+// always required their disposal to be recorded, and it is.
+//
+// Idempotent, and run on every start: the second time there is nothing left
+// to do, so it costs one query. It writes only to CLOSED slips' billed
+// machines, and only where nothing is recorded yet.
+function backfillClosedSlips() {
+  const rows = db.prepare(
+    `SELECT m.id, m.state, m.disposal, s.closed_at, s.closed_by
+       FROM slip_machines m JOIN service_slips s ON s.id = m.slip_id
+      WHERE s.status = 'CLOSED'
+        AND TRIM(IFNULL(m.converted_at, '')) != ''
+        AND m.state != 'CONDEMNED'
+        AND (m.state != 'REPAIRED' OR TRIM(IFNULL(m.disposal, '')) = '')`
+  ).all();
+  if (!rows.length) return { repaired: 0, collected: 0 };
+  const setState = db.prepare(
+    "UPDATE slip_machines SET state = 'REPAIRED', decided_by = ?, decided_at = ? WHERE id = ?");
+  const setCollected = db.prepare(
+    "UPDATE slip_machines SET disposal = 'COLLECTED', disposal_by = ?, disposal_at = ? WHERE id = ?");
+  let repaired = 0, collected = 0;
+  db.transaction(() => {
+    for (const r of rows) {
+      const when = String(r.closed_at || "").trim() || null;
+      const who = String(r.closed_by || "").trim();
+      if (r.state !== "REPAIRED") { setState.run(who, when, r.id); repaired++; }
+      if (!String(r.disposal || "").trim()) { setCollected.run(who, when, r.id); collected++; }
+    }
+  })();
+  console.log(`[db] closed slips: ${repaired} machine(s) set to Repaired, ${collected} marked collected`);
+  return { repaired, collected };
+}
+try { backfillClosedSlips(); } catch (e) { console.error("[db] closed-slip backfill failed:", e.message); }
+module.exports.backfillClosedSlips = backfillClosedSlips;
+
 // ---- Replacement parts ------------------------------------------------------
 // "The book says this part; we fit that one instead." Written by anyone,
 // including technicians - they are the ones who find out at the bench, and a
