@@ -47,5 +47,35 @@ check("both empty", fits("", ""), false);
 // must simply not match anything anyone searches for.
 check("free text does not match a model", fits("No Guidebar and Chain", "365"), false);
 
+// ---- one machine written two ways ------------------------------------------
+// John, 30 Sep 2026: HBZ260 and HBZ260EZ are the same blower. The catalogue
+// says "HBZ260" on 95 parts and "HBZ260EZ" on one, so a machine registered as
+// HBZ260EZ found one part - the WS7F plug on slip 00083 was the first noticed.
+// The groups live in machine-types.js, read by the app and the server alike.
+console.log("\n-- one machine written two ways --");
+check("the WS7F plug, as the catalogue lists it, fits an HBZ260EZ",
+  fits("BK3410, 525BX, HBZ260", "HBZ260EZ"), true);
+check("and the one part filed under HBZ260EZ fits an HBZ260",
+  fits("HBZ260EZ", "HBZ260"), true);
+check("a machine in no group is exactly what it was",
+  fits("HBZ260", "HB2302"), false);
+check("an alias is a spelling, never a prefix",
+  fits("HBZ2600", "HBZ260EZ"), false);
+
+const MT = require(path.resolve(__dirname, "..", "frontend", "machine-types.js"));
+check("a group answers the same for every spelling in it",
+  MT.aliasKeys("hbz-260 ez"), MT.aliasKeys("HBZ260"));
+check("a model in no group is its own only spelling", MT.aliasKeys("EBZ5100"), ["EBZ5100"]);
+check("every group names at least two spellings",
+  MT.MODEL_ALIASES.filter((g) => g.length < 2), []);
+const seen = new Map();
+const twice = [];
+for (const g of MT.MODEL_ALIASES) for (const s of g) {
+  const k = MT.modelKey(s);
+  if (seen.has(k) && seen.get(k) !== g) twice.push(s);
+  seen.set(k, g);
+}
+check("and no spelling sits in two groups", twice, []);
+
 console.log(failures ? `\n${failures} FAILED\n` : "\nall passed\n");
 process.exit(failures ? 1 : 0);

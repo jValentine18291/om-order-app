@@ -1362,31 +1362,46 @@ module.exports.getStockBalances = getStockBalances;
 // appearing inside "3650" is a different machine. SQL narrows the rows and the
 // exact token check happens here, which keeps the query simple and the
 // matching honest.
-const modelKey = (s) => String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+// The key and the alias groups come from machine-types.js, which the browser
+// loads too: one list of "these spellings are one machine", read by both.
+const MACHINE_TYPES = require(require("path").join(
+  __dirname, "..", "..", "frontend", "machine-types.js"));
+const modelKey = MACHINE_TYPES.modelKey;
 
 // Does this item's second line name that machine? Exported so the app, the
 // route and the tests all ask the same question of the same code, rather than
 // each carrying its own copy that can drift.
+//
+// "That machine" includes every spelling of it. John, 30 Sep 2026: the
+// catalogue says "HBZ260" and the slip says "HBZ260EZ", and they are the same
+// blower - see MODEL_ALIASES in machine-types.js.
 function fitsModel(desc2, model) {
-  const wanted = modelKey(model);
-  if (!wanted) return false;          // "everything" is not a machine
-  return String(desc2 || "").split(",").some((entry) => modelKey(entry) === wanted);
+  const wanted = MACHINE_TYPES.aliasKeys(model);
+  if (!wanted.length) return false;   // "everything" is not a machine
+  return String(desc2 || "").split(",").some((entry) => wanted.indexOf(modelKey(entry)) !== -1);
 }
 
 async function partsForModel(model, limit = 200) {
-  const wanted = modelKey(model);
-  if (!wanted) return { model: "", total: 0, results: [], truncated: false };
+  const wanted = MACHINE_TYPES.aliasKeys(model);
+  if (!wanted.length) return { model: "", total: 0, results: [], truncated: false };
   const cap = Math.max(1, Math.min(500, Number(limit) || 200));
 
+  // SQL narrows on every spelling of the machine - one LIKE per spelling -
+  // and the exact check below does the matching, exactly as before. The
+  // spellings are the alias keys, letters and digits only, which is what the
+  // catalogue writes; a Desc2 punctuated some other way would be missed by
+  // the LIKE here as it was by the old one, and 96% of them carry none.
+  const params = {};
+  wanted.forEach((k, i) => { params[`m${i}`] = k; });
   const rows = await query(
     `SELECT i.ItemCode,
             COALESCE(NULLIF(i.Description, ''), NULLIF(i.Desc2, ''), i.ItemCode) AS Descr,
             NULLIF(i.Desc2, '') AS Desc2
        FROM Item i
       WHERE i.IsActive = 'T'
-        AND i.Desc2 LIKE '%' + @m + '%'
+        AND (${wanted.map((_, i) => `i.Desc2 LIKE '%' + @m${i} + '%'`).join(" OR ")})
       ORDER BY i.ItemCode`,
-    { m: String(model).trim() }
+    params
   );
 
   // The row matched somewhere in the line; keep it only if the machine is one

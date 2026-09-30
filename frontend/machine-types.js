@@ -124,14 +124,52 @@
     return `${s} ${type}`;
   }
 
+  // ONE MACHINE, WRITTEN TWO WAYS. John, 30 Sep 2026: "all the parts for
+  // HBZ260 must also appear for HBZ260EZ because they are the exact same
+  // model, just written differently." AutoCount's catalogue says "HBZ260" on
+  // 95 parts and "HBZ260EZ" on one, so a machine registered as HBZ260EZ found
+  // one part - the WS7F plug on slip 00083 was the first one noticed.
+  //
+  // Each row is a group of spellings that mean the same machine. Asking for
+  // any of them finds parts filed under all of them. EDIT THIS to add a
+  // group; the matcher in autocountRepo.js reads it, so nothing else changes.
+  //
+  // Spellings, not prefixes, on purpose: "365" is inside "3650" and they are
+  // different saws. A group says two names are one machine; it never says
+  // "anything starting with".
+  const MODEL_ALIASES = [
+    ["HBZ260", "HBZ260EZ"],
+  ];
+
+  // Letters and digits only, upper-cased - the same key the matcher uses, so
+  // "HBZ-260 EZ" and "hbz260ez" land on the same group.
+  function modelKey(s) {
+    return String(s == null ? "" : s).toUpperCase().replace(/[^A-Z0-9]/g, "");
+  }
+
+  // Every spelling that means this machine, as keys, itself included. A model
+  // in no group is its own only spelling.
+  function aliasKeys(model) {
+    const want = modelKey(model);
+    if (!want) return [];
+    for (const group of MODEL_ALIASES) {
+      const keys = group.map(modelKey);
+      if (keys.indexOf(want) !== -1) return keys;
+    }
+    return [want];
+  }
+
   return {
     BY_TYPE: BY_TYPE,
     TYPE_OF: TYPE_OF,
     TYPE_WORDS: TYPE_WORDS,
     NOT_A_MACHINE: NOT_A_MACHINE,
+    MODEL_ALIASES: MODEL_ALIASES,
     typeFor: typeFor,
     namesAType: namesAType,
     fromCategory: fromCategory,
     expand: expand,
+    modelKey: modelKey,
+    aliasKeys: aliasKeys,
   };
 });
