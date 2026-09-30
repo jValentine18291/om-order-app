@@ -1378,7 +1378,20 @@ function requestBadgesHtml(slip, style) {
   }</div>`;
 }
 
+// "Repaired – With Customer". John, 1 Oct 2026: a repaired machine the
+// customer has taken home reads differently from one still on the rack, in
+// every place a machine's status is shown. Derived, not stored: it is the
+// REPAIRED state plus the collection already recorded against the machine,
+// so there is nothing new to keep in step.
+const WITH_CUSTOMER = { label: "Repaired – With Customer", cls: "mq-collected" };
+function withCustomer(m) {
+  return !!m && m.state === "REPAIRED" && m.disposal === "COLLECTED";
+}
+
 function machinePill(m) {
+  if (withCustomer(m)) {
+    return ` <span class="machine-quote ${WITH_CUSTOMER.cls}">${escapeHtml(WITH_CUSTOMER.label)}</span>`;
+  }
   const st = MACHINE_STATE[m.state];
   if (!st) return "";
   if (m.state === "CONDEMNED") {
@@ -5638,7 +5651,8 @@ function renderMachineQuoteRow() {
     row.style.display = "flex";
     const condemned = m.state === "CONDEMNED";
     $("mm-quote-state").innerHTML =
-      `<span class="machine-quote ${condemned ? "mq-condemn" : "mq-repaired"}">${condemned ? "Condemned" : "Repaired"}</span> <span>${escapeHtml(
+      `<span class="machine-quote ${condemned ? "mq-condemn" : withCustomer(m) ? WITH_CUSTOMER.cls : "mq-repaired"}">${
+        condemned ? "Condemned" : withCustomer(m) ? WITH_CUSTOMER.label : "Repaired"}</span> <span>${escapeHtml(
         DISPOSAL_LABEL[m.disposal] ||
         (condemned ? "Still here — record where it goes before the slip can close."
                    : "Still here — tick it off when the customer collects it."))}</span>`;
@@ -7080,10 +7094,85 @@ async function onCloseSlipChosen(slipNumber) {
         stranded.length === 1
           ? "was condemned and is still here. Record where it went under View Slips first."
           : "were condemned and are still here. Record where each one went under View Slips first."
-      }</div>` : "");
+      }</div>` : "") +
+      csCollectHtml(slip);
+    wireCsCollect(slip);
   } catch (e) {
     toast(e.message, "err");
   }
+}
+
+// ---- Collected, from Close Service ------------------------------------------
+// John, 1 Oct 2026: tick off the machines the customer has taken, here, where
+// Sales already are when the customer is at the counter. Grouped under the
+// Sales Order each is on, because that is the paperwork the customer is
+// collecting against - two batches of a five-machine slip read as two groups.
+//
+// Only machines ON an order are listed: a machine is collected against its
+// paperwork (see setMachineDisposal). One already collected shows as such and
+// cannot be ticked again; a condemned one we disposed of says so instead.
+function csCollectHtml(slip) {
+  const billed = (slip.machines || []).filter((m) =>
+    String(m.converted_at || "").trim() && (m.state === "REPAIRED" || m.state === "CONDEMNED"));
+  if (!billed.length || slip.status === "CLOSED") return "";
+  const bySo = new Map();
+  for (const m of billed) {
+    const so = String(m.so_number || "").trim() || "Sales Order";
+    if (!bySo.has(so)) bySo.set(so, []);
+    bySo.get(so).push(m);
+  }
+  const open = billed.filter((m) => !String(m.disposal || "").trim()).length;
+  let html = `<div class="cs-collect"><div class="cs-collect-q">Collected by the customer?</div>`;
+  for (const [so, ms] of bySo) {
+    html += `<div class="cs-collect-so">${escapeHtml(so)}</div>`;
+    for (const m of ms) {
+      const done = String(m.disposal || "").trim();
+      const note = done === "COLLECTED"
+        ? (m.state === "REPAIRED" ? WITH_CUSTOMER.label : "Customer collected it")
+        : done === "DISPOSED" ? "Disposed of" : (m.state === "CONDEMNED" ? "Condemned" : "Repaired");
+      html += `
+        <label class="cs-collect-row${done ? " cs-collect-done" : ""}">
+          <input type="checkbox" value="${m.id}"${done ? " disabled checked" : ""}>
+          <span class="cs-collect-name">${escapeHtml(machineLabel(slip, m))}</span>
+          <span class="cs-collect-note">${escapeHtml(note)}</span>
+        </label>`;
+    }
+  }
+  html += open
+    ? `<button type="button" class="btn-secondary" id="cs-collect-go" style="width:100%;margin-top:8px">Mark ticked as collected</button>`
+    : "";
+  return html + `</div>`;
+}
+
+function wireCsCollect(slip) {
+  const go = $("cs-collect-go");
+  if (!go) return;
+  go.addEventListener("click", async () => {
+    const ids = [...document.querySelectorAll('#cs-context .cs-collect input:checked:not(:disabled)')]
+      .map((c) => Number(c.value));
+    if (!ids.length) { $("cs-status").innerHTML = statusErr("Tick the machines the customer is taking."); return; }
+    const names = (slip.machines || []).filter((m) => ids.includes(m.id)).map(machineTitle);
+    // A status change, so it asks - like every other one since 30 Sep 2026.
+    if (!confirmLines("Mark these machines as collected by the customer?", names)) return;
+    go.disabled = true;
+    try {
+      for (const id of ids) {
+        await api(`/api/slips/${encodeURIComponent(slip.slip_number)}/machines/${id}/disposal`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ disposal: "COLLECTED", who: initialsFor(getUser()) }),
+        });
+      }
+      toast(ids.length === 1 ? "1 machine collected" : `${ids.length} machines collected`, "ok");
+      await onCloseSlipChosen(slip.slip_number);
+      if (closeSearch) closeSearch.refresh();
+    } catch (e) {
+      // Some may have gone through before the one that failed: redraw, so
+      // the screen shows what really happened, then say why.
+      await onCloseSlipChosen(slip.slip_number);
+      $("cs-status").innerHTML = statusErr(e.message);
+    }
+  });
 }
 
 // The Sales Orders on this slip that still have no DO/CS/INV against them.

@@ -3451,6 +3451,24 @@ input.spk-qty{width:84px;flex:0 0 auto;text-align:right;
    question nor a status. */
 .q-tag-collected { background: #E7F5EC; color: #135A31; }
 
+/* "Repaired – With Customer": finished AND gone home. Deeper green than
+   Repaired, so the two read apart at a glance on a list. */
+.machine-quote.mq-collected { background: #135A31; color: #fff; }
+
+/* Close Service: tick off what the customer is taking, grouped by the Sales
+   Order it is on. John, 1 Oct 2026. */
+.cs-collect { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line, #e3e8ea); }
+.cs-collect-q { font-size: .82rem; font-weight: 700; color: var(--ink); }
+.cs-collect-so { font-size: .75rem; font-weight: 700; color: var(--ink-faint); margin: 10px 0 4px; letter-spacing: .02em; }
+.cs-collect-row {
+  display: flex; align-items: center; gap: 8px; padding: 6px 0;
+  font-size: .88rem; color: var(--ink);
+}
+.cs-collect-row input { width: 18px; height: 18px; flex: none; }
+.cs-collect-name { flex: 1; min-width: 0; }
+.cs-collect-note { font-size: .75rem; color: var(--ink-faint); white-space: nowrap; }
+.cs-collect-done .cs-collect-name { color: var(--ink-faint); }
+
 /* ===========================================================================
    COMMON JOBS - the screen John edits the strip on. John, 30 Sep 2026.
    A list in the strip's order, then one form for adding or editing.
