@@ -1232,7 +1232,7 @@ function machineTitle(m) {
 // Wires a text input + results container to the search endpoint, debounced.
 // onPick(slipNumber) is called when the user taps a result.
 // ============================================================================
-function setupSlipSearch({ inputId, resultsId, scope, onPick }) {
+function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo }) {
   const input = $(inputId);
   const results = $(resultsId);
   let debounce = null;
@@ -1258,10 +1258,11 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick }) {
     }
     results.innerHTML =
       list.map((s) =>
-        `<button type="button" class="slip-result" data-slip="${escapeAttr(s.slip_number)}">
+        `<button type="button" class="slip-result${onInfo ? " sr-has-info" : ""}" data-slip="${escapeAttr(s.slip_number)}">
            <span class="sr-num">${escapeHtml(s.slip_number)}</span>
            <span class="sr-co">${escapeHtml(s.company)}</span>
            <span class="sr-status sr-${escapeAttr(s.status)}">${escapeHtml(STATUS_LABEL[s.status] || s.status)}</span>
+           ${onInfo ? `<span class="sr-info" role="button" aria-label="Summary" data-info="1">i</span>` : ""}
            ${quotePills(s)}
          </button>`
       ).join("") +
@@ -1269,7 +1270,28 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick }) {
 
     results.querySelectorAll(".slip-result").forEach((btn) => {
       if (btn.dataset.slip === picked) btn.classList.add("picked");
-      btn.addEventListener("click", () => {
+      // THE SUMMARY, where a list asked for one (Close Service). Two ways in:
+      // the (i), which works with a mouse and says the card exists, and a
+      // long-press on a phone. A long-press must not ALSO pick the slip, so
+      // the click it would otherwise end in is swallowed.
+      let pressTimer = null, pressed = false, startX = 0, startY = 0;
+      if (onInfo) {
+        btn.addEventListener("pointerdown", (e) => {
+          pressed = false; startX = e.clientX; startY = e.clientY;
+          clearTimeout(pressTimer);
+          pressTimer = setTimeout(() => { pressed = true; onInfo(btn.dataset.slip); }, 550);
+        });
+        // A finger that moves is scrolling the list, not pressing a slip.
+        btn.addEventListener("pointermove", (e) => {
+          if (Math.abs(e.clientX - startX) > 10 || Math.abs(e.clientY - startY) > 10) clearTimeout(pressTimer);
+        });
+        ["pointerup", "pointercancel", "pointerleave"].forEach((ev) =>
+          btn.addEventListener(ev, () => clearTimeout(pressTimer)));
+        btn.addEventListener("contextmenu", (e) => e.preventDefault());
+      }
+      btn.addEventListener("click", (e) => {
+        if (pressed) { pressed = false; e.preventDefault(); return; }
+        if (onInfo && e.target.closest("[data-info]")) { onInfo(btn.dataset.slip); return; }
         const num = btn.dataset.slip;
         // Mark selection visually
         results.querySelectorAll(".slip-result").forEach((b) => b.classList.remove("picked"));
@@ -7078,6 +7100,7 @@ async function enterCloseService() {
     closeSearch = setupSlipSearch({
       inputId: "cs-search", resultsId: "cs-results", scope: "repaired",
       onPick: (slipNumber) => onCloseSlipChosen(slipNumber),
+      onInfo: (slipNumber) => openSlipSummary(slipNumber),
     });
   }
   closeSearch.reset();
@@ -7125,6 +7148,68 @@ async function onCloseSlipChosen(slipNumber) {
     toast(e.message, "err");
   }
 }
+
+// ---- A slip at a glance -----------------------------------------------------
+// John, 1 Oct 2026: long-press a slip in Close Service, or tap its (i), for
+// who it is, who to call, every machine with its status and what it came to,
+// and the total. The figures are the server's - see slipSummary() - so the
+// GST here is worked out exactly as the quotation's was.
+async function openSlipSummary(slipNumber) {
+  const body = $("sum-body");
+  $("sum-title").textContent = `Slip ${slipNumber}`;
+  $("sum-sub").textContent = "";
+  body.innerHTML = `<div class="fp-loading">Loading…</div>`;
+  $("sum-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+  let s;
+  try {
+    s = await api(`/api/slips/${encodeURIComponent(slipNumber)}/summary`);
+  } catch (e) {
+    body.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Could not read that slip")}</div>`;
+    return;
+  }
+  $("sum-title").textContent = s.company;
+  // Two text nodes, not one: Chinese translates whole text nodes, and the
+  // status is its own phrase there.
+  $("sum-sub").innerHTML = `<span>Slip ${escapeHtml(s.slip_number)}</span> · <span>${escapeHtml(STATUS_LABEL[s.status] || s.status)}</span>`;
+  const people = [[s.contact_name, s.contact_number], [s.contact2_name, s.contact2_number]]
+    .filter(([n, p]) => String(n || "").trim() || String(p || "").trim());
+  // Whether each machine has gone home. A machine not yet on an order cannot
+  // have been collected, and saying "still here" of it is simply true.
+  const where = (m) => m.disposal === "COLLECTED" ? "With customer"
+    : m.disposal === "DISPOSED" ? "Disposed of" : "Still here";
+  const label = (m) => withCustomer(m) ? WITH_CUSTOMER.label
+    : ((MACHINE_STATE[m.state] || {}).label || m.state);
+  body.innerHTML = `
+    <div class="sum-people">${people.length ? people.map(([n, p]) => `
+      <div class="sum-person"><span>${escapeHtml(n || "—")}</span><b>${escapeHtml(p || "")}</b></div>`).join("")
+      : `<div class="sum-person"><span>No contact recorded</span></div>`}
+    </div>
+    <div class="sum-machines">${(s.machines || []).map((m) => `
+      <div class="sum-m">
+        <div class="sum-m-main">
+          <div class="sum-m-name">${escapeHtml(m.machine_desc)}${m.serial_no ? ` <span class="sum-m-sn">S/N ${escapeHtml(m.serial_no)}</span>` : ""}</div>
+          <div class="sum-m-tags">
+            <span class="machine-quote ${withCustomer(m) ? WITH_CUSTOMER.cls : ((MACHINE_STATE[m.state] || {}).cls || "mq-none")}">${escapeHtml(label(m))}</span>
+            ${withCustomer(m) ? "" : `<span class="sum-m-where">${escapeHtml(where(m))}</span>`}
+          </div>
+        </div>
+        <div class="sum-m-cost">${money(m.cost)}</div>
+      </div>`).join("")}
+    </div>
+    <div class="sum-totals">
+      <div><span>Subtotal</span><b>${money(s.subtotal)}</b></div>
+      <div><span>GST ${Math.round((s.gst_rate || 0) * 100)}%</span><b>${money(s.gst)}</b></div>
+      <div class="sum-total"><span>Total</span><b>${money(s.total)}</b></div>
+    </div>`;
+}
+
+function closeSlipSummary() {
+  $("sum-modal").style.display = "none";
+  document.body.style.overflow = "";
+}
+$("sum-close").addEventListener("click", closeSlipSummary);
+$("sum-modal").addEventListener("click", (e) => { if (e.target.id === "sum-modal") closeSlipSummary(); });
 
 // ---- Collected, from Close Service ------------------------------------------
 // John, 1 Oct 2026: tick off the machines the customer has taken, here, where

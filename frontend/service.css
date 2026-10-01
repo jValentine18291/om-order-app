@@ -3455,6 +3455,31 @@ input.spk-qty{width:84px;flex:0 0 auto;text-align:right;
    Repaired, so the two read apart at a glance on a list. */
 .machine-quote.mq-collected { background: #135A31; color: #fff; }
 
+/* A slip at a glance (Close Service). The (i) on each row, and the card.
+   No text selection or iOS callout on a long-press: the press is the action. */
+.sr-has-info { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.sr-info {
+  display: inline-grid; place-items: center; flex: none;
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid var(--ink-faint); color: var(--ink-soft);
+  font: italic 700 12px/1 Georgia, serif; margin-left: 6px; cursor: pointer;
+}
+.sr-info:hover { border-color: var(--ink); color: var(--ink); }
+.sum-people { margin-bottom: 12px; }
+.sum-person { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; font-size: .9rem; }
+.sum-person span { color: var(--ink-soft); }
+.sum-machines { border-top: 1px solid var(--border); }
+.sum-m { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.sum-m-main { flex: 1; min-width: 0; }
+.sum-m-name { font-weight: 600; color: var(--ink); font-size: .92rem; }
+.sum-m-sn { font-weight: 400; color: var(--ink-faint); font-size: .78rem; }
+.sum-m-tags { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 4px; }
+.sum-m-where { font-size: .75rem; color: var(--ink-faint); }
+.sum-m-cost { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.sum-totals { margin-top: 10px; font-variant-numeric: tabular-nums; }
+.sum-totals div { display: flex; justify-content: space-between; padding: 3px 0; font-size: .9rem; color: var(--ink-soft); }
+.sum-totals .sum-total { color: var(--ink); font-size: 1.02rem; border-top: 1px solid var(--border); margin-top: 4px; padding-top: 8px; }
+
 /* Close Service: tick off what the customer is taking, grouped by the Sales
    Order it is on. John, 1 Oct 2026. */
 .cs-collect { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line, #e3e8ea); }

@@ -706,6 +706,14 @@
     "Mark these machines as collected by the customer?": "确定将这些机器标记为客户已取回吗？",
     "Tick the machines the customer is taking.": "请勾选客户要取回的机器。",
     "1 machine collected": "1 台机器已取回",
+    // ---- A slip at a glance (Close Service, 1 Oct 2026) ----
+    "With customer": "客户已取回",
+    "Still here": "还在这里",
+    "No contact recorded": "没有联络人记录",
+    "The buttons on every machine sheet": "每张机器维修单上的按钮",
+    "Subtotal": "小计",
+    "Total": "总计",
+    "GST 9%": "消费税 9%",
     // A machine billed before it was finished (slip 00080, 1 Oct 2026).
     "Already on a Sales Order - mark it fully repaired when the work is done.":
       "已在销售订单上 — 完工后请点「保存 · 已修好」。",

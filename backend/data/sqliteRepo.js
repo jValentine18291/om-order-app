@@ -3458,6 +3458,49 @@ const commonJobs = {
 };
 module.exports.commonJobs = commonJobs;
 
+// ---- A slip at a glance, for the counter -------------------------------------
+// John, 1 Oct 2026: long-press a slip in Close Service for the company, who to
+// call, every machine with its status and what its repair came to, and the
+// total. Every machine rather than only repaired ones (his call): a slip in
+// Close Service is often part-billed, and the customer asking about "the other
+// one" should find it on the same card.
+//
+// WHAT A MACHINE CAME TO is its own figures on the slip - parts at their
+// quantities plus labour - the same total its machine sheet shows. Not the
+// Sales Order's: order_lines carry no machine, so its amounts cannot be split
+// back out per machine. The two only differ where parts were edited after
+// billing, which the machine sheet already warns about.
+//
+// A CONDEMNED machine is $0, whatever was priced on it before the customer
+// said no - that is how it goes on the order (see test-condemned-on-order).
+//
+// GST is worked out here, by the quotation's own rule and rate, so the
+// summary and the quotation the customer already has cannot disagree.
+function slipSummary(slipNumber) {
+  const slip = getSlip(slipNumber);
+  if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
+  const r2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+  const machines = (slip.machines || []).map((m) => {
+    const parts = (m.parts || []).reduce((n, p) => n + (Number(p.unit_price) || 0) * (Number(p.quantity) || 0), 0);
+    const cost = m.state === "CONDEMNED" ? 0 : r2(parts + (Number(m.labour_charge) || 0));
+    return {
+      id: m.id, machine_desc: m.machine_desc, serial_no: m.serial_no || "",
+      state: m.state, disposal: m.disposal || "",
+      billed: !!String(m.converted_at || "").trim(), so_number: m.so_number || "",
+      cost,
+    };
+  });
+  const subtotal = r2(machines.reduce((n, m) => n + m.cost, 0));
+  const gst = r2(subtotal * GST_RATE);
+  return {
+    slip_number: slip.slip_number, company: slip.company, status: slip.status,
+    contact_name: slip.contact_name || "", contact_number: slip.contact_number || "",
+    contact2_name: slip.contact2_name || "", contact2_number: slip.contact2_number || "",
+    machines, subtotal, gst_rate: GST_RATE, gst, total: r2(subtotal + gst),
+  };
+}
+module.exports.slipSummary = slipSummary;
+
 // ---- Closed slips: every machine on them is with the customer ---------------
 // John, 1 Oct 2026: a slip that reads "Collected & Closed" means the customer
 // has everything on it, so its machines should say "Repaired - With

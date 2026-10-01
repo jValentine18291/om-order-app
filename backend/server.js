@@ -454,6 +454,19 @@ app.get("/api/slip-numbers", (req, res) => {
   }
 });
 
+// A slip at a glance - the long-press card in Close Service. See slipSummary()
+// in sqliteRepo.js for what each figure is and why.
+app.get("/api/slips/:slip/summary", (req, res) => {
+  try {
+    res.set("Cache-Control", "no-store");
+    res.json(data.slips.slipSummary(req.params.slip));
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    console.error("[GET /api/slips/:slip/summary]", err);
+    res.status(500).json({ error: "Could not read that slip." });
+  }
+});
+
 app.post("/api/slips", async (req, res) => {
   try {
     // Named one by one rather than spread, so nothing a client invents reaches

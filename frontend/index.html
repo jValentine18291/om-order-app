@@ -873,7 +873,7 @@
   <!-- How many pieces of the chosen tube. Buttons for the usual counts, and a
        box for the day it is four. -->
   <div class="modal-overlay" id="tube-qty-modal" style="display:none">
-    <div class="modal-sheet modal-sheet-narrow">
+    <div class="modal-sheet">
       <div class="modal-head">
         <div>
           <strong id="tube-qty-title">Tube</strong>
@@ -899,7 +899,7 @@
        rather than assumed: they differ per customer, and both are printed on
        the quotation the customer holds us to. -->
   <div class="modal-overlay" id="quote-modal" style="display:none">
-    <div class="modal-sheet modal-sheet-narrow">
+    <div class="modal-sheet">
       <div class="modal-head">
         <div>
           <strong>Send Quotation</strong>
@@ -965,7 +965,7 @@
        CORRECTORS in app-functions.js. The one sheet in the app that overrules
        the workflow, so it says what it will undo before it does it. -->
   <div class="modal-overlay" id="fix-modal" style="display:none">
-    <div class="modal-sheet modal-sheet-narrow">
+    <div class="modal-sheet">
       <div class="modal-head">
         <div>
           <strong>Correct this machine</strong>
@@ -992,7 +992,7 @@
        confirmAction() in app.js, which also explains why this is a sheet of
        our own rather than a confirm(). -->
   <div class="modal-overlay" id="ask-modal" style="display:none">
-    <div class="modal-sheet modal-sheet-narrow">
+    <div class="modal-sheet">
       <div class="modal-head">
         <div>
           <strong id="ask-title"></strong>
@@ -1602,6 +1602,21 @@
        A popup rather than a screen for the same reason the part peek is: the
        question is "what else fits this?", and being carried somewhere else
        answers it while losing the part you were looking at. -->
+  <!-- A slip at a glance, from Close Service: long-press a slip, or its (i).
+       John, 1 Oct 2026. Read-only - nothing on it changes anything. -->
+  <div class="modal-overlay" id="sum-modal" style="display:none">
+    <div class="modal-sheet">
+      <div class="modal-head">
+        <div>
+          <strong id="sum-title">Slip</strong>
+          <div class="mm-sub" id="sum-sub"></div>
+        </div>
+        <button class="modal-x" id="sum-close" type="button" aria-label="Close">&#10005;</button>
+      </div>
+      <div id="sum-body"></div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="fits-modal" style="display:none">
     <div class="modal-sheet">
       <div class="modal-head">
