@@ -48,6 +48,10 @@ const PATTERNS = [
   [/^(.+) · (.+) · not being repaired - it still has to leave the workshop$/,
    "$1 · $2 · 不维修，但仍需运出车间"],
   [/^(.+) · (.+) · (\d+) machines?$/, "$1 · $2 · $3 台机器"],
+  // A technician gave the customer's answer (1 Oct 2026).
+  [/^Proceed: (.+)$/, "继续维修：$1"],
+  [/^(.+) · (.+) · (.+): customer agreed, repair going ahead$/, "$1 · $2 · $3：客户同意，继续维修"],
+  [/^(.+) · (.+) · (.+): customer says too expensive - condemned$/, "$1 · $2 · $3：客户嫌太贵，已报废"],
   [/^Sales Order (.+)$/, "销售订单 $1"],
   [/^(.+) · (.+) · (\d+) still on the slip$/, "$1 · $2 · 服务单上还有 $3 台"],
 

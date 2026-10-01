@@ -5919,14 +5919,20 @@ function renderMachineQuoteRow() {
   // screen, where there is no Save bar.
   actions = actions.filter(([to]) => to !== "AWAITING_QUOTE");
   if (!canDecide()) {
+    // EXCEPT THE CUSTOMER'S ANSWER. John, 1 Oct 2026: technicians often ring
+    // the customer themselves - skipping the formal quotation - and when the
+    // answer is "go ahead", they say so here. Sales are told (see
+    // notifyStateChange on the server). Everything else stays with Sales.
+    const proceed = canProceed() && (m.state === "AWAITING_QUOTE" || m.state === "QUOTED")
+      ? [["TO_REPAIR", "Proceed with repair", "btn-secondary"]] : [];
     // A line saying where the buttons went, but only to somebody who would
     // otherwise have had one. A technician who looks for "Mark as repaired" and
     // finds nothing reports the app as broken; this answers them on the screen
     // they are already on.
-    if (actions.length) {
+    if (actions.length > proceed.length) {
       text += ` <span class="mm-quote-note">Only Sales and Admin can change this. The Save buttons below are yours.</span>`;
     }
-    actions = [];
+    actions = proceed;
   }
 
   // Too expensive to repair, said on the phone or at the bench. Added last so
@@ -6000,7 +6006,7 @@ async function moveMachine(btn, to) {
     await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/machines/${m.id}/state`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ state: to, who: initialsFor(getUser()) }),
+      body: JSON.stringify({ state: to, who: initialsFor(getUser()), role: getRole() }),
     });
     await refreshSlip();
     renderMachineParts();
@@ -7762,7 +7768,7 @@ function wireVsStatusActions(slipNumber) {
         await api(`/api/slips/${encodeURIComponent(slipNumber)}/state`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ state, who: initialsFor(getUser()) }),
+          body: JSON.stringify({ state, who: initialsFor(getUser()), role: getRole() }),
         });
         toast(state === "AWAITING_QUOTE" ? "Sent for quoting"
             : state === "QUOTED" ? "Marked as quoted"
@@ -8094,7 +8100,7 @@ function wireDecideButtons(wrap, slipNumber, slip) {
         await api(`/api/slips/${encodeURIComponent(slipNumber)}/machines/${machineId}/state`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ state, who: initialsFor(getUser()) }),
+          body: JSON.stringify({ state, who: initialsFor(getUser()), role: getRole() }),
         });
         toast(MOVE_TOAST[state] || "Saved", "ok");
         onViewSlipChosen(slipNumber);
@@ -9827,7 +9833,16 @@ function canMarkRepaired() {
 // Condemning. Was offered to whoever was holding the phone or standing at the
 // bench when the customer balked at the price, technicians included.
 function canCondemn() {
-  return canDecide();
+  // And technicians, since 1 Oct 2026 (John): they ring customers themselves,
+  // and "too expensive, condemn it" is an answer they are given at the bench.
+  // On the machine sheet and on View Slips. Sales are told when they do.
+  return canDecide() || getRole() === "tech";
+}
+
+// "Proceed with repair" - the customer's yes - for a technician who rang
+// them. Sales and Admin have it through canDecide() already.
+function canProceed() {
+  return canDecide() || getRole() === "tech";
 }
 
 // The states a machine can be condemned FROM. Everything except a machine

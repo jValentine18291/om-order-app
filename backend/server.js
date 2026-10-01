@@ -2011,10 +2011,34 @@ app.patch("/api/machines/:machineId/labour", async (req, res) => {
 // them; the technicians who worked on THAT machine are told when the answer
 // comes back, because a slip may hold another machine that is nothing to do
 // with them and a notification everyone gets is one nobody reads.
-async function notifyStateChange(slip, machineId, before, state) {
+async function notifyStateChange(slip, machineId, before, state, actor = {}) {
   try {
     const m = (slip.machines || []).find((x) => x.id === machineId);
     const desc = m ? m.machine_desc : "machine";
+
+    // A TECHNICIAN GAVE THE CUSTOMER'S ANSWER (1 Oct 2026). Sales hear about
+    // it - they were not on the call, and they are the ones who invoice the
+    // repair or deal with a condemned machine leaving. The technicians are not
+    // told: one of them just pressed the button.
+    if (actor.role === "tech") {
+      const by = actor.who || "A technician";
+      if (state === "TO_REPAIR" && (before === "AWAITING_QUOTE" || before === "QUOTED")) {
+        await push.notify(pushDb, QUOTE_NOTIFY_ROLES, {
+          title: `Proceed: ${desc}`,
+          body: `${slip.slip_number} · ${slip.company} · ${by}: customer agreed, repair going ahead`,
+          slip: slip.slip_number,
+        });
+        return;
+      }
+      if (state === "CONDEMNED" && before !== "CONDEMNED") {
+        await push.notify(pushDb, QUOTE_NOTIFY_ROLES, {
+          title: `Condemned: ${desc}`,
+          body: `${slip.slip_number} · ${slip.company} · ${by}: customer says too expensive - condemned`,
+          slip: slip.slip_number,
+        });
+        return;
+      }
+    }
 
     if (state === "AWAITING_QUOTE" && before !== "AWAITING_QUOTE") {
       const waiting = (slip.machines || []).filter((x) => x.state === "AWAITING_QUOTE").length;
@@ -2071,24 +2095,37 @@ async function notifyStateChange(slip, machineId, before, state) {
 // Inert while logins are off, like every other needRole() in this file: with
 // nobody signed in there is nobody to check, and the screen is the only gate
 // there is. It becomes real the day require-login goes on.
+// The rule itself lives in machine-roles.js since 1 Oct 2026, when
+// technicians were given the customer's answer (proceed / condemn).
 const CAN_DECIDE_MACHINE = ["sales", "admin"];
 
 async function handleMachineState(req, res) {
   try {
     const machineId = Number(req.params.id);
     const state = String((req.body || {}).state || "").toUpperCase();
-    if (state !== "AWAITING_QUOTE" && !needRole(req, res, CAN_DECIDE_MACHINE)) return;
     // Read the machine before the change: what to send, and to whom, depends
     // on where it was, and afterwards that is gone.
     const prev = await data.slips.getSlip(req.params.slip);
     const before = ((prev && prev.machines) || []).find((m) => m.id === machineId);
+    // TECHNICIANS MAY GIVE THE CUSTOMER'S ANSWER. John, 1 Oct 2026: they ring
+    // customers themselves, often skipping the formal quotation, so "go ahead"
+    // (from waiting-to-quote or quoted) and "too expensive, condemn it" (from
+    // anywhere not finished) are theirs too. Everything else stays Sales'.
+    const allowed = require("./machine-roles").rolesForMachineMove(before ? before.state : "", state);
+    if (allowed && !needRole(req, res, allowed)) return;
     const slip = await data.slips.setMachineState(
       req.params.slip, machineId, state, (req.body || {}).who || ""
     );
     res.json(slip);
     // Answer first, notify after: a push is a round trip to Google or Apple,
     // and the person who tapped the button should not wait for it.
-    notifyStateChange(slip, machineId, before ? before.state : "", state);
+    // Who did it: the signed-in role when logins are on, else what the phone
+    // says it is - only ever used to choose who is TOLD, never to allow.
+    const actor = {
+      role: String((req.user && req.user.role) || (req.body || {}).role || ""),
+      who: String((req.body || {}).who || "").trim(),
+    };
+    notifyStateChange(slip, machineId, before ? before.state : "", state, actor);
   } catch (err) {
     if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
     console.error("[PATCH /api/slips/:slip/machines/:id/state]", err);
