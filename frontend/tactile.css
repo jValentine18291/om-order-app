@@ -1,0 +1,175 @@
+/* ============================================================================
+   TACTILE 3D - John, 1 Oct 2026.
+   ============================================================================
+   Every button and card sits on a solid edge, and pressing one pushes it down
+   onto that edge, so a press is something you can see. Chosen from three
+   mock-ups (flat, tactile, soft raised) over a game-style look.
+
+   Loaded LAST, after styles.css and service.css, and kept in this one file so
+   the whole look can be tuned - or taken out - in one place. Nothing here
+   changes what anything does; only how it looks.
+
+   THE PARTS
+     --d    how deep the edge is. Pressing moves the element down by exactly
+            this, so it lands on its own edge.
+     --e    the edge's colour: a darker shade of the element's own border or
+            fill, so each button reads as one solid piece.
+     lift   a soft shadow under the edge, so it stands off the page.
+
+   SPACING (John: "enough space between them"). The edge and its shadow sit
+   BELOW the element, outside its box, so anything stacked under a raised
+   element needs at least --d more room than before or the edge touches it.
+   Every list and row of raised things gets its gap opened up at the bottom.
+
+   iPHONE. Safari only shows :active on a tap when the page listens for
+   touches - app.js adds an empty touchstart listener for exactly that. The
+   pane I test in is Chromium, so the press needs checking on a real iPhone.
+   ========================================================================== */
+
+:root {
+  --d: 4px;
+  --d-sm: 3px;
+  --e-neutral: #c3d1c9;
+  --lift: 0 7px 12px -4px rgba(22, 36, 31, .16);
+  --lift-sm: 0 5px 9px -4px rgba(22, 36, 31, .14);
+}
+
+/* ---- What is raised ------------------------------------------------------ */
+/* Pressable: buttons, tiles, list rows and the cards that open something. */
+.btn-primary, .btn-secondary, .btn-quiet,
+.home-btn, .role-btn, .staff-btn,
+.slip-result, .slip-card, .machine-btn, .po-card, .mp-row, .company-option,
+.status-btn, .decide-btn, .tube-btn, .bo-diesel, .vs-delete,
+.pu-chip, .pu-bchip, .pu-done, .pu-edit, .pu-delete,
+.topbar .pill, .switch-role, .pu-notify, .fp-scan-btn, .fp-scan-stop, .ipl-price-btn, .contact-act,
+.mp-chip, .pp-act, .ipl-reset, .ipl-offline-btn, .mm-book-change, .fp-shelf-edit, .ac-retry, .fits-chip, .bo-remove,
+.lang-toggle, .app-update-go, .mm-condemn-btn, .modal-x {
+  --e: var(--e-neutral);
+  box-shadow: 0 var(--d) 0 var(--e), var(--lift);
+  transition: transform .06s ease-out, box-shadow .06s ease-out, filter .1s, background .1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Small things - chips, pills, the language and close buttons - get a
+   shallower edge, in proportion. */
+.btn-quiet, .pu-chip, .pu-bchip, .pu-done, .pu-edit, .pu-delete,
+.mp-chip, .pp-act, .ipl-reset, .ipl-offline-btn, .mm-book-change, .fp-shelf-edit, .ac-retry, .fits-chip, .bo-remove,
+.topbar .pill,
+.lang-toggle, .app-update-go, .modal-x {
+  --d: var(--d-sm);
+  box-shadow: 0 var(--d) 0 var(--e), var(--lift-sm);
+}
+
+/* ---- Pressed: down onto the edge ----------------------------------------- */
+/* Replaces every earlier :active (scale, brightness, 1px nudges) so the whole
+   app presses the same way. */
+.btn-primary:active, .btn-secondary:active, .btn-quiet:active,
+.home-btn:active, .role-btn:active, .staff-btn:active,
+.slip-result:active, .slip-card:active, .machine-btn:active, .po-card:active,
+.mp-row:active, .company-option:active,
+.status-btn:active, .decide-btn:active, .tube-btn:active, .bo-diesel:active, .vs-delete:active,
+.pu-chip:active, .pu-bchip:active, .pu-done:active, .pu-edit:active, .pu-delete:active,
+.topbar .pill:active, .switch-role:active, .pu-notify:active, .fp-scan-btn:active, .fp-scan-stop:active, .ipl-price-btn:active, .contact-act:active, .mp-chip:active, .pp-act:active, .ipl-reset:active, .ipl-offline-btn:active, .mm-book-change:active, .fp-shelf-edit:active, .ac-retry:active, .fits-chip:active, .bo-remove:active,
+.lang-toggle:active, .app-update-go:active, .mm-condemn-btn:active, .modal-x:active {
+  transform: translateY(var(--d));
+  box-shadow: 0 0 0 var(--e), 0 1px 2px rgba(22, 36, 31, .12);
+  filter: none;
+}
+
+/* Can't be pressed: no edge, no press. Flat says "not now" without words. */
+.btn-primary:disabled, .btn-secondary:disabled, .decide-btn:disabled,
+.status-btn:disabled, .pu-done:disabled, .pu-edit:disabled, .pu-delete:disabled,
+.mm-save-btn:disabled, .slip-result:disabled, .machine-btn:disabled {
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* ---- Edge colours: a darker shade of each element's own colour ----------- */
+.btn-primary { --e: #05555a; box-shadow: 0 var(--d) 0 var(--e), 0 8px 14px -4px rgba(4, 90, 80, .35); }
+.btn-primary:active { filter: none; }
+.mm-save-quote { --e: #8a5300; }
+.btn-secondary { --e: #b9c9c0; }
+
+.slip-card, .slip-result, .machine-btn, .home-btn, .staff-btn,
+.company-option, .mp-row, .tube-btn { --e: #cddad3; }
+.po-card { --e: #cddad3; }
+
+.role-sales { --e: #c47a12; }
+.role-tech  { --e: #2a6fb5; }
+
+.status-btn-quote   { --e: #c97f12; }
+.status-btn-quoted  { --e: #6c52c0; }
+.status-btn-noquote { --e: var(--e-neutral); }
+
+.decide-repair  { --e: #7cbf98; }
+.decide-condemn, .btn-condemn { --e: #d99a9a; }
+.decide-quoted  { --e: #d4ab6e; }
+
+.pu-chip-on, .pu-chip-on:active { --e: #000; }
+.pu-bchip-on { --e: #1B7A42; }
+.pu-done   { --e: #2FA45C; }
+.pu-delete, .vs-delete { --e: #d99a9a; }
+.bo-diesel { --e: #c48f2c; }
+
+/* ---- Room for the edge ---------------------------------------------------- */
+/* Lists of raised rows: wider gaps, and room at the foot so the last row's
+   edge is not cut off by the scroll box it sits in. */
+.slip-results { gap: 12px; padding: 2px 4px calc(var(--d) + 8px); }
+#pu-list { gap: 16px; }
+#sd-machines { gap: 14px; }
+.po-card { margin-bottom: 14px; }
+.home-actions { gap: 14px; }
+.company-suggest { gap: 10px; padding: 2px 4px calc(var(--d) + 8px); }
+.mm-save-row { gap: 14px; }
+.decide-row { gap: 10px; row-gap: 12px; }
+.status-actions { gap: 10px; row-gap: 12px; }
+.pu-filters { gap: 10px; row-gap: 12px; margin-bottom: 18px; }
+.pu-brands { gap: 8px; row-gap: 10px; margin: -4px 0 18px; }
+.pu-actions { gap: 10px; row-gap: 12px; }
+.cs-cond-btns { gap: 10px; margin-top: 10px; margin-bottom: 4px; }
+
+/* The later additions' edges, each a shade of its own border or fill. */
+.fp-scan-btn  { --e: #7fb9bc; }
+.contact-act  { --e: #b9dfe1; }
+.pu-notify    { --e: #e3b56f; }
+.ac-retry     { --e: #c9924a; }
+.fits-chip    { --e: #b9dfe1; }
+
+/* ---- Cards that only show things ----------------------------------------- */
+/* Raised too (John: every card), on a shallower edge than anything pressable
+   and with no press - nothing happens when they are tapped, and a card that
+   sank under a finger would promise that something will. */
+.vs-card, .vs-machine, .created-card, .fp-card, .vse-card, .pu-card,
+.summary-card, .slip-context {
+  --e: #d3dfd8;
+  box-shadow: 0 var(--d-sm) 0 var(--e), var(--lift-sm);
+}
+.slip-context { --e: #c4dcdc; }
+.vs-machine { margin-bottom: 16px; }
+.vs-card { margin-bottom: 18px; }
+/* A row of decisions inside a machine card is followed straight away by the
+   parts list - room for the edge before it. */
+.decide-row { margin-bottom: 10px; }
+.status-actions { margin-bottom: 16px; }
+.contact-row { --e: #d3dfd8; box-shadow: 0 var(--d-sm) 0 var(--e), var(--lift-sm); }
+
+/* ---- The machine sheet ---------------------------------------------------- */
+/* Add a part and Scan QR Code are styled by id there, so they are named here
+   by id too. The gap between them opens up for the edge. */
+.mm-b #mm-addpart, .mm-b #mm-scan-btn {
+  box-shadow: 0 var(--d) 0 var(--e), var(--lift);
+  transition: transform .06s ease-out, box-shadow .06s ease-out;
+}
+.mm-b #mm-addpart  { --e: #0d4f54; box-shadow: 0 var(--d) 0 var(--e), 0 8px 14px -4px rgba(4, 90, 80, .35); }
+.mm-b #mm-scan-btn { --e: #7fb9bc; margin-top: 14px; }
+.mm-b #mm-addpart:active, .mm-b #mm-scan-btn:active {
+  transform: translateY(var(--d));
+  box-shadow: 0 0 0 var(--e), 0 1px 2px rgba(22, 36, 31, .12);
+}
+.mm-b #os-labour-field { margin-top: 16px; }
+/* Common jobs and fogger tubes: grids of raised buttons - the edge needs
+   room between rows, not only between columns. */
+.job-btns, .tube-btns { gap: 12px 10px; padding-bottom: 6px; }
+/* "Mark as repaired" over "Too expensive - condemn", and the disposal pair. */
+.mm-quote-btns { gap: 14px; }
+.mm-disposal { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }

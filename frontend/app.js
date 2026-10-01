@@ -35,6 +35,11 @@ const session = {
 
 // ---- Helpers ---------------------------------------------------------------
 const $ = (id) => document.getElementById(id);
+
+// Tactile 3D (tactile.css, 1 Oct 2026): a press pushes a button down onto its
+// edge with :active. iPhone Safari only applies :active on a tap when the page
+// listens for touches, so this listener exists to do nothing but be there.
+document.addEventListener("touchstart", () => {}, { passive: true });
 const money = (n) => "$" + (Number(n) || 0).toFixed(2);
 
 const ICON = {
