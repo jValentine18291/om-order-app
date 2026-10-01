@@ -1239,12 +1239,25 @@ function machineTitle(m) {
 // waiting since the first - or, for one with nothing billed (all condemned),
 // from the day it came in. Amber from SLIP_STALE_DAYS, the same fortnight
 // the other lists use.
+//
+// A slip with no order at all - condemned machines only, which need none
+// (1 Oct 2026) - says how long since the LAST one was condemned instead.
+// "On SO" of a slip with no SO would be the one thing on the row that's false.
 function soAgeTag(slip) {
-  const billed = ((slip && slip.machines) || [])
-    .map((m) => String(m.converted_at || "").trim()).filter(Boolean).sort();
-  const days = daysSince(billed[0] || slip.created_at);
-  if (days === null) return "";
-  const text = days <= 0 ? "On SO today" : days === 1 ? "On SO 1 day" : `On SO ${days} days`;
+  const ms = (slip && slip.machines) || [];
+  const billed = ms.map((m) => String(m.converted_at || "").trim()).filter(Boolean).sort();
+  let days, text;
+  if (billed.length) {
+    days = daysSince(billed[0]);
+    if (days === null) return "";
+    text = days <= 0 ? "On SO today" : days === 1 ? "On SO 1 day" : `On SO ${days} days`;
+  } else {
+    const condemned = ms.filter((m) => m.state === "CONDEMNED")
+      .map((m) => String(m.decided_at || "").trim()).filter(Boolean).sort();
+    days = daysSince(condemned[condemned.length - 1] || slip.created_at);
+    if (days === null) return "";
+    text = days <= 0 ? "Condemned today" : days === 1 ? "Condemned 1 day" : `Condemned ${days} days`;
+  }
   return `<span class="q-tag q-tag-age${days >= SLIP_STALE_DAYS ? " q-tag-age-late" : ""}">${escapeHtml(text)}</span>`;
 }
 
@@ -1364,6 +1377,9 @@ const STATUS_LABEL = {
   ALL_REPAIRED: "All Repaired",
   PART_SO: "Partial SO",
   CALL_CUSTOMER: "All Repaired", // legacy name, shown as the new label
+  // Every machine condemned and accounted for, and nothing ever billed: no
+  // Sales Order to say "SO Created" about. John, 1 Oct 2026.
+  READY_TO_CLOSE: "Ready to close",
   // The end of a slip's life, in the three steps sales actually work through:
   // the order is raised here, keyed into AutoCount as a DO/INV/CS by hand, and
   // only then is the customer called to come and collect. The last two are set
@@ -7142,12 +7158,16 @@ async function onCloseSlipChosen(slipNumber) {
     // A condemned machine still in the workshop stops the slip closing. Say so
     // here, on the screen where someone is about to try, rather than only
     // refusing once they have typed the DO number.
+    // Only the ones ON an order: a condemned machine with none is answered
+    // right here now, in its own block below (csCondemnedHtml).
     const stranded = (slip.machines || []).filter(
       (m) => m.state === "CONDEMNED" && !String(m.disposal || "").trim()
+        && String(m.converted_at || "").trim()
     );
     $("cs-context").innerHTML =
       `<div><strong>${escapeHtml(slip.company)}</strong> · Slip ${escapeHtml(slip.slip_number)}</div>` +
-      `<div class="sub">Status: ${escapeHtml(STATUS_LABEL[slip.status] || slip.status)} · ${slip.machines.length} machine(s)</div>` +
+      // Separate text nodes so Chinese can translate each phrase on its own.
+      `<div class="sub"><span>Status</span>: <span>${escapeHtml(STATUS_LABEL[slip.status] || slip.status)}</span> · <span>${slip.machines.length} machine(s)</span></div>` +
       (formatDate(slip.created_at) ? `<div class="sub">Created: ${escapeHtml(formatDate(slip.created_at))}</div>` : "") +
       ((slip.orders || []).filter((o) => o.so_number).map((o) =>
         `<div class="sub">${escapeHtml(o.so_number)}: ${o.closing_ref
@@ -7159,7 +7179,9 @@ async function onCloseSlipChosen(slipNumber) {
           ? "was condemned and is still here. Record where it went under View Slips first."
           : "were condemned and are still here. Record where each one went under View Slips first."
       }</div>` : "") +
+      csCondemnedHtml(slip) +
       csCollectHtml(slip);
+    wireCsCondemned(slip);
     wireCsCollect(slip);
   } catch (e) {
     toast(e.message, "err");
@@ -7270,6 +7292,62 @@ function csCollectHtml(slip) {
   return html + `</div>`;
 }
 
+// ---- Condemned, with no Sales Order -----------------------------------------
+// John, 1 Oct 2026: a condemned machine does not always go on a Sales Order -
+// there is nothing to charge. It still has to be accounted for before the slip
+// closes, and Close Service is where Sales are when the customer turns up, so
+// both answers are here: the customer took it, or we disposed of it. The
+// customer's signature is still required at close (his call), so an unsigned
+// one says so rather than letting the Close button be the first to mention it.
+function csCondemnedHtml(slip) {
+  const ms = (slip.machines || []).filter((m) =>
+    m.state === "CONDEMNED" && !String(m.converted_at || "").trim());
+  if (!ms.length || slip.status === "CLOSED") return "";
+  return `<div class="cs-collect cs-condemned"><div class="cs-collect-q">Condemned, no Sales Order</div>${
+    ms.map((m) => {
+      const done = String(m.disposal || "").trim();
+      const signed = !!m.has_condemn_signature;
+      return `<div class="cs-cond-row" data-cond="${m.id}">
+          <div class="cs-cond-head">
+            <span class="cs-collect-name">${escapeHtml(machineLabel(slip, m))}</span>
+            <span class="cs-cond-sign${signed ? "" : " cs-cond-unsigned"}">${signed ? "Signed for condemning" : "Not signed yet"}</span>
+          </div>${done
+            ? `<div class="cs-cond-done">${escapeHtml(DISPOSAL_LABEL[done] || done)}</div>`
+            : `<div class="cs-cond-btns">
+                <button type="button" class="btn-secondary" data-disposal="COLLECTED">Customer collected</button>
+                <button type="button" class="btn-secondary" data-disposal="DISPOSED">We disposed of it</button>
+              </div>`}${signed ? "" : `<div class="cs-cond-note">Take the customer's signature under View Slips before closing.</div>`}
+        </div>`;
+    }).join("")}</div>`;
+}
+
+function wireCsCondemned(slip) {
+  document.querySelectorAll("#cs-context .cs-cond-row [data-disposal]").forEach((b) =>
+    b.addEventListener("click", async () => {
+      const id = Number(b.closest("[data-cond]").dataset.cond);
+      const m = (slip.machines || []).find((x) => x.id === id);
+      const to = b.dataset.disposal;
+      if (!m) return;
+      if (!confirmLines("Record where this condemned machine went?", [
+        machineTitle(m), tr(DISPOSAL_LABEL[to]),
+      ])) return;
+      b.closest(".cs-cond-btns").querySelectorAll("button").forEach((x) => { x.disabled = true; });
+      try {
+        await api(`/api/slips/${encodeURIComponent(slip.slip_number)}/machines/${id}/disposal`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ disposal: to, who: initialsFor(getUser()) }),
+        });
+        toast(DISPOSAL_LABEL[to], "ok");
+        await onCloseSlipChosen(slip.slip_number);
+        if (closeSearch) closeSearch.refresh();
+      } catch (e) {
+        await onCloseSlipChosen(slip.slip_number);
+        $("cs-status").innerHTML = statusErr(e.message);
+      }
+    }));
+}
+
 function wireCsCollect(slip) {
   const go = $("cs-collect-go");
   if (!go) return;
@@ -7324,7 +7402,10 @@ function renderCloseStep() {
   $("cs-cancel-close").style.display = "none";
 
   $("cs-ref-field").style.display = needsNumber || forced ? "" : "none";
-  $("cs-reinvoice").style.display = !needsNumber ? "" : "none";
+  // Nothing to correct on a slip that never had an order - condemned machines
+  // only, which close with no DO/CS/INV number at all.
+  const hasOrders = ((csSlip && csSlip.orders) || []).some((o) => o.so_number);
+  $("cs-reinvoice").style.display = !needsNumber && hasOrders ? "" : "none";
   $("cs-submit").textContent = needsNumber || forced
     ? "Record DO/CS/INV number" : "Collected & Closed";
 
@@ -7402,7 +7483,9 @@ function renderCloseConfirm() {
   // Every document, not just the last one recorded: a slip collected in two
   // goes has two, and seeing only one of them is how somebody closes a slip
   // whose second batch they have forgotten about.
-  $("cs-c-ref").textContent = refs.length ? refs.join(", ") : "—";
+  // A slip of condemned machines with no order has no number, and a dash
+  // there reads like something forgotten.
+  $("cs-c-ref").textContent = refs.length ? refs.join(", ") : tr("No Sales Order");
 
   $("cs-confirm").style.display = "";
   $("cs-ref-field").style.display = "none";

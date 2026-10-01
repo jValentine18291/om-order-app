@@ -711,6 +711,13 @@
     "Still here": "还在这里",
     "No contact recorded": "没有联络人记录",
     "The buttons on every machine sheet": "每张机器维修单上的按钮",
+    // ---- Condemned with no Sales Order (Close Service, 1 Oct 2026) ----
+    "Condemned, no Sales Order": "已报废，无销售单",
+    "Not signed yet": "客户未签名",
+    "Take the customer's signature under View Slips before closing.": "结单前，请在「查看服务单」中让客户签名。",
+    "Record where this condemned machine went?": "记录这台报废机器的去向？",
+    "Ready to close": "可结单",
+    "No Sales Order": "无销售单",
     "Subtotal": "小计",
     "Total": "总计",
     "GST 9%": "消费税 9%",
@@ -1081,6 +1088,9 @@
     // Close Service: how long a slip has been on a Sales Order.
     [/^On SO (\d+) days?$/, "已开销售单 $1 天"],
     [/^On SO today$/, "今天开销售单"],
+    [/^Condemned (\d+) days?$/, "已报废 $1 天"],
+    [/^Condemned today$/, "今天报废"],
+    [/^(\d+) machine\(s\)$/, "$1 台机器"],
     // The pills on a slip card. They were English on a technician's screen
     // because nothing here had ever been asked to translate them.
     [/^(\d+) to quote$/, "$1 台待报价"],

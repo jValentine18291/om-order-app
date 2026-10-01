@@ -640,7 +640,8 @@ select {
    whether any of it has reached an order yet. */
 .vs-REPAIRED, .sr-REPAIRED,
 .vs-ALL_REPAIRED, .sr-ALL_REPAIRED, .vs-CALL_CUSTOMER, .sr-CALL_CUSTOMER,
-.vs-CONVERTED, .sr-CONVERTED { background: #E7F5EC; color: #1B7A42; }
+.vs-CONVERTED, .sr-CONVERTED,
+.vs-READY_TO_CLOSE, .sr-READY_TO_CLOSE { background: #E7F5EC; color: #1B7A42; }
 /* Partial SO: part of it is billed and part is still on the bench, so it is
    half a workshop state and half a sales one. Teal - the app's own colour -
    rather than borrowing the green of finished or the blue of in progress. */
@@ -1550,6 +1551,7 @@ body.signin-brand .topbar .pill {
 .slip-card:has(.vs-ALL_REPAIRED), .slip-result:has(.sr-ALL_REPAIRED) { border-left-color: #1B7A42; }
 .slip-card:has(.vs-CALL_CUSTOMER),.slip-result:has(.sr-CALL_CUSTOMER){ border-left-color: #1B7A42; }
 .slip-card:has(.vs-PART_SO),      .slip-result:has(.sr-PART_SO)      { border-left-color: #0a7f86; }
+.slip-card:has(.vs-READY_TO_CLOSE),.slip-result:has(.sr-READY_TO_CLOSE){ border-left-color: #1B7A42; }
 .slip-card:has(.vs-INVOICED),     .slip-result:has(.sr-INVOICED)     { border-left-color: #A85B00; }
 .slip-card:has(.vs-CLOSED),       .slip-result:has(.sr-CLOSED)       { border-left-color: var(--ink-faint); }
 
@@ -3496,6 +3498,16 @@ input.spk-qty{width:84px;flex:0 0 auto;text-align:right;
 .cs-collect-name { flex: 1; min-width: 0; }
 .cs-collect-note { font-size: .75rem; color: var(--ink-faint); white-space: nowrap; }
 .cs-collect-done .cs-collect-name { color: var(--ink-faint); }
+/* Close Service: a condemned machine with no Sales Order, and where it went. */
+.cs-cond-row { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.cs-cond-row:last-child { border-bottom: 0; }
+.cs-cond-head { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.cs-cond-sign { font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: #E7F5EC; color: #135A31; white-space: nowrap; }
+.cs-cond-sign.cs-cond-unsigned { background: var(--amber-tint, #fbf1dd); color: #9a6413; }
+.cs-cond-btns { display: flex; gap: 8px; margin-top: 8px; }
+.cs-cond-btns .btn-secondary { flex: 1; margin: 0; }
+.cs-cond-done { font-size: .82rem; color: var(--ink-soft); margin-top: 4px; }
+.cs-cond-note { font-size: .75rem; color: #9a6413; margin-top: 6px; }
 
 /* ===========================================================================
    COMMON JOBS - the screen John edits the strip on. John, 30 Sep 2026.

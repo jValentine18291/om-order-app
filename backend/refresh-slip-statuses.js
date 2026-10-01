@@ -91,7 +91,7 @@ if (!changes.length) {
 const LABEL = {
   OPEN: "Open", IN_PROGRESS: "In Progress", NEED_QUOTE: "Need to Quote",
   QUOTED: "Quoted", REPAIRED: "Repaired", ALL_REPAIRED: "All Repaired",
-  PART_SO: "Partial SO", CONVERTED: "Converted",
+  PART_SO: "Partial SO", CONVERTED: "Converted", READY_TO_CLOSE: "Ready to close",
 };
 const name = (s) => LABEL[s] || s;
 

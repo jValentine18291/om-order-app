@@ -423,7 +423,7 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
 const WORKING_SCOPE = `(
   status != 'CLOSED'
   AND (
-    status NOT IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED')
+    status NOT IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'READY_TO_CLOSE')
     OR EXISTS (
       SELECT 1 FROM slip_machines m
        WHERE m.slip_id = service_slips.id
@@ -460,7 +460,7 @@ function listSlips(statusFilter = "active") {
     ).all();
   } else if (statusFilter === "repaired" || statusFilter === "call_customer") {
     rows = db.prepare(`SELECT * FROM service_slips WHERE (
-       status IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'PART_SO')
+       status IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'PART_SO', 'READY_TO_CLOSE')
        OR (
          -- Everything on it is either billed or condemned: nothing left to do
          -- in the workshop, even if a condemned machine still has to be
@@ -1995,7 +1995,7 @@ function searchSlips(query = "", scope = "all", limit = 20) {
     scope === "active" ? "status != 'CLOSED'" :
     scope === "working" ? WORKING_SCOPE :
     scope === "repaired" ? `(
-       status IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'PART_SO')
+       status IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'PART_SO', 'READY_TO_CLOSE')
        OR (
          -- Everything on it is either billed or condemned: nothing left to do
          -- in the workshop, even if a condemned machine still has to be
@@ -2799,7 +2799,11 @@ function deriveSlipStatus(slipId) {
   // now (see listSlips), which is a truer question anyway, and the slip lists
   // carry a count beside the status - "In Progress · 2 to quote".
   if (ms.every(machineSettled) && !extrasLeft) {
-    next = "CONVERTED";                                // everything dealt with
+    // Everything dealt with. "SO Created" only if something actually went on
+    // one: a slip of condemned machines, collected or disposed of with no
+    // Sales Order at all (John, 1 Oct 2026 - they do not always need one),
+    // would otherwise claim an order nobody raised. It reads Ready to close.
+    next = any((m) => String(m.converted_at || "").trim()) ? "CONVERTED" : "READY_TO_CLOSE";
   } else if (any((m) => m.converted_at)) {
     // Some of it is on a Sales Order. Which of the two this is depends on
     // whether the workshop still has something to do:
@@ -3214,7 +3218,11 @@ function setMachineDisposal(slipNumber, machineId, disposal, who = "") {
     const e = new Error("Only a condemned machine is disposed of.");
     e.status = 400; throw e;
   }
-  if (d === "COLLECTED" && !String(machine.converted_at || "").trim()) {
+  // A REPAIRED machine is collected against its paperwork. A CONDEMNED one
+  // need not have any: John, 1 Oct 2026 - condemned machines do not always
+  // go on a Sales Order, and the customer taking one away is still the
+  // answer to "where did it go". Their signature is still required, at close.
+  if (d === "COLLECTED" && machine.state !== "CONDEMNED" && !String(machine.converted_at || "").trim()) {
     const e = new Error("Put it on a Sales Order first - a machine is collected against its paperwork.");
     e.status = 409; throw e;
   }
