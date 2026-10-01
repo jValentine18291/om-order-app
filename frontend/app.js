@@ -1359,6 +1359,9 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge }) {
     async refresh() {
       await runSearch();
     },
+    // The slip picked in this list, if any - so a refresh after being away
+    // can read that slip again too (see refreshAfterAway).
+    pickedSlip() { return picked; },
   };
 }
 
@@ -10262,7 +10265,9 @@ function renderShipments() {
     b.addEventListener("click", () => openShipment(Number(b.dataset.ship))));
 }
 
+let shipDetailId = null;   // the one on screen, for refreshAfterAway
 async function openShipment(id) {
+  shipDetailId = id;
   showScreen("ship-detail");
   $("shd-no").textContent = "—";
   $("shd-head").innerHTML = `<div class="fp-loading">Loading…</div>`;
@@ -12645,6 +12650,85 @@ function takeUpdateNow() {
   }
   pendingUpdate = false;
   location.reload();
+}
+
+// ---- Back after a while: read the screen again -----------------------------
+// John, 1 Oct 2026. Phones stay on one screen for days, and what a screen shows
+// is what was true when it was LOADED - "On SO 3 days", a status, a list. The
+// records themselves are always stamped by the server at the moment of the
+// action, so nothing is ever SAVED with an old date; this is about what people
+// read. Away more than 30 minutes, and the screen they come back to is read
+// again, in place: same screen, same search, same slip picked.
+//
+// NEVER OVER SOMEBODY'S WORK. With anything open over the screen - a machine
+// sheet, a signature, a quotation, a confirmation - or parts scanned and not
+// saved, nothing is touched: the sheet itself is the thing they came back to.
+// Screens that are forms (New Service, Bulk Order, editing) are left alone.
+//
+// "Away" is measured two ways, because iPhone does not always say it went to
+// the background: when the page was hidden, and when the minute-tick last ran
+// (a suspended page's ticks stop, so a long gap between them is time away).
+const AWAY_REFRESH_MS = 30 * 60 * 1000;
+let awaySince = 0;
+let lastTick = Date.now();
+setInterval(() => { if (document.visibilityState === "visible") lastTick = Date.now(); }, 60 * 1000);
+
+function wasAwayLong() {
+  const now = Date.now();
+  const hidden = awaySince ? now - awaySince : 0;
+  const asleep = now - lastTick;
+  return Math.max(hidden, asleep) > AWAY_REFRESH_MS;
+}
+
+function backFromAway() {
+  if (document.visibilityState !== "visible") return;
+  const long = wasAwayLong();
+  awaySince = 0;
+  lastTick = Date.now();
+  if (long) refreshAfterAway();
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") { if (!awaySince) awaySince = Date.now(); return; }
+  backFromAway();
+});
+window.addEventListener("pageshow", backFromAway);
+window.addEventListener("focus", backFromAway);
+
+async function refreshAfterAway() {
+  const screen = SCREENS.find((s) => $("screen-" + s).classList.contains("active"));
+  const busy = [...document.querySelectorAll(".modal-overlay")].some((m) => m.style.display !== "none" && m.style.display !== "")
+    || (session && session.pendingParts && session.pendingParts.length > 0);
+  if (busy) return;
+  try {
+    if (screen === "home") applyRoleToHome();
+    else if (screen === "open") {
+      session.allSlips = await api(`/api/slips?status=working`);
+      renderSlipList();
+    } else if (screen === "slip" && session.slipNumber) {
+      session.slip = await api(`/api/slips/${encodeURIComponent(session.slipNumber)}`);
+      renderSlipScreen();
+    } else if (screen === "close" && closeSearch) {
+      await closeSearch.refresh();
+      // The slip picked below the list, unless a number is half-typed into it
+      // or the close is mid-confirmation - reading it again would wipe that.
+      const typed = $("cs-ref").value.trim() !== String((csSlip && csSlip.closing_ref) || "").trim();
+      if (csPickedSlip && !csConfirming && !typed) await onCloseSlipChosen(csPickedSlip);
+    } else if (screen === "view" && viewSearch) {
+      await viewSearch.refresh();
+      const no = viewSearch.pickedSlip();
+      if (no) await onViewSlipChosen(no);
+    } else if (screen === "quote") await enterNeedToQuote();
+    else if (screen === "purchase") { if (!puEditing) await loadPartRequests(); }
+    else if (screen === "po") setPoScope(poScope);
+    else if (screen === "po-detail") { const no = $("pod-no").textContent.trim(); if (no) await openPurchaseOrder(no); }
+    else if (screen === "ship") setShipScope(shipScope);
+    else if (screen === "ship-detail" && shipDetailId) await openShipment(shipDetailId);
+    // new, bulk, ship-edit, people, jobs, find, ipl, role: forms or lookups,
+    // nothing on them goes stale with time.
+  } catch (_) {
+    // Offline, or the server mid-restart: leave the screen as it was. The
+    // next time they come back, it tries again.
+  }
 }
 
 if ("serviceWorker" in navigator) {
