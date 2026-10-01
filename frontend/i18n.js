@@ -519,8 +519,12 @@
     // The customer signing, in person, that a machine is beyond repair.
     "Customer signature needed": "需要客户签名",
     "Signed for condemning": "已签名报废",
-    "The customer signs in person to confirm they want this machine condemned. The slip cannot be closed until they have.":
-      "客户须本人签名确认同意报废本机器。未签名前，服务单不能结束。",
+    "The customer signs in person to confirm they want this machine condemned. Needed before the slip closes, unless we dispose of it.":
+      "客户须本人签名确认同意报废本机器。除非由我们处理掉，否则结单前必须签名。",
+    // A condemned machine WE disposed of needs no signature (1 Oct 2026).
+    "No signature needed": "无需签名",
+    "We disposed of it, so the slip can close without a signature.": "已由我们处理掉，服务单无需签名即可结单。",
+    "Needed only if the customer collects it.": "仅在客户取回时需要签名。",
     "The customer has signed to confirm this machine is beyond repair.":
       "客户已签名确认本机器无法维修。",
     "Take the signature": "请客户签名",

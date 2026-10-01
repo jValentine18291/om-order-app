@@ -631,7 +631,10 @@ function unsignedCondemned(slipId) {
     `SELECT m.machine_desc
        FROM slip_machines m
        LEFT JOIN machine_condemn_signatures g ON g.machine_id = m.id
-      WHERE m.slip_id = ? AND m.state = 'CONDEMNED' AND g.machine_id IS NULL`
+      WHERE m.slip_id = ? AND m.state = 'CONDEMNED' AND g.machine_id IS NULL
+        -- One WE disposed of needs no signature to close: John, 1 Oct 2026.
+        -- The customer signs when they take a condemned machine away.
+        AND IFNULL(m.disposal, '') != 'DISPOSED'`
   ).all(slipId).map((r) => r.machine_desc);
 }
 
@@ -1910,7 +1913,8 @@ function closeSlip(slipNumber, closingRef, who = "") {
   if (unsigned.length) {
     const e = new Error(
       `Condemned but not signed for: ${unsigned.join(", ")}. ` +
-      "The customer signs in person to confirm they want it condemned."
+      "The customer signs in person to confirm they want it condemned. " +
+      "If we disposed of it instead, record that - no signature is needed then."
     );
     e.status = 400; throw e;
   }

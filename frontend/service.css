@@ -3517,6 +3517,7 @@ input.spk-qty{width:84px;flex:0 0 auto;text-align:right;
 .cs-cond-head { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
 .cs-cond-sign { font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: #E7F5EC; color: #135A31; white-space: nowrap; }
 .cs-cond-sign.cs-cond-unsigned { background: var(--amber-tint, #fbf1dd); color: #9a6413; }
+.cs-cond-sign.cs-cond-waived { background: #eef2f7; color: var(--ink-soft, #55665f); }
 .cs-cond-btns { display: flex; gap: 8px; margin-top: 8px; }
 .cs-cond-btns .btn-secondary { flex: 1; margin: 0; }
 .cs-cond-done { font-size: .82rem; color: var(--ink-soft); margin-top: 4px; }

@@ -82,6 +82,14 @@ async function condemnedSlip(company, { sign = true } = {}) {
   await data.slips.setCondemnSignature(c.no, c.id, { image: sig, who: "JT" });
   check("and closes once signed", (await data.slips.closeSlip(c.no, "", "KS")).status, "CLOSED");
 
+  console.log("\n-- not signed, but WE disposed of it: no signature needed --");
+  // John, 1 Oct 2026: the customer signs when they take it away.
+  const d = await condemnedSlip("CONDEMNED DISPOSED UNSIGNED", { sign: false });
+  await refuse("still refused while nobody has said where it went",
+    () => data.slips.closeSlip(d.no, "", "KS"), /not signed for/);
+  await data.slips.setMachineDisposal(d.no, d.id, "DISPOSED", "CY");
+  check("disposed of: closes without a signature", (await data.slips.closeSlip(d.no, "", "KS")).status, "CLOSED");
+
   console.log("\n-- a repaired machine still needs its order --");
   const r = await data.slips.createSlip({
     company: "REPAIRED NO SO", contact_name: "A", contact_number: "1", signature: sig,

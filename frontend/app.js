@@ -4831,6 +4831,16 @@ let condemnSigMachine = null;
 let condemnSigSlip = "";
 let condemnSigAfter = null;
 
+// What to say about a condemned machine's signature. John, 1 Oct 2026: one
+// WE disposed of needs none to close the slip - the customer is only asked
+// to sign when they take it. `unsigned` is the screen's own wording for the
+// case where it is still needed.
+function condemnSigLabel(m, unsigned) {
+  if (m && m.has_condemn_signature) return "Signed for condemning";
+  if (m && m.disposal === "DISPOSED") return "No signature needed";
+  return unsigned;
+}
+
 function renderCondemnSig() {
   const box = $("mm-condemn-sig");
   if (!box) return;
@@ -4839,12 +4849,15 @@ function renderCondemnSig() {
     box.style.display = "none"; box.innerHTML = ""; return;
   }
   const signed = !!m.has_condemn_signature;
-  box.className = "mm-condemn-sig" + (signed ? " mm-condemn-signed" : "");
+  const waived = !signed && m.disposal === "DISPOSED";
+  box.className = "mm-condemn-sig" + (signed || waived ? " mm-condemn-signed" : "");
   box.innerHTML = `
-    <div class="mm-condemn-head">${signed ? "Signed for condemning" : "Customer signature needed"}</div>
+    <div class="mm-condemn-head">${condemnSigLabel(m, "Customer signature needed")}</div>
     <div class="mm-condemn-body">${signed
       ? "The customer has signed to confirm this machine is beyond repair."
-      : "The customer signs in person to confirm they want this machine condemned. The slip cannot be closed until they have."}</div>
+      : waived
+        ? "We disposed of it, so the slip can close without a signature."
+        : "The customer signs in person to confirm they want this machine condemned. Needed before the slip closes, unless we dispose of it."}</div>
     <button type="button" class="mm-condemn-btn" id="mm-condemn-go">${
       signed ? "Sign again" : "Take the signature"}</button>`;
   $("mm-condemn-go").addEventListener("click", openCondemnSignature);
@@ -7310,13 +7323,19 @@ function csCondemnedHtml(slip) {
       return `<div class="cs-cond-row" data-cond="${m.id}">
           <div class="cs-cond-head">
             <span class="cs-collect-name">${escapeHtml(machineLabel(slip, m))}</span>
-            <span class="cs-cond-sign${signed ? "" : " cs-cond-unsigned"}">${signed ? "Signed for condemning" : "Not signed yet"}</span>
+            <span class="cs-cond-sign${signed ? "" : done === "DISPOSED" ? " cs-cond-waived" : " cs-cond-unsigned"}">${condemnSigLabel(m, "Not signed yet")}</span>
           </div>${done
             ? `<div class="cs-cond-done">${escapeHtml(DISPOSAL_LABEL[done] || done)}</div>`
             : `<div class="cs-cond-btns">
                 <button type="button" class="btn-secondary" data-disposal="COLLECTED">Customer collected</button>
                 <button type="button" class="btn-secondary" data-disposal="DISPOSED">We disposed of it</button>
-              </div>`}${signed ? "" : `<div class="cs-cond-note">Take the customer's signature under View Slips before closing.</div>`}
+              </div>`}${
+            // Only while the signature can still matter: never for one we
+            // disposed of; as a heads-up before anything is recorded; as the
+            // thing to do once the customer has taken it.
+            signed || done === "DISPOSED" ? ""
+            : done === "COLLECTED" ? `<div class="cs-cond-note">Take the customer's signature under View Slips before closing.</div>`
+            : `<div class="cs-cond-note">Needed only if the customer collects it.</div>`}
         </div>`;
     }).join("")}</div>`;
 }
@@ -7837,8 +7856,8 @@ function renderSlipDetail(slip) {
     // that the machine is beyond repair, and then say what becomes of it.
     if (accountable && m.state === "CONDEMNED") {
       const signed = !!m.has_condemn_signature;
-      html += `<div class="decide-row decide-sign${signed ? " decide-signed" : ""}" data-sign="${m.id}">
-          <span class="decide-q">${signed ? "Signed for condemning" : "Customer signature needed"}</span>
+      html += `<div class="decide-row decide-sign${signed || m.disposal === "DISPOSED" ? " decide-signed" : ""}" data-sign="${m.id}">
+          <span class="decide-q">${condemnSigLabel(m, "Customer signature needed")}</span>
           <button type="button" class="decide-btn">${signed ? "Sign again" : "Take the signature"}</button>
         </div>`;
     }
