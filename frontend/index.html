@@ -293,8 +293,12 @@
         </div>
         <div id="cj-line-fields">
           <div class="field" style="margin-top:12px;">
-            <label for="cj-code">Item code &mdash; as AutoCount has it</label>
-            <input id="cj-code" type="text" autocomplete="off" placeholder="e.g. A7 SVR WAREHOUSE" />
+            <label for="cj-code">Item code &mdash; pick it from AutoCount</label>
+            <!-- Searched like Find Part, and picked from the list - John,
+                 1 Oct 2026. Once picked it shows as a box with Change. -->
+            <input id="cj-code" type="text" autocomplete="off" placeholder="Search by description or part no.&hellip;" />
+            <div class="cj-chosen" id="cj-code-chosen" style="display:none"></div>
+            <div class="company-suggest" id="cj-code-results"></div>
           </div>
           <div class="cj-two">
             <div class="field" style="margin-top:12px;">

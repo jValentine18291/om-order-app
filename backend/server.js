@@ -2312,7 +2312,12 @@ app.post("/api/admin/common-jobs", async (req, res) => {
     if (code && !String(body.comment || "").trim() &&
         (process.env.ITEMS_SOURCE || "sqlite").toLowerCase() === "autocount") {
       const item = await data.items.findItem(code);
-      if (!item || !item.item_code) {
+      // EXACTLY that item. findItem forgives - "848BE058B2" can find
+      // "848BE058B2R" - which is right for a scan and wrong here, where the
+      // code was picked from a list (John, 1 Oct 2026). Spaces and capitals
+      // are the only differences allowed.
+      const norm = (s) => String(s || "").replace(/\s+/g, "").toUpperCase();
+      if (!item || !item.item_code || norm(item.item_code) !== norm(code)) {
         return res.status(400).json({ error: `"${code}" is not an item code in AutoCount. Check the spelling.` });
       }
       // The code as AutoCount spells it, so the line it adds resolves the

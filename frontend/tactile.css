@@ -43,6 +43,7 @@
 .pu-chip, .pu-bchip, .pu-done, .pu-edit, .pu-delete,
 .topbar .pill, .switch-role, .pu-notify, .fp-scan-btn, .fp-scan-stop, .ipl-price-btn, .contact-act,
 .mp-chip, .pp-act, .ipl-reset, .ipl-offline-btn, .mm-book-change, .fp-shelf-edit, .ac-retry, .fits-chip, .bo-remove,
+.cj-chosen-change,
 .lang-toggle, .app-update-go, .mm-condemn-btn, .modal-x {
   --e: var(--e-neutral);
   box-shadow: 0 var(--d) 0 var(--e), var(--lift);
@@ -55,6 +56,7 @@
 .btn-quiet, .pu-chip, .pu-bchip, .pu-done, .pu-edit, .pu-delete,
 .mp-chip, .pp-act, .ipl-reset, .ipl-offline-btn, .mm-book-change, .fp-shelf-edit, .ac-retry, .fits-chip, .bo-remove,
 .topbar .pill,
+.cj-chosen-change,
 .lang-toggle, .app-update-go, .modal-x {
   --d: var(--d-sm);
   box-shadow: 0 var(--d) 0 var(--e), var(--lift-sm);
@@ -70,6 +72,7 @@
 .status-btn:active, .decide-btn:active, .tube-btn:active, .bo-diesel:active, .vs-delete:active,
 .pu-chip:active, .pu-bchip:active, .pu-done:active, .pu-edit:active, .pu-delete:active,
 .topbar .pill:active, .switch-role:active, .pu-notify:active, .fp-scan-btn:active, .fp-scan-stop:active, .ipl-price-btn:active, .contact-act:active, .mp-chip:active, .pp-act:active, .ipl-reset:active, .ipl-offline-btn:active, .mm-book-change:active, .fp-shelf-edit:active, .ac-retry:active, .fits-chip:active, .bo-remove:active,
+.cj-chosen-change:active,
 .lang-toggle:active, .app-update-go:active, .mm-condemn-btn:active, .modal-x:active {
   transform: translateY(var(--d));
   box-shadow: 0 0 0 var(--e), 0 1px 2px rgba(22, 36, 31, .12);

@@ -724,6 +724,10 @@
     "No Sales Order": "无销售单",
     // ---- Orders: supplier filter (1 Oct 2026) ----
     "Mark as Ordered": "标记为已下单",
+    // Common jobs editor: the code picked from AutoCount (1 Oct 2026).
+    "Item code — pick it from AutoCount": "物料编号 — 从 AutoCount 中选择",
+    "Pick the item code from the AutoCount list.": "请从 AutoCount 列表中选择物料编号。",
+    "Searching…": "搜索中…",
     // The order cards' own labels, never translated until now.
     "Order": "订购",
     "Stock then": "当时库存",

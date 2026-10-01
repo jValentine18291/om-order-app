@@ -5152,6 +5152,75 @@ function cjDrawList() {
     </div>`).join("");
 }
 
+// ---- The item code, picked from AutoCount ------------------------------------
+// John, 1 Oct 2026: searched the way Find Part searches - description or part
+// number, service codes included - and picked from the list, so a job can
+// never carry a code AutoCount does not have. Picking fills the job name from
+// the part's description when it is still empty (his call); the price is
+// always his own.
+let cjCode = null;
+let cjCodeTimer = null;
+
+function cjSetCode(item) {
+  cjCode = item;
+  const box = $("cj-code-chosen");
+  const input = $("cj-code");
+  if (!item) {
+    box.style.display = "none"; box.innerHTML = "";
+    input.style.display = "";
+    return;
+  }
+  input.style.display = "none";
+  $("cj-code-results").innerHTML = "";
+  box.style.display = "";
+  const draw = (desc) => {
+    box.innerHTML = `
+      <div class="cj-chosen-main">${partTwoLines(item,
+        desc ? `<span class="fp-opt-desc">${escapeHtml(desc)}</span>` : "",
+        `<span class="fp-opt-code mono">${escapeHtml(item.item_code)}</span>`)}</div>
+      <button type="button" class="cj-chosen-change" id="cj-code-change">Change</button>`;
+    $("cj-code-change").addEventListener("click", () => {
+      cjSetCode(null);
+      input.value = "";
+      input.focus();
+    });
+  };
+  draw(item.description);
+  // An existing job knows only its code: fetch the description to show
+  // beside it, and carry on without one if AutoCount cannot be reached.
+  if (!item.description) {
+    lookupItem(item.item_code).then((r) => {
+      if (cjCode === item && r && r.description) { item.description = r.description; draw(r.description); }
+    }).catch(() => {});
+  }
+}
+
+$("cj-code").addEventListener("input", () => {
+  clearTimeout(cjCodeTimer);
+  const q = $("cj-code").value.trim();
+  const box = $("cj-code-results");
+  if (q.length < 2) { box.innerHTML = ""; return; }
+  cjCodeTimer = setTimeout(async () => {
+    box.innerHTML = `<div class="fp-loading">Searching…</div>`;
+    try {
+      const data = await api(`/api/parts-search?q=${encodeURIComponent(q)}`);
+      const list = (data && (data.results || data.items)) || (Array.isArray(data) ? data : []);
+      if ($("cj-code").value.trim() !== q) return;      // typed on since
+      if (!list.length) { box.innerHTML = `<div class="fp-empty">No matching parts</div>`; return; }
+      box.innerHTML = list.map((p) => partOptionHtml(p)).join("");
+      box.querySelectorAll(".company-option").forEach((btn) =>
+        btn.addEventListener("click", () => {
+          const p = list.find((x) => x.item_code === btn.dataset.code);
+          if (!p) return;
+          if (!$("cj-title").value.trim()) $("cj-title").value = String(p.description || "").trim();
+          cjSetCode({ item_code: p.item_code, description: String(p.description || "").trim() });
+        }));
+    } catch (e) {
+      box.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Search failed")}</div>`;
+    }
+  }, 250);
+});
+
 function cjHideForm() {
   cjEditing = null;
   const f = $("cj-form"); if (f) f.style.display = "none";
@@ -5173,7 +5242,9 @@ function cjOpenForm(job) {
   cjEditing = job || null;
   $("cj-form-title").textContent = job ? `Editing: ${job.title}` : "New job";
   $("cj-title").value = job ? job.title : "";
-  $("cj-code").value = job && !job.comment ? job.code : "";
+  $("cj-code").value = "";
+  $("cj-code-results").innerHTML = "";
+  cjSetCode(job && !job.comment && job.code ? { item_code: job.code, description: "" } : null);
   $("cj-price").value = job && !job.comment ? String(job.price) : "0";
   $("cj-qty").value = job && !job.comment ? String(job.qty) : "1";
   $("cj-comment").value = job && job.comment ? job.comment : "";
@@ -5197,7 +5268,10 @@ async function cjSave() {
   };
   if (kind === "comment") body.comment = $("cj-comment").value.trim();
   else {
-    body.code = $("cj-code").value.trim();
+    // Picked from AutoCount's list, never typed (John, 1 Oct 2026). The server
+    // checks it again, but saying so here is quicker than a round trip.
+    if (!cjCode) { $("cj-status").innerHTML = statusErr("Pick the item code from the AutoCount list."); return; }
+    body.code = cjCode.item_code;
     body.price = Number($("cj-price").value);
     body.qty = Number($("cj-qty").value);
   }
