@@ -2287,6 +2287,19 @@ body.signin-brand .topbar .pill {
   color: var(--ink-soft); cursor: pointer;
 }
 .pu-chip-on { background: var(--ink); color: #fff; border-color: var(--ink); }
+/* Supplier chips: a second, smaller row under the status chips, with how many
+   parts each has in the tab on screen. */
+.pu-brands { display: flex; gap: 6px; margin: -6px 0 14px; flex-wrap: wrap; }
+.pu-brands:empty { display: none; }
+.pu-bchip {
+  padding: 5px 11px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--surface); font-size: .78rem; font-weight: 600;
+  color: var(--ink-soft); cursor: pointer;
+}
+.pu-bchip b { font-weight: 700; color: var(--ink-faint); margin-left: 2px; font-variant-numeric: tabular-nums; }
+.pu-bchip-on { background: #E7F5EC; color: #135A31; border-color: #1B7A42; }
+.pu-bchip-on b { color: #135A31; }
+.pu-hidden-note { font-size: .78rem; color: var(--ink-faint); margin-top: 6px; }
 .pu-card-pending { border-left: 4px solid #C0392B; }
 .pu-card-ordered { border-left: 4px solid #1B7A42; }
 .pu-status {

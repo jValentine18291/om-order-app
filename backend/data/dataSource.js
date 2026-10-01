@@ -159,5 +159,11 @@ module.exports = {
     deletePartRequestBatch: (...a) => sqliteRepo.partRequests.deletePartRequestBatch(...a),
     countPendingPartRequests: (...a) => sqliteRepo.partRequests.countPendingPartRequests(...a),
     pendingRequestsFor: (...a) => sqliteRepo.partRequests.pendingRequestsFor(...a),
+    // Each line's brand, from wherever items are read: AutoCount on the
+    // office server, the local items table otherwise.
+    fillBrands: (rows) => sqliteRepo.partRequests.fillPartRequestBrands(rows,
+      ITEMS_SOURCE === "autocount"
+        ? (codes) => require("./autocountRepo").getItemBrands(codes)
+        : async (codes) => sqliteRepo.partRequests.localItemBrands(codes)),
   },
 };

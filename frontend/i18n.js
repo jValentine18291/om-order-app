@@ -718,6 +718,14 @@
     "Record where this condemned machine went?": "记录这台报废机器的去向？",
     "Ready to close": "可结单",
     "No Sales Order": "无销售单",
+    // ---- Orders: supplier filter (1 Oct 2026) ----
+    "Mark as Ordered": "标记为已下单",
+    // The order cards' own labels, never translated until now.
+    "Order": "订购",
+    "Stock then": "当时库存",
+    "Edit": "编辑",
+    "Delete": "删除",
+    "The other suppliers' parts on this order stay Need to Order.": "此单中其他供应商的零件仍为「需要订购」。",
     "Subtotal": "小计",
     "Total": "总计",
     "GST 9%": "消费税 9%",
@@ -1091,6 +1099,10 @@
     [/^Condemned (\d+) days?$/, "已报废 $1 天"],
     [/^Condemned today$/, "今天报废"],
     [/^(\d+) machine\(s\)$/, "$1 台机器"],
+    // Orders, filtered to one supplier.
+    [/^Mark (.+) parts as Ordered\??$/, "将 $1 零件标记为已下单"],
+    [/^\+ (\d+) (.+) parts? on this order, hidden by the filter$/, "此单另有 $1 件 $2 零件（已被筛选隐藏）"],
+    [/^\+ (\d+) parts from other suppliers on this order, hidden by the filter$/, "此单另有 $1 件其他供应商的零件（已被筛选隐藏）"],
     // The pills on a slip card. They were English on a technician's screen
     // because nothing here had ever been asked to translate them.
     [/^(\d+) to quote$/, "$1 台待报价"],

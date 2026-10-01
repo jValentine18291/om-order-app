@@ -1230,6 +1230,10 @@ try {
   // what the stock WAS when the order was made, not what it is now - the
   // snapshot is the decision's context, and it never needs AutoCount again.
   if (!cols.includes("stock_at_request")) db.exec("ALTER TABLE part_requests ADD COLUMN stock_at_request REAL");
+  // The item's brand in AutoCount, for Iris's supplier filter on Orders (John,
+  // 1 Oct 2026). NULL = not looked up yet; '' = looked up, none recorded.
+  // Filled by the list itself the first time it meets the row, then kept.
+  if (!cols.includes("brand")) db.exec("ALTER TABLE part_requests ADD COLUMN brand TEXT");
   if (!cols.includes("batch_id")) {
     db.exec("ALTER TABLE part_requests ADD COLUMN batch_id TEXT DEFAULT ''");
     db.exec("UPDATE part_requests SET batch_id = 'R' || id WHERE batch_id = ''");

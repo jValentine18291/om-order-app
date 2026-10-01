@@ -11598,11 +11598,53 @@ $("pu-filters").querySelectorAll(".pu-chip").forEach((chip) =>
   })
 );
 
+// ---- Supplier filter --------------------------------------------------------
+// John, 1 Oct 2026, for Iris: filter Orders by supplier. The supplier is the
+// brand AutoCount holds on the item (his call over the code prefix), with the
+// "R" brands - ZENOAH R and the like, the non-genuine replacements - as chips
+// of their own, since they are likely bought elsewhere. No brand: "Other".
+// Remembered on the phone, so she lands back on the supplier she was doing.
+const PU_BRAND_KEY = "om-pu-brand";
+let puBrand = "";
+try { puBrand = localStorage.getItem(PU_BRAND_KEY) || ""; } catch (_) {}
+
+// "HUSQVARNA R" -> "Husqvarna R". Short words are initials and stay capitals:
+// BNS, ARS, NGK, AS Motor.
+function brandName(brand) {
+  const b = String(brand || "").trim();
+  if (!b) return "Other";
+  return b.split(/\s+/).map((w) => w.length <= 3 ? w.toUpperCase()
+    : w.toLowerCase().replace(/(^|-)([a-z])/g, (_, p, c) => p + c.toUpperCase())).join(" ");
+}
+const rowBrand = (r) => brandName(r.brand);
+
+function renderBrandChips(rows) {
+  const box = $("pu-brands");
+  const counts = new Map();
+  for (const r of rows) counts.set(rowBrand(r), (counts.get(rowBrand(r)) || 0) + 1);
+  // One supplier, or none, is nothing to choose between.
+  if (counts.size < 2) { box.innerHTML = ""; return ""; }
+  const active = counts.has(puBrand) ? puBrand : "";
+  const names = [...counts.keys()].sort((a, b) =>
+    (a === "Other") - (b === "Other") || counts.get(b) - counts.get(a) || a.localeCompare(b));
+  box.innerHTML =
+    `<button type="button" class="pu-bchip${active ? "" : " pu-bchip-on"}" data-brand="">All suppliers <b>${rows.length}</b></button>` +
+    names.map((n) => `<button type="button" class="pu-bchip${n === active ? " pu-bchip-on" : ""}" data-brand="${escapeAttr(n)}">${escapeHtml(n)} <b>${counts.get(n)}</b></button>`).join("");
+  box.querySelectorAll(".pu-bchip").forEach((c) => c.addEventListener("click", () => {
+    puBrand = c.dataset.brand;
+    try { localStorage.setItem(PU_BRAND_KEY, puBrand); } catch (_) {}
+    loadPartRequests();
+  }));
+  return active;
+}
+
 async function loadPartRequests() {
   const wrap = $("pu-list");
   wrap.innerHTML = `<div class="fp-loading">Loading orders…</div>`;
   try {
     const rows = await api(`/api/part-requests?status=${encodeURIComponent(puStatus)}`);
+    const activeBrand = rows.length ? renderBrandChips(rows) : "";
+    if (!rows.length) $("pu-brands").innerHTML = "";
     if (!rows.length) {
       wrap.innerHTML = `<div class="fp-empty">${
         puStatus === "PENDING" ? "Nothing waiting to be ordered"
@@ -11625,13 +11667,32 @@ async function loadPartRequests() {
       : Number.isInteger(Number(v)) ? String(v) : Number(v).toFixed(2));
     const day = (t) => String(t || "").split(" ")[0];
 
-    wrap.innerHTML = batches.map((b) => {
+    // Filtered to one supplier: an order shows only that supplier's lines, and
+    // an order with none of them is not shown at all. The rest of the order is
+    // still there, and the card says so.
+    const shownOf = (b) => activeBrand ? b.rows.filter((r) => rowBrand(r) === activeBrand) : b.rows;
+
+    wrap.innerHTML = batches.filter((b) => shownOf(b).length).map((b) => {
       const first = b.rows[b.rows.length - 1]; // oldest row carries the submission
-      const pending = b.rows.some((r) => r.status === "PENDING");
+      const shown = shownOf(b);
+      // Of the lines on screen: with a supplier picked, the card's status is
+      // that supplier's, not the hidden ones'.
+      const pending = shown.some((r) => r.status === "PENDING");
       // The order's own note; the same value rides on every row of the batch.
       const orderRemark = first.batch_remarks || "";
+      const hidden = b.rows.filter((r) => !shown.includes(r));
+      const hiddenBrands = [...new Set(hidden.map(rowBrand))];
+      const hiddenNote = !hidden.length ? ""
+        : hiddenBrands.length === 1
+          ? (hidden.length === 1 ? `+ 1 ${hiddenBrands[0]} part on this order, hidden by the filter`
+            : `+ ${hidden.length} ${hiddenBrands[0]} parts on this order, hidden by the filter`)
+          : `+ ${hidden.length} parts from other suppliers on this order, hidden by the filter`;
+      // Marking only the supplier on screen, when the rest of the order is
+      // another supplier's (John's call): those stay Need to Order until Iris
+      // orders them. With nothing hidden it is the whole order, as before.
+      const partial = !!activeBrand && hidden.some((r) => r.status === "PENDING");
 
-      const lines = b.rows.slice().reverse().map((r) => {
+      const lines = shown.slice().reverse().map((r) => {
         // The balance WHEN THE ORDER WAS MADE - the context of the decision.
         // John chose this over live stock; rows from before the change have
         // none and show a dash.
@@ -11661,7 +11722,10 @@ async function loadPartRequests() {
       const actions = [
         pending && canDecide() ? `<button class="pu-edit" data-edit="${escapeAttr(b.key)}">Edit</button>` : "",
         canManage ? `<button class="pu-delete" data-delete="${escapeAttr(b.key)}">Delete</button>` : "",
-        pending && canManage ? `<button class="pu-done" data-batch="${escapeAttr(b.key)}">Mark as Ordered</button>` : "",
+        pending && canManage && shown.some((r) => r.status === "PENDING")
+          ? `<button class="pu-done" data-batch="${escapeAttr(b.key)}"${partial
+              ? ` data-ids="${shown.filter((r) => r.status === "PENDING").map((r) => r.id).join(",")}"` : ""}>${
+              partial ? `Mark ${escapeHtml(activeBrand)} parts as Ordered` : "Mark as Ordered"}</button>` : "",
       ].filter(Boolean).join("");
 
       return `
@@ -11677,6 +11741,7 @@ async function loadPartRequests() {
               : escapeHtml(day(first.created_at))}</span>
         </div>
         ${lines}
+        ${hiddenNote ? `<div class="pu-hidden-note">${escapeHtml(hiddenNote)}</div>` : ""}
         ${orderRemark ? `<div class="pu-remarks">“${escapeHtml(orderRemark)}”</div>` : ""}
         ${actions ? `<div class="pu-actions">${actions}</div>` : ""}
       </div>`;
@@ -11714,10 +11779,23 @@ async function loadPartRequests() {
     wireOrderEditCard(wrap);
     wrap.querySelectorAll(".pu-done").forEach((btn) =>
       btn.addEventListener("click", async () => {
-        if (!confirm("Mark this order as Ordered?\n\nDo this once it has been transferred to a Purchase Order.")) return;
+        const ids = String(btn.dataset.ids || "").split(",").map(Number).filter(Boolean);
+        if (ids.length) {
+          // Only these lines: name them, and say the rest stays.
+          const b = byId.get(btn.dataset.batch);
+          const what = b.rows.filter((r) => ids.includes(r.id))
+            .map((r) => `${r.qty_requested} × ${r.description || r.item_code}`);
+          if (!confirmLines(`${tr(btn.textContent.trim())}?`, [
+            ...what, tr("The other suppliers' parts on this order stay Need to Order."),
+          ])) return;
+        } else if (!confirm("Mark this order as Ordered?\n\nDo this once it has been transferred to a Purchase Order.")) return;
         btn.disabled = true;
         try {
-          await api(`/api/part-requests/batch/${encodeURIComponent(btn.dataset.batch)}/ordered`, { method: "PATCH" });
+          if (ids.length) {
+            for (const id of ids) await api(`/api/part-requests/${id}/ordered`, { method: "PATCH" });
+          } else {
+            await api(`/api/part-requests/batch/${encodeURIComponent(btn.dataset.batch)}/ordered`, { method: "PATCH" });
+          }
           toast("Marked as Ordered", "ok");
           loadPartRequests();
         } catch (e) {

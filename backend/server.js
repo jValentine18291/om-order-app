@@ -855,7 +855,10 @@ app.get("/api/part-requests", async (req, res) => {
     // No AutoCount here at all: the stock number shown is the balance WHEN THE
     // ORDER WAS MADE, captured at creation and stored with the row. The list
     // is a plain local read however long the history grows.
-    res.json(await data.requests.listPartRequests(String(req.query.status || "PENDING")));
+    // Brands are the one exception, and only once per row: see
+    // fillPartRequestBrands(). Every later read is local again.
+    const rows = await data.requests.listPartRequests(String(req.query.status || "PENDING"));
+    res.json(await data.requests.fillBrands(rows));
   } catch (err) {
     console.error("[GET /api/part-requests]", err);
     res.status(500).json({ error: "Failed to load requests" });

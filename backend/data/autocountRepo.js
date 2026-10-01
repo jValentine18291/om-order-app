@@ -1350,6 +1350,26 @@ module.exports.purchaseOrderShape = purchaseOrderShape;
 
 module.exports.getStockBalances = getStockBalances;
 
+// The brand AutoCount holds on each item - the supplier grouping on Orders
+// (John, 1 Oct 2026). Read-only, chunked like getStockBalances above.
+async function getItemBrands(codes) {
+  const list = [...new Set((codes || []).map((c) => String(c || "").trim()).filter(Boolean))];
+  const out = new Map();
+  for (let i = 0; i < list.length; i += 100) {
+    const chunk = list.slice(i, i + 100);
+    const params = {};
+    chunk.forEach((c, j) => { params[`c${j}`] = c; });
+    const rows = await query(
+      `SELECT ItemCode, ItemBrand FROM Item
+        WHERE ItemCode IN (${chunk.map((_, j) => `@c${j}`).join(",")})`,
+      params
+    );
+    for (const r of rows) out.set(r.ItemCode, String(r.ItemBrand || "").trim());
+  }
+  return out;
+}
+module.exports.getItemBrands = getItemBrands;
+
 // ---- Every part that fits one machine ---------------------------------------
 // The machines a part fits are kept on the item's SECOND description line.
 // A survey of the live catalogue settled how to read it: 5,722 of 7,536 active

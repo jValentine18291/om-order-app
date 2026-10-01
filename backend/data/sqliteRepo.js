@@ -3952,7 +3952,46 @@ function markPartRequestOrdered(id) {
   return { ok: true };
 }
 
-const partRequests = { createPartRequest, createPartRequestBatch, listPartRequests, markPartRequestOrdered, markPartRequestBatchOrdered, updatePartRequestBatch, deletePartRequestBatch, pendingRequestsFor };
+// THE SUPPLIER OF EACH ORDER LINE, for the Orders filter. John, 1 Oct 2026:
+// Iris orders supplier by supplier. The brand AutoCount holds on the item is
+// the grouping (his call) - SHUQ, SHCN and UHUQ all read HUSQVARNA there, and
+// the M-coded parts carry theirs too, which no prefix could tell. Looked up
+// once per row and kept, so the list stays a local read after the first time.
+//
+// lookup(codes) -> Map(code -> brand). A row whose code is not found, or a
+// free-text line, is stored as '' and shows under "Other".
+async function fillPartRequestBrands(rows, lookup) {
+  const need = rows.filter((r) => r.brand === null || r.brand === undefined);
+  if (!need.length) return rows;
+  const codes = [...new Set(need.filter((r) => !r.free_text).map((r) => String(r.item_code || "").trim()).filter(Boolean))];
+  let found = new Map();
+  try {
+    found = codes.length ? await lookup(codes) : new Map();
+  } catch (e) {
+    // AutoCount unreachable: show them as Other this time and ask again next
+    // time, rather than storing a "none" that was never true.
+    console.error("[part-requests] brand lookup failed:", e.message);
+    for (const r of need) r.brand = "";
+    return rows;
+  }
+  const set = db.prepare("UPDATE part_requests SET brand = ? WHERE id = ?");
+  for (const r of need) {
+    r.brand = String(found.get(String(r.item_code || "").trim()) || "").trim();
+    set.run(r.brand, r.id);
+  }
+  return rows;
+}
+
+// The same question of the local items table, for when items are not read
+// from AutoCount (tests, and the demo set-up).
+function localItemBrands(codes) {
+  const get = db.prepare("SELECT brand FROM items WHERE item_code = ?");
+  const out = new Map();
+  for (const c of codes) { const r = get.get(c); if (r && r.brand) out.set(c, r.brand); }
+  return out;
+}
+
+const partRequests = { createPartRequest, createPartRequestBatch, listPartRequests, markPartRequestOrdered, markPartRequestBatchOrdered, updatePartRequestBatch, deletePartRequestBatch, pendingRequestsFor, fillPartRequestBrands, localItemBrands };
 module.exports.partRequests = partRequests;
 
 // Fast count of pending reorder requests (for the Purchaser notification).
