@@ -780,6 +780,19 @@ try {
   console.error("[db] contact2 migration check failed:", e.message);
 }
 
+// Migration: the paper booklet's slip number. John, 1 Oct 2026 - slips are
+// still written in the booklet as well, and staff quote both numbers, so the
+// Sales Order says "S/S: 37016 / 00095". Optional; '' prints as before.
+try {
+  const cols = db.prepare("PRAGMA table_info(service_slips)").all().map((c) => c.name);
+  if (cols.length && !cols.includes("physical_ss")) {
+    db.exec("ALTER TABLE service_slips ADD COLUMN physical_ss TEXT DEFAULT ''");
+    console.log("[db] migrated: added physical_ss to service_slips");
+  }
+} catch (e) {
+  console.error("[db] physical_ss migration check failed:", e.message);
+}
+
 // Migration: a note against the slip's own parts.
 //
 // ONE note for the whole group, the way a machine has one repair comment, and

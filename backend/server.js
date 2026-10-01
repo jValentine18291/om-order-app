@@ -474,9 +474,9 @@ app.post("/api/slips", async (req, res) => {
     // as to the form and the table. contact2 was added in three places and
     // arrived empty until it was added in the fourth.
     // slip_number: "" for the next number, or one picked from the unused list.
-    const { company, debtor_code, contact_name, contact_number, whatsapp_number, contact2_name, contact2_number, check_service, repair_only, quote_first, notes, machines, signature, created_by, slip_number } = req.body || {};
+    const { company, debtor_code, contact_name, contact_number, whatsapp_number, contact2_name, contact2_number, check_service, repair_only, quote_first, notes, machines, signature, created_by, slip_number, physical_ss } = req.body || {};
     const withTypes = await withMachineTypes(machines);
-    const slip = await data.slips.createSlip({ company, debtor_code, contact_name, contact_number, whatsapp_number, contact2_name, contact2_number, check_service, repair_only, quote_first, notes, machines: withTypes, signature, created_by, slip_number });
+    const slip = await data.slips.createSlip({ company, debtor_code, contact_name, contact_number, whatsapp_number, contact2_name, contact2_number, check_service, repair_only, quote_first, notes, machines: withTypes, signature, created_by, slip_number, physical_ss });
     res.status(201).json(slip);
   } catch (err) {
     if (err.status === 400 || err.status === 409) return res.status(err.status).json({ error: err.message });

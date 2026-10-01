@@ -1666,7 +1666,7 @@ async function loadSlipNumberChoices() {
 function resetNewServiceForm() {
   loadSlipNumberChoices();
   ["ns-company", "ns-contact-name", "ns-contact-number", "ns-whatsapp",
-   "ns-contact2-name", "ns-contact2-number", "ns-notes"].forEach((id) => ($(id).value = ""));
+   "ns-contact2-name", "ns-contact2-number", "ns-notes", "ns-physical-ss"].forEach((id) => ($(id).value = ""));
   const same = $("ns-whatsapp-same"); if (same) same.checked = true;
   const wa = $("ns-whatsapp"); if (wa) wa.setAttribute("disabled", "true");
   const created = $("ns-created"); if (created) { created.style.display = "none"; created.innerHTML = ""; }
@@ -1754,6 +1754,8 @@ async function submitNewService() {
         signature,
         // "" is the next number; anything else was picked from the unused list.
         slip_number: ($("ns-slipno") || {}).value || "",
+        // The booklet's number, as typed; the server checks it is digits.
+        physical_ss: ($("ns-physical-ss") || {}).value || "",
       }),
     });
     toast(`Service slip ${slip.slip_number} created`, "ok");
@@ -7795,7 +7797,9 @@ function renderSlipDetail(slip) {
         <div>
           <div class="vs-company">${escapeHtml(slip.company)}</div>
           <div class="vs-sub">Slip ${escapeHtml(slip.slip_number)} · Created ${escapeHtml(formatDate(slip.created_at))}${
-            slip.created_by ? ` · Registered by ${escapeHtml(slip.created_by)}` : ""}</div>
+            slip.created_by ? ` · Registered by ${escapeHtml(slip.created_by)}` : ""}</div>${
+            // The paper booklet's number, when one was written down (1 Oct 2026).
+            slip.physical_ss ? `<div class="vs-sub"><span>Physical SS</span> <b>${escapeHtml(slip.physical_ss)}</b></div>` : ""}
         </div>
         <span class="vs-status vs-${escapeAttr(slip.status)}">${escapeHtml(STATUS_LABEL[slip.status] || slip.status)}</span>
       </div>
@@ -8192,6 +8196,7 @@ function vseOriginal() {
     contact2_name: vseSlip.contact2_name || "",
     contact2_number: vseSlip.contact2_number || "",
     notes: vseSlip.notes || "",
+    physical_ss: vseSlip.physical_ss || "",
     // Read as true/false, because that is what the tickboxes answer with. The
     // slip carries them as 1/0 out of SQLite.
     check_service: !!vseSlip.check_service,
@@ -8220,6 +8225,7 @@ function openSlipEdit(slip) {
   $("vse-contact2-name").value = slip.contact2_name || "";
   $("vse-contact2-number").value = slip.contact2_number || "";
   $("vse-notes").value = slip.notes || "";
+  $("vse-physical-ss").value = slip.physical_ss || "";
   for (const [field, id] of VSE_REQUESTS) $(id).checked = !!slip[field];
 
   const machines = slip.machines || [];
@@ -8281,7 +8287,7 @@ function openSlipEdit(slip) {
 function vseWatch() {
   const fields = [
     ...["vse-company", "vse-contact-name", "vse-contact-number", "vse-whatsapp",
-        "vse-contact2-name", "vse-contact2-number", "vse-notes"].map((id) => $(id)),
+        "vse-contact2-name", "vse-contact2-number", "vse-notes", "vse-physical-ss"].map((id) => $(id)),
     ...document.querySelectorAll("#vse-machines input, #vse-machines textarea"),
   ];
   for (const el of fields) {
@@ -8339,7 +8345,7 @@ function vseMarkAll() {
     ["vse-company", o.company], ["vse-contact-name", o.contact_name],
     ["vse-contact-number", o.contact_number], ["vse-whatsapp", o.whatsapp_number],
     ["vse-contact2-name", o.contact2_name], ["vse-contact2-number", o.contact2_number],
-    ["vse-notes", o.notes],
+    ["vse-notes", o.notes], ["vse-physical-ss", o.physical_ss],
   ];
   for (const [id, before] of pairs) {
     const el = $(id);
@@ -8554,6 +8560,7 @@ function vseCollect() {
     contact_number: val("vse-contact-number"),
     whatsapp_number: val("vse-whatsapp"),
     notes: val("vse-notes"),
+    physical_ss: val("vse-physical-ss").replace(/\s+/g, ""),
     check_service: $("vse-check-service").checked,
     repair_only: $("vse-repair-only").checked,
     quote_first: $("vse-quote-first").checked,
@@ -8566,7 +8573,7 @@ function vseCollect() {
     ["company", "Company"], ["contact_name", "Contact name"],
     ["contact_number", "Contact number"], ["whatsapp_number", "WhatsApp"],
     ["contact2_name", "Second contact name"], ["contact2_number", "Second contact number"],
-    ["notes", "Notes"],
+    ["notes", "Notes"], ["physical_ss", "Physical SS"],
   ]) {
     if (o[key].trim() !== payload[key]) customer.push({ label, before: o[key].trim(), after: payload[key] });
   }

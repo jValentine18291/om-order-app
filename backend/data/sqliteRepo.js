@@ -294,7 +294,27 @@ function signedShape(slip, machines) {
   };
 }
 
-function createSlip({ company, debtor_code = "", contact_name = "", contact_number = "", whatsapp_number = "", contact2_name = "", contact2_number = "", check_service = false, repair_only = false, quote_first = false, notes = "", machines = [], signature = "", created_by = "", slip_number = "" } = {}) {
+// ---- The paper booklet's number ---------------------------------------------
+// John, 1 Oct 2026: slips are still written in the booklet too, and staff
+// quote both numbers. Optional, numbers only (his mock-up), kept as text so a
+// leading nought survives. Printed on the Sales Order only, ahead of the
+// app's: "S/S: 37016 / 00095".
+function cleanPhysicalSs(v) {
+  const s = String(v == null ? "" : v).replace(/\s+/g, "");
+  if (!s) return "";
+  if (!/^\d{1,12}$/.test(s)) {
+    const e = new Error("Physical SS: numbers only - the number printed on the booklet's slip.");
+    e.status = 400; throw e;
+  }
+  return s;
+}
+function physicalSsPrefix(slip) {
+  const p = String((slip && slip.physical_ss) || "").trim();
+  return p ? `${p} / ` : "";
+}
+
+function createSlip({ company, debtor_code = "", contact_name = "", contact_number = "", whatsapp_number = "", contact2_name = "", contact2_number = "", check_service = false, repair_only = false, quote_first = false, notes = "", machines = [], signature = "", created_by = "", slip_number = "", physical_ss = "" } = {}) {
+  const physicalSs = cleanPhysicalSs(physical_ss);
   const newCompanyName = String(company || "").trim();
   if (!company || !String(company).trim()) {
     const e = new Error("Company is required to register a service slip.");
@@ -341,8 +361,8 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
   const checkService = !!check_service && !repair_only;
 
   const insertSlip = db.prepare(
-    `INSERT INTO service_slips (slip_number, company, debtor_code, contact_name, contact_number, whatsapp_number, contact2_name, contact2_number, check_service, repair_only, quote_first, notes, created_by, status)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'OPEN')`
+    `INSERT INTO service_slips (slip_number, company, debtor_code, contact_name, contact_number, whatsapp_number, contact2_name, contact2_number, check_service, repair_only, quote_first, notes, created_by, physical_ss, status)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'OPEN')`
   );
   const insertMachine = db.prepare(
     "INSERT INTO slip_machines (slip_id, machine_desc, machine_code, serial_no, remarks, machine_type, job_site, state) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
@@ -371,7 +391,7 @@ function createSlip({ company, debtor_code = "", contact_name = "", contact_numb
     const slipNumber = String(slip_number || "").trim()
       ? claimSlipNumber(slip_number)
       : allocateSlipNumber();
-    const info = insertSlip.run(slipNumber, String(company).trim(), String(debtor_code || "").trim(), contact_name, contact_number, whatsapp_number, String(contact2_name || "").trim(), String(contact2_number || "").trim(), checkService ? 1 : 0, repair_only ? 1 : 0, wantsQuote ? 1 : 0, notes, String(created_by || "").trim().slice(0, 60));
+    const info = insertSlip.run(slipNumber, String(company).trim(), String(debtor_code || "").trim(), contact_name, contact_number, whatsapp_number, String(contact2_name || "").trim(), String(contact2_number || "").trim(), checkService ? 1 : 0, repair_only ? 1 : 0, wantsQuote ? 1 : 0, notes, String(created_by || "").trim().slice(0, 60), physicalSs);
     const slipId = info.lastInsertRowid;
     // Every machine starts RECEIVED, even when the customer asked for a quote.
     // Marking them AWAITING_QUOTE here used to put the slip on Sales' Need to
@@ -1052,7 +1072,9 @@ function createSlipOrder(slipNumber, machineIds, opts) {
     e.status = 400; throw e;
   }
 
-  const lines = slipBlockLines(slip, wanted, all, extras);
+  // With the booklet's number: the Sales Order is the one document that
+  // carries it (John, 1 Oct 2026). The quotation below builds without.
+  const lines = slipBlockLines(slip, wanted, all, extras, { physicalSs: true });
 
   const so = createOrder({ notes: `S/S: ${slip.slip_number}`, lines });
 
@@ -1086,7 +1108,7 @@ function createSlipOrder(slipNumber, machineIds, opts) {
 // wording, because the two documents are read side by side.
 const EXTRAS_HEADING = "Additional parts";
 
-function slipBlockLines(slip, wanted, all, extras = []) {
+function slipBlockLines(slip, wanted, all, extras = [], { physicalSs = false } = {}) {
   const lines = [];
   const total = all.length;
 
@@ -1132,7 +1154,7 @@ function slipBlockLines(slip, wanted, all, extras = []) {
       description:
         `${model}` +
         (serial ? `, S/N: ${serial}` : "") +
-        `, S/S: ${slip.slip_number}${who} - ${pos}/${total}`,
+        `, S/S: ${physicalSs ? physicalSsPrefix(slip) : ""}${slip.slip_number}${who} - ${pos}/${total}`,
     });
 
     let machineTotal = labour;
@@ -2024,9 +2046,11 @@ function searchSlips(query = "", scope = "all", limit = 20) {
     // Match the slip number (spaces stripped) OR the company name (as typed,
     // case-insensitive) so "Tan Land" finds Tan Landscaping's slips.
     sql = `SELECT * FROM service_slips
-             WHERE ${scopeClause} AND (slip_number LIKE ? OR company LIKE ?)
+             WHERE ${scopeClause} AND (slip_number LIKE ? OR company LIKE ?
+                   -- The booklet's number finds the slip too (1 Oct 2026).
+                   OR IFNULL(physical_ss, '') LIKE ?)
              ORDER BY slip_number DESC LIMIT ?`;
-    params = [`%${q}%`, `%${raw}%`, cap + 1];
+    params = [`%${q}%`, `%${raw}%`, `%${q}%`, cap + 1];
   }
 
   const rows = db.prepare(sql).all(...params);
@@ -2240,8 +2264,10 @@ function renumberSlipMachines(slipId) {
 // customer asked for, and each machine's name, serial and intake remarks.
 // Parts, labour, comments and status are the WORK and live in Open Service -
 // not touched here. A closed slip is a finished record and is refused.
-function updateSlipDetails(slipNumber, { company, contact_name, contact_number, whatsapp_number, contact2_name, contact2_number, notes, machines, check_service, repair_only, quote_first, who = "" } = {}) {
+function updateSlipDetails(slipNumber, { company, contact_name, contact_number, whatsapp_number, contact2_name, contact2_number, notes, machines, check_service, repair_only, quote_first, physical_ss, who = "" } = {}) {
   const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
+  // undefined = not sent (an older phone): leave it. Anything sent is checked.
+  const newPhysical = physical_ss === undefined ? undefined : cleanPhysicalSs(physical_ss);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
   if (slip.status === "CLOSED") { const e = new Error("Slip is closed and can no longer be edited."); e.status = 409; throw e; }
 
@@ -2329,6 +2355,7 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
   note("Second contact number", before.contact2_number,
        contact2_number === undefined ? before.contact2_number : contact2_number);
   note("Notes", before.notes, notes === undefined ? before.notes : notes);
+  if (newPhysical !== undefined) note("Physical SS", slip.physical_ss, newPhysical);
   // These print on the customer's copy, so changing one after they signed is
   // recorded like anything else on it. Written as Yes/No rather than 1/0: the
   // log is read by people, and "Quote First: "" -> "1"" says nothing.
@@ -2390,6 +2417,9 @@ function updateSlipDetails(slipNumber, { company, contact_name, contact_number, 
       newCheck, newRepairOnly, newQuoteFirst,
       slip.id
     );
+    if (newPhysical !== undefined) {
+      db.prepare("UPDATE service_slips SET physical_ss = ? WHERE id = ?").run(newPhysical, slip.id);
+    }
     for (const m of mEdits) {
       if (m.code === undefined) updMachine.run(m.desc, m.serial, m.remarks, m.id);
       else updMachineWithCode.run(m.desc, m.serial, m.remarks, m.code, m.id);

@@ -728,6 +728,9 @@
     "Item code — pick it from AutoCount": "物料编号 — 从 AutoCount 中选择",
     "Pick the item code from the AutoCount list.": "请从 AutoCount 列表中选择物料编号。",
     "Searching…": "搜索中…",
+    // The paper booklet's slip number (1 Oct 2026).
+    "Physical SS": "纸本服务单号",
+    "(booklet number)": "（单据本上的号码）",
     // The order cards' own labels, never translated until now.
     "Order": "订购",
     "Stock then": "当时库存",

@@ -667,6 +667,12 @@
         <label for="ns-slipno">Slip number</label>
         <select id="ns-slipno"></select>
       </div>
+      <!-- The paper booklet's number, printed on the Sales Order beside the app's.
+           Optional, numbers only. John, 1 Oct 2026. -->
+      <div class="field">
+        <label for="ns-physical-ss">Physical SS <span style="color:var(--ink-faint);font-weight:400;">(booklet number)</span></label>
+        <input id="ns-physical-ss" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="12" autocomplete="off" placeholder="e.g. 37016" />
+      </div>
 
       <div class="field">
         <label for="ns-company">Company <span class="req">*</span></label>
@@ -1532,6 +1538,10 @@
           <div class="field">
             <label for="vse-company">Company <span class="req">*</span></label>
             <input id="vse-company" type="text" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="vse-physical-ss">Physical SS <span style="color:var(--ink-faint);font-weight:400;">(booklet number)</span></label>
+            <input id="vse-physical-ss" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="12" autocomplete="off" placeholder="e.g. 37016" />
           </div>
           <div class="field">
             <label for="vse-contact-name">Contact name</label>
