@@ -1983,7 +1983,12 @@ function setMachineComment(machineId, comment) {
 function searchSlips(query = "", scope = "all", limit = 20) {
   const raw = String(query).trim();
   const q = raw.replace(/\s+/g, ""); // digits-style matching for slip numbers
-  const cap = Math.max(1, Math.min(50, Number(limit) || 20));
+  // Close Service lists EVERY slip waiting to be closed. John, 1 Oct 2026:
+  // the list stopped at the newest twenty, which on the day hid twenty-two of
+  // forty-two - 00006 to 00057, the oldest and so the ones most needing a
+  // chase. The other lists stay capped: they reach across every slip ever
+  // written, and are searched rather than scrolled. 1000 is only a backstop.
+  const cap = scope === "repaired" ? 1000 : Math.max(1, Math.min(50, Number(limit) || 20));
 
   let sql, params;
   const scopeClause =

@@ -3450,6 +3450,9 @@ input.spk-qty{width:84px;flex:0 0 auto;text-align:right;
    is still in the building, per slip. Its own colour: it is neither the quote
    question nor a status. */
 .q-tag-collected { background: #E7F5EC; color: #135A31; }
+/* Close Service: how long on a Sales Order. Amber once it is a fortnight. */
+.q-tag-age { background: #eef2f7; color: var(--ink-soft, #55665f); font-variant-numeric: tabular-nums; }
+.q-tag-age-late { background: var(--amber-tint, #fbf1dd); color: #9a6413; }
 
 /* "Repaired – With Customer": finished AND gone home. Deeper green than
    Repaired, so the two read apart at a glance on a list. */

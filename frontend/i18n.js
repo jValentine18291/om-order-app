@@ -1078,6 +1078,9 @@
     // the plural needs a pattern, and it must not match "1 day".
     [/^(\d+) days$/, "$1 天"],
     [/^Waiting (\d+) days$/, "已等待 $1 天"],
+    // Close Service: how long a slip has been on a Sales Order.
+    [/^On SO (\d+) days?$/, "已开销售单 $1 天"],
+    [/^On SO today$/, "今天开销售单"],
     // The pills on a slip card. They were English on a technician's screen
     // because nothing here had ever been asked to translate them.
     [/^(\d+) to quote$/, "$1 台待报价"],

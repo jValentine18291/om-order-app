@@ -916,18 +916,19 @@ function updateSignOutButton() {
 //
 // The slip carries both numbers - to_quote and quote_waiting - from
 // withQuoteCounts() on the server, so nothing here has to fetch machines.
-function quotePills(slip) {
+function quotePills(slip, extra = "") {
   if (!slip) return "";
   const n = Number(slip.to_quote) || 0;
   const w = Number(slip.quote_waiting) || 0;
   const c = collectedCount(slip);
-  if (!n && !w && !c) return "";
+  if (!n && !w && !c && !extra) return "";
   const tags = [];
   if (n) tags.push(`<span class="q-tag q-tag-do">${n} to quote</span>`);
   if (w) tags.push(`<span class="q-tag q-tag-wait">${w} waiting on customer</span>`);
   // What is still in the building, per slip. Shown from the first billed
   // machine onward, so "0 of 5 collected" is itself a fact worth reading.
   if (c) tags.push(`<span class="q-tag q-tag-collected">${c.collected} of ${c.of} collected</span>`);
+  if (extra) tags.push(extra);
   return `<span class="q-tags">${tags.join("")}</span>`;
 }
 
@@ -1232,7 +1233,22 @@ function machineTitle(m) {
 // Wires a text input + results container to the search endpoint, debounced.
 // onPick(slipNumber) is called when the user taps a result.
 // ============================================================================
-function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo }) {
+// How long a slip has been on a Sales Order, for the Close Service list. John,
+// 1 Oct 2026: with every waiting slip now listed, which ones need tending.
+// Counted from its FIRST Sales Order - a slip billed in two goes has been
+// waiting since the first - or, for one with nothing billed (all condemned),
+// from the day it came in. Amber from SLIP_STALE_DAYS, the same fortnight
+// the other lists use.
+function soAgeTag(slip) {
+  const billed = ((slip && slip.machines) || [])
+    .map((m) => String(m.converted_at || "").trim()).filter(Boolean).sort();
+  const days = daysSince(billed[0] || slip.created_at);
+  if (days === null) return "";
+  const text = days <= 0 ? "On SO today" : days === 1 ? "On SO 1 day" : `On SO ${days} days`;
+  return `<span class="q-tag q-tag-age${days >= SLIP_STALE_DAYS ? " q-tag-age-late" : ""}">${escapeHtml(text)}</span>`;
+}
+
+function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge }) {
   const input = $(inputId);
   const results = $(resultsId);
   let debounce = null;
@@ -1263,7 +1279,7 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo }) {
            <span class="sr-co">${escapeHtml(s.company)}</span>
            <span class="sr-status sr-${escapeAttr(s.status)}">${escapeHtml(STATUS_LABEL[s.status] || s.status)}</span>
            ${onInfo ? `<span class="sr-info" role="button" aria-label="Summary" data-info="1">i</span>` : ""}
-           ${quotePills(s)}
+           ${quotePills(s, soAge ? soAgeTag(s) : "")}
          </button>`
       ).join("") +
       (data.hasMore ? `<div class="slip-result-more">Keep typing to narrow results…</div>` : "");
@@ -7101,6 +7117,7 @@ async function enterCloseService() {
       inputId: "cs-search", resultsId: "cs-results", scope: "repaired",
       onPick: (slipNumber) => onCloseSlipChosen(slipNumber),
       onInfo: (slipNumber) => openSlipSummary(slipNumber),
+      soAge: true,
     });
   }
   closeSearch.reset();
