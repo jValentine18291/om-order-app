@@ -141,12 +141,15 @@ console.log("\n-- rule 5: one list, and it matches the buttons in the app --");
 // app-functions.js is a button that can never be granted or taken away, and
 // nothing anywhere would say so.
 const html = fs.readFileSync(path.resolve(__dirname, "..", "frontend", "index.html"), "utf8");
-const home = html.slice(html.indexOf('id="screen-home"'), html.indexOf('id="screen-home"') + 8000);
+// The whole home screen, to the next screen - not a fixed 8000 characters,
+// which the logs tile (2 Oct 2026) pushed the Orders tile past.
+const homeAt = html.indexOf('id="screen-home"');
+const home = html.slice(homeAt, html.indexOf('<section', homeAt + 1));
 const inHtml = [...home.matchAll(/class="home-btn[^"]*"[^>]*data-go="([a-z-]+)"/g)].map((m) => m[1]);
-// "people" and "jobs" are extras rather than jobs - admin screens decided by
-// who you are, not handed out per person - so neither is on the list.
+// "people", "jobs" and "logs" are extras rather than jobs - admin screens
+// decided by who you are, not handed out per person - so none is on the list.
 check("every home button is on the list", inHtml.filter((id) =>
-  id !== "people" && id !== "jobs" && !FN.IDS.includes(id)), []);
+  id !== "people" && id !== "jobs" && id !== "logs" && !FN.IDS.includes(id)), []);
 check("and every one on the list is a home button", FN.IDS.filter((id) => !inHtml.includes(id)), []);
 check("with 'people' found in the app but deliberately left off the list",
   inHtml.includes("people"), true);

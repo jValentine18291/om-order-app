@@ -2306,6 +2306,26 @@ function needDeleter(req, res) {
 }
 
 // And for the common jobs strip. Same list of people, its own capability.
+// ---- The logs, as one Excel workbook ------------------------------------------
+// John's alone (2 Oct 2026): it holds customer phone numbers and who-did-what
+// for everybody. Built fresh on every download - see logs-export.js.
+app.get("/api/admin/logs.xlsx", async (req, res) => {
+  if (!needKeyholder(req, res, "canDownloadLogs", "Only John can download the logs.")) return;
+  try {
+    const buf = await require("./logs-export").buildLogsWorkbook(require("./db"));
+    const d = new Date();
+    const p = (n) => String(n).padStart(2, "0");
+    const name = `OM Service logs ${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}.xlsx`;
+    res.set("Cache-Control", "no-store");
+    res.set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.set("Content-Disposition", `attachment; filename="${name}"`);
+    res.send(Buffer.from(buf));
+  } catch (err) {
+    console.error("[GET /api/admin/logs.xlsx]", err);
+    res.status(500).json({ error: "Could not build the logs file." });
+  }
+});
+
 function needJobsEditor(req, res) {
   return needKeyholder(req, res, "canEditCommonJobs", "Only John can change the common jobs.");
 }

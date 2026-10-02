@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "exceljs": "^4.4.0",
     "express": "^4.21.2",
     "mssql": "^11.0.1",
     "web-push": "^3.6.7"

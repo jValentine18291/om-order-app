@@ -66,7 +66,8 @@ const figures = index.reduce((n, m) => n + (Number(m.figures) || 0), 0);
 const expected = 1 + index.length + drawings + logos.length;
 const actual = pngs.length + jsons.length + logos.length;
 check("the app's total matches the folder", expected, actual);
-check("and that is what it is", actual, 708);
+// 714 since the Zenoah HTZ7500 (2 Oct 2026): its JSON and five drawings.
+check("and that is what it is", actual, 714);
 
 console.log("\n-- every drawing a book names is there --");
 const named = new Set();

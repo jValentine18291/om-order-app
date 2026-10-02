@@ -732,6 +732,11 @@
     "Physical SS": "纸本服务单号",
     // Close Service status chips (2 Oct 2026).
     "No slips under this filter": "此筛选下没有服务单",
+    // The logs workbook (2 Oct 2026).
+    "Download logs": "下载记录",
+    "Every record the app keeps, as an Excel file": "应用保存的所有记录（Excel 文件）",
+    "Building the logs file…": "正在生成记录文件…",
+    "Could not build the logs file.": "无法生成记录文件。",
     "(booklet number)": "（单据本上的号码）",
     // The order cards' own labels, never translated until now.
     "Order": "订购",

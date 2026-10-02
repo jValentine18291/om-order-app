@@ -81,6 +81,9 @@
   // they are on. John alone, his call on 30 Sep 2026 ("mine alone for now").
   // A price typed here reaches a customer's invoice with nothing in between.
   function canEditCommonJobs(user) { return isKeyholder(user); }
+  // The logs workbook - every record the app keeps, customers' numbers and
+  // who-did-what included. John alone, his call on 2 Oct 2026.
+  function canDownloadLogs(user) { return isKeyholder(user); }
 
   // The repair sheet was behind a per-person list while John tried it, 25 to
   // 26 Sep 2026. He green-lit it for everyone, so the list is gone rather than
@@ -139,6 +142,6 @@
   }
 
   return { FUNCTIONS, IDS, ROLE_DEFAULTS, functionsFor, isDefault, clean,
-           KEYHOLDERS, canCorrect, canDeleteSlips, canEditCommonJobs,
+           KEYHOLDERS, canCorrect, canDeleteSlips, canEditCommonJobs, canDownloadLogs,
            SPLIT_TRIAL, usesSplitSheet };
 });

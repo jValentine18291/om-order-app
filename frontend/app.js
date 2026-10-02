@@ -810,6 +810,12 @@ function applyRoleToHome() {
     const mine = !!(window.OM_FUNCTIONS && OM_FUNCTIONS.canEditCommonJobs(getUser()));
     jobsTile.style.display = mine ? "flex" : "none";
   }
+  // The logs workbook, John's alone too (2 Oct 2026).
+  const logsTile = $("home-logs");
+  if (logsTile) {
+    const mine = !!(window.OM_FUNCTIONS && OM_FUNCTIONS.canDownloadLogs && OM_FUNCTIONS.canDownloadLogs(getUser()));
+    logsTile.style.display = mine ? "flex" : "none";
+  }
   updateSignOutButton();
   updateLangToggle();
   // Declared further down; guard so this is safe during startup.
@@ -3041,8 +3047,8 @@ async function shareSlipPdf(slipIn) {
 //
 // The parameter stays because every caller has a sensible title and a platform
 // that uses one may come back; it simply is not sent while sharing a file.
-async function deliverPdf(blob, filename, title) {
-  const file = new File([blob], filename, { type: "application/pdf" });
+async function deliverPdf(blob, filename, title, type = "application/pdf") {
+  const file = new File([blob], filename, { type });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({ files: [file] });
@@ -5179,6 +5185,37 @@ function cjDrawList() {
         <button type="button" class="btn-secondary" data-cj-hide="${i}">${j.hidden ? "Show" : "Hide"}</button>
       </div>
     </div>`).join("");
+}
+
+// ---- The logs, as an Excel workbook ------------------------------------------
+// John, 2 Oct 2026. Built on the server from everything it keeps, then handed
+// over the way PDFs are: the share sheet on a phone (Save to Files, AirDrop,
+// mail), a plain download on a computer.
+async function downloadLogs(btn) {
+  if (btn) btn.disabled = true;
+  toast("Building the logs file…", "ok");
+  try {
+    const u = getUser();
+    const headers = {};
+    const token = authToken();
+    if (token) headers.Authorization = `Bearer ${token}`;
+    const res = await fetch(`${API}/api/admin/logs.xlsx?user_id=${encodeURIComponent((u && u.id) || "")}`,
+      { headers, cache: "no-store" });
+    if (!res.ok) {
+      let msg = "Could not build the logs file.";
+      try { msg = (await res.json()).error || msg; } catch (_) {}
+      throw new Error(msg);
+    }
+    const blob = await res.blob();
+    const name = ((res.headers.get("Content-Disposition") || "").match(/filename="([^"]+)"/) || [])[1]
+      || "OM Service logs.xlsx";
+    await deliverPdf(blob, name, name,
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  } catch (e) {
+    toast(e.message, "err");
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 // ---- The item code, picked from AutoCount ------------------------------------
@@ -9548,6 +9585,7 @@ document.querySelectorAll(".home-btn").forEach((b) =>
     else if (go === "ship") { enterShipments(); }
     else if (go === "people") { showScreen("people"); renderPeople(); }
     else if (go === "jobs") { showScreen("jobs"); renderJobsAdmin(); }
+    else if (go === "logs") { downloadLogs(b); }
   })
 );
 $("home-link").addEventListener("click", goHome);

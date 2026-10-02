@@ -1491,4 +1491,56 @@ try {
   console.error("[db] timestamp localtime migration failed:", e.message);
 }
 
+// ---- Every machine status change, kept ---------------------------------------
+// John, 2 Oct 2026: a machine used to keep only its LATEST decision, so the
+// trail - sent for quoting, quoted, proceed, repaired - was lost one step at a
+// time. Kept from the day this went in; nothing earlier can be recovered.
+//
+// BY TRIGGERS, not by each function that moves a machine. There are five of
+// those today (set, undo, correct, set-all, the closed-slip backfill) and a
+// sixth written next month would be the one that forgot. A trigger fires for
+// every write to the column, whoever wrote it. Who: decided_by for a status,
+// disposal_by for a collection, as the writing function recorded them.
+try {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS machine_status_history (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      machine_id  INTEGER NOT NULL,
+      slip_id     INTEGER NOT NULL,
+      field       TEXT NOT NULL,            -- 'state' or 'disposal'
+      from_value  TEXT DEFAULT '',
+      to_value    TEXT DEFAULT '',
+      who         TEXT DEFAULT '',
+      changed_at  TEXT DEFAULT (datetime('now','localtime'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_msh_machine ON machine_status_history(machine_id);
+    -- Dropped and made again on every start, so a corrected definition
+    -- reaches databases that already have the old one.
+    DROP TRIGGER IF EXISTS trg_msh_insert;
+    DROP TRIGGER IF EXISTS trg_msh_state;
+    DROP TRIGGER IF EXISTS trg_msh_disposal;
+    -- Registered: whoever registered the slip, as the slip recorded it.
+    CREATE TRIGGER trg_msh_insert AFTER INSERT ON slip_machines
+    BEGIN
+      INSERT INTO machine_status_history (machine_id, slip_id, field, from_value, to_value, who)
+      VALUES (NEW.id, NEW.slip_id, 'state', '', IFNULL(NEW.state, ''),
+              COALESCE(NULLIF(NEW.decided_by, ''), (SELECT created_by FROM service_slips WHERE id = NEW.slip_id), ''));
+    END;
+    CREATE TRIGGER trg_msh_state AFTER UPDATE OF state ON slip_machines
+    WHEN IFNULL(OLD.state, '') IS NOT IFNULL(NEW.state, '')
+    BEGIN
+      INSERT INTO machine_status_history (machine_id, slip_id, field, from_value, to_value, who)
+      VALUES (NEW.id, NEW.slip_id, 'state', IFNULL(OLD.state, ''), IFNULL(NEW.state, ''), IFNULL(NEW.decided_by, ''));
+    END;
+    CREATE TRIGGER trg_msh_disposal AFTER UPDATE OF disposal ON slip_machines
+    WHEN IFNULL(OLD.disposal, '') IS NOT IFNULL(NEW.disposal, '')
+    BEGIN
+      INSERT INTO machine_status_history (machine_id, slip_id, field, from_value, to_value, who)
+      VALUES (NEW.id, NEW.slip_id, 'disposal', IFNULL(OLD.disposal, ''), IFNULL(NEW.disposal, ''), IFNULL(NEW.disposal_by, ''));
+    END;
+  `);
+} catch (e) {
+  console.error("[db] machine_status_history setup failed:", e.message);
+}
+
 module.exports = db;
