@@ -1,0 +1,2737 @@
+{
+ "id": "htz7500",
+ "name": "Zenoah HTZ7500 Hedge Trimmer",
+ "source": "htz7500.pdf",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "BLADE, GEAR CASE",
+   "image": "htz7500-fig1.png",
+   "hotspots": [
+    {
+     "key": "35",
+     "x": 34.85,
+     "y": 17.205
+    },
+    {
+     "key": "24",
+     "x": 89.472,
+     "y": 20.056
+    },
+    {
+     "key": "30",
+     "x": 71.544,
+     "y": 21.639
+    },
+    {
+     "key": "29",
+     "x": 19.329,
+     "y": 23.42
+    },
+    {
+     "key": "34",
+     "x": 57.314,
+     "y": 25.281
+    },
+    {
+     "key": "33",
+     "x": 57.314,
+     "y": 29.319
+    },
+    {
+     "key": "16",
+     "x": 88.853,
+     "y": 31.695
+    },
+    {
+     "key": "15",
+     "x": 60.226,
+     "y": 35.653
+    },
+    {
+     "key": "18",
+     "x": 66.613,
+     "y": 37.395
+    },
+    {
+     "key": "28",
+     "x": 35.967,
+     "y": 38.583
+    },
+    {
+     "key": "1",
+     "x": 47.288,
+     "y": 40.008
+    },
+    {
+     "key": "17",
+     "x": 88.909,
+     "y": 35.653
+    },
+    {
+     "key": "19",
+     "x": 66.611,
+     "y": 40.285
+    },
+    {
+     "key": "25",
+     "x": 89.132,
+     "y": 42.502
+    },
+    {
+     "key": "10",
+     "x": 31.319,
+     "y": 44.482
+    },
+    {
+     "key": "14",
+     "x": 41.643,
+     "y": 44.482
+    },
+    {
+     "key": "10",
+     "x": 55.52,
+     "y": 45.51
+    },
+    {
+     "key": "27",
+     "x": 87.507,
+     "y": 44.521
+    },
+    {
+     "key": "11",
+     "x": 62.747,
+     "y": 46.381
+    },
+    {
+     "key": "26",
+     "x": 89.132,
+     "y": 49.826
+    },
+    {
+     "key": "4",
+     "x": 62.356,
+     "y": 51.132
+    },
+    {
+     "key": "10",
+     "x": 12.887,
+     "y": 51.489
+    },
+    {
+     "key": "31",
+     "x": 67.493,
+     "y": 53.914
+    },
+    {
+     "key": "27",
+     "x": 87.507,
+     "y": 54.379
+    },
+    {
+     "key": "6",
+     "x": 62.692,
+     "y": 55.565
+    },
+    {
+     "key": "3",
+     "x": 62.692,
+     "y": 58.573
+    },
+    {
+     "key": "2",
+     "x": 17.816,
+     "y": 60.04
+    },
+    {
+     "key": "12",
+     "x": 62.804,
+     "y": 61.067
+    },
+    {
+     "key": "23",
+     "x": 89.132,
+     "y": 61.465
+    },
+    {
+     "key": "6",
+     "x": 41.236,
+     "y": 62.652
+    },
+    {
+     "key": "9",
+     "x": 62.749,
+     "y": 64.472
+    },
+    {
+     "key": "6",
+     "x": 32.552,
+     "y": 65.898
+    },
+    {
+     "key": "22",
+     "x": 68.628,
+     "y": 65.385
+    },
+    {
+     "key": "21",
+     "x": 83.418,
+     "y": 66.453
+    },
+    {
+     "key": "8",
+     "x": 41.404,
+     "y": 68.154
+    },
+    {
+     "key": "5",
+     "x": 11.747,
+     "y": 70.711
+    },
+    {
+     "key": "6",
+     "x": 11.747,
+     "y": 72.399
+    },
+    {
+     "key": "7",
+     "x": 11.747,
+     "y": 77.762
+    },
+    {
+     "key": "20",
+     "x": 89.132,
+     "y": 69.146
+    },
+    {
+     "key": "7",
+     "x": 32.44,
+     "y": 71.519
+    },
+    {
+     "key": "13",
+     "x": 39.611,
+     "y": 78.921
+    },
+    {
+     "key": "32",
+     "x": 77.759,
+     "y": 79.003
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "848D3J6501",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "848D3J6501"
+    },
+    {
+     "key": "2",
+     "part_number": "T4543-11110",
+     "depth": 1,
+     "sub": true,
+     "description": "PLATE, UPPER",
+     "qty": "1",
+     "remarks": "",
+     "search": "T454311110"
+    },
+    {
+     "key": "3",
+     "part_number": "T4543-11120",
+     "depth": 1,
+     "sub": true,
+     "description": "PLATE, LOWER",
+     "qty": "1",
+     "remarks": "",
+     "search": "T454311120"
+    },
+    {
+     "key": "4",
+     "part_number": "848D3J65A0",
+     "depth": 1,
+     "sub": true,
+     "description": "BLADE, LOWER",
+     "qty": "1",
+     "remarks": "",
+     "search": "848D3J65A0"
+    },
+    {
+     "key": "5",
+     "part_number": "848D3J65B0",
+     "depth": 1,
+     "sub": true,
+     "description": "BLADE, UPPER",
+     "qty": "1",
+     "remarks": "",
+     "search": "848D3J65B0"
+    },
+    {
+     "key": "6",
+     "part_number": "T4521-11311",
+     "depth": 1,
+     "sub": true,
+     "description": "SPACER",
+     "qty": "9",
+     "remarks": "",
+     "search": "T452111311"
+    },
+    {
+     "key": "7",
+     "part_number": "T4520-11331",
+     "depth": 1,
+     "sub": true,
+     "description": "SCREW",
+     "qty": "4",
+     "remarks": "",
+     "search": "T452011331"
+    },
+    {
+     "key": "8",
+     "part_number": "1252-30520",
+     "depth": 1,
+     "sub": true,
+     "description": "BOLT",
+     "qty": "4",
+     "remarks": "",
+     "search": "125230520"
+    },
+    {
+     "key": "9",
+     "part_number": "8488452500",
+     "depth": 1,
+     "sub": true,
+     "description": "BOLT",
+     "qty": "1",
+     "remarks": "",
+     "search": "8488452500"
+    },
+    {
+     "key": "10",
+     "part_number": "T4531-11350",
+     "depth": 1,
+     "sub": true,
+     "description": "NUT",
+     "qty": "5",
+     "remarks": "",
+     "search": "T453111350"
+    },
+    {
+     "key": "11",
+     "part_number": "T4543-11410",
+     "depth": 1,
+     "sub": true,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "T454311410"
+    },
+    {
+     "key": "12",
+     "part_number": "848D3066E1",
+     "depth": 1,
+     "sub": true,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "848D3066E1"
+    },
+    {
+     "key": "13",
+     "part_number": "T4543-11230",
+     "depth": 1,
+     "sub": true,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "T454311230"
+    },
+    {
+     "key": "14",
+     "part_number": "848D3J66G0",
+     "depth": 1,
+     "sub": true,
+     "description": "GUARD",
+     "qty": "1",
+     "remarks": "",
+     "search": "848D3J66G0"
+    },
+    {
+     "key": "15",
+     "part_number": "586 93 71-01",
+     "depth": 0,
+     "sub": false,
+     "description": "GEARCASE COMP. UPPER",
+     "qty": "1",
+     "remarks": "",
+     "search": "586937101"
+    },
+    {
+     "key": "16",
+     "part_number": "84888C0280",
+     "depth": 1,
+     "sub": true,
+     "description": "BEARING",
+     "qty": "2",
+     "remarks": "",
+     "search": "84888C0280"
+    },
+    {
+     "key": "17",
+     "part_number": "4065-02812",
+     "depth": 1,
+     "sub": true,
+     "description": "RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "406502812"
+    },
+    {
+     "key": "18",
+     "part_number": "848D3061B0",
+     "depth": 1,
+     "sub": true,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "848D3061B0"
+    },
+    {
+     "key": "19",
+     "part_number": "T4543-42320",
+     "depth": 1,
+     "sub": true,
+     "description": "BOLT",
+     "qty": "2",
+     "remarks": "",
+     "search": "T454342320"
+    },
+    {
+     "key": "20",
+     "part_number": "586 93 72-01",
+     "depth": 0,
+     "sub": false,
+     "description": "GEARCASE COMP. BOTOM",
+     "qty": "1",
+     "remarks": "",
+     "search": "586937201"
+    },
+    {
+     "key": "21",
+     "part_number": "848D3061B0",
+     "depth": 1,
+     "sub": true,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "848D3061B0"
+    },
+    {
+     "key": "22",
+     "part_number": "T4543-42320",
+     "depth": 1,
+     "sub": true,
+     "description": "BOLT",
+     "qty": "2",
+     "remarks": "",
+     "search": "T454342320"
+    },
+    {
+     "key": "23",
+     "part_number": "T4543-21220",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "T454321220"
+    },
+    {
+     "key": "24",
+     "part_number": "848D305111",
+     "depth": 0,
+     "sub": false,
+     "description": "DRUM",
+     "qty": "1",
+     "remarks": "",
+     "search": "848D305111"
+    },
+    {
+     "key": "25",
+     "part_number": "848D3062A0",
+     "depth": 0,
+     "sub": false,
+     "description": "GEAR, DRIVE",
+     "qty": "1",
+     "remarks": "",
+     "search": "848D3062A0"
+    },
+    {
+     "key": "26",
+     "part_number": "T4543-42210",
+     "depth": 0,
+     "sub": false,
+     "description": "GEAR, DRIVEN",
+     "qty": "1",
+     "remarks": "",
+     "search": "T454342210"
+    },
+    {
+     "key": "27",
+     "part_number": "T4543-42100",
+     "depth": 0,
+     "sub": false,
+     "description": "ROD ASSY",
+     "qty": "2",
+     "remarks": "",
+     "search": "T454342100"
+    },
+    {
+     "key": "28",
+     "part_number": "T4503-12115",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "T450312115"
+    },
+    {
+     "key": "29",
+     "part_number": "T4521-11330",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, BLADE",
+     "qty": "4",
+     "remarks": "",
+     "search": "T452111330"
+    },
+    {
+     "key": "30",
+     "part_number": "3199-13350",
+     "depth": 0,
+     "sub": false,
+     "description": "FITTING",
+     "qty": "1",
+     "remarks": "",
+     "search": "319913350"
+    },
+    {
+     "key": "31",
+     "part_number": "T4543-42410",
+     "depth": 0,
+     "sub": false,
+     "description": "FELT",
+     "qty": "1",
+     "remarks": "",
+     "search": "T454342410"
+    },
+    {
+     "key": "32",
+     "part_number": "8488451600",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT",
+     "qty": "6",
+     "remarks": "",
+     "search": "8488451600"
+    },
+    {
+     "key": "33",
+     "part_number": "1252-30625",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT",
+     "qty": "3",
+     "remarks": "",
+     "search": "125230625"
+    },
+    {
+     "key": "34",
+     "part_number": "1565-72311",
+     "depth": 0,
+     "sub": false,
+     "description": "CLAMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "156572311"
+    },
+    {
+     "key": "35",
+     "part_number": "848D3J90S0",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "848D3J90S0"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 BLADE, GEAR CASE"
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "HANDLE",
+   "image": "htz7500-fig2.png",
+   "hotspots": [
+    {
+     "key": "18",
+     "x": 43.25,
+     "y": 14.469
+    },
+    {
+     "key": "22",
+     "x": 38.657,
+     "y": 22.15
+    },
+    {
+     "key": "5",
+     "x": 69.838,
+     "y": 23.634
+    },
+    {
+     "key": "25",
+     "x": 18.712,
+     "y": 23.812
+    },
+    {
+     "key": "21",
+     "x": 45.491,
+     "y": 25.594
+    },
+    {
+     "key": "14",
+     "x": 68.975,
+     "y": 28.399
+    },
+    {
+     "key": "19",
+     "x": 45.489,
+     "y": 29.948
+    },
+    {
+     "key": "9",
+     "x": 64.287,
+     "y": 30.247
+    },
+    {
+     "key": "13",
+     "x": 58.333,
+     "y": 32.483
+    },
+    {
+     "key": "16",
+     "x": 85.052,
+     "y": 34.884
+    },
+    {
+     "key": "10",
+     "x": 68.102,
+     "y": 36.047
+    },
+    {
+     "key": "20",
+     "x": 45.489,
+     "y": 36.322
+    },
+    {
+     "key": "23",
+     "x": 21.904,
+     "y": 38.103
+    },
+    {
+     "key": "22",
+     "x": 21.904,
+     "y": 41.547
+    },
+    {
+     "key": "26",
+     "x": 45.489,
+     "y": 42.062
+    },
+    {
+     "key": "24",
+     "x": 21.904,
+     "y": 44.675
+    },
+    {
+     "key": "11",
+     "x": 84.828,
+     "y": 46.197
+    },
+    {
+     "key": "7",
+     "x": 80.692,
+     "y": 48.127
+    },
+    {
+     "key": "27",
+     "x": 21.904,
+     "y": 49.188
+    },
+    {
+     "key": "4",
+     "x": 13.855,
+     "y": 52.591
+    },
+    {
+     "key": "8",
+     "x": 68.929,
+     "y": 52.714
+    },
+    {
+     "key": "15",
+     "x": 57.017,
+     "y": 53.942
+    },
+    {
+     "key": "12",
+     "x": 72.758,
+     "y": 51.209
+    },
+    {
+     "key": "6",
+     "x": 76.38,
+     "y": 49.745
+    },
+    {
+     "key": "17",
+     "x": 61.61,
+     "y": 55.644
+    },
+    {
+     "key": "3",
+     "x": 13.854,
+     "y": 56.074
+    },
+    {
+     "key": "2",
+     "x": 13.854,
+     "y": 59.438
+    },
+    {
+     "key": "28",
+     "x": 61.544,
+     "y": 67.804
+    },
+    {
+     "key": "1",
+     "x": 13.854,
+     "y": 68.939
+    },
+    {
+     "key": "2",
+     "x": 13.854,
+     "y": 74.363
+    },
+    {
+     "key": "29",
+     "x": 49.485,
+     "y": 73.38
+    },
+    {
+     "key": "30",
+     "x": 58.864,
+     "y": 73.38
+    },
+    {
+     "key": "31",
+     "x": 69.875,
+     "y": 73.38
+    },
+    {
+     "key": "32",
+     "x": 76.879,
+     "y": 73.38
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "848D383212",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE-R COMP.",
+     "qty": "1",
+     "remarks": "",
+     "search": "848D383212"
+    },
+    {
+     "key": "2",
+     "part_number": "848D3G32L0",
+     "depth": 0,
+     "sub": false,
+     "description": "SPACER",
+     "qty": "4",
+     "remarks": "",
+     "search": "848D3G32L0"
+    },
+    {
+     "key": "3",
+     "part_number": "T4503-31220",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER",
+     "qty": "2",
+     "remarks": "",
+     "search": "T450331220"
+    },
+    {
+     "key": "4",
+     "part_number": "T4503-31230",
+     "depth": 0,
+     "sub": false,
+     "description": "CAP",
+     "qty": "2",
+     "remarks": "",
+     "search": "T450331230"
+    },
+    {
+     "key": "5",
+     "part_number": "T4519-32100",
+     "depth": 0,
+     "sub": false,
+     "description": "LEVER-ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "T451932100"
+    },
+    {
+     "key": "6",
+     "part_number": "1638-84130",
+     "depth": 1,
+     "sub": true,
+     "description": "LEVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "163884130"
+    },
+    {
+     "key": "7",
+     "part_number": "1638-84140",
+     "depth": 1,
+     "sub": true,
+     "description": "LEVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "163884140"
+    },
+    {
+     "key": "8",
+     "part_number": "6844-84150",
+     "depth": 1,
+     "sub": true,
+     "description": "TOP",
+     "qty": "1",
+     "remarks": "",
+     "search": "684484150"
+    },
+    {
+     "key": "9",
+     "part_number": "1638-84160",
+     "depth": 1,
+     "sub": true,
+     "description": "CLAMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "163884160"
+    },
+    {
+     "key": "10",
+     "part_number": "T4519-13300",
+     "depth": 1,
+     "sub": true,
+     "description": "CABLE COMP.",
+     "qty": "1",
+     "remarks": "",
+     "search": "T451913300"
+    },
+    {
+     "key": "11",
+     "part_number": "1638-84170",
+     "depth": 1,
+     "sub": true,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "163884170"
+    },
+    {
+     "key": "12",
+     "part_number": "1638-84180",
+     "depth": 1,
+     "sub": true,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "163884180"
+    },
+    {
+     "key": "13",
+     "part_number": "0263-60620",
+     "depth": 1,
+     "sub": true,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "026360620"
+    },
+    {
+     "key": "14",
+     "part_number": "1638-84190",
+     "depth": 1,
+     "sub": true,
+     "description": "NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "163884190"
+    },
+    {
+     "key": "15",
+     "part_number": "0260-60535",
+     "depth": 1,
+     "sub": true,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "026060535"
+    },
+    {
+     "key": "16",
+     "part_number": "575 52 11-01",
+     "depth": 1,
+     "sub": true,
+     "description": "NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "575521101"
+    },
+    {
+     "key": "17",
+     "part_number": "1638-84220",
+     "depth": 1,
+     "sub": true,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "163884220"
+    },
+    {
+     "key": "18",
+     "part_number": "T4519-32410",
+     "depth": 0,
+     "sub": false,
+     "description": "PIPE",
+     "qty": "1",
+     "remarks": "",
+     "search": "T451932410"
+    },
+    {
+     "key": "19",
+     "part_number": "T4519-32510",
+     "depth": 0,
+     "sub": false,
+     "description": "MOUNT",
+     "qty": "1",
+     "remarks": "",
+     "search": "T451932510"
+    },
+    {
+     "key": "20",
+     "part_number": "T4519-32520",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "T451932520"
+    },
+    {
+     "key": "21",
+     "part_number": "0280-10504",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "2",
+     "remarks": "",
+     "search": "028010504"
+    },
+    {
+     "key": "22",
+     "part_number": "T4503-31210",
+     "depth": 0,
+     "sub": false,
+     "description": "ABSORBER",
+     "qty": "4",
+     "remarks": "",
+     "search": "T450331210"
+    },
+    {
+     "key": "23",
+     "part_number": "T4519-32220",
+     "depth": 0,
+     "sub": false,
+     "description": "COLLAR",
+     "qty": "2",
+     "remarks": "",
+     "search": "T451932220"
+    },
+    {
+     "key": "24",
+     "part_number": "T4503-32230",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "T450332230"
+    },
+    {
+     "key": "25",
+     "part_number": "08034-20414",
+     "depth": 0,
+     "sub": false,
+     "description": "BAND",
+     "qty": "1",
+     "remarks": "",
+     "search": "0803420414"
+    },
+    {
+     "key": "26",
+     "part_number": "01252-30530",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT",
+     "qty": "2",
+     "remarks": "",
+     "search": "0125230530"
+    },
+    {
+     "key": "27",
+     "part_number": "3540-13260",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT",
+     "qty": "2",
+     "remarks": "",
+     "search": "354013260"
+    },
+    {
+     "key": "28",
+     "part_number": "8488U00010",
+     "depth": 0,
+     "sub": false,
+     "description": "TOOL SET",
+     "qty": "1",
+     "remarks": "",
+     "search": "8488U00010"
+    },
+    {
+     "key": "29",
+     "part_number": "T4017-91130",
+     "depth": 1,
+     "sub": true,
+     "description": "SOCKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "T401791130"
+    },
+    {
+     "key": "30",
+     "part_number": "3540-91120",
+     "depth": 1,
+     "sub": true,
+     "description": "SPANNER",
+     "qty": "1",
+     "remarks": "",
+     "search": "354091120"
+    },
+    {
+     "key": "31",
+     "part_number": "1030-91340",
+     "depth": 1,
+     "sub": true,
+     "description": "DRIVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "103091340"
+    },
+    {
+     "key": "32",
+     "part_number": "9007-00425",
+     "depth": 1,
+     "sub": true,
+     "description": "WRENCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "900700425"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 HANDLE"
+  },
+  {
+   "id": "3",
+   "number": "3",
+   "title": "ENGINE UNIT 01",
+   "image": "htz7500-fig3.png",
+   "hotspots": [
+    {
+     "key": "6",
+     "x": 55.754,
+     "y": 13.029
+    },
+    {
+     "key": "45",
+     "x": 32.569,
+     "y": 14.337
+    },
+    {
+     "key": "4",
+     "x": 50.335,
+     "y": 15.295
+    },
+    {
+     "key": "9",
+     "x": 25.765,
+     "y": 16.197
+    },
+    {
+     "key": "5",
+     "x": 45.295,
+     "y": 17.324
+    },
+    {
+     "key": "7",
+     "x": 30.582,
+     "y": 18.146
+    },
+    {
+     "key": "8",
+     "x": 34.292,
+     "y": 19.649
+    },
+    {
+     "key": "39",
+     "x": 24.337,
+     "y": 25.906
+    },
+    {
+     "key": "8",
+     "x": 49.67,
+     "y": 25.914
+    },
+    {
+     "key": "3",
+     "x": 51.555,
+     "y": 24.42
+    },
+    {
+     "key": "7",
+     "x": 52.935,
+     "y": 27.172
+    },
+    {
+     "key": "31",
+     "x": 69.883,
+     "y": 27.42
+    },
+    {
+     "key": "9",
+     "x": 56.858,
+     "y": 28.726
+    },
+    {
+     "key": "37",
+     "x": 13.034,
+     "y": 30.478
+    },
+    {
+     "key": "32",
+     "x": 74.883,
+     "y": 31.428
+    },
+    {
+     "key": "1",
+     "x": 35.09,
+     "y": 32.505
+    },
+    {
+     "key": "33",
+     "x": 74.883,
+     "y": 35.169
+    },
+    {
+     "key": "2",
+     "x": 50.471,
+     "y": 35.347
+    },
+    {
+     "key": "44",
+     "x": 86.27,
+     "y": 35.258
+    },
+    {
+     "key": "34",
+     "x": 74.883,
+     "y": 38.495
+    },
+    {
+     "key": "38",
+     "x": 11.732,
+     "y": 42.147
+    },
+    {
+     "key": "18",
+     "x": 50.639,
+     "y": 42.592
+    },
+    {
+     "key": "35",
+     "x": 61.858,
+     "y": 43.127
+    },
+    {
+     "key": "17",
+     "x": 50.639,
+     "y": 47.372
+    },
+    {
+     "key": "20",
+     "x": 34.967,
+     "y": 49.659
+    },
+    {
+     "key": "36",
+     "x": 79.589,
+     "y": 50.104
+    },
+    {
+     "key": "19",
+     "x": 44.589,
+     "y": 53.459
+    },
+    {
+     "key": "22",
+     "x": 36.774,
+     "y": 53.548
+    },
+    {
+     "key": "21",
+     "x": 42.992,
+     "y": 56.013
+    },
+    {
+     "key": "42",
+     "x": 14.925,
+     "y": 58.418
+    },
+    {
+     "key": "43",
+     "x": 18.371,
+     "y": 59.843
+    },
+    {
+     "key": "20",
+     "x": 48.539,
+     "y": 54.855
+    },
+    {
+     "key": "22",
+     "x": 45.892,
+     "y": 57.052
+    },
+    {
+     "key": "11",
+     "x": 51.858,
+     "y": 59.605
+    },
+    {
+     "key": "13",
+     "x": 21.606,
+     "y": 61.06
+    },
+    {
+     "key": "12",
+     "x": 32.068,
+     "y": 65.425
+    },
+    {
+     "key": "16",
+     "x": 67.152,
+     "y": 65.751
+    },
+    {
+     "key": "23",
+     "x": 37.656,
+     "y": 67.592
+    },
+    {
+     "key": "26",
+     "x": 77.32,
+     "y": 68.513
+    },
+    {
+     "key": "25",
+     "x": 42.572,
+     "y": 69.492
+    },
+    {
+     "key": "10",
+     "x": 39.295,
+     "y": 72.313
+    },
+    {
+     "key": "30",
+     "x": 78.286,
+     "y": 72.937
+    },
+    {
+     "key": "12",
+     "x": 56.144,
+     "y": 75.312
+    },
+    {
+     "key": "27",
+     "x": 83.286,
+     "y": 74.926
+    },
+    {
+     "key": "15",
+     "x": 59.799,
+     "y": 76.678
+    },
+    {
+     "key": "24",
+     "x": 89.295,
+     "y": 77.984
+    },
+    {
+     "key": "14",
+     "x": 63.707,
+     "y": 78.192
+    },
+    {
+     "key": "41",
+     "x": 20.471,
+     "y": 81.339
+    },
+    {
+     "key": "29",
+     "x": 76.9,
+     "y": 83.091
+    },
+    {
+     "key": "28",
+     "x": 82.404,
+     "y": 85.229
+    },
+    {
+     "key": "40",
+     "x": 31.522,
+     "y": 85.763
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "T1551-12110",
+     "depth": 0,
+     "sub": false,
+     "description": "CYLINDER",
+     "qty": "1",
+     "remarks": "",
+     "search": "T155112110"
+    },
+    {
+     "key": "2",
+     "part_number": "848F0112B0",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET, BASE",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F0112B0"
+    },
+    {
+     "key": "3",
+     "part_number": "4820-12130",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT TORX T27",
+     "qty": "4",
+     "remarks": "M5x22",
+     "search": "482012130"
+    },
+    {
+     "key": "4",
+     "part_number": "848F0014A2",
+     "depth": 0,
+     "sub": false,
+     "description": "INSULATOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F0014A2"
+    },
+    {
+     "key": "5",
+     "part_number": "T1551-13121",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET, INSU",
+     "qty": "1",
+     "remarks": "",
+     "search": "T155113121"
+    },
+    {
+     "key": "6",
+     "part_number": "T4950-52001",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT TORX T27",
+     "qty": "4",
+     "remarks": "M5x20",
+     "search": "T495052001"
+    },
+    {
+     "key": "7",
+     "part_number": "T1551-16110",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER, TR",
+     "qty": "2",
+     "remarks": "",
+     "search": "T155116110"
+    },
+    {
+     "key": "8",
+     "part_number": "T1551-16142",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET, TR",
+     "qty": "2",
+     "remarks": "",
+     "search": "T155116142"
+    },
+    {
+     "key": "9",
+     "part_number": "8488141000",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT TORX T27",
+     "qty": "4",
+     "remarks": "M4x10",
+     "search": "8488141000"
+    },
+    {
+     "key": "10",
+     "part_number": "848F012111",
+     "depth": 0,
+     "sub": false,
+     "description": "CRANKCASECOMP.",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F012111"
+    },
+    {
+     "key": "11",
+     "part_number": "T1551-21141",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET, CASE",
+     "qty": "1",
+     "remarks": "",
+     "search": "T155121141"
+    },
+    {
+     "key": "12",
+     "part_number": "6030-06001",
+     "depth": 0,
+     "sub": false,
+     "description": "BEARIN",
+     "qty": "2",
+     "remarks": "",
+     "search": "603006001"
+    },
+    {
+     "key": "13",
+     "part_number": "4810-21210",
+     "depth": 0,
+     "sub": false,
+     "description": "SEAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "481021210"
+    },
+    {
+     "key": "14",
+     "part_number": "1850-21220",
+     "depth": 0,
+     "sub": false,
+     "description": "SEAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "185021220"
+    },
+    {
+     "key": "15",
+     "part_number": "4065-02812",
+     "depth": 0,
+     "sub": false,
+     "description": "RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "406502812"
+    },
+    {
+     "key": "16",
+     "part_number": "4820-13180",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT TORX T27",
+     "qty": "3",
+     "remarks": "M5x20",
+     "search": "482013180"
+    },
+    {
+     "key": "17",
+     "part_number": "848F0041A1",
+     "depth": 0,
+     "sub": false,
+     "description": "PISTON",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F0041A1"
+    },
+    {
+     "key": "18",
+     "part_number": "8488C34200",
+     "depth": 0,
+     "sub": false,
+     "description": "RING",
+     "qty": "2",
+     "remarks": "",
+     "search": "8488C34200"
+    },
+    {
+     "key": "19",
+     "part_number": "1600-41310",
+     "depth": 0,
+     "sub": false,
+     "description": "PIN",
+     "qty": "1",
+     "remarks": "",
+     "search": "160041310"
+    },
+    {
+     "key": "20",
+     "part_number": "1260-41320",
+     "depth": 0,
+     "sub": false,
+     "description": "RING",
+     "qty": "2",
+     "remarks": "",
+     "search": "126041320"
+    },
+    {
+     "key": "21",
+     "part_number": "T1551-41410",
+     "depth": 0,
+     "sub": false,
+     "description": "BEARING",
+     "qty": "1",
+     "remarks": "",
+     "search": "T155141410"
+    },
+    {
+     "key": "22",
+     "part_number": "1101-41340",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "110141340"
+    },
+    {
+     "key": "23",
+     "part_number": "848F014202",
+     "depth": 0,
+     "sub": false,
+     "description": "CRANKSHAFT COMP.",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F014202"
+    },
+    {
+     "key": "24",
+     "part_number": "1650-43230",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT",
+     "qty": "1",
+     "remarks": "M8xP1.0",
+     "search": "165043230"
+    },
+    {
+     "key": "25",
+     "part_number": "1000-43240",
+     "depth": 0,
+     "sub": false,
+     "description": "KEY",
+     "qty": "1",
+     "remarks": "",
+     "search": "100043240"
+    },
+    {
+     "key": "26",
+     "part_number": "848F337113",
+     "depth": 0,
+     "sub": false,
+     "description": "ROTOR ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F337113"
+    },
+    {
+     "key": "27",
+     "part_number": "2841-71120",
+     "depth": 1,
+     "sub": true,
+     "description": "PAWL",
+     "qty": "2",
+     "remarks": "",
+     "search": "284171120"
+    },
+    {
+     "key": "28",
+     "part_number": "2850-71140",
+     "depth": 1,
+     "sub": true,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "285071140"
+    },
+    {
+     "key": "29",
+     "part_number": "2850-71151",
+     "depth": 1,
+     "sub": true,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "285071151"
+    },
+    {
+     "key": "30",
+     "part_number": "T1501-71130",
+     "depth": 1,
+     "sub": true,
+     "description": "SPRING",
+     "qty": "2",
+     "remarks": "",
+     "search": "T150171130"
+    },
+    {
+     "key": "31",
+     "part_number": "T1551-71200",
+     "depth": 0,
+     "sub": false,
+     "description": "COIL ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "T155171200"
+    },
+    {
+     "key": "32",
+     "part_number": "848F3071C2",
+     "depth": 1,
+     "sub": true,
+     "description": "CAP",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F3071C2"
+    },
+    {
+     "key": "33",
+     "part_number": "T1108-72120",
+     "depth": 1,
+     "sub": true,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "T110872120"
+    },
+    {
+     "key": "34",
+     "part_number": "2850-71320",
+     "depth": 1,
+     "sub": true,
+     "description": "TUBE",
+     "qty": "1",
+     "remarks": "",
+     "search": "285071320"
+    },
+    {
+     "key": "35",
+     "part_number": "1260-71261",
+     "depth": 0,
+     "sub": false,
+     "description": "SPACER",
+     "qty": "2",
+     "remarks": "",
+     "search": "126071261"
+    },
+    {
+     "key": "36",
+     "part_number": "4820-72150",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT TORX T27",
+     "qty": "2",
+     "remarks": "M4x16",
+     "search": "482072150"
+    },
+    {
+     "key": "37",
+     "part_number": "848F0115A0",
+     "depth": 0,
+     "sub": false,
+     "description": "MUFFLER",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F0115A0"
+    },
+    {
+     "key": "38",
+     "part_number": "4820-15310",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT TORX T27",
+     "qty": "2",
+     "remarks": "M5x50",
+     "search": "482015310"
+    },
+    {
+     "key": "39",
+     "part_number": "848F0115C2",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET, MUFF",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F0115C2"
+    },
+    {
+     "key": "40",
+     "part_number": "848F0015D1",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F0015D1"
+    },
+    {
+     "key": "41",
+     "part_number": "4820-12350",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT TORX T27",
+     "qty": "2",
+     "remarks": "M5x10",
+     "search": "482012350"
+    },
+    {
+     "key": "42",
+     "part_number": "848F0151G0",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE, CLUTCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F0151G0"
+    },
+    {
+     "key": "43",
+     "part_number": "2850-55211",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "285055211"
+    },
+    {
+     "key": "44",
+     "part_number": "848F017210",
+     "depth": 0,
+     "sub": false,
+     "description": "CORDCOMP.",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F017210"
+    },
+    {
+     "key": "45",
+     "part_number": "3699-91867",
+     "depth": 0,
+     "sub": false,
+     "description": "SPARK PLUG",
+     "qty": "1",
+     "remarks": "NGK:CMR 7H",
+     "search": "369991867"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 ENGINE UNIT 01"
+  },
+  {
+   "id": "4",
+   "number": "4",
+   "title": "ENGINE UNIT 02",
+   "image": "htz7500-fig4.png",
+   "hotspots": [
+    {
+     "key": "28",
+     "x": 79.898,
+     "y": 13.923
+    },
+    {
+     "key": "30",
+     "x": 88.331,
+     "y": 14.924
+    },
+    {
+     "key": "1",
+     "x": 27.151,
+     "y": 15.61
+    },
+    {
+     "key": "26",
+     "x": 69.098,
+     "y": 18.222
+    },
+    {
+     "key": "21",
+     "x": 53.414,
+     "y": 19.508
+    },
+    {
+     "key": "27",
+     "x": 62.703,
+     "y": 20.828
+    },
+    {
+     "key": "4",
+     "x": 43.751,
+     "y": 22.115
+    },
+    {
+     "key": "25",
+     "x": 49.925,
+     "y": 24.331
+    },
+    {
+     "key": "22",
+     "x": 54.034,
+     "y": 25.044
+    },
+    {
+     "key": "29",
+     "x": 83.662,
+     "y": 22.345
+    },
+    {
+     "key": "24",
+     "x": 58.066,
+     "y": 23.564
+    },
+    {
+     "key": "2",
+     "x": 36.666,
+     "y": 32.42
+    },
+    {
+     "key": "42",
+     "x": 11.299,
+     "y": 33.93
+    },
+    {
+     "key": "41",
+     "x": 15.277,
+     "y": 35.533
+    },
+    {
+     "key": "40",
+     "x": 20.543,
+     "y": 37.611
+    },
+    {
+     "key": "23",
+     "x": 44.452,
+     "y": 35.649
+    },
+    {
+     "key": "20",
+     "x": 38.908,
+     "y": 37.132
+    },
+    {
+     "key": "19",
+     "x": 65.691,
+     "y": 36.035
+    },
+    {
+     "key": "4",
+     "x": 23.62,
+     "y": 38.849
+    },
+    {
+     "key": "3",
+     "x": 27.767,
+     "y": 40.443
+    },
+    {
+     "key": "18",
+     "x": 38.906,
+     "y": 40.539
+    },
+    {
+     "key": "39",
+     "x": 16.202,
+     "y": 46.385
+    },
+    {
+     "key": "17",
+     "x": 52.205,
+     "y": 47.59
+    },
+    {
+     "key": "16",
+     "x": 47.165,
+     "y": 49.647
+    },
+    {
+     "key": "38",
+     "x": 14.77,
+     "y": 50.653
+    },
+    {
+     "key": "31",
+     "x": 55.756,
+     "y": 49.784
+    },
+    {
+     "key": "37",
+     "x": 72.093,
+     "y": 55.27
+    },
+    {
+     "key": "34",
+     "x": 41.328,
+     "y": 56.229
+    },
+    {
+     "key": "5",
+     "x": 24.63,
+     "y": 56.961
+    },
+    {
+     "key": "12",
+     "x": 26.153,
+     "y": 61.303
+    },
+    {
+     "key": "32",
+     "x": 41.519,
+     "y": 59.974
+    },
+    {
+     "key": "35",
+     "x": 44.931,
+     "y": 61.328
+    },
+    {
+     "key": "14",
+     "x": 23.441,
+     "y": 63.379
+    },
+    {
+     "key": "33",
+     "x": 48.762,
+     "y": 62.893
+    },
+    {
+     "key": "13",
+     "x": 19.131,
+     "y": 64.971
+    },
+    {
+     "key": "36",
+     "x": 58.009,
+     "y": 66.742
+    },
+    {
+     "key": "7",
+     "x": 52.128,
+     "y": 69.316
+    },
+    {
+     "key": "6",
+     "x": 20.511,
+     "y": 70.514
+    },
+    {
+     "key": "43",
+     "x": 70.467,
+     "y": 69.602
+    },
+    {
+     "key": "11",
+     "x": 41.666,
+     "y": 78.52
+    },
+    {
+     "key": "6",
+     "x": 20.511,
+     "y": 78.66
+    },
+    {
+     "key": "9",
+     "x": 45.825,
+     "y": 80.212
+    },
+    {
+     "key": "8",
+     "x": 49.733,
+     "y": 81.608
+    },
+    {
+     "key": "10",
+     "x": 53.178,
+     "y": 83.003
+    },
+    {
+     "key": "15",
+     "x": 25.14,
+     "y": 84.735
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "848F0131A1",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER, ENGINE",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F0131A1"
+    },
+    {
+     "key": "2",
+     "part_number": "4810-72120",
+     "depth": 0,
+     "sub": false,
+     "description": "GROMMET",
+     "qty": "1",
+     "remarks": "",
+     "search": "481072120"
+    },
+    {
+     "key": "3",
+     "part_number": "848F0131B1",
+     "depth": 0,
+     "sub": false,
+     "description": "DEFLECTOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F0131B1"
+    },
+    {
+     "key": "4",
+     "part_number": "4820-32120",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT TORX",
+     "qty": "2",
+     "remarks": "M5x16",
+     "search": "482032120"
+    },
+    {
+     "key": "5",
+     "part_number": "848F018503",
+     "depth": 0,
+     "sub": false,
+     "description": "TANK ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F018503"
+    },
+    {
+     "key": "6",
+     "part_number": "T1501-85120",
+     "depth": 1,
+     "sub": true,
+     "description": "PACKING",
+     "qty": "2",
+     "remarks": "",
+     "search": "T150185120"
+    },
+    {
+     "key": "7",
+     "part_number": "T1015-85202",
+     "depth": 1,
+     "sub": true,
+     "description": "CAP ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "T101585202"
+    },
+    {
+     "key": "8",
+     "part_number": "4500-85300",
+     "depth": 2,
+     "sub": true,
+     "description": "HOLDER ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "450085300"
+    },
+    {
+     "key": "9",
+     "part_number": "4500-85220",
+     "depth": 2,
+     "sub": true,
+     "description": "PACKING",
+     "qty": "1",
+     "remarks": "",
+     "search": "450085220"
+    },
+    {
+     "key": "10",
+     "part_number": "5601-85260",
+     "depth": 2,
+     "sub": true,
+     "description": "FILTER",
+     "qty": "1",
+     "remarks": "",
+     "search": "560185260"
+    },
+    {
+     "key": "11",
+     "part_number": "4820-85260",
+     "depth": 2,
+     "sub": true,
+     "description": "STOPPER",
+     "qty": "1",
+     "remarks": "",
+     "search": "482085260"
+    },
+    {
+     "key": "12",
+     "part_number": "848F018530",
+     "depth": 1,
+     "sub": true,
+     "description": "PIPECOMP.",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F018530"
+    },
+    {
+     "key": "13",
+     "part_number": "3306-85401",
+     "depth": 1,
+     "sub": true,
+     "description": "FILTER",
+     "qty": "1",
+     "remarks": "",
+     "search": "330685401"
+    },
+    {
+     "key": "14",
+     "part_number": "1260-85460",
+     "depth": 1,
+     "sub": true,
+     "description": "COLLER",
+     "qty": "1",
+     "remarks": "",
+     "search": "126085460"
+    },
+    {
+     "key": "15",
+     "part_number": "4820-32120",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT TORX",
+     "qty": "3",
+     "remarks": "M5x16",
+     "search": "482032120"
+    },
+    {
+     "key": "16",
+     "part_number": "1950-86120",
+     "depth": 0,
+     "sub": false,
+     "description": "CLIP",
+     "qty": "1",
+     "remarks": "",
+     "search": "195086120"
+    },
+    {
+     "key": "17",
+     "part_number": "848F018102",
+     "depth": 0,
+     "sub": false,
+     "description": "CARBURETOR ASSY",
+     "qty": "1",
+     "remarks": "WYA-39B",
+     "search": "848F018102"
+    },
+    {
+     "key": "18",
+     "part_number": "848F0314C1",
+     "depth": 0,
+     "sub": false,
+     "description": "GASKET, CARB",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F0314C1"
+    },
+    {
+     "key": "19",
+     "part_number": "4820-15310",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT TORX T27",
+     "qty": "2",
+     "remarks": "M5x50",
+     "search": "482015310"
+    },
+    {
+     "key": "20",
+     "part_number": "4500-81910",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "450081910"
+    },
+    {
+     "key": "21",
+     "part_number": "848F028332",
+     "depth": 0,
+     "sub": false,
+     "description": "BODY ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F028332"
+    },
+    {
+     "key": "22",
+     "part_number": "T1512-82130",
+     "depth": 1,
+     "sub": true,
+     "description": "PLATE, CHOKE",
+     "qty": "1",
+     "remarks": "",
+     "search": "T151282130"
+    },
+    {
+     "key": "23",
+     "part_number": "T1600-82140",
+     "depth": 1,
+     "sub": true,
+     "description": "LEVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "T160082140"
+    },
+    {
+     "key": "24",
+     "part_number": "581 73 62-01",
+     "depth": 1,
+     "sub": true,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "581736201"
+    },
+    {
+     "key": "25",
+     "part_number": "T1513-82120",
+     "depth": 1,
+     "sub": true,
+     "description": "PACKING",
+     "qty": "1",
+     "remarks": "",
+     "search": "T151382120"
+    },
+    {
+     "key": "26",
+     "part_number": "848F0383F2",
+     "depth": 0,
+     "sub": false,
+     "description": "ELEMENT",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F0383F2"
+    },
+    {
+     "key": "27",
+     "part_number": "848F0283K2",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F0283K2"
+    },
+    {
+     "key": "28",
+     "part_number": "848F3C8321",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F3C8321"
+    },
+    {
+     "key": "29",
+     "part_number": "T1108-82220",
+     "depth": 1,
+     "sub": true,
+     "description": "KNOB",
+     "qty": "1",
+     "remarks": "",
+     "search": "T110882220"
+    },
+    {
+     "key": "30",
+     "part_number": "T1652-82250",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "T165282250"
+    },
+    {
+     "key": "31",
+     "part_number": "848F017511",
+     "depth": 0,
+     "sub": false,
+     "description": "RECOIL ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F017511"
+    },
+    {
+     "key": "32",
+     "part_number": "T1512-75120",
+     "depth": 1,
+     "sub": true,
+     "description": "REEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "T151275120"
+    },
+    {
+     "key": "33",
+     "part_number": "T1501-75130",
+     "depth": 1,
+     "sub": true,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "T150175130"
+    },
+    {
+     "key": "34",
+     "part_number": "1850-75151",
+     "depth": 1,
+     "sub": true,
+     "description": "SCREW",
+     "qty": "1",
+     "remarks": "",
+     "search": "185075151"
+    },
+    {
+     "key": "35",
+     "part_number": "T1501-75160",
+     "depth": 1,
+     "sub": true,
+     "description": "ROPE",
+     "qty": "1",
+     "remarks": "",
+     "search": "T150175160"
+    },
+    {
+     "key": "36",
+     "part_number": "3330-75421",
+     "depth": 1,
+     "sub": true,
+     "description": "KNOB",
+     "qty": "1",
+     "remarks": "",
+     "search": "333075421"
+    },
+    {
+     "key": "37",
+     "part_number": "4820-32120",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT TORX",
+     "qty": "4",
+     "remarks": "",
+     "search": "482032120"
+    },
+    {
+     "key": "38",
+     "part_number": "848EA05110",
+     "depth": 0,
+     "sub": false,
+     "description": "SHOECOMP.",
+     "qty": "1",
+     "remarks": "",
+     "search": "848EA05110"
+    },
+    {
+     "key": "39",
+     "part_number": "T1700-51220",
+     "depth": 1,
+     "sub": true,
+     "description": "SPRING",
+     "qty": "1",
+     "remarks": "",
+     "search": "T170051220"
+    },
+    {
+     "key": "40",
+     "part_number": "1140-51230",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "114051230"
+    },
+    {
+     "key": "41",
+     "part_number": "1970-51241",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER",
+     "qty": "2",
+     "remarks": "",
+     "search": "197051241"
+    },
+    {
+     "key": "42",
+     "part_number": "848F0151H0",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "848F0151H0"
+    },
+    {
+     "key": "43",
+     "part_number": "848F0390C1",
+     "depth": 0,
+     "sub": false,
+     "description": "LABEL, RECOIL",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F0390C1"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.4 ENGINE UNIT 02"
+  },
+  {
+   "id": "5",
+   "number": "5",
+   "title": "CARBURETOR",
+   "image": "htz7500-fig5.png",
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 50.359,
+     "y": 12.811
+    },
+    {
+     "key": "12",
+     "x": 40.406,
+     "y": 17.587
+    },
+    {
+     "key": "14",
+     "x": 59.774,
+     "y": 17.68
+    },
+    {
+     "key": "15",
+     "x": 64.173,
+     "y": 19.145
+    },
+    {
+     "key": "13",
+     "x": 40.547,
+     "y": 21.772
+    },
+    {
+     "key": "11",
+     "x": 63.352,
+     "y": 24.112
+    },
+    {
+     "key": "17",
+     "x": 63.404,
+     "y": 26.576
+    },
+    {
+     "key": "10",
+     "x": 63.549,
+     "y": 32.924
+    },
+    {
+     "key": "9",
+     "x": 57.912,
+     "y": 39.582
+    },
+    {
+     "key": "8",
+     "x": 57.841,
+     "y": 41.782
+    },
+    {
+     "key": "4",
+     "x": 34.48,
+     "y": 54.222
+    },
+    {
+     "key": "3",
+     "x": 62.623,
+     "y": 58.167
+    },
+    {
+     "key": "2",
+     "x": 69.294,
+     "y": 57.782
+    },
+    {
+     "key": "5",
+     "x": 42.379,
+     "y": 74.333
+    },
+    {
+     "key": "7",
+     "x": 42.47,
+     "y": 79.425
+    },
+    {
+     "key": "6",
+     "x": 42.497,
+     "y": 83.825
+    },
+    {
+     "key": "16",
+     "x": 61.428,
+     "y": 85.396
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "848F018102",
+     "depth": 0,
+     "sub": false,
+     "description": "CARBURETOR ASSY",
+     "qty": "1",
+     "remarks": "WYA-39B",
+     "search": "848F018102"
+    },
+    {
+     "key": "2",
+     "part_number": "848F600631",
+     "depth": 1,
+     "sub": true,
+     "description": "REBUILD KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F600631"
+    },
+    {
+     "key": "3",
+     "part_number": "1850-81450",
+     "depth": 2,
+     "sub": true,
+     "description": "BODY ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "185081450"
+    },
+    {
+     "key": "4",
+     "part_number": "4810-06022",
+     "depth": 2,
+     "sub": true,
+     "description": "GASKET KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "481006022"
+    },
+    {
+     "key": "5",
+     "part_number": "1850-81490",
+     "depth": 1,
+     "sub": true,
+     "description": "BODY",
+     "qty": "1",
+     "remarks": "",
+     "search": "185081490"
+    },
+    {
+     "key": "6",
+     "part_number": "1850-81520",
+     "depth": 1,
+     "sub": true,
+     "description": "COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "185081520"
+    },
+    {
+     "key": "7",
+     "part_number": "1751-81510",
+     "depth": 1,
+     "sub": true,
+     "description": "PUMP",
+     "qty": "1",
+     "remarks": "",
+     "search": "175181510"
+    },
+    {
+     "key": "8",
+     "part_number": "848F0181P0",
+     "depth": 1,
+     "sub": true,
+     "description": "JET",
+     "qty": "1",
+     "remarks": "",
+     "search": "848F0181P0"
+    },
+    {
+     "key": "9",
+     "part_number": "1751-81240",
+     "depth": 1,
+     "sub": true,
+     "description": "O-RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "175181240"
+    },
+    {
+     "key": "10",
+     "part_number": "1751-81130",
+     "depth": 1,
+     "sub": true,
+     "description": "RING",
+     "qty": "1",
+     "remarks": "",
+     "search": "175181130"
+    },
+    {
+     "key": "11",
+     "part_number": "1881-81140",
+     "depth": 1,
+     "sub": true,
+     "description": "SWIVEL",
+     "qty": "1",
+     "remarks": "",
+     "search": "188181140"
+    },
+    {
+     "key": "12",
+     "part_number": "1752-81110",
+     "depth": 1,
+     "sub": true,
+     "description": "SCREW",
+     "qty": "2",
+     "remarks": "",
+     "search": "175281110"
+    },
+    {
+     "key": "13",
+     "part_number": "5500-81120",
+     "depth": 1,
+     "sub": true,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "550081120"
+    },
+    {
+     "key": "14",
+     "part_number": "1751-81180",
+     "depth": 1,
+     "sub": true,
+     "description": "NUT",
+     "qty": "1",
+     "remarks": "",
+     "search": "175181180"
+    },
+    {
+     "key": "15",
+     "part_number": "8488361200",
+     "depth": 1,
+     "sub": true,
+     "description": "SCREW-CABLE-ADJ",
+     "qty": "1",
+     "remarks": "",
+     "search": "8488361200"
+    },
+    {
+     "key": "16",
+     "part_number": "1850-81530",
+     "depth": 1,
+     "sub": true,
+     "description": "SCREW",
+     "qty": "4",
+     "remarks": "",
+     "search": "185081530"
+    },
+    {
+     "key": "17",
+     "part_number": "5500-81160",
+     "depth": 1,
+     "sub": true,
+     "description": "WASHER",
+     "qty": "1",
+     "remarks": "",
+     "search": "550081160"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.5 CARBURETOR"
+  }
+ ]
+}

@@ -370,6 +370,15 @@
   "parts": 158
  },
  {
+  "id": "htz7500",
+  "name": "Zenoah HTZ7500 Hedge Trimmer",
+  "short": "HTZ7500",
+  "brand": "Zenoah",
+  "category": "Hedge Trimmer",
+  "figures": 5,
+  "parts": 172
+ },
+ {
   "id": "lhtza",
   "name": "Zenoah LHTZ-A Trimmer Head",
   "short": "LHTZ-A",
