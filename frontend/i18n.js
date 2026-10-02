@@ -730,6 +730,8 @@
     "Searching…": "搜索中…",
     // The paper booklet's slip number (1 Oct 2026).
     "Physical SS": "纸本服务单号",
+    // Close Service status chips (2 Oct 2026).
+    "No slips under this filter": "此筛选下没有服务单",
     "(booklet number)": "（单据本上的号码）",
     // The order cards' own labels, never translated until now.
     "Order": "订购",

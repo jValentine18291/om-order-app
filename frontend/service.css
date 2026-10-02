@@ -3566,3 +3566,9 @@ input.spk-qty{width:84px;flex:0 0 auto;text-align:right;
   border-radius: 999px; padding: 6px 12px;
 }
 #cj-code-results:empty { display: none; }
+
+/* Close Service status chips (2 Oct 2026): the Orders chips, with a count. */
+.cs-filters { margin: 12px 0 14px; }
+.cs-filters .pu-chip b { font-weight: 700; color: var(--ink-faint); margin-left: 2px; font-variant-numeric: tabular-nums; }
+.cs-filters .pu-chip-on b { color: #cfd8d3; }
+.cs-filters:empty { display: none; }

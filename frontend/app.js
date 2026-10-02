@@ -1266,10 +1266,30 @@ function soAgeTag(slip) {
   return `<span class="q-tag q-tag-age${days >= SLIP_STALE_DAYS ? " q-tag-age-late" : ""}">${escapeHtml(text)}</span>`;
 }
 
-function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge }) {
+function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge, filters, filterBoxId }) {
   const input = $(inputId);
   const results = $(resultsId);
   let debounce = null;
+  // STATUS CHIPS, where a list asked for them (Close Service, 2 Oct 2026).
+  // Filtered here, on what the search already returned - the list holds
+  // every slip in scope - so a chip answers at once and the search text and
+  // the chip work together. Every visit starts on All (John's call): reset()
+  // puts it back.
+  let filterKey = "all";
+  let lastData = null;
+  const filterBox = filterBoxId ? $(filterBoxId) : null;
+
+  function drawFilterChips(all) {
+    if (!filterBox || !filters) return;
+    const count = (f) => all.filter(f.match).length;
+    filterBox.innerHTML =
+      `<button type="button" class="pu-chip${filterKey === "all" ? " pu-chip-on" : ""}" data-filter="all">All <b>${all.length}</b></button>` +
+      filters.map((f) => `<button type="button" class="pu-chip${filterKey === f.key ? " pu-chip-on" : ""}" data-filter="${escapeAttr(f.key)}">${escapeHtml(f.label)} <b>${count(f)}</b></button>`).join("");
+    filterBox.querySelectorAll("[data-filter]").forEach((b) => b.addEventListener("click", () => {
+      filterKey = b.dataset.filter;
+      if (lastData) renderResults(lastData);
+    }));
+  }
   // Which row is selected, kept here rather than only as a class on the
   // button, so it survives the list being drawn again.
   let picked = "";
@@ -1285,9 +1305,15 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge }) {
   }
 
   function renderResults(data) {
-    const list = data.results || [];
+    lastData = data;
+    const every = data.results || [];
+    drawFilterChips(every);
+    const chosen = filters && filterKey !== "all" ? filters.find((f) => f.key === filterKey) : null;
+    const list = chosen ? every.filter(chosen.match) : every;
     if (list.length === 0) {
-      results.innerHTML = `<div class="slip-result-empty">${input.value.trim() ? "No matching slips" : "No slips yet"}</div>`;
+      results.innerHTML = `<div class="slip-result-empty">${
+        every.length && chosen ? "No slips under this filter"
+        : input.value.trim() ? "No matching slips" : "No slips yet"}</div>`;
       return;
     }
     results.innerHTML =
@@ -1346,6 +1372,7 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge }) {
     // Clears what was typed and shows recent slips.
     reset() {
       picked = "";
+      filterKey = "all";
       input.value = "";
       results.innerHTML = `<div class="slip-result-empty">Loading…</div>`;
       runSearch();
@@ -7237,6 +7264,15 @@ async function enterCloseService() {
       onPick: (slipNumber) => onCloseSlipChosen(slipNumber),
       onInfo: (slipNumber) => openSlipSummary(slipNumber),
       soAge: true,
+      // John, 2 Oct 2026. "SO Created" takes in Partial SO and All Repaired -
+      // anything with an order not yet invoiced. "Condemned" is the slips
+      // with no order at all: condemned machines, which need none.
+      filterBoxId: "cs-filters",
+      filters: [
+        { key: "so", label: "SO Created", match: (s) => s.status !== "INVOICED" && slipHasOrder(s) },
+        { key: "inv", label: "Invoice Created", match: (s) => s.status === "INVOICED" },
+        { key: "cond", label: "Condemned", match: (s) => s.status !== "INVOICED" && !slipHasOrder(s) },
+      ],
     });
   }
   closeSearch.reset();
@@ -7289,6 +7325,11 @@ async function onCloseSlipChosen(slipNumber) {
   } catch (e) {
     toast(e.message, "err");
   }
+}
+
+// Whether any machine on a listed slip has gone on a Sales Order.
+function slipHasOrder(s) {
+  return ((s && s.machines) || []).some((m) => String(m.converted_at || "").trim());
 }
 
 // ---- A slip at a glance -----------------------------------------------------
