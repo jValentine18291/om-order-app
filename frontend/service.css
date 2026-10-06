@@ -3658,3 +3658,16 @@ details.vs-machine[open] > summary.vs-machine-name {
   border-left: 3px solid #e6b0b0; padding: 6px 10px; border-radius: 0 8px 8px 0; margin: 2px 0 10px;
 }
 .vs-step-why { color: #A32020; }
+
+/* ---- Close Service: the slip in a window (6 Oct 2026) ----
+   The list is the whole page now - no box of its own to scroll inside, which
+   is what kept catching fingers meant for the details below it. */
+#cs-results { max-height: none; overflow: visible; }
+.cs-sheet { max-width: 560px; }
+.cs-sheet #cs-context { margin-top: 4px; }
+.cs-notes {
+  font-size: .86rem; color: var(--ink); background: #fffbea; border-left: 3px solid #e8c99b;
+  padding: 6px 10px; border-radius: 0 8px 8px 0; margin: 0 0 8px; white-space: pre-wrap;
+}
+.cs-notes > span:first-child { font-weight: 700; }
+.sum-notes { margin: -4px 0 12px; }

@@ -3584,6 +3584,8 @@ function slipSummary(slipNumber) {
     slip_number: slip.slip_number, company: slip.company, status: slip.status,
     contact_name: slip.contact_name || "", contact_number: slip.contact_number || "",
     contact2_name: slip.contact2_name || "", contact2_number: slip.contact2_number || "",
+    // John, 6 Oct 2026: the booklet's number and the slip's notes too.
+    physical_ss: slip.physical_ss || "", notes: slip.notes || "",
     machines, subtotal, gst_rate: GST_RATE, gst, total: r2(subtotal + gst),
   };
 }

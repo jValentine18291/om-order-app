@@ -872,6 +872,11 @@ function showScreen(name) {
   // The pad is sized when its popup opens, not here — it measures zero while
   // the popup is closed, whatever screen is showing.
   // Leaving the working context: hide the machine modal and stop any camera.
+  // Close Service's slip window lives on that screen; leaving takes it away.
+  if (name !== "close") {
+    const cm = $("cs-modal");
+    if (cm && cm.style.display !== "none") { cm.style.display = "none"; document.body.style.overflow = ""; }
+  }
   if (name !== "slip") {
     const mm = $("machine-modal");
     if (mm) { mm.style.display = "none"; document.body.style.overflow = ""; }
@@ -7333,10 +7338,23 @@ async function onCloseSlipChosen(slipNumber) {
   // Close primed for one slip can never be answered against another.
   csConfirming = false;
   renderCloseStep();
-  if (!slipNumber) { $("cs-context").style.display = "none"; return; }
+  if (!slipNumber) { $("cs-context").style.display = "none"; closeCsWindow(); return; }
+  // The window opens at once, saying which slip, while it is read.
+  $("csm-title").textContent = `Slip ${slipNumber}`;
+  $("csm-sub").textContent = "";
+  $("cs-status").innerHTML = "";
+  openCsWindow();
   try {
     const slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
     csSlip = slip;
+    // Its header: who, which slip, the booklet's number, where it has got to.
+    $("csm-title").textContent = slip.company;
+    $("csm-sub").innerHTML = [
+      `<span>Slip ${escapeHtml(slip.slip_number)}</span>`,
+      slip.physical_ss ? `<span>Physical SS</span> ${escapeHtml(slip.physical_ss)}` : "",
+      `<span>${escapeHtml(STATUS_LABEL[slip.status] || slip.status)}</span>`,
+      `<span>${slip.machines.length} machine(s)</span>`,
+    ].filter(Boolean).join(" · ");
     // The number recorded at the invoice step, so closing does not ask for it
     // again and correcting it starts from what is there.
     $("cs-ref").value = slip.closing_ref || "";
@@ -7351,10 +7369,9 @@ async function onCloseSlipChosen(slipNumber) {
       (m) => m.state === "CONDEMNED" && !String(m.disposal || "").trim()
         && String(m.converted_at || "").trim()
     );
+    // Company, slip and status are the window's own header now.
     $("cs-context").innerHTML =
-      `<div><strong>${escapeHtml(slip.company)}</strong> · Slip ${escapeHtml(slip.slip_number)}</div>` +
-      // Separate text nodes so Chinese can translate each phrase on its own.
-      `<div class="sub"><span>Status</span>: <span>${escapeHtml(STATUS_LABEL[slip.status] || slip.status)}</span> · <span>${slip.machines.length} machine(s)</span></div>` +
+      (String(slip.notes || "").trim() ? `<div class="cs-notes"><span>Notes</span>: ${escapeHtml(slip.notes)}</div>` : "") +
       (formatDate(slip.created_at) ? `<div class="sub">Created: ${escapeHtml(formatDate(slip.created_at))}</div>` : "") +
       ((slip.orders || []).filter((o) => o.so_number).map((o) =>
         `<div class="sub">${escapeHtml(o.so_number)}: ${o.closing_ref
@@ -7374,6 +7391,25 @@ async function onCloseSlipChosen(slipNumber) {
     toast(e.message, "err");
   }
 }
+
+// ---- The slip's window ---------------------------------------------------------
+// Close Service, 6 Oct 2026 (John): the details and buttons for a slip open
+// over the list instead of under it. Closing it leaves the list where it was.
+function openCsWindow() {
+  $("cs-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+function closeCsWindow() {
+  const m = $("cs-modal");
+  if (!m || m.style.display === "none") return;
+  m.style.display = "none";
+  document.body.style.overflow = "";
+  // A half-asked close goes with it, as it does when another slip is picked.
+  csConfirming = false;
+  renderCloseStep();
+}
+$("csm-x").addEventListener("click", closeCsWindow);
+$("cs-modal").addEventListener("click", (e) => { if (e.target.id === "cs-modal") closeCsWindow(); });
 
 // Whether any machine on a listed slip has gone on a Sales Order.
 function slipHasOrder(s) {
@@ -7402,7 +7438,8 @@ async function openSlipSummary(slipNumber) {
   $("sum-title").textContent = s.company;
   // Two text nodes, not one: Chinese translates whole text nodes, and the
   // status is its own phrase there.
-  $("sum-sub").innerHTML = `<span>Slip ${escapeHtml(s.slip_number)}</span> · <span>${escapeHtml(STATUS_LABEL[s.status] || s.status)}</span>`;
+  $("sum-sub").innerHTML = `<span>Slip ${escapeHtml(s.slip_number)}</span>${
+    s.physical_ss ? ` · <span>Physical SS</span> ${escapeHtml(s.physical_ss)}` : ""} · <span>${escapeHtml(STATUS_LABEL[s.status] || s.status)}</span>`;
   const people = [[s.contact_name, s.contact_number], [s.contact2_name, s.contact2_number]]
     .filter(([n, p]) => String(n || "").trim() || String(p || "").trim());
   // Whether each machine has gone home. A machine not yet on an order cannot
@@ -7415,7 +7452,8 @@ async function openSlipSummary(slipNumber) {
     <div class="sum-people">${people.length ? people.map(([n, p]) => `
       <div class="sum-person"><span>${escapeHtml(n || "—")}</span><b>${escapeHtml(p || "")}</b></div>`).join("")
       : `<div class="sum-person"><span>No contact recorded</span></div>`}
-    </div>
+    </div>${String(s.notes || "").trim()
+      ? `<div class="cs-notes sum-notes"><span>Notes</span>: ${escapeHtml(s.notes)}</div>` : ""}
     <div class="sum-machines">${(s.machines || []).map((m) => `
       <div class="sum-m">
         <div class="sum-m-main">
@@ -7720,8 +7758,12 @@ async function submitClose() {
     });
     csConfirming = false;
     toast(`Slip ${slipNumber} closed`, "ok");
-    $("cs-status").innerHTML = statusOk(`Closed ${slipNumber}. Returning home…`);
-    setTimeout(goHome, 1400);
+    // Back to the list, which no longer holds it - the next slip is usually
+    // why somebody is on this screen. (It went Home before the window.)
+    csPickedSlip = null;
+    csSlip = null;
+    closeCsWindow();
+    if (closeSearch) await closeSearch.refresh();
   } catch (e) {
     // Refused - a machine still on the bench, a Sales Order with no document.
     // Back to the ordinary step, so the reason is read rather than tapped past
