@@ -3572,3 +3572,45 @@ input.spk-qty{width:84px;flex:0 0 auto;text-align:right;
 .cs-filters .pu-chip b { font-weight: 700; color: var(--ink-faint); margin-left: 2px; font-variant-numeric: tabular-nums; }
 .cs-filters .pu-chip-on b { color: #cfd8d3; }
 .cs-filters:empty { display: none; }
+
+/* ---- View Slips: folded machines and their activity (6 Oct 2026) ---- */
+details.vs-machine > summary.vs-machine-name {
+  list-style: none; cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 0; padding-bottom: 0; border-bottom: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+details.vs-machine > summary::-webkit-details-marker { display: none; }
+details.vs-machine > summary::after {
+  content: "\203A"; flex: none; font-size: 1.3rem; line-height: 1; color: var(--ink-faint);
+  transition: transform .15s; margin-left: 2px;
+}
+details.vs-machine[open] > summary::after { transform: rotate(90deg); }
+details.vs-machine[open] > summary.vs-machine-name {
+  margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.vs-m-label { flex: 1; min-width: 0; }
+.vs-m-amt { flex: none; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); }
+.vs-activity { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border); }
+.vs-activity-head { font-size: .78rem; font-weight: 700; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+.vs-step {
+  position: relative; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px;
+  padding: 3px 0 3px 16px; font-size: .84rem; color: var(--ink);
+}
+.vs-step::before {
+  content: ""; position: absolute; left: 3px; top: 9px; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--primary, #0a7f86);
+}
+.vs-step + .vs-step::after {
+  content: ""; position: absolute; left: 6px; top: -6px; height: 14px; border-left: 1px solid var(--border-2, #cbd8d1);
+}
+.vs-step-what { font-weight: 600; }
+.vs-step-who { color: var(--ink-soft); }
+.vs-step-when { margin-left: auto; color: var(--ink-faint); font-size: .78rem; font-variant-numeric: tabular-nums; }
+.vs-step-note { font-size: .76rem; color: var(--ink-faint); margin-top: 4px; }
+/* "Found under: Closed (1)" when a search has nothing under the chip on. */
+.slip-result-jump {
+  font: inherit; font-size: .8rem; font-weight: 700; cursor: pointer;
+  color: var(--primary, #0a7f86); background: #fff; border: 1px solid #bcd2d5;
+  border-radius: 999px; padding: 3px 10px; margin: 4px 2px 0;
+}

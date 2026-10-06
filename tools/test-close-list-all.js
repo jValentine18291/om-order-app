@@ -59,8 +59,10 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
   const typed = await data.slips.searchSlips("Close List", "repaired", 20);
   check("typing still searches all of them", typed.results.length, 25);
 
+  // View Slips lists every slip too since 6 Oct 2026 - its status chips only
+  // mean something over all of them. 25 billed + 5 untouched = 30.
   const all = await data.slips.searchSlips("", "all", 20);
-  check("View Service keeps its cap", [all.results.length, all.hasMore], [20, true]);
+  check("View Slips lists every slip too", [all.results.length, all.hasMore], [30, false]);
 
   console.log(failures ? `\n${failures} FAILED` : "\nAll passed.");
   process.exit(failures ? 1 : 0);

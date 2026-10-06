@@ -548,8 +548,21 @@ function getSlip(slipNumber, includeSignature = false) {
   if (!slip) return null;
   const machines = db.prepare("SELECT * FROM slip_machines WHERE slip_id = ?").all(slip.id);
   const getParts = db.prepare("SELECT * FROM machine_parts WHERE machine_id = ? ORDER BY id");
+  // Each machine's trail, for the activity list on View Slips (6 Oct 2026).
+  // Kept since 2 Oct 2026 by triggers in db.js; oldest first.
+  const historyBy = new Map();
+  try {
+    for (const h of db.prepare(
+      `SELECT machine_id, field, from_value, to_value, who, changed_at
+         FROM machine_status_history WHERE slip_id = ? ORDER BY id`
+    ).all(slip.id)) {
+      if (!historyBy.has(h.machine_id)) historyBy.set(h.machine_id, []);
+      historyBy.get(h.machine_id).push(h);
+    }
+  } catch (_) { /* a database from before the table: no history to show */ }
   for (const m of machines) {
     m.parts = getParts.all(m.id);
+    m.history = historyBy.get(m.id) || [];
     // What it is short of. Always present, even when empty, so every screen
     // can ask without checking whether the field is there.
     // Whether the customer has signed for condemning it, WITHOUT the image -
@@ -2014,7 +2027,10 @@ function searchSlips(query = "", scope = "all", limit = 20) {
   // forty-two - 00006 to 00057, the oldest and so the ones most needing a
   // chase. The other lists stay capped: they reach across every slip ever
   // written, and are searched rather than scrolled. 1000 is only a backstop.
-  const cap = scope === "repaired" ? 1000 : Math.max(1, Math.min(50, Number(limit) || 20));
+  //
+  // View Slips too, since 6 Oct 2026 (John): its list has status chips now,
+  // which only mean something over every slip, not the newest twenty.
+  const cap = scope === "repaired" || scope === "all" ? 5000 : Math.max(1, Math.min(50, Number(limit) || 20));
 
   let sql, params;
   const scopeClause =
@@ -2048,9 +2064,15 @@ function searchSlips(query = "", scope = "all", limit = 20) {
     sql = `SELECT * FROM service_slips
              WHERE ${scopeClause} AND (slip_number LIKE ? OR company LIKE ?
                    -- The booklet's number finds the slip too (1 Oct 2026).
-                   OR IFNULL(physical_ss, '') LIKE ?)
+                   OR IFNULL(physical_ss, '') LIKE ?
+                   -- And the customer's phone, however it was spaced when
+                   -- typed in (6 Oct 2026). Three digits at least, so a
+                   -- slip number does not also match every phone.
+                   OR (LENGTH(?) >= 3 AND (
+                        REPLACE(IFNULL(contact_number, ''), ' ', '') LIKE ?
+                     OR REPLACE(IFNULL(contact2_number, ''), ' ', '') LIKE ?)))
              ORDER BY slip_number DESC LIMIT ?`;
-    params = [`%${q}%`, `%${raw}%`, `%${q}%`, cap + 1];
+    params = [`%${q}%`, `%${raw}%`, `%${q}%`, q, `%${q}%`, `%${q}%`, cap + 1];
   }
 
   const rows = db.prepare(sql).all(...params);

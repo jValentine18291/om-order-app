@@ -732,6 +732,19 @@
     "Physical SS": "纸本服务单号",
     // Close Service status chips (2 Oct 2026).
     "No slips under this filter": "此筛选下没有服务单",
+    // View Slips (6 Oct 2026): chips, activity.
+    "Found under:": "在以下筛选中：",
+    "Active": "进行中",
+    "Need quote": "需要报价",
+    "SO / Invoiced": "已开销售单 / 已开发票",
+    "Activity": "记录",
+    "Last change": "最近变更",
+    "Steps before 2 Oct 2026 were not kept.": "2026年10月2日之前的步骤没有记录。",
+    "Marked repaired": "已标记修好",
+    "Put back to Need Repair": "改回需要维修",
+    "Collection undone": "取回已撤销",
+    "Registered": "已登记",
+    "Slip, company, phone or booklet no.…": "服务单号、公司、电话或纸本单号…",
     // The logs workbook (2 Oct 2026).
     "Download logs": "下载记录",
     "Every record the app keeps, as an Excel file": "应用保存的所有记录（Excel 文件）",

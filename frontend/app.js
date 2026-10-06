@@ -1272,7 +1272,7 @@ function soAgeTag(slip) {
   return `<span class="q-tag q-tag-age${days >= SLIP_STALE_DAYS ? " q-tag-age-late" : ""}">${escapeHtml(text)}</span>`;
 }
 
-function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge, filters, filterBoxId }) {
+function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge, filters, filterBoxId, defaultFilter = "all", allLast = false }) {
   const input = $(inputId);
   const results = $(resultsId);
   let debounce = null;
@@ -1281,16 +1281,16 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge, fil
   // every slip in scope - so a chip answers at once and the search text and
   // the chip work together. Every visit starts on All (John's call): reset()
   // puts it back.
-  let filterKey = "all";
+  let filterKey = defaultFilter;
   let lastData = null;
   const filterBox = filterBoxId ? $(filterBoxId) : null;
 
   function drawFilterChips(all) {
     if (!filterBox || !filters) return;
     const count = (f) => all.filter(f.match).length;
-    filterBox.innerHTML =
-      `<button type="button" class="pu-chip${filterKey === "all" ? " pu-chip-on" : ""}" data-filter="all">All <b>${all.length}</b></button>` +
-      filters.map((f) => `<button type="button" class="pu-chip${filterKey === f.key ? " pu-chip-on" : ""}" data-filter="${escapeAttr(f.key)}">${escapeHtml(f.label)} <b>${count(f)}</b></button>`).join("");
+    const allChip = `<button type="button" class="pu-chip${filterKey === "all" ? " pu-chip-on" : ""}" data-filter="all">All <b>${all.length}</b></button>`;
+    const chips = filters.map((f) => `<button type="button" class="pu-chip${filterKey === f.key ? " pu-chip-on" : ""}" data-filter="${escapeAttr(f.key)}">${escapeHtml(f.label)} <b>${count(f)}</b></button>`).join("");
+    filterBox.innerHTML = allLast ? chips + allChip : allChip + chips;
     filterBox.querySelectorAll("[data-filter]").forEach((b) => b.addEventListener("click", () => {
       filterKey = b.dataset.filter;
       if (lastData) renderResults(lastData);
@@ -1317,9 +1317,19 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge, fil
     const chosen = filters && filterKey !== "all" ? filters.find((f) => f.key === filterKey) : null;
     const list = chosen ? every.filter(chosen.match) : every;
     if (list.length === 0) {
+      // Under another chip, say which - a search for a closed slip while
+      // "Active" is on should not read as the slip not existing.
+      const elsewhere = every.length && chosen
+        ? filters.filter((f) => f !== chosen && every.some(f.match))
+            .map((f) => `<button type="button" class="slip-result-jump" data-filter="${escapeAttr(f.key)}">${escapeHtml(f.label)} (${every.filter(f.match).length})</button>`).join(" ")
+        : "";
       results.innerHTML = `<div class="slip-result-empty">${
-        every.length && chosen ? "No slips under this filter"
+        every.length && chosen ? `<span>No slips under this filter</span>${elsewhere ? ` <span>Found under:</span> ${elsewhere}` : ""}`
         : input.value.trim() ? "No matching slips" : "No slips yet"}</div>`;
+      results.querySelectorAll(".slip-result-jump").forEach((b) => b.addEventListener("click", () => {
+        filterKey = b.dataset.filter;
+        if (lastData) renderResults(lastData);
+      }));
       return;
     }
     results.innerHTML =
@@ -1378,7 +1388,7 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge, fil
     // Clears what was typed and shows recent slips.
     reset() {
       picked = "";
-      filterKey = "all";
+      filterKey = defaultFilter;
       input.value = "";
       results.innerHTML = `<div class="slip-result-empty">Loading…</div>`;
       runSearch();
@@ -7748,6 +7758,14 @@ async function enterViewSlips() {
     viewSearch = setupSlipSearch({
       inputId: "vs-search", resultsId: "vs-results", scope: "all",
       onPick: (slipNumber) => onViewSlipChosen(slipNumber),
+      // John, 6 Oct 2026: every slip, filtered by chips, starting on Active.
+      filterBoxId: "vs-filters", defaultFilter: "active", allLast: true,
+      filters: [
+        { key: "active", label: "Active", match: (s) => s.status !== "CLOSED" },
+        { key: "quote", label: "Need quote", match: (s) => s.status !== "CLOSED" && (Number(s.to_quote) || 0) > 0 },
+        { key: "billed", label: "SO / Invoiced", match: (s) => s.status !== "CLOSED" && slipHasOrder(s) },
+        { key: "closed", label: "Closed", match: (s) => s.status === "CLOSED" },
+      ],
     });
   }
   viewSearch.reset();
@@ -7759,6 +7777,8 @@ async function onViewSlipChosen(slipNumber) {
   wrap.innerHTML = `<div class="slip-context"><span class="led"></span> Loading…</div>`;
   try {
     const slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
+    if (vsOpen.slip !== slip.slip_number) vsOpen = { slip: slip.slip_number, ids: null };
+    wrap.dataset.slip = slip.slip_number;
     wrap.innerHTML = renderSlipDetail(slip);
     wireVsStatusActions(slipNumber);
     // The slip goes in as well: the confirmation before each move names the
@@ -7862,6 +7882,88 @@ function wireVsStatusActions(slipNumber) {
   );
 }
 
+// ---- Folded machines and their activity (View Slips, 6 Oct 2026) -------------
+// John: one line per machine - name, status, total - opened with a tap. The
+// ones that need somebody to act open by themselves (his call): waiting to
+// be quoted, waiting on the customer, condemned and not yet settled, or on an
+// order but not finished. A slip of one machine opens it - there is nothing to
+// fold it away from. What a person opens or closes stays that way while the
+// slip is redrawn after a button, until another slip is picked.
+let vsOpen = { slip: "", ids: null };
+
+function vsMachineNeedsAction(m) {
+  if (m.state === "AWAITING_QUOTE" || m.state === "QUOTED") return true;
+  if (m.state === "CONDEMNED") {
+    const signedOrWaived = m.has_condemn_signature || m.disposal === "DISPOSED";
+    return !String(m.disposal || "").trim() || !signedOrWaived;
+  }
+  if (String(m.converted_at || "").trim() && m.state !== "REPAIRED") return true;
+  return false;
+}
+
+function vsMachineOpen(slip, m) {
+  if (vsOpen.slip === slip.slip_number && vsOpen.ids) return vsOpen.ids.has(m.id);
+  return (slip.machines || []).length === 1 || vsMachineNeedsAction(m);
+}
+
+// Remembered per slip: a details element reports its own toggling.
+document.addEventListener("toggle", (e) => {
+  const d = e.target;
+  if (!d || !d.matches || !d.matches("#vs-detail details.vs-machine")) return;
+  const slipNo = $("vs-detail").dataset.slip || "";
+  if (!slipNo) return;
+  if (vsOpen.slip !== slipNo || !vsOpen.ids) {
+    vsOpen = { slip: slipNo, ids: new Set([...$("vs-detail").querySelectorAll("details.vs-machine[open]")].map((x) => Number(x.dataset.mid))) };
+  }
+  const id = Number(d.dataset.mid);
+  if (d.open) vsOpen.ids.add(id); else vsOpen.ids.delete(id);
+}, true);
+
+// What happened to a machine, newest first, in the app's own words. Kept
+// from 2 Oct 2026 (machine_status_history); a machine older than that shows
+// its last recorded decision and says the rest was not kept.
+function vsStepLabel(h) {
+  if (h.field === "disposal") {
+    return h.to_value === "COLLECTED" ? "Customer collected"
+         : h.to_value === "DISPOSED" ? "Disposed of" : "Collection undone";
+  }
+  const from = h.from_value, to = h.to_value;
+  if (!from) return "Registered";
+  if (to === "RECEIVED") return "Put back to Need Repair";
+  if (to === "AWAITING_QUOTE") return "Sent for quoting";
+  if (to === "QUOTED") return "Quoted";
+  if (to === "TO_REPAIR") {
+    return from === "QUOTED" || from === "AWAITING_QUOTE" ? "Proceed with repair"
+         : from === "REPAIRED" ? "Not finished after all"
+         : from === "CONDEMNED" ? "Repair it after all" : "In Progress";
+  }
+  if (to === "REPAIRED") return "Marked repaired";
+  if (to === "CONDEMNED") return "Condemned";
+  return (MACHINE_STATE[to] || {}).label || to;
+}
+
+function vsActivityHtml(m) {
+  const steps = (m.history || []).slice().reverse();
+  // Date and time as two pieces of text: Chinese translates whole pieces,
+  // and the date is one it knows.
+  const when = (t) => {
+    const d = new Date(String(t || "").replace(" ", "T"));
+    if (isNaN(d)) return "";
+    const p = (n) => String(n).padStart(2, "0");
+    return `<span>${escapeHtml(formatDate(t))}</span> <span>${p(d.getHours())}:${p(d.getMinutes())}</span>`;
+  };
+  const rows = steps.map((h) => `
+      <div class="vs-step"><span class="vs-step-what">${escapeHtml(vsStepLabel(h))}</span>${
+        h.who ? ` <span class="vs-step-who">· ${escapeHtml(h.who)}</span>` : ""}<span class="vs-step-when">${when(h.changed_at)}</span></div>`);
+  const older = !steps.some((h) => h.field === "state" && !h.from_value);
+  const note = older
+    ? `<div class="vs-step-note">${m.decided_at && !steps.length
+        ? `<span>Last change</span>: <span>${escapeHtml((MACHINE_STATE[m.state] || {}).label || m.state)}</span>${m.decided_by ? ` · ${escapeHtml(m.decided_by)}` : ""} · ${when(m.decided_at)}. `
+        : ""}<span>Steps before 2 Oct 2026 were not kept.</span></div>`
+    : "";
+  return `<div class="vs-activity"><div class="vs-activity-head">Activity</div>${rows.join("")}${note}</div>`;
+}
+
 function renderSlipDetail(slip) {
   // Header block: customer + meta
   let slipQty = 0, slipAmount = 0, slipParts = 0, slipLabour = 0;
@@ -7931,8 +8033,9 @@ function renderSlipDetail(slip) {
     const pill = machinePill(m);
 
     html += `
-      <div class="vs-machine">
-        <div class="vs-machine-name">${escapeHtml(machineLabel(slip, m))}${pill}</div>`;
+      <details class="vs-machine" data-mid="${m.id}"${vsMachineOpen(slip, m) ? " open" : ""}>
+        <summary class="vs-machine-name"><span class="vs-m-label">${escapeHtml(machineLabel(slip, m))}${pill}</span><span class="vs-m-amt">${money(mAmount)}</span></summary>
+        <div class="vs-machine-body">`;
 
     // Sales quote the machine, ring the customer, and come back with one of two
     // answers. Each step is offered only from where the machine actually is,
@@ -8102,7 +8205,8 @@ function renderSlipDetail(slip) {
       }
       html += `<div class="vs-machine-total">Machine total: <strong>${money(mAmount)}</strong> (${mQty} qty)</div>`;
     }
-    html += `</div>`;
+    html += vsActivityHtml(m);
+    html += `</div></details>`;
   }
 
   // Slip total
