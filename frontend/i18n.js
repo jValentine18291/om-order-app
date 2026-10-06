@@ -747,6 +747,7 @@
     "Slip, company, phone or booklet no.…": "服务单号、公司、电话或纸本单号…",
     // The logs workbook (2 Oct 2026).
     "Download logs": "下载记录",
+    "People & devices": "人员与设备",
     "Every record the app keeps, as an Excel file": "应用保存的所有记录（Excel 文件）",
     "Building the logs file…": "正在生成记录文件…",
     "Could not build the logs file.": "无法生成记录文件。",

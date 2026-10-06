@@ -78,9 +78,8 @@
 
     <!-- ============ SCREEN: ROLE (who is using the app) ============ -->
     <section id="screen-role" class="screen">
-      <div class="section-head">
-        <p class="eyebrow">Service desk</p>
-        <h2>Who is using this phone?</h2>
+      <div class="section-head page-head">
+        <h2 class="page-title">Who is using this phone?</h2>
       </div>
       <!-- The names. Still the picker it always was - tapping one now asks
            for a code instead of going straight in, but only when signing in
@@ -111,9 +110,8 @@
 
     <!-- ============ SCREEN: PEOPLE (admin) ============ -->
     <section id="screen-people" class="screen">
-      <div class="section-head">
-        <p class="eyebrow">Admin</p>
-        <h2>People &amp; devices</h2>
+      <div class="section-head page-head">
+        <h2 class="page-title">People &amp; devices</h2>
       </div>
       <p class="nsm-hint" data-no-i18n>Nobody's code can be read, here or anywhere
         else — only reset. Tap Reset and they choose a new one the next time they
@@ -136,10 +134,9 @@
       <div class="section-head">
         <div class="home-head-row">
           <div class="home-head-top">
-            <p class="eyebrow">Service desk</p>
             <span class="role-badge" id="role-badge"></span>
           </div>
-          <h2>What would you like to do?</h2>
+          <h2 class="page-title">What would you like to do?</h2>
         </div>
       </div>
       <div class="home-actions">
@@ -274,9 +271,8 @@
          kind is picked. "For" is by machine family; nothing ticked means
          every machine. -->
     <section id="screen-jobs" class="screen">
-      <div class="section-head">
-        <p class="eyebrow">Admin</p>
-        <h2>Common jobs</h2>
+      <div class="section-head page-head">
+        <h2 class="page-title">Common jobs</h2>
       </div>
       <p class="nsm-hint" data-no-i18n>What the technicians see on every machine sheet, in this
         order. A change shows the next time anyone opens a sheet &mdash; nothing to deploy.
@@ -341,9 +337,8 @@
     <!-- The thing that travels and has a date. Everyone reads it; only the
          Purchaser can change one. -->
     <section id="screen-ship" class="screen">
-      <div class="section-head">
-        <p class="eyebrow">Purchasing</p>
-        <h2>Shipments</h2>
+      <div class="section-head page-head">
+        <h2 class="page-title">Shipments</h2>
       </div>
       <div class="toggle" id="ship-scope" style="margin-bottom:12px">
         <button type="button" data-shipscope="live">On the way</button>
@@ -469,9 +464,8 @@
     <!-- The order itself is AutoCount's and is only read. The app adds one
          fact it cannot know: whether Iris has actually sent it. -->
     <section id="screen-po" class="screen">
-      <div class="section-head">
-        <p class="eyebrow">Purchasing</p>
-        <h2>Purchase Orders</h2>
+      <div class="section-head page-head">
+        <h2 class="page-title">Purchase Orders</h2>
       </div>
       <div class="toggle" id="po-scope" style="margin-bottom:12px">
         <button type="button" data-poscope="open">Still open</button>
@@ -498,9 +492,8 @@
 
     <!-- ============ SCREEN: FIND PART ============ -->
     <section id="screen-find" class="screen">
-      <div class="section-head">
-        <p class="eyebrow">Parts</p>
-        <h2>Find Part</h2>
+      <div class="section-head page-head">
+        <h2 class="page-title">Find Part</h2>
       </div>
       <!-- Two questions, one box. "What is this part" and "what is on this
            shelf" are asked by the same people minutes apart, and a second
@@ -538,9 +531,8 @@
          hidden once a model is open so the diagram sits at the top of the
          screen where it is worked on, and "Change" brings it back. -->
     <section id="screen-ipl" class="screen">
-      <div class="section-head">
-        <p class="eyebrow">Parts catalogue</p>
-        <h2>IPL</h2>
+      <div class="section-head page-head">
+        <h2 class="page-title">IPL</h2>
       </div>
 
       <!-- Every drawing on the phone, for a technician on a customer's site
@@ -601,9 +593,8 @@
          one opens it in View Slips, which already shows every part and carries
          the "Mark as Quoted" button. -->
     <section id="screen-quote" class="screen">
-      <div class="section-head">
-        <p class="eyebrow">Sales</p>
-        <h2>Need to Quote</h2>
+      <div class="section-head page-head">
+        <h2 class="page-title">Need to Quote</h2>
       </div>
       <!-- The notifications switch used to be here, and on the slip picker,
            and nowhere else. It is on the home screen now, where everybody can
@@ -613,9 +604,8 @@
 
     <!-- ============ SCREEN: PURCHASER (requested parts) ============ -->
     <section id="screen-purchase" class="screen">
-      <div class="section-head">
-        <p class="eyebrow">Purchasing</p>
-        <h2>Orders</h2>
+      <div class="section-head page-head">
+        <h2 class="page-title">Orders</h2>
       </div>
       <!-- Which orders to show. Need to Order is the work; Ordered is the
            record it leaves behind, kept so an old request can be looked up. -->
@@ -634,9 +624,8 @@
     <!-- A cart: add parts one at a time, submit the lot as one order. Nothing
          reaches the purchaser until Submit, so a half-built list costs nothing. -->
     <section id="screen-bulk" class="screen">
-      <div class="section-head">
-        <p class="eyebrow">Purchasing</p>
-        <h2>Bulk Order</h2>
+      <div class="section-head page-head">
+        <h2 class="page-title">Bulk Order</h2>
       </div>
       <!-- Diesel is not an AutoCount item, so it cannot be searched for like a
            part. It is also the one thing ordered often enough, and always in
@@ -661,10 +650,8 @@
 
     <!-- ============ SCREEN: NEW SERVICE ============ -->
     <section id="screen-new" class="screen">
-      <div class="section-head">
-        <p class="eyebrow">New service</p>
-        <h2>Register a service slip</h2>
-        <p class="lede">Enter the customer's details and the machines brought in.</p>
+      <div class="section-head page-head">
+        <h2 class="page-title">New Service</h2>
       </div>
 
       <!-- THE SLIP NUMBER. John, 30 Sep 2026: defaulted to the next number,
@@ -761,9 +748,8 @@
 
     <!-- ============ SCREEN: OPEN SERVICE (slip list) ============ -->
     <section id="screen-open" class="screen">
-      <div class="section-head">
-        <p class="eyebrow">Open service</p>
-        <h2>Pick a service slip</h2>
+      <div class="section-head page-head">
+        <h2 class="page-title">Open Service</h2>
       </div>
       <div class="field">
         <label for="os-search">Search</label>
@@ -811,10 +797,8 @@
 
     <!-- ============ SCREEN: CLOSE SERVICE ============ -->
     <section id="screen-close" class="screen">
-      <div class="section-head">
-        <p class="eyebrow">Close service</p>
-        <h2>Finish a service slip</h2>
-        <p class="lede">Record the DO/CS/INV once it is keyed into AutoCount, then close it when the customer has collected and paid.</p>
+      <div class="section-head page-head">
+        <h2 class="page-title">Close Service</h2>
       </div>
       <div class="field">
         <label for="cs-search">Service slip <span class="req">*</span></label>
@@ -859,10 +843,8 @@
 
     <!-- ============ SCREEN: VIEW SLIPS ============ -->
     <section id="screen-view" class="screen">
-      <div class="section-head">
-        <p class="eyebrow">View slips</p>
-        <h2>Look up a service slip</h2>
-        <p class="lede">Select any slip to see its full details.</p>
+      <div class="section-head page-head">
+        <h2 class="page-title">View Slips</h2>
       </div>
       <div class="field">
         <label for="vs-search">Service slip</label>

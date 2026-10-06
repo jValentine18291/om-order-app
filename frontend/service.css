@@ -3614,3 +3614,22 @@ details.vs-machine[open] > summary.vs-machine-name {
   color: var(--primary, #0a7f86); background: #fff; border: 1px solid #bcd2d5;
   border-radius: 999px; padding: 3px 10px; margin: 4px 2px 0;
 }
+
+/* ---- Page titles (6 Oct 2026) ----------------------------------------------
+   John: one big title per page, the same words as its home tile - no small
+   label above, no sentence below. A short teal underline marks it as the
+   page's title (his pick of three). Detail pages and the shipment editor
+   keep their label-and-number heads. */
+.page-head { margin-bottom: 18px; }
+.page-title {
+  font-family: var(--display); font-size: 28px; font-weight: 800;
+  letter-spacing: -0.02em; line-height: 1.15; margin: 0; color: var(--ink);
+}
+.page-title::after {
+  content: ""; display: block; width: 34px; height: 4px; border-radius: 2px;
+  background: var(--primary, #0a7f86); margin-top: 8px;
+}
+/* Home: with the "Service desk" label gone, the name badge shares the
+   question's line, on the right, rather than sitting alone above it. */
+.home-head-row { display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.home-head-top { flex: none; padding-top: 4px; }
