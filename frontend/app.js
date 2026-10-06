@@ -993,13 +993,34 @@ function trackVisibleViewport() {
     // .modal-overlay reserves it as padding so a sheet lands above the keys
     // while the overlay itself still covers the whole screen.
     const layout = window.innerHeight || root.clientHeight || 0;
-    const kbd = Math.max(0, Math.round(layout - vv.height - vv.offsetTop));
+    // ONLY WHILE SOMEBODY IS TYPING. John, 7 Oct 2026: after sending a
+    // quotation through the iPhone share sheet, the slip window came back with
+    // an empty band at the bottom a keyboard tall. The quotation's boxes had
+    // had the keyboard up, the share sheet took the screen, and when it closed
+    // iOS never said the keyboard had gone - so the old height stayed in
+    // --kbd. With no box focused there is no keyboard, whatever iOS reports.
+    const el = document.activeElement;
+    const typing = !!el && (el.isContentEditable ||
+      (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) &&
+       !/^(button|checkbox|radio|submit|file|range|color)$/i.test(el.type || "")));
+    const kbd = typing ? Math.max(0, Math.round(layout - vv.height - vv.offsetTop)) : 0;
     root.style.setProperty("--kbd", kbd + "px");
   };
   // Both: resize is the keyboard opening, scroll is the page being nudged
   // under it, which iOS also does.
   vv.addEventListener("resize", set);
   vv.addEventListener("scroll", set);
+  // And every other moment the answer can change without iOS saying so: a box
+  // gaining or losing focus (measured again once the keyboard has moved), the
+  // app coming back from the share sheet or another app, a turn of the phone.
+  const soon = () => { set(); setTimeout(set, 120); setTimeout(set, 450); };
+  document.addEventListener("focusin", soon);
+  document.addEventListener("focusout", soon);
+  document.addEventListener("visibilitychange", soon);
+  window.addEventListener("pageshow", soon);
+  window.addEventListener("focus", soon);
+  window.addEventListener("resize", soon);
+  window.addEventListener("orientationchange", soon);
   set();
 }
 trackVisibleViewport();
