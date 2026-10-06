@@ -878,8 +878,8 @@ function showScreen(name) {
   // The pad is sized when its popup opens, not here — it measures zero while
   // the popup is closed, whatever screen is showing.
   // Leaving the working context: hide the machine modal and stop any camera.
-  // View Slips' too.
-  if (name !== "view") {
+  // View Slips' too - kept only on the page that opened it.
+  if (name !== vsWindowScreen) {
     const vm = $("vs-modal");
     if (vm && vm.style.display !== "none") { vm.style.display = "none"; document.body.style.overflow = ""; }
   }
@@ -3161,7 +3161,7 @@ $("os-search").addEventListener("input", renderSlipList);
 // One button, two screens: it goes back to whichever list the current screen
 // came from. Hard-wired to Open Service, it took a purchase order back to
 // the workshop's slip list.
-$("top-back").addEventListener("click", () => {
+$("top-back").addEventListener("click", async () => {
   if ($("screen-po-detail").classList.contains("active")) enterPurchaseOrders();
   else if ($("screen-ship-detail").classList.contains("active")) enterShipments();
   // A slip opened from View Slips goes back to View Slips. Sending it to the
@@ -3169,9 +3169,14 @@ $("top-back").addEventListener("click", () => {
   // needs correcting is usually one that list no longer shows.
   else if (slipScreenFrom === "view" && session.slipNumber) {
     const no = session.slipNumber;
-    showScreen("view");
+    // Back to whichever page the slip window was opened on.
+    if (vsWindowScreen === "quote") {
+      await enterNeedToQuote();
+    } else {
+      showScreen("view");
+      if (viewSearch) viewSearch.refresh();
+    }
     onViewSlipChosen(no);
-    if (viewSearch) viewSearch.refresh();
   }
   else enterOpenService();
 });
@@ -7423,6 +7428,9 @@ $("csm-x").addEventListener("click", closeCsWindow);
 $("cs-modal").addEventListener("click", (e) => { if (e.target.id === "cs-modal") closeCsWindow(); });
 
 // View Slips' window, the same idea as Close Service's (John, 6 Oct 2026).
+// Opened from View Slips or from Need to Quote; this says which, so leaving
+// that page closes it and closing it on Need to Quote reads the list again.
+let vsWindowScreen = "view";
 function openVsWindow() {
   $("vs-modal").style.display = "flex";
   document.body.style.overflow = "hidden";
@@ -7432,6 +7440,9 @@ function closeVsWindow() {
   if (!m || m.style.display === "none") return;
   m.style.display = "none";
   document.body.style.overflow = "";
+  // A slip quoted from the window drops off the Need to Quote list.
+  const quoteShown = $("screen-quote") && $("screen-quote").classList.contains("active");
+  if (vsWindowScreen === "quote" && quoteShown) enterNeedToQuote();
 }
 $("vsm-x").addEventListener("click", closeVsWindow);
 $("vs-modal").addEventListener("click", (e) => { if (e.target.id === "vs-modal") closeVsWindow(); });
@@ -7826,7 +7837,7 @@ async function enterViewSlips() {
   if (!viewSearch) {
     viewSearch = setupSlipSearch({
       inputId: "vs-search", resultsId: "vs-results", scope: "all",
-      onPick: (slipNumber) => onViewSlipChosen(slipNumber),
+      onPick: (slipNumber) => { vsWindowScreen = "view"; onViewSlipChosen(slipNumber); },
       // John, 6 Oct 2026: every slip, filtered by chips, starting on Active.
       filterBoxId: "vs-filters", defaultFilter: "active", allLast: true,
       filters: [
@@ -11690,12 +11701,12 @@ async function enterNeedToQuote() {
         }</div>
       </button>`;
     }).join("");
-    // Straight into View Slips, which already lists every part with its price
-    // and carries the "Mark as Quoted" button — no second copy of any of it.
+    // The View Slips slip window, opened over this list (John, 6 Oct 2026) -
+    // every part with its price and the "Mark as Quoted" button, without
+    // leaving Need to Quote. Closing it reads the list again.
     wrap.querySelectorAll(".slip-card").forEach((b) =>
       b.addEventListener("click", () => {
-        showScreen("view");
-        if (viewSearch) viewSearch.reset();
+        vsWindowScreen = "quote";
         onViewSlipChosen(b.dataset.slip);
       })
     );
@@ -13157,7 +13168,11 @@ async function refreshAfterAway() {
       await viewSearch.refresh();
       const no = viewSearch.pickedSlip();
       if (no && $("vs-modal").style.display !== "none") await onViewSlipChosen(no);
-    } else if (screen === "quote") await enterNeedToQuote();
+    } else if (screen === "quote") {
+      await enterNeedToQuote();
+      const no = $("vs-detail").dataset.slip;
+      if (no && vsWindowScreen === "quote" && $("vs-modal").style.display !== "none") await onViewSlipChosen(no);
+    }
     else if (screen === "purchase") { if (!puEditing) await loadPartRequests(); }
     else if (screen === "po") setPoScope(poScope);
     else if (screen === "po-detail") { const no = $("pod-no").textContent.trim(); if (no) await openPurchaseOrder(no); }
