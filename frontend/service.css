@@ -3633,3 +3633,28 @@ details.vs-machine[open] > summary.vs-machine-name {
    question's line, on the right, rather than sitting alone above it. */
 .home-head-row { display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: flex-start; gap: 10px; }
 .home-head-top { flex: none; padding-top: 4px; }
+
+/* ---- Condemning with a reason (6 Oct 2026) ---- */
+#cond-modal { z-index: 90; }            /* above the machine sheet it opens from */
+.cond-sheet { max-width: 420px; }
+.cond-lab { font-size: .82rem; font-weight: 700; color: var(--ink-soft); margin: 14px 0 8px; }
+.cond-lab span { font-weight: 400; color: var(--ink-faint); }
+.cond-chips { display: flex; flex-wrap: wrap; gap: 8px; row-gap: 12px; }
+.cond-chip {
+  font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer;
+  padding: 7px 13px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--ink-soft);
+  box-shadow: 0 3px 0 var(--e-neutral, #c3d1c9); transition: transform .06s, box-shadow .06s;
+}
+.cond-chip:active { transform: translateY(3px); box-shadow: 0 0 0 transparent; }
+.cond-chip.on { background: #FBE9E9; color: #A32020; border-color: #e6b0b0; box-shadow: 0 3px 0 #d99a9a; }
+#cond-note { width: 100%; box-sizing: border-box; font: inherit; font-size: .95rem; border: 1px solid var(--border); border-radius: 10px; padding: 9px 11px; resize: vertical; }
+.cond-warn { font-size: .8rem; color: var(--ink-faint); margin: 10px 0 0; }
+.cond-btns { display: flex; gap: 10px; margin-top: 16px; }
+.cond-btns > * { flex: 1; margin: 0; }
+.btn-primary.cond-go { background: #C0392B; --e: #8e2a20; box-shadow: 0 var(--d, 4px) 0 var(--e), 0 8px 14px -4px rgba(142, 42, 32, .35); }
+.cond-reason {
+  font-size: .86rem; color: var(--ink); background: #fdf6f5;
+  border-left: 3px solid #e6b0b0; padding: 6px 10px; border-radius: 0 8px 8px 0; margin: 2px 0 10px;
+}
+.vs-step-why { color: #A32020; }

@@ -553,7 +553,7 @@ function getSlip(slipNumber, includeSignature = false) {
   const historyBy = new Map();
   try {
     for (const h of db.prepare(
-      `SELECT machine_id, field, from_value, to_value, who, changed_at
+      `SELECT machine_id, field, from_value, to_value, who, changed_at, IFNULL(note, '') AS note
          FROM machine_status_history WHERE slip_id = ? ORDER BY id`
     ).all(slip.id)) {
       if (!historyBy.has(h.machine_id)) historyBy.set(h.machine_id, []);
@@ -1184,7 +1184,7 @@ function slipBlockLines(slip, wanted, all, extras = [], { physicalSs = false } =
     // with it and this one says what was decided about it.
     const comment = String(m.repair_comment || "").trim();
     if (comment) lines.push({ note: true, description: `*${comment}` });
-    if (condemned) lines.push({ note: true, description: CONDEMNED_NOTE });
+    if (condemned) lines.push({ note: true, description: condemnedNote(m) });
 
     // Where the machine works, at the foot of its block and immediately above
     // its SubTotal - John's placement, Sep 2026. It is the customer's own
@@ -2912,7 +2912,19 @@ function slipHasWork(slipId) {
 }
 
 // Move one machine along. Every step in the drawing is this function.
-function setMachineState(slipNumber, machineId, state, who = "") {
+// Why a machine was condemned - optional, both parts (John, 6 Oct 2026).
+const CONDEMN_REASONS = new Set(["TOO_EXPENSIVE", "BEYOND_REPAIR", "OTHER"]);
+// What the Sales Order says for each (his call: the quick reason prints, the
+// typed note stays internal). No reason given: the line it always printed.
+function condemnedNote(m) {
+  const r = String((m && m.condemn_reason) || "").toUpperCase();
+  return r === "TOO_EXPENSIVE" ? "*Condemned - too expensive to repair"
+       : r === "BEYOND_REPAIR" ? "*Condemned - beyond repair"
+       : r === "OTHER" ? "*Condemned"
+       : CONDEMNED_NOTE;
+}
+
+function setMachineState(slipNumber, machineId, state, who = "", { reason, note } = {}) {
   const st = String(state || "").toUpperCase();
   if (!MACHINE_STATES.has(st)) { const e = new Error("Invalid machine state."); e.status = 400; throw e; }
   const { slip, machine } = machineOnSlip(slipNumber, machineId);
@@ -2931,14 +2943,21 @@ function setMachineState(slipNumber, machineId, state, who = "") {
   // quote-first slip only the answered kind may be marked fully repaired.
   const approved = (machine.state === "QUOTED" || machine.state === "AWAITING_QUOTE") && st === "TO_REPAIR";
   const unapproved = st === "AWAITING_QUOTE" || st === "RECEIVED";
+  // Condemning records why; leaving CONDEMNED clears it, like the disposal.
+  // In the same statement as the state, so the history trigger sees it.
+  const why = String(reason || "").toUpperCase();
+  const condemnReason = st === "CONDEMNED" ? (CONDEMN_REASONS.has(why) ? why : "") : "";
+  const condemnNote = st === "CONDEMNED" ? String(note || "").trim().slice(0, 300) : "";
+  const touchReason = st === "CONDEMNED" || clearDisposal;
   db.prepare(
     `UPDATE slip_machines
         SET state = ?, decided_by = ?, decided_at = datetime('now','localtime')
             ${clearDisposal ? ", disposal = '', disposal_at = '', disposal_by = ''" : ""}
             ${approved ? ", quote_approved_at = datetime('now','localtime')" : ""}
             ${unapproved ? ", quote_approved_at = ''" : ""}
+            ${touchReason ? ", condemn_reason = ?, condemn_note = ?" : ""}
       WHERE id = ?`
-  ).run(st, String(who || "").trim(), machine.id);
+  ).run(...[st, String(who || "").trim(), ...(touchReason ? [condemnReason, condemnNote] : []), machine.id]);
   deriveSlipStatus(slip.id);
   return getSlip(slipNumber);
 }

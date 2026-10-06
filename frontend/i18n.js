@@ -748,6 +748,14 @@
     // The logs workbook (2 Oct 2026).
     "Download logs": "下载记录",
     "People & devices": "人员与设备",
+    // Condemning with a reason (6 Oct 2026).
+    "Condemn this machine?": "报废这台机器？",
+    "Why?": "原因？",
+    "Too expensive to repair": "维修太贵",
+    "Beyond repair": "无法维修",
+    "Something else": "其他原因",
+    "Work on it stops, and the customer signs to confirm.": "停止维修，并由客户签名确认。",
+    "e.g. Customer declined the quote": "例如：客户不接受报价",
     "Every record the app keeps, as an Excel file": "应用保存的所有记录（Excel 文件）",
     "Building the logs file…": "正在生成记录文件…",
     "Could not build the logs file.": "无法生成记录文件。",

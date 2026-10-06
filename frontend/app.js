@@ -4904,7 +4904,7 @@ function renderCondemnSig() {
   const signed = !!m.has_condemn_signature;
   const waived = !signed && m.disposal === "DISPOSED";
   box.className = "mm-condemn-sig" + (signed || waived ? " mm-condemn-signed" : "");
-  box.innerHTML = `
+  box.innerHTML = `${condemnReasonHtml(m)}
     <div class="mm-condemn-head">${condemnSigLabel(m, "Customer signature needed")}</div>
     <div class="mm-condemn-body">${signed
       ? "The customer has signed to confirm this machine is beyond repair."
@@ -6013,7 +6013,7 @@ function renderMachineQuoteRow() {
   // it sits at the bottom, away from the buttons that carry the job forward,
   // and coloured so it is never the one tapped by mistake.
   if (canCondemn() && CONDEMNABLE.includes(m.state)) {
-    actions = actions.concat([["CONDEMNED", "Too expensive — condemn", "btn-secondary btn-condemn"]]);
+    actions = actions.concat([["CONDEMNED", "Condemn", "btn-secondary btn-condemn"]]);
   }
 
   state.innerHTML = text;
@@ -6062,14 +6062,15 @@ async function moveMachine(btn, to) {
   if (to === "AWAITING_QUOTE" && !openMachineHasSomethingToQuote(m) &&
       !confirmQuotingEmpty([machineTitle(m)])) return;
 
+  let why = null;
   if (to === "CONDEMNED") {
     // Its own question, kept: condemning is the one move that stops the work
     // and asks where the machine goes, and that deserves saying rather than a
     // status name.
-    if (!confirm(
-      "Condemn this machine?\n\nThe customer is not paying to have it repaired. "
-      + "Work on it stops, and you will be asked whether they collect it or we dispose of it."
-    )) return;
+    // Since 6 Oct 2026 it also asks why - optionally - in the app's own popup
+    // rather than the phone's box, which cannot hold a reason (askCondemn).
+    why = await askCondemn(m, session.slip);
+    if (!why) return;
   } else if (!confirmStateChange(m, to)) {
     // Everything else says which machine, where it is, and where it is going.
     return;
@@ -6080,7 +6081,7 @@ async function moveMachine(btn, to) {
     await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/machines/${m.id}/state`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ state: to, who: initialsFor(getUser()), role: getRole() }),
+      body: JSON.stringify({ state: to, who: initialsFor(getUser()), role: getRole(), ...(why || {}) }),
     });
     await refreshSlip();
     renderMachineParts();
@@ -7882,6 +7883,60 @@ function wireVsStatusActions(slipNumber) {
   );
 }
 
+// ---- Condemning, with an optional reason (6 Oct 2026) -------------------------
+// John: whenever a technician or Sales condemns a machine, ask why - but never
+// insist. A quick reason (Too expensive / Beyond repair / Something else) and
+// a note, both optional. The quick reason prints on the Sales Order; the note
+// stays internal. Resolves { reason, note } on Condemn, null on Cancel.
+const CONDEMN_REASON_LABEL = {
+  TOO_EXPENSIVE: "Too expensive to repair", BEYOND_REPAIR: "Beyond repair", OTHER: "Something else",
+};
+let condResolve = null;
+
+function askCondemn(m, slip) {
+  return new Promise((resolve) => {
+    condResolve = resolve;
+    $("cond-sub").innerHTML = m
+      ? `<span>${escapeHtml(machineTitle(m))}</span>${slip ? ` · <span>Slip ${escapeHtml(slip.slip_number)}</span>` : ""}`
+      : "";
+    $("cond-chips").querySelectorAll(".cond-chip").forEach((c) => c.classList.remove("on"));
+    $("cond-note").value = "";
+    $("cond-modal").style.display = "flex";
+  });
+}
+
+function closeCondemn(answer) {
+  $("cond-modal").style.display = "none";
+  const r = condResolve;
+  condResolve = null;
+  if (r) r(answer);
+}
+
+$("cond-chips").addEventListener("click", (e) => {
+  const chip = e.target.closest(".cond-chip");
+  if (!chip) return;
+  // One reason at most; tapping the chosen one again clears it.
+  const was = chip.classList.contains("on");
+  $("cond-chips").querySelectorAll(".cond-chip").forEach((c) => c.classList.remove("on"));
+  if (!was) chip.classList.add("on");
+});
+$("cond-go").addEventListener("click", () => {
+  const on = $("cond-chips").querySelector(".cond-chip.on");
+  closeCondemn({ reason: on ? on.dataset.reason : "", note: $("cond-note").value.trim() });
+});
+$("cond-cancel").addEventListener("click", () => closeCondemn(null));
+$("cond-x").addEventListener("click", () => closeCondemn(null));
+$("cond-modal").addEventListener("click", (e) => { if (e.target.id === "cond-modal") closeCondemn(null); });
+
+// The reason, as a line under a condemned machine - nothing when none given.
+function condemnReasonHtml(m) {
+  if (!m || m.state !== "CONDEMNED") return "";
+  const r = CONDEMN_REASON_LABEL[String(m.condemn_reason || "").toUpperCase()] || "";
+  const n = String(m.condemn_note || "").trim();
+  if (!r && !n) return "";
+  return `<div class="cond-reason">${r ? `<b>${escapeHtml(r)}</b>` : ""}${r && n ? " · " : ""}${n ? `<span>${escapeHtml(n)}</span>` : ""}</div>`;
+}
+
 // ---- Folded machines and their activity (View Slips, 6 Oct 2026) -------------
 // John: one line per machine - name, status, total - opened with a tap. The
 // ones that need somebody to act open by themselves (his call): waiting to
@@ -7952,9 +8007,14 @@ function vsActivityHtml(m) {
     const p = (n) => String(n).padStart(2, "0");
     return `<span>${escapeHtml(formatDate(t))}</span> <span>${p(d.getHours())}:${p(d.getMinutes())}</span>`;
   };
-  const rows = steps.map((h) => `
+  const rows = steps.map((h) => {
+    const [rc, rn] = String(h.note || "").split("|");
+    const why = [CONDEMN_REASON_LABEL[rc] || "", (rn || "").trim()].filter(Boolean);
+    return `
       <div class="vs-step"><span class="vs-step-what">${escapeHtml(vsStepLabel(h))}</span>${
-        h.who ? ` <span class="vs-step-who">· ${escapeHtml(h.who)}</span>` : ""}<span class="vs-step-when">${when(h.changed_at)}</span></div>`);
+        h.who ? ` <span class="vs-step-who">· ${escapeHtml(h.who)}</span>` : ""}${
+        why.length ? ` <span class="vs-step-why">· ${why.map((w) => `<span>${escapeHtml(w)}</span>`).join(" · ")}</span>` : ""}<span class="vs-step-when">${when(h.changed_at)}</span></div>`;
+  });
   const older = !steps.some((h) => h.field === "state" && !h.from_value);
   const note = older
     ? `<div class="vs-step-note">${m.decided_at && !steps.length
@@ -8035,7 +8095,7 @@ function renderSlipDetail(slip) {
     html += `
       <details class="vs-machine" data-mid="${m.id}"${vsMachineOpen(slip, m) ? " open" : ""}>
         <summary class="vs-machine-name"><span class="vs-m-label">${escapeHtml(machineLabel(slip, m))}${pill}</span><span class="vs-m-amt">${money(mAmount)}</span></summary>
-        <div class="vs-machine-body">`;
+        <div class="vs-machine-body">${condemnReasonHtml(m)}`;
 
     // Sales quote the machine, ring the customer, and come back with one of two
     // answers. Each step is offered only from where the machine actually is,
@@ -8069,7 +8129,7 @@ function renderSlipDetail(slip) {
     // touched yet - the guard above keeps quoting off a Received machine, and
     // that has nothing to do with whether the customer wants it back.
     if (canCondemn() && live && CONDEMNABLE.includes(m.state)) {
-      acts = acts.concat([["CONDEMNED", "Too expensive — condemn", "decide-condemn"]]);
+      acts = acts.concat([["CONDEMNED", "Condemn", "decide-condemn"]]);
     }
     // John's correction link. Offered on every machine including a closed
     // slip's - where it opens and then refuses, which is a clearer answer than
@@ -8267,10 +8327,11 @@ function wireDecideButtons(wrap, slipNumber, slip) {
       if (state === "AWAITING_QUOTE" && subject && !machineHasSomethingToQuote(subject) &&
           !confirmQuotingEmpty([machineTitle(subject)])) return;
 
+      let why = null;
       if (state === "CONDEMNED") {
-        if (!confirm(
-          "Condemn this machine?\n\nThe technicians who worked on it will be told to stop."
-        )) return;
+        // The same popup as the machine sheet, reason and note optional.
+        why = await askCondemn(subject, slip);
+        if (!why) return;
       } else if (!confirmStateChange(machineById(machineId), state)) {
         // The same question as the machine sheet asks, for the same reason.
         // "Confirm Repair" and "Too expensive — condemn" sit one tap apart.
@@ -8282,7 +8343,7 @@ function wireDecideButtons(wrap, slipNumber, slip) {
         await api(`/api/slips/${encodeURIComponent(slipNumber)}/machines/${machineId}/state`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ state, who: initialsFor(getUser()), role: getRole() }),
+          body: JSON.stringify({ state, who: initialsFor(getUser()), role: getRole(), ...(why || {}) }),
         });
         toast(MOVE_TOAST[state] || "Saved", "ok");
         onViewSlipChosen(slipNumber);

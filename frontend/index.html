@@ -1615,6 +1615,30 @@
        A popup rather than a screen for the same reason the part peek is: the
        question is "what else fits this?", and being carried somewhere else
        answers it while losing the part you were looking at. -->
+  <!-- Condemning, with an optional reason - John, 6 Oct 2026. The same popup
+       on the machine sheet and on View Slips. Nothing in it is required. -->
+  <div class="modal-overlay" id="cond-modal" style="display:none">
+    <div class="modal-sheet cond-sheet">
+      <div class="modal-head">
+        <div><strong>Condemn this machine?</strong><div class="mm-sub" id="cond-sub"></div></div>
+        <button class="modal-x" id="cond-x" type="button" aria-label="Close">&#10005;</button>
+      </div>
+      <div class="cond-lab">Why? <span>(optional)</span></div>
+      <div class="cond-chips" id="cond-chips">
+        <button type="button" class="cond-chip" data-reason="TOO_EXPENSIVE">Too expensive to repair</button>
+        <button type="button" class="cond-chip" data-reason="BEYOND_REPAIR">Beyond repair</button>
+        <button type="button" class="cond-chip" data-reason="OTHER">Something else</button>
+      </div>
+      <div class="cond-lab">Note <span>(optional)</span></div>
+      <textarea id="cond-note" rows="2" maxlength="300" placeholder="e.g. Customer declined the quote"></textarea>
+      <p class="cond-warn" id="cond-warn">Work on it stops, and the customer signs to confirm.</p>
+      <div class="cond-btns">
+        <button type="button" class="btn-secondary" id="cond-cancel">Cancel</button>
+        <button type="button" class="btn-primary cond-go" id="cond-go">Condemn</button>
+      </div>
+    </div>
+  </div>
+
   <!-- A slip at a glance, from Close Service: long-press a slip, or its (i).
        John, 1 Oct 2026. Read-only - nothing on it changes anything. -->
   <div class="modal-overlay" id="sum-modal" style="display:none">

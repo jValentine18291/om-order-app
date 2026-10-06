@@ -2031,9 +2031,13 @@ async function notifyStateChange(slip, machineId, before, state, actor = {}) {
         return;
       }
       if (state === "CONDEMNED" && before !== "CONDEMNED") {
+        const why = String((m && m.condemn_reason) || "");
         await push.notify(pushDb, QUOTE_NOTIFY_ROLES, {
           title: `Condemned: ${desc}`,
-          body: `${slip.slip_number} · ${slip.company} · ${by}: customer says too expensive - condemned`,
+          body: `${slip.slip_number} · ${slip.company} · ${by}: ` + (
+            why === "TOO_EXPENSIVE" ? "customer says too expensive - condemned"
+            : why === "BEYOND_REPAIR" ? "beyond repair - condemned"
+            : "condemned"),
           slip: slip.slip_number,
         });
         return;
@@ -2113,8 +2117,10 @@ async function handleMachineState(req, res) {
     // anywhere not finished) are theirs too. Everything else stays Sales'.
     const allowed = require("./machine-roles").rolesForMachineMove(before ? before.state : "", state);
     if (allowed && !needRole(req, res, allowed)) return;
+    // Condemning may say why (6 Oct 2026); ignored for every other state.
     const slip = await data.slips.setMachineState(
-      req.params.slip, machineId, state, (req.body || {}).who || ""
+      req.params.slip, machineId, state, (req.body || {}).who || "",
+      { reason: (req.body || {}).reason, note: (req.body || {}).note }
     );
     res.json(slip);
     // Answer first, notify after: a push is a round trip to Google or Apple,

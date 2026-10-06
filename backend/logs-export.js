@@ -31,6 +31,10 @@ const SLIP_STATUS = {
 };
 
 const TEAL = "FF0A7F86";
+const CONDEMN_REASON = { TOO_EXPENSIVE: "Too expensive to repair", BEYOND_REPAIR: "Beyond repair", OTHER: "Something else" };
+// "REASON|note" (the history's note) or the two columns, as one readable line.
+const whyText = (reason, note) =>
+  [CONDEMN_REASON[String(reason || "").toUpperCase()] || "", String(note || "").trim()].filter(Boolean).join(" - ");
 
 // "2026-10-02 10:14:05" -> a Date whose UTC parts are those wall-clock parts.
 // Excel has no time zones: writing it this way puts exactly 10:14 in the cell,
@@ -114,7 +118,8 @@ async function buildLogsWorkbook(db) {
 
   // ---- Status history -------------------------------------------------------
   const hist = db.prepare(
-    `SELECT h.changed_at, s.slip_number, s.company, m.machine_desc, h.field, h.from_value, h.to_value, h.who
+    `SELECT h.changed_at, s.slip_number, s.company, m.machine_desc, h.field, h.from_value, h.to_value, h.who,
+            IFNULL(h.note, '') AS note
        FROM machine_status_history h
        LEFT JOIN slip_machines m ON m.id = h.machine_id
        LEFT JOIN service_slips s ON s.id = h.slip_id
@@ -122,31 +127,34 @@ async function buildLogsWorkbook(db) {
   ).all();
   sheet(wb, "Status history", [
     ["When", 18, "date"], ["Slip", 9], ["Company", 32], ["Machine", 28],
-    ["What", 12], ["From", 20], ["To", 20], ["By", 8],
+    ["What", 12], ["From", 20], ["To", 20], ["By", 8], ["Reason", 40, "wrap"],
   ], hist.map((h) => {
     const label = h.field === "disposal" ? (v) => DISPOSAL[v] || (v ? v : "Not yet")
                                          : (v) => MACHINE_STATE[v] || v;
     return [when(h.changed_at), h.slip_number || "(deleted)", h.company || "", h.machine_desc || "",
       h.field === "disposal" ? "Collection" : (h.from_value ? "Status" : "Registered"),
-      h.from_value ? label(h.from_value) : "", label(h.to_value), h.who || ""];
+      h.from_value ? label(h.from_value) : "", label(h.to_value), h.who || "",
+      whyText(...String(h.note || "").split("|"))];
   }), "Nothing yet - the history starts from the day this went live.");
 
   // ---- Machines now -------------------------------------------------------
   const machines = db.prepare(
     `SELECT s.slip_number, s.company, m.machine_desc, m.serial_no, m.state, m.decided_by, m.decided_at,
-            m.so_number, m.converted_at, m.disposal, m.disposal_by, m.disposal_at
+            m.so_number, m.converted_at, m.disposal, m.disposal_by, m.disposal_at,
+            m.condemn_reason, m.condemn_note
        FROM slip_machines m JOIN service_slips s ON s.id = m.slip_id
       ORDER BY s.slip_number DESC, m.id`
   ).all();
   sheet(wb, "Machines now", [
     ["Slip", 9], ["Company", 32], ["Machine", 28], ["Serial", 14], ["Status", 20],
     ["Last decision by", 10], ["Last decision", 18, "date"], ["Sales Order", 16], ["On SO since", 18, "date"],
-    ["Gone?", 20], ["By", 8], ["When", 18, "date"],
+    ["Gone?", 20], ["By", 8], ["When", 18, "date"], ["Condemned because", 40, "wrap"],
   ], machines.map((m) => [
     m.slip_number, m.company, m.machine_desc, m.serial_no || "",
     m.state === "REPAIRED" && m.disposal === "COLLECTED" ? "Repaired – With Customer" : (MACHINE_STATE[m.state] || m.state),
     m.decided_by || "", when(m.decided_at), m.so_number || "", when(m.converted_at),
     DISPOSAL[m.disposal] || "Still here", m.disposal_by || "", when(m.disposal_at),
+    m.state === "CONDEMNED" ? whyText(m.condemn_reason, m.condemn_note) : "",
   ]));
 
   // ---- Slips ------------------------------------------------------------------

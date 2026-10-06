@@ -1501,6 +1501,25 @@ try {
 // sixth written next month would be the one that forgot. A trigger fires for
 // every write to the column, whoever wrote it. Who: decided_by for a status,
 // disposal_by for a collection, as the writing function recorded them.
+// Why a machine was condemned (6 Oct 2026, John): a quick reason -
+// TOO_EXPENSIVE / BEYOND_REPAIR / OTHER - and an optional note, both
+// optional. The quick reason prints on the Sales Order; the note is internal.
+try {
+  const mcols = db.prepare("PRAGMA table_info(slip_machines)").all().map((c) => c.name);
+  if (!mcols.includes("condemn_reason")) db.exec("ALTER TABLE slip_machines ADD COLUMN condemn_reason TEXT DEFAULT ''");
+  if (!mcols.includes("condemn_note")) db.exec("ALTER TABLE slip_machines ADD COLUMN condemn_note TEXT DEFAULT ''");
+} catch (e) {
+  console.error("[db] condemn reason migration failed:", e.message);
+}
+// The history table predates its note column on databases that already had
+// it (2 Oct 2026): add it before the triggers below are made to write it.
+try {
+  const hcols = db.prepare("PRAGMA table_info(machine_status_history)").all().map((c) => c.name);
+  if (hcols.length && !hcols.includes("note")) db.exec("ALTER TABLE machine_status_history ADD COLUMN note TEXT DEFAULT ''");
+} catch (e) {
+  console.error("[db] history note migration failed:", e.message);
+}
+
 try {
   db.exec(`
     CREATE TABLE IF NOT EXISTS machine_status_history (
@@ -1511,6 +1530,7 @@ try {
       from_value  TEXT DEFAULT '',
       to_value    TEXT DEFAULT '',
       who         TEXT DEFAULT '',
+      note        TEXT DEFAULT '',            -- condemned: "REASON|note"
       changed_at  TEXT DEFAULT (datetime('now','localtime'))
     );
     CREATE INDEX IF NOT EXISTS idx_msh_machine ON machine_status_history(machine_id);
@@ -1526,11 +1546,15 @@ try {
       VALUES (NEW.id, NEW.slip_id, 'state', '', IFNULL(NEW.state, ''),
               COALESCE(NULLIF(NEW.decided_by, ''), (SELECT created_by FROM service_slips WHERE id = NEW.slip_id), ''));
     END;
+    -- A condemning carries its reason into the trail: written in the same
+    -- UPDATE as the state, so NEW has it.
     CREATE TRIGGER trg_msh_state AFTER UPDATE OF state ON slip_machines
     WHEN IFNULL(OLD.state, '') IS NOT IFNULL(NEW.state, '')
     BEGIN
-      INSERT INTO machine_status_history (machine_id, slip_id, field, from_value, to_value, who)
-      VALUES (NEW.id, NEW.slip_id, 'state', IFNULL(OLD.state, ''), IFNULL(NEW.state, ''), IFNULL(NEW.decided_by, ''));
+      INSERT INTO machine_status_history (machine_id, slip_id, field, from_value, to_value, who, note)
+      VALUES (NEW.id, NEW.slip_id, 'state', IFNULL(OLD.state, ''), IFNULL(NEW.state, ''), IFNULL(NEW.decided_by, ''),
+              CASE WHEN NEW.state = 'CONDEMNED'
+                   THEN IFNULL(NEW.condemn_reason, '') || '|' || IFNULL(NEW.condemn_note, '') ELSE '' END);
     END;
     CREATE TRIGGER trg_msh_disposal AFTER UPDATE OF disposal ON slip_machines
     WHEN IFNULL(OLD.disposal, '') IS NOT IFNULL(NEW.disposal, '')
