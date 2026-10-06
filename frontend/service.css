@@ -3679,3 +3679,19 @@ details.vs-machine[open] > summary.vs-machine-name {
 #vs-results { max-height: none; overflow: visible; }
 .vs-sheet { max-width: 640px; }
 .vs-sheet #vs-detail .vs-card:first-child { margin-top: 2px; }
+
+/* ---- John's tools: small pills at the foot of Home (6 Oct 2026) ---- */
+.home-admin-row { margin-top: 22px; }
+.home-admin-label {
+  margin: 0 0 8px; font-size: .72rem; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-faint);
+}
+.home-admin-pills { display: flex; flex-wrap: wrap; gap: 8px; row-gap: 12px; }
+.home-btn.home-pill {
+  width: auto; flex-direction: row; align-items: center; gap: 7px;
+  padding: 7px 13px; border-radius: 999px; min-height: 0;
+  font-size: .86rem; font-weight: 600; color: var(--ink-soft);
+  --d: 3px; box-shadow: 0 var(--d) 0 var(--e, #cddad3), var(--lift-sm);
+}
+.home-pill-ic { display: inline-grid; place-items: center; color: #1B7A42; }
+.home-pill-ic svg { width: 16px; height: 16px; }

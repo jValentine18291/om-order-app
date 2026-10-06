@@ -816,6 +816,12 @@ function applyRoleToHome() {
     const mine = !!(window.OM_FUNCTIONS && OM_FUNCTIONS.canDownloadLogs && OM_FUNCTIONS.canDownloadLogs(getUser()));
     logsTile.style.display = mine ? "flex" : "none";
   }
+  // The Admin row at the bottom (6 Oct 2026): shown when any of its three is.
+  const adminRow = $("home-admin-row");
+  if (adminRow) {
+    adminRow.style.display = [...adminRow.querySelectorAll(".home-btn")]
+      .some((b) => b.style.display !== "none") ? "" : "none";
+  }
   updateSignOutButton();
   updateLangToggle();
   // Declared further down; guard so this is safe during startup.
