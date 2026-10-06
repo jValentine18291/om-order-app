@@ -3671,3 +3671,11 @@ details.vs-machine[open] > summary.vs-machine-name {
 }
 .cs-notes > span:first-child { font-weight: 700; }
 .sum-notes { margin: -4px 0 12px; }
+
+/* ---- View Slips: the slip in a window (6 Oct 2026) ----
+   Its list is the whole page; the slip opens over it. Below every window that
+   opens FROM the slip (they sit at 60 and up), so those still land on top. */
+#vs-modal { z-index: 55; }
+#vs-results { max-height: none; overflow: visible; }
+.vs-sheet { max-width: 640px; }
+.vs-sheet #vs-detail .vs-card:first-child { margin-top: 2px; }

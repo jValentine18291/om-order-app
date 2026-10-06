@@ -872,6 +872,11 @@ function showScreen(name) {
   // The pad is sized when its popup opens, not here — it measures zero while
   // the popup is closed, whatever screen is showing.
   // Leaving the working context: hide the machine modal and stop any camera.
+  // View Slips' too.
+  if (name !== "view") {
+    const vm = $("vs-modal");
+    if (vm && vm.style.display !== "none") { vm.style.display = "none"; document.body.style.overflow = ""; }
+  }
   // Close Service's slip window lives on that screen; leaving takes it away.
   if (name !== "close") {
     const cm = $("cs-modal");
@@ -7411,6 +7416,20 @@ function closeCsWindow() {
 $("csm-x").addEventListener("click", closeCsWindow);
 $("cs-modal").addEventListener("click", (e) => { if (e.target.id === "cs-modal") closeCsWindow(); });
 
+// View Slips' window, the same idea as Close Service's (John, 6 Oct 2026).
+function openVsWindow() {
+  $("vs-modal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+function closeVsWindow() {
+  const m = $("vs-modal");
+  if (!m || m.style.display === "none") return;
+  m.style.display = "none";
+  document.body.style.overflow = "";
+}
+$("vsm-x").addEventListener("click", closeVsWindow);
+$("vs-modal").addEventListener("click", (e) => { if (e.target.id === "vs-modal") closeVsWindow(); });
+
 // Whether any machine on a listed slip has gone on a Sales Order.
 function slipHasOrder(s) {
   return ((s && s.machines) || []).some((m) => String(m.converted_at || "").trim());
@@ -7796,6 +7815,7 @@ function reopenRefField() {
 let viewSearch = null;
 async function enterViewSlips() {
   showScreen("view");
+  closeVsWindow();
   $("vs-detail").innerHTML = "";
   if (!viewSearch) {
     viewSearch = setupSlipSearch({
@@ -7816,8 +7836,13 @@ async function enterViewSlips() {
 
 async function onViewSlipChosen(slipNumber) {
   const wrap = $("vs-detail");
-  if (!slipNumber) { wrap.innerHTML = ""; return; }
-  wrap.innerHTML = `<div class="slip-context"><span class="led"></span> Loading…</div>`;
+  if (!slipNumber) { wrap.innerHTML = ""; closeVsWindow(); return; }
+  // In its own window over the list, as Close Service (6 Oct 2026). A redraw
+  // of the slip already open keeps what is on screen until the new copy lands.
+  const same = $("vs-modal").style.display !== "none" && wrap.dataset.slip === String(slipNumber);
+  $("vsm-title").innerHTML = `<span>Slip</span> ${escapeHtml(slipNumber)}`;
+  openVsWindow();
+  if (!same) wrap.innerHTML = `<div class="slip-context"><span class="led"></span> Loading…</div>`;
   try {
     const slip = await api(`/api/slips/${encodeURIComponent(slipNumber)}`);
     if (vsOpen.slip !== slip.slip_number) vsOpen = { slip: slip.slip_number, ids: null };
@@ -13078,7 +13103,9 @@ window.addEventListener("focus", backFromAway);
 
 async function refreshAfterAway() {
   const screen = SCREENS.find((s) => $("screen-" + s).classList.contains("active"));
-  const busy = [...document.querySelectorAll(".modal-overlay")].some((m) => m.style.display !== "none" && m.style.display !== "")
+  const busy = [...document.querySelectorAll(".modal-overlay")]
+      .filter((m) => m.id !== "vs-modal" && m.id !== "cs-modal")
+      .some((m) => m.style.display !== "none" && m.style.display !== "")
     || (session && session.pendingParts && session.pendingParts.length > 0);
   if (busy) return;
   try {
@@ -13094,11 +13121,13 @@ async function refreshAfterAway() {
       // The slip picked below the list, unless a number is half-typed into it
       // or the close is mid-confirmation - reading it again would wipe that.
       const typed = $("cs-ref").value.trim() !== String((csSlip && csSlip.closing_ref) || "").trim();
-      if (csPickedSlip && !csConfirming && !typed) await onCloseSlipChosen(csPickedSlip);
+      // Only while its window is open - a window somebody closed stays closed.
+      const shown = $("cs-modal").style.display !== "none";
+      if (shown && csPickedSlip && !csConfirming && !typed) await onCloseSlipChosen(csPickedSlip);
     } else if (screen === "view" && viewSearch) {
       await viewSearch.refresh();
       const no = viewSearch.pickedSlip();
-      if (no) await onViewSlipChosen(no);
+      if (no && $("vs-modal").style.display !== "none") await onViewSlipChosen(no);
     } else if (screen === "quote") await enterNeedToQuote();
     else if (screen === "purchase") { if (!puEditing) await loadPartRequests(); }
     else if (screen === "po") setPoScope(poScope);

@@ -864,7 +864,18 @@
         <div class="pu-filters cs-filters" id="vs-filters"></div>
         <div class="slip-results" id="vs-results"></div>
       </div>
-      <div id="vs-detail"></div>
+      <!-- THE SLIP, IN ITS OWN WINDOW - as Close Service (John, 6 Oct 2026).
+           Below the windows that open from it (edit, signature, Sales Order,
+           condemn...), which all sit at 60 and up - see #vs-modal in the CSS. -->
+      <div class="modal-overlay" id="vs-modal" style="display:none">
+        <div class="modal-sheet vs-sheet">
+          <div class="modal-head">
+            <div><strong id="vsm-title">Slip</strong></div>
+            <button class="modal-x" id="vsm-x" type="button" aria-label="Close">&#10005;</button>
+          </div>
+          <div id="vs-detail"></div>
+        </div>
+      </div>
     </section>
 
   </div>
