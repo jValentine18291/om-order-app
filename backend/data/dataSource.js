@@ -101,6 +101,7 @@ module.exports = {
     saveMachineWork: (...a) => dataRepo.slips.saveMachineWork(...a),
     setMachineDisposal: (...a) => dataRepo.slips.setMachineDisposal(...a),
     techniciansForMachine: (...a) => dataRepo.slips.techniciansForMachine(...a),
+    firstTechnicianForMachine: (...a) => dataRepo.slips.firstTechnicianForMachine(...a),
     createSlipOrder: (...a) => dataRepo.slips.createSlipOrder(...a),
     quotationForSlip: (...a) => dataRepo.slips.quotationForSlip(...a),
     issueQuotation: (...a) => dataRepo.slips.issueQuotation(...a),

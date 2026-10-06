@@ -12008,16 +12008,39 @@ async function togglePush(which = "home") {
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.addEventListener("message", (e) => {
     if (e.data && e.data.type === "go" && e.data.screen === "quote") enterNeedToQuote();
+    if (e.data && e.data.type === "go" && e.data.screen === "machine") openSlipMachine(e.data.slip, e.data.machine);
   });
 }
 
-// ...and a notification that opened the app cold arrives as ?go=quote.
+// A technician's "go ahead" lands on that slip with that machine's sheet open
+// (6 Oct 2026). Unsaved parts on whatever is open now are not thrown away:
+// with any waiting, the slip is left alone and a toast says why.
+async function openSlipMachine(slipNumber, machineId) {
+  if (!slipNumber || !getUser()) return;
+  if (session && session.pendingParts && session.pendingParts.length) {
+    toast(`Slip ${slipNumber}: save the parts on this machine first`, "err");
+    return;
+  }
+  try {
+    await onSlipChosen(String(slipNumber), "open");
+    const id = Number(machineId);
+    if (id && session.slip && (session.slip.machines || []).some((m) => m.id === id)) openMachineModal(id);
+  } catch (e) {
+    toast(e.message || "Could not open that slip", "err");
+  }
+}
+
+// ...and a notification that opened the app cold arrives as ?go=quote, or
+// as ?slip=...&machine=... for a technician's go-ahead.
 (function openFromNotification() {
   try {
-    const go = new URLSearchParams(location.search).get("go");
+    const q = new URLSearchParams(location.search);
+    const go = q.get("go");
     if (go === "quote") {
       // After the role has been read, or the screen is shown to nobody.
       setTimeout(() => { if (getUser()) enterNeedToQuote(); }, 300);
+    } else if (q.get("slip")) {
+      setTimeout(() => openSlipMachine(q.get("slip"), q.get("machine")), 300);
     }
   } catch (_) {}
 })();

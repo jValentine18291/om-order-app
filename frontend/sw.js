@@ -9,7 +9,7 @@
 // on EVERY open, and opens outnumber deploys a hundred to one. Now the cached
 // copy is served instantly and the fresh one is fetched behind it, so a
 // deploy shows one open later and startup does not touch the network at all.
-const CACHE = "om-order-v381";
+const CACHE = "om-order-v382";
 
 // IPL artwork lives in its own cache, deliberately NOT version-stamped.
 // They are large, they are already fetched only when a section is opened, and
@@ -232,21 +232,32 @@ self.addEventListener("push", (e) => {
       // Replaces rather than stacks when the same slip is marked twice.
       tag: d.slip ? `slip-${d.slip}` : "om-service",
       renotify: true,
-      data: { slip: d.slip || "" },
+      // `open` and `machine` say where a tap should land (6 Oct 2026): a
+      // technician's "go ahead" opens that slip at that machine.
+      data: { slip: d.slip || "", open: d.open || "", machine: d.machine || "" },
     })
   );
 });
 
 // Tapping it should land on the list, not just open the app somewhere.
+// A technician's "go ahead with the repair" lands on that slip at that machine
+// instead - the quote list is Sales', and a technician cannot open it.
 self.addEventListener("notificationclick", (e) => {
   e.notification.close();
-  const target = new URL("./index.html?go=quote", self.location).href;
+  const d = (e.notification && e.notification.data) || {};
+  const toMachine = d.open === "machine" && d.slip;
+  const target = new URL(toMachine
+    ? `./index.html?slip=${encodeURIComponent(d.slip)}&machine=${encodeURIComponent(d.machine || "")}`
+    : "./index.html?go=quote", self.location).href;
+  const message = toMachine
+    ? { type: "go", screen: "machine", slip: d.slip, machine: d.machine }
+    : { type: "go", screen: "quote" };
   e.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => {
       // Reuse a window that is already open rather than piling up new ones.
       for (const w of wins) {
         if (w.url.startsWith(self.location.origin) && "focus" in w) {
-          w.postMessage({ type: "go", screen: "quote" });
+          w.postMessage(message);
           return w.focus();
         }
       }

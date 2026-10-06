@@ -1139,6 +1139,8 @@
     [/^Condemned (\d+) days?$/, "已报废 $1 天"],
     [/^Condemned today$/, "今天报废"],
     [/^(\d+) machine\(s\)$/, "$1 台机器"],
+    // Opening a slip from a notification while parts are unsaved (6 Oct 2026).
+    [/^Slip (.+): save the parts on this machine first$/, "服务单 $1：请先保存这台机器上的零件"],
     // Orders, filtered to one supplier.
     [/^Mark (.+) parts as Ordered\??$/, "将 $1 零件标记为已下单"],
     [/^\+ (\d+) (.+) parts? on this order, hidden by the filter$/, "此单另有 $1 件 $2 零件（已被筛选隐藏）"],

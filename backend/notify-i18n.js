@@ -40,6 +40,10 @@ const PATTERNS = [
   // on. These are the reason this file exists.
   [/^Repair: (.+)$/, "可以维修：$1"],
   [/^Condemn: (.+)$/, "报废：$1"],
+  // With who confirmed, in brackets (6 Oct 2026) - and without, for a push
+  // from before that or with nobody's initials.
+  [/^(.+) · (.+) · the customer says go ahead with the repair \((.+)\)$/, "$1 · $2 · 客户同意维修（$3）"],
+  [/^(.+) · (.+) · the customer says do not repair - condemn it \((.+)\)$/, "$1 · $2 · 客户不维修，要报废（$3）"],
   [/^(.+) · (.+) · the customer says go ahead with the repair$/, "$1 · $2 · 客户同意维修"],
   [/^(.+) · (.+) · the customer says do not repair - condemn it$/, "$1 · $2 · 客户不维修，要报废"],
 

@@ -2061,13 +2061,24 @@ async function notifyStateChange(slip, machineId, before, state, actor = {}) {
     const answered = (before === "QUOTED" || before === "AWAITING_QUOTE") &&
                      (state === "TO_REPAIR" || state === "CONDEMNED");
     if (answered) {
-      const techs = await data.slips.techniciansForMachine(machineId);
+      // GO AHEAD goes to the technician who FIRST worked on the machine - John,
+      // 6 Oct 2026 - with nobody recorded, every technician. A condemning still
+      // goes to everyone whose parts are on it: they all have work to stop.
+      const techs = state === "TO_REPAIR"
+        ? [data.slips.firstTechnicianForMachine(machineId)].filter(Boolean)
+        : await data.slips.techniciansForMachine(machineId);
+      // Who confirmed it, in brackets, so they know who to ask.
+      const by = actor && actor.who ? ` (${actor.who})` : "";
       await push.notifyTechs(pushDb, techs, {
         title: `${state === "TO_REPAIR" ? "Repair" : "Condemn"}: ${desc}`,
         body: `${slip.slip_number} · ${slip.company} · the customer says ${
           state === "TO_REPAIR" ? "go ahead with the repair" : "do not repair - condemn it"
-        }`,
+        }${by}`,
         slip: slip.slip_number,
+        // Tapping opens this slip at this machine (sw.js), not the quote list
+        // technicians cannot use.
+        open: "machine",
+        machine: machineId,
       });
       return;
     }

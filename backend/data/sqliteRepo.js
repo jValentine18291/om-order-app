@@ -3321,7 +3321,42 @@ function techniciansForMachine(machineId) {
   ).all(machineId).map((r) => String(r.technician).trim());
 }
 
+// THE TECHNICIAN WHO FIRST WORKED ON A MACHINE (John, 6 Oct 2026): the one
+// told when Sales confirm the repair. The earliest of: a part they added
+// (machine_parts.created_at), or a status step they took (the history, kept
+// since 2 Oct 2026) - a quote request, a save. Only technicians count: the
+// initials are checked against the technicians' codes, so a part John scanned
+// in at the counter does not make him "the technician". '' when nobody is
+// recorded, and the caller tells every technician instead.
+function firstTechnicianForMachine(machineId) {
+  let techCodes = new Set();
+  try {
+    techCodes = new Set(db.prepare(
+      "SELECT tech FROM app_users WHERE role = 'tech' AND TRIM(IFNULL(tech, '')) != ''"
+    ).all().map((r) => String(r.tech).trim()));
+  } catch (_) { /* no users table: take any initials */ }
+  const isTech = (who) => !techCodes.size || techCodes.has(String(who || "").trim());
+  const seen = [];
+  for (const r of db.prepare(
+    `SELECT technician AS who, created_at AS at FROM machine_parts
+      WHERE machine_id = ? AND TRIM(IFNULL(technician, '')) != '' ORDER BY id`
+  ).all(machineId)) {
+    if (isTech(r.who)) { seen.push(r); break; }
+  }
+  try {
+    for (const r of db.prepare(
+      `SELECT who, changed_at AS at FROM machine_status_history
+        WHERE machine_id = ? AND TRIM(IFNULL(who, '')) != '' ORDER BY id`
+    ).all(machineId)) {
+      if (isTech(r.who)) { seen.push(r); break; }
+    }
+  } catch (_) { /* no history table yet */ }
+  seen.sort((a, b) => String(a.at || "").localeCompare(String(b.at || "")));
+  return seen.length ? String(seen[0].who).trim() : "";
+}
+
 const slips = {
+  firstTechnicianForMachine,
   poTracking, poStatus, setPoStatus, PO_STATUSES,
   listShipments, getShipment, createShipment, updateShipment,
   allocatedByPo, receivedByPo, shipmentsForPo, SHIPMENT_STATUSES, DESTINATIONS,
