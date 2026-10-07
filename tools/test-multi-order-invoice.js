@@ -99,9 +99,11 @@ const refs = (slip) => (slip.orders || []).map((o) => `${o.so_number}=${o.closin
   })());
   let half = await data.slips.getSlip(noC);
   check("one invoiced, one not", refs(half).map((r) => r.split("=")[1]), ["DO-A", "-"]);
-  check("the slip still reads Invoice Created", half.status, "INVOICED");
-  await refuse("but it will not close with a batch unaccounted for",
-    () => data.slips.closeSlip(noC, "", "KS"), /No DO\/CS\/INV recorded for/);
+  // SO Created, not Invoice Created, while a batch still needs its number -
+  // John, 7 Oct 2026 (slip 00048). It used to read Invoice Created here.
+  check("the slip reads SO Created while a batch still needs its number", half.status, "CONVERTED");
+  await refuse("and it will not close with a batch unaccounted for",
+    () => data.slips.closeSlip(noC, "", "KS"), /No DO\/CS\/INV recorded for|Record the DO\/CS\/INV number first/);
 
   // Once the second batch has its number the slip can close.
   const second = half.orders[1].so_number;

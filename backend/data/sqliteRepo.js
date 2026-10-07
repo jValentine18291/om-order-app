@@ -1786,13 +1786,17 @@ function autoInvoiceFromDocuments(slipNumber, who = "AutoCount") {
     // has none - the same rule, one level up.
     const last = filled[filled.length - 1];
     const keepRef = String(slip.closing_ref || "").trim();
+    // Invoice Created only once every order has its number (7 Oct 2026).
+    const waiting = ordersAwaitingNumber(slip.slip_number);
     db.prepare(
       `UPDATE service_slips
-          SET status = CASE WHEN status = 'CLOSED' THEN status ELSE 'INVOICED' END,
+          SET status = CASE WHEN status = 'CLOSED' THEN status
+                            WHEN ? = 0 THEN 'INVOICED' ELSE status END,
               closing_ref = ?, invoiced_by = ?,
               invoiced_at = COALESCE(invoiced_at, datetime('now','localtime'))
         WHERE id = ?`
-    ).run(keepRef || last.doc_no, keepRef ? String(slip.invoiced_by || "") : String(who || "").trim(), slip.id);
+    ).run(waiting, keepRef || last.doc_no, keepRef ? String(slip.invoiced_by || "") : String(who || "").trim(), slip.id);
+    if (waiting) deriveSlipStatus(slip.id);
   });
   tx();
   return { filled };
@@ -1874,12 +1878,17 @@ function setSlipInvoiced(slipNumber, ref, who = "", soNumber = "") {
     //
     // The slip's own closing_ref keeps the most recent, so every screen and
     // document that reads one number still reads a true one.
+    // Invoice Created once EVERY order has its number (7 Oct 2026); with one
+    // still waiting, the slip reads what its machines say - SO Created.
+    const waiting = ordersAwaitingNumber(slip.slip_number);
     db.prepare(
       `UPDATE service_slips
-          SET status = 'INVOICED', closing_ref = ?, invoiced_by = ?,
+          SET status = CASE WHEN ? = 0 THEN 'INVOICED' ELSE status END,
+              closing_ref = ?, invoiced_by = ?,
               invoiced_at = datetime('now','localtime')
         WHERE id = ?`
-    ).run(String(ref).trim(), String(who || "").trim(), slip.id);
+    ).run(waiting, String(ref).trim(), String(who || "").trim(), slip.id);
+    if (waiting) deriveSlipStatus(slip.id);
   });
   tx();
   return getSlip(slipNumber);
@@ -2822,8 +2831,27 @@ function machineSettled(m) {
 // in this app can see AutoCount's invoice or the customer's car.
 const MANUAL_SLIP_STATUSES = new Set(["INVOICED", "CLOSED"]);
 
+// A slip's Sales Orders still waiting for their DO/CS/INV number.
+// "Invoice Created" means NONE are (John, 7 Oct 2026): slip 00048 had its
+// first order invoiced and a second raised five days later, and went on
+// saying Invoice Created while the new order still needed its number.
+function ordersAwaitingNumber(slipNumber) {
+  return db.prepare(
+    `SELECT COUNT(*) AS n FROM orders
+      WHERE notes = ? AND TRIM(IFNULL(so_number, '')) != '' AND TRIM(IFNULL(closing_ref, '')) = ''`
+  ).get(`S/S: ${slipNumber}`).n;
+}
+
 function deriveSlipStatus(slipId) {
   const slip = db.prepare("SELECT * FROM service_slips WHERE id = ?").get(slipId);
+  // INVOICED stands only while every order has its number. An order still
+  // waiting - one raised after the others were invoiced - puts the slip back
+  // to what its machines say (SO Created, usually), and recording that number
+  // makes it Invoice Created again (setSlipInvoiced).
+  if (slip && slip.status === "INVOICED" && ordersAwaitingNumber(slip.slip_number) > 0) {
+    db.prepare("UPDATE service_slips SET status = 'CONVERTED' WHERE id = ?").run(slip.id);
+    slip.status = "CONVERTED";
+  }
   // Both of these are deliberate acts by sales, and a later edit to a machine
   // must not quietly undo one. A slip that has been invoiced stays invoiced
   // even if somebody corrects a part on it afterwards.
@@ -3383,6 +3411,19 @@ const slips = {
 // dependency" - and it is the kind of warning that scrolls past. It ran, it
 // changed nothing, and the slip stayed lost.
 //
+// Invoice Created only once every Sales Order has its number (7 Oct 2026):
+// on every start, any invoiced slip with an order still waiting is read
+// again - slip 00048 the day this went in. Cheap, and none on most days.
+try {
+  let fixed = 0;
+  for (const r of db.prepare("SELECT id, slip_number FROM service_slips WHERE status = 'INVOICED'").all()) {
+    if (ordersAwaitingNumber(r.slip_number) > 0) { deriveSlipStatus(r.id); fixed++; }
+  }
+  if (fixed) console.log(`[db] ${fixed} invoiced slip(s) with an order still waiting for its number: back to SO Created`);
+} catch (e) {
+  console.error("[db] invoiced-slip recheck failed:", e.message);
+}
+
 // Guarded on there being no PART_SO row yet, so it happens once. CLOSED and
 // INVOICED are never recomputed: those are a person's word about something
 // outside this app.
