@@ -5768,7 +5768,10 @@ function renderMachineParts() {
   const wrap = $("machine-parts");
   const machine = currentPartHolder();
   const parts = machine ? (machine.parts || []) : [];
-  wrap.innerHTML = "";
+  // Reopened for another repair (8 Oct 2026): say so, and why, over the list.
+  // The parts already on it stay in the list below, editable as ever.
+  const reopened = machine ? machineReopenedHtml(machine) : "";
+  wrap.innerHTML = reopened;
 
   // Pending (scanned but not yet saved) parts first, visually distinct.
   if (session.pendingParts.length) {
@@ -5809,7 +5812,7 @@ function renderMachineParts() {
   }
 
   if (parts.length === 0 && session.pendingParts.length === 0) {
-    wrap.innerHTML = `
+    wrap.innerHTML = reopened + `
       <div class="cart-empty">
         <div class="ico">
           <svg viewBox="0 0 24 24" fill="none" stroke="#1f6f78" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
@@ -7682,7 +7685,10 @@ function csCollectHtml(slip) {
           <input type="checkbox" value="${m.id}"${done ? " disabled checked" : ""}>
           <span class="cs-collect-name">${escapeHtml(machineLabel(slip, m))}</span>
           <span class="cs-collect-note">${escapeHtml(note)}</span>
-        </label>`;
+        </label>${
+        // Found with another fault at collection (8 Oct 2026, John).
+        canDecide() && m.reopen_block === ""
+          ? `<button type="button" class="cs-reopen" data-reopen="${m.id}">Found a problem? Reopen</button>` : ""}`;
     }
   }
   html += open
@@ -7754,6 +7760,13 @@ function wireCsCondemned(slip) {
 }
 
 function wireCsCollect(slip) {
+  document.querySelectorAll("#cs-context .cs-reopen").forEach((b) =>
+    b.addEventListener("click", async () => {
+      const m = (slip.machines || []).find((x) => x.id === Number(b.dataset.reopen));
+      if (!m || !(await reopenMachineFlow(slip, m))) return;
+      await onCloseSlipChosen(slip.slip_number);
+      if (closeSearch) closeSearch.refresh();
+    }));
   const go = $("cs-collect-go");
   if (!go) return;
   go.addEventListener("click", async () => {
@@ -8155,6 +8168,94 @@ function condemnReasonHtml(m) {
   return `<div class="cond-reason">${r ? `<b>${escapeHtml(r)}</b>` : ""}${r && n ? " · " : ""}${n ? `<span>${escapeHtml(n)}</span>` : ""}</div>`;
 }
 
+// ---- Reopening a machine for another repair (8 Oct 2026) ----------------------
+// John: a customer came to collect a machine already on an SO and a DO, and it
+// had another fault. Sales and John reopen it - from View Slips, or from Close
+// Service at the point of collection - and it goes back to the workshop on the
+// same line, its parts, labour and comment still on it and still editable.
+// The new SO carries both repairs; Sales move that whole SO to a new DO. m.rounds
+// records each reopening and the SO/DO it was on before. A closed slip is not
+// reopened: that comes back on a new slip.
+
+// "Repair 2" / "第2次维修". Written here rather than left to i18n.js, whose
+// "<word> <number>" pattern would otherwise take it for a filter chip.
+function repairRoundText(n) {
+  return window.OM_I18N && window.OM_I18N.isEnabled() ? `第${n}次维修` : `Repair ${n}`;
+}
+
+// Which repair this is, who reopened it, when and why, and the SO/DO it was
+// on before - over the machine on View Slips and on the technician's sheet.
+// The parts themselves are the machine's own list, as before.
+function machineReopenedHtml(m) {
+  const rounds = (m && m.rounds) || [];
+  const last = rounds[rounds.length - 1];
+  if (!last) return "";
+  const note = String(last.reopen_note || "").trim();
+  const before = rounds.map((r) => [r.so_number, r.closing_ref].filter(Boolean).join(" / ")).filter(Boolean);
+  return `<div class="mr-banner"><span data-no-i18n>${escapeHtml(repairRoundText(last.round + 1))}</span> · <span>Reopened</span>${
+    last.reopened_by ? ` <span>(${escapeHtml(last.reopened_by)})</span>` : ""}${
+    last.reopened_at ? ` · <span>${escapeHtml(formatDate(last.reopened_at))}</span>` : ""}${
+    note ? `<br>“${escapeHtml(note)}”` : ""}${
+    before.length ? `<div class="mr-before"><span>Was on</span> ${before.map(escapeHtml).join(", ")}</div>` : ""}</div>`;
+}
+
+// The popup. Resolves { state, note } on Reopen, null on Cancel.
+let reoResolve = null;
+function askReopen(m, slip) {
+  return new Promise((resolve) => {
+    reoResolve = resolve;
+    $("reo-sub").innerHTML = m
+      ? `<span>${escapeHtml(machineTitle(m))}</span>${slip ? ` · <span>Slip ${escapeHtml(slip.slip_number)}</span>` : ""}`
+      : "";
+    const order = ((slip && slip.orders) || []).find((o) => o.so_number === m.so_number);
+    const doc = [m.so_number, order && order.closing_ref].filter(Boolean).join(" / ");
+    $("reo-info").innerHTML =
+      `<span>Its parts and labour stay on it and can be edited. The new SO will carry both repairs.</span>` +
+      (doc ? ` <span>The old one is left as it is:</span> ${escapeHtml(doc)}` : "");
+    $("reo-note").value = "";
+    $("reo-chips").querySelectorAll(".reo-chip").forEach((c) =>
+      c.classList.toggle("on", c.dataset.state === "TO_REPAIR"));
+    $("reo-modal").style.display = "flex";
+  });
+}
+function closeReopen(answer) {
+  $("reo-modal").style.display = "none";
+  const r = reoResolve;
+  reoResolve = null;
+  if (r) r(answer);
+}
+$("reo-chips").addEventListener("click", (e) => {
+  const chip = e.target.closest(".reo-chip");
+  if (!chip) return;
+  $("reo-chips").querySelectorAll(".reo-chip").forEach((c) => c.classList.toggle("on", c === chip));
+});
+$("reo-go").addEventListener("click", () => {
+  const on = $("reo-chips").querySelector(".reo-chip.on");
+  closeReopen({ state: on ? on.dataset.state : "TO_REPAIR", note: $("reo-note").value.trim() });
+});
+$("reo-cancel").addEventListener("click", () => closeReopen(null));
+$("reo-x").addEventListener("click", () => closeReopen(null));
+$("reo-modal").addEventListener("click", (e) => { if (e.target.id === "reo-modal") closeReopen(null); });
+
+// Ask, then reopen. True when it was reopened.
+async function reopenMachineFlow(slip, m) {
+  const answer = await askReopen(m, slip);
+  if (!answer) return false;
+  try {
+    await api(`/api/slips/${encodeURIComponent(slip.slip_number)}/machines/${m.id}/reopen`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...answer, who: initialsFor(getUser()), role: getRole() }),
+    });
+    toast("Machine reopened", "ok");
+    refreshQuoteCount();
+    return true;
+  } catch (e) {
+    toast(e.message || "Could not reopen it", "err");
+    return false;
+  }
+}
+
 // ---- Folded machines and their activity (View Slips, 6 Oct 2026) -------------
 // John: one line per machine - name, status, total - opened with a tap. The
 // ones that need somebody to act open by themselves (his call): waiting to
@@ -8196,6 +8297,7 @@ document.addEventListener("toggle", (e) => {
 // from 2 Oct 2026 (machine_status_history); a machine older than that shows
 // its last recorded decision and says the rest was not kept.
 function vsStepLabel(h) {
+  if (h.field === "reopen") return "Reopened for another repair";
   if (h.field === "disposal") {
     return h.to_value === "COLLECTED" ? "Customer collected"
          : h.to_value === "DISPOSED" ? "Disposed of" : "Collection undone";
@@ -8216,7 +8318,10 @@ function vsStepLabel(h) {
 }
 
 function vsActivityHtml(m) {
-  const steps = (m.history || []).slice().reverse();
+  // A reopening also moves the state and undoes a collection, in the same
+  // instant; "Reopened for another repair" already says both.
+  const reopenedAt = new Set((m.history || []).filter((h) => h.field === "reopen").map((h) => h.changed_at));
+  const steps = (m.history || []).filter((h) => h.field === "reopen" || !reopenedAt.has(h.changed_at)).reverse();
   // Date and time as two pieces of text: Chinese translates whole pieces,
   // and the date is one it knows.
   const when = (t) => {
@@ -8226,8 +8331,12 @@ function vsActivityHtml(m) {
     return `<span>${escapeHtml(formatDate(t))}</span> <span>${p(d.getHours())}:${p(d.getMinutes())}</span>`;
   };
   const rows = steps.map((h) => {
+    // A condemning's note is "REASON|note"; a reopening's is just what was
+    // wrong this time.
     const [rc, rn] = String(h.note || "").split("|");
-    const why = [CONDEMN_REASON_LABEL[rc] || "", (rn || "").trim()].filter(Boolean);
+    const why = h.field === "reopen"
+      ? [String(h.note || "").trim()].filter(Boolean)
+      : [CONDEMN_REASON_LABEL[rc] || "", (rn || "").trim()].filter(Boolean);
     return `
       <div class="vs-step"><span class="vs-step-what">${escapeHtml(vsStepLabel(h))}</span>${
         h.who ? ` <span class="vs-step-who">· ${escapeHtml(h.who)}</span>` : ""}${
@@ -8310,10 +8419,13 @@ function renderSlipDetail(slip) {
 
     const pill = machinePill(m);
 
+    // A reopened machine says which repair this is (8 Oct 2026).
+    const round = (m.rounds || []).length
+      ? ` <span class="mr-tag" data-no-i18n>${escapeHtml(repairRoundText((m.rounds || []).length + 1))}</span>` : "";
     html += `
       <details class="vs-machine" data-mid="${m.id}"${vsMachineOpen(slip, m) ? " open" : ""}>
-        <summary class="vs-machine-name"><span class="vs-m-label">${escapeHtml(machineLabel(slip, m))}${pill}</span><span class="vs-m-amt">${money(mAmount)}</span></summary>
-        <div class="vs-machine-body">${condemnReasonHtml(m)}`;
+        <summary class="vs-machine-name"><span class="vs-m-label">${escapeHtml(machineLabel(slip, m))}${pill}${round}</span><span class="vs-m-amt">${money(mAmount)}</span></summary>
+        <div class="vs-machine-body">${condemnReasonHtml(m)}${machineReopenedHtml(m)}`;
 
     // Sales quote the machine, ring the customer, and come back with one of two
     // answers. Each step is offered only from where the machine actually is,
@@ -8437,6 +8549,13 @@ function renderSlipDetail(slip) {
       html += `<div class="decide-row decide-disposal decide-collect" data-dispose="${m.id}">
           <span class="decide-q">${m.disposal === "COLLECTED" ? "Collected" + (m.disposal_at ? " · " + escapeHtml(formatDate(m.disposal_at)) : "") : "Still here"}</span>
           <button type="button" class="decide-btn"${m.disposal === "COLLECTED" ? " disabled" : ""} data-disposal="COLLECTED">Customer collected</button>
+        </div>`;
+    }
+    // Found with another fault (8 Oct 2026): back to the workshop on this
+    // line. The server says whether it can be (m.reopen_block).
+    if (canDecide() && m.reopen_block === "") {
+      html += `<div class="decide-row" data-reopen="${m.id}">
+          <button type="button" class="decide-btn decide-reopen">Reopen machine</button>
         </div>`;
     }
     html += `${m.serial_no ? `<div class="vs-machine-serial">S/N ${escapeHtml(m.serial_no)}</div>` : ""}${
@@ -8600,6 +8719,15 @@ function wireDecideButtons(wrap, slipNumber, slip) {
         toast(e.message || "Could not put the status back", "err");
         btn.disabled = false;
       }
+    });
+  });
+
+  wrap.querySelectorAll("[data-reopen] button").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const m = machineById(Number(btn.closest("[data-reopen]").dataset.reopen));
+      if (!m || !(await reopenMachineFlow(slip, m))) return;
+      onViewSlipChosen(slipNumber);
+      if (viewSearch) viewSearch.refresh();
     });
   });
 

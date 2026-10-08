@@ -577,6 +577,11 @@ function getSlip(slipNumber, includeSignature = false) {
     // here rather than in the app so the button and the rule that refuses it
     // are the same sentence; the app only has to read the answer.
     m.can_undo = canUndoMachine(m);
+    // Its earlier repairs, when it has been reopened (8 Oct 2026), and why it
+    // cannot be reopened now, or "" - the button reads this, the server
+    // refuses with it.
+    m.rounds = machineRounds(m.id);
+    m.reopen_block = reopenBlockReason(slip, m);
   }
   slip.machines = machines;
   // Parts that belong to the SLIP and to no machine on it - something sold
@@ -3357,6 +3362,89 @@ function setMachineDisposal(slipNumber, machineId, disposal, who = "") {
   return getSlip(slipNumber);
 }
 
+// ---- Reopening a machine for a second repair ---------------------------------
+// John, 8 Oct 2026: a customer came to collect a machine already on an SO and
+// a DO, and it had another fault. Sales or John reopen it; it goes back to the
+// workshop on the SAME line.
+//
+// EVERYTHING ON IT STAYS, AND STAYS EDITABLE (John, same day): its parts, its
+// labour and its comment. Only its billing is undone - off its SO, not
+// collected - so when it is finished the new SO carries the first repair and
+// the second together, and Sales move that whole SO to a new DO in AutoCount.
+// The old SO and its DO are left exactly as they are, in `orders` and in
+// AutoCount; machine_rounds records which one it was, who reopened it and why.
+//
+// Why it cannot be reopened, or "". One sentence for the button and the
+// refusal alike, as quoteBlockReason.
+function reopenBlockReason(slip, machine) {
+  if (slip.status === "CLOSED") return "The slip is closed - a machine that comes back after that starts a new slip.";
+  if (machine.state !== "REPAIRED") return "Only a repaired machine can be reopened.";
+  if (!String(machine.converted_at || "").trim()) return "It is not on a Sales Order yet - carry on with it as it is.";
+  return "";
+}
+
+function reopenMachine(slipNumber, machineId, { state = "TO_REPAIR", note = "", who = "" } = {}) {
+  const { slip, machine } = machineOnSlip(slipNumber, machineId);
+  const why = reopenBlockReason(slip, machine);
+  if (why) { const e = new Error(why); e.status = 409; throw e; }
+  const next = String(state || "").toUpperCase();
+  if (next !== "TO_REPAIR" && next !== "AWAITING_QUOTE") {
+    const e = new Error("A reopened machine goes to In Progress or Waiting to quote."); e.status = 400; throw e;
+  }
+  const by = String(who || "").trim();
+  const reason = String(note || "").trim().slice(0, 300);
+  const round = Number(machine.repair_round) || 1;
+
+  db.transaction(() => {
+    db.prepare(
+      `INSERT INTO machine_rounds (machine_id, slip_id, round, so_number, converted_at, disposal, reopened_by, reopen_note)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(machine.id, slip.id, round, machine.so_number || "", machine.converted_at, machine.disposal || "", by, reason);
+
+    // The trail: one line saying it was reopened and why, then the state and
+    // (if it had been collected) the disposal changes, by their triggers.
+    try {
+      db.prepare(
+        `INSERT INTO machine_status_history (machine_id, slip_id, field, from_value, to_value, who, note)
+         VALUES (?, ?, 'reopen', ?, ?, ?, ?)`
+      ).run(machine.id, slip.id, String(round), String(round + 1), by, reason);
+    } catch (_) { /* no history table yet */ }
+
+    db.prepare(
+      `UPDATE slip_machines
+          SET state = ?, decided_by = ?, decided_at = datetime('now','localtime'),
+              converted_at = NULL, so_number = '',
+              disposal = '', disposal_by = '', disposal_at = '',
+              repair_round = ?
+        WHERE id = ?`
+    ).run(next, by, round + 1, machine.id);
+
+    // Invoice Created and Collected & Closed are set by hand and never worked
+    // out again (MANUAL_SLIP_STATUSES) - a slip that had reached Invoice
+    // Created is put back to be worked out from its machines, which now
+    // include one back in the workshop.
+    if (slip.status === "INVOICED") {
+      db.prepare("UPDATE service_slips SET status = 'IN_PROGRESS' WHERE id = ?").run(slip.id);
+    }
+    deriveSlipStatus(slip.id);
+  })();
+  return getSlip(slipNumber);
+}
+
+// A machine's reopenings, oldest first, each with the SO it was on before and
+// the DO/CS/INV that order had - for the screens to show under the machine.
+function machineRounds(machineId) {
+  let rounds = [];
+  try {
+    rounds = db.prepare("SELECT * FROM machine_rounds WHERE machine_id = ? ORDER BY round").all(machineId);
+  } catch (_) { return []; }
+  const order = db.prepare("SELECT closing_ref FROM orders WHERE so_number = ?");
+  for (const r of rounds) {
+    r.closing_ref = r.so_number ? ((order.get(r.so_number) || {}).closing_ref || "") : "";
+  }
+  return rounds;
+}
+
 // Which technicians worked on a machine, by the initials on their part rows -
 // the only record of who touched it. A machine with nothing scanned yet has
 // none, and the caller decides what to do about that.
@@ -3409,7 +3497,7 @@ const slips = {
   orderDocuments, recordOrderDocuments, billingDocument, autoInvoiceFromDocuments,
   slipsAwaitingDocuments,
   slipDeletable, deleteSlip,
-  createSlip, freeSlipNumbers, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setSlipExtrasNote, slipContacts, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, saveMachineWork, setMachineDisposal, deriveSlipStatus, correctMachine,
+  createSlip, freeSlipNumbers, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setSlipExtrasNote, slipContacts, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, saveMachineWork, setMachineDisposal, reopenMachine, deriveSlipStatus, correctMachine,
   setCondemnSignature, getCondemnSignature, unsignedCondemned,
   setMachineIplModel,
   machineNeedsQuoteFirst, quoteAnswered, quoteBlockReason, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,

@@ -1520,6 +1520,35 @@ try {
   console.error("[db] history note migration failed:", e.message);
 }
 
+// A MACHINE REOPENED FOR A SECOND REPAIR (8 Oct 2026, John): a customer came
+// to collect a machine already on an SO and a DO, and it had another fault.
+// The machine keeps its line, its parts, its labour and its comment - all of
+// it still editable - and goes back to the workshop. The new SO carries the
+// first repair and the second together; Sales move that whole SO to a new DO
+// in AutoCount (John, same day). This table is the record of each reopening:
+// which SO the machine was on before, who reopened it, when and why.
+try {
+  const rcols = db.prepare("PRAGMA table_info(slip_machines)").all().map((c) => c.name);
+  if (!rcols.includes("repair_round")) db.exec("ALTER TABLE slip_machines ADD COLUMN repair_round INTEGER DEFAULT 1");
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS machine_rounds (
+      id              INTEGER PRIMARY KEY AUTOINCREMENT,
+      machine_id      INTEGER NOT NULL,
+      slip_id         INTEGER NOT NULL,
+      round           INTEGER NOT NULL,        -- 1 for the first repair
+      so_number       TEXT DEFAULT '',          -- the SO it was on before
+      converted_at    TEXT,
+      disposal        TEXT DEFAULT '',          -- COLLECTED if it had gone out
+      reopened_at     TEXT DEFAULT (datetime('now','localtime')),
+      reopened_by     TEXT DEFAULT '',
+      reopen_note     TEXT DEFAULT ''           -- what was wrong this time
+    );
+    CREATE INDEX IF NOT EXISTS idx_mr_machine ON machine_rounds(machine_id);
+  `);
+} catch (e) {
+  console.error("[db] machine rounds setup failed:", e.message);
+}
+
 try {
   db.exec(`
     CREATE TABLE IF NOT EXISTS machine_status_history (

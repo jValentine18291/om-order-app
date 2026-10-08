@@ -3658,6 +3658,16 @@ details.vs-machine[open] > summary.vs-machine-name {
 
 /* ---- Condemning with a reason (6 Oct 2026) ---- */
 #cond-modal { z-index: 90; }            /* above the machine sheet it opens from */
+#reo-modal { z-index: 90; }             /* above the slip windows it opens from */
+.cond-chip.reo-chip.on { background: #E6F1FB; color: #185FA5; border-color: #b5d4f4; box-shadow: 0 3px 0 #85b7eb; }
+
+/* A reopened machine (8 Oct 2026): which repair it is, why, and the SO/DO it
+   was on before - on View Slips and over the technician's parts list. */
+.mr-before { font-size: .76rem; color: var(--ink-faint); margin-top: 3px; }
+.mr-tag { display: inline-block; font-size: .68rem; font-weight: 700; color: #A85B00; background: #FDF0E0; border-radius: 6px; padding: 2px 7px; margin-left: 6px; vertical-align: middle; }
+.mr-banner { background: #FDF0E0; color: #A85B00; border-radius: 8px; padding: 7px 10px; font-size: .84rem; margin: 6px 0; }
+.decide-btn.decide-reopen { color: #A85B00; border-color: #e3b26b; }
+.cs-reopen { display: block; margin: 2px 0 6px auto; font-size: .78rem; color: #A85B00; background: none; border: 0; padding: 2px 0; cursor: pointer; text-decoration: underline; }
 .cond-sheet { max-width: 420px; }
 .cond-lab { font-size: .82rem; font-weight: 700; color: var(--ink-soft); margin: 14px 0 8px; }
 .cond-lab span { font-weight: 400; color: var(--ink-faint); }

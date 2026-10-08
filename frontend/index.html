@@ -1657,6 +1657,29 @@
     </div>
   </div>
 
+  <!-- Reopening a machine for a second repair (8 Oct 2026, John): found with
+       another fault when the customer came to collect it. -->
+  <div class="modal-overlay" id="reo-modal" style="display:none">
+    <div class="modal-sheet cond-sheet">
+      <div class="modal-head">
+        <div><strong>Reopen for another repair?</strong><div class="mm-sub" id="reo-sub"></div></div>
+        <button class="modal-x" id="reo-x" type="button" aria-label="Close">&#10005;</button>
+      </div>
+      <p class="cond-warn" id="reo-info"></p>
+      <div class="cond-lab">What's wrong now? <span>(optional)</span></div>
+      <textarea id="reo-note" rows="2" maxlength="300" placeholder="e.g. Hard to start when hot"></textarea>
+      <div class="cond-lab">Send it to</div>
+      <div class="cond-chips" id="reo-chips">
+        <button type="button" class="cond-chip reo-chip on" data-state="TO_REPAIR">In Progress</button>
+        <button type="button" class="cond-chip reo-chip" data-state="AWAITING_QUOTE">Waiting to quote</button>
+      </div>
+      <div class="cond-btns">
+        <button type="button" class="btn-secondary" id="reo-cancel">Cancel</button>
+        <button type="button" class="btn-primary" id="reo-go">Reopen</button>
+      </div>
+    </div>
+  </div>
+
   <!-- A slip at a glance, from Close Service: long-press a slip, or its (i).
        John, 1 Oct 2026. Read-only - nothing on it changes anything. -->
   <div class="modal-overlay" id="sum-modal" style="display:none">

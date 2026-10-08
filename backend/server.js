@@ -2560,6 +2560,43 @@ app.patch("/api/slips/:slip/machines/:id/disposal", async (req, res) => {
   }
 });
 
+// REOPEN A MACHINE FOR A SECOND REPAIR (8 Oct 2026, John). Sales and John
+// only. The first repair is archived with its SO and DO (reopenMachine), the
+// machine goes back to the workshop, and the technician who first worked on
+// it is told - in their language, tapping straight to the machine.
+app.post("/api/slips/:slip/machines/:id/reopen", async (req, res) => {
+  if (!needRole(req, res, CAN_DECIDE_MACHINE)) return;
+  try {
+    const body = req.body || {};
+    const machineId = Number(req.params.id);
+    const who = String(body.who || "").trim();
+    const note = String(body.note || "").trim();
+    const slip = await data.slips.reopenMachine(req.params.slip, machineId,
+      { state: body.state, note, who });
+    res.json(slip);
+    try {
+      const m = (slip.machines || []).find((x) => x.id === machineId) || {};
+      const desc = m.machine_desc || "a machine";
+      const first = data.slips.firstTechnicianForMachine(machineId);
+      // Nobody recorded: an empty list tells every technician (notifyTechs).
+      await push.notifyTechs(pushDb, first ? [first] : [], {
+        title: `Reopened: ${desc}`,
+        body: `${slip.slip_number} · ${slip.company} · reopened for another repair` +
+              (note ? `: ${note}` : "") + (who ? ` (${who})` : ""),
+        slip: slip.slip_number,
+        open: "machine",
+        machine: machineId,
+      });
+    } catch (e) {
+      console.error("[push] reopen notify failed:", e.message);
+    }
+  } catch (err) {
+    if (err.status === 400 || err.status === 404 || err.status === 409) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/slips/:slip/machines/:id/reopen]", err);
+    res.status(err.status || 500).json({ error: err.message || "Failed to reopen the machine" });
+  }
+});
+
 // ---- The three routes this replaced -----------------------------------------
 // A phone runs its cached copy of the app until its second open, so for a shift
 // or so after a deploy these are still being called. They translate into the

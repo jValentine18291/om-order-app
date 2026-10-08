@@ -129,6 +129,12 @@ async function buildLogsWorkbook(db) {
     ["When", 18, "date"], ["Slip", 9], ["Company", 32], ["Machine", 28],
     ["What", 12], ["From", 20], ["To", 20], ["By", 8], ["Reason", 40, "wrap"],
   ], hist.map((h) => {
+    // Reopened for another repair (8 Oct 2026): from repair N to N+1, and
+    // the note is just what was wrong - not a condemning's "REASON|note".
+    if (h.field === "reopen") {
+      return [when(h.changed_at), h.slip_number || "(deleted)", h.company || "", h.machine_desc || "",
+        "Reopened", `Repair ${h.from_value}`, `Repair ${h.to_value}`, h.who || "", h.note || ""];
+    }
     const label = h.field === "disposal" ? (v) => DISPOSAL[v] || (v ? v : "Not yet")
                                          : (v) => MACHINE_STATE[v] || v;
     return [when(h.changed_at), h.slip_number || "(deleted)", h.company || "", h.machine_desc || "",

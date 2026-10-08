@@ -38,6 +38,14 @@ const PATTERNS = [
   // ---- The two the technicians actually get -------------------------------
   // The answer to a quotation, which is the only thing the workshop is waiting
   // on. These are the reason this file exists.
+  // A machine reopened for another repair (8 Oct 2026) - with and without the
+  // fault and who reopened it. Before the generic ones below, so a fault that
+  // happens to end in "condemned" is still read as a reopening.
+  [/^Reopened: (.+)$/, "再次维修：$1"],
+  [/^(.+) · (.+) · reopened for another repair: (.+) \(([^()]+)\)$/, "$1 · $2 · 需要再次维修：$3（$4）"],
+  [/^(.+) · (.+) · reopened for another repair: (.+)$/, "$1 · $2 · 需要再次维修：$3"],
+  [/^(.+) · (.+) · reopened for another repair \(([^()]+)\)$/, "$1 · $2 · 需要再次维修（$3）"],
+  [/^(.+) · (.+) · reopened for another repair$/, "$1 · $2 · 需要再次维修"],
   [/^Repair: (.+)$/, "可以维修：$1"],
   [/^Condemn: (.+)$/, "报废：$1"],
   // With who confirmed, in brackets (6 Oct 2026) - and without, for a push
