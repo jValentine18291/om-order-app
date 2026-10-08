@@ -2091,7 +2091,25 @@ function searchSlips(query = "", scope = "all", limit = 20) {
   // decided_at comes along so a list can say how long a machine has been
   // waiting - it is when the machine last moved, which for one sitting on
   // Sales' list is when it was sent to them.
-  const getMachines = db.prepare("SELECT id, machine_desc, state, disposal, converted_at, decided_at FROM slip_machines WHERE slip_id = ?");
+  //
+  // numbered and has_work are for the slip labels (8 Oct 2026, John): a slip
+  // reads every label its machines earn, not one status. numbered tells SO
+  // Created (order still waiting on its DO/CS/INV) from Invoice Created; it is
+  // null for a machine billed before machines carried their SO number, and
+  // the screen falls back on the slip's own status for those. has_work tells
+  // Not started from In Progress, by the same test slipHasWork uses.
+  const getMachines = db.prepare(
+    `SELECT m.id, m.machine_desc, m.state, m.disposal, m.converted_at, m.decided_at,
+            CASE WHEN TRIM(IFNULL(m.so_number, '')) = '' THEN NULL
+                 WHEN EXISTS (SELECT 1 FROM orders o WHERE o.so_number = m.so_number
+                                 AND TRIM(IFNULL(o.closing_ref, '')) != '') THEN 1
+                 ELSE 0 END AS numbered,
+            CASE WHEN IFNULL(m.labour_charge, 0) > 0
+                   OR TRIM(IFNULL(m.repair_comment, '')) != ''
+                   OR EXISTS (SELECT 1 FROM machine_parts p WHERE p.machine_id = m.id)
+                 THEN 1 ELSE 0 END AS has_work
+       FROM slip_machines m WHERE m.slip_id = ?`
+  );
   for (const r of trimmed) r.machines = getMachines.all(r.id);
 
   // The same two counts every other list carries. Through withQuoteCounts

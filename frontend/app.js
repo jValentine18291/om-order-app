@@ -1309,7 +1309,7 @@ function soAgeTag(slip) {
   return `<span class="q-tag q-tag-age${days >= SLIP_STALE_DAYS ? " q-tag-age-late" : ""}">${escapeHtml(text)}</span>`;
 }
 
-function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge, filters, filterBoxId, defaultFilter = "all", allLast = false }) {
+function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge, filters, filterBoxId, defaultFilter = "all", allLast = false, labels = false }) {
   const input = $(inputId);
   const results = $(resultsId);
   let debounce = null;
@@ -1326,7 +1326,9 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge, fil
     if (!filterBox || !filters) return;
     const count = (f) => all.filter(f.match).length;
     const allChip = `<button type="button" class="pu-chip${filterKey === "all" ? " pu-chip-on" : ""}" data-filter="all">All <b>${all.length}</b></button>`;
-    const chips = filters.map((f) => `<button type="button" class="pu-chip${filterKey === f.key ? " pu-chip-on" : ""}" data-filter="${escapeAttr(f.key)}">${escapeHtml(f.label)} <b>${count(f)}</b></button>`).join("");
+    // A label's chip shows only while some slip has that label, or while it is
+    // the one picked - nine labels of mostly-empty chips would bury the rest.
+    const chips = filters.filter((f) => !f.hideEmpty || filterKey === f.key || count(f) > 0).map((f) => `<button type="button" class="pu-chip${filterKey === f.key ? " pu-chip-on" : ""}" data-filter="${escapeAttr(f.key)}">${escapeHtml(f.label)} <b>${count(f)}</b></button>`).join("");
     filterBox.innerHTML = allLast ? chips + allChip : allChip + chips;
     filterBox.querySelectorAll("[data-filter]").forEach((b) => b.addEventListener("click", () => {
       filterKey = b.dataset.filter;
@@ -1370,15 +1372,16 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge, fil
       return;
     }
     results.innerHTML =
-      list.map((s) =>
-        `<button type="button" class="slip-result${onInfo ? " sr-has-info" : ""}" data-slip="${escapeAttr(s.slip_number)}">
+      list.map((s) => {
+        const edge = labels ? slipLabelEdge(s) : "";
+        return `<button type="button" class="slip-result${onInfo ? " sr-has-info" : ""}${edge ? " sl-edged" : ""}"${edge ? ` style="${edge}"` : ""} data-slip="${escapeAttr(s.slip_number)}">
            <span class="sr-num">${escapeHtml(s.slip_number)}</span>
            <span class="sr-co">${escapeHtml(s.company)}</span>
-           <span class="sr-status sr-${escapeAttr(s.status)}">${escapeHtml(STATUS_LABEL[s.status] || s.status)}</span>
+           ${labels ? slipLabelPill(s) : `<span class="sr-status sr-${escapeAttr(s.status)}">${escapeHtml(STATUS_LABEL[s.status] || s.status)}</span>`}
            ${onInfo ? `<span class="sr-info" role="button" aria-label="Summary" data-info="1">i</span>` : ""}
            ${quotePills(s, soAge ? soAgeTag(s) : "")}
-         </button>`
-      ).join("") +
+         </button>`;
+      }).join("") +
       (data.hasMore ? `<div class="slip-result-more">Keep typing to narrow results…</div>` : "");
 
     results.querySelectorAll(".slip-result").forEach((btn) => {
@@ -1477,6 +1480,124 @@ const STATUS_LABEL = {
   INVOICED: "Invoice Created",
   CLOSED: "Collected & Closed",
 };
+
+// ---- Slip labels -------------------------------------------------------------
+// John, 8 Oct 2026: a slip of two machines - one on an SO, one waiting to be
+// quoted - is both of those things, and the one status it carried could only
+// say one. View Slips and Close Service show every label its machines earn
+// instead, the two that matter most as one half-half pill, and the slip is
+// found under each label's chip.
+//
+// IN PRIORITY ORDER, his. Display only: the slip's status underneath, and
+// everything that closes a slip or files it on a list, is unchanged.
+//
+// Written in both languages here and kept away from i18n.js (data-no-i18n):
+// the short words clash with ones it already has - "Close" is 关闭 on every
+// button - and the language only changes on a reload, which redraws these.
+const SLIP_LABELS = [
+  { key: "quote", en: "Waiting on quote",           zh: "待报价",          short: "Quote",     zhShort: "报价",   bg: "#FDF0E0", fg: "#A85B00" },
+  { key: "bill",  en: "Ready to bill",              zh: "待开单",          short: "Bill",      zhShort: "开单",   bg: "#E2F4F3", fg: "#0A6B70" },
+  { key: "so",    en: "SO Created",                 zh: "已开销售单",      short: "SO",        zhShort: "销售单", bg: "#E7F5EC", fg: "#1B7A42" },
+  { key: "close", en: "Collected – ready to close", zh: "已取走 – 可结单", short: "Close",     zhShort: "结单",   bg: "#E9EDF2", fg: "#33424A" },
+  { key: "cond",  en: "Condemned – to settle",      zh: "已报废 – 待处理", short: "Condemned", zhShort: "报废",   bg: "#FBE9E9", fg: "#A32020" },
+  { key: "cust",  en: "Waiting on customer",        zh: "等待客户回复",    short: "Customer",  zhShort: "待客户", bg: "#F0EAFB", fg: "#5B3FA8" },
+  { key: "inv",   en: "Invoice Created",            zh: "已开发票",        short: "Invoiced",  zhShort: "已开票", bg: "#1B4D2E", fg: "#ffffff" },
+  // 维修中 rather than 进行中: that is View Slips' "Active" chip in Chinese.
+  { key: "work",  en: "In Progress",                zh: "维修中",          short: "Working",   zhShort: "维修中", bg: "#E6F1FB", fg: "#185FA5" },
+  { key: "new",   en: "Not started",                zh: "未开始",          short: "New",       zhShort: "未开始", bg: "#EEF1F0", fg: "#55665f" },
+];
+const SLIP_LABEL_BY_KEY = Object.fromEntries(SLIP_LABELS.map((l) => [l.key, l]));
+function slipLabelText(l, short) {
+  const zh = window.OM_I18N && window.OM_I18N.isEnabled();
+  return short ? (zh ? l.zhShort : l.short) : (zh ? l.zh : l.en);
+}
+
+// Which labels a slip earns, in priority order. Takes a row from the slip
+// search (whose machines carry `numbered` and `has_work`) or a whole slip from
+// /api/slips/:slip (whose machines carry so_number, parts and labour, and
+// whose orders carry their DO/CS/INV).
+//
+//   billed, its order has no DO/CS/INV yet    SO Created
+//   billed, numbered, still in the workshop   Invoice Created
+//   billed, numbered, collected               nothing - it is done
+//   condemned and not yet collected/disposed  Condemned - to settle
+//   waiting to quote / on the customer        Waiting on quote / on customer
+//   repaired, not billed                      Ready to bill
+//   being worked on, or work written on it    In Progress
+//   nothing done yet                          Not started
+//
+// A slip whose every machine has gone, and earns nothing else, is Collected -
+// ready to close. A closed slip earns none: its own status says it.
+function slipLabels(s) {
+  if (!s || s.status === "CLOSED") return [];
+  const ms = s.machines || [];
+  const numberedOrders = new Set((s.orders || [])
+    .filter((o) => o.so_number && String(o.closing_ref || "").trim()).map((o) => o.so_number));
+  const set = new Set();
+  for (const m of ms) {
+    const gone = !!String(m.disposal || "").trim();
+    if (String(m.converted_at || "").trim()) {
+      let numbered = m.numbered;
+      if (numbered === undefined && m.so_number && s.orders) numbered = numberedOrders.has(m.so_number);
+      // Billed before machines carried their SO number: the slip says.
+      if (numbered === undefined || numbered === null) numbered = s.status === "INVOICED";
+      if (!numbered) set.add("so");
+      else if (!gone) set.add("inv");
+      continue;
+    }
+    if (m.state === "CONDEMNED") { if (!gone) set.add("cond"); continue; }
+    if (m.state === "AWAITING_QUOTE") set.add("quote");
+    else if (m.state === "QUOTED") set.add("cust");
+    else if (m.state === "REPAIRED") set.add("bill");
+    else if (m.state === "TO_REPAIR") set.add("work");
+    else {
+      const work = m.has_work !== undefined ? !!Number(m.has_work)
+        : (Number(m.labour_charge) || 0) > 0 || !!String(m.repair_comment || "").trim() || (m.parts || []).length > 0;
+      set.add(work ? "work" : "new");
+    }
+  }
+  if (!set.size && ms.length && ms.every((m) => String(m.disposal || "").trim())) set.add("close");
+  return SLIP_LABELS.filter((l) => set.has(l.key)).map((l) => l.key);
+}
+
+// The pill: one label in full words; two or more as one half-half pill of the
+// top two in short words, "+1" for any more. Falls back to the plain status
+// pill where a slip earns no label (closed, or no machines). `cls` is the
+// class the plain pill takes on each screen (sr-status / vs-status).
+function slipLabelPill(s, cls = "sr-status") {
+  const keys = slipLabels(s);
+  if (!keys.length) {
+    return `<span class="${cls} ${cls === "sr-status" ? "sr" : "vs"}-${escapeAttr(s.status)}">${escapeHtml(STATUS_LABEL[s.status] || s.status)}</span>`;
+  }
+  const ls = keys.map((k) => SLIP_LABEL_BY_KEY[k]);
+  const all = escapeAttr(ls.map((l) => slipLabelText(l, false)).join(" · "));
+  const part = (l, short) => `<span class="sl-part" style="background:${l.bg};color:${l.fg}">${escapeHtml(slipLabelText(l, short))}</span>`;
+  const body = ls.length === 1 ? part(ls[0], false) : part(ls[0], true) + part(ls[1], true);
+  const more = ls.length > 2 ? `<span class="sl-more">+${ls.length - 2}</span>` : "";
+  return `<span class="sl-pill" data-no-i18n title="${all}">${body}</span>${more}`;
+}
+
+// The row's left edge in the same colours: half and half for two labels. The
+// style for the row, or "" where it keeps its plain status edge.
+function slipLabelEdge(s) {
+  const keys = slipLabels(s);
+  if (!keys.length) return "";
+  const a = SLIP_LABEL_BY_KEY[keys[0]], b = SLIP_LABEL_BY_KEY[keys[1] || keys[0]];
+  // The edge is the strong colour of each label; Invoice Created's pill is
+  // already dark, so its own background serves.
+  const edge = (l) => l.key === "inv" ? l.bg : l.fg;
+  return `--sl1:${edge(a)};--sl2:${edge(b)}`;
+}
+
+// One chip per label, for the lists that show them. Named from the table
+// above in the language the app is in, like the pills, so a chip and a pill
+// can never disagree.
+function slipLabelFilters() {
+  return SLIP_LABELS.map((l) => ({
+    key: "l-" + l.key, label: slipLabelText(l, false), hideEmpty: true,
+    match: (s) => slipLabels(s).includes(l.key),
+  }));
+}
 
 // Where a machine is. A slip's own status is worked out from these, so this is
 // the only thing anyone has to read to know what is happening to a machine.
@@ -7354,15 +7475,10 @@ async function enterCloseService() {
       onPick: (slipNumber) => onCloseSlipChosen(slipNumber),
       onInfo: (slipNumber) => openSlipSummary(slipNumber),
       soAge: true,
-      // John, 2 Oct 2026. "SO Created" takes in Partial SO and All Repaired -
-      // anything with an order not yet invoiced. "Condemned" is the slips
-      // with no order at all: condemned machines, which need none.
-      filterBoxId: "cs-filters",
-      filters: [
-        { key: "so", label: "SO Created", match: (s) => s.status !== "INVOICED" && slipHasOrder(s) },
-        { key: "inv", label: "Invoice Created", match: (s) => s.status === "INVOICED" },
-        { key: "cond", label: "Condemned", match: (s) => s.status !== "INVOICED" && !slipHasOrder(s) },
-      ],
+      // One chip per slip label (John, 8 Oct 2026), replacing SO Created /
+      // Invoice Created / Condemned: a slip with two labels is under both.
+      filterBoxId: "cs-filters", labels: true,
+      filters: slipLabelFilters(),
     });
   }
   closeSearch.reset();
@@ -7389,7 +7505,7 @@ async function onCloseSlipChosen(slipNumber) {
     $("csm-sub").innerHTML = [
       `<span>Slip ${escapeHtml(slip.slip_number)}</span>`,
       slip.physical_ss ? `<span>Physical SS</span> ${escapeHtml(slip.physical_ss)}` : "",
-      `<span>${escapeHtml(STATUS_LABEL[slip.status] || slip.status)}</span>`,
+      slipLabelPill(slip),
       `<span>${slip.machines.length} machine(s)</span>`,
     ].filter(Boolean).join(" · ");
     // The number recorded at the invoice step, so closing does not ask for it
@@ -7468,10 +7584,6 @@ function closeVsWindow() {
 $("vsm-x").addEventListener("click", closeVsWindow);
 $("vs-modal").addEventListener("click", (e) => { if (e.target.id === "vs-modal") closeVsWindow(); });
 
-// Whether any machine on a listed slip has gone on a Sales Order.
-function slipHasOrder(s) {
-  return ((s && s.machines) || []).some((m) => String(m.converted_at || "").trim());
-}
 
 // ---- A slip at a glance -----------------------------------------------------
 // John, 1 Oct 2026: long-press a slip in Close Service, or tap its (i), for
@@ -7860,11 +7972,12 @@ async function enterViewSlips() {
       inputId: "vs-search", resultsId: "vs-results", scope: "all",
       onPick: (slipNumber) => { vsWindowScreen = "view"; onViewSlipChosen(slipNumber); },
       // John, 6 Oct 2026: every slip, filtered by chips, starting on Active.
-      filterBoxId: "vs-filters", defaultFilter: "active", allLast: true,
+      // One chip per slip label between Active and Closed (8 Oct 2026),
+      // replacing "Need quote" and "SO / Invoiced".
+      filterBoxId: "vs-filters", defaultFilter: "active", allLast: true, labels: true,
       filters: [
         { key: "active", label: "Active", match: (s) => s.status !== "CLOSED" },
-        { key: "quote", label: "Need quote", match: (s) => s.status !== "CLOSED" && (Number(s.to_quote) || 0) > 0 },
-        { key: "billed", label: "SO / Invoiced", match: (s) => s.status !== "CLOSED" && slipHasOrder(s) },
+        ...slipLabelFilters(),
         { key: "closed", label: "Closed", match: (s) => s.status === "CLOSED" },
       ],
     });
@@ -8152,7 +8265,7 @@ function renderSlipDetail(slip) {
             // The paper booklet's number, when one was written down (1 Oct 2026).
             slip.physical_ss ? `<div class="vs-sub"><span>Physical SS</span> <b>${escapeHtml(slip.physical_ss)}</b></div>` : ""}
         </div>
-        <span class="vs-status vs-${escapeAttr(slip.status)}">${escapeHtml(STATUS_LABEL[slip.status] || slip.status)}</span>
+        <span class="vs-labels">${slipLabelPill(slip, "vs-status")}</span>
       </div>
       ${
         // On a line of their own, under the header. Inside it they were a
