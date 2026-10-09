@@ -697,6 +697,15 @@
     "Pick a slip first.": "请先选择服务单。",
     // Pressing Save on a machine is what marks it repaired.
     "Saved · marked as Repaired": "已保存 · 已标记为已修好",
+    // Free of charge (9 Oct 2026). The SO wording itself stays English.
+    "Free of charge (FOC)?": "免费维修（FOC）？",
+    "No parts, labour or note on this machine.": "这台机器没有零件、人工费或备注。",
+    "No charge on this machine - it comes to $0.": "这台机器没有收费，总额 $0。",
+    "It will be marked as Repaired, free of charge.": "将标记为已修好，免费。",
+    "The Sales Order will say \"*No servicing (FOC)\".": "销售单上会写 “*No servicing (FOC)”。",
+    "The Sales Order will add \"*FOC\" under the note.": "销售单会在备注下加上 “*FOC”。",
+    "Saved · repaired, free of charge": "已保存 · 已修好（免费）",
+    "Free of charge — goes on at $0": "免费 — 以 $0 开单",
     // ---- The three Save buttons ----
     // John, 30 Sep 2026: short enough to fit on one line of a phone, and
     // meaning exactly what the English says. 未完成 is "not finished", 已修好

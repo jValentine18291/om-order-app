@@ -1973,8 +1973,10 @@ app.post("/api/machines/:machineId/finish", async (req, res) => {
 app.post("/api/machines/:machineId/save", async (req, res) => {
   try {
     const machineId = Number(req.params.machineId);
-    const { outcome = "", who = "" } = req.body || {};
-    const result = await data.slips.saveMachineWork(machineId, outcome, who);
+    const { outcome = "", who = "", foc = false } = req.body || {};
+    // foc: "fully repaired", free of charge, confirmed by the technician on a
+    // machine that comes to $0 (9 Oct 2026, John).
+    const result = await data.slips.saveMachineWork(machineId, outcome, who, { foc: foc === true });
     res.json(result);
 
     const slip = result && result.slip;

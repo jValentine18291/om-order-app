@@ -3613,6 +3613,29 @@ function confirmSave(outcome) {
   return confirmLines(session.extras ? "Save these parts?" : (o ? o.ask : "Save this machine?"), lines);
 }
 
+// Free of charge? Asked on "fully repaired" when the machine comes to $0.
+// true: confirmed FOC. false: not a $0 machine, ask the ordinary question.
+// null: it was asked and the technician said no - save nothing.
+function askFoc() {
+  const m = session.extras ? null : currentMachine();
+  if (!m || String(m.converted_at || "").trim()) return false;
+  if (!["RECEIVED", "TO_REPAIR", "REPAIRED"].includes(m.state)) return false;
+  const lines = [...(m.parts || []), ...(session.pendingParts || [])];
+  const unpriced = lines.some((p) => !(Number(p.unit_price) > 0)
+    && !(window.OM_JOBS && window.OM_JOBS.zeroIsDeliberate(p)));
+  const total = lines.reduce((s, p) => s + (Number(p.unit_price) || 0) * (Number(p.quantity) || 0), 0)
+    + (Number(currentLabourValue()) || 0);
+  if (unpriced || total > 0) return false;
+  const note = String(($("os-comment") || {}).value || "").trim();
+  const nothing = !note && !lines.length;
+  return confirmLines("Free of charge (FOC)?", [
+    machineTitle(m),
+    tr(nothing ? "No parts, labour or note on this machine." : "No charge on this machine - it comes to $0."),
+    tr("It will be marked as Repaired, free of charge."),
+    tr(nothing ? "The Sales Order will say \"*No servicing (FOC)\"." : "The Sales Order will add \"*FOC\" under the note."),
+  ]) ? true : null;
+}
+
 // WHICH SAVE BUTTONS THIS SHEET GETS, and whether "fully repaired" is allowed.
 //
 // The slip's own parts have no status: one plain Save. A machine gets the
@@ -3665,7 +3688,15 @@ async function closeMachineModal(outcome) {
   // status without saying so - it is what marks a machine Repaired - and a
   // technician who meant to close the sheet should find that out before it
   // happens rather than from the pill afterwards.
-  if (save && !confirmSave(outcome)) return;
+  // FREE OF CHARGE (9 Oct 2026, John). "Fully repaired" on a machine that
+  // comes to $0 - nothing recorded, or only a note - asks whether the repair
+  // is free of charge, in place of the ordinary question. Yes marks it
+  // repaired and the Sales Order says "*No servicing (FOC)", or "*FOC" under
+  // the note. Not asked when a part is still waiting for its price: that is
+  // $0 because nobody has priced it, not because it is free.
+  const foc = save && outcome === "repaired" && askFoc();
+  if (foc === null) return;
+  if (save && !foc && !confirmSave(outcome)) return;
   if (save && session.extras) {
     // Nothing here is "repaired", so there is nothing to mark. The parts, and
     // the note that goes with them.
@@ -3696,7 +3727,7 @@ async function closeMachineModal(outcome) {
         await api(`/api/machines/${session.machineId}/save`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ outcome, who: initialsFor(getUser()) }),
+          body: JSON.stringify({ outcome, who: initialsFor(getUser()), foc: !!foc }),
         });
       } catch (e) {
         // The parts ARE saved by this point. Failing the whole Save over the
@@ -3709,7 +3740,7 @@ async function closeMachineModal(outcome) {
         restore();
         return;
       }
-      toast((SAVE_OUTCOME[outcome] || {}).done || "Saved", "ok");
+      toast(foc ? "Saved · repaired, free of charge" : (SAVE_OUTCOME[outcome] || {}).done || "Saved", "ok");
     } catch (e) {
       toast(e.message, "err");
       restore();
@@ -5954,7 +5985,10 @@ function updateSlipFooter() {
   // A slip whose only unconverted machines are condemned still has an order to
   // raise: they leave the building on it, at nothing.
   const anyCondemned = (session.slip.machines || []).some((m) => m.state === "CONDEMNED" && !m.converted_at);
-  const billable = slipParts > 0 || slipTotal > 0 || anyCondemned;
+  // And one repaired free of charge (9 Oct 2026, John): its order is at $0
+  // and says "*No servicing (FOC)".
+  const anyFoc = (session.slip.machines || []).some((m) => m.foc && m.state === "REPAIRED" && !m.converted_at);
+  const billable = slipParts > 0 || slipTotal > 0 || anyCondemned || anyFoc;
   // A slip converted machine by machine sits at ALL_REPAIRED between orders, so
   // that status must not disable the button any more - only a slip whose every
   // machine is already on an order, or one that is closed.
@@ -6477,7 +6511,9 @@ function openConvertPicker() {
     // collecting it, and it needs paperwork like anything else leaving the
     // building. Nothing was recorded on it and nothing has to be.
     const condemned = m.state === "CONDEMNED";
-    const billable = condemned || parts > 0 || labour > 0 || String(m.repair_comment || "").trim();
+    // Free of charge goes on at $0 too, saying so (9 Oct 2026).
+    const foc = !!m.foc && m.state === "REPAIRED";
+    const billable = condemned || foc || parts > 0 || labour > 0 || String(m.repair_comment || "").trim();
     // A QUOTE NOBODY HAS ANSWERED. The server refuses this machine with the
     // same sentence, so the box is greyed with the reason rather than the
     // order failing after the button is pressed. See quoteBlockReason().
@@ -6495,6 +6531,8 @@ function openConvertPicker() {
           ? "Not finished yet — mark it repaired first"
           : condemned
             ? "Condemned — goes on at no charge"
+            : foc && !parts && !labour
+              ? "Free of charge — goes on at $0"
             : billable
               ? `${parts} part${parts === 1 ? "" : "s"}${labour > 0 ? " · labour " + money(labour) : ""}`
               : "No work recorded yet";

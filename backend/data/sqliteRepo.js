@@ -1081,8 +1081,10 @@ function createSlipOrder(slipNumber, machineIds, opts) {
   // Condemned machines are exempt. Being condemned IS the fact the block
   // records, and it is often the whole of it: a machine written off on sight
   // has no parts, no labour and nothing anyone typed.
+  // A machine confirmed free of charge is exempt too: "nothing done, nothing
+  // charged" is the fact its block records (9 Oct 2026).
   const untouched = wanted
-    .filter((m) => m.state !== "CONDEMNED")
+    .filter((m) => m.state !== "CONDEMNED" && !m.foc)
     .filter((m) => (m.parts || []).length === 0 && !String(m.repair_comment || "").trim() && !(Number(m.labour_charge) > 0))
     .map((m) => m.machine_desc);
   if (untouched.length) {
@@ -1190,6 +1192,12 @@ function slipBlockLines(slip, wanted, all, extras = [], { physicalSs = false } =
     const comment = String(m.repair_comment || "").trim();
     if (comment) lines.push({ note: true, description: `*${comment}` });
     if (condemned) lines.push({ note: true, description: condemnedNote(m) });
+    // Free of charge, as the technician confirmed (9 Oct 2026, John). Said
+    // only while it is still $0: work added afterwards is charged for.
+    const charged = labour + parts.reduce((s, p) => s + p.unit_price * p.quantity, 0);
+    if (!condemned && m.foc && charged === 0) {
+      lines.push({ note: true, description: comment ? "*FOC" : "*No servicing (FOC)" });
+    }
 
     // Where the machine works, at the foot of its block and immediately above
     // its SubTotal - John's placement, Sep 2026. It is the customer's own
@@ -3060,7 +3068,7 @@ function undoMachineDecision(slipNumber, machineId, who = "") {
   db.prepare(
     `UPDATE slip_machines
         SET state = 'RECEIVED', decided_by = ?, decided_at = datetime('now','localtime'),
-            disposal = '', disposal_at = '', disposal_by = ''
+            disposal = '', disposal_at = '', disposal_by = '', foc = 0
       WHERE id = ?`
   ).run(String(who || "").trim(), machine.id);
   deriveSlipStatus(slip.id);
@@ -3214,7 +3222,15 @@ function finishRepair(machineId, who = "") {
 // Save is pressed far more often than a machine moves.
 const SAVE_OUTCOMES = new Set(["progress", "repaired", "quote"]);
 
-function saveMachineWork(machineId, outcome, who = "") {
+// What a machine's own work comes to: labour plus its parts.
+function machineCharge(machine) {
+  const parts = db.prepare(
+    "SELECT IFNULL(SUM(unit_price * quantity), 0) AS t FROM machine_parts WHERE machine_id = ?"
+  ).get(machine.id).t;
+  return (Number(machine.labour_charge) || 0) + (Number(parts) || 0);
+}
+
+function saveMachineWork(machineId, outcome, who = "", { foc = false } = {}) {
   const how = String(outcome || "").toLowerCase();
   if (!SAVE_OUTCOMES.has(how)) { const e = new Error("Say what the save means."); e.status = 400; throw e; }
   const machine = db.prepare("SELECT * FROM slip_machines WHERE id = ?").get(machineId);
@@ -3271,6 +3287,24 @@ function saveMachineWork(machineId, outcome, who = "") {
       );
       e.status = 409; throw e;
     }
+    // FREE OF CHARGE (9 Oct 2026, John). A repair that costs the customer
+    // nothing, said so by the technician: repaired with nothing recorded, or
+    // with only a note, and the Sales Order says "*No servicing (FOC)" or
+    // "*FOC". Only at $0 - a machine with a charge on it is not free.
+    if (foc) {
+      if (machineCharge(machine) > 0) {
+        const e = new Error("This machine has a charge on it, so it is not free of charge.");
+        e.status = 409; throw e;
+      }
+      db.prepare("UPDATE slip_machines SET foc = 1 WHERE id = ?").run(machine.id);
+      const moved = machine.state !== "REPAIRED";
+      return {
+        slip: moved ? setMachineState(slip.slip_number, machine.id, "REPAIRED", who) : getSlip(slip.slip_number),
+        moved, state: "REPAIRED",
+      };
+    }
+    // A plain "fully repaired" is not free of charge, whatever it was before.
+    if (machine.foc) db.prepare("UPDATE slip_machines SET foc = 0 WHERE id = ?").run(machine.id);
     if (machine.state !== "REPAIRED" && !machineHasWork(machine.id)) {
       const e = new Error("Nothing has been recorded on this machine - add the parts, labour or a note first.");
       e.status = 409; throw e;
@@ -3413,7 +3447,7 @@ function reopenMachine(slipNumber, machineId, { state = "TO_REPAIR", note = "", 
     db.prepare(
       `UPDATE slip_machines
           SET state = ?, decided_by = ?, decided_at = datetime('now','localtime'),
-              converted_at = NULL, so_number = '',
+              converted_at = NULL, so_number = '', foc = 0,
               disposal = '', disposal_by = '', disposal_at = '',
               repair_round = ?
         WHERE id = ?`
