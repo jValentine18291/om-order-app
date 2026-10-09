@@ -278,10 +278,13 @@
   }
 
   // And one part under two NAMES. The books call an air filter AIR CLEANER
-  // (5 books) or just ELEMENT (16 lines, the Zenoah-made machines). Not
-  // "ANTIVIBRATION ELEMENT" - 22 lines that are rubber mounts, not filters.
+  // (5 books) or just ELEMENT (16 lines, the Zenoah-made machines), and so
+  // does AutoCount - the BK3410's is "Element 2-102". Not the antivibration
+  // elements: 22 book lines and several AutoCount items that are rubber
+  // mounts, not filters, spelt with and without the hyphen.
   const PHRASES = [
-    { typed: "AIR FILTER", also: ["AIR CLEANER", "ELEMENT"], notWith: ["ANTIVIBRATION"] },
+    { typed: "AIR FILTER", also: ["AIR CLEANER", "ELEMENT"],
+      notWith: ["ANTIVIBRATION", "ANTI-VIBRATION", "ANTI VIBRATION"] },
   ];
 
   // The ways a term can be read: itself, and with a phrase above swapped for

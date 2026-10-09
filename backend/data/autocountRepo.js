@@ -569,21 +569,39 @@ function buildPartsSearchSql(q, limit = 15, fit = {}) {
 
   const words = term.split(/\s+/).slice(0, 6); // sane cap on word count
   const params = { exact: term.replace(/\s+/g, "").toUpperCase() };
-  const conditions = words.map((w, idx) => {
-    params[`w${idx}`] = w;
-    params[`n${idx}`] = w.replace(/\s+/g, "").toUpperCase();
+  // One reading's words, each of which has to appear somewhere. `p` keeps the
+  // first reading's parameters named as they always were (@w0, @n0 ...).
+  const wordTests = (ws, p) => ws.map((w, idx) => {
+    params[`${p}w${idx}`] = w;
+    params[`${p}n${idx}`] = w.replace(/\s+/g, "").toUpperCase();
     // The word's other spellings (9 Oct 2026, John): "carburetor" finds a
     // "Carburettor" too. The same groups the parts books are read with -
     // see spellingsOf in machine-ipl.js.
     const others = MACHINE_IPL.spellingsOf(w).filter((s) => s !== w.toUpperCase());
     const alt = others.map((s, j) => {
-      params[`w${idx}s${j}`] = s;
-      return `\n           OR i.Description LIKE '%' + @w${idx}s${j} + '%'`;
+      params[`${p}w${idx}s${j}`] = s;
+      return `\n           OR i.Description LIKE '%' + @${p}w${idx}s${j} + '%'`;
     }).join("");
-    return `( i.Description LIKE '%' + @w${idx} + '%'${alt}
-           OR i.Desc2 LIKE '%' + @w${idx} + '%'
-           OR REPLACE(UPPER(i.ItemCode), ' ', '') LIKE '%' + @n${idx} + '%' )`;
+    return `( i.Description LIKE '%' + @${p}w${idx} + '%'${alt}
+           OR i.Desc2 LIKE '%' + @${p}w${idx} + '%'
+           OR REPLACE(UPPER(i.ItemCode), ' ', '') LIKE '%' + @${p}n${idx} + '%' )`;
   });
+  let conditions = wordTests(words, "");
+  // And the term's other NAMES (9 Oct 2026): "air filter" also finds what
+  // AutoCount calls "Element" or "Air Cleaner" - the BK3410's air filter is
+  // "Element 2-102" - but never an antivibration element. See termReadings in
+  // machine-ipl.js, which the parts books are read with too.
+  const others = MACHINE_IPL.termReadings(words.join(" ")).slice(1);
+  if (others.length) {
+    const readings = [`( ${conditions.join("\n        AND ")} )`].concat(others.map((r, ri) => {
+      const not = (r.notWith || []).map((x, k) => {
+        params[`r${ri}x${k}`] = x;
+        return `i.Description NOT LIKE '%' + @r${ri}x${k} + '%'`;
+      });
+      return `( ${wordTests(r.words.slice(0, 6), `r${ri}`).concat(not).join("\n        AND ")} )`;
+    }));
+    conditions = [`( ${readings.join("\n        OR ")} )`];
+  }
 
   // Spaces AND dashes, because neither is written consistently: the book has
   // "590 53 64-02" and AutoCount has its own idea of where the spaces go.

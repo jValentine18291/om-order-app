@@ -62,5 +62,16 @@ check("a word with one spelling adds nothing", Object.keys(none.params).some((k)
 const dup = buildPartsSearchSql("coil", 15, { models: ["BK3410"], also: ["BK3410"] });
 check("a model is never its own equivalent", /@eq0/.test(dup.sql), false);
 
+// AutoCount calls the BK3410's air filter "Element 2-102" (live, 9 Oct 2026).
+const af = buildPartsSearchSql("air filter", 15, { brand: "SHUQ", models: ["532RBS"], also: ["BK3410"] });
+check("air filter also asks for Element and Air Cleaner",
+  Object.entries(af.params).filter(([k]) => /^r\dw\d$/.test(k)).map(([, v]) => v), ["AIR", "CLEANER", "ELEMENT"]);
+check("but not an antivibration element, either spelling",
+  ["ANTIVIBRATION", "ANTI-VIBRATION"].every((x) => Object.values(af.params).includes(x)) && af.sql.includes("NOT LIKE '%' + @r0x0"), true);
+check("every parameter named is supplied, and every one supplied is used",
+  [...af.sql.matchAll(/@([a-z0-9]+)/gi)].every((m) => m[1] in af.params) &&
+  Object.keys(af.params).every((k) => af.sql.includes("@" + k)), true);
+check("a term with no other names is searched as before", /@r0/.test(b.sql), false);
+
 console.log(failures ? `\n${failures} FAILED` : "\nAll passed.");
 process.exit(failures ? 1 : 0);
