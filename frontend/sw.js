@@ -9,7 +9,7 @@
 // on EVERY open, and opens outnumber deploys a hundred to one. Now the cached
 // copy is served instantly and the fresh one is fetched behind it, so a
 // deploy shows one open later and startup does not touch the network at all.
-const CACHE = "om-order-v386";
+const CACHE = "om-order-v387";
 
 // IPL artwork lives in its own cache, deliberately NOT version-stamped.
 // They are large, they are already fetched only when a section is opened, and
@@ -17,6 +17,14 @@ const CACHE = "om-order-v386";
 // made phones re-download the same drawings over office Wi-Fi. This cache
 // survives version bumps; only the app shell above is versioned.
 const IPL_CACHE = "om-ipl-diagrams";
+
+// Where a tapped notification said to go, kept until the app has gone there
+// (9 Oct 2026, John: the go-ahead should land on the machine's repair sheet).
+// A message to an open window is lost if iOS has that window asleep, and the
+// URL of a cold start is lost if the app reloads itself to take an update;
+// this survives both, and the app reads it every time it comes to the front.
+const GO_CACHE = "om-pending-go";
+const GO_KEY = "./__pending-go";
 const SHELL = [
   "./",
   "./index.html",
@@ -60,7 +68,7 @@ self.addEventListener("activate", (e) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((k) => k !== CACHE && k !== IPL_CACHE)
+          .filter((k) => k !== CACHE && k !== IPL_CACHE && k !== GO_CACHE)
           .map((k) => caches.delete(k))
       )
     )
@@ -252,8 +260,14 @@ self.addEventListener("notificationclick", (e) => {
   const message = toMachine
     ? { type: "go", screen: "machine", slip: d.slip, machine: d.machine }
     : { type: "go", screen: "quote" };
+  // Written down first, so the app finds it however it wakes up.
+  const note = toMachine
+    ? caches.open(GO_CACHE).then((c) => c.put(GO_KEY, new Response(JSON.stringify({
+        slip: d.slip, machine: d.machine || "", at: Date.now(),
+      }), { headers: { "Content-Type": "application/json" } }))).catch(() => {})
+    : Promise.resolve();
   e.waitUntil(
-    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => {
+    note.then(() => self.clients.matchAll({ type: "window", includeUncontrolled: true })).then((wins) => {
       // Reuse a window that is already open rather than piling up new ones.
       for (const w of wins) {
         if (w.url.startsWith(self.location.origin) && "focus" in w) {

@@ -264,14 +264,48 @@
     return { iplId, brand, models };
   }
 
+  // ONE PART, SPELT TWO WAYS (John, 9 Oct 2026). The parts books are printed
+  // in British English - 23 say CARBURETTOR, 17 CARBURETOR - and a technician
+  // typing "carburetor" into the 532RBS's book found nothing. A word in a
+  // group matches any spelling in it. The parts search on the server uses
+  // the same groups (spellingsOf), so the book and AutoCount agree.
+  const SPELLINGS = [
+    ["CARBURETOR", "CARBURETTOR", "CARBURATOR"],
+  ];
+  function spellingsOf(word) {
+    const w = String(word || "").toUpperCase();
+    return SPELLINGS.find((g) => g.includes(w)) || [w];
+  }
+
+  // And one part under two NAMES. The books call an air filter AIR CLEANER
+  // (5 books) or just ELEMENT (16 lines, the Zenoah-made machines). Not
+  // "ANTIVIBRATION ELEMENT" - 22 lines that are rubber mounts, not filters.
+  const PHRASES = [
+    { typed: "AIR FILTER", also: ["AIR CLEANER", "ELEMENT"], notWith: ["ANTIVIBRATION"] },
+  ];
+
+  // The ways a term can be read: itself, and with a phrase above swapped for
+  // each of its other names. Each is a list of words plus what rules it out.
+  function termReadings(term) {
+    const t = String(term || "").trim().toUpperCase().replace(/\s+/g, " ");
+    const out = [{ words: t.split(" ").filter(Boolean), notWith: [] }];
+    for (const ph of PHRASES) {
+      if (!t.includes(ph.typed)) continue;
+      for (const alt of ph.also) {
+        out.push({ words: t.replace(ph.typed, alt).split(" ").filter(Boolean), notWith: ph.notWith || [] });
+      }
+    }
+    return out;
+  }
+
   // The part numbers in this book that the technician's search term matches.
   //
   // Filtered by the term rather than sent whole: a book runs to 338 parts and
   // the search only needs to know which of them are candidates for what was
   // actually typed. A handful of numbers travels; a parts list does not.
   function preferredNumbers(iplDoc, term, cap = 25) {
-    const words = String(term || "").trim().toUpperCase().split(/\s+/).filter(Boolean);
-    if (!words.length || !iplDoc) return [];
+    const readings = termReadings(term).filter((r) => r.words.length);
+    if (!readings.length || !iplDoc) return [];
     const out = [];
     const seen = new Set();
     for (const fig of iplDoc.figures || []) {
@@ -279,10 +313,12 @@
         const num = String(p.part_number || "").trim();
         if (!num || seen.has(num)) continue;
         // The same test the catalogue search does: every word has to appear
-        // somewhere, in the number or in what the part is called.
+        // somewhere, in the number or in what the part is called - in any of
+        // its spellings, under any of the term's readings.
         const hay = `${num} ${p.description || ""} ${p.remarks || ""}`.toUpperCase();
         const haySquashed = hay.replace(/\s+/g, "");
-        if (!words.every((w) => hay.includes(w) || haySquashed.includes(w.replace(/\s+/g, "")))) continue;
+        const has = (w) => spellingsOf(w).some((s) => hay.includes(s) || haySquashed.includes(s.replace(/\s+/g, "")));
+        if (!readings.some((r) => !r.notWith.some((x) => hay.includes(x)) && r.words.every(has))) continue;
         seen.add(num);
         // Squashed to letters and digits, which is how the catalogue search
         // compares them: AutoCount holds "SHUQ 590 53 64-02" and the book has
@@ -295,6 +331,6 @@
   }
 
   return { fitFor, brandPrefixFor, brandPrefixForBrandName, matchIplModel,
-           preferredNumbers, modelWordsFor, modelKeys, codePrefix,
+           preferredNumbers, modelWordsFor, modelKeys, codePrefix, spellingsOf, termReadings,
            BRAND_BY_PREFIX, STANDS_ALONE };
 });

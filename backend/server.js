@@ -1374,6 +1374,8 @@ app.get("/api/parts-search", async (req, res) => {
       brand: String(req.query.brand || ""),
       prefer: String(req.query.prefer || "").split(",").filter(Boolean),
       models: String(req.query.models || "").split(",").filter(Boolean),
+      // The equivalent model's, listed under its own (9 Oct 2026).
+      also: String(req.query.also || "").split(",").filter(Boolean),
     });
     res.json({ results });
   } catch (err) {
@@ -1678,6 +1680,21 @@ app.get("/api/machine-search", async (req, res) => {
   } catch (err) {
     console.error("[GET /api/machine-search]", err.message);
     res.json({ results: [] });
+  }
+});
+
+// Which of our machines a typed model is (9 Oct 2026): its brand, from the
+// AutoCount unit with that model number. Read-only; null when it is not one
+// of ours or the units disagree. See lookupMachineModel.
+app.get("/api/machine-lookup", async (req, res) => {
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") return res.json({ machine: null });
+    const acRepo = require("./data/autocountRepo");
+    res.json({ machine: await acRepo.lookupMachineModel(String(req.query.text || "").slice(0, 200)) });
+  } catch (err) {
+    console.error("[GET /api/machine-lookup]", err.message);
+    res.json({ machine: null });
   }
 });
 

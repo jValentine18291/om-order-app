@@ -119,6 +119,9 @@ function writebackEnabled() {
 //           item_code, old_price, new_price }
 const UNSTOCKED = require(require("path").join(
   __dirname, "..", "..", "frontend", "service-items.js"));
+// The spellings the parts search shares with the parts books (spellingsOf).
+const MACHINE_IPL = require(require("path").join(
+  __dirname, "..", "..", "frontend", "machine-ipl.js"));
 
 async function updateItemPriceIfMissing(itemCode, newPrice) {
   // Used by the Sales Order path: fills the Contractor price from what a
@@ -569,7 +572,15 @@ function buildPartsSearchSql(q, limit = 15, fit = {}) {
   const conditions = words.map((w, idx) => {
     params[`w${idx}`] = w;
     params[`n${idx}`] = w.replace(/\s+/g, "").toUpperCase();
-    return `( i.Description LIKE '%' + @w${idx} + '%'
+    // The word's other spellings (9 Oct 2026, John): "carburetor" finds a
+    // "Carburettor" too. The same groups the parts books are read with -
+    // see spellingsOf in machine-ipl.js.
+    const others = MACHINE_IPL.spellingsOf(w).filter((s) => s !== w.toUpperCase());
+    const alt = others.map((s, j) => {
+      params[`w${idx}s${j}`] = s;
+      return `\n           OR i.Description LIKE '%' + @w${idx}s${j} + '%'`;
+    }).join("");
+    return `( i.Description LIKE '%' + @w${idx} + '%'${alt}
            OR i.Desc2 LIKE '%' + @w${idx} + '%'
            OR REPLACE(UPPER(i.ItemCode), ' ', '') LIKE '%' + @n${idx} + '%' )`;
   });
@@ -613,6 +624,17 @@ function buildPartsSearchSql(q, limit = 15, fit = {}) {
   const modelTests = models.map((m, idx) => {
     params[`md${idx}`] = m;
     return `${D2} LIKE '%,' + @md${idx} + ',%'`;
+  });
+
+  // THE EQUIVALENT MODEL's parts (9 Oct 2026, John): a 532RBS on the bench
+  // also lists what AutoCount files under the BK3410, below its own and above
+  // the rest of the brand. See EQUIVALENTS in machine-types.js.
+  const also = [...new Set((fit.also || [])
+    .map((m) => String(m || "").toUpperCase().replace(/[^A-Z0-9.]/g, ""))
+    .filter((m) => m.length >= 3 && !models.includes(m)))].slice(0, 6);
+  const alsoTests = also.map((m, idx) => {
+    params[`eq${idx}`] = m;
+    return `${D2} LIKE '%,' + @eq${idx} + ',%'`;
   });
 
   const brand = String(fit.brand || "").toUpperCase().replace(/[^A-Z]/g, "");
@@ -659,6 +681,9 @@ function buildPartsSearchSql(q, limit = 15, fit = {}) {
     // Above the machine's own parts, and only for a term that named it.
     servicePrefix ? `WHEN ${CODE} LIKE @acode + '%' THEN -1` : "",
     own.length ? `WHEN ${own.join(" OR ")} THEN 0` : "",
+    // Half a step, so the ranks either side keep the numbers the screen and
+    // the tests already know: 0 its own, 1 its brand, 2 the rest.
+    alsoTests.length ? `WHEN ${alsoTests.join(" OR ")} THEN 0.5` : "",
     brand ? `WHEN ${CODE} LIKE @brand + '%' THEN 1` : "",
   ].filter(Boolean);
   const fitRank = whens.length ? `CASE ${whens.join(" ")} ELSE 2 END` : "2";
@@ -699,8 +724,9 @@ async function searchParts(q, limit = 15, fit = {}) {
     desc2: r.Desc2 && r.Desc2 !== r.Descr ? r.Desc2 : "",
     uom: r.BaseUOM || "",
     bal_qty: r.BalQty === null || r.BalQty === undefined ? 0 : Number(r.BalQty),
-    // 0 this machine's own part, 1 same brand, 2 everything else. The screen
-    // marks 0 so a technician can see WHY it is at the top.
+    // 0 this machine's own part, 0.5 its equivalent model's, 1 same brand,
+    // 2 everything else. The screen marks 0 and 0.5 so a technician can see
+    // WHY it is at the top.
     fit: Number(r.FitRank),
   }));
 }
@@ -791,6 +817,56 @@ async function machineCategory(modelText) {
   return "";
 }
 module.exports.machineCategory = machineCategory;
+
+// WHICH OF OUR MACHINES A TYPED MODEL IS - John, 9 Oct 2026. Sales often type
+// the model rather than pick it from the list ("532RBS - 1/3" on slip 00150),
+// and a machine with no item code had no brand unless a parts book happened to
+// match it - so its own brand's parts did not come first in the search.
+//
+// Looked up live among the machine units (codes starting U), by the MODEL
+// NUMBER only: "532RBS" against "UHUQ 532RBS 967...", never against the whole
+// "Husqvarna 532RBS Backpack Brushcutter". So a model added to AutoCount is
+// recognised the day it is added, with no list here to keep up.
+//
+// A word counts only if it carries a digit and is 3+ long, and it has to sit
+// on a boundary in the code, as machineCategory's does. When the units it
+// finds disagree about the brand, it is no answer - one brand or nothing.
+const lookupCache = new Map();
+const LOOKUP_TTL_MS = 60 * 60 * 1000;
+async function lookupMachineModel(text) {
+  const tokens = String(text || "")
+    .toUpperCase().split(/[^A-Z0-9]+/).filter((t) => t.length >= 3 && /[0-9]/.test(t)).slice(0, 4);
+  for (const t of tokens) {
+    const hit = lookupCache.get(t);
+    let rows;
+    if (hit && Date.now() - hit.at < LOOKUP_TTL_MS) rows = hit.rows;
+    else {
+      rows = await query(
+        `SELECT TOP 20 i.ItemCode, LTRIM(RTRIM(ISNULL(i.ItemCategory, ''))) AS cat
+           FROM Item i
+          WHERE i.IsActive = 'T'
+            AND UPPER(i.ItemCode) LIKE 'U%'
+            AND ' ' + REPLACE(REPLACE(REPLACE(UPPER(i.ItemCode), '(', ' '), ')', ' '), '-', ' ') + ' '
+                LIKE '% ' + @t + ' %'`,
+        { t }
+      );
+      lookupCache.set(t, { at: Date.now(), rows });
+    }
+    if (!rows.length) continue;
+    const prefixes = [...new Set(rows.map((r) => String(r.ItemCode).trim().split(/\s+/)[0].toUpperCase()))];
+    if (prefixes.length !== 1 || !/^U[A-Z]{2,5}$/.test(prefixes[0])) continue;
+    const cats = [...new Set(rows.map((r) => r.cat).filter(Boolean))];
+    return {
+      model: t,
+      unit_prefix: prefixes[0],
+      parts_prefix: "S" + prefixes[0].slice(1),
+      category: cats.length === 1 ? cats[0] : "",
+      item_code: rows.length === 1 ? String(rows[0].ItemCode).trim() : "",
+    };
+  }
+  return null;
+}
+module.exports.lookupMachineModel = lookupMachineModel;
 
 // What is on a shelf. The shelf lives on the item's BASE-UOM row, which is the
 // same row setPartShelf writes to - ask any other row and the answer would be

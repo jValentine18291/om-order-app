@@ -4174,10 +4174,24 @@ async function loadMachineFit() {
   fitFor = { machineId: m.id, brand: MachineIpl.brandPrefixFor(m), iplId: "",
              doc: null, models: MachineIpl.modelWordsFor(m) };
 
+  // Its equivalent model's parts, listed under its own (9 Oct 2026, John): a
+  // 532RBS also gets what AutoCount files under the BK3410.
+  const MT = window.OM_MACHINE_TYPES;
+  fitFor.also = MT && MT.equivalentsOf ? MT.equivalentsOf(fitFor.models) : [];
+
   try {
     if (!ipl.models) ipl.models = await api("./ipl/index.json");
     const fit = MachineIpl.fitFor(m, ipl.models || []);
     if (fitFor && fitFor.machineId === m.id) fitFor.brand = fit.brand;
+    // A model typed in by hand with no parts book has no brand to go on.
+    // AutoCount's own machine units say which brand that model number is
+    // (9 Oct 2026, John) - asked only when nothing else has answered.
+    if (!fit.brand) {
+      try {
+        const r = await api(`/api/machine-lookup?text=${encodeURIComponent(`${m.machine_desc || ""} ${m.machine_code || ""}`)}`);
+        if (r && r.machine && fitFor && fitFor.machineId === m.id) fitFor.brand = r.machine.parts_prefix || "";
+      } catch (_) { /* no answer is no brand, as before */ }
+    }
     const id = fit.iplId;
     if (!id) return;
     fitFor.iplId = id;
@@ -4200,6 +4214,7 @@ function fitQuery(term) {
   if ((fitFor.models || []).length) {
     parts.push(`models=${encodeURIComponent(fitFor.models.join(","))}`);
   }
+  if ((fitFor.also || []).length) parts.push(`also=${encodeURIComponent(fitFor.also.join(","))}`);
   const prefer = fitFor.doc ? MachineIpl.preferredNumbers(fitFor.doc, term) : [];
   if (prefer.length) parts.push(`prefer=${encodeURIComponent(prefer.join(","))}`);
   return parts.length ? "&" + parts.join("&") : "";
@@ -10221,7 +10236,10 @@ function partOptionHtml(p, { extraClass = "" } = {}) {
   // fit 0 means this part is in the machine's own parts book. Marked rather
   // than merely sorted first, so a technician can see WHY it is at the top -
   // an order with no reason given is one nobody trusts.
-  const mine = p.fit === 0 ? `<span class="fp-opt-fit">This machine</span>` : "";
+  // 0.5 is filed under its equivalent model (machine-types.js EQUIVALENTS) -
+  // likely to fit, not certain to, which is why it is said in other words.
+  const mine = p.fit === 0 ? `<span class="fp-opt-fit">This machine</span>`
+    : p.fit === 0.5 ? `<span class="fp-opt-fit fp-opt-fit-eq">Equivalent model</span>` : "";
   return `<button type="button" class="company-option fp-opt-row ${extraClass}" data-code="${escapeAttr(p.item_code)}">
       <span class="fp-opt-main">
         ${partTwoLines(p,
@@ -12281,9 +12299,45 @@ async function togglePush(which = "home") {
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.addEventListener("message", (e) => {
     if (e.data && e.data.type === "go" && e.data.screen === "quote") enterNeedToQuote();
-    if (e.data && e.data.type === "go" && e.data.screen === "machine") openSlipMachine(e.data.slip, e.data.machine);
+    // Through the note the worker left, not the message's own copy, so the
+    // message and the app coming to the front cannot both open it.
+    if (e.data && e.data.type === "go" && e.data.screen === "machine") {
+      takePendingGo().then((done) => { if (!done) openSlipMachine(e.data.slip, e.data.machine); });
+    }
   });
 }
+
+// WHERE A TAPPED NOTIFICATION SAID TO GO (9 Oct 2026, John: the technician
+// told to go ahead should land on that machine's repair sheet). The worker
+// writes it down before it does anything else (sw.js, GO_CACHE); this reads it
+// and crosses it off. Asked on every way the app can come to the front -
+// the worker's message, a cold start, waking from sleep, reloading to take an
+// update - because on an iPhone any one of those can be the only one that
+// happens. Ten minutes old is too old: a tap from this morning is not why
+// somebody opened the app this afternoon.
+const GO_CACHE = "om-pending-go", GO_KEY = "./__pending-go";
+let goTaking = false;
+async function takePendingGo() {
+  if (goTaking || !("caches" in window) || !getUser()) return false;
+  goTaking = true;
+  try {
+    const c = await caches.open(GO_CACHE);
+    const hit = await c.match(GO_KEY);
+    if (!hit) return false;
+    const go = await hit.json().catch(() => null);
+    await c.delete(GO_KEY);
+    if (!go || !go.slip || Date.now() - Number(go.at || 0) > 10 * 60 * 1000) return false;
+    await openSlipMachine(go.slip, go.machine);
+    return true;
+  } catch (_) {
+    return false;
+  } finally {
+    goTaking = false;
+  }
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") takePendingGo(); });
+window.addEventListener("pageshow", () => takePendingGo());
+window.addEventListener("focus", () => takePendingGo());
 
 // A technician's "go ahead" lands on that slip with that machine's sheet open
 // (6 Oct 2026). Unsaved parts on whatever is open now are not thrown away:
@@ -12313,7 +12367,15 @@ async function openSlipMachine(slipNumber, machineId) {
       // After the role has been read, or the screen is shown to nobody.
       setTimeout(() => { if (getUser()) enterNeedToQuote(); }, 300);
     } else if (q.get("slip")) {
-      setTimeout(() => openSlipMachine(q.get("slip"), q.get("machine")), 300);
+      // The note first (it is the same place, and reading it crosses it off
+      // so waking up again cannot reopen it); the address as the fallback.
+      // Then the address is cleared, so a reload later lands where they are.
+      setTimeout(async () => {
+        if (!(await takePendingGo())) await openSlipMachine(q.get("slip"), q.get("machine"));
+        try { history.replaceState(null, "", location.pathname); } catch (_) {}
+      }, 300);
+    } else {
+      setTimeout(() => takePendingGo(), 300);
     }
   } catch (_) {}
 })();

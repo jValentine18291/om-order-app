@@ -141,6 +141,36 @@
     ["HBZ260", "HBZ260EZ"],
   ];
 
+  // EQUIVALENT MODELS: a different machine whose parts are often the same.
+  // John, 9 Oct 2026: the Husqvarna 532RBS is the Zenoah BK3410's equivalent
+  // and the 525BX the HBZ260's. "Not all" parts are shared, so unlike the
+  // aliases above this does not say they are one machine: the other model's
+  // parts are listed too, BELOW the machine's own. Two-way - a BK3410 on the
+  // bench sees 532RBS parts under its own the same way.
+  //
+  // Why it matters: AutoCount stocks 6 of the 194 parts in the 532RBS's book;
+  // what is actually on the shelf for it is filed under the BK3410.
+  const EQUIVALENTS = [
+    ["532RBS", "BK3410"],
+    ["525BX", "HBZ260"],
+  ];
+
+  // The equivalent models' spellings for these models (aliases included),
+  // leaving out the models themselves. [] when there are none.
+  function equivalentsOf(models) {
+    const mine = new Set();
+    for (const m of models || []) for (const k of aliasKeys(m)) mine.add(k);
+    const out = [];
+    for (const pair of EQUIVALENTS) {
+      const keys = pair.map(modelKey);
+      if (!keys.some((k) => mine.has(k))) continue;
+      for (const k of keys) {
+        for (const a of aliasKeys(k)) if (!mine.has(a) && out.indexOf(a) === -1) out.push(a);
+      }
+    }
+    return out;
+  }
+
   // Letters and digits only, upper-cased - the same key the matcher uses, so
   // "HBZ-260 EZ" and "hbz260ez" land on the same group.
   function modelKey(s) {
@@ -165,6 +195,8 @@
     TYPE_WORDS: TYPE_WORDS,
     NOT_A_MACHINE: NOT_A_MACHINE,
     MODEL_ALIASES: MODEL_ALIASES,
+    EQUIVALENTS: EQUIVALENTS,
+    equivalentsOf: equivalentsOf,
     typeFor: typeFor,
     namesAType: namesAType,
     fromCategory: fromCategory,
