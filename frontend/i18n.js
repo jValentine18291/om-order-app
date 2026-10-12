@@ -680,6 +680,8 @@
     "e.g. Hard to start when hot": "例如：热机难启动",
     "Its parts and labour stay on it and can be edited. The new SO will carry both repairs.": "原有零件和人工费保留，可以修改。新销售单将包括两次维修。",
     "The old one is left as it is:": "旧单据保持不变：",
+    "Its condemned note is cleared and it comes off its SO; the new SO will charge for the repair. The customer's condemn signature stays on record.": "报废备注将被清除，并从原销售单移除；新销售单将收取维修费用。客户的报废签名仍保留记录。",
+    "Was condemned": "曾报废",
     "Finish a service slip": "完结服务单",
     "Record DO/CS/INV number": "登记 DO/CS/INV 号码",
     "Correct the number": "修正号码",

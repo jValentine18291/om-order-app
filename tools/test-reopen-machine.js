@@ -72,7 +72,7 @@ const part = (code, price, tech) => ({ item_code: code, description: `Part ${cod
     m.history.filter((h) => h.field === "reopen").map((h) => h.note), ["Hard to start when hot"]);
   check("the first technician is still the one told", data.slips.firstTechnicianForMachine(a), "WJ");
   await refused("not twice while it is being worked on",
-    () => data.slips.reopenMachine(s.slip_number, a, { who: "KS" }), /Only a repaired machine/);
+    () => data.slips.reopenMachine(s.slip_number, a, { who: "KS" }), /Only a repaired or condemned machine/);
 
   console.log("\n-- the second repair, and the new SO carrying both --");
   await data.slips.addPartToMachine(a, part("P-NEW", 25, "WJ"));
@@ -104,6 +104,43 @@ const part = (code, price, tech) => ({ item_code: code, description: `Part ${cod
   const q = await data.slips.reopenMachine(t.slip_number, c, { state: "AWAITING_QUOTE", who: "KS" });
   check("on Sales' list to quote", q.machines[0].state, "AWAITING_QUOTE");
   check("an SO with no DO yet still reads its SO", q.machines[0].rounds[0].closing_ref, "");
+
+  console.log("\n-- a condemned machine on an SO: the customer changed their mind (12 Oct 2026) --");
+  const v = await data.slips.createSlip({ company: "CHANGED MIND", contact_name: "A", contact_number: "1", signature: sig,
+    machines: [{ desc: "EBZ5100 - 1/2" }, { desc: "EBZ5100 - 2/2" }] });
+  const [e, f] = v.machines.map((x) => x.id);
+  await data.slips.addPartToMachine(e, part("P-CARB", 60, "XL"));
+  await data.slips.setMachineState(v.slip_number, e, "CONDEMNED", "KS", { reason: "TOO_EXPENSIVE", note: "Declined $280" });
+  await refused("not on an SO: 'Repair it after all' is the way",
+    () => data.slips.reopenMachine(v.slip_number, e, { who: "KS" }), /Repair it after all/);
+  const soC = await data.slips.createSlipOrder(v.slip_number, [e], "KS");
+  await data.slips.setMachineDisposal(v.slip_number, e, "COLLECTED", "KS");
+  check("on its SO and collected: it can be reopened",
+    (await data.slips.getSlip(v.slip_number)).machines.find((x) => x.id === e).reopen_block, "");
+  const rc = await data.slips.reopenMachine(v.slip_number, e, { state: "TO_REPAIR", note: "Customer changed mind", who: "CY" });
+  const me = rc.machines.find((x) => x.id === e);
+  check("back to In Progress", me.state, "TO_REPAIR");
+  check("no longer condemned or collected", [me.condemn_reason, me.condemn_note, me.disposal], ["", "", ""]);
+  check("its part is still on it", me.parts.map((p) => p.item_code), ["P-CARB"]);
+  check("recorded as having been condemned, on its SO", [me.rounds[0].prev_state, me.rounds[0].so_number], ["CONDEMNED", soC.so_number]);
+  await data.slips.setMachineState(v.slip_number, e, "REPAIRED", "XL");
+  const soR = await data.slips.createSlipOrder(v.slip_number, [e], "KS");
+  const rLines = (await data.orders.getOrder(soR.so_number)).lines.map((l) => l.description || "");
+  check("the new SO charges for it", (await data.orders.getOrder(soR.so_number)).total_amount, 60);
+  check("and says nothing about condemning", rLines.some((d) => /condemn|declined/i.test(d)), false);
+
+  // The other one: condemned and disposed of by us - nothing to repair.
+  await data.slips.setMachineState(v.slip_number, f, "CONDEMNED", "KS");
+  await data.slips.createSlipOrder(v.slip_number, [f], "KS");
+  await data.slips.setMachineDisposal(v.slip_number, f, "DISPOSED", "KS");
+  await refused("disposed of: not reopened", () => data.slips.reopenMachine(v.slip_number, f, { who: "KS" }), /disposed of/);
+  for (const o of (await data.slips.getSlip(v.slip_number)).orders.filter((x) => !x.closing_ref)) {
+    await data.slips.setSlipInvoiced(v.slip_number, `DO-${o.so_number.slice(-3)}`, "KS", o.so_number);
+  }
+  await data.slips.setMachineDisposal(v.slip_number, e, "COLLECTED", "KS");
+  await data.slips.closeSlip(v.slip_number, "DO-X", "KS");
+  check("and the slip closes - no condemn signature asked of it now",
+    (await data.slips.getSlip(v.slip_number)).status, "CLOSED");
 
   console.log("\n-- the technician's notification, in Chinese --");
   check("title", translate("Reopened: 525BX - 1/2", "zh"), "再次维修：525BX - 1/2");

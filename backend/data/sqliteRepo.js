@@ -3410,10 +3410,22 @@ function setMachineDisposal(slipNumber, machineId, disposal, who = "") {
 //
 // Why it cannot be reopened, or "". One sentence for the button and the
 // refusal alike, as quoteBlockReason.
+//
+// A CONDEMNED machine on an SO too (12 Oct 2026, John - for Chiu Yan and
+// Carmen): the customer changed their mind after the order was raised. Its
+// condemned note is cleared, so the new SO does not print it; the customer's
+// condemn signature stays on record and stops mattering, since closing asks it
+// only of a machine still condemned. Not one WE disposed of - it is gone - and
+// not one with no SO, which has "Repair it after all" already.
 function reopenBlockReason(slip, machine) {
   if (slip.status === "CLOSED") return "The slip is closed - a machine that comes back after that starts a new slip.";
-  if (machine.state !== "REPAIRED") return "Only a repaired machine can be reopened.";
-  if (!String(machine.converted_at || "").trim()) return "It is not on a Sales Order yet - carry on with it as it is.";
+  if (machine.state === "CONDEMNED" && machine.disposal === "DISPOSED") return "It was disposed of - there is nothing to repair.";
+  if (machine.state !== "REPAIRED" && machine.state !== "CONDEMNED") return "Only a repaired or condemned machine can be reopened.";
+  if (!String(machine.converted_at || "").trim()) {
+    return machine.state === "CONDEMNED"
+      ? "It is not on a Sales Order - use \"Repair it after all\"."
+      : "It is not on a Sales Order yet - carry on with it as it is.";
+  }
   return "";
 }
 
@@ -3431,9 +3443,9 @@ function reopenMachine(slipNumber, machineId, { state = "TO_REPAIR", note = "", 
 
   db.transaction(() => {
     db.prepare(
-      `INSERT INTO machine_rounds (machine_id, slip_id, round, so_number, converted_at, disposal, reopened_by, reopen_note)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(machine.id, slip.id, round, machine.so_number || "", machine.converted_at, machine.disposal || "", by, reason);
+      `INSERT INTO machine_rounds (machine_id, slip_id, round, so_number, converted_at, disposal, reopened_by, reopen_note, prev_state)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(machine.id, slip.id, round, machine.so_number || "", machine.converted_at, machine.disposal || "", by, reason, machine.state);
 
     // The trail: one line saying it was reopened and why, then the state and
     // (if it had been collected) the disposal changes, by their triggers.
@@ -3449,6 +3461,9 @@ function reopenMachine(slipNumber, machineId, { state = "TO_REPAIR", note = "", 
           SET state = ?, decided_by = ?, decided_at = datetime('now','localtime'),
               converted_at = NULL, so_number = '', foc = 0,
               disposal = '', disposal_by = '', disposal_at = '',
+              -- A condemned machine is not condemned any more: its note would
+              -- otherwise print on the new SO (12 Oct 2026).
+              condemn_reason = '', condemn_note = '',
               repair_round = ?
         WHERE id = ?`
     ).run(next, by, round + 1, machine.id);

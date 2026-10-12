@@ -1549,6 +1549,10 @@ try {
     );
     CREATE INDEX IF NOT EXISTS idx_mr_machine ON machine_rounds(machine_id);
   `);
+  // What it was before it was reopened - REPAIRED, or CONDEMNED since
+  // 12 Oct 2026 - so the screen can say "was condemned".
+  const mrcols = db.prepare("PRAGMA table_info(machine_rounds)").all().map((c) => c.name);
+  if (!mrcols.includes("prev_state")) db.exec("ALTER TABLE machine_rounds ADD COLUMN prev_state TEXT DEFAULT ''");
 } catch (e) {
   console.error("[db] machine rounds setup failed:", e.message);
 }

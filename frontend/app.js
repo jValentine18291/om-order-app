@@ -8249,7 +8249,8 @@ function machineReopenedHtml(m) {
     last.reopened_by ? ` <span>(${escapeHtml(last.reopened_by)})</span>` : ""}${
     last.reopened_at ? ` · <span>${escapeHtml(formatDate(last.reopened_at))}</span>` : ""}${
     note ? `<br>“${escapeHtml(note)}”` : ""}${
-    before.length ? `<div class="mr-before"><span>Was on</span> ${before.map(escapeHtml).join(", ")}</div>` : ""}</div>`;
+    before.length ? `<div class="mr-before"><span>Was on</span> ${before.map(escapeHtml).join(", ")}${
+      last.prev_state === "CONDEMNED" ? ` · <span>Was condemned</span>` : ""}</div>` : ""}</div>`;
 }
 
 // The popup. Resolves { state, note } on Reopen, null on Cancel.
@@ -8262,9 +8263,12 @@ function askReopen(m, slip) {
       : "";
     const order = ((slip && slip.orders) || []).find((o) => o.so_number === m.so_number);
     const doc = [m.so_number, order && order.closing_ref].filter(Boolean).join(" / ");
-    $("reo-info").innerHTML =
-      `<span>Its parts and labour stay on it and can be edited. The new SO will carry both repairs.</span>` +
-      (doc ? ` <span>The old one is left as it is:</span> ${escapeHtml(doc)}` : "");
+    // A condemned one (12 Oct 2026): the customer changed their mind.
+    $("reo-info").innerHTML = m.state === "CONDEMNED"
+      ? `<span>Its condemned note is cleared and it comes off its SO; the new SO will charge for the repair. The customer's condemn signature stays on record.</span>` +
+        (doc ? ` <span>The old one is left as it is:</span> ${escapeHtml(doc)}` : "")
+      : `<span>Its parts and labour stay on it and can be edited. The new SO will carry both repairs.</span>` +
+        (doc ? ` <span>The old one is left as it is:</span> ${escapeHtml(doc)}` : "");
     $("reo-note").value = "";
     $("reo-chips").querySelectorAll(".reo-chip").forEach((c) =>
       c.classList.toggle("on", c.dataset.state === "TO_REPAIR"));
