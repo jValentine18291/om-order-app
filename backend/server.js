@@ -2991,9 +2991,12 @@ app.get("/api/slips/:slip/quotation", async (req, res) => {
 // whole of the numbering rule.
 app.post("/api/slips/:slip/quotation", async (req, res) => {
   try {
-    const { payment = "", delivery = "", who = "", service = "", extras, machines } = req.body || {};
+    const { payment = "", delivery = "", who = "", service = "", extras, machines, english } = req.body || {};
     const issued = await data.slips.issueQuotation(req.params.slip,
                        { payment, delivery, who, service, extras: extras !== false,
+                         // { machineId: "English" } for comments in Chinese
+                         // (12 Oct 2026) - the Quotation only.
+                         english: english && typeof english === "object" && !Array.isArray(english) ? english : undefined,
                          // Absent means every machine with work on it, which is
                          // what this route did before the choice existed and
                          // what an older phone still on a cached app will send.

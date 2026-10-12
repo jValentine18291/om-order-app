@@ -1128,7 +1128,18 @@ function createSlipOrder(slipNumber, machineIds, opts) {
 // wording, because the two documents are read side by side.
 const EXTRAS_HEADING = "Additional parts";
 
-function slipBlockLines(slip, wanted, all, extras = [], { physicalSs = false } = {}) {
+// CHINESE IN A REPAIR COMMENT (12 Oct 2026, John). The Quotation prints the
+// English Sales typed for it (comment_en), or leaves it off when there is none
+// - the quotation's PDF font has no Chinese characters, so the original would
+// print as garbage. The Sales Order prints the technician's own words.
+const HAS_CHINESE = /[㐀-鿿豈-﫿]/;
+function quotationComment(m) {
+  const comment = String(m.repair_comment || "").trim();
+  if (!HAS_CHINESE.test(comment)) return comment;
+  return String(m.comment_en || "").trim();
+}
+
+function slipBlockLines(slip, wanted, all, extras = [], { physicalSs = false, quotation = false } = {}) {
   const lines = [];
   const total = all.length;
 
@@ -1190,7 +1201,9 @@ function slipBlockLines(slip, wanted, all, extras = [], { physicalSs = false } =
     // here at nothing. Both, because the technician's line says what was wrong
     // with it and this one says what was decided about it.
     const comment = String(m.repair_comment || "").trim();
-    if (comment) lines.push({ note: true, description: `*${comment}` });
+    // The Quotation's own wording of it: the English, where it was in Chinese.
+    const printed = quotation ? quotationComment(m) : comment;
+    if (printed) lines.push({ note: true, description: `*${printed}` });
     if (condemned) lines.push({ note: true, description: condemnedNote(m) });
     // Free of charge, as the technician confirmed (9 Oct 2026, John). Said
     // only while it is still $0: work added afterwards is charged for.
@@ -1393,6 +1406,22 @@ function issueQuotation(slipNumber, terms) {
   // travels in terms, and the fingerprint below is taken over the lines those
   // choices produce - so a quotation for two machines out of four is a
   // different document from one for all four, and gets its own number.
+  //
+  // The English Sales typed for Chinese comments, saved first so the lines
+  // carry it (12 Oct 2026). Kept on the machine, with the comment it was
+  // written for, so the next quotation starts from it.
+  const english = (terms || {}).english;
+  if (english && typeof english === "object") {
+    const slipRow = db.prepare("SELECT id FROM service_slips WHERE slip_number = ?").get(String(slipNumber));
+    const save = db.prepare(
+      `UPDATE slip_machines SET comment_en = ?, comment_en_src = TRIM(IFNULL(repair_comment, ''))
+        WHERE id = ? AND slip_id = ?`);
+    if (slipRow) {
+      for (const [id, text] of Object.entries(english)) {
+        save.run(String(text == null ? "" : text).trim().slice(0, 500), Number(id), slipRow.id);
+      }
+    }
+  }
   const q = quotationForSlip(slipNumber, (terms || {}).machines, terms);
   const fp = quotationFingerprint(q.lines, terms);
   const last = db.prepare(
@@ -1461,7 +1490,7 @@ function quotationForSlip(slipNumber, machineIds, opts) {
     e.status = 400; throw e;
   }
 
-  let lines = slipBlockLines(slip, wanted, all, extras);
+  let lines = slipBlockLines(slip, wanted, all, extras, { quotation: true });
 
   // Sales can force one service item across the whole quotation, for a slip
   // written before the app knew a rider from a brushcutter.
@@ -1541,6 +1570,14 @@ function quotationForSlip(slipNumber, machineIds, opts) {
         // quotation is often re-sent after part of a slip has gone onto an
         // order - but is worth saying on the screen.
         so_number: m.so_number || "",
+        // A comment in Chinese gets an English box on the sheet (12 Oct
+        // 2026): the comment, the English typed for it before, and whether
+        // the technician has changed the comment since.
+        comment_chinese: HAS_CHINESE.test(String(m.repair_comment || "")),
+        comment: String(m.repair_comment || "").trim(),
+        comment_en: String(m.comment_en || "").trim(),
+        comment_en_stale: !!String(m.comment_en || "").trim() &&
+          String(m.comment_en_src || "").trim() !== String(m.repair_comment || "").trim(),
       };
     }),
     machines_included: wanted.map((m) => m.id),

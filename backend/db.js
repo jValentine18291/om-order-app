@@ -1534,6 +1534,13 @@ try {
   // technician. The Sales Order says so - "*No servicing (FOC)", or "*FOC"
   // under the technician's note - for as long as the machine is still $0.
   if (!rcols.includes("foc")) db.exec("ALTER TABLE slip_machines ADD COLUMN foc INTEGER DEFAULT 0");
+  // THE REPAIR COMMENT IN ENGLISH, for the Quotation only (12 Oct 2026, John).
+  // Technicians often write in Chinese; Sales type the English on the Send
+  // Quotation sheet. comment_en_src is the comment it was written for, so a
+  // comment changed afterwards is flagged for Sales to check. The Sales Order
+  // keeps the technician's own words.
+  if (!rcols.includes("comment_en")) db.exec("ALTER TABLE slip_machines ADD COLUMN comment_en TEXT DEFAULT ''");
+  if (!rcols.includes("comment_en_src")) db.exec("ALTER TABLE slip_machines ADD COLUMN comment_en_src TEXT DEFAULT ''");
   db.exec(`
     CREATE TABLE IF NOT EXISTS machine_rounds (
       id              INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -682,6 +682,12 @@
     "The old one is left as it is:": "旧单据保持不变：",
     "Its condemned note is cleared and it comes off its SO; the new SO will charge for the repair. The customer's condemn signature stays on record.": "报废备注将被清除，并从原销售单移除；新销售单将收取维修费用。客户的报废签名仍保留记录。",
     "Was condemned": "曾报废",
+    // Send Quotation, English for a Chinese comment (12 Oct 2026).
+    "Technician wrote": "技术员备注",
+    "English for the quotation": "报价单英文备注",
+    "The technician changed the comment - check the English": "技术员已修改备注 - 请检查英文",
+    "Left empty, the comment is left off the quotation": "留空则报价单上不显示备注",
+    "The technician changed the comment since the English was typed. Send with this English?": "输入英文后技术员修改了备注。仍用这段英文发送吗？",
     "Finish a service slip": "完结服务单",
     "Record DO/CS/INV number": "登记 DO/CS/INV 号码",
     "Correct the number": "修正号码",

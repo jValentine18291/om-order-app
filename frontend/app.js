@@ -7206,11 +7206,52 @@ function renderQuoteMachines(q) {
             m.so_number ? ` · already on ${escapeHtml(m.so_number)}` : ""}</span>
         </span>
         <span class="conv-amt">${money(m.amount)}</span>
-      </label>`;
+      </label>${m.comment_chinese ? quoteEnglishHtml(m) : ""}`;
   }).join("");
 
-  list.querySelectorAll("input").forEach((c) =>
+  list.querySelectorAll('input[type="checkbox"]').forEach((c) =>
     c.addEventListener("change", () => quoteTotals(q, Number(q.extras_total) || 0)));
+}
+
+// THE COMMENT IN ENGLISH, for this quotation (12 Oct 2026, John). A machine
+// whose repair comment is in Chinese gets a box under it for Sales to type the
+// English the customer will read. Optional: left empty, the comment is left
+// off the quotation - its PDF cannot print Chinese. Saved with the quotation,
+// so the next one starts from it; flagged when the technician has changed the
+// comment since. The Sales Order keeps the technician's own words.
+function quoteEnglishHtml(m) {
+  return `
+    <div class="quote-en">
+      <div class="quote-en-cn"><span class="quote-en-lab">Technician wrote</span><span>${escapeHtml(m.comment)}</span></div>
+      <label class="quote-en-lab" for="quote-en-${m.id}">English for the quotation <span>(optional)</span></label>
+      ${m.comment_en_stale ? `<div class="quote-en-stale">The technician changed the comment - check the English</div>` : ""}
+      <textarea id="quote-en-${m.id}" class="quote-en-box" rows="2" maxlength="500" data-en="${escapeAttr(String(m.id))}"
+        data-was="${escapeAttr(m.comment_en || "")}" data-stale="${m.comment_en_stale ? "1" : ""}"
+        placeholder="Left empty, the comment is left off the quotation">${escapeHtml(m.comment_en || "")}</textarea>
+    </div>`;
+}
+
+// What was typed, for the machines ticked: { id: "English" }.
+function quoteEnglish() {
+  const chosen = quoteChosenMachines();
+  const out = {};
+  document.querySelectorAll("#quote-machines .quote-en-box").forEach((b) => {
+    if (chosen.includes(Number(b.dataset.en))) out[b.dataset.en] = b.value.trim();
+  });
+  return out;
+}
+
+// English written for an older comment and not looked at again: asked once.
+function quoteEnglishStaleOk(q) {
+  const chosen = quoteChosenMachines();
+  const stale = [...document.querySelectorAll('#quote-machines .quote-en-box[data-stale="1"]')]
+    .filter((b) => chosen.includes(Number(b.dataset.en)) && b.value.trim() && b.value.trim() === b.dataset.was);
+  if (!stale.length) return true;
+  const names = stale.map((b) => {
+    const m = (q.machines_available || []).find((x) => String(x.id) === b.dataset.en);
+    return m ? quoteMachineName(m) : "";
+  });
+  return confirmLines("The technician changed the comment since the English was typed. Send with this English?", names);
 }
 
 // What the ticks come to. BEFORE GST, and it says so - the tax is the server's
@@ -7337,6 +7378,7 @@ async function shareRepairQuotation(slipNumber) {
       $("quote-status").textContent = "Tick at least one machine, or the additional parts.";
       return;
     }
+    if (!quoteEnglishStaleOk(q)) return;
     $("quote-go").disabled = true;
     $("quote-status").textContent = "Preparing…";
     try {
@@ -7358,6 +7400,8 @@ async function shareRepairQuotation(slipNumber) {
           // "Everything" worked out twice - once here, once on the server - is
           // two answers that can differ.
           machines: quoteChosenMachines(),
+          // The English for comments written in Chinese (12 Oct 2026).
+          english: quoteEnglish(),
         }),
       });
       const blob = buildRepairQuotationPdf(issued, terms);
