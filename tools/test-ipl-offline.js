@@ -66,8 +66,8 @@ const figures = index.reduce((n, m) => n + (Number(m.figures) || 0), 0);
 const expected = 1 + index.length + drawings + logos.length;
 const actual = pngs.length + jsons.length + logos.length;
 check("the app's total matches the folder", expected, actual);
-// 737 since the Husqvarna R 214C (15 Oct 2026): its JSON and 22 drawings.
-check("and that is what it is", actual, 737);
+// 757 since the Husqvarna R 420TsX AWD (15 Oct 2026): its JSON and 19 drawings.
+check("and that is what it is", actual, 757);
 
 console.log("\n-- every drawing a book names is there --");
 const named = new Set();

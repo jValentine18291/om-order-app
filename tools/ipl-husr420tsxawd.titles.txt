@@ -1,0 +1,52 @@
+# R 420TsX AWD - titles as printed on the machine's own drawings.
+#
+# TEN SHEETS WHERE THE DRAWING SAYS SOMETHING ELSE
+# The drawing wins, because it is the page in front of the technician:
+#
+#   portal "CHASSIS / FRAME"         ->  drawing "CHASSIS"  (as the P525DX, R 214C)
+#   portal "FUEL SYSTEM"             ->  "FUEL"
+#   portal "WHEELS AND TIRES"        ->  "WHEELS"
+#   portal "MOWER LIFT / DECK LIFT"  ->  "LIFTING"
+#   portal "HEIGHT ADJUSTMENT"       ->  "HEIGHT ADJUSTER"
+#   portal "ATTACHMENTS"             ->  "EQUIPMENT FRAME"
+#   portal "COVER" (x4)              ->  "COVERS - 1" .. "COVERS - 4"
+#
+# The sheets are already in the book's order, so no --order.
+#
+# NO HOTSPOTS FILE, and that is a finding: all 19 sheets were looked at with
+# every hotspot ringed and every Ref gap checked against the drawing, and
+# nothing is missing or stray. One part has no hotspot and should not get one:
+# HYDRAULICS 45, the oil filter (575645401), is listed but carries no printed
+# number - the filter is drawn ghosted beside callout 27. It stays findable in
+# the sheet's parts list and by search.
+#
+# NO CUTTING DECK: the export has none - the deck for this rider is a separate
+# item with its own book.
+#
+# TO RE-IMPORT:
+#
+#   python tools/ipl-import-csv.py --csv "R 420TsX AWD Ride-on Mower IPL.csv" \
+#     --id husr420tsxawd --name "Husqvarna R 420TsX AWD Ride-on Mower" \
+#     --short "R 420TsX AWD" --brand Husqvarna --category "Ride-on Mower" \
+#     --titles tools/ipl-husr420tsxawd.titles.txt
+#
+# One line per sheet, in the order --dry-run lists them. "-" keeps the export's name.
+CHASSIS
+FUEL
+-
+-
+WHEELS
+-
+-
+LIFTING
+HEIGHT ADJUSTER
+EQUIPMENT FRAME
+-
+-
+-
+-
+COVERS - 1
+COVERS - 2
+COVERS - 3
+COVERS - 4
+-

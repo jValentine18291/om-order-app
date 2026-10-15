@@ -693,5 +693,14 @@
   "category": "Ride-on Mower",
   "figures": 22,
   "parts": 373
+ },
+ {
+  "id": "husr420tsxawd",
+  "name": "Husqvarna R 420TsX AWD Ride-on Mower",
+  "short": "R 420TsX AWD",
+  "brand": "Husqvarna",
+  "category": "Ride-on Mower",
+  "figures": 19,
+  "parts": 487
  }
 ]
