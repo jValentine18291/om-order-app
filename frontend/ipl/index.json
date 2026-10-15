@@ -684,5 +684,14 @@
   "category": "Lawn Mower",
   "figures": 1,
   "parts": 54
+ },
+ {
+  "id": "husr214c",
+  "name": "Husqvarna R 214C Ride-on Mower",
+  "short": "R 214C",
+  "brand": "Husqvarna",
+  "category": "Ride-on Mower",
+  "figures": 22,
+  "parts": 373
  }
 ]

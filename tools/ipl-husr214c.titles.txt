@@ -1,0 +1,57 @@
+# R 214C - titles as printed on the machine's own drawings, read off the sheets.
+#
+# THE ORDER IS NOT THE EXPORT'S
+# The portal files the Combi 94 deck as two sheets, and exports the second one
+# LAST - after the decals. Both are headed "COMBI 94 ARCM294 MOWER DECK /
+# CUTTING DECK", and one is plainly the other's continuation (callouts 2-45,
+# then 40-71). So the second is moved up beside the first:
+#
+#     --order 1,22,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21
+#
+# NINE SHEETS WHERE THE DRAWING SAYS SOMETHING ELSE
+# The drawing wins, because it is the page in front of the technician:
+#
+#   portal "CHASSIS / FRAME"         ->  drawing "CHASSIS"  (as the P525DX)
+#   portal "CHASSIS REAR" (x2)       ->  "CHASSIS, REAR - 1" / "- 2"
+#   portal "TRANSMISSION" (sheet 1)  ->  "HYDROSTAT K46 EU"
+#     (sheet 2 is named TRANSMISSION here too, though it matches the export:
+#     with both halves titled, neither is labelled "1 of 2" / "2 of 2")
+#   portal "MOWER LIFT / DECK LIFT"  ->  "MOWER LIFT"
+#   portal "HEIGHT ADJUSTMENT"       ->  "ADJUSTER HEIGHT"
+#   portal "CONTROLS"                ->  "CONTROL UNIT"
+#   portal "COVER" (x3)              ->  "COVER - 1" / "- 2" / "- 3"
+#
+# The two deck sheets keep the export's name: the importer already shows them
+# as "(1 of 2)" and "(2 of 2)", which is what the drawing's header means.
+#
+# TO RE-IMPORT:
+#
+#   python tools/ipl-import-csv.py --csv "R 214C Ride-on Mower IPL.csv" \
+#     --id husr214c --name "Husqvarna R 214C Ride-on Mower" \
+#     --short "R 214C" --brand Husqvarna --category "Ride-on Mower" \
+#     --order 1,22,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21 \
+#     --titles tools/ipl-husr214c.titles.txt
+#
+# One line per sheet, in the order AFTER --order. "-" keeps the export's name.
+-
+-
+CHASSIS
+CHASSIS, REAR - 1
+CHASSIS, REAR - 2
+HYDROSTAT K46 EU
+TRANSMISSION
+-
+-
+MOWER LIFT
+ADJUSTER HEIGHT
+CONTROL UNIT
+-
+-
+-
+COVER - 1
+COVER - 2
+COVER - 3
+-
+-
+-
+-

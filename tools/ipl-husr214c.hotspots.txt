@@ -1,0 +1,27 @@
+# R 214C - hotspot corrections the portal export needs.
+#
+#     <figure> add|unlisted|drop  <key> <x%> <y%>
+#
+# <figure> is the position AFTER --order (see ipl-husr214c.titles.txt).
+#
+# All 22 sheets were looked at with every hotspot ringed, and every gap in
+# each sheet's Ref column was checked against the drawing. Two faults, both in
+# the export itself:
+#
+# 1. ADJUSTER HEIGHT prints 7, 8 and 9 - hexagon nut, washer, pin - in a
+#    column under 10, and the export lists all three parts with no box for any
+#    of them. Placed on the printed digits: same x as callout 10's box
+#    (27.972%), y measured off the glyph rows at 1336, 1364 and 1390 px of the
+#    1737 px sheet (10's glyphs centre at 1307 px, its box at 75.363%).
+#
+# 2. COVER - 3 carries a second box for part 3 on the "3" of the page title
+#    "COVER - 3". Tapping the title would open part 3; the real callout 3 is
+#    lower down and keeps its own box.
+#
+# The other gaps (deck 5/29/35/40/43 and 45/46/70, mower lift 11/19/20/22,
+# engine 4, electrical 3/18/20/21/27/32, cover-2 2, wheels 7) are numbers the
+# drawings do not print, so there is nothing to add for them.
+11 add 7 27.972 80.023
+11 add 8 27.972 78.526
+11 add 9 27.972 76.914
+18 drop 3 17.928 5.989
