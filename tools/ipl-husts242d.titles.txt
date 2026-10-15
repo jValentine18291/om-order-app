@@ -1,0 +1,39 @@
+# TS 242D - sheet titles.
+#
+# TWO VERSIONS OF THE MACHINE IN ONE BOOK
+# These drawings print no section title; several are headed instead with the
+# product number they apply to - "For 96041044700" or "For 96041044200", two
+# versions of the TS 242D. The mower lift and the cutting deck come once for
+# each, and the export names them in a way that hides it (the two lift sheets
+# as "MOWER LIFT / DECK LIFT" and "MOWER LIFT LEVER", the two decks
+# identically). So the product number goes in the title, where a technician
+# picking between them can see which is theirs:
+#
+#   sheet 7   MOWER LIFT - 96041044700
+#   sheet 8   MOWER LIFT - 96041044200
+#   sheet 10  MOWER DECK - 96041044200
+#   sheet 11  MOWER DECK - 96041044700
+#
+# The chassis sheet is headed "For 96041044700" too, with no counterpart for
+# the other version; it keeps its export name. Everything else does too.
+#
+# TO RE-IMPORT:
+#
+#   python tools/ipl-import-csv.py --csv "TS 242D Tractor Mower IPL.csv" \
+#     --id husts242d --name "Husqvarna TS 242D Tractor Mower" \
+#     --short "TS 242D" --brand Husqvarna --category "Tractor Mower" \
+#     --titles tools/ipl-husts242d.titles.txt
+#
+# One line per sheet, in the order --dry-run lists them. "-" keeps the export's name.
+-
+-
+-
+-
+-
+-
+MOWER LIFT - 96041044700
+MOWER LIFT - 96041044200
+-
+MOWER DECK - 96041044200
+MOWER DECK - 96041044700
+-

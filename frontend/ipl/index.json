@@ -702,5 +702,14 @@
   "category": "Ride-on Mower",
   "figures": 19,
   "parts": 487
+ },
+ {
+  "id": "husts242d",
+  "name": "Husqvarna TS 242D Tractor Mower",
+  "short": "TS 242D",
+  "brand": "Husqvarna",
+  "category": "Tractor Mower",
+  "figures": 12,
+  "parts": 424
  }
 ]

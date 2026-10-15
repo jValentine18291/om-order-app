@@ -1,0 +1,18 @@
+# TS 242D - hotspot corrections the portal export needs.
+#
+#     <figure> add|unlisted|drop  <key> <x%> <y%>
+#
+# All 12 sheets were looked at with every hotspot ringed, and every part with
+# no hotspot was checked against the drawing. One fault:
+#
+#   ENGINE prints 69 - the exhaust gaskets, two part numbers under one
+#   callout - and the export gives it no box. Placed on the printed digits:
+#   glyphs at x 930-959, y 357-377 px of the 1240x1070 sheet.
+#
+# The others with no hotspot are parts the drawings do not print, so there is
+# nothing to add: CHASSIS 84 (guard), DECALS 30-35 (decals and pads),
+# WHEELS 15 (sealing foam). They stay in each sheet's list and in search.
+#
+# Not a fault, though the checker flags it: STEERING 8 and 9 are printed side
+# by side, and each has its own box on its own digit.
+9 add 69 76.169 34.299
