@@ -221,6 +221,14 @@
     "Bal. Qty": "库存数量",
     // On a search result: this part is in the machine's own parts book.
     "This machine": "本机适用",
+    // Check Price: what the part has been selling for (15 Oct 2026).
+    "Recent sales": "近期销售",
+    "Most common price": "最常见价格",
+    "No common price": "没有常见价格",
+    "last sold at this price": "最近一次以此价格售出",
+    "Last sold": "最近售出",
+    "Recent sales price": "近期销售价",
+    "Recent sales could not be read.": "无法读取近期销售。",
     "Equivalent model": "同款机型适用",
     "Current Qty": "现有数量",
     "Qty Requested": "申请数量",
@@ -1145,7 +1153,14 @@
     [/^· Slip (.+)$/, "· 服务单 $1"],
     [/^Machine: (.+) · Tech: (.+)$/, "机器：$1 · 技术员：$2"],
 
+    [/^Added (.+) at (\$[\d,.]+) \(recent sales price\) — tap Save when done$/, "已添加 $1，按近期销售价 $2 — 完成后请点击保存"],
     [/^Added (.+) — tap Save when done$/, "已添加 $1 — 完成后请点击保存"],
+    // Check Price, recent sales (15 Oct 2026).
+    [/^(\d+) of the last (\d+) sales$/, "最近 $2 次销售中有 $1 次"],
+    [/^(\d+) sales? since$/, "$1 次销售，始于"],
+    [/^Show the (\d+) sales?$/, "显示这 $1 次销售"],
+    [/^Only (\d+) sales? in the last (\d+) months$/, "过去 $2 个月仅有 $1 次销售"],
+    [/^No sales in the last (\d+) months$/, "过去 $1 个月没有销售"],
     [/^Service slip (.+) created$/, "服务单 $1 已创建"],
     [/^Slip (.+) closed$/, "服务单 $1 已结单"],
     [/^Closed (.+)\. Returning home…$/, "$1 已结单。返回首页…"],

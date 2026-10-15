@@ -1593,3 +1593,108 @@ async function getPartPrices(code) {
 }
 
 module.exports.getPartPrices = getPartPrices;
+
+// ---- What the part has actually been selling for ---------------------------
+// John, 15 Oct 2026: beside the Contractor and List Price, the most common
+// price of its last 7 sales - and, on a repair, that price for a part with no
+// Contractor Price saved. READ-ONLY.
+//
+// COUNTED THE WAY THE SALES APP COUNTS (om-sales-app README): the stock ledger
+// StockDTL is the spine. AutoCount posts stock once, on the delivery order; an
+// invoice raised from a DO posts none, so it is not counted twice, and a
+// cancelled document has no stock row at all.
+//
+// John's choices:
+//   - the UNIT PRICE before discount, per base unit. The line may be in another
+//     UOM, so it is scaled by the line's Qty against the ledger's base-unit Qty;
+//     and to SGD by the document's CurrencyRate.
+//   - $0 lines left out (FOC, warranty)
+//   - documents from this app's service slips left out - they carry the
+//     "S/S:" line every slip's order is keyed with
+//   - the last 12 months only, even when that leaves fewer than 7
+const RECENT_SALES = 7;
+const RECENT_MONTHS = 12;
+const RECENT_DOCS = [
+  // ledger type, detail table, master table, what the screen calls it
+  ["DO", "DODTL", "DO", "DO"],
+  ["CS", "CSDTL", "CS", "CS"],
+  ["IV", "IVDTL", "IV", "INV"],
+];
+
+function buildRecentSalesSql() {
+  const joins = RECENT_DOCS.map(([t, dtl, mst], i) =>
+    `LEFT JOIN [${dtl}] d${i} ON d${i}.DtlKey = s.DtlKey AND s.DocType = '${t}'
+    LEFT JOIN [${mst}] m${i} ON m${i}.DocKey = d${i}.DocKey`).join("\n    ");
+  const pick = (col) => `COALESCE(${RECENT_DOCS.map((_, i) => `d${i}.${col}`).join(", ")})`;
+  const slipDoc = RECENT_DOCS.map(([t, dtl], i) =>
+    `(s.DocType = '${t}' AND EXISTS (SELECT 1 FROM [${dtl}] x WHERE x.DocKey = d${i}.DocKey
+                                      AND x.Description LIKE '%S/S:%'))`).join("\n        OR ");
+  return `
+SELECT TOP ${RECENT_SALES}
+       s.DocType, s.DocDate, -s.Qty AS BaseQty,
+       ${pick("UnitPrice")} AS UnitPrice,
+       ${pick("Qty")} AS LineQty,
+       COALESCE(${RECENT_DOCS.map((_, i) => `m${i}.DocNo`).join(", ")}) AS DocNo,
+       COALESCE(${RECENT_DOCS.map((_, i) => `m${i}.CurrencyRate`).join(", ")}, 1) AS CurrencyRate
+  FROM StockDTL s
+    ${joins}
+ WHERE s.ItemCode = @itemCode
+   AND s.DocType IN (${RECENT_DOCS.map(([t]) => `'${t}'`).join(", ")})
+   AND s.Qty < 0
+   AND s.DocDate >= @since
+   AND ${pick("UnitPrice")} > 0
+   AND NOT (
+        ${slipDoc})
+ ORDER BY s.DocDate DESC, s.DtlKey DESC`;
+}
+
+// The figures, worked out from the rows. Separate from the query so it can be
+// tested without a database.
+//
+// THE MOST COMMON PRICE: prices to the cent, the one sold at most often. A tie
+// goes to the one sold most recently - the newer figure is the better guess.
+// When every sale was at a different price there is no common price, and the
+// recommendation falls back to the latest sale (common: null says so).
+function summariseRecentSales(rows) {
+  const round2 = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+  const sales = (rows || []).map((r) => {
+    const unit = Number(r.UnitPrice) || 0;
+    const line = Number(r.LineQty) || 0;
+    const base = Number(r.BaseQty) || 0;
+    const fx = Number(r.CurrencyRate) || 1;
+    // Per base unit: a line of 2 BOX of 10 is 20 units in the ledger.
+    const perBase = line > 0 && base > 0 ? unit * line / base : unit;
+    return {
+      date: docDate(r.DocDate),
+      doc_type: (RECENT_DOCS.find(([t]) => t === String(r.DocType).trim()) || [])[3] || String(r.DocType).trim(),
+      doc_no: String(r.DocNo || "").trim(),
+      price: round2(perBase * fx),
+    };
+  }).filter((s) => s.price > 0);
+  if (!sales.length) return { sales: [], common: null, latest: null, recommended: null };
+
+  const counts = new Map();
+  sales.forEach((s, i) => {
+    const c = counts.get(s.price) || { price: s.price, count: 0, first: i };
+    c.count++;
+    counts.set(s.price, c);
+  });
+  const best = [...counts.values()].sort((a, b) => b.count - a.count || a.first - b.first)[0];
+  const common = best.count >= 2 ? { price: best.price, count: best.count } : null;
+  const latest = sales[0];
+  return { sales, common, latest, recommended: common ? common.price : latest.price };
+}
+
+async function recentSalesPrices(code) {
+  const itemCode = String(code || "").trim();
+  if (!itemCode) return null;
+  const since = new Date();
+  since.setMonth(since.getMonth() - RECENT_MONTHS);
+  since.setHours(0, 0, 0, 0);
+  const rows = await query(buildRecentSalesSql(), { itemCode, since });
+  return { item_code: itemCode, months: RECENT_MONTHS, limit: RECENT_SALES, ...summariseRecentSales(rows) };
+}
+
+module.exports.recentSalesPrices = recentSalesPrices;
+module.exports.summariseRecentSales = summariseRecentSales;
+module.exports.buildRecentSalesSql = buildRecentSalesSql;

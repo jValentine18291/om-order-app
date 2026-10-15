@@ -4351,6 +4351,19 @@ How much does it cost? Leave blank to price it later.`,
           unitPrice = n;
         }
       }
+      // NO CONTRACTOR PRICE: priced at what it has been selling for (15 Oct
+      // 2026, John) - the most common price of its last 7 sales, or failing a
+      // common one the latest. The technician can change it like any price,
+      // and on save it becomes the Contractor Price in AutoCount, as a typed
+      // price does (his call). Not for a free-text or service code, whose
+      // sales history is every job ever put on it.
+      let fromSales = false;
+      if (!freeText && !(unitPrice > 0) && !isUnstockedCode(item.item_code)) {
+        try {
+          const r = await api(`/api/part-recent-price/${encodeURIComponent(item.item_code)}`);
+          if (r && Number(r.recommended) > 0) { unitPrice = Number(r.recommended); fromSales = true; }
+        } catch (_) { /* no answer: it stays unpriced, as before */ }
+      }
       session.pendingParts.push({
         item_code: item.item_code,
         description,
@@ -4359,8 +4372,11 @@ How much does it cost? Leave blank to price it later.`,
         quantity: 1,
         technician: session.technician,
         free_text: freeText,
+        price_from_sales: fromSales,
       });
-      toast(`Added ${description} — tap Save when done`, "ok");
+      toast(fromSales
+        ? `Added ${description} at ${money(unitPrice)} (recent sales price) — tap Save when done`
+        : `Added ${description} — tap Save when done`, "ok");
       renderMachineParts();
       updateSlipFooter();
       return;
@@ -5833,7 +5849,9 @@ function renderMachineParts() {
                   p.free_text
                     ? ` <button type="button" class="desc-edit" data-pdesc="${i}" aria-label="Edit description">${PENCIL}</button>`
                     : ""
-                }${p.technician ? ` · ${escapeHtml(p.technician)}` : ""}</div>`,
+                }${p.technician ? ` · ${escapeHtml(p.technician)}` : ""}${
+                  // Priced from its recent sales, no Contractor Price (15 Oct 2026).
+                  p.price_from_sales ? ` <span class="rs-tag">Recent sales price</span>` : ""}</div>`,
                 `<div class="sku mono">${escapeHtml(p.item_code)}</div>`)}
               ${tubeQtyDisplay(p) ? `<div class="tube-frac${tubeQtyDisplay(p).wrong ? " tube-frac-bad" : ""}">${escapeHtml(tubeQtyDisplay(p).frac)}</div>` : ""}
             </div>
@@ -13363,7 +13381,8 @@ $("machine-parts").addEventListener("change", (e) => {
     }
   } else if (e.target.dataset.pprice !== undefined) {
     const p = session.pendingParts[Number(e.target.dataset.pprice)];
-    if (p) { p.unit_price = Math.max(0, parseFloat(e.target.value) || 0); renderMachineParts(); updateSlipFooter(); }
+    // A price typed over the recent-sales one is the technician's own now.
+    if (p) { p.unit_price = Math.max(0, parseFloat(e.target.value) || 0); p.price_from_sales = false; renderMachineParts(); updateSlipFooter(); }
   } else if (e.target.dataset.qty) {
     const id = Number(e.target.dataset.qty);
     const m = currentMachine();
@@ -14856,6 +14875,7 @@ async function loadIplPrices(box = $("ipl-part-price")) {
         </div>`;
     }
     html += `</div>`;
+    html += recentSalesHtml(p);
     // The resolved AutoCount code, not the number printed on the diagram. Any
     // write must target the exact item whose price was just shown.
     iplPriceState.itemCode = p.item_code;
@@ -14869,6 +14889,46 @@ async function loadIplPrices(box = $("ipl-part-price")) {
   } catch (e) {
     box.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Couldn't load prices")}</div>`;
   }
+}
+
+// WHAT IT HAS BEEN SELLING FOR (15 Oct 2026, John): the most common unit price
+// of its last 7 sales in the past 12 months, before discount, leaving out $0
+// lines and service-slip orders - see recentSalesPrices() in autocountRepo.js.
+// With the latest sale and the span, and the 7 themselves folded underneath.
+function recentSalesHtml(p) {
+  const r = p && p.recent;
+  if (!r) {
+    return p && p.recent_error
+      ? `<div class="rs-box"><div class="rs-head">Recent sales</div><div class="rs-sub">${escapeHtml(p.recent_error)}</div></div>`
+      : "";
+  }
+  const n = (r.sales || []).length;
+  if (!n) {
+    return `<div class="rs-box"><div class="rs-head">Recent sales</div>
+      <div class="rs-sub">No sales in the last ${escapeHtml(String(r.months))} months</div></div>`;
+  }
+  const latest = r.latest;
+  const oldest = r.sales[n - 1];
+  const head = r.common
+    ? `<div class="rs-big">${money(r.common.price)}</div>
+       <div class="rs-sub"><span>Most common price</span> - <span>${r.common.count} of the last ${n} sales</span></div>`
+    : `<div class="rs-big">${money(latest.price)}</div>
+       <div class="rs-sub"><span>No common price</span> - <span>last sold at this price</span></div>`;
+  const few = n < r.limit
+    ? `<div class="rs-sub"><span>Only ${n} ${n === 1 ? "sale" : "sales"} in the last ${escapeHtml(String(r.months))} months</span></div>` : "";
+  const rows = r.sales.map((s) => `
+      <div class="rs-row${r.common && s.price === r.common.price ? " rs-hi" : ""}">
+        <span><span>${escapeHtml(formatDate(s.date))}</span> · ${escapeHtml(s.doc_type)} <span class="mono">${escapeHtml(s.doc_no)}</span></span>
+        <span>${money(s.price)}</span></div>`).join("");
+  return `
+    <div class="rs-box">
+      <div class="rs-head">Recent sales</div>
+      ${head}
+      <div class="rs-sub"><span>Last sold</span> <span>${escapeHtml(formatDate(latest.date))}</span> · ${money(latest.price)}${
+        n > 1 ? ` · <span>${n} sales since</span> <span>${escapeHtml(formatDate(oldest.date))}</span>` : ""}</div>
+      ${few}
+      <details class="rs-list"><summary>Show the ${n} ${n === 1 ? "sale" : "sales"}</summary>${rows}</details>
+    </div>`;
 }
 
 // Fill in a price AutoCount does not have. Two deliberate steps: the value is

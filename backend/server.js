@@ -895,10 +895,40 @@ app.get("/api/part-prices/:code", async (req, res) => {
     if (!row || row.error) {
       return res.status(404).json({ error: `"${req.params.code}" not found in AutoCount.` });
     }
+    // Its last 7 sales (15 Oct 2026). On its own: a failure here must not
+    // take the two prices above down with it.
+    try {
+      row.recent = await acRepo.recentSalesPrices(row.item_code);
+    } catch (e) {
+      console.error("[GET /api/part-prices/:code] recent sales:", e.message);
+      row.recent = null;
+      row.recent_error = "Recent sales could not be read.";
+    }
     res.json(row);
   } catch (err) {
     console.error("[GET /api/part-prices/:code]", err.message);
     res.status(500).json({ error: "Price lookup failed." });
+  }
+});
+
+// The price a part has been selling at, for the repair sheet (15 Oct 2026):
+// asked when a technician adds a part with no Contractor Price. Read-only;
+// { recommended: null } when it cannot say.
+app.get("/api/part-recent-price/:code", async (req, res) => {
+  try {
+    const itemsSource = (process.env.ITEMS_SOURCE || "sqlite").toLowerCase();
+    if (itemsSource !== "autocount") return res.json({ recommended: null });
+    const acRepo = require("./data/autocountRepo");
+    const r = await acRepo.recentSalesPrices(req.params.code);
+    res.json({
+      item_code: req.params.code,
+      recommended: r ? r.recommended : null,
+      common: r ? r.common : null,
+      count: r ? r.sales.length : 0,
+    });
+  } catch (err) {
+    console.error("[GET /api/part-recent-price/:code]", err.message);
+    res.json({ recommended: null });
   }
 });
 
