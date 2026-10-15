@@ -1,0 +1,38 @@
+# TF 230 - sheet titles.
+#
+# TWO VERSIONS OF THE MACHINE, ONE WHEEL SHEET EACH
+# The export files both wheel sheets as "WHEELS AND TIRES". The drawings say
+# which product numbers each is for - "For 967316701, 967316704" (a transport
+# wheel) and "For 967067801, 967067804" (the pair of lug wheels) - so that
+# goes in the title, where a technician can match it to the machine's label.
+#
+# The rest of the drawings carry no printed title, so they keep the export's.
+#
+# TO RE-IMPORT:
+#
+#   python tools/ipl-import-csv.py --csv "TF230 Tiller IPL.csv" \
+#     --id hustf230 --name "Husqvarna TF 230 Tiller" \
+#     --short "TF 230" --brand Husqvarna --category "Tiller" \
+#     --titles tools/ipl-hustf230.titles.txt
+#
+# One line per sheet, in the order --dry-run lists them. "-" keeps the export's name.
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+WHEELS - 967316701, 967316704
+WHEELS - 967067801, 967067804
+-

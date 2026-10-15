@@ -711,5 +711,14 @@
   "category": "Tractor Mower",
   "figures": 12,
   "parts": 424
+ },
+ {
+  "id": "hustf230",
+  "name": "Husqvarna TF 230 Tiller",
+  "short": "TF 230",
+  "brand": "Husqvarna",
+  "category": "Tiller",
+  "figures": 20,
+  "parts": 294
  }
 ]

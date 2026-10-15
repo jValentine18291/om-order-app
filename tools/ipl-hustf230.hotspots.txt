@@ -1,0 +1,16 @@
+# TF 230 - hotspot corrections the portal export needs.
+#
+#     <figure> add|unlisted|drop  <key> <x%> <y%>
+#
+# All 20 sheets were looked at with every hotspot ringed. Every part the
+# export lists has its box, and every printed number but one is ringed:
+#
+#   GEAR BOX prints a 51, pointing at the gearbox housing, and the export
+#   lists no part 51 (the sheet stops at 50, the gearbox assembly). Marked
+#   "unlisted", so tapping it says the book prints the number and lists no
+#   part, rather than doing nothing. Placed on the digits: about x 337-349,
+#   y 385-395 px of the 1240x885 sheet.
+#
+# Not callouts, so deliberately left alone: the reference table printed at the
+# foot of INTAKE SYSTEM (its Ref column is a table, not a drawing).
+13 unlisted 51 27.661 44.068
