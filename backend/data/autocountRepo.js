@@ -1621,6 +1621,22 @@ const RECENT_DOCS = [
   ["IV", "IVDTL", "IV", "INV"],
 ];
 
+// CUSTOMERS ON SPECIAL PRICES, left out (John, 20 Oct 2026): hardware shops
+// and three trade accounts buy below what a contractor pays, so their sales
+// would pull the "usual price" down for a technician pricing a repair.
+//
+// Matched on the customer's name, as he gave them - the name on the document
+// and the Debtor record's, either one. Written to catch exactly those, checked
+// against the live Debtor list: "Horne" alone also matched COPTHORNE KING'S
+// HOTEL, and "Precision" PRECISION PEST PTE LTD, so the three are matched from
+// the start of the name. "Hardware" anywhere: there are dozens of them.
+const SPECIAL_PRICE_CUSTOMERS = [
+  "%HARDWARE%",
+  "HORNE TRADING%",
+  "PRECISION CO PTE%",
+  "KEH TECHNOLOGY%",
+];
+
 function buildRecentSalesSql() {
   const joins = RECENT_DOCS.map(([t, dtl, mst], i) =>
     `LEFT JOIN [${dtl}] d${i} ON d${i}.DtlKey = s.DtlKey AND s.DocType = '${t}'
@@ -1629,6 +1645,9 @@ function buildRecentSalesSql() {
   const slipDoc = RECENT_DOCS.map(([t, dtl], i) =>
     `(s.DocType = '${t}' AND EXISTS (SELECT 1 FROM [${dtl}] x WHERE x.DocKey = d${i}.DocKey
                                       AND x.Description LIKE '%S/S:%'))`).join("\n        OR ");
+  const docName = `COALESCE(${RECENT_DOCS.map((_, i) => `m${i}.DebtorName`).join(", ")}, '')`;
+  const special = SPECIAL_PRICE_CUSTOMERS.map((p) =>
+    `UPPER(${docName}) LIKE '${p}' OR UPPER(ISNULL(cust.CompanyName, '')) LIKE '${p}'`).join("\n        OR ");
   return `
 SELECT TOP ${RECENT_SALES}
        s.DocType, s.DocDate, -s.Qty AS BaseQty,
@@ -1638,6 +1657,7 @@ SELECT TOP ${RECENT_SALES}
        COALESCE(${RECENT_DOCS.map((_, i) => `m${i}.CurrencyRate`).join(", ")}, 1) AS CurrencyRate
   FROM StockDTL s
     ${joins}
+    LEFT JOIN Debtor cust ON cust.AccNo = COALESCE(${RECENT_DOCS.map((_, i) => `m${i}.DebtorCode`).join(", ")})
  WHERE s.ItemCode = @itemCode
    AND s.DocType IN (${RECENT_DOCS.map(([t]) => `'${t}'`).join(", ")})
    AND s.Qty < 0
@@ -1645,6 +1665,8 @@ SELECT TOP ${RECENT_SALES}
    AND ${pick("UnitPrice")} > 0
    AND NOT (
         ${slipDoc})
+   AND NOT (
+        ${special})
  ORDER BY s.DocDate DESC, s.DtlKey DESC`;
 }
 
@@ -1698,3 +1720,4 @@ async function recentSalesPrices(code) {
 module.exports.recentSalesPrices = recentSalesPrices;
 module.exports.summariseRecentSales = summariseRecentSales;
 module.exports.buildRecentSalesSql = buildRecentSalesSql;
+module.exports.SPECIAL_PRICE_CUSTOMERS = SPECIAL_PRICE_CUSTOMERS;

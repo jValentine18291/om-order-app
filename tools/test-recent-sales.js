@@ -67,5 +67,22 @@ check("service-slip documents left out, in all three", (sql.match(/Description L
 check("newest first", /ORDER BY s\.DocDate DESC/.test(sql), true);
 check("only the parameters it is given", [...sql.matchAll(/@(\w+)/g)].map((m) => m[1]).filter((v, i, x) => x.indexOf(v) === i).sort(), ["itemCode", "since"]);
 
+console.log("\n-- customers on special prices (20 Oct 2026) --");
+// SQL LIKE, as the database reads it: % is anything, case does not matter.
+const like = (name, pat) => new RegExp("^" + pat.split("%").map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join(".*") + "$", "i").test(name);
+const special = (name) => ac.SPECIAL_PRICE_CUSTOMERS.some((p) => like(name, p));
+// Names as the live Debtor list spells them, 20 Oct 2026.
+for (const n of ["ACERTEC HARDWARE PTE LTD", "BAN SOON HARDWARE & HYDRAULIC SUPPLY",
+  "CHONG BROTHER HARDWARE SUPPLY -Hardware City", "HORNE TRADING PTE LTD", "PRECISION CO PTE LTD", "KEH TECHNOLOGY"]) {
+  check(`left out: ${n}`, special(n), true);
+}
+for (const n of ["COPTHORNE KING'S HOTEL SINGAPORE", "PRECISION PEST PTE. LTD.", "TAN LANDSCAPING PTE LTD", "CASH"]) {
+  check(`kept: ${n}`, special(n), false);
+}
+check("the query leaves them out, by the document's name and the Debtor's",
+  /AND NOT \( UPPER\(COALESCE\(m0\.DebtorName, m1\.DebtorName, m2\.DebtorName, ''\)\) LIKE '%HARDWARE%' OR UPPER\(ISNULL\(cust\.CompanyName, ''\)\) LIKE '%HARDWARE%'/.test(sql), true);
+check("matched to the customer record by its code",
+  /LEFT JOIN Debtor cust ON cust\.AccNo = COALESCE\(m0\.DebtorCode, m1\.DebtorCode, m2\.DebtorCode\)/.test(sql), true);
+
 console.log(failures ? `\n${failures} FAILED` : "\nAll passed.");
 process.exit(failures ? 1 : 0);
