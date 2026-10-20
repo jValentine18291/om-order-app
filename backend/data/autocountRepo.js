@@ -1637,14 +1637,26 @@ const SPECIAL_PRICE_CUSTOMERS = [
   "KEH TECHNOLOGY%",
 ];
 
+// WHICH SERVICE-SLIP SALES ARE LEFT OUT (John, 20 Oct 2026): only this app's.
+// They are priced from the very figure worked out here, so counting them
+// would let a price feed back into itself. Sales from the PAPER booklet before
+// the app count like any other - DO-2604-014, two speed nuts to Splendor
+// Horticultural in April, was the one that showed the rule was catching both.
+//
+// Both kinds carry the same "S/S:" line, so the line cannot tell them apart;
+// the date can. The app's first slip is dated 31 Aug 2026, and since then
+// every repair is registered in it.
+const APP_SLIPS_FROM = new Date(2026, 7, 31);
+
 function buildRecentSalesSql() {
   const joins = RECENT_DOCS.map(([t, dtl, mst], i) =>
     `LEFT JOIN [${dtl}] d${i} ON d${i}.DtlKey = s.DtlKey AND s.DocType = '${t}'
     LEFT JOIN [${mst}] m${i} ON m${i}.DocKey = d${i}.DocKey`).join("\n    ");
   const pick = (col) => `COALESCE(${RECENT_DOCS.map((_, i) => `d${i}.${col}`).join(", ")})`;
-  const slipDoc = RECENT_DOCS.map(([t, dtl], i) =>
+  // This app's slips only: an S/S: document dated since the app went live.
+  const slipDoc = `s.DocDate >= @appSlipsFrom AND (` + RECENT_DOCS.map(([t, dtl], i) =>
     `(s.DocType = '${t}' AND EXISTS (SELECT 1 FROM [${dtl}] x WHERE x.DocKey = d${i}.DocKey
-                                      AND x.Description LIKE '%S/S:%'))`).join("\n        OR ");
+                                      AND x.Description LIKE '%S/S:%'))`).join("\n        OR ") + `)`;
   const docName = `COALESCE(${RECENT_DOCS.map((_, i) => `m${i}.DebtorName`).join(", ")}, '')`;
   const special = SPECIAL_PRICE_CUSTOMERS.map((p) =>
     `UPPER(${docName}) LIKE '${p}' OR UPPER(ISNULL(cust.CompanyName, '')) LIKE '${p}'`).join("\n        OR ");
@@ -1713,7 +1725,7 @@ async function recentSalesPrices(code) {
   const since = new Date();
   since.setMonth(since.getMonth() - RECENT_MONTHS);
   since.setHours(0, 0, 0, 0);
-  const rows = await query(buildRecentSalesSql(), { itemCode, since });
+  const rows = await query(buildRecentSalesSql(), { itemCode, since, appSlipsFrom: APP_SLIPS_FROM });
   return { item_code: itemCode, months: RECENT_MONTHS, limit: RECENT_SALES, ...summariseRecentSales(rows) };
 }
 
@@ -1729,9 +1741,9 @@ function buildRecentSalesWhySql() {
     `LEFT JOIN [${dtl}] d${i} ON d${i}.DtlKey = s.DtlKey AND s.DocType = '${t}'
     LEFT JOIN [${mst}] m${i} ON m${i}.DocKey = d${i}.DocKey`).join("\n    ");
   const pick = (col) => `COALESCE(${RECENT_DOCS.map((_, i) => `d${i}.${col}`).join(", ")})`;
-  const slipDoc = RECENT_DOCS.map(([t, dtl], i) =>
+  const slipDoc = `s.DocDate >= @appSlipsFrom AND (` + RECENT_DOCS.map(([t, dtl], i) =>
     `(s.DocType = '${t}' AND EXISTS (SELECT 1 FROM [${dtl}] x WHERE x.DocKey = d${i}.DocKey
-                                      AND x.Description LIKE '%S/S:%'))`).join(" OR ");
+                                      AND x.Description LIKE '%S/S:%'))`).join(" OR ") + `)`;
   const docName = `COALESCE(${RECENT_DOCS.map((_, i) => `m${i}.DebtorName`).join(", ")}, '')`;
   const special = SPECIAL_PRICE_CUSTOMERS.map((p) =>
     `UPPER(${docName}) LIKE '${p}' OR UPPER(ISNULL(cust.CompanyName, '')) LIKE '${p}'`).join(" OR ");
@@ -1764,16 +1776,16 @@ async function recentSalesWhy(code) {
   since.setHours(0, 0, 0, 0);
   let rows;
   try {
-    rows = await query(buildRecentSalesWhySql(), { itemCode, since });
+    rows = await query(buildRecentSalesWhySql(), { itemCode, since, appSlipsFrom: APP_SLIPS_FROM });
   } catch (e) {
     // FromDocDtlKey is the one column here not yet seen on this database.
     // Without it, the rest still answers.
     rows = await query(buildRecentSalesWhySql().replace(
-      /\(SELECT TOP 1 iv\.UnitPrice[\s\S]*?\) AS InvoicePrice/, "NULL AS InvoicePrice"), { itemCode, since });
+      /\(SELECT TOP 1 iv\.UnitPrice[\s\S]*?\) AS InvoicePrice/, "NULL AS InvoicePrice"), { itemCode, since, appSlipsFrom: APP_SLIPS_FROM });
   }
   return rows.map((r) => {
     const price = Number(r.UnitPrice) || 0;
-    const why = Number(r.IsSlip) ? "left out: service slip (S/S: line)"
+    const why = Number(r.IsSlip) ? "left out: this app's service slip"
       : Number(r.IsSpecial) ? "left out: special-price customer"
       : !(price > 0) ? "left out: $0 line"
       : "counted";

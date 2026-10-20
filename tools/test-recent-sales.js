@@ -65,7 +65,11 @@ check("$0 lines left out", /COALESCE\(d0\.UnitPrice, d1\.UnitPrice, d2\.UnitPric
 check("12 months", /s\.DocDate >= @since/.test(sql), true);
 check("service-slip documents left out, in all three", (sql.match(/Description LIKE '%S\/S:%'/g) || []).length, 3);
 check("newest first", /ORDER BY s\.DocDate DESC/.test(sql), true);
-check("only the parameters it is given", [...sql.matchAll(/@(\w+)/g)].map((m) => m[1]).filter((v, i, x) => x.indexOf(v) === i).sort(), ["itemCode", "since"]);
+check("only the parameters it is given", [...sql.matchAll(/@(\w+)/g)].map((m) => m[1]).filter((v, i, x) => x.indexOf(v) === i).sort(), ["appSlipsFrom", "itemCode", "since"]);
+// Paper-booklet repairs before the app count; this app's do not (20 Oct 2026,
+// DO-2604-014 to Splendor Horticultural).
+check("only S/S: documents since the app went live are left out",
+  /AND NOT \( s\.DocDate >= @appSlipsFrom AND \(/.test(sql), true);
 
 console.log("\n-- customers on special prices (20 Oct 2026) --");
 // SQL LIKE, as the database reads it: % is anything, case does not matter.
