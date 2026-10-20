@@ -1107,8 +1107,10 @@ app.post("/api/part-location", async (req, res) => {
     // Who is asking comes first: it is the cheapest check, it needs no database,
     // and "Only Admin can change a location" is the honest answer to give a
     // technician - "AutoCount is not enabled" would send them to the wrong place.
-    if (!needRole(req, res, ["purchaser", "admin"])) {
-      stamp("REFUSED - not a purchaser or admin");
+    // Sales added 20 Oct 2026 (John: Carmen and Chiu Yan). Keep in step with
+    // canChangeLocation() in app.js.
+    if (!needRole(req, res, ["sales", "purchaser", "admin"])) {
+      stamp("REFUSED - not sales, purchaser or admin");
       return;
     }
     if (!String(who || "").trim()) {

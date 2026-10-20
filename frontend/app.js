@@ -10977,9 +10977,11 @@ async function saveReplacement(itemCode) {
 // Purchaser and Admin. The shelf is the Purchaser's job - she is the one
 // putting the stock away, so she is the one who knows where it went, and
 // having to find an admin to record it is how a location goes stale.
-// Technicians and Sales still only read it.
+// Sales too since 20 Oct 2026 (John: Carmen and Chiu Yan, the whole Sales
+// group). Technicians still only read it. Keep in step with the server's
+// check on /api/part-location.
 function canChangeLocation() {
-  return ["purchaser", "admin"].includes(getRole());
+  return ["sales", "purchaser", "admin"].includes(getRole());
 }
 
 function shelfRowHtml(p) {
@@ -11740,7 +11742,7 @@ $("po-scope").addEventListener("click", (e) => {
 });
 $("po-q").addEventListener("input", () => renderPurchaseOrders());
 
-// ---- Change location (Purchaser and Admin) ----------------------------------
+// ---- Change location (Sales, Purchaser and Admin) ---------------------------
 // This WRITES to AutoCount and overwrites what is there - a location is meant
 // to change, so unlike a price there is no "already set" guard to fall back on.
 // The confirmation step is the guard: the current value and the new one are put
