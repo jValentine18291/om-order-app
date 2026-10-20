@@ -1718,6 +1718,74 @@ async function recentSalesPrices(code) {
 }
 
 module.exports.recentSalesPrices = recentSalesPrices;
+
+// WHY A SALE WAS OR WAS NOT COUNTED (20 Oct 2026). John found a sale in April
+// that the last 7 did not show, and nothing on screen could say why. This is
+// the same 12 months with none of the rules applied, each sale saying which
+// rule - if any - leaves it out, and what the invoice raised from it charged.
+// Read-only; reached as /api/part-prices/<code>?why=1, never from the screen.
+function buildRecentSalesWhySql() {
+  const joins = RECENT_DOCS.map(([t, dtl, mst], i) =>
+    `LEFT JOIN [${dtl}] d${i} ON d${i}.DtlKey = s.DtlKey AND s.DocType = '${t}'
+    LEFT JOIN [${mst}] m${i} ON m${i}.DocKey = d${i}.DocKey`).join("\n    ");
+  const pick = (col) => `COALESCE(${RECENT_DOCS.map((_, i) => `d${i}.${col}`).join(", ")})`;
+  const slipDoc = RECENT_DOCS.map(([t, dtl], i) =>
+    `(s.DocType = '${t}' AND EXISTS (SELECT 1 FROM [${dtl}] x WHERE x.DocKey = d${i}.DocKey
+                                      AND x.Description LIKE '%S/S:%'))`).join(" OR ");
+  const docName = `COALESCE(${RECENT_DOCS.map((_, i) => `m${i}.DebtorName`).join(", ")}, '')`;
+  const special = SPECIAL_PRICE_CUSTOMERS.map((p) =>
+    `UPPER(${docName}) LIKE '${p}' OR UPPER(ISNULL(cust.CompanyName, '')) LIKE '${p}'`).join(" OR ");
+  return `
+SELECT TOP 50
+       s.DocType, s.DocDate, -s.Qty AS BaseQty, s.DtlKey,
+       ${pick("UnitPrice")} AS UnitPrice,
+       COALESCE(${RECENT_DOCS.map((_, i) => `m${i}.DocNo`).join(", ")}) AS DocNo,
+       ${docName} AS Customer,
+       CASE WHEN ${slipDoc} THEN 1 ELSE 0 END AS IsSlip,
+       CASE WHEN ${special} THEN 1 ELSE 0 END AS IsSpecial,
+       -- The invoice raised from a delivery order, which carries no stock row
+       -- of its own: what IT charged for this line, when the DO said nothing.
+       (SELECT TOP 1 iv.UnitPrice FROM IVDTL iv
+         WHERE s.DocType = 'DO' AND iv.FromDocType = 'DO' AND iv.FromDocDtlKey = s.DtlKey) AS InvoicePrice
+  FROM StockDTL s
+    ${joins}
+    LEFT JOIN Debtor cust ON cust.AccNo = COALESCE(${RECENT_DOCS.map((_, i) => `m${i}.DebtorCode`).join(", ")})
+ WHERE s.ItemCode = @itemCode
+   AND s.DocType IN (${RECENT_DOCS.map(([t]) => `'${t}'`).join(", ")})
+   AND s.Qty < 0
+   AND s.DocDate >= @since
+ ORDER BY s.DocDate DESC, s.DtlKey DESC`;
+}
+
+async function recentSalesWhy(code) {
+  const itemCode = String(code || "").trim();
+  const since = new Date();
+  since.setMonth(since.getMonth() - RECENT_MONTHS);
+  since.setHours(0, 0, 0, 0);
+  let rows;
+  try {
+    rows = await query(buildRecentSalesWhySql(), { itemCode, since });
+  } catch (e) {
+    // FromDocDtlKey is the one column here not yet seen on this database.
+    // Without it, the rest still answers.
+    rows = await query(buildRecentSalesWhySql().replace(
+      /\(SELECT TOP 1 iv\.UnitPrice[\s\S]*?\) AS InvoicePrice/, "NULL AS InvoicePrice"), { itemCode, since });
+  }
+  return rows.map((r) => {
+    const price = Number(r.UnitPrice) || 0;
+    const why = Number(r.IsSlip) ? "left out: service slip (S/S: line)"
+      : Number(r.IsSpecial) ? "left out: special-price customer"
+      : !(price > 0) ? "left out: $0 line"
+      : "counted";
+    return {
+      date: docDate(r.DocDate), doc_type: String(r.DocType).trim(), doc_no: String(r.DocNo || "").trim(),
+      customer: String(r.Customer || "").trim(), qty: Number(r.BaseQty), unit_price: price,
+      invoice_price: r.InvoicePrice === null || r.InvoicePrice === undefined ? null : Number(r.InvoicePrice),
+      why,
+    };
+  });
+}
+module.exports.recentSalesWhy = recentSalesWhy;
 module.exports.summariseRecentSales = summariseRecentSales;
 module.exports.buildRecentSalesSql = buildRecentSalesSql;
 module.exports.SPECIAL_PRICE_CUSTOMERS = SPECIAL_PRICE_CUSTOMERS;

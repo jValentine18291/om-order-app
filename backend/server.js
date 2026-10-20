@@ -899,6 +899,9 @@ app.get("/api/part-prices/:code", async (req, res) => {
     // take the two prices above down with it.
     try {
       row.recent = await acRepo.recentSalesPrices(row.item_code);
+      // Every sale in the window and the rule that left it out, if any -
+      // for answering "why wasn't this sale counted". Read-only, JSON only.
+      if (req.query.why) row.recent_why = await acRepo.recentSalesWhy(row.item_code);
     } catch (e) {
       console.error("[GET /api/part-prices/:code] recent sales:", e.message);
       row.recent = null;
