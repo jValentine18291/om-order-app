@@ -956,7 +956,9 @@ app.get("/api/part-recent-price/:code", async (req, res) => {
 // meant to change a price, which is the realistic failure. What it cannot stop
 // is somebody deliberately choosing another person's name - for that, the
 // answer is the log, which records the id, the old price and the new one.
-const PRICE_OVERWRITE_USERS = ["john"];
+// Carmen and Chiu Yan added 20 Oct 2026, John's ask. Keep in step with
+// CAN_OVERWRITE_PRICE in app.js.
+const PRICE_OVERWRITE_USERS = ["john", "carmen", "chiuyan"];
 
 app.post("/api/part-prices", async (req, res) => {
   const { item_code, tier, price, who, role, user_id, overwrite } = req.body || {};
@@ -1005,7 +1007,7 @@ app.post("/api/part-prices", async (req, res) => {
       // the old price genuinely was not read - and it certainly was not absent.
       stamp("REFUSED - not allowed to change an existing price", { old_price: "unknown" });
       return res.status(403).json({
-        error: "Only John can change a price that AutoCount already has.",
+        error: "Only John, Carmen and Chiu Yan can change a price that AutoCount already has.",
       });
     }
 

@@ -14827,7 +14827,8 @@ const CAN_SET_PRICE = ["sales", "purchaser", "admin"];
 // the button is drawn. Both must be changed together - the phones run a cached
 // copy of this file for a shift after a deploy, so the browser's idea of who
 // may do what is always the stale one.
-const CAN_OVERWRITE_PRICE = ["john"];
+// Carmen and Chiu Yan added 20 Oct 2026, John's ask.
+const CAN_OVERWRITE_PRICE = ["john", "carmen", "chiuyan"];
 
 function canOverwritePrice() {
   const u = getUser();

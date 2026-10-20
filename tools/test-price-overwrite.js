@@ -76,6 +76,9 @@ function listFrom(src, name) {
   check("the browser has one too", Array.isArray(onClient), true);
   check("they are the same", onServer, onClient);
   check("and John is on it", (onServer || []).includes("john"), true);
+  // Carmen and Chiu Yan since 20 Oct 2026 (John's ask).
+  check("and Carmen and Chiu Yan", ["carmen", "chiuyan"].every((u) => (onServer || []).includes(u)), true);
+  check("and nobody else", (onServer || []).length, 3);
   // Identified by STAFF id, not initials: John's initials are the single
   // letter "J", and a permission hanging on one letter is one new colleague
   // away from being wrong.
@@ -161,7 +164,7 @@ function listFrom(src, name) {
   // become an overwrite by accident, so the flag is sent, not deduced from the
   // price already being there.
   check("the route reads an explicit flag", /overwrite\s*&&\s*!PRICE_OVERWRITE_USERS/.test(serverSrc), true);
-  check("and refuses with 403 when it is not John", /403\).json\(\{\s*\n?\s*error: "Only John can change/.test(serverSrc), true);
+  check("and refuses with 403 for anyone else", /403\).json\(\{\s*\n?\s*error: "Only John, Carmen and Chiu Yan can change/.test(serverSrc), true);
   check("the browser sends the user id", /user_id:\s*\(getUser\(\)\s*\|\|\s*\{\}\)\.id/.test(appSrc), true);
 
   console.log(failures ? `\n${failures} FAILED` : "\nAll good.");
