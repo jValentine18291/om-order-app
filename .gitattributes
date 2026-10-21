@@ -1,0 +1,4 @@
+
+# Third-party files, byte for byte as downloaded (21 Oct 2026): no line-ending
+# conversion on a Windows checkout, which could change a minified library.
+frontend/vendor/** -text
