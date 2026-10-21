@@ -664,6 +664,7 @@
     // The Sales Order number, at the top of a slip.
     "Sales Order": "销售单",
     "Sales Orders": "销售单",
+    "no DO/CS/INV yet": "尚无 DO/CS/INV",
     // The customer says the repair costs too much. Technicians can record
     // it themselves now, so it needs to read in Chinese too.
     "Too expensive — condemn": "维修费过高 — 报废",

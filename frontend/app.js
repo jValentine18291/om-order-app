@@ -7740,13 +7740,21 @@ async function openSlipSummary(slipNumber) {
       <div class="sum-person"><span>${escapeHtml(n || "—")}</span><b>${escapeHtml(p || "")}</b></div>`).join("")
       : `<div class="sum-person"><span>No contact recorded</span></div>`}
     </div>${String(s.notes || "").trim()
-      ? `<div class="cs-notes sum-notes"><span>Notes</span>: ${escapeHtml(s.notes)}</div>` : ""}
+      ? `<div class="cs-notes sum-notes"><span>Notes</span>: ${escapeHtml(s.notes)}</div>` : ""}${
+      // Its Sales Orders, each with its DO/CS/INV (21 Oct 2026). None, none shown.
+      (s.orders || []).length ? `
+    <div class="sum-orders"><div class="sum-orders-head">Sales Orders</div>${s.orders.map((o) => `
+      <div class="sum-order"><span class="mono">${escapeHtml(o.so_number)}</span>${o.closing_ref
+        ? `<span class="mono">${escapeHtml(o.closing_ref)}</span>`
+        : `<span class="sum-order-none">no DO/CS/INV yet</span>`}</div>`).join("")}
+    </div>` : ""}
     <div class="sum-machines">${(s.machines || []).map((m) => `
       <div class="sum-m">
         <div class="sum-m-main">
           <div class="sum-m-name">${escapeHtml(m.machine_desc)}${m.serial_no ? ` <span class="sum-m-sn">S/N ${escapeHtml(m.serial_no)}</span>` : ""}</div>
           <div class="sum-m-tags">
             <span class="machine-quote ${withCustomer(m) ? WITH_CUSTOMER.cls : ((MACHINE_STATE[m.state] || {}).cls || "mq-none")}">${escapeHtml(label(m))}</span>
+            ${m.so_number ? `<span class="sum-m-so mono">${escapeHtml(m.so_number)}</span>` : ""}
             ${withCustomer(m) ? "" : `<span class="sum-m-where">${escapeHtml(where(m))}</span>`}
           </div>
         </div>

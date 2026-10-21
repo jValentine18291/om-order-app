@@ -3854,6 +3854,10 @@ function slipSummary(slipNumber) {
     contact2_name: slip.contact2_name || "", contact2_number: slip.contact2_number || "",
     // John, 6 Oct 2026: the booklet's number and the slip's notes too.
     physical_ss: slip.physical_ss || "", notes: slip.notes || "",
+    // Its Sales Orders and the DO/CS/INV recorded against each (John, 21 Oct
+    // 2026) - the same list Close Service reads, oldest first.
+    orders: (slip.orders || []).filter((o) => o.so_number)
+      .map((o) => ({ so_number: o.so_number, closing_ref: o.closing_ref || "" })),
     machines, subtotal, gst_rate: GST_RATE, gst, total: r2(subtotal + gst),
   };
 }

@@ -73,6 +73,12 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
   check("GST 9% of the subtotal, rounded", sum.gst, 3.72);
   check("total", sum.total, 45.02);
   check("rate", sum.gst_rate, 0.09);
+  // The Sales Order, slip-wide and per machine (John, 21 Oct 2026).
+  const so = sum.machines[0].so_number;
+  check("its Sales Order, with no DO yet", sum.orders, [{ so_number: so, closing_ref: "" }]);
+  check("and on each machine on it", sum.machines.map((m) => m.so_number), [so, so, ""]);
+  await data.slips.setSlipInvoiced(s.slip_number, "DO-2610-0198", "KS");
+  check("its DO once recorded", data.slips.slipSummary(s.slip_number).orders, [{ so_number: so, closing_ref: "DO-2610-0198" }]);
 
   let status = 0;
   try { data.slips.slipSummary("99999"); } catch (e) { status = e.status; }
