@@ -9788,18 +9788,39 @@ async function startScanner() {
     }
   }
 
+  // Path 2: ZXing fallback (iPhone Safari, browsers without BarcodeDetector)
+  const startZxing = () => {
+    if (!window.ZXingBrowser || !videoStream) return false;
+    try {
+      zxingReader = new ZXingBrowser.BrowserMultiFormatReader();
+      zxingReader.decodeFromVideoElement(video, (result) => {
+        if (result) onScanCandidate(result.getText());
+      });
+      return true;
+    } catch (_) { return false; }
+  };
+
   // Path 1: native BarcodeDetector (Chrome/Android, some others)
   if ("BarcodeDetector" in window) {
     try {
       const detector = new window.BarcodeDetector({
         formats: ["code_128", "code_39", "qr_code", "ean_13"],
       });
+      // A DETECTOR THAT NEVER WORKS hands over to ZXing (21 Oct 2026). The
+      // polyfill builds fine and then fails on every frame when its reader
+      // file cannot be fetched - which is how the scanners went quiet when the
+      // office firewall blocked it, a camera on screen and nothing ever read.
+      // A frame with no barcode is not a failure; only a thrown error counts.
+      let failures = 0, worked = false;
       const tick = async () => {
         if (!videoStream) return;
         try {
           const codes = await detector.detect(video);
+          worked = true;
           if (codes && codes.length) onScanCandidate(codes[0].rawValue);
-        } catch (_) {}
+        } catch (_) {
+          if (!worked && ++failures >= 15) { detectLoop = null; startZxing() || scanStatus(STATUS_UNSUPPORTED); return; }
+        }
         detectLoop = requestAnimationFrame(tick);
       };
       detectLoop = requestAnimationFrame(tick);
@@ -9809,20 +9830,12 @@ async function startScanner() {
     }
   }
 
-  // Path 2: ZXing fallback (iPhone Safari, browsers without BarcodeDetector)
-  if (window.ZXingBrowser) {
-    try {
-      zxingReader = new ZXingBrowser.BrowserMultiFormatReader();
-      zxingReader.decodeFromVideoElement(video, (result) => {
-        if (result) onScanCandidate(result.getText());
-      });
-      return;
-    } catch (_) {}
-  }
+  if (startZxing()) return;
 
   // Camera works but no decoder engine is available — guide to manual entry.
-  scanStatus('<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> Scanner not supported here — use Type code');
+  scanStatus(STATUS_UNSUPPORTED);
 }
+const STATUS_UNSUPPORTED = '<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> Scanner not supported here — use Type code';
 
 // Torch / flashlight — helps in dim storeroom lighting. Supported on most
 // Android Chrome; quietly hidden where the device/browser can't do it.
@@ -9978,25 +9991,9 @@ async function startQrScanner(target) {
     return;
   }
 
-  // Path 1: native / polyfilled BarcodeDetector, QR only
-  if ("BarcodeDetector" in window) {
-    try {
-      const detector = new window.BarcodeDetector({ formats: ["qr_code"] });
-      const tick = async () => {
-        if (!qrStream) return;
-        try {
-          const codes = await detector.detect(video);
-          if (codes && codes.length) onQrCandidate(codes[0].rawValue);
-        } catch (_) {}
-        qrDetectLoop = requestAnimationFrame(tick);
-      };
-      qrDetectLoop = requestAnimationFrame(tick);
-      return;
-    } catch (_) {}
-  }
-
   // Path 2: ZXing fallback
-  if (window.ZXingBrowser) {
+  const startZxing = () => {
+    if (!window.ZXingBrowser || !qrStream) return false;
     try {
       qrZxingReader = new ZXingBrowser.BrowserQRCodeReader
         ? new ZXingBrowser.BrowserQRCodeReader()
@@ -10004,11 +10001,36 @@ async function startQrScanner(target) {
       qrZxingReader.decodeFromVideoElement(video, (result) => {
         if (result) onQrCandidate(result.getText());
       });
+      return true;
+    } catch (_) { return false; }
+  };
+  const unsupported = '<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> Scanner not supported here — use Type code';
+
+  // Path 1: native / polyfilled BarcodeDetector, QR only. One that fails on
+  // every frame hands over to ZXing - see startScanner (21 Oct 2026).
+  if ("BarcodeDetector" in window) {
+    try {
+      const detector = new window.BarcodeDetector({ formats: ["qr_code"] });
+      let failures = 0, worked = false;
+      const tick = async () => {
+        if (!qrStream) return;
+        try {
+          const codes = await detector.detect(video);
+          worked = true;
+          if (codes && codes.length) onQrCandidate(codes[0].rawValue);
+        } catch (_) {
+          if (!worked && ++failures >= 15) { qrDetectLoop = null; startZxing() || qrStatus(unsupported); return; }
+        }
+        qrDetectLoop = requestAnimationFrame(tick);
+      };
+      qrDetectLoop = requestAnimationFrame(tick);
       return;
     } catch (_) {}
   }
 
-  qrStatus('<span class="led" style="background:var(--amber);box-shadow:0 0 0 3px var(--amber-tint)"></span> Scanner not supported here — use Type code');
+  if (startZxing()) return;
+
+  qrStatus(unsupported);
 }
 
 async function stopQrScanner() {

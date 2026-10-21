@@ -9,7 +9,7 @@
 // on EVERY open, and opens outnumber deploys a hundred to one. Now the cached
 // copy is served instantly and the fresh one is fetched behind it, so a
 // deploy shows one open later and startup does not touch the network at all.
-const CACHE = "om-order-v400";
+const CACHE = "om-order-v401";
 
 // IPL artwork lives in its own cache, deliberately NOT version-stamped.
 // They are large, they are already fetched only when a section is opened, and
@@ -40,6 +40,10 @@ const SHELL = [
   "./machine-names.js",
   "./machine-ipl.js",
   "./i18n.js",
+  // The scanners, served from here since 21 Oct 2026 (see index.html).
+  "./vendor/zxing-browser-0.1.5.min.js",
+  "./vendor/barcode-detector-3.2.2.min.js",
+  "./vendor/zxing_reader-3.1.3.wasm",
   "./logo.png",
   "./icon-192.png",
   "./icon-180.png",

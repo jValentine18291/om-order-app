@@ -36,10 +36,27 @@
   <link rel="stylesheet" href="./service.css" />
   <!-- Tactile 3D: every button and card on a solid edge. Last, on purpose. -->
   <link rel="stylesheet" href="./tactile.css" />
-  <script src="https://unpkg.com/@zxing/browser@0.1.5"></script>
+  <!-- THE SCANNERS COME FROM THIS SERVER, not a CDN (21 Oct 2026). The office
+       FortiGate began blocking fastly.jsdelivr.net, which served the
+       BarcodeDetector polyfill AND the zxing reader it loads at scan time,
+       and the QR scanners stopped. Pinned copies in ./vendor: ZXing browser
+       0.1.5, barcode-detector 3.2.2, and the zxing-wasm 3.1.3 reader that
+       version expects (SHA-256 checked against the one it embeds). -->
+  <script src="./vendor/zxing-browser-0.1.5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-  <script src="https://fastly.jsdelivr.net/npm/barcode-detector@3/dist/iife/polyfill.min.js"></script>
+  <script src="./vendor/barcode-detector-3.2.2.min.js"></script>
+  <script>
+    // The polyfill's reader file, from here rather than fastly.jsdelivr.net.
+    try {
+      if (window.BarcodeDetectionAPI && BarcodeDetectionAPI.setZXingModuleOverrides) {
+        BarcodeDetectionAPI.setZXingModuleOverrides({
+          locateFile: function (path, prefix) {
+            return /\.wasm$/.test(path) ? "./vendor/zxing_reader-3.1.3.wasm" : prefix + path;
+          },
+        });
+      }
+    } catch (e) { /* the ZXing fallback still scans */ }
+  </script>
   <!-- jsPDF — generate the service-slip receipt PDF in the browser -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
