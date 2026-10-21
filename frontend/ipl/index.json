@@ -720,5 +720,14 @@
   "category": "Tiller",
   "figures": 20,
   "parts": 294
+ },
+ {
+  "id": "g2500",
+  "name": "Zenoah G2500",
+  "short": "G2500",
+  "brand": "Zenoah",
+  "category": "Chainsaw",
+  "figures": 7,
+  "parts": 264
  }
 ]

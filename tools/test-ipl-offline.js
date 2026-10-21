@@ -66,8 +66,8 @@ const figures = index.reduce((n, m) => n + (Number(m.figures) || 0), 0);
 const expected = 1 + index.length + drawings + logos.length;
 const actual = pngs.length + jsons.length + logos.length;
 check("the app's total matches the folder", expected, actual);
-// 791 since the Husqvarna TF 230 (15 Oct 2026): its JSON and 20 drawings.
-check("and that is what it is", actual, 791);
+// 799 since the Zenoah G2500 (21 Oct 2026): its JSON and 7 drawings.
+check("and that is what it is", actual, 799);
 
 console.log("\n-- every drawing a book names is there --");
 const named = new Set();

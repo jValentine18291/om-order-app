@@ -1,0 +1,22 @@
+# G2500 - corrections to Fig.1 ENGINE UNIT 01. Everything else is placed from
+# the PDF's own text layer. All seven sheets were looked at with every hotspot
+# ringed; these are the only faults.
+#
+#   <figure> add|unlisted|drop <key> <x%> <y%>
+#
+# THE "*1" MARK. This book flags parts for the G2500-OPS only with "*1",
+# printed straight after the number - "20b*1" - and explained in a key at the
+# top of the sheet: "*1: OPS ONLY".
+#
+# So the reader saw "20b*1" as one word that is no callout, and the four
+# OPS-only parts got no hotspot. Placed on the number itself, from the word
+# boxes in the text layer (page 2, 595x842 pt): "20b*1" at x 376.3-402.4,
+# so "20b" is its first three of five characters, centred at x 384.1.
+1 add 20b 64.55 30.33
+1 add 20c 64.55 31.52
+1 add 21b 67.67 41.98
+1 add 21c 67.67 43.17
+#
+# And it read the "1" of the key's "*1" as callout 1, so a tap on the key would
+# have opened the cylinder assembly. Removed; the real callout 1 keeps its own.
+1 drop 1 72.558 15.799
