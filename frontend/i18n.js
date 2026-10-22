@@ -761,6 +761,7 @@
     "Condemned, no Sales Order": "已报废，无销售单",
     "Not signed yet": "客户未签名",
     "Take the customer's signature under View Slips before closing.": "结单前，请在「查看服务单」中让客户签名。",
+    "The customer's signature is needed before closing.": "结单前需要客户签名。",
     "Record where this condemned machine went?": "记录这台报废机器的去向？",
     "Ready to close": "可结单",
     "No Sales Order": "无销售单",

@@ -7651,13 +7651,14 @@ async function onCloseSlipChosen(slipNumber) {
       (stranded.length ? `<div class="cs-blocked"><b>Cannot close yet</b>${
         escapeHtml(stranded.map((m) => m.machine_desc).join(", "))} ${
         stranded.length === 1
-          ? "was condemned and is still here. Record where it went under View Slips first."
-          : "were condemned and are still here. Record where each one went under View Slips first."
+          ? "was condemned and is still here. Tick it below if the customer took it, or record it under View Slips if we disposed of it."
+          : "were condemned and are still here. Tick each one below if the customer took it, or record it under View Slips if we disposed of it."
       }</div>` : "") +
       csCondemnedHtml(slip) +
       csCollectHtml(slip);
     wireCsCondemned(slip);
     wireCsCollect(slip);
+    wireCsSign(slip);
   } catch (e) {
     toast(e.message, "err");
   }
@@ -7803,12 +7804,16 @@ function csCollectHtml(slip) {
       const note = done === "COLLECTED"
         ? (m.state === "REPAIRED" ? WITH_CUSTOMER.label : "Customer collected it")
         : done === "DISPOSED" ? "Disposed of" : (m.state === "CONDEMNED" ? "Condemned" : "Repaired");
+      // A condemned one says whether the customer has signed for it, and can
+      // be signed for right here (22 Oct 2026).
+      const sig = m.state === "CONDEMNED" && done !== "DISPOSED"
+        ? `<span class="cs-cond-sign${m.has_condemn_signature ? "" : " cs-cond-unsigned"}">${condemnSigLabel(m, "Not signed yet")}</span>` : "";
       html += `
         <label class="cs-collect-row${done ? " cs-collect-done" : ""}">
           <input type="checkbox" value="${m.id}"${done ? " disabled checked" : ""}>
           <span class="cs-collect-name">${escapeHtml(machineLabel(slip, m))}</span>
           <span class="cs-collect-note">${escapeHtml(note)}</span>
-        </label>${
+        </label>${sig || csSignButton(m) ? `<div class="cs-collect-sign">${sig}${csSignButton(m)}</div>` : ""}${
         // Found with another fault at collection (8 Oct 2026, John).
         canDecide() && m.reopen_block === ""
           ? `<button type="button" class="cs-reopen" data-reopen="${m.id}">Found a problem? Reopen</button>` : ""}`;
@@ -7849,10 +7854,29 @@ function csCondemnedHtml(slip) {
             // disposed of; as a heads-up before anything is recorded; as the
             // thing to do once the customer has taken it.
             signed || done === "DISPOSED" ? ""
-            : done === "COLLECTED" ? `<div class="cs-cond-note">Take the customer's signature under View Slips before closing.</div>`
-            : `<div class="cs-cond-note">Needed only if the customer collects it.</div>`}
+            : done === "COLLECTED" ? `<div class="cs-cond-note">The customer's signature is needed before closing.</div>`
+            : `<div class="cs-cond-note">Needed only if the customer collects it.</div>`}${
+            csSignButton(m)}
         </div>`;
     }).join("")}</div>`;
+}
+
+// THE CONDEMN SIGNATURE, here at the counter (John, 22 Oct 2026). It could
+// only be taken under View Slips, and Close Service is where the customer is
+// standing when they collect a condemned machine. Same pad, same record. Not
+// for one we disposed of - no signature is needed then.
+function csSignButton(m) {
+  if (!m || m.state !== "CONDEMNED" || m.disposal === "DISPOSED") return "";
+  return `<button type="button" class="btn-secondary cs-sign" data-sign="${m.id}">${
+    m.has_condemn_signature ? "Sign again" : "Take the signature"}</button>`;
+}
+function wireCsSign(slip) {
+  document.querySelectorAll("#cs-context .cs-sign").forEach((b) =>
+    b.addEventListener("click", () => {
+      const m = (slip.machines || []).find((x) => x.id === Number(b.dataset.sign));
+      // Redraw the window afterwards: the signature is what lets it close.
+      openCondemnSignatureFor(slip, m, async () => { await onCloseSlipChosen(slip.slip_number); });
+    }));
 }
 
 function wireCsCondemned(slip) {
