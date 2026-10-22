@@ -143,6 +143,13 @@ module.exports = {
     getPartNotes: (...a) => sqliteRepo.partNotes.getPartNotes(...a),
     setPartNote: (...a) => sqliteRepo.partNotes.setPartNote(...a),
   },
+  // What to use when a part is out of stock (22 Oct 2026). Local, like notes.
+  alternatives: {
+    list: (...a) => sqliteRepo.partAlternatives.listAlternatives(...a),
+    forCodes: (...a) => sqliteRepo.partAlternatives.alternativesFor(...a),
+    add: (...a) => sqliteRepo.partAlternatives.addAlternative(...a),
+    remove: (...a) => sqliteRepo.partAlternatives.removeAlternative(...a),
+  },
   // Which part we fit instead. Local, like the notes: AutoCount holds what a
   // part IS, never what this workshop does when it cannot be had.
   replacements: {

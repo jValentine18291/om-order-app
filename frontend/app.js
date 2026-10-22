@@ -4682,8 +4682,13 @@ $("ap-q").addEventListener("input", () => {
       }
       box.innerHTML = list.map((p) => partOptionHtml(p)).join("");
       box.querySelectorAll(".company-option").forEach((btn) => {
-        const part = list.find((p) => p.item_code === btn.dataset.code);
-        btn.addEventListener("click", () => apPick(btn, part || { item_code: btn.dataset.code }));
+        btn.addEventListener("click", (e) => {
+          const code = pickedCode(e, btn);
+          // The alternative carries its own description and stock, so it goes
+          // through the same in-stock check the row's own part would.
+          const alt = list.flatMap((p) => p.alternatives || []).find((a) => a.item_code === code);
+          apPick(btn, list.find((p) => p.item_code === code) || alt || { item_code: code });
+        });
       });
     } catch (_) { box.innerHTML = `<div class="fp-empty">Part search is not available.</div>`; }
   }, 250);
@@ -10407,7 +10412,32 @@ function partOptionHtml(p, { extraClass = "" } = {}) {
       </span>
       ${known ? `<span class="fp-opt-qty ${n > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${escapeHtml(qty)}${
         p.uom ? `<span class="fp-opt-uom">${escapeHtml(p.uom)}</span>` : ""}</span>` : ""}
+      ${partAltHtml(p)}
     </button>`;
+}
+
+// OUT OF STOCK, AND WHAT TO USE INSTEAD (22 Oct 2026, John). The server sends
+// alternatives only for a part with no stock (parts-search), so a part on the
+// shelf shows nothing extra. The "use" control is a span, not a button - this
+// sits inside the row's own button - and the row's click handler asks
+// pickedCode() which one was meant.
+function partAltHtml(p) {
+  const alts = (p && p.alternatives) || [];
+  if (!alts.length) return "";
+  return `<span class="fp-alt">${alts.map((a) => {
+    const q = Number(a.bal_qty);
+    const stock = a.bal_qty === null || a.bal_qty === undefined ? ""
+      : ` · <span class="${q > 0 ? "fp-alt-ok" : "fp-alt-none"}">${escapeHtml(Number.isInteger(q) ? String(q) : q.toFixed(2))} <span>in stock</span></span>`;
+    return `<span class="fp-alt-line"><span>Out of stock - alternative:</span> <b class="mono">${escapeHtml(a.item_code)}</b>${stock}</span>
+      <span class="fp-alt-use" role="button" tabindex="0" data-alt-code="${escapeAttr(a.item_code)}">Use the alternative instead</span>`;
+  }).join("")}</span>`;
+}
+
+// Which code a tap on a part row meant: the alternative, when its control was
+// the thing tapped, else the row's own.
+function pickedCode(e, row) {
+  const alt = e && e.target && e.target.closest && e.target.closest("[data-alt-code]");
+  return alt ? alt.dataset.altCode : row.dataset.code;
 }
 
 // A number that matches no spare part may still be something AutoCount holds:
@@ -10524,7 +10554,7 @@ $("fp-q").addEventListener("input", () => {
       }
       box.innerHTML = list.map((p) => partOptionHtml(p)).join("");
       box.querySelectorAll(".company-option").forEach((btn) =>
-        btn.addEventListener("click", () => showPartStock(btn.dataset.code))
+        btn.addEventListener("click", (e) => showPartStock(pickedCode(e, btn)))
       );
     } catch (_) { box.innerHTML = ""; }
   }, 250);
@@ -10562,6 +10592,7 @@ async function showPartStock(code) {
     wireShelfEdit(detail, p, (shelf) => { p.shelf = shelf; showPartStock(p.item_code); });
     wireFits(detail);
     renderPartNote(detail, p, () => showPartStock(p.item_code));
+    renderPartAlternatives(detail, p, () => showPartStock(p.item_code));
   } catch (e) {
     detail.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Lookup failed")}</div>`;
   }
@@ -10788,6 +10819,53 @@ function partNoteHtml(note, addIfEmpty = true) {
     : "";
 }
 
+// ALTERNATIVE PARTS on the Find Part card (22 Oct 2026, John): what to use
+// when this part is out of stock, each with its own stock. Set by Sales,
+// Purchaser and Admin - the people who know the stock - from the same AutoCount
+// picker replacements use. Added at the foot of the card, below the price.
+async function renderPartAlternatives(container, part, onSaved) {
+  if (!container || !part || !part.item_code) return;
+  let list = [];
+  try { list = (await api(`/api/part-alternatives/${encodeURIComponent(part.item_code)}`)).results || []; } catch (_) {}
+  const can = canEditNote();
+  if (!list.length && !can) return;
+  const rows = list.map((a) => {
+    const q = Number(a.bal_qty);
+    const stock = a.bal_qty === null || a.bal_qty === undefined ? ""
+      : `<span class="${q > 0 ? "fp-alt-ok" : "fp-alt-none"}">${escapeHtml(Number.isInteger(q) ? String(q) : q.toFixed(2))} <span>in stock</span></span>`;
+    return `<div class="repl-row">
+        <button type="button" class="repl-code mono" data-part-code="${escapeAttr(a.item_code)}">${escapeHtml(a.item_code)}</button>
+        <span class="repl-desc">${escapeHtml(a.description || "")}</span>
+        <span class="repl-who">${stock}</span>
+        ${can ? `<button type="button" class="repl-del" data-alt-del="${escapeAttr(String(a.id))}" aria-label="Remove this alternative">&#10005;</button>` : ""}
+      </div>`;
+  }).join("");
+  const box = document.createElement("div");
+  box.className = "repl-box fp-alt-box";
+  box.innerHTML = `<b class="repl-head">If out of stock, use</b>${rows || `<div class="mut">None yet.</div>`}${
+    can ? `<button type="button" class="repl-add" data-alt-add>+ <span>${list.length ? "Another alternative" : "Add an alternative part"}</span></button>` : ""}`;
+  container.appendChild(box);
+  box.querySelectorAll("[data-part-code]").forEach((el) =>
+    el.addEventListener("click", () => peekAtPart(el.dataset.partCode)));
+  const add = box.querySelector("[data-alt-add]");
+  if (add) add.addEventListener("click", () =>
+    openReplModal({ part_key: part.item_code, description: part.description, mode: "alt" }, onSaved));
+  box.querySelectorAll("[data-alt-del]").forEach((el) =>
+    el.addEventListener("click", async () => {
+      if (!confirm("Remove this alternative?\n\nIt will no longer be offered when this part is out of stock.")) return;
+      try {
+        await api(`/api/part-alternatives/${encodeURIComponent(el.dataset.altDel)}`, {
+          method: "DELETE", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ role: getRole() }),
+        });
+        toast("Alternative removed", "ok");
+        if (onSaved) onSaved();
+      } catch (e) {
+        toast(e.message || "Could not remove it", "err");
+      }
+    }));
+}
+
 // Put the note at the top of a card and wire its button. Called after the card
 // is written, because innerHTML replaces whatever was there.
 async function renderPartNote(container, part, onSaved, { addIfEmpty = true } = {}) {
@@ -10947,7 +11025,16 @@ async function renderPartReplacements(container, part, onSaved) {
 function openReplModal(part, onSaved) {
   replPart = part;
   replOnSaved = onSaved || null;
-  $("repl-for").textContent = `Instead of ${part.description || part.part_key}`;
+  // The same picker chooses an ALTERNATIVE part too (22 Oct 2026): one used
+  // only when this one is out of stock. part.mode says which it is saving.
+  const alt = part.mode === "alt";
+  $("repl-title").textContent = alt ? "Alternative part" : "Replacement part";
+  $("repl-warn").textContent = alt
+    ? "Offered to everyone, technicians included, whenever this part is out of stock."
+    : "Everyone who opens this part will see the replacement, including the technicians.";
+  $("repl-for").textContent = alt
+    ? `If ${part.part_key} is out of stock, use`
+    : `Instead of ${part.description || part.part_key}`;
   $("repl-q").value = "";
   $("repl-results").innerHTML =
     `<div class="fp-empty">Search for the part you fit instead.</div>`;
@@ -11004,6 +11091,22 @@ $("repl-q").addEventListener("input", () => {
 
 async function saveReplacement(itemCode) {
   if (!replPart) return;
+  if (replPart.mode === "alt") {
+    try {
+      await api("/api/part-alternatives", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ item_code: replPart.part_key, alt_code: itemCode, who: initialsFor(getUser()), role: getRole() }),
+      });
+      const saved = replOnSaved;
+      toast("Alternative recorded", "ok");
+      closeReplModal();
+      if (saved) saved();
+    } catch (e) {
+      toast(e.message || "Could not save the alternative", "err");
+    }
+    return;
+  }
   try {
     await api("/api/part-replacements", {
       method: "POST",
@@ -13318,8 +13421,8 @@ $("code-input").addEventListener("input", () => {
       }
       box.innerHTML = list.map((p) => partOptionHtml(p)).join("");
       box.querySelectorAll(".company-option").forEach((btn) =>
-        btn.addEventListener("click", () => {
-          addByCode(btn.dataset.code);
+        btn.addEventListener("click", (e) => {
+          addByCode(pickedCode(e, btn));
           $("code-input").value = "";
           box.innerHTML = "";
           $("code-input").focus();

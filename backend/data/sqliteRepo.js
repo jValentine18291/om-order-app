@@ -3685,6 +3685,46 @@ function setPartNote(itemCode, note, who = "") {
 const partNotes = { getPartNote, getPartNotes, setPartNote };
 module.exports.partNotes = partNotes;
 
+// ---- Alternative parts (22 Oct 2026) ---------------------------------------
+// See part_alternatives in db.js. Exact item codes, like notes.
+function listAlternatives(itemCode) {
+  return db.prepare(
+    "SELECT id, item_code, alt_code, created_by, created_at FROM part_alternatives WHERE item_code = ? ORDER BY id"
+  ).all(String(itemCode || "").trim());
+}
+
+// { item_code: [alt_code, ...] } for many parts at once - one query for a whole
+// list of search results.
+function alternativesFor(codes) {
+  const list = [...new Set((codes || []).map((c) => String(c || "").trim()).filter(Boolean))];
+  if (!list.length) return {};
+  const rows = db.prepare(
+    `SELECT item_code, alt_code FROM part_alternatives WHERE item_code IN (${list.map(() => "?").join(",")}) ORDER BY id`
+  ).all(...list);
+  const out = {};
+  for (const r of rows) (out[r.item_code] = out[r.item_code] || []).push(r.alt_code);
+  return out;
+}
+
+function addAlternative(itemCode, altCode, who = "") {
+  const code = String(itemCode || "").trim();
+  const alt = String(altCode || "").trim();
+  if (!code || !alt) { const e = new Error("Missing item code."); e.status = 400; throw e; }
+  if (code === alt) { const e = new Error("A part cannot be its own alternative."); e.status = 400; throw e; }
+  db.prepare(
+    "INSERT OR IGNORE INTO part_alternatives (item_code, alt_code, created_by) VALUES (?, ?, ?)"
+  ).run(code, alt, String(who || "").trim());
+  return listAlternatives(code);
+}
+
+function removeAlternative(id) {
+  const r = db.prepare("DELETE FROM part_alternatives WHERE id = ?").run(Number(id));
+  if (!r.changes) { const e = new Error("That alternative was not found."); e.status = 404; throw e; }
+  return { ok: true };
+}
+
+module.exports.partAlternatives = { listAlternatives, alternativesFor, addAlternative, removeAlternative };
+
 // ---- The common jobs, as John keeps them ------------------------------------
 // The strip of buttons on every machine sheet. Seeded from common-jobs.js by
 // db.js; edited here and nowhere else, from a screen only John has. See the

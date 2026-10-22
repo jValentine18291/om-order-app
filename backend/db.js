@@ -1564,6 +1564,37 @@ try {
   console.error("[db] machine rounds setup failed:", e.message);
 }
 
+// ALTERNATIVE PARTS (22 Oct 2026, John). A part we use when the one wanted is
+// out of stock - SZEN 140051111 (Shoe Clutch) and its aftermarket
+// M1618GC 140051111R. Not a replacement: the original is still the first
+// choice, so the alternative is offered only when the original has none.
+// One way: an alternative of A is not thereby an alternative's A.
+try {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS part_alternatives (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      item_code   TEXT NOT NULL,          -- the part wanted: exact AutoCount ItemCode
+      alt_code    TEXT NOT NULL,          -- what to use when it is out of stock
+      created_by  TEXT DEFAULT '',
+      created_at  TEXT DEFAULT (datetime('now','localtime'))
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_part_alternatives_pair ON part_alternatives(item_code, alt_code);
+  `);
+  // The one note that was really an alternative: written 31 Aug 2026 as just
+  // "140051111R", it asked every technician "Add this part anyway?" as if the
+  // part were superseded. Moved across once; a note anybody has since changed
+  // is left alone.
+  const n = db.prepare("SELECT note FROM part_notes WHERE item_code = 'SZEN 140051111'").get();
+  if (n && String(n.note).trim() === "140051111R") {
+    db.prepare(`INSERT OR IGNORE INTO part_alternatives (item_code, alt_code, created_by)
+                VALUES ('SZEN 140051111', 'M1618GC 140051111R', 'J')`).run();
+    db.prepare("DELETE FROM part_notes WHERE item_code = 'SZEN 140051111'").run();
+    console.log("[db] SZEN 140051111: note '140051111R' moved to an alternative part (M1618GC 140051111R)");
+  }
+} catch (e) {
+  console.error("[db] part alternatives setup failed:", e.message);
+}
+
 try {
   db.exec(`
     CREATE TABLE IF NOT EXISTS machine_status_history (

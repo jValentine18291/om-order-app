@@ -1399,6 +1399,76 @@ app.delete("/api/part-replacements/:id", async (req, res) => {
   }
 });
 
+// ALTERNATIVE PARTS (22 Oct 2026, John): what to use when a part is out of
+// stock. Each with its description and stock from AutoCount, so the card says
+// whether the alternative is any use today. Set by Sales, Purchaser and Admin,
+// like a note; read by everyone.
+async function alternativesWithStock(codes) {
+  const map = data.alternatives.forCodes(codes);
+  const alts = [...new Set(Object.values(map).flat())];
+  if (!alts.length) return {};
+  let stock = new Map();
+  try {
+    if ((process.env.ITEMS_SOURCE || "sqlite").toLowerCase() === "autocount") {
+      stock = await require("./data/autocountRepo").getStockBalances(alts);
+    }
+  } catch (e) {
+    console.error("[alternatives] stock lookup:", e.message);
+  }
+  const out = {};
+  for (const [code, list] of Object.entries(map)) {
+    out[code] = list.map((alt) => {
+      const s = stock.get(alt);
+      return { item_code: alt, description: s ? s.description : "", bal_qty: s ? s.bal_qty : null };
+    });
+  }
+  return out;
+}
+
+app.get("/api/part-alternatives/:code", async (req, res) => {
+  try {
+    const code = String(req.params.code || "").trim();
+    const rows = data.alternatives.list(code);
+    const withStock = (await alternativesWithStock([code]))[code] || [];
+    res.json({
+      results: rows.map((r) => ({
+        ...r, ...(withStock.find((s) => s.item_code === r.alt_code) || {}), item_code: r.alt_code, for_code: r.item_code,
+      })),
+    });
+  } catch (err) {
+    console.error("[GET /api/part-alternatives]", err.message);
+    res.json({ results: [] });
+  }
+});
+
+app.post("/api/part-alternatives", async (req, res) => {
+  if (!needRole(req, res, ["sales", "purchaser", "admin"])) return;
+  try {
+    const { item_code, alt_code, who = "" } = req.body || {};
+    // Both must be real AutoCount items: a mistyped alternative is a dead end
+    // offered to a technician at exactly the moment they are stuck.
+    const part = await requireAutoCountItem(item_code);
+    const alt = await requireAutoCountItem(alt_code);
+    data.alternatives.add(part.item_code, alt.item_code, who);
+    res.json({ ok: true });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/part-alternatives]", err);
+    res.status(500).json({ error: "Could not save the alternative." });
+  }
+});
+
+app.delete("/api/part-alternatives/:id", async (req, res) => {
+  if (!needRole(req, res, ["sales", "purchaser", "admin"])) return;
+  try {
+    res.json(data.alternatives.remove(req.params.id));
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    console.error("[DELETE /api/part-alternatives]", err);
+    res.status(500).json({ error: "Could not remove the alternative." });
+  }
+});
+
 // Find Part: search parts by description/code (suggestion list).
 app.get("/api/parts-search", async (req, res) => {
   try {
@@ -1414,6 +1484,18 @@ app.get("/api/parts-search", async (req, res) => {
       // The equivalent model's, listed under its own (9 Oct 2026).
       also: String(req.query.also || "").split(",").filter(Boolean),
     });
+    // An out-of-stock part carries its alternatives, with their stock
+    // (22 Oct 2026). One in stock carries nothing: the original is the
+    // choice, and nothing should get in its way.
+    try {
+      const empty = results.filter((r) => !(Number(r.bal_qty) > 0)).map((r) => r.item_code);
+      if (empty.length) {
+        const alts = await alternativesWithStock(empty);
+        for (const r of results) if (alts[r.item_code]) r.alternatives = alts[r.item_code];
+      }
+    } catch (e) {
+      console.error("[parts-search] alternatives:", e.message);
+    }
     res.json({ results });
   } catch (err) {
     // Say that it BROKE, rather than answering with an empty list.

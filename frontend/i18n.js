@@ -665,6 +665,17 @@
     "Sales Order": "销售单",
     "Sales Orders": "销售单",
     "no DO/CS/INV yet": "尚无 DO/CS/INV",
+    // Alternative parts (22 Oct 2026).
+    "Out of stock - alternative:": "缺货 - 替代零件：",
+    "Use the alternative instead": "改用替代零件",
+    "If out of stock, use": "缺货时改用",
+    "Add an alternative part": "添加替代零件",
+    "Another alternative": "再添加替代零件",
+    "Alternative part": "替代零件",
+    "Alternative recorded": "已记录替代零件",
+    "Alternative removed": "已删除替代零件",
+    "Offered to everyone, technicians included, whenever this part is out of stock.": "此零件缺货时，所有人（包括技术员）都会看到替代零件。",
+    "None yet.": "暂无。",
     // The customer says the repair costs too much. Technicians can record
     // it themselves now, so it needs to read in Chinese too.
     "Too expensive — condemn": "维修费过高 — 报废",

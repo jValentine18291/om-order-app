@@ -3279,6 +3279,19 @@ body.signin-brand .topbar .pill {
    is the thing being checked against the shelf, so it gets its own column
    rather than being buried in the line underneath. */
 .fp-opt-row { display: flex; align-items: center; gap: 12px; }
+/* Out of stock, and what to use instead (22 Oct 2026): a full-width strip
+   under the row. */
+.fp-opt-row:has(.fp-alt) { flex-wrap: wrap; }
+.fp-alt { flex-basis: 100%; display: flex; flex-direction: column; gap: 5px; background: #F0EAFB;
+  border-radius: 8px; padding: 6px 9px; font-size: .78rem; color: #5B3FA8; text-align: left; }
+.fp-alt-line b { color: #3C3489; }
+.fp-alt-ok { font-weight: 700; color: #1B7A42; }
+.fp-alt-none { font-weight: 700; color: #A32020; }
+.fp-alt-use { align-self: flex-start; font-weight: 700; font-size: .8rem; color: #5B3FA8; background: #fff;
+  border: 1px solid #cdbff0; border-radius: 8px; padding: 5px 10px; box-shadow: 0 2px 0 #cdbff0; }
+.fp-alt-box { margin-top: 12px; }
+.repl-box.fp-alt-box { background: #F0EAFB; border-left-color: #5B3FA8; color: #3C3489; }
+.repl-box.fp-alt-box .repl-row + .repl-row { border-top-color: #ddd2f6; }
 .fp-opt-main { flex: 1; min-width: 0; }
 .fp-opt-main .fp-opt-desc { overflow-wrap: anywhere; }
 .fp-opt-qty {
