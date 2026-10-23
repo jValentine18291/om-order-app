@@ -225,6 +225,14 @@
           </span>
           <span class="home-txt"><strong>Purchase Orders</strong><small>What is on order and where it is</small></span>
         </button>
+        <!-- AutoCount's quotations, read-only (23 Oct 2026). Shown only to the
+             eight in canViewQuotations - set in applyRoleToHome, not by job. -->
+        <button class="home-btn home-buy" data-go="qt" id="home-qt" style="display:none">
+          <span class="home-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h3M8 17h3M14 13h2M14 17h2"/></svg>
+          </span>
+          <span class="home-txt"><strong>Quotations</strong><small>What we have quoted, from AutoCount</small></span>
+        </button>
         <button class="home-btn home-buy" data-go="requests">
           <span class="home-ic">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
@@ -473,6 +481,24 @@
     <!-- ============ SCREEN: PURCHASE ORDERS ============ -->
     <!-- The order itself is AutoCount's and is only read. The app adds one
          fact it cannot know: whether Iris has actually sent it. -->
+    <!-- ============ SCREEN: QUOTATIONS (AutoCount, read-only) ============ -->
+    <section id="screen-qt" class="screen">
+      <div class="section-head page-head">
+        <h2 class="page-title">Quotations</h2>
+      </div>
+      <div class="field">
+        <label for="qt-q">Search</label>
+        <input id="qt-q" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+               placeholder="Debtor, quotation no. or item…" />
+      </div>
+      <div class="pu-filters" id="qt-range">
+        <button type="button" class="pu-chip pu-chip-on" data-range="3">Last 3 months</button>
+        <button type="button" class="pu-chip" data-range="year">This year</button>
+        <button type="button" class="pu-chip" data-range="all">All</button>
+      </div>
+      <div id="qt-list"></div>
+    </section>
+
     <section id="screen-po" class="screen">
       <div class="section-head page-head">
         <h2 class="page-title">Purchase Orders</h2>

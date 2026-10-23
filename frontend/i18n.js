@@ -115,6 +115,17 @@
     "New shipment": "新增货运",
     "Update this shipment": "更新此货运",
     "Purchase Orders": "采购订单",
+    // Quotations (23 Oct 2026)
+    "Quotations": "报价单",
+    "What we have quoted, from AutoCount": "AutoCount 里的报价单",
+    "Debtor, quotation no. or item…": "客户、报价单号或货品…",
+    "Last 3 months": "最近 3 个月",
+    "This year": "今年",
+    "No quotations match": "没有符合的报价单",
+    "No quotations": "没有报价单",
+    "No items on this quotation": "此报价单没有货品",
+    "Agent": "业务员",
+    "More": "更多",
     "← Purchase Orders": "← 采购订单",
     "What is on order and where it is": "已订购的货品及其状态",
     "Purchasing": "采购",
@@ -1036,6 +1047,8 @@
   }
 
   var PATTERNS = [
+    // Quotations: "3 items" on a quotation's card (23 Oct 2026)
+    [/^(\d+) items?$/, function (_, n) { return n + " 项货品"; }],
     // Dates, alone and inside the lines that carry them
     [new RegExp("^" + DATE + "$"), function (_, d, m, y) { return cnDate(d, m, y); }],
     [new RegExp("^Created: " + DATE + "$"), function (_, d, m, y) { return "创建日期：" + cnDate(d, m, y); }],

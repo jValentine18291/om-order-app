@@ -84,6 +84,13 @@
   // The logs workbook - every record the app keeps, customers' numbers and
   // who-did-what included. John alone, his call on 2 Oct 2026.
   function canDownloadLogs(user) { return isKeyholder(user); }
+  // QUOTATIONS (23 Oct 2026): AutoCount's quotations, read-only. John named
+  // these eight; by staff id, like the keyholders - not by job, because one
+  // admin (Alvin) is deliberately not on it.
+  const QUOTATION_VIEWERS = ["john", "chiuyan", "carmen", "iris", "chansing", "keeseng", "shirley", "khoon"];
+  function canViewQuotations(user) {
+    return !!user && QUOTATION_VIEWERS.includes(String(user.id || ""));
+  }
 
   // The repair sheet was behind a per-person list while John tried it, 25 to
   // 26 Sep 2026. He green-lit it for everyone, so the list is gone rather than
@@ -143,5 +150,6 @@
 
   return { FUNCTIONS, IDS, ROLE_DEFAULTS, functionsFor, isDefault, clean,
            KEYHOLDERS, canCorrect, canDeleteSlips, canEditCommonJobs, canDownloadLogs,
+           QUOTATION_VIEWERS, canViewQuotations,
            SPLIT_TRIAL, usesSplitSheet };
 });

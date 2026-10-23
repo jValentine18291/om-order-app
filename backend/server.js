@@ -1469,6 +1469,35 @@ app.delete("/api/part-alternatives/:id", async (req, res) => {
   }
 });
 
+// QUOTATIONS (23 Oct 2026, John): AutoCount's quotations, read-only, for the
+// eight people in canViewQuotations (app-functions.js). ?q= searches debtor,
+// quotation number and items; ?since=YYYY-MM-DD narrows the dates; ?offset=
+// pages. One quotation's items from /api/quotations/:docNo/items.
+const quotationsUnavailable = (res) => res.status(503).json({ error: "AutoCount is not connected." });
+app.get("/api/quotations", async (req, res) => {
+  if (!needKeyholder(req, res, "canViewQuotations", "Quotations are open to John, Chiu Yan, Carmen, Iris, Chan Sing, Kee Seng, Shirley and Uncle Khoon.")) return;
+  if ((process.env.ITEMS_SOURCE || "sqlite").toLowerCase() !== "autocount") return quotationsUnavailable(res);
+  try {
+    const since = /^\d{4}-\d{2}-\d{2}$/.test(String(req.query.since || "")) ? String(req.query.since) : null;
+    res.json(await require("./data/autocountRepo").searchQuotations({
+      q: String(req.query.q || "").slice(0, 100), since, offset: req.query.offset,
+    }));
+  } catch (err) {
+    console.error("[GET /api/quotations]", err.message);
+    res.status(500).json({ error: "Could not read the quotations from AutoCount." });
+  }
+});
+app.get("/api/quotations/:docNo/items", async (req, res) => {
+  if (!needKeyholder(req, res, "canViewQuotations", "Quotations are open to John, Chiu Yan, Carmen, Iris, Chan Sing, Kee Seng, Shirley and Uncle Khoon.")) return;
+  if ((process.env.ITEMS_SOURCE || "sqlite").toLowerCase() !== "autocount") return quotationsUnavailable(res);
+  try {
+    res.json({ items: await require("./data/autocountRepo").quotationItems(req.params.docNo) });
+  } catch (err) {
+    console.error("[GET /api/quotations/:docNo/items]", err.message);
+    res.status(500).json({ error: "Could not read that quotation from AutoCount." });
+  }
+});
+
 // Find Part: search parts by description/code (suggestion list).
 app.get("/api/parts-search", async (req, res) => {
   try {

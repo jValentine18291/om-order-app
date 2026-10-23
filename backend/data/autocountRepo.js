@@ -1798,6 +1798,87 @@ async function recentSalesWhy(code) {
   });
 }
 module.exports.recentSalesWhy = recentSalesWhy;
+
+// ---- Quotations (23 Oct 2026, John) ----------------------------------------
+// AutoCount's own quotations, QT / QTDTL, READ-ONLY: a list to look back at
+// what was quoted. The same document shape as SO / SODTL, which the app
+// writes (autocountSalesOrder.js): header DocNo, DocDate, DebtorName,
+// SalesAgent, Cancelled, FinalTotal; lines Seq, ItemCode, Description, Qty,
+// UnitPrice. Cancelled quotations are left out, and lines with no item code
+// (notes such as "Being repair & replacement of part :-") are not shown -
+// both John's choices.
+//
+// ONE SEARCH covers the debtor, the quotation number and the items (code or
+// description): every word typed has to appear in one of them, so "tan bk3410"
+// finds Tan Landscaping's quotations for a BK3410.
+const QT_PAGE = 30;
+
+function buildQuotationSearchSql(q, since) {
+  const params = {};
+  const words = String(q || "").trim().split(/\s+/).filter(Boolean).slice(0, 5);
+  const conds = words.map((w, i) => {
+    params[`w${i}`] = w;
+    params[`n${i}`] = w.replace(/\s+/g, "").toUpperCase();
+    return `( m.DocNo LIKE '%' + @w${i} + '%'
+           OR m.DebtorName LIKE '%' + @w${i} + '%'
+           OR EXISTS (SELECT 1 FROM QTDTL x WHERE x.DocKey = m.DocKey
+                        AND (REPLACE(UPPER(ISNULL(x.ItemCode, '')), ' ', '') LIKE '%' + @n${i} + '%'
+                             OR x.Description LIKE '%' + @w${i} + '%')) )`;
+  });
+  if (since) params.since = since;
+  const sql = `
+SELECT m.DocKey, m.DocNo, m.DocDate, m.DebtorName, m.SalesAgent,
+       COALESCE(m.FinalTotal, m.NetTotal, 0) AS Total,
+       (SELECT COUNT(*) FROM QTDTL d WHERE d.DocKey = m.DocKey AND ISNULL(d.ItemCode, '') <> '') AS Items
+  FROM QT m
+ WHERE ISNULL(m.Cancelled, 'F') <> 'T'
+   ${since ? "AND m.DocDate >= @since" : ""}
+   ${conds.length ? "AND " + conds.join("\n   AND ") : ""}
+ ORDER BY m.DocDate DESC, m.DocNo DESC
+ OFFSET @offset ROWS FETCH NEXT @take ROWS ONLY`;
+  return { sql, params };
+}
+
+async function searchQuotations({ q = "", since = null, offset = 0 } = {}) {
+  const built = buildQuotationSearchSql(q, since);
+  const skip = Math.max(0, Number(offset) || 0);
+  // One more than a page, to know whether there is another.
+  const rows = await query(built.sql, { ...built.params, offset: skip, take: QT_PAGE + 1 });
+  return {
+    results: rows.slice(0, QT_PAGE).map((r) => ({
+      doc_key: r.DocKey,
+      doc_no: String(r.DocNo || "").trim(),
+      date: docDate(r.DocDate),
+      debtor: String(r.DebtorName || "").trim(),
+      agent: String(r.SalesAgent || "").trim(),
+      total: Number(r.Total) || 0,
+      items: Number(r.Items) || 0,
+    })),
+    more: rows.length > QT_PAGE,
+    next: skip + QT_PAGE,
+  };
+}
+
+async function quotationItems(docNo) {
+  const rows = await query(
+    `SELECT d.ItemCode, d.Description, d.Qty, d.UOM, d.UnitPrice
+       FROM QTDTL d JOIN QT m ON m.DocKey = d.DocKey
+      WHERE m.DocNo = @docNo AND ISNULL(d.ItemCode, '') <> ''
+      ORDER BY d.Seq, d.DtlKey`,
+    { docNo: String(docNo || "").trim() }
+  );
+  return rows.map((r) => ({
+    item_code: String(r.ItemCode || "").trim(),
+    description: String(r.Description || "").trim(),
+    qty: Number(r.Qty) || 0,
+    uom: String(r.UOM || "").trim(),
+    unit_price: Number(r.UnitPrice) || 0,
+  }));
+}
+
+module.exports.searchQuotations = searchQuotations;
+module.exports.quotationItems = quotationItems;
+module.exports.buildQuotationSearchSql = buildQuotationSearchSql;
 module.exports.summariseRecentSales = summariseRecentSales;
 module.exports.buildRecentSalesSql = buildRecentSalesSql;
 module.exports.SPECIAL_PRICE_CUSTOMERS = SPECIAL_PRICE_CUSTOMERS;

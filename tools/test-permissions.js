@@ -146,10 +146,11 @@ const html = fs.readFileSync(path.resolve(__dirname, "..", "frontend", "index.ht
 const homeAt = html.indexOf('id="screen-home"');
 const home = html.slice(homeAt, html.indexOf('<section', homeAt + 1));
 const inHtml = [...home.matchAll(/class="home-btn[^"]*"[^>]*data-go="([a-z-]+)"/g)].map((m) => m[1]);
-// "people", "jobs" and "logs" are extras rather than jobs - admin screens
-// decided by who you are, not handed out per person - so none is on the list.
+// "people", "jobs", "logs" and "qt" are extras rather than jobs - decided by
+// who you are, not handed out per person - so none is on the list.
+const EXTRAS = ["people", "jobs", "logs", "qt"];
 check("every home button is on the list", inHtml.filter((id) =>
-  id !== "people" && id !== "jobs" && id !== "logs" && !FN.IDS.includes(id)), []);
+  !EXTRAS.includes(id) && !FN.IDS.includes(id)), []);
 check("and every one on the list is a home button", FN.IDS.filter((id) => !inHtml.includes(id)), []);
 check("with 'people' found in the app but deliberately left off the list",
   inHtml.includes("people"), true);

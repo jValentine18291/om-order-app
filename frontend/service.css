@@ -3778,3 +3778,23 @@ details.vs-machine[open] > summary.vs-machine-name {
 }
 .home-pill-ic { display: inline-grid; place-items: center; color: #1B7A42; }
 .home-pill-ic svg { width: 16px; height: 16px; }
+
+/* ---- Quotations (AutoCount, read-only, 23 Oct 2026) ---------------------- */
+.qt-card{background:#fff;border:1px solid var(--line,#e3e6e8);border-left:4px solid #8f9ba2;
+  border-radius:11px;margin-bottom:9px;overflow:hidden}
+.qt-card.qt-open{border-left-color:var(--ink,#1d2a30)}
+.qt-head{display:block;width:100%;text-align:left;background:none;border:0;padding:11px 12px;font:inherit;cursor:pointer;color:inherit}
+.qt-head:active{background:var(--primary-tint,#eef7f8)}
+.qt-total{font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+.qt-items{border-top:1px solid var(--line,#e3e6e8);padding:4px 12px 10px}
+.qt-line{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:8px 6px;
+  border-bottom:1px solid #f0f2f3;border-radius:6px}
+.qt-line-main{min-width:0}
+.qt-line-main strong{display:block;font-size:13px;color:var(--ink,#1d2a30)}
+.qt-line-main span{display:block;font-size:12px;color:var(--ink-faint,#78868c);margin-top:1px}
+.qt-line-amt{text-align:right;white-space:nowrap;font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--ink-2,#45525a)}
+.qt-line-amt .qt-qty{display:block;font-weight:700;color:var(--ink,#1d2a30)}
+.qt-hit{background:#FFF4D6;box-shadow:inset 3px 0 0 #E0A100}
+.qt-sum{display:flex;justify-content:space-between;padding:10px 6px 0;font-size:13.5px}
+.qt-sum strong{font-variant-numeric:tabular-nums}
+.qt-more{display:block;width:100%;margin:4px 0 16px}

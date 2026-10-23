@@ -76,7 +76,7 @@ function formatDate(ts) {
 // ---- Screen navigation -----------------------------------------------------
 // "purchase" is the part-requests list (Orders); "po" and "po-detail" are the
 // supplier purchase orders. Different things, named apart on purpose.
-const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip", "purchase", "quote", "ipl", "bulk", "po", "po-detail", "ship", "ship-detail", "ship-edit", "people", "jobs"];
+const SCREENS = ["role", "home", "new", "open", "close", "view", "find", "slip", "purchase", "quote", "ipl", "bulk", "qt", "po", "po-detail", "ship", "ship-detail", "ship-edit", "people", "jobs"];
 
 // ---- Who is using this phone ------------------------------------------------
 // Staff pick their name once per phone; the choice is remembered and decides
@@ -815,6 +815,13 @@ function applyRoleToHome() {
   if (logsTile) {
     const mine = !!(window.OM_FUNCTIONS && OM_FUNCTIONS.canDownloadLogs && OM_FUNCTIONS.canDownloadLogs(getUser()));
     logsTile.style.display = mine ? "flex" : "none";
+  }
+  // Quotations (23 Oct 2026): the eight John named, by person rather than by
+  // job, so the loop above (which only knows jobs) hides it first.
+  const qtTile = $("home-qt");
+  if (qtTile) {
+    const mine = !!(window.OM_FUNCTIONS && OM_FUNCTIONS.canViewQuotations && OM_FUNCTIONS.canViewQuotations(getUser()));
+    qtTile.style.display = mine ? "flex" : "none";
   }
   // The Admin row at the bottom (6 Oct 2026): shown when any of its three is.
   const adminRow = $("home-admin-row");
@@ -10271,6 +10278,7 @@ document.querySelectorAll(".home-btn").forEach((b) =>
     else if (go === "bulk") { enterBulkOrder(); }
     else if (go === "ipl") { enterIpl(); }
     else if (go === "po") { enterPurchaseOrders(); }
+    else if (go === "qt") { enterQuotations(); }
     else if (go === "ship") { enterShipments(); }
     else if (go === "people") { showScreen("people"); renderPeople(); }
     else if (go === "jobs") { showScreen("jobs"); renderJobsAdmin(); }
@@ -11750,6 +11758,156 @@ function canSetPoStatus() {
 
 let poScope = "open";
 let poOrders = [];
+
+// ---- Quotations (AutoCount, read-only) --------------------------------------
+// John, 23 Oct 2026: a list of the quotations made in AutoCount - number,
+// date, debtor, agent, total, and the items inside - searchable by debtor,
+// quotation number or item. Nothing here writes anything. Cancelled ones are
+// left out by the server. Newest first, 30 at a time, more as you scroll.
+const qt = { range: "3", results: [], next: null, more: false, seq: 0, timer: null, observer: null };
+
+function enterQuotations() {
+  showScreen("qt");
+  if (!qt.wired) {
+    qt.wired = true;
+    $("qt-q").addEventListener("input", () => {
+      clearTimeout(qt.timer);
+      qt.timer = setTimeout(() => loadQuotations(true), 350);
+    });
+    document.querySelectorAll("#qt-range [data-range]").forEach((b) =>
+      b.addEventListener("click", () => {
+        qt.range = b.dataset.range;
+        document.querySelectorAll("#qt-range [data-range]").forEach((c) =>
+          c.classList.toggle("pu-chip-on", c === b));
+        loadQuotations(true);
+      }));
+  }
+  loadQuotations(true);
+}
+
+// The chip as a date AutoCount can compare against. "Last 3 months" counts
+// back from today; "This year" is from 1 January.
+function quotationSince(range) {
+  const d = new Date();
+  if (range === "all") return "";
+  if (range === "year") return `${d.getFullYear()}-01-01`;
+  d.setMonth(d.getMonth() - 3);
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+// The words being searched, so the items that matched can be picked out.
+function quotationWords() {
+  return ($("qt-q").value || "").trim().toLowerCase().split(/\s+/).filter(Boolean);
+}
+
+async function loadQuotations(reset) {
+  const box = $("qt-list");
+  // A reply for an older search is dropped - typing fast sends several.
+  const seq = ++qt.seq;
+  if (reset) {
+    qt.results = []; qt.next = 0; qt.more = false;
+    box.innerHTML = `<div class="fp-loading">Reading AutoCount…</div>`;
+  }
+  const params = new URLSearchParams({
+    q: ($("qt-q").value || "").trim(),
+    offset: String(qt.next || 0),
+    user_id: (getUser() || {}).id || "",
+  });
+  const since = quotationSince(qt.range);
+  if (since) params.set("since", since);
+  try {
+    const data = await api(`/api/quotations?${params}`);
+    if (seq !== qt.seq) return;
+    qt.results = qt.results.concat(data.results || []);
+    qt.more = !!data.more;
+    qt.next = data.next;
+    renderQuotations();
+  } catch (e) {
+    if (seq !== qt.seq) return;
+    if (reset) box.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Could not load the quotations")}</div>`;
+    else toast(e.message || "Could not load more quotations");
+  }
+}
+
+function renderQuotations() {
+  const box = $("qt-list");
+  if (qt.observer) { qt.observer.disconnect(); qt.observer = null; }
+  if (!qt.results.length) {
+    box.innerHTML = `<div class="fp-empty">${quotationWords().length ? "No quotations match" : "No quotations"}</div>`;
+    return;
+  }
+  box.innerHTML = qt.results.map((r) => `
+    <div class="qt-card" data-qt="${escapeAttr(r.doc_no)}">
+      <button type="button" class="qt-head">
+        <div class="po-top">
+          <strong data-no-i18n>${escapeHtml(r.doc_no)}</strong>
+          <span class="qt-total" data-no-i18n>${money(r.total)}</span>
+        </div>
+        <div class="po-sup" data-no-i18n>${escapeHtml(r.debtor || "—")}</div>
+        <div class="po-sub">${r.date ? `<span>${escapeHtml(formatDate(r.date))}</span> · ` : ""}${
+          r.agent ? `<span>Agent</span> <span data-no-i18n>${escapeHtml(r.agent)}</span> · ` : ""}<span>${
+          r.items} item${r.items === 1 ? "" : "s"}</span></div>
+      </button>
+      <div class="qt-items" hidden></div>
+    </div>`).join("") + (qt.more ? `<button type="button" class="btn-quiet qt-more" id="qt-more">More</button>` : "");
+  box.querySelectorAll(".qt-card").forEach((card) =>
+    card.querySelector(".qt-head").addEventListener("click", () => toggleQuotation(card)));
+  const more = $("qt-more");
+  if (more) {
+    const go = () => { more.disabled = true; more.textContent = "Loading…"; loadQuotations(false); };
+    more.addEventListener("click", go);
+    // Scrolling to the bottom loads the next 30 by itself; the button is
+    // there for the phone that does not support watching for it.
+    if ("IntersectionObserver" in window) {
+      qt.observer = new IntersectionObserver((es) => {
+        if (es.some((e) => e.isIntersecting) && !more.disabled) go();
+      });
+      qt.observer.observe(more);
+    }
+  }
+}
+
+async function toggleQuotation(card) {
+  const box = card.querySelector(".qt-items");
+  if (!box.hidden) { box.hidden = true; card.classList.remove("qt-open"); return; }
+  box.hidden = false;
+  card.classList.add("qt-open");
+  if (box.dataset.loaded) return;
+  box.innerHTML = `<div class="fp-loading">Reading AutoCount…</div>`;
+  try {
+    const qs = new URLSearchParams({ user_id: (getUser() || {}).id || "" });
+    const data = await api(`/api/quotations/${encodeURIComponent(card.dataset.qt)}/items?${qs}`);
+    const items = data.items || [];
+    box.dataset.loaded = "1";
+    if (!items.length) { box.innerHTML = `<div class="fp-empty">No items on this quotation</div>`; return; }
+    // An item matches when every searched word that is not the quotation
+    // number or the debtor appears in its code or description - the same
+    // rule the server searched with, so the line it found is the one lit up.
+    const r = qt.results.find((x) => x.doc_no === card.dataset.qt) || {};
+    const head = `${r.doc_no || ""} ${r.debtor || ""}`.toLowerCase();
+    const words = quotationWords().filter((w) => !head.includes(w));
+    const hit = (it) => {
+      if (!words.length) return false;
+      const text = `${String(it.item_code || "").replace(/\s+/g, "")} ${it.item_code || ""} ${it.description || ""}`.toLowerCase();
+      return words.every((w) => text.includes(w));
+    };
+    box.innerHTML = items.map((it) => `
+      <div class="qt-line${hit(it) ? " qt-hit" : ""}">
+        <div class="qt-line-main" data-no-i18n>
+          <strong>${escapeHtml(it.item_code)}</strong>
+          <span>${escapeHtml(it.description || "")}</span>
+        </div>
+        <div class="qt-line-amt" data-no-i18n>
+          <span class="qt-qty">${escapeHtml(trimNum(it.qty))}${it.uom ? " " + escapeHtml(it.uom) : ""}</span>
+          <span>× ${money(it.unit_price)}</span>
+        </div>
+      </div>`).join("") + `
+      <div class="qt-sum"><span>Total</span><strong data-no-i18n>${money(r.total)}</strong></div>`;
+  } catch (e) {
+    box.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Could not load this quotation")}</div>`;
+  }
+}
 
 async function enterPurchaseOrders() {
   showScreen("po");
