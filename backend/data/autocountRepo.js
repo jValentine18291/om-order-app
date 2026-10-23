@@ -1808,23 +1808,43 @@ module.exports.recentSalesWhy = recentSalesWhy;
 // (notes such as "Being repair & replacement of part :-") are not shown -
 // both John's choices.
 //
-// ONE SEARCH covers the debtor, the quotation number and the items (code or
-// description): every word typed has to appear in one of them, so "tan bk3410"
-// finds Tan Landscaping's quotations for a BK3410.
+// TWO SEARCHES (John, 23 Oct 2026, the day after the first version had one):
+//   q    - the debtor or the quotation number. Every word has to appear in
+//          one of the two, so "tan 2610" is Tan Landscaping in October.
+//   item - the items' codes and descriptions. Every word has to appear on
+//          the SAME line, so "shoe bk3410" is a BK3410 shoe and not a
+//          quotation with a shoe for one machine and a BK3410 head.
+//   code - an exact item code, from tapping a suggestion. Wins over item.
+// A field left empty does not narrow anything; both filled means both.
 const QT_PAGE = 30;
 
-function buildQuotationSearchSql(q, since) {
+const qtWords = (s) => String(s || "").trim().split(/\s+/).filter(Boolean).slice(0, 5);
+
+// One line's code or description, for each word: the code compared with its
+// spaces taken out, so "szen140051111" and "SZEN 140051111" both find it.
+function qtLineMatch(alias, words, params, prefix) {
+  return words.map((w, i) => {
+    params[`${prefix}w${i}`] = w;
+    params[`${prefix}n${i}`] = w.replace(/\s+/g, "").toUpperCase();
+    return `(REPLACE(UPPER(ISNULL(${alias}.ItemCode, '')), ' ', '') LIKE '%' + @${prefix}n${i} + '%'
+                OR ${alias}.Description LIKE '%' + @${prefix}w${i} + '%')`;
+  }).join(" AND ");
+}
+
+function buildQuotationSearchSql({ q = "", item = "", code = "", since = null } = {}) {
   const params = {};
-  const words = String(q || "").trim().split(/\s+/).filter(Boolean).slice(0, 5);
-  const conds = words.map((w, i) => {
+  const conds = qtWords(q).map((w, i) => {
     params[`w${i}`] = w;
-    params[`n${i}`] = w.replace(/\s+/g, "").toUpperCase();
-    return `( m.DocNo LIKE '%' + @w${i} + '%'
-           OR m.DebtorName LIKE '%' + @w${i} + '%'
-           OR EXISTS (SELECT 1 FROM QTDTL x WHERE x.DocKey = m.DocKey
-                        AND (REPLACE(UPPER(ISNULL(x.ItemCode, '')), ' ', '') LIKE '%' + @n${i} + '%'
-                             OR x.Description LIKE '%' + @w${i} + '%')) )`;
+    return `( m.DocNo LIKE '%' + @w${i} + '%' OR m.DebtorName LIKE '%' + @w${i} + '%' )`;
   });
+  const exact = String(code || "").trim();
+  if (exact) {
+    params.code = exact;
+    conds.push(`EXISTS (SELECT 1 FROM QTDTL x WHERE x.DocKey = m.DocKey AND x.ItemCode = @code)`);
+  } else if (qtWords(item).length) {
+    conds.push(`EXISTS (SELECT 1 FROM QTDTL x WHERE x.DocKey = m.DocKey
+                 AND ${qtLineMatch("x", qtWords(item), params, "i")})`);
+  }
   if (since) params.since = since;
   const sql = `
 SELECT m.DocKey, m.DocNo, m.DocDate, m.DebtorName, m.SalesAgent,
@@ -1839,8 +1859,8 @@ SELECT m.DocKey, m.DocNo, m.DocDate, m.DebtorName, m.SalesAgent,
   return { sql, params };
 }
 
-async function searchQuotations({ q = "", since = null, offset = 0 } = {}) {
-  const built = buildQuotationSearchSql(q, since);
+async function searchQuotations({ q = "", item = "", code = "", since = null, offset = 0 } = {}) {
+  const built = buildQuotationSearchSql({ q, item, code, since });
   const skip = Math.max(0, Number(offset) || 0);
   // One more than a page, to know whether there is another.
   const rows = await query(built.sql, { ...built.params, offset: skip, take: QT_PAGE + 1 });
@@ -1876,6 +1896,40 @@ async function quotationItems(docNo) {
   }));
 }
 
+// THE ITEM BOX'S SUGGESTIONS: only parts that are on a quotation (John's
+// choice - every suggestion then has something behind it), most-quoted
+// first. Every word on the same line, as in the search. Across all dates and
+// not cancelled; the date chips still narrow the list once one is picked.
+function buildQuotedItemsSql(term) {
+  const params = {};
+  const words = qtWords(term);
+  if (!words.length) return null;
+  const sql = `
+SELECT TOP 15 d.ItemCode, MAX(d.Description) AS Description,
+       COUNT(DISTINCT d.DocKey) AS Quotes, MAX(m.DocDate) AS LastDate
+  FROM QTDTL d JOIN QT m ON m.DocKey = d.DocKey
+ WHERE ISNULL(m.Cancelled, 'F') <> 'T'
+   AND ISNULL(d.ItemCode, '') <> ''
+   AND ${qtLineMatch("d", words, params, "")}
+ GROUP BY d.ItemCode
+ ORDER BY COUNT(DISTINCT d.DocKey) DESC, MAX(m.DocDate) DESC`;
+  return { sql, params };
+}
+
+async function quotedItems(term) {
+  const built = buildQuotedItemsSql(term);
+  if (!built) return [];
+  const rows = await query(built.sql, built.params);
+  return rows.map((r) => ({
+    item_code: String(r.ItemCode || "").trim(),
+    description: String(r.Description || "").trim(),
+    quotes: Number(r.Quotes) || 0,
+    last: docDate(r.LastDate),
+  }));
+}
+
+module.exports.quotedItems = quotedItems;
+module.exports.buildQuotedItemsSql = buildQuotedItemsSql;
 module.exports.searchQuotations = searchQuotations;
 module.exports.quotationItems = quotationItems;
 module.exports.buildQuotationSearchSql = buildQuotationSearchSql;

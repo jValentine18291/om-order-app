@@ -1480,11 +1480,25 @@ app.get("/api/quotations", async (req, res) => {
   try {
     const since = /^\d{4}-\d{2}-\d{2}$/.test(String(req.query.since || "")) ? String(req.query.since) : null;
     res.json(await require("./data/autocountRepo").searchQuotations({
-      q: String(req.query.q || "").slice(0, 100), since, offset: req.query.offset,
+      q: String(req.query.q || "").slice(0, 100),
+      item: String(req.query.item || "").slice(0, 100),
+      code: String(req.query.code || "").slice(0, 60),
+      since, offset: req.query.offset,
     }));
   } catch (err) {
     console.error("[GET /api/quotations]", err.message);
     res.status(500).json({ error: "Could not read the quotations from AutoCount." });
+  }
+});
+// The Item box's suggestions: parts that have been on a quotation.
+app.get("/api/quotation-items", async (req, res) => {
+  if (!needKeyholder(req, res, "canViewQuotations", "Quotations are open to John, Chiu Yan, Carmen, Iris, Chan Sing, Kee Seng, Shirley and Uncle Khoon.")) return;
+  if ((process.env.ITEMS_SOURCE || "sqlite").toLowerCase() !== "autocount") return quotationsUnavailable(res);
+  try {
+    res.json({ results: await require("./data/autocountRepo").quotedItems(String(req.query.q || "").slice(0, 100)) });
+  } catch (err) {
+    console.error("[GET /api/quotation-items]", err.message);
+    res.status(500).json({ error: "Could not read the quoted items from AutoCount." });
   }
 });
 app.get("/api/quotations/:docNo/items", async (req, res) => {

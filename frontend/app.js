@@ -11761,10 +11761,16 @@ let poOrders = [];
 
 // ---- Quotations (AutoCount, read-only) --------------------------------------
 // John, 23 Oct 2026: a list of the quotations made in AutoCount - number,
-// date, debtor, agent, total, and the items inside - searchable by debtor,
-// quotation number or item. Nothing here writes anything. Cancelled ones are
-// left out by the server. Newest first, 30 at a time, more as you scroll.
-const qt = { range: "3", results: [], next: null, more: false, seq: 0, timer: null, observer: null };
+// date, debtor, agent, total, and the items inside. Nothing here writes
+// anything. Cancelled ones are left out by the server. Newest first, 30 at a
+// time, more as you scroll.
+//
+// TWO BOXES (his second ask, same day): debtor or quotation number in one,
+// the item in the other. The item box suggests parts that have been quoted;
+// tapping one searches for exactly that code (qt.code) and shows it as a
+// tag. Typing without tapping still searches the words.
+const qt = { range: "3", results: [], next: null, more: false, seq: 0, timer: null, observer: null,
+             code: "", sugTimer: null, sugSeq: 0 };
 
 function enterQuotations() {
   showScreen("qt");
@@ -11773,6 +11779,20 @@ function enterQuotations() {
     $("qt-q").addEventListener("input", () => {
       clearTimeout(qt.timer);
       qt.timer = setTimeout(() => loadQuotations(true), 350);
+    });
+    $("qt-item").addEventListener("input", () => {
+      clearTimeout(qt.timer);
+      qt.timer = setTimeout(() => loadQuotations(true), 350);
+      clearTimeout(qt.sugTimer);
+      qt.sugTimer = setTimeout(suggestQuotedItems, 250);
+    });
+    // Enter means "these words, not a suggestion" - put the list away.
+    $("qt-item").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { $("qt-item-sug").innerHTML = ""; $("qt-item").blur(); }
+    });
+    $("qt-pick-x").addEventListener("click", () => {
+      pickQuotedItem(null);
+      $("qt-item").focus();
     });
     document.querySelectorAll("#qt-range [data-range]").forEach((b) =>
       b.addEventListener("click", () => {
@@ -11796,9 +11816,52 @@ function quotationSince(range) {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 
-// The words being searched, so the items that matched can be picked out.
-function quotationWords() {
-  return ($("qt-q").value || "").trim().toLowerCase().split(/\s+/).filter(Boolean);
+// The item words typed, so the lines that matched can be picked out.
+function quotationItemWords() {
+  return ($("qt-item").value || "").trim().toLowerCase().split(/\s+/).filter(Boolean);
+}
+
+// Parts that have been on a quotation, most-quoted first - only those, so
+// every suggestion has something behind it (John's choice).
+async function suggestQuotedItems() {
+  const box = $("qt-item-sug");
+  const term = ($("qt-item").value || "").trim();
+  const seq = ++qt.sugSeq;
+  if (term.length < 2) { box.innerHTML = ""; return; }
+  try {
+    const qs = new URLSearchParams({ q: term, user_id: (getUser() || {}).id || "" });
+    const data = await api(`/api/quotation-items?${qs}`);
+    if (seq !== qt.sugSeq || qt.code) return;
+    const list = data.results || [];
+    if (!list.length) { box.innerHTML = `<div class="fp-empty">Not on any quotation</div>`; return; }
+    box.innerHTML = list.map((p) => `
+      <button type="button" class="company-option fp-opt-row" data-code="${escapeAttr(p.item_code)}" data-desc="${escapeAttr(p.description)}">
+        <span class="fp-opt-main" data-no-i18n>
+          ${partTwoLines(p, `<span class="fp-opt-desc">${escapeHtml(p.description)}</span>`,
+            `<span class="fp-opt-code mono">${escapeHtml(p.item_code)}</span>`)}
+        </span>
+        <span class="qt-sug-n">${p.quotes} quotation${p.quotes === 1 ? "" : "s"}</span>
+      </button>`).join("");
+    box.querySelectorAll(".company-option").forEach((b) =>
+      b.addEventListener("click", () => pickQuotedItem({ code: b.dataset.code, desc: b.dataset.desc })));
+  } catch (_) {
+    if (seq === qt.sugSeq) box.innerHTML = "";
+  }
+}
+
+// A tapped suggestion becomes a tag and searches for exactly that code;
+// null puts the box back.
+function pickQuotedItem(p) {
+  qt.code = p ? p.code : "";
+  qt.sugSeq++;
+  clearTimeout(qt.sugTimer);
+  $("qt-item-sug").innerHTML = "";
+  $("qt-item").value = "";
+  $("qt-item").hidden = !!p;
+  $("qt-pick").hidden = !p;
+  $("qt-pick-txt").innerHTML = p
+    ? `<strong>${escapeHtml(p.code)}</strong>${p.desc ? ` · ${escapeHtml(p.desc)}` : ""}` : "";
+  loadQuotations(true);
 }
 
 async function loadQuotations(reset) {
@@ -11811,6 +11874,8 @@ async function loadQuotations(reset) {
   }
   const params = new URLSearchParams({
     q: ($("qt-q").value || "").trim(),
+    item: qt.code ? "" : ($("qt-item").value || "").trim(),
+    code: qt.code,
     offset: String(qt.next || 0),
     user_id: (getUser() || {}).id || "",
   });
@@ -11834,7 +11899,7 @@ function renderQuotations() {
   const box = $("qt-list");
   if (qt.observer) { qt.observer.disconnect(); qt.observer = null; }
   if (!qt.results.length) {
-    box.innerHTML = `<div class="fp-empty">${quotationWords().length ? "No quotations match" : "No quotations"}</div>`;
+    box.innerHTML = `<div class="fp-empty">${($("qt-q").value || "").trim() || qt.code || quotationItemWords().length ? "No quotations match" : "No quotations"}</div>`;
     return;
   }
   box.innerHTML = qt.results.map((r) => `
@@ -11881,13 +11946,12 @@ async function toggleQuotation(card) {
     const items = data.items || [];
     box.dataset.loaded = "1";
     if (!items.length) { box.innerHTML = `<div class="fp-empty">No items on this quotation</div>`; return; }
-    // An item matches when every searched word that is not the quotation
-    // number or the debtor appears in its code or description - the same
-    // rule the server searched with, so the line it found is the one lit up.
+    // The line the server found, lit up: the picked code exactly, or every
+    // typed item word in the code or description - the server's own rule.
     const r = qt.results.find((x) => x.doc_no === card.dataset.qt) || {};
-    const head = `${r.doc_no || ""} ${r.debtor || ""}`.toLowerCase();
-    const words = quotationWords().filter((w) => !head.includes(w));
+    const words = quotationItemWords();
     const hit = (it) => {
+      if (qt.code) return it.item_code === qt.code;
       if (!words.length) return false;
       const text = `${String(it.item_code || "").replace(/\s+/g, "")} ${it.item_code || ""} ${it.description || ""}`.toLowerCase();
       return words.every((w) => text.includes(w));

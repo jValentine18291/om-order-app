@@ -118,7 +118,12 @@
     // Quotations (23 Oct 2026)
     "Quotations": "报价单",
     "What we have quoted, from AutoCount": "AutoCount 里的报价单",
-    "Debtor, quotation no. or item…": "客户、报价单号或货品…",
+    "Debtor or quotation no.": "客户或报价单号",
+    "Item": "货品",
+    "Prince's, QT-2610-037…": "客户名称、QT-2610-037…",
+    "Part no. or description…": "零件号或描述…",
+    "Not on any quotation": "没有报价单包含此货品",
+    "Clear item": "清除货品",
     "Last 3 months": "最近 3 个月",
     "This year": "今年",
     "No quotations match": "没有符合的报价单",
@@ -1049,6 +1054,7 @@
   var PATTERNS = [
     // Quotations: "3 items" on a quotation's card (23 Oct 2026)
     [/^(\d+) items?$/, function (_, n) { return n + " 项货品"; }],
+    [/^(\d+) quotations?$/, function (_, n) { return n + " 份报价单"; }],
     // Dates, alone and inside the lines that carry them
     [new RegExp("^" + DATE + "$"), function (_, d, m, y) { return cnDate(d, m, y); }],
     [new RegExp("^Created: " + DATE + "$"), function (_, d, m, y) { return "创建日期：" + cnDate(d, m, y); }],

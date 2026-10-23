@@ -3798,3 +3798,10 @@ details.vs-machine[open] > summary.vs-machine-name {
 .qt-sum{display:flex;justify-content:space-between;padding:10px 6px 0;font-size:13.5px}
 .qt-sum strong{font-variant-numeric:tabular-nums}
 .qt-more{display:block;width:100%;margin:4px 0 16px}
+/* The Item box: a tapped suggestion becomes this tag in the box's place. */
+#qt-item[hidden], .qt-pick[hidden] { display: none; }
+.qt-pick{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 6px 9px 12px;
+  border:1px solid #9cc7cc;background:var(--primary-tint,#eef7f8);border-radius:10px;font-size:.93rem}
+.qt-pick-txt{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qt-pick-x{flex:none;width:30px;height:30px;border:0;border-radius:8px;background:transparent;font-size:20px;line-height:1;color:var(--ink-faint,#78868c);cursor:pointer}
+.qt-sug-n{flex:none;font-size:11.5px;color:var(--ink-faint,#78868c);white-space:nowrap;margin-left:8px}

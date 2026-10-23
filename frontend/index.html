@@ -487,9 +487,21 @@
         <h2 class="page-title">Quotations</h2>
       </div>
       <div class="field">
-        <label for="qt-q">Search</label>
+        <label for="qt-q">Debtor or quotation no.</label>
         <input id="qt-q" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
-               placeholder="Debtor, quotation no. or item…" />
+               placeholder="Prince's, QT-2610-037…" />
+      </div>
+      <!-- Items get their own box, with suggestions from what has been quoted
+           (John, 23 Oct 2026). Tapping one swaps the box for a tag. -->
+      <div class="field">
+        <label for="qt-item">Item</label>
+        <input id="qt-item" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+               placeholder="Part no. or description…" />
+        <div class="qt-pick" id="qt-pick" hidden>
+          <span class="qt-pick-txt" id="qt-pick-txt" data-no-i18n></span>
+          <button type="button" class="qt-pick-x" id="qt-pick-x" aria-label="Clear item">×</button>
+        </div>
+        <div class="company-suggest" id="qt-item-sug"></div>
       </div>
       <div class="pu-filters" id="qt-range">
         <button type="button" class="pu-chip pu-chip-on" data-range="3">Last 3 months</button>
