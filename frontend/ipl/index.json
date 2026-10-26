@@ -729,5 +729,14 @@
   "category": "Chainsaw",
   "figures": 7,
   "parts": 264
+ },
+ {
+  "id": "hus350bt",
+  "name": "Husqvarna 350BT",
+  "short": "350BT",
+  "brand": "Husqvarna",
+  "category": "Blower",
+  "figures": 18,
+  "parts": 227
  }
 ]

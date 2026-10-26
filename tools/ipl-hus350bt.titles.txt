@@ -1,0 +1,32 @@
+# Titles for the 350BT, one line per sheet in the order --dry-run lists them.
+# The drawings print only a section letter and "350BT/BF", so the portal's
+# names stand ("-") except where two sheets share one:
+#  - STARTER twice: the original, and the one fitted from s/n 20213100102
+#    (the portal's comment). The second drawing is headed "150BT" - Husqvarna
+#    reused the 150BT's starter drawing - but its parts are filed under the
+#    350BT, with that serial range.
+#  - CARBURETOR DETAILS twice: the drawings are identical apart from the
+#    corner box naming the carburettor and its serials, and the portal lists
+#    the same 19 parts under both.
+#  - Sheets 11 and 12 carry each other's names in the portal: "PISTON AND
+#    CRANKSHAFT" is drawing K, the crankcase with its seals and bearings, and
+#    "CRANKSHAFT" is drawing L, the piston and crankshaft. The parts under
+#    each agree with the drawing, so only the titles are swapped back.
+-
+-
+-
+STARTER
+-
+STARTER (s/n 20213100102 on)
+-
+-
+-
+-
+CRANKCASE
+PISTON AND CRANKSHAFT
+-
+-
+-
+CARBURETOR DETAILS (Walbro WYA-225A, s/n 20170600001 on)
+CARBURETOR DETAILS (Walbro WYA-79, s/n 20090900001-20170600000)
+-

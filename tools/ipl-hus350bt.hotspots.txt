@@ -1,0 +1,17 @@
+# 350BT - corrections to the portal's hotspots. All 18 sheets were looked at
+# with every hotspot ringed (tools/ipl-check-hotspots.py); these are the only
+# faults.
+#
+#   <figure> add|unlisted|drop <key> <x%> <y%>
+#
+# FUEL TANK (sheet 8). The drawing prints "1A" and "1B" stacked beside the
+# tank - the two tank versions - and the portal lists both as part 1 (FUEL
+# TANK 581192601, TANK ASSY 502846001) but gives them no box, so nothing was
+# there to tap. One hotspot on the pair; a tap lists both.
+8 add 1 34.4 56.5
+# And it prints "10" on the tank body with no part listed under 10.
+8 unlisted 10 44.7 85.8
+#
+# STARTER (sheet 4). Part 15 (NUT) is boxed twice a fraction apart - one
+# callout, so one hotspot.
+4 drop 15 32.995 76.965
