@@ -3805,3 +3805,11 @@ details.vs-machine[open] > summary.vs-machine-name {
 .qt-pick-txt{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .qt-pick-x{flex:none;width:30px;height:30px;border:0;border-radius:8px;background:transparent;font-size:20px;line-height:1;color:var(--ink-faint,#78868c);cursor:pointer}
 .qt-sug-n{flex:none;font-size:11.5px;color:var(--ink-faint,#78868c);white-space:nowrap;margin-left:8px}
+
+/* View Slips: who worked on each slip (26 Oct 2026). Small, so the company
+   keeps the room; the technician picked in the dropdown is filled in. */
+.slip-result .sr-techs { display: inline-flex; gap: 3px; flex: none; }
+.slip-result .sr-tech { font-size: .7rem; font-weight: 700; padding: 2px 6px; border-radius: 999px;
+  border: 1px solid var(--border); color: var(--ink-faint); background: #fff; line-height: 1.3; }
+.slip-result .sr-tech-on { background: var(--primary-tint); border-color: var(--primary); color: var(--primary); }
+#vs-tech { width: 100%; }

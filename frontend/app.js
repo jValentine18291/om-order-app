@@ -1316,9 +1316,25 @@ function soAgeTag(slip) {
   return `<span class="q-tag q-tag-age${days >= SLIP_STALE_DAYS ? " q-tag-age-late" : ""}">${escapeHtml(text)}</span>`;
 }
 
-function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge, filters, filterBoxId, defaultFilter = "all", allLast = false, labels = false }) {
+function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge, filters, filterBoxId, defaultFilter = "all", allLast = false, labels = false, techSelectId = "" }) {
   const input = $(inputId);
   const results = $(resultsId);
+  // WHO WORKED ON IT, where a list asked for it (View Slips, 26 Oct 2026):
+  // a dropdown of the technicians, and their initials on every row. The
+  // server sends each slip's `techs`; the dropdown narrows the list BEFORE the
+  // chips count it, so the counts are that technician's.
+  const techSelect = techSelectId ? $(techSelectId) : null;
+  if (techSelect) {
+    techSelect.innerHTML = `<option value="">All technicians</option>` +
+      STAFF.filter((u) => u.group === "tech" && u.tech)
+        .map((u) => `<option value="${escapeAttr(u.tech)}">${escapeHtml(u.name)} (${escapeHtml(u.tech)})</option>`).join("");
+    techSelect.addEventListener("change", () => { if (lastData) renderResults(lastData); });
+  }
+  const techTags = (s) => {
+    if (!techSelect || !(s.techs || []).length) return "";
+    return `<span class="sr-techs" data-no-i18n>${s.techs.map((t) =>
+      `<span class="sr-tech${t === techSelect.value ? " sr-tech-on" : ""}">${escapeHtml(t)}</span>`).join("")}</span>`;
+  };
   let debounce = null;
   // STATUS CHIPS, where a list asked for them (Close Service, 2 Oct 2026).
   // Filtered here, on what the search already returned - the list holds
@@ -1358,7 +1374,8 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge, fil
 
   function renderResults(data) {
     lastData = data;
-    const every = data.results || [];
+    const tech = techSelect ? techSelect.value : "";
+    const every = (data.results || []).filter((s) => !tech || (s.techs || []).includes(tech));
     drawFilterChips(every);
     const chosen = filters && filterKey !== "all" ? filters.find((f) => f.key === filterKey) : null;
     const list = chosen ? every.filter(chosen.match) : every;
@@ -1371,7 +1388,7 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge, fil
         : "";
       results.innerHTML = `<div class="slip-result-empty">${
         every.length && chosen ? `<span>No slips under this filter</span>${elsewhere ? ` <span>Found under:</span> ${elsewhere}` : ""}`
-        : input.value.trim() ? "No matching slips" : "No slips yet"}</div>`;
+        : input.value.trim() ? "No matching slips" : tech ? "No slips for this technician" : "No slips yet"}</div>`;
       results.querySelectorAll(".slip-result-jump").forEach((b) => b.addEventListener("click", () => {
         filterKey = b.dataset.filter;
         if (lastData) renderResults(lastData);
@@ -1384,6 +1401,7 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge, fil
         return `<button type="button" class="slip-result${onInfo ? " sr-has-info" : ""}${edge ? " sl-edged" : ""}"${edge ? ` style="${edge}"` : ""} data-slip="${escapeAttr(s.slip_number)}">
            <span class="sr-num">${escapeHtml(s.slip_number)}</span>
            <span class="sr-co">${escapeHtml(s.company)}</span>
+           ${techTags(s)}
            ${labels ? slipLabelPill(s) : `<span class="sr-status sr-${escapeAttr(s.status)}">${escapeHtml(STATUS_LABEL[s.status] || s.status)}</span>`}
            ${onInfo ? `<span class="sr-info" role="button" aria-label="Summary" data-info="1">i</span>` : ""}
            ${quotePills(s, soAge ? soAgeTag(s) : "")}
@@ -1436,6 +1454,7 @@ function setupSlipSearch({ inputId, resultsId, scope, onPick, onInfo, soAge, fil
     reset() {
       picked = "";
       filterKey = defaultFilter;
+      if (techSelect) techSelect.value = "";
       input.value = "";
       results.innerHTML = `<div class="slip-result-empty">Loading…</div>`;
       runSearch();
@@ -8147,6 +8166,7 @@ async function enterViewSlips() {
       // One chip per slip label between Active and Closed (8 Oct 2026),
       // replacing "Need quote" and "SO / Invoiced".
       filterBoxId: "vs-filters", defaultFilter: "active", allLast: true, labels: true,
+      techSelectId: "vs-tech",
       filters: [
         { key: "active", label: "Active", match: (s) => s.status !== "CLOSED" },
         ...slipLabelFilters(),

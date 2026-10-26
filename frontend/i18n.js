@@ -54,6 +54,9 @@
     "Register, close and view slips": "登记、结单、查看服务单",
     "Technician 技术员": "技术员",
     "Technician": "技术员",
+    // View Slips' technician filter (26 Oct 2026)
+    "All technicians": "全部技术员",
+    "No slips for this technician": "此技术员没有服务单",
     "Scan parts onto a service slip": "扫描零件到服务单",
     "Purchaser": "采购员",
     "Slips, parts and purchasing": "服务单、零件与采购",

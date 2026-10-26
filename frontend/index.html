@@ -908,6 +908,13 @@
       <div class="field">
         <label for="vs-search">Service slip</label>
         <input id="vs-search" type="text" autocomplete="off" placeholder="Slip, company, phone or booklet no.&hellip;" />
+      </div>
+      <!-- Who worked on it (John, 26 Oct 2026). Filled from STAFF in app.js. -->
+      <div class="field">
+        <label for="vs-tech">Technician</label>
+        <select id="vs-tech"><option value="">All technicians</option></select>
+      </div>
+      <div class="field">
         <!-- Status chips over every slip: Active / Need quote / SO-Invoiced / Closed / All. 6 Oct 2026. -->
         <div class="pu-filters cs-filters" id="vs-filters"></div>
         <div class="slip-results" id="vs-results"></div>

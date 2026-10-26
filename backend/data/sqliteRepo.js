@@ -2162,6 +2162,26 @@ function searchSlips(query = "", scope = "all", limit = 20) {
   );
   for (const r of trimmed) r.machines = getMachines.all(r.id);
 
+  // WHO WORKED ON IT (John, 26 Oct 2026): View Slips filters by technician
+  // and tags each row with their initials. "Worked on" is any part they added
+  // - on a machine or on the slip itself - or any step they saved, so a slip
+  // two technicians shared belongs to both. Only the technicians' codes
+  // count: a part John scanned in at the counter does not make him one.
+  // Ordered by code, so the tags read the same way on every row.
+  const codes = technicianCodes();
+  const getWho = db.prepare(
+    `SELECT TRIM(p.technician) AS who FROM machine_parts p
+       LEFT JOIN slip_machines m ON m.id = p.machine_id
+      WHERE (m.slip_id = ? OR p.slip_id = ?) AND TRIM(IFNULL(p.technician, '')) != ''
+     UNION
+     SELECT TRIM(h.who) FROM machine_status_history h
+      WHERE h.slip_id = ? AND TRIM(IFNULL(h.who, '')) != ''`
+  );
+  for (const r of trimmed) {
+    r.techs = getWho.all(r.id, r.id, r.id).map((x) => x.who)
+      .filter((w) => codes.has(w)).sort();
+  }
+
   // The same two counts every other list carries. Through withQuoteCounts
   // rather than tallied from r.machines here: one definition of what "to
   // quote" means, in one place, however many lists come to show it.
@@ -3548,13 +3568,19 @@ function techniciansForMachine(machineId) {
 // initials are checked against the technicians' codes, so a part John scanned
 // in at the counter does not make him "the technician". '' when nobody is
 // recorded, and the caller tells every technician instead.
-function firstTechnicianForMachine(machineId) {
-  let techCodes = new Set();
+// The technicians' initials (WJ / XL / KM / R), from the people list. Empty
+// only on a database with no users table.
+function technicianCodes() {
   try {
-    techCodes = new Set(db.prepare(
+    return new Set(db.prepare(
       "SELECT tech FROM app_users WHERE role = 'tech' AND TRIM(IFNULL(tech, '')) != ''"
     ).all().map((r) => String(r.tech).trim()));
-  } catch (_) { /* no users table: take any initials */ }
+  } catch (_) { return new Set(); }
+}
+
+function firstTechnicianForMachine(machineId) {
+  // No users table: take any initials.
+  const techCodes = technicianCodes();
   const isTech = (who) => !techCodes.size || techCodes.has(String(who || "").trim());
   const seen = [];
   for (const r of db.prepare(
