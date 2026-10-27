@@ -1133,8 +1133,8 @@ function partTwoLines(p, descHtml, codeHtml) {
   return partLeadsWithCode(p) ? codeHtml + descHtml : descHtml + codeHtml;
 }
 
-async function lookupItem(code) {
-  return api(`/api/items/${encodeURIComponent(code)}`);
+async function lookupItem(code, isPackage = false) {
+  return api(`/api/items/${encodeURIComponent(code)}${isPackage ? "?package=1" : ""}`);
 }
 
 // ---- Asking before anything moves ------------------------------------------
@@ -3850,6 +3850,7 @@ async function commitPendingParts() {
         item_code: p.item_code, description: p.description, uom: p.uom,
         unit_price: p.unit_price, quantity: p.quantity, technician: p.technician,
         free_text: !!p.free_text,
+        is_package: !!p.is_package,
         // Which tube type this line is. Without it the server would merge two
         // tubes cut from the same roll into one line at one price.
         variant: p.variant || "",
@@ -4312,7 +4313,9 @@ function fitQuery(term) {
 
 // The scanned-part entry point. Parts are held as PENDING (not yet saved) and
 // committed to the server when the technician taps Save in the machine popup.
-async function addByCode(code) {
+// isPackage: the code is an AutoCount Item Package, picked from a package row
+// (27 Oct 2026). Looked up as a package, and its line says so.
+async function addByCode(code, { isPackage = false } = {}) {
   code = (code || "").trim();
   if (!code) return;
   // A part needs somewhere to go and somebody to have added it. On the slip's
@@ -4322,7 +4325,7 @@ async function addByCode(code) {
     return;
   }
   try {
-    const item = await lookupItem(code);
+    const item = await lookupItem(code, isPackage);
     // Same part already pending for this tech? Just bump its quantity.
     //
     // NOT a tube line, though. Four PulsFOG tube types share item code
@@ -4343,6 +4346,7 @@ async function addByCode(code) {
     // lets it be asked again.
     const existing = session.pendingParts.find(
       (p) => p.item_code === item.item_code
+        && !!p.is_package === !!item.is_package
         && p.technician === session.technician
         && !(p.variant || "")
         // The flag first: by now the typed name has replaced the catalogue
@@ -4432,6 +4436,7 @@ How much does it cost? Leave blank to price it later.`,
         technician: session.technician,
         free_text: freeText,
         price_from_sales: fromSales,
+        is_package: !!item.is_package,
       });
       toast(fromSales
         ? `Added ${description} at ${money(unitPrice)} (recent sales price) — tap Save when done`
@@ -4725,7 +4730,8 @@ $("ap-q").addEventListener("input", () => {
   if (q.length < 2) { box.innerHTML = ""; return; }
   apDebounce = setTimeout(async () => {
     try {
-      const data = await api(`/api/parts-search?q=${encodeURIComponent(q)}${fitQuery(q)}`);
+      // packages=1: Item Packages too, for technicians only (27 Oct 2026).
+      const data = await api(`/api/parts-search?q=${encodeURIComponent(q)}${fitQuery(q)}&packages=1`);
       const list = data.results || [];
       if (!list.length) {
         const machines = await machineMatches(q);
@@ -4800,7 +4806,7 @@ async function apPick(btn, part) {
   // A service or MISC code is never in stock and never will be, so there is
   // nothing to ask and nothing to order. Straight on, and the naming and
   // pricing prompts in addByCode do the rest.
-  const stocked = !isUnstockedCode(part.item_code);
+  const stocked = !isUnstockedCode(part.item_code) && !part.is_package;
   if (stocked && (!known || Number(bal) <= 0)) { showApPart(part); return; }
 
   if (btn) btn.disabled = true;
@@ -4929,7 +4935,7 @@ async function apAddChosen({ thenOrder = false } = {}) {
   // checked.
   const before = apPieceCount();
   const part = { ...apChosen };
-  await addByCode(part.item_code);
+  await addByCode(part.item_code, { isPackage: !!part.is_package });
   if (apPieceCount() <= before) {
     apSay(statusErr(
       "That part was not added — the catalogue did not accept the code. Nothing has changed."
@@ -5915,7 +5921,8 @@ function renderMachineParts() {
                     : ""
                 }${p.technician ? ` · ${escapeHtml(p.technician)}` : ""}${
                   // Priced from its recent sales, no Contractor Price (15 Oct 2026).
-                  p.price_from_sales ? ` <span class="rs-tag">Recent sales price</span>` : ""}</div>`,
+                  p.price_from_sales ? ` <span class="rs-tag">Recent sales price</span>` : ""}${
+                  p.is_package ? ` <span class="pkg-tag">Package</span>` : ""}</div>`,
                 `<div class="sku mono">${escapeHtml(p.item_code)}</div>`)}
               ${tubeQtyDisplay(p) ? `<div class="tube-frac${tubeQtyDisplay(p).wrong ? " tube-frac-bad" : ""}">${escapeHtml(tubeQtyDisplay(p).frac)}</div>` : ""}
             </div>
@@ -5969,7 +5976,8 @@ function renderMachineParts() {
               (p.free_text || isFreeTextPart(p.item_code, p.description))
                 ? ` <button type="button" class="desc-edit" data-desc="${p.id}" aria-label="Edit description">${PENCIL}</button>`
                 : ""
-            }${p.technician ? ` · ${escapeHtml(p.technician)}` : ""}</div>`,
+            }${p.technician ? ` · ${escapeHtml(p.technician)}` : ""}${
+              Number(p.is_package) ? ` <span class="pkg-tag">Package</span>` : ""}</div>`,
             `<div class="sku mono">${escapeHtml(p.item_code)}</div>`)}
           ${tubeQtyDisplay(p) ? `<div class="tube-frac${tubeQtyDisplay(p).wrong ? " tube-frac-bad" : ""}">${escapeHtml(tubeQtyDisplay(p).frac)}</div>` : ""}
           ${noPrice ? `<div class="no-price-tag">No price — enter one</div>` : ""}
@@ -10522,13 +10530,20 @@ function partOptionHtml(p, { extraClass = "" } = {}) {
   // 0.5 is filed under its equivalent model (machine-types.js EQUIVALENTS) -
   // likely to fit, not certain to, which is why it is said in other words.
   const mine = p.fit === 0 ? `<span class="fp-opt-fit">This machine</span>`
-    : p.fit === 0.5 ? `<span class="fp-opt-fit fp-opt-fit-eq">Equivalent model</span>` : "";
+    : p.fit === 0.5 ? `<span class="fp-opt-fit fp-opt-fit-eq">Equivalent model</span>`
+    // An Item Package (27 Oct 2026): what is in it, and its price. Its figure
+    // is how many whole sets the stock of its items would make up.
+    : p.is_package ? `<span class="pkg-tag">Package</span>` : "";
+  const inside = p.is_package && (p.items || []).length
+    ? `<span class="pkg-items">${escapeHtml(`${p.items.length} item${p.items.length === 1 ? "" : "s"} · ${money(p.unit_price)} · `)}${
+        escapeHtml(p.items.map((i) => i.description).join(", "))}</span>` : "";
   return `<button type="button" class="company-option fp-opt-row ${extraClass}" data-code="${escapeAttr(p.item_code)}">
       <span class="fp-opt-main">
         ${partTwoLines(p,
           `<span class="fp-opt-desc">${escapeHtml(p.description)}${
             p.desc2 ? ` <span class="fp-opt-model">· ${escapeHtml(p.desc2)}</span>` : ""}${mine}</span>`,
           `<span class="fp-opt-code mono">${sub}</span>`)}
+        ${inside}
       </span>
       ${known ? `<span class="fp-opt-qty ${n > 0 ? "fp-qty-ok" : "fp-qty-zero"}">${escapeHtml(qty)}${
         p.uom ? `<span class="fp-opt-uom">${escapeHtml(p.uom)}</span>` : ""}</span>` : ""}
@@ -13740,7 +13755,8 @@ $("code-input").addEventListener("input", () => {
   if (q.length < 2) { box.innerHTML = ""; return; }
   codeDebounce = setTimeout(async () => {
     try {
-      const data = await api(`/api/parts-search?q=${encodeURIComponent(q)}${fitQuery(q)}`);
+      // packages=1: Item Packages too, for technicians only (27 Oct 2026).
+      const data = await api(`/api/parts-search?q=${encodeURIComponent(q)}${fitQuery(q)}&packages=1`);
       const list = data.results || [];
       if (!list.length) {
         // Named rather than offered. A machine is not something that can be
@@ -13761,7 +13777,8 @@ $("code-input").addEventListener("input", () => {
       box.innerHTML = list.map((p) => partOptionHtml(p)).join("");
       box.querySelectorAll(".company-option").forEach((btn) =>
         btn.addEventListener("click", (e) => {
-          addByCode(pickedCode(e, btn));
+          const code = pickedCode(e, btn);
+          addByCode(code, { isPackage: !!(list.find((p) => p.item_code === code) || {}).is_package });
           $("code-input").value = "";
           box.innerHTML = "";
           $("code-input").focus();

@@ -232,6 +232,111 @@ async function desc2For(itemCodes) {
   return Object.fromEntries(rows.map((r) => [r.ItemCode, r.Desc2 || ""]));
 }
 
+// ITEM PACKAGES (27 Oct 2026, John). A technician can put an AutoCount Item
+// Package on a machine as one line ("SZEN 140082002 Cleaner Assy 4-35").
+// AutoCount writes a package onto a document in a shape of its own, read off
+// OM's own cash sales and DOs (tools/show-package-lines.js):
+//
+//   the PACKAGE line   no ItemCode, the package's name, qty and price,
+//                      PackageDocKey = Package.DocKey, no TaxType but its Tax;
+//                      the only one of the set the document total counts
+//   one line per ITEM  DtlType "P", ParentDtlKey = the package line's DtlKey,
+//                      SubQty = how many per package, Qty = SubQty x the
+//                      package qty, the package's own prices; these are the
+//                      lines that move stock. Seq 16, 32... of their own,
+//                      their tax adding up to the package line's.
+//
+// Which lines are packages is carried on the line (is_package), never guessed
+// from the code: SZEN 140082002 is a package AND an ordinary item.
+async function packagesFor(codes) {
+  const out = {};
+  for (const code of codes) {
+    const p = await query(
+      "SELECT TOP 1 DocKey, PackageCode, Description, UserUOM FROM Package WHERE PackageCode = @c AND IsActive = 'T'",
+      { c: code });
+    if (!p.length) continue;
+    const items = await query(
+      `SELECT Seq, ItemCode, Description, UOM, Qty, UnitPrice FROM PackageDTL
+        WHERE DocKey = @k AND ItemCode IS NOT NULL AND ItemCode <> '' ORDER BY Seq`,
+      { k: p[0].DocKey });
+    if (items.length) out[code] = { ...p[0], items };
+  }
+  return out;
+}
+
+// The lines of one package: the package line, then its items. Their prices are
+// the package's own; if the slip's price for the package differs from the sum
+// of them, they are scaled to it and the last item takes the odd cent, so the
+// items always add up to the package line exactly - as AutoCount's do.
+function packageRows(l, pkg, seq, date, desc2) {
+  const qty = Number(l.quantity) || 0;
+  const price = money(l.unit_price);
+  const sub = money(qty * price);
+  const tax = gstOn(sub, SR9.rate);
+
+  const base = money(pkg.items.reduce((t, i) => t + money((Number(i.Qty) || 0) * money(i.UnitPrice)), 0));
+  const scale = base > 0 && base !== price ? price / base : 1;
+  const kids = pkg.items.map((i) => {
+    const per = Number(i.Qty) || 0;
+    const kq = per * qty;
+    const kp = money(money(i.UnitPrice) * scale);
+    return { i, per, kq, kp, sub: money(kq * kp) };
+  });
+  const last = kids[kids.length - 1];
+  const off = money(sub - kids.reduce((t, k) => t + k.sub, 0));
+  if (off !== 0) {
+    last.sub = money(last.sub + off);
+    last.kp = last.kq > 0 ? money(last.sub / last.kq) : last.kp;
+  }
+  kids.forEach((k) => { k.tax = gstOn(k.sub, SR9.rate); });
+  const taxOff = money(tax - kids.reduce((t, k) => t + k.tax, 0));
+  if (taxOff !== 0) last.tax = money(last.tax + taxOff);
+
+  const parent = {
+    Seq: seq, MainItem: "T", Location: LOCATION,
+    Description: clean(l.description || pkg.Description, 200),
+    ...(pkg.UserUOM ? { UserUOM: pkg.UserUOM } : {}),
+    Qty: qty, Rate: 1, SmallestQty: qty,
+    UnitPrice: price, SmallestUnitPrice: price,
+    SubTotal: sub, LocalSubTotal: sub, SubTotalExTax: sub, LocalSubTotalExTax: sub,
+    Tax: tax, LocalTax: tax, TaxCurrencyTax: tax,
+    TaxableAmt: sub, LocalTaxableAmt: sub, TaxCurrencyTaxableAmt: sub,
+    Transferable: "T", PrintOut: "T", DtlType: "N", AddToSubTotal: "T",
+    PackageDocKey: pkg.DocKey,
+    StockReceived: "F", TransferedQty: 0,
+    DeliveryDate: date, Guid: guid(),
+  };
+  const children = kids.map((k, n) => ({
+    Seq: (n + 1) * SEQ_STEP, MainItem: "T",
+    ItemCode: k.i.ItemCode, Location: LOCATION,
+    Description: clean(k.i.Description || k.i.ItemCode, 200),
+    Desc2: desc2[k.i.ItemCode] || "",
+    UOM: k.i.UOM || "UNIT", UserUOM: k.i.UOM || "UNIT",
+    Qty: k.kq, Rate: 1, SmallestQty: k.kq, SubQty: k.per,
+    UnitPrice: k.kp, SmallestUnitPrice: k.kp,
+    SubTotal: k.sub, LocalSubTotal: k.sub, SubTotalExTax: k.sub, LocalSubTotalExTax: k.sub,
+    TaxType: SR9.code, TaxRate: SR9.rate,
+    Tax: k.tax, LocalTax: k.tax, TaxCurrencyTax: k.tax,
+    TaxableAmt: k.sub, LocalTaxableAmt: k.sub, TaxCurrencyTaxableAmt: k.sub,
+    PrintOut: "T", DtlType: "P", AddToSubTotal: "T",
+    StockReceived: "F", TransferedQty: 0,
+    Guid: guid(),
+  }));
+  return { parent, children, sub, tax };
+}
+
+// The rows as they are inserted: DtlKeys in order from the DocKey, and each
+// package item pointed at its package line's key.
+function keyedRows(details, docKey) {
+  return details.map((d, i) => {
+    const { _parent, ...row } = d;
+    return {
+      DtlKey: docKey + i + 1, DocKey: docKey, ...row,
+      ...(_parent !== undefined ? { ParentDtlKey: docKey + _parent + 1 } : {}),
+    };
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Build the rows. Split out from the writing so a dry run can show exactly
 // what would go in without touching anything.
@@ -264,7 +369,17 @@ async function buildRows({ slipNumber, debtorCode, contactName, contactNumber, s
     e.status = 400; throw e;
   }
 
-  const codes = [...new Set(lines.filter((l) => l.item_code).map((l) => l.item_code))];
+  const pkgCodes = [...new Set(lines.filter((l) => Number(l.is_package) && l.item_code).map((l) => l.item_code))];
+  const packages = await packagesFor(pkgCodes);
+  const gone = pkgCodes.filter((c) => !packages[c]);
+  if (gone.length) {
+    const e = new Error(`Item package ${gone.join(", ")} is not in AutoCount, or is no longer active.`);
+    e.status = 400; throw e;
+  }
+  const codes = [...new Set([
+    ...lines.filter((l) => l.item_code && !Number(l.is_package)).map((l) => l.item_code),
+    ...Object.values(packages).flatMap((p) => p.items.map((i) => i.ItemCode)),
+  ])];
   const desc2 = await desc2For(codes);
 
   // The date has to come first: the document number is derived from it.
@@ -314,6 +429,16 @@ async function buildRows({ slipNumber, debtorCode, contactName, contactNumber, s
       return;
     }
 
+    if (Number(l.is_package)) {
+      const r = packageRows(l, packages[l.item_code], seq, date, desc2);
+      const at = details.length;
+      details.push(r.parent);
+      for (const c of r.children) details.push({ ...c, _parent: at });
+      totalExTax = money(totalExTax + r.sub);
+      totalTax = money(totalTax + r.tax);
+      return;
+    }
+
     const qty = Number(l.quantity) || 0;
     const price = money(l.unit_price);
     const sub = money(qty * price);
@@ -349,12 +474,23 @@ async function buildRows({ slipNumber, debtorCode, contactName, contactNumber, s
   const drift = money(documentTax - totalTax);
   if (drift !== 0) {
     // Put the difference on the last priced line, the way AutoCount does.
+    // Never a package's item line: those are not counted in the total. A
+    // package line may take it, and then its last item does too, so the items
+    // still add up to it.
     for (let i = details.length - 1; i >= 0; i--) {
       const d = details[i];
-      if (d.ItemCode && d.Tax !== undefined) {
+      if ((d.ItemCode || d.PackageDocKey) && d.DtlType !== "P" && d.Tax !== undefined) {
         d.Tax = money(d.Tax + drift);
         d.LocalTax = d.Tax;
         d.TaxCurrencyTax = d.Tax;
+        if (d.PackageDocKey) {
+          const kid = details.filter((x) => x._parent === i).pop();
+          if (kid) {
+            kid.Tax = money(kid.Tax + drift);
+            kid.LocalTax = kid.Tax;
+            kid.TaxCurrencyTax = kid.Tax;
+          }
+        }
         break;
       }
     }
@@ -377,6 +513,7 @@ async function buildRows({ slipNumber, debtorCode, contactName, contactNumber, s
       blockExTax = 0; blockTax = 0;
       continue;
     }
+    if (d.DtlType === "P") continue;    // inside its package line's figure already
     if (d.SubTotal !== undefined) blockExTax = money(blockExTax + d.SubTotal);
     if (d.Tax !== undefined) blockTax = money(blockTax + d.Tax);
   }
@@ -448,7 +585,7 @@ async function createSalesOrder(payload, { dryRun = false } = {}) {
       doc_no: built.docNo,
       would_use_doc_key: docKey,
       header: built.header,
-      details: built.details,
+      details: keyedRows(built.details, docKey),
       totals: { ex_tax: built.totalExTax, tax: built.totalTax, net: built.net },
     };
   }
@@ -474,10 +611,7 @@ async function createSalesOrder(payload, { dryRun = false } = {}) {
       const h = insertSql("SO", header);
       await execute(h.sql, h.params);
 
-      let dtlKey = docKey;
-      for (const d of built.details) {
-        dtlKey += 1;
-        const row = { DtlKey: dtlKey, DocKey: docKey, ...d };
+      for (const row of keyedRows(built.details, docKey)) {
         const q = insertSql("SODTL", row);
         await execute(q.sql, q.params);
       }
@@ -499,4 +633,4 @@ async function createSalesOrder(payload, { dryRun = false } = {}) {
   throw new Error(`Could not allocate a document key after 4 tries: ${lastError && lastError.message}`);
 }
 
-module.exports = { createSalesOrder, buildRows, nextKey, nextDocNo, writebackEnabled };
+module.exports = { createSalesOrder, buildRows, nextKey, nextDocNo, writebackEnabled, keyedRows };

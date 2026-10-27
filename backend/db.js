@@ -649,6 +649,29 @@ try {
   console.error("[db] machine_parts free_text migration check failed:", e.message);
 }
 
+// AN ITEM PACKAGE (John, 27 Oct 2026): AutoCount's Package, a set of items sold
+// as one at one price - "SZEN 140082002 Cleaner Assy 4-35". A technician can
+// put one on a machine as a single line. Its code is a PackageCode, not an
+// ItemCode, so everything that would look it up in Item - the price written
+// back, the Sales Order written into AutoCount - has to know which it is.
+try {
+  const cols = db.prepare("PRAGMA table_info(machine_parts)").all().map((c) => c.name);
+  if (!cols.includes("is_package")) {
+    db.exec("ALTER TABLE machine_parts ADD COLUMN is_package INTEGER DEFAULT 0");
+    console.log("[db] migrated: added is_package to machine_parts");
+  }
+  // And on the order line it becomes, which is what the Sales Order written
+  // into AutoCount is built from. Needed there because a code is not enough
+  // to tell: SZEN 140082002 is both a package and an ordinary item.
+  const ol = db.prepare("PRAGMA table_info(order_lines)").all().map((c) => c.name);
+  if (ol.length && !ol.includes("is_package")) {
+    db.exec("ALTER TABLE order_lines ADD COLUMN is_package INTEGER DEFAULT 0");
+    console.log("[db] migrated: added is_package to order_lines");
+  }
+} catch (e) {
+  console.error("[db] machine_parts is_package migration check failed:", e.message);
+}
+
 // ---------------------------------------------------------------------------
 // WHO IS USING THE APP, and what they are allowed to do.
 //

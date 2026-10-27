@@ -749,6 +749,79 @@ async function searchParts(q, limit = 15, fit = {}) {
   }));
 }
 
+// ITEM PACKAGES (John, 27 Oct 2026): AutoCount's Package / PackageDTL - a set
+// of items sold as one, at one price ("SZEN 140082002 Cleaner Assy 4-35",
+// $12.30 for four parts). Technicians pick one when adding parts and it goes on
+// the machine as ONE line, his choice.
+//
+// A package has no stock of its own: its items do. How many whole packages
+// could be made up today is the item that runs out first - floor(stock / qty
+// needed) across its items - and that is the figure the picker shows.
+async function packagesWhere(where, params, cap) {
+  const rows = await query(
+    `SELECT TOP ${cap} p.DocKey, p.PackageCode, p.Description, p.UnitPrice, p.UserUOM
+       FROM Package p
+      WHERE p.IsActive = 'T' AND ${where}
+      ORDER BY p.PackageCode`,
+    params
+  );
+  if (!rows.length) return [];
+  const keys = {};
+  rows.forEach((r, i) => { keys[`k${i}`] = r.DocKey; });
+  const items = await query(
+    `SELECT d.DocKey, d.Seq, d.ItemCode, d.Description, d.UOM, d.Qty, d.UnitPrice,
+            (SELECT SUM(s.Qty) FROM StockDTL s WHERE s.ItemCode = d.ItemCode) AS BalQty
+       FROM PackageDTL d
+      WHERE d.DocKey IN (${rows.map((_, i) => `@k${i}`).join(",")})
+      ORDER BY d.DocKey, d.Seq`,
+    keys
+  );
+  return rows.map((r) => {
+    const mine = items.filter((d) => String(d.DocKey) === String(r.DocKey));
+    const sets = mine.length ? Math.max(0, Math.min(...mine.map((d) =>
+      Number(d.Qty) > 0 ? Math.floor((Number(d.BalQty) || 0) / Number(d.Qty)) : Infinity))) : 0;
+    return {
+      item_code: r.PackageCode,
+      description: r.Description || r.PackageCode,
+      uom: r.UserUOM || "SET",
+      unit_price: Number(r.UnitPrice) || 0,
+      bal_qty: Number.isFinite(sets) ? sets : 0,
+      is_package: true,
+      package_dockey: Number(r.DocKey),
+      items: mine.map((d) => ({
+        item_code: d.ItemCode, description: d.Description || d.ItemCode, uom: d.UOM || "",
+        qty: Number(d.Qty) || 0, unit_price: Number(d.UnitPrice) || 0,
+      })),
+    };
+  });
+}
+
+// Every word typed has to appear in the code or the description, as part
+// searches do.
+async function searchPackages(q, limit = 5) {
+  const words = String(q || "").trim().split(/\s+/).filter(Boolean).slice(0, 6);
+  if (!words.length) return [];
+  const params = {};
+  const where = words.map((w, i) => {
+    params[`w${i}`] = w;
+    params[`n${i}`] = w.replace(/\s+/g, "").toUpperCase();
+    return `( p.Description LIKE '%' + @w${i} + '%'
+           OR REPLACE(UPPER(p.PackageCode), ' ', '') LIKE '%' + @n${i} + '%' )`;
+  }).join(" AND ");
+  return packagesWhere(where, params, Math.max(1, Math.min(10, Number(limit) || 5)));
+}
+
+// One package by its exact code, spaces ignored - what a tap on a package row
+// adds. Never a fuzzy match: a package must not stand in for a part.
+async function findPackage(code) {
+  const norm = String(code || "").replace(/\s+/g, "").toUpperCase();
+  if (!norm) return null;
+  const rows = await packagesWhere("REPLACE(UPPER(p.PackageCode), ' ', '') = @norm", { norm }, 1);
+  return rows[0] || null;
+}
+module.exports.searchPackages = searchPackages;
+module.exports.findPackage = findPackage;
+
 // The machines themselves, not their parts. Machine units are the U-prefixed
 // item codes - UHUQ, UZEN, UPUL and so on - which is what separates a unit
 // from the thousands of spares that would otherwise drown the list.

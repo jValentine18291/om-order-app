@@ -92,8 +92,8 @@ function createOrder({ notes = "", lines } = {}) {
   );
   const insertLine = db.prepare(
     `INSERT INTO order_lines
-       (order_id, item_code, description, uom, unit_price, quantity, line_amount)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
+       (order_id, item_code, description, uom, unit_price, quantity, line_amount, is_package)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
   );
   const updateOrder = db.prepare(
     `UPDATE orders SET total_qty = ?, total_amount = ? WHERE id = ?`
@@ -108,7 +108,7 @@ function createOrder({ notes = "", lines } = {}) {
         // Stored so the order reads back as a block; contributes nothing to the
         // totals. A sub-total row carries its amount for display only — adding
         // it to totalAmount would count that machine twice.
-        insertLine.run(orderId, "", l.description || "", "", 0, 0, Number(l.line_amount) || 0);
+        insertLine.run(orderId, "", l.description || "", "", 0, 0, Number(l.line_amount) || 0, 0);
         continue;
       }
       const qty = Number(l.quantity);
@@ -123,7 +123,8 @@ function createOrder({ notes = "", lines } = {}) {
         l.uom || "UNIT",
         price,
         qty,
-        amount
+        amount,
+        l.is_package ? 1 : 0
       );
     }
     updateOrder.run(totalQty, totalAmount, orderId);
@@ -781,7 +782,7 @@ function slipIdForPart(partId) {
 // was charged for after the fact, on a document this app cannot alter. A
 // second scan of the same part starts a new line instead, and that line is
 // what the next order picks up.
-function addPartToSlip(slipNumber, { item_code, description, uom = "UNIT", unit_price = 0, quantity = 1, technician = "", free_text, variant = "" } = {}) {
+function addPartToSlip(slipNumber, { item_code, description, uom = "UNIT", unit_price = 0, quantity = 1, technician = "", free_text, variant = "", is_package = false } = {}) {
   const slip = db.prepare("SELECT id FROM service_slips WHERE slip_number = ?").get(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
   if (!item_code) { const e = new Error("item_code is required."); e.status = 400; throw e; }
@@ -792,9 +793,9 @@ function addPartToSlip(slipNumber, { item_code, description, uom = "UNIT", unit_
   const existing = freeText ? null : db.prepare(
     `SELECT * FROM machine_parts
       WHERE slip_id = ? AND machine_id IS NULL AND item_code = ? AND technician = ?
-        AND IFNULL(variant, '') = ?
+        AND IFNULL(variant, '') = ? AND IFNULL(is_package, 0) = ?
         AND (converted_at IS NULL OR converted_at = '')`
-  ).get(slip.id, item_code, technician, variantKey);
+  ).get(slip.id, item_code, technician, variantKey, is_package ? 1 : 0);
 
   if (existing) {
     db.prepare("UPDATE machine_parts SET quantity = quantity + ? WHERE id = ?")
@@ -802,17 +803,18 @@ function addPartToSlip(slipNumber, { item_code, description, uom = "UNIT", unit_
   } else {
     db.prepare(
       `INSERT INTO machine_parts
-         (machine_id, slip_id, item_code, description, uom, unit_price, quantity, technician, variant, free_text)
-       VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+         (machine_id, slip_id, item_code, description, uom, unit_price, quantity, technician, variant, free_text, is_package)
+       VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(slip.id, item_code, description || item_code, uom, Number(unit_price) || 0,
-          Number(quantity) || 1, technician, variantKey, freeText ? 1 : 0);
+          Number(quantity) || 1, technician, variantKey, freeText ? 1 : 0, is_package ? 1 : 0);
   }
   // A part on the slip is work recorded, the same as a part on a machine.
   deriveSlipStatus(slip.id);
   return extrasForSlip(slip.id);
 }
 
-function addPartToMachine(machineId, { item_code, description, uom = "UNIT", unit_price = 0, quantity = 1, technician = "", free_text, variant = "" } = {}) {
+// is_package: an AutoCount Item Package on one line (27 Oct 2026) - see db.js.
+function addPartToMachine(machineId, { item_code, description, uom = "UNIT", unit_price = 0, quantity = 1, technician = "", free_text, variant = "", is_package = false } = {}) {
   const machine = db.prepare("SELECT * FROM slip_machines WHERE id = ?").get(machineId);
   if (!machine) { const e = new Error("Machine not found on any slip."); e.status = 404; throw e; }
   if (!item_code) { const e = new Error("item_code is required."); e.status = 400; throw e; }
@@ -838,23 +840,25 @@ function addPartToMachine(machineId, { item_code, description, uom = "UNIT", uni
   const variantKey = String(variant || "");
   const freeText = !!(free_text || isFreeTextPart(item_code, description));
   const existing = freeText ? null : db.prepare(
-    "SELECT * FROM machine_parts WHERE machine_id = ? AND item_code = ? AND technician = ? AND IFNULL(variant, '') = ?"
-  ).get(machineId, item_code, technician, variantKey);
+    // A package and an item can share a code (SZEN 140082002), so which one
+    // a line is decides whether it merges.
+    "SELECT * FROM machine_parts WHERE machine_id = ? AND item_code = ? AND technician = ? AND IFNULL(variant, '') = ? AND IFNULL(is_package, 0) = ?"
+  ).get(machineId, item_code, technician, variantKey, is_package ? 1 : 0);
 
   if (existing) {
     db.prepare("UPDATE machine_parts SET quantity = quantity + ? WHERE id = ?")
       .run(Number(quantity) || 1, existing.id);
   } else {
     db.prepare(
-      `INSERT INTO machine_parts (machine_id, item_code, description, uom, unit_price, quantity, technician, variant, free_text)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO machine_parts (machine_id, item_code, description, uom, unit_price, quantity, technician, variant, free_text, is_package)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(machineId, item_code, description || item_code, uom, Number(unit_price) || 0, Number(quantity) || 1, technician,
           variantKey,
           // The caller has seen the CATALOGUE description; by the time the row
           // is written, the staff-typed name has replaced it, so the fact
           // cannot be worked out here. Trust the flag, and still check the
           // code ourselves so an old client that sends nothing still works.
-          freeText ? 1 : 0);
+          freeText ? 1 : 0, is_package ? 1 : 0);
   }
   deriveSlipStatus(machine.slip_id);      // work recorded: OPEN -> IN_PROGRESS
   return db.prepare("SELECT * FROM machine_parts WHERE machine_id = ? ORDER BY id").all(machineId);
@@ -1201,6 +1205,8 @@ function slipBlockLines(slip, wanted, all, extras = [], { physicalSs = false, qu
       lines.push({
         item_code: p.item_code, description: p.description, uom: p.uom,
         unit_price: p.unit_price, quantity: p.quantity,
+        // An Item Package goes into AutoCount as its own shape (27 Oct 2026).
+        ...(Number(p.is_package) ? { is_package: true } : {}),
       });
       machineTotal += p.unit_price * p.quantity;
     }
@@ -1255,6 +1261,8 @@ function slipBlockLines(slip, wanted, all, extras = [], { physicalSs = false, qu
       lines.push({
         item_code: p.item_code, description: p.description, uom: p.uom,
         unit_price: p.unit_price, quantity: p.quantity,
+        // An Item Package goes into AutoCount as its own shape (27 Oct 2026).
+        ...(Number(p.is_package) ? { is_package: true } : {}),
       });
       extrasTotal += p.unit_price * p.quantity;
     }

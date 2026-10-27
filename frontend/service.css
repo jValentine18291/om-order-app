@@ -3819,3 +3819,8 @@ details.vs-machine[open] > summary.vs-machine-name {
 
 /* A second contact written down with no number (27 Oct 2026). */
 .vs-nonum { color: var(--ink-faint); font-style: italic; }
+
+/* An AutoCount Item Package on a technician's picker and parts list (27 Oct 2026). */
+.pkg-tag { display: inline-block; margin-left: 4px; padding: 0 6px; border-radius: 6px; font-size: .7rem;
+  font-weight: 700; background: #E6F1FB; color: #185FA5; border: 1px solid #B5D4F4; white-space: nowrap; vertical-align: 1px; }
+.pkg-items { display: block; font-size: .75rem; color: #5F5E5A; margin-top: 2px; }

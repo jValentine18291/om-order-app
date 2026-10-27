@@ -347,6 +347,18 @@ app.get("/api/items/:code", async (req, res) => {
     const code = String(req.params.code || "").trim();
     if (!code) return res.status(400).json({ error: "Missing code" });
 
+    // An Item Package, asked for by name (27 Oct 2026): the technician tapped
+    // a package row. Looked up as a package ONLY - a package code must never
+    // fall through to the item lookup's fuzzy matching and come back as a part.
+    if (req.query.package === "1") {
+      if ((process.env.ITEMS_SOURCE || "sqlite").toLowerCase() !== "autocount") {
+        return res.status(404).json({ error: `No package found for "${code}"` });
+      }
+      const pkg = await require("./data/autocountRepo").findPackage(code);
+      if (!pkg) return res.status(404).json({ error: `No package found for "${code}"` });
+      return res.json(pkg);
+    }
+
     const item = await data.items.findItem(code);
     if (!item) {
       return res.status(404).json({ error: `No item found for "${code}"` });
@@ -1555,8 +1567,19 @@ app.get("/api/parts-search", async (req, res) => {
     // An out-of-stock part carries its alternatives, with their stock
     // (22 Oct 2026). One in stock carries nothing: the original is the
     // choice, and nothing should get in its way.
+    // ITEM PACKAGES, for the technicians' pickers only (27 Oct 2026, John):
+    // they ask with packages=1, and matching packages come first, marked. Find
+    // Part does not ask. A failure here costs the packages, never the parts.
+    if (req.query.packages === "1") {
+      try {
+        const pk = await acRepo.searchPackages(String(req.query.q || ""), 5);
+        results.unshift(...pk);
+      } catch (e) {
+        console.error("[parts-search] packages:", e.message);
+      }
+    }
     try {
-      const empty = results.filter((r) => !(Number(r.bal_qty) > 0)).map((r) => r.item_code);
+      const empty = results.filter((r) => !r.is_package && !(Number(r.bal_qty) > 0)).map((r) => r.item_code);
       if (empty.length) {
         const alts = await alternativesWithStock(empty);
         for (const r of results) if (alts[r.item_code]) r.alternatives = alts[r.item_code];
@@ -2997,6 +3020,8 @@ async function writeSlipPricesToAutoCount(parts, source) {
   const { logPriceEvent } = require("./priceLog");
   for (const part of parts || []) {
     if (!(Number(part.unit_price) > 0)) continue;      // nothing keyed in
+    // A package's price is the package's, not an item's (27 Oct 2026).
+    if (Number(part.is_package)) continue;
     try {
       const r = await acRepo.updateItemPriceIfMissing(part.item_code, part.unit_price);
       if (r.status === "updated") {
