@@ -1625,10 +1625,13 @@ function getSlipOrder(slipNumber) {
 // every order in full.
 function slipOrderRefs(slipNumber) {
   return db.prepare(
-    `SELECT so_number, autocount_doc_no, closing_ref, invoiced_at, invoiced_by
+    `SELECT so_number, autocount_doc_no, closing_ref, invoiced_at, invoiced_by, total_amount
        FROM orders WHERE notes = ? ORDER BY id`
   ).all(`S/S: ${slipNumber}`).map((o) => ({
     so_number: o.so_number,
+    // For Close Service: a slip whose orders are all $0 can close without an
+    // invoice (27 Oct 2026).
+    total_amount: Number(o.total_amount) || 0,
     autocount_doc_no: o.autocount_doc_no || "",
     closing_ref: o.closing_ref || "",
     invoiced_at: o.invoiced_at || "",
@@ -2078,19 +2081,25 @@ function closeSlip(slipNumber, closingRef, who = "", { noInvoice = false } = {})
 // DO/CS/INV. Sales decide this at Close Service, any machine, after the screen
 // has shown them whatever was recorded on it that will now never be billed.
 //
-// Only a slip with no Sales Order on it. One that has an order has a document
-// in AutoCount waiting on its number, and closing round that is how it would
-// be forgotten - that slip closes the ordinary way. And only once every
-// machine is finished: one still on the bench is a technician's to finish,
-// not something to close past. Condemned machines are held to exactly what
+// A Sales Order on it is allowed only at $0 - every one of them (John, 27 Oct
+// 2026, slip 00030: one free-of-charge machine on SO-2610-132 at $0, already
+// with the customer, and nothing to invoice). An order with a charge on it is
+// money waiting on its DO/CS/INV, and closing round that is how it would be
+// forgotten - that slip closes the ordinary way. And only once every machine
+// is finished: one still on the bench is a technician's to finish, not
+// something to close past. Condemned machines are held to exactly what
 // closeSlip asks of them.
+//
+// The order itself is left as it is, here and in AutoCount: this app only
+// reads AutoCount, so closing or cancelling the SO there is sales' to do.
 function closeWithoutInvoice(slip, who = "") {
-  const orderCount = db.prepare(
-    "SELECT COUNT(*) AS n FROM orders WHERE notes = ?"
-  ).get(`S/S: ${slip.slip_number}`).n;
-  if (orderCount) {
+  const charged = db.prepare(
+    "SELECT so_number, total_amount FROM orders WHERE notes = ? AND IFNULL(total_amount, 0) > 0 ORDER BY id"
+  ).all(`S/S: ${slip.slip_number}`);
+  if (charged.length) {
     const e = new Error(
-      "This slip has a Sales Order. Record its DO/CS/INV number and close it the usual way."
+      `${charged.map((o) => `${o.so_number} is $${Number(o.total_amount).toFixed(2)}`).join(", ")}. ` +
+      "A Sales Order with a charge needs its DO/CS/INV number - close it the usual way."
     );
     e.status = 400; throw e;
   }

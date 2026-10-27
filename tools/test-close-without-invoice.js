@@ -11,10 +11,11 @@
 // Checked: a slip of repaired machines with nothing billed is now in Close
 // Service; it closes with no number and is marked as closed without invoice,
 // its machines collected; a charge recorded on it does not stop sales closing
-// it; a slip with any Sales Order is refused and closes the ordinary way; a
+// it; a slip with a charged Sales Order is refused and closes the ordinary way; a
 // machine still on the bench is refused; a condemned one is held to the usual
 // signature and disposal; the ordinary close is unchanged and still refuses an
-// unbilled machine.
+// unbilled machine. And (00030) a slip whose Sales Orders are all $0 closes
+// the same way; one with a charge on any order is refused.
 const fs = require("fs");
 const path = require("path");
 const target = process.argv[2];
@@ -87,16 +88,43 @@ const noInvoice = { noInvoice: true };
     () => data.slips.closeSlip(c.slip_number, "", "KS", noInvoice), /Not finished yet: MS250 - 2\/2/);
   check("left open", (await data.slips.getSlip(c.slip_number)).status !== "CLOSED", true);
 
-  console.log("\n-- a Sales Order on it --");
-  const d = await make("HAS AN SO", ["MS180"]);
-  await data.slips.saveMachineWork(d.machines[0].id, "repaired", "WJ", { foc: true });
-  await data.slips.createSlipOrder(d.slip_number, [d.machines[0].id], "WJ");
-  await refused("refused: its order needs its number",
-    () => data.slips.closeSlip(d.slip_number, "", "KS", noInvoice), /has a Sales Order/);
-  await data.slips.setSlipInvoiced(d.slip_number, "DO-2610-0009", "KS");
-  slip = await data.slips.closeSlip(d.slip_number, "", "KS");
-  check("and the ordinary way still works", [slip.status, slip.closing_ref, slip.closed_no_invoice],
-    ["CLOSED", "DO-2610-0009", 0]);
+  console.log("\n-- 00030's shape: free of charge on a $0 Sales Order, already collected --");
+  const z = await make("ZERO SO", ["Blastrac 1-10DPS75"]);
+  await data.slips.saveMachineWork(z.machines[0].id, "repaired", "WJ", { foc: true });
+  const zso = await data.slips.createSlipOrder(z.slip_number, [z.machines[0].id], "WJ");
+  check("the slip carries the order's total, for the screen",
+    (await data.slips.getSlip(z.slip_number)).orders.map((o) => o.total_amount), [0]);
+  await refused("the ordinary close still wants its number",
+    () => data.slips.closeSlip(z.slip_number, "", "KS"), /DO\/CS\/INV/);
+  slip = await data.slips.closeSlip(z.slip_number, "", "KS", noInvoice);
+  check("closes with no invoice", [slip.status, slip.closed_no_invoice], ["CLOSED", 1]);
+  check("the order is left as it was", slip.orders.map((o) => [o.so_number, o.closing_ref]), [[zso.so_number, ""]]);
+
+  console.log("\n-- a Sales Order with a charge on it --");
+  const d = await make("CHARGED SO", ["MS180 - 1/2", "525BX - 2/2"]);
+  const [d1, d2] = d.machines.map((m) => m.id);
+  await data.slips.setMachineLabour(d1, 40);
+  await data.slips.setMachineState(d.slip_number, d1, "REPAIRED", "WJ");
+  await data.slips.saveMachineWork(d2, "repaired", "WJ", { foc: true });
+  const dso = await data.slips.createSlipOrder(d.slip_number, [d1], "WJ");
+  await data.slips.createSlipOrder(d.slip_number, [d2], "WJ");
+  await refused("refused, naming the order and its total",
+    () => data.slips.closeSlip(d.slip_number, "", "KS", noInvoice),
+    new RegExp(`${dso.so_number} is \\$40\\.00\\. A Sales Order with a charge needs its DO/CS/INV`));
+  await data.slips.setSlipInvoiced(d.slip_number, "DO-2610-0009", "KS", dso.so_number);
+  await refused("still refused once that one is invoiced - every order has to be $0",
+    () => data.slips.closeSlip(d.slip_number, "", "KS", noInvoice), /is \$40\.00/);
+  check("left open", (await data.slips.getSlip(d.slip_number)).status !== "CLOSED", true);
+
+  console.log("\n-- the ordinary way is untouched --");
+  const o = await make("ORDINARY", ["MS180"]);
+  await data.slips.setMachineLabour(o.machines[0].id, 40);
+  await data.slips.setMachineState(o.slip_number, o.machines[0].id, "REPAIRED", "WJ");
+  await data.slips.createSlipOrder(o.slip_number, [o.machines[0].id], "WJ");
+  await data.slips.setSlipInvoiced(o.slip_number, "DO-2610-0010", "KS");
+  slip = await data.slips.closeSlip(o.slip_number, "", "KS");
+  check("closes with its number", [slip.status, slip.closing_ref, slip.closed_no_invoice],
+    ["CLOSED", "DO-2610-0010", 0]);
 
   console.log("\n-- with a condemned machine --");
   const e = await make("WITH CONDEMNED", ["MS180 - 1/2", "BK3410 - 2/2"]);

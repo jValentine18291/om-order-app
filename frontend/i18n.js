@@ -742,6 +742,15 @@
     "Recorded but will not be billed:": "已记录但不会收费：",
     "Slip parts": "服务单零件",
     "Closed without invoice": "已结单（无发票）",
+    // ...and a slip whose Sales Orders are all $0 (slip 00030).
+    "None": "无",
+    "at $0": "金额 $0",
+    "Every Sales Order on this slip is $0. No invoice is needed, so you can close it without one.":
+      "这张服务单的销售单都是 $0，不需要开发票，可以直接结单。",
+    "The Sales Order stays open in AutoCount. Close or cancel it there if you don't want it on the list.":
+      "销售单在 AutoCount 里仍然是未结状态。如不想留在列表上，请在 AutoCount 里关闭或取消。",
+    "The Sales Orders stay open in AutoCount. Close or cancel them there if you don't want them on the list.":
+      "这些销售单在 AutoCount 里仍然是未结状态。如不想留在列表上，请在 AutoCount 里关闭或取消。",
     "No Sales Order on this slip. If the customer is being charged, create the Sales Order first. If not, close it without an invoice.":
       "这张服务单没有销售单。如果要向客户收费，请先开销售单；如果不收费，可以不开发票直接结单。",
     "If nothing on the slip is charged, sales can close it without an invoice.":

@@ -7641,6 +7641,7 @@ let closeSearch = null;
 let csPickedSlip = null; // currently selected slip number in Close Service
 let csSlip = null;       // and the slip itself, for deciding which step it is on
 let csConfirming = false; // showing "are you sure" rather than the ordinary step
+let csConfirmNoInv = false; // and the close being asked about is the no-invoice one
 async function enterCloseService() {
   showScreen("close");
   $("cs-context").style.display = "none";
@@ -7711,7 +7712,7 @@ async function onCloseSlipChosen(slipNumber) {
       ((slip.orders || []).filter((o) => o.so_number).map((o) =>
         `<div class="sub">${escapeHtml(o.so_number)}: ${o.closing_ref
           ? `<strong>${escapeHtml(o.closing_ref)}</strong>${o.invoiced_by ? ` · ${escapeHtml(o.invoiced_by)}` : ""}`
-          : `<em>no DO/CS/INV yet</em>`}</div>`).join("")) +
+          : `<em>no DO/CS/INV yet</em>`}${o.total_amount === undefined ? "" : ` · ${money(o.total_amount)}`}</div>`).join("")) +
       (stranded.length ? `<div class="cs-blocked"><b>Cannot close yet</b>${
         escapeHtml(stranded.map((m) => m.machine_desc).join(", "))} ${
         stranded.length === 1
@@ -7720,7 +7721,8 @@ async function onCloseSlipChosen(slipNumber) {
       }</div>` : "") +
       csCondemnedHtml(slip) +
       csCollectHtml(slip) +
-      (csNoInvoice() ? `<div class="sub cs-noinv">No Sales Order on this slip. If the customer is being charged, create the Sales Order first. If not, close it without an invoice.</div>` : "");
+      (csNoInvoice() ? `<div class="sub cs-noinv">No Sales Order on this slip. If the customer is being charged, create the Sales Order first. If not, close it without an invoice.</div>` : "") +
+      (csZeroSo() ? `<div class="sub cs-noinv">Every Sales Order on this slip is $0. No invoice is needed, so you can close it without one.</div>` : "");
     wireCsCondemned(slip);
     wireCsCollect(slip);
     wireCsSign(slip);
@@ -8033,6 +8035,19 @@ function csUnbilledCharges() {
   return out;
 }
 
+// AND A SLIP WHOSE SALES ORDERS ARE ALL $0 (John, 27 Oct 2026, slip 00030):
+// a free-of-charge machine put on an order at nothing, already with the
+// customer. No invoice will ever be raised for it, so the DO/CS/INV the
+// ordinary close waits for never comes. Offered beside the number box, not in
+// place of it - somebody may still have raised a DO for it. An order with a
+// charge on it rules this out (the server refuses the same).
+function csZeroSo() {
+  const orders = ((csSlip && csSlip.orders) || []).filter((o) => o.so_number);
+  return orders.length > 0
+    && orders.every((o) => !(Number(o.total_amount) > 0))
+    && orders.some((o) => !o.closing_ref);
+}
+
 // The Sales Orders on this slip that still have no DO/CS/INV against them.
 function csAwaiting() {
   return ((csSlip && csSlip.orders) || []).filter((o) => o.so_number && !o.closing_ref);
@@ -8063,6 +8078,7 @@ function renderCloseStep() {
   $("cs-reinvoice").style.display = !needsNumber && hasOrders ? "" : "none";
   $("cs-submit").textContent = noInvoice ? "Close without invoice"
     : needsNumber || forced ? "Record DO/CS/INV number" : "Collected & Closed";
+  $("cs-noinv").style.display = csZeroSo() && !forced ? "" : "none";
 
   // The picker only where there is a choice to make.
   const orders = ((csSlip && csSlip.orders) || []).filter((o) => o.so_number);
@@ -8143,9 +8159,17 @@ function renderCloseConfirm() {
   $("cs-c-ref").textContent = refs.length ? refs.join(", ") : tr("No Sales Order");
   // With no invoice at all, said so, and with anything that had a price on it
   // named - sales are deciding it will not be charged, so they see what.
-  const noInvoice = csNoInvoice();
+  const noInvoice = csConfirmNoInv;
   $("cs-c-ref-l").textContent = tr(noInvoice ? "Invoice" : "Invoiced with");
-  if (noInvoice) $("cs-c-ref").textContent = tr("None – not charged");
+  // With a $0 order, which one - and that it is still open in AutoCount,
+  // which this app only reads and so cannot close for them.
+  const zero = orders.map((o) => o.so_number);
+  if (noInvoice) $("cs-c-ref").textContent = zero.length
+    ? `${tr("None")} – ${zero.join(", ")} ${tr("at $0")}` : tr("None – not charged");
+  $("cs-c-acnote").style.display = noInvoice && zero.length ? "" : "none";
+  $("cs-c-acnote").textContent = zero.length > 1
+    ? tr("The Sales Orders stay open in AutoCount. Close or cancel them there if you don't want them on the list.")
+    : tr("The Sales Order stays open in AutoCount. Close or cancel it there if you don't want it on the list.");
   const unbilled = noInvoice ? csUnbilledCharges() : [];
   $("cs-c-unbilled").style.display = unbilled.length ? "" : "none";
   $("cs-c-unbilled").textContent = unbilled.length
@@ -8155,12 +8179,14 @@ function renderCloseConfirm() {
   $("cs-ref-field").style.display = "none";
   $("cs-so-field").style.display = "none";
   $("cs-reinvoice").style.display = "none";
+  $("cs-noinv").style.display = "none";
   $("cs-cancel-close").style.display = "";
   $("cs-submit").textContent = noInvoice ? "Yes, close without invoice" : "Yes, close this slip";
 }
 
-function askToClose() {
+function askToClose(noInvoice = false) {
   if (!csPickedSlip) { $("cs-status").innerHTML = statusErr("Pick a slip to close."); return; }
+  csConfirmNoInv = !!noInvoice;
   csConfirming = true;
   $("cs-status").innerHTML = "";
   renderCloseConfirm();
@@ -8182,7 +8208,7 @@ async function submitClose() {
     await api(`/api/slips/${encodeURIComponent(slipNumber)}/close`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ who: initialsFor(getUser()), no_invoice: csNoInvoice() }),
+      body: JSON.stringify({ who: initialsFor(getUser()), no_invoice: csConfirmNoInv }),
     });
     csConfirming = false;
     toast(`Slip ${slipNumber} closed`, "ok");
@@ -13868,7 +13894,7 @@ $("cs-submit").addEventListener("click", () => {
   // Already asked, and this is the answer.
   if (csConfirming) return submitClose();
   // Nothing billed and nobody charging for it: straight to the question.
-  if (csNoInvoice()) return askToClose();
+  if (csNoInvoice()) return askToClose(true);
   // Invoiced and not in the middle of correcting the number: the button closes
   // the slip - after asking. Everything else records the number.
   const done = !!csSlip && csAwaiting().length === 0;
@@ -13876,6 +13902,7 @@ $("cs-submit").addEventListener("click", () => {
   return submitInvoiced();
 });
 $("cs-cancel-close").addEventListener("click", cancelClose);
+$("cs-noinv").addEventListener("click", () => askToClose(true));
 $("cs-reinvoice").addEventListener("click", reopenRefField);
 $("cs-so").addEventListener("change", () => {
   const o = ((csSlip && csSlip.orders) || []).find((x) => x.so_number === $("cs-so").value);
