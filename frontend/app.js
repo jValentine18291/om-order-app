@@ -1296,7 +1296,8 @@ function machineTitle(m) {
 // the other lists use.
 //
 // A slip with no order at all - condemned machines only, which need none
-// (1 Oct 2026) - says how long since the LAST one was condemned instead.
+// (1 Oct 2026) - says how long since the LAST one was condemned instead, and
+// one with a repaired machine on it, how long since the last was repaired.
 // "On SO" of a slip with no SO would be the one thing on the row that's false.
 function soAgeTag(slip) {
   const ms = (slip && slip.machines) || [];
@@ -1306,6 +1307,14 @@ function soAgeTag(slip) {
     days = daysSince(billed[0]);
     if (days === null) return "";
     text = days <= 0 ? "On SO today" : days === 1 ? "On SO 1 day" : `On SO ${days} days`;
+  } else if (ms.some((m) => m.state === "REPAIRED")) {
+    // Repaired and nothing billed (in Close Service since 27 Oct 2026, to be
+    // closed without an invoice): since the last machine was finished.
+    const repaired = ms.filter((m) => m.state === "REPAIRED")
+      .map((m) => String(m.decided_at || "").trim()).filter(Boolean).sort();
+    days = daysSince(repaired[repaired.length - 1] || slip.created_at);
+    if (days === null) return "";
+    text = days <= 0 ? "Repaired today" : days === 1 ? "Repaired 1 day" : `Repaired ${days} days`;
   } else {
     const condemned = ms.filter((m) => m.state === "CONDEMNED")
       .map((m) => String(m.decided_at || "").trim()).filter(Boolean).sort();
@@ -1525,6 +1534,9 @@ const SLIP_LABELS = [
   { key: "bill",  en: "Ready to bill",              zh: "待开单",          short: "Bill",      zhShort: "开单",   bg: "#E2F4F3", fg: "#0A6B70" },
   { key: "so",    en: "SO Created",                 zh: "已开销售单",      short: "SO",        zhShort: "销售单", bg: "#E7F5EC", fg: "#1B7A42" },
   { key: "close", en: "Collected – ready to close", zh: "已取走 – 可结单", short: "Close",     zhShort: "结单",   bg: "#E9EDF2", fg: "#33424A" },
+  // Repaired free of charge and on no order (27 Oct 2026): it can close with
+  // no invoice, so "Ready to bill" would send sales looking for a bill.
+  { key: "foc",   en: "Free of charge – no invoice", zh: "免费 – 无需发票", short: "FOC",      zhShort: "免费",   bg: "#E9EDF2", fg: "#33424A" },
   { key: "cond",  en: "Condemned – to settle",      zh: "已报废 – 待处理", short: "Condemned", zhShort: "报废",   bg: "#FBE9E9", fg: "#A32020" },
   { key: "cust",  en: "Waiting on customer",        zh: "等待客户回复",    short: "Customer",  zhShort: "待客户", bg: "#F0EAFB", fg: "#5B3FA8" },
   { key: "inv",   en: "Invoice Created",            zh: "已开发票",        short: "Invoiced",  zhShort: "已开票", bg: "#1B4D2E", fg: "#ffffff" },
@@ -1549,6 +1561,7 @@ function slipLabelText(l, short) {
 //   condemned and not yet collected/disposed  Condemned - to settle
 //   waiting to quote / on the customer        Waiting on quote / on customer
 //   repaired, not billed                      Ready to bill
+//   repaired free of charge, not billed       Free of charge - no invoice
 //   being worked on, or work written on it    In Progress
 //   nothing done yet                          Not started
 //
@@ -1574,7 +1587,7 @@ function slipLabels(s) {
     if (m.state === "CONDEMNED") { if (!gone) set.add("cond"); continue; }
     if (m.state === "AWAITING_QUOTE") set.add("quote");
     else if (m.state === "QUOTED") set.add("cust");
-    else if (m.state === "REPAIRED") set.add("bill");
+    else if (m.state === "REPAIRED") set.add(Number(m.foc) ? "foc" : "bill");
     else if (m.state === "TO_REPAIR") set.add("work");
     else {
       const work = m.has_work !== undefined ? !!Number(m.has_work)
@@ -3677,6 +3690,8 @@ function askFoc() {
     tr(nothing ? "No parts, labour or note on this machine." : "No charge on this machine - it comes to $0."),
     tr("It will be marked as Repaired, free of charge."),
     tr(nothing ? "The Sales Order will say \"*No servicing (FOC)\"." : "The Sales Order will add \"*FOC\" under the note."),
+    // Or no order at all (27 Oct 2026): sales can close it without an invoice.
+    tr("If nothing on the slip is charged, sales can close it without an invoice."),
   ]) ? true : null;
 }
 
@@ -7704,7 +7719,8 @@ async function onCloseSlipChosen(slipNumber) {
           : "were condemned and are still here. Tick each one below if the customer took it, or record it under View Slips if we disposed of it."
       }</div>` : "") +
       csCondemnedHtml(slip) +
-      csCollectHtml(slip);
+      csCollectHtml(slip) +
+      (csNoInvoice() ? `<div class="sub cs-noinv">No Sales Order on this slip. If the customer is being charged, create the Sales Order first. If not, close it without an invoice.</div>` : "");
     wireCsCondemned(slip);
     wireCsCollect(slip);
     wireCsSign(slip);
@@ -7993,6 +8009,30 @@ function wireCsCollect(slip) {
   });
 }
 
+// CLOSING WITH NO INVOICE (John, 27 Oct 2026): a slip with no Sales Order on
+// it and a machine that is not billed - checked, nothing wrong, handed back.
+// Sales decide, so any machine qualifies; the confirmation names whatever was
+// recorded on it that will now never be billed. A condemned-only slip is not
+// this: it already closes with no number, the ordinary way.
+function csNoInvoice() {
+  if (!csSlip || ((csSlip.orders || []).length)) return false;
+  return (csSlip.machines || []).some((m) => m.state !== "CONDEMNED" && !String(m.converted_at || "").trim());
+}
+
+// What was recorded but will not be billed, for that confirmation.
+function csUnbilledCharges() {
+  const out = [];
+  const sum = (parts) => (parts || []).reduce((t, p) => t + (Number(p.unit_price) || 0) * (Number(p.quantity) || 0), 0);
+  for (const m of (csSlip && csSlip.machines) || []) {
+    if (m.state === "CONDEMNED" || String(m.converted_at || "").trim()) continue;
+    const t = sum(m.parts) + (Number(m.labour_charge) || 0);
+    if (t > 0) out.push(`${machineTitle(m)} ${money(t)}`);
+  }
+  const loose = sum(((csSlip && csSlip.extras) || []).filter((p) => !String(p.converted_at || "").trim()));
+  if (loose > 0) out.push(`${tr("Slip parts")} ${money(loose)}`);
+  return out;
+}
+
 // The Sales Orders on this slip that still have no DO/CS/INV against them.
 function csAwaiting() {
   return ((csSlip && csSlip.orders) || []).filter((o) => o.so_number && !o.closing_ref);
@@ -8007,6 +8047,7 @@ function renderCloseStep() {
   const awaiting = csAwaiting();
   const needsNumber = !csSlip ? true : awaiting.length > 0;
   const forced = $("cs-submit").dataset.force === "invoice";
+  const noInvoice = csNoInvoice();
 
   // Asking the second time is a state of its own, so that leaving this screen,
   // picking another slip or correcting a number all drop out of it rather than
@@ -8015,13 +8056,13 @@ function renderCloseStep() {
   $("cs-confirm").style.display = "none";
   $("cs-cancel-close").style.display = "none";
 
-  $("cs-ref-field").style.display = needsNumber || forced ? "" : "none";
+  $("cs-ref-field").style.display = (needsNumber || forced) && !noInvoice ? "" : "none";
   // Nothing to correct on a slip that never had an order - condemned machines
   // only, which close with no DO/CS/INV number at all.
   const hasOrders = ((csSlip && csSlip.orders) || []).some((o) => o.so_number);
   $("cs-reinvoice").style.display = !needsNumber && hasOrders ? "" : "none";
-  $("cs-submit").textContent = needsNumber || forced
-    ? "Record DO/CS/INV number" : "Collected & Closed";
+  $("cs-submit").textContent = noInvoice ? "Close without invoice"
+    : needsNumber || forced ? "Record DO/CS/INV number" : "Collected & Closed";
 
   // The picker only where there is a choice to make.
   const orders = ((csSlip && csSlip.orders) || []).filter((o) => o.so_number);
@@ -8100,13 +8141,22 @@ function renderCloseConfirm() {
   // A slip of condemned machines with no order has no number, and a dash
   // there reads like something forgotten.
   $("cs-c-ref").textContent = refs.length ? refs.join(", ") : tr("No Sales Order");
+  // With no invoice at all, said so, and with anything that had a price on it
+  // named - sales are deciding it will not be charged, so they see what.
+  const noInvoice = csNoInvoice();
+  $("cs-c-ref-l").textContent = tr(noInvoice ? "Invoice" : "Invoiced with");
+  if (noInvoice) $("cs-c-ref").textContent = tr("None – not charged");
+  const unbilled = noInvoice ? csUnbilledCharges() : [];
+  $("cs-c-unbilled").style.display = unbilled.length ? "" : "none";
+  $("cs-c-unbilled").textContent = unbilled.length
+    ? `${tr("Recorded but will not be billed:")} ${unbilled.join(", ")}` : "";
 
   $("cs-confirm").style.display = "";
   $("cs-ref-field").style.display = "none";
   $("cs-so-field").style.display = "none";
   $("cs-reinvoice").style.display = "none";
   $("cs-cancel-close").style.display = "";
-  $("cs-submit").textContent = "Yes, close this slip";
+  $("cs-submit").textContent = noInvoice ? "Yes, close without invoice" : "Yes, close this slip";
 }
 
 function askToClose() {
@@ -8132,7 +8182,7 @@ async function submitClose() {
     await api(`/api/slips/${encodeURIComponent(slipNumber)}/close`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ who: initialsFor(getUser()) }),
+      body: JSON.stringify({ who: initialsFor(getUser()), no_invoice: csNoInvoice() }),
     });
     csConfirming = false;
     toast(`Slip ${slipNumber} closed`, "ok");
@@ -8604,6 +8654,7 @@ function renderSlipDetail(slip) {
       ${slip.notes ? `<div class="vs-notes">${escapeHtml(slip.notes)}</div>` : ""}
       ${slip.status === "INVOICED" && slip.closing_ref ? `<div class="vs-sub">Invoiced with: <strong>${escapeHtml(slip.closing_ref)}</strong>${slip.invoiced_at ? " on " + escapeHtml(formatDate(slip.invoiced_at)) : ""}</div>` : ""}
       ${slip.status === "CLOSED" && slip.closing_ref ? `<div class="vs-sub">Closed with: <strong>${escapeHtml(slip.closing_ref)}</strong>${slip.closed_at ? " on " + escapeHtml(formatDate(slip.closed_at)) : ""}</div>` : ""}
+      ${slip.status === "CLOSED" && Number(slip.closed_no_invoice) ? `<div class="vs-sub"><strong>Closed without invoice</strong>${slip.closed_at ? " on " + escapeHtml(formatDate(slip.closed_at)) : ""}</div>` : ""}
       ${renderVsStatusActions(slip)}
     </div>`;
 
@@ -13816,6 +13867,8 @@ $("machine-parts").addEventListener("change", (e) => {
 $("cs-submit").addEventListener("click", () => {
   // Already asked, and this is the answer.
   if (csConfirming) return submitClose();
+  // Nothing billed and nobody charging for it: straight to the question.
+  if (csNoInvoice()) return askToClose();
   // Invoiced and not in the middle of correcting the number: the button closes
   // the slip - after asking. Everything else records the number.
   const done = !!csSlip && csAwaiting().length === 0;

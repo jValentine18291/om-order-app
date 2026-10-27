@@ -85,6 +85,14 @@ async function labels(no) {
   const pill3 = sandbox.slipLabelPill((await data.slips.searchSlips(b.no, "all")).results[0]);
   check("three labels: top two and +1", />Bill</.test(pill3) && />Customer</.test(pill3) && /\+1</.test(pill3), true);
 
+  console.log("\n-- repaired free of charge, on no order (27 Oct 2026) --");
+  const fc = await slip("FREE OF CHARGE", 2);
+  await data.slips.saveMachineWork(fc.ids[0], "repaired", "WJ", { foc: true });
+  await repaired(fc.no, fc.ids[1]);
+  check("FOC is not 'ready to bill'", await labels(fc.no), ["bill", "foc"]);
+  await data.slips.createSlipOrder(fc.no, [fc.ids[0]], "KS");
+  check("put on a $0 order after all: SO Created", await labels(fc.no), ["bill", "so"]);
+
   console.log("\n-- one label: full words --");
   const c = await slip("UNTOUCHED", 1);
   check("not started", await labels(c.no), ["new"]);

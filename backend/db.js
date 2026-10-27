@@ -1072,6 +1072,13 @@ try {
     db.exec("ALTER TABLE service_slips ADD COLUMN closed_by TEXT DEFAULT ''");
     console.log("[db] migrated: added closed_by to service_slips");
   }
+  // Closed with no invoice at all (John, 27 Oct 2026): checked, nothing wrong,
+  // nothing charged, handed back. Its own flag rather than a word in
+  // closing_ref, which every screen reads as a document number.
+  if (cols.length && !cols.some((c) => c.name === "closed_no_invoice")) {
+    db.exec("ALTER TABLE service_slips ADD COLUMN closed_no_invoice INTEGER DEFAULT 0");
+    console.log("[db] migrated: added closed_no_invoice to service_slips");
+  }
 } catch (e) {
   console.error("[db] service_slips invoice migration check failed:", e.message);
 }

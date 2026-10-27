@@ -453,6 +453,29 @@ const WORKING_SCOPE = `(
   )
 )`;
 
+// WHAT CLOSE SERVICE OFFERS. One definition for its list and its search.
+//
+// REPAIRED since 27 Oct 2026 (John): every machine finished and nothing
+// billed. Those used to wait for a Sales Order before Close Service would show
+// them, but a machine checked and found fine is handed back with no invoice at
+// all, and sales have to be able to find the slip to close it that way.
+const CLOSE_SCOPE = `(
+       status IN ('REPAIRED', 'ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'PART_SO', 'READY_TO_CLOSE')
+       OR (
+         -- Everything on it is either billed or condemned: nothing left to do
+         -- in the workshop, even if a condemned machine still has to be
+         -- accounted for. Closing refuses in that case, and says so.
+         status != 'CLOSED'
+         AND EXISTS (SELECT 1 FROM slip_machines m WHERE m.slip_id = service_slips.id)
+         AND NOT EXISTS (
+           SELECT 1 FROM slip_machines m
+            WHERE m.slip_id = service_slips.id
+              AND m.state != 'CONDEMNED'
+              AND (m.converted_at IS NULL OR m.converted_at = '')
+         )
+       )
+     )`;
+
 // List slips filtered by status group. 'active' = everything not CLOSED.
 function listSlips(statusFilter = "active") {
   let rows;
@@ -479,22 +502,7 @@ function listSlips(statusFilter = "active") {
         ORDER BY s.slip_number`
     ).all();
   } else if (statusFilter === "repaired" || statusFilter === "call_customer") {
-    rows = db.prepare(`SELECT * FROM service_slips WHERE (
-       status IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'PART_SO', 'READY_TO_CLOSE')
-       OR (
-         -- Everything on it is either billed or condemned: nothing left to do
-         -- in the workshop, even if a condemned machine still has to be
-         -- accounted for. Closing refuses in that case, and says so.
-         status != 'CLOSED'
-         AND EXISTS (SELECT 1 FROM slip_machines m WHERE m.slip_id = service_slips.id)
-         AND NOT EXISTS (
-           SELECT 1 FROM slip_machines m
-            WHERE m.slip_id = service_slips.id
-              AND m.state != 'CONDEMNED'
-              AND (m.converted_at IS NULL OR m.converted_at = '')
-         )
-       )
-     ) ORDER BY slip_number`).all();
+    rows = db.prepare(`SELECT * FROM service_slips WHERE ${CLOSE_SCOPE} ORDER BY slip_number`).all();
   } else if (statusFilter === "closed") {
     rows = db.prepare("SELECT * FROM service_slips WHERE status = 'CLOSED' ORDER BY slip_number DESC").all();
   } else if (statusFilter === "all") {
@@ -1949,10 +1957,11 @@ function setSlipInvoiced(slipNumber, ref, who = "", soNumber = "") {
 // The DO/CS/INV number was recorded at the step above and is not asked for
 // again - passing one here only corrects it, for the case where sales notice
 // the wrong number after the fact.
-function closeSlip(slipNumber, closingRef, who = "") {
+function closeSlip(slipNumber, closingRef, who = "", { noInvoice = false } = {}) {
   const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
   if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
   if (slip.status === "CLOSED") { const e = new Error("Slip is already closed."); e.status = 400; throw e; }
+  if (noInvoice) return closeWithoutInvoice(slip, who);
 
   // Has anything on this slip been billed at all?
   //
@@ -2064,6 +2073,78 @@ function closeSlip(slipNumber, closingRef, who = "") {
   return getSlip(slipNumber);
 }
 
+// CLOSED WITH NO INVOICE (John, 27 Oct 2026). A machine checked and found
+// fine is handed back: nothing is charged, so there is no Sales Order and no
+// DO/CS/INV. Sales decide this at Close Service, any machine, after the screen
+// has shown them whatever was recorded on it that will now never be billed.
+//
+// Only a slip with no Sales Order on it. One that has an order has a document
+// in AutoCount waiting on its number, and closing round that is how it would
+// be forgotten - that slip closes the ordinary way. And only once every
+// machine is finished: one still on the bench is a technician's to finish,
+// not something to close past. Condemned machines are held to exactly what
+// closeSlip asks of them.
+function closeWithoutInvoice(slip, who = "") {
+  const orderCount = db.prepare(
+    "SELECT COUNT(*) AS n FROM orders WHERE notes = ?"
+  ).get(`S/S: ${slip.slip_number}`).n;
+  if (orderCount) {
+    const e = new Error(
+      "This slip has a Sales Order. Record its DO/CS/INV number and close it the usual way."
+    );
+    e.status = 400; throw e;
+  }
+  const everyMachine = db.prepare(
+    "SELECT id, machine_desc, state, disposal FROM slip_machines WHERE slip_id = ?"
+  ).all(slip.id);
+  const unfinished = everyMachine
+    .filter((m) => m.state !== "REPAIRED" && m.state !== "CONDEMNED")
+    .map((m) => m.machine_desc);
+  if (unfinished.length) {
+    const e = new Error(
+      `Not finished yet: ${unfinished.join(", ")}. ` +
+      "The technician marks each machine repaired before the slip can close."
+    );
+    e.status = 400; throw e;
+  }
+  const unsigned = unsignedCondemned(slip.id);
+  if (unsigned.length) {
+    const e = new Error(
+      `Condemned but not signed for: ${unsigned.join(", ")}. ` +
+      "The customer signs in person to confirm they want it condemned. " +
+      "If we disposed of it instead, record that - no signature is needed then."
+    );
+    e.status = 400; throw e;
+  }
+  const stranded = strandedCondemned(slip.id);
+  if (stranded.length) {
+    const e = new Error(
+      `Condemned but not yet accounted for: ${stranded.join(", ")}. ` +
+      "Record whether the customer collected it or we disposed of it."
+    );
+    e.status = 400; throw e;
+  }
+  // Handed back: every repaired machine is collected now, by whoever closes,
+  // as the ordinary Collected & Closed does for billed ones.
+  db.transaction(() => {
+    const tick = db.prepare(
+      `UPDATE slip_machines
+          SET disposal = 'COLLECTED', disposal_by = ?, disposal_at = datetime('now','localtime')
+        WHERE id = ? AND TRIM(IFNULL(disposal, '')) = ''`
+    );
+    for (const m of everyMachine) {
+      if (m.state === "REPAIRED") tick.run(String(who || "").trim(), m.id);
+    }
+    db.prepare(
+      `UPDATE service_slips
+          SET status = 'CLOSED', closing_ref = '', closed_no_invoice = 1,
+              closed_by = ?, closed_at = datetime('now','localtime')
+        WHERE id = ?`
+    ).run(String(who || "").trim(), slip.id);
+  })();
+  return getSlip(slip.slip_number);
+}
+
 // Save a machine's repair comment (free text).
 function setMachineComment(machineId, comment) {
   const machine = db.prepare("SELECT * FROM slip_machines WHERE id = ?").get(machineId);
@@ -2095,22 +2176,7 @@ function searchSlips(query = "", scope = "all", limit = 20) {
   const scopeClause =
     scope === "active" ? "status != 'CLOSED'" :
     scope === "working" ? WORKING_SCOPE :
-    scope === "repaired" ? `(
-       status IN ('ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'PART_SO', 'READY_TO_CLOSE')
-       OR (
-         -- Everything on it is either billed or condemned: nothing left to do
-         -- in the workshop, even if a condemned machine still has to be
-         -- accounted for. Closing refuses in that case, and says so.
-         status != 'CLOSED'
-         AND EXISTS (SELECT 1 FROM slip_machines m WHERE m.slip_id = service_slips.id)
-         AND NOT EXISTS (
-           SELECT 1 FROM slip_machines m
-            WHERE m.slip_id = service_slips.id
-              AND m.state != 'CONDEMNED'
-              AND (m.converted_at IS NULL OR m.converted_at = '')
-         )
-       )
-     )` :
+    scope === "repaired" ? CLOSE_SCOPE :
     "1=1";
 
   if (!q) {
@@ -2149,7 +2215,7 @@ function searchSlips(query = "", scope = "all", limit = 20) {
   // the screen falls back on the slip's own status for those. has_work tells
   // Not started from In Progress, by the same test slipHasWork uses.
   const getMachines = db.prepare(
-    `SELECT m.id, m.machine_desc, m.state, m.disposal, m.converted_at, m.decided_at,
+    `SELECT m.id, m.machine_desc, m.state, m.disposal, m.converted_at, m.decided_at, IFNULL(m.foc, 0) AS foc,
             CASE WHEN TRIM(IFNULL(m.so_number, '')) = '' THEN NULL
                  WHEN EXISTS (SELECT 1 FROM orders o WHERE o.so_number = m.so_number
                                  AND TRIM(IFNULL(o.closing_ref, '')) != '') THEN 1

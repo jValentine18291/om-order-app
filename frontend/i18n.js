@@ -733,6 +733,19 @@
     // Closing is asked for twice, so both the question and the way out of it
     // have to read properly.
     "Yes, close this slip": "是的，结单",
+    // Closing with no invoice at all (27 Oct 2026): checked, nothing wrong,
+    // nothing charged, handed back.
+    "Close without invoice": "不开发票结单",
+    "Yes, close without invoice": "是的，不开发票结单",
+    "Invoice": "发票",
+    "None – not charged": "无 – 不收费",
+    "Recorded but will not be billed:": "已记录但不会收费：",
+    "Slip parts": "服务单零件",
+    "Closed without invoice": "已结单（无发票）",
+    "No Sales Order on this slip. If the customer is being charged, create the Sales Order first. If not, close it without an invoice.":
+      "这张服务单没有销售单。如果要向客户收费，请先开销售单；如果不收费，可以不开发票直接结单。",
+    "If nothing on the slip is charged, sales can close it without an invoice.":
+      "如果这张服务单没有任何收费，销售部可以不开发票直接结单。",
     "Not yet — go back": "还没有 — 返回",
     "Closing is final. The slip leaves every list, and its parts can no longer be changed.":
       "结单后无法撤销。此单将从所有列表中移除，零件也不能再更改。",
@@ -1225,6 +1238,8 @@
     [/^On SO today$/, "今天开销售单"],
     [/^Condemned (\d+) days?$/, "已报废 $1 天"],
     [/^Condemned today$/, "今天报废"],
+    [/^Repaired (\d+) days?$/, "已修好 $1 天"],
+    [/^Repaired today$/, "今天修好"],
     [/^(\d+) machine\(s\)$/, "$1 台机器"],
     // Opening a slip from a notification while parts are unsaved (6 Oct 2026).
     [/^Slip (.+): save the parts on this machine first$/, "服务单 $1：请先保存这台机器上的零件"],

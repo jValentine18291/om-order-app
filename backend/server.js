@@ -3248,8 +3248,10 @@ app.post("/api/slips/:slip/invoiced", async (req, res) => {
 
 app.post("/api/slips/:slip/close", async (req, res) => {
   try {
-    const { closing_ref, who = "" } = req.body || {};
-    const slip = await data.slips.closeSlip(req.params.slip, closing_ref, who);
+    // no_invoice: closed with nothing billed at all (27 Oct 2026) - see
+    // closeWithoutInvoice in the repo for what it still insists on.
+    const { closing_ref, who = "", no_invoice = false } = req.body || {};
+    const slip = await data.slips.closeSlip(req.params.slip, closing_ref, who, { noInvoice: no_invoice === true });
     res.json(slip);
   } catch (err) {
     if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });

@@ -205,9 +205,12 @@ const refs = (slip) => (slip.orders || []).map((o) => `${o.so_number}=${o.closin
 
   let v = await mk("VIS ALL REPAIRED NONE BILLED", 2);
   for (const m of v.machines) { await data.slips.setMachineLabour(m.id, 10); await data.slips.finishRepair(m.id, "WJ"); }
-  // A technician can still un-tick a machine they finished by mistake.
-  check("every machine repaired, nothing billed: technicians keep it",
-    await who(v.slip_number), [true, false]);
+  // A technician can still un-tick a machine they finished by mistake. And
+  // since 27 Oct 2026 Close Service shows it too, so a machine handed back
+  // with no charge can be closed without an invoice
+  // (test-close-without-invoice.js).
+  check("every machine repaired, nothing billed: technicians keep it, sales see it",
+    await who(v.slip_number), [true, true]);
 
   v = await mk("VIS WORKSHOP DONE HALF BILLED", 2);
   for (const m of v.machines) { await data.slips.setMachineLabour(m.id, 10); await data.slips.finishRepair(m.id, "WJ"); }
