@@ -81,6 +81,42 @@ async function main() {
   console.log("=== Item columns that might mark a package ===");
   if (!flags.length) console.log("  (none)");
   flags.forEach((f) => console.log(`  ${f.c} ${f.d}`));
+  console.log("");
+
+  // 4. How a package travels on a sales document. The app writes Sales Orders
+  // straight into SO/SODTL, and SODTL.ItemCode must be a real item, so a
+  // package can only go on as one line if the detail tables have a column of
+  // their own for it. And if AutoCount's own invoices have used packages, how
+  // those lines look is the pattern to copy.
+  for (const dtl of ["SODTL", "IVDTL", "CSDTL", "DODTL"]) {
+    try { await packageColumns(dtl); } catch (e) { console.log(`  (${dtl}: ${e.message})`); }
+  }
+}
+
+async function packageColumns(dtl) {
+  {
+    const pc = await query(
+      `SELECT COLUMN_NAME AS c, DATA_TYPE AS d FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME = @t AND (COLUMN_NAME LIKE '%Package%' OR COLUMN_NAME LIKE '%Pkg%')
+        ORDER BY ORDINAL_POSITION`, { t: dtl });
+    console.log(`=== ${dtl}: package columns ===`);
+    if (!pc.length) { console.log("  (none)"); return; }
+    pc.forEach((c) => console.log(`  ${c.c} ${c.d}`));
+    const where = pc.map((c) => `([${c.c}] IS NOT NULL AND CAST([${c.c}] AS nvarchar(100)) NOT IN ('', 'F', '0'))`).join(" OR ");
+    const used = await query(`SELECT COUNT(*) AS n FROM [${dtl}] WHERE ${where}`);
+    console.log(`  lines that use them: ${used[0].n}`);
+    if (used[0].n) {
+      const keys = await query(`SELECT TOP 2 DocKey FROM [${dtl}] WHERE ${where} GROUP BY DocKey ORDER BY DocKey DESC`);
+      for (const k of keys) {
+        const lines = await query(
+          `SELECT ${["Seq", "ItemCode", "Description", "Qty", "UOM", "UnitPrice", ...pc.map((c) => c.c)]
+              .map((c) => `[${c}]`).join(", ")}
+             FROM [${dtl}] WHERE DocKey = @k ORDER BY Seq`, { k: k.DocKey });
+        console.log(`  --- one ${dtl.replace("DTL", "")} that used a package (DocKey ${k.DocKey}) ---`);
+        lines.forEach((l) => console.log("    " + Object.entries(l).map(([n, v]) => `${n}=${cell(v)}`).join("  ")));
+      }
+    }
+  }
 }
 
 main().then(() => process.exit(0)).catch((e) => {
