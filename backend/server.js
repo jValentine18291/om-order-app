@@ -1403,9 +1403,27 @@ app.delete("/api/part-replacements/:id", async (req, res) => {
 // stock. Each with its description and stock from AutoCount, so the card says
 // whether the alternative is any use today. Set by Sales, Purchaser and Admin,
 // like a note; read by everyone.
+//
+// And the replacements recorded in the parts books ("We fit instead"), since
+// 27 Oct 2026 (John): a part the book says was replaced is the first thing to
+// reach for when it is out of stock. They come after the alternatives set
+// here, a code already among those is not listed twice, and each carries
+// from_ipl so the card can say where it came from - it is removed in the
+// parts book that recorded it, not here.
 async function alternativesWithStock(codes) {
-  const map = data.alternatives.forCodes(codes);
-  const alts = [...new Set(Object.values(map).flat())];
+  const alt = data.alternatives.forCodes(codes);
+  const repl = data.replacements.forCodes(codes);
+  const map = {};
+  for (const code of new Set([...Object.keys(alt), ...Object.keys(repl)])) {
+    const list = (alt[code] || []).map((c) => ({ code: c, from_ipl: false, description: "" }));
+    for (const r of repl[code] || []) {
+      if (r.item_code !== code && !list.some((x) => x.code === r.item_code)) {
+        list.push({ code: r.item_code, from_ipl: true, description: r.description });
+      }
+    }
+    if (list.length) map[code] = list;
+  }
+  const alts = [...new Set(Object.values(map).flat().map((x) => x.code))];
   if (!alts.length) return {};
   let stock = new Map();
   try {
@@ -1417,9 +1435,12 @@ async function alternativesWithStock(codes) {
   }
   const out = {};
   for (const [code, list] of Object.entries(map)) {
-    out[code] = list.map((alt) => {
-      const s = stock.get(alt);
-      return { item_code: alt, description: s ? s.description : "", bal_qty: s ? s.bal_qty : null };
+    out[code] = list.map((x) => {
+      const s = stock.get(x.code);
+      return {
+        item_code: x.code, description: s ? s.description : x.description, bal_qty: s ? s.bal_qty : null,
+        ...(x.from_ipl ? { from_ipl: true } : {}),
+      };
     });
   }
   return out;
@@ -1431,9 +1452,13 @@ app.get("/api/part-alternatives/:code", async (req, res) => {
     const rows = data.alternatives.list(code);
     const withStock = (await alternativesWithStock([code]))[code] || [];
     res.json({
-      results: rows.map((r) => ({
-        ...r, ...(withStock.find((s) => s.item_code === r.alt_code) || {}), item_code: r.alt_code, for_code: r.item_code,
-      })),
+      results: [
+        ...rows.map((r) => ({
+          ...r, ...(withStock.find((s) => s.item_code === r.alt_code) || {}), item_code: r.alt_code, for_code: r.item_code,
+        })),
+        // The parts books' replacements: no id, so nothing here can remove one.
+        ...withStock.filter((s) => s.from_ipl).map((s) => ({ ...s, id: null, for_code: code })),
+      ],
     });
   } catch (err) {
     console.error("[GET /api/part-alternatives]", err.message);

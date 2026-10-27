@@ -10943,6 +10943,8 @@ function partNoteHtml(note, addIfEmpty = true) {
 // when this part is out of stock, each with its own stock. Set by Sales,
 // Purchaser and Admin - the people who know the stock - from the same AutoCount
 // picker replacements use. Added at the foot of the card, below the price.
+// The parts books' replacements are listed here too (27 Oct 2026), tagged
+// "From parts book".
 async function renderPartAlternatives(container, part, onSaved) {
   if (!container || !part || !part.item_code) return;
   let list = [];
@@ -10955,9 +10957,12 @@ async function renderPartAlternatives(container, part, onSaved) {
       : `<span class="${q > 0 ? "fp-alt-ok" : "fp-alt-none"}">${escapeHtml(Number.isInteger(q) ? String(q) : q.toFixed(2))} <span>in stock</span></span>`;
     return `<div class="repl-row">
         <button type="button" class="repl-code mono" data-part-code="${escapeAttr(a.item_code)}">${escapeHtml(a.item_code)}</button>
-        <span class="repl-desc">${escapeHtml(a.description || "")}</span>
+        <span class="repl-desc">${escapeHtml(a.description || "")}${
+          // Recorded in a parts book as "We fit instead" (27 Oct 2026), and
+          // removed there - so no cross here.
+          a.from_ipl ? ` <span class="fp-alt-ipl">From parts book</span>` : ""}</span>
         <span class="repl-who">${stock}</span>
-        ${can ? `<button type="button" class="repl-del" data-alt-del="${escapeAttr(String(a.id))}" aria-label="Remove this alternative">&#10005;</button>` : ""}
+        ${can && !a.from_ipl ? `<button type="button" class="repl-del" data-alt-del="${escapeAttr(String(a.id))}" aria-label="Remove this alternative">&#10005;</button>` : ""}
       </div>`;
   }).join("");
   const box = document.createElement("div");

@@ -3290,6 +3290,9 @@ body.signin-brand .topbar .pill {
 .fp-alt-use { align-self: flex-start; font-weight: 700; font-size: .8rem; color: #5B3FA8; background: #fff;
   border: 1px solid #cdbff0; border-radius: 8px; padding: 5px 10px; box-shadow: 0 2px 0 #cdbff0; }
 .fp-alt-box { margin-top: 12px; }
+/* A replacement recorded in a parts book, shown with the alternatives (27 Oct 2026). */
+.fp-alt-ipl { display: inline-block; margin-left: 4px; padding: 0 6px; border-radius: 6px; font-size: .7rem;
+  font-weight: 700; background: #fff; color: #5B3FA8; border: 1px solid #cdbff0; white-space: nowrap; }
 .repl-box.fp-alt-box { background: #F0EAFB; border-left-color: #5B3FA8; color: #3C3489; }
 .repl-box.fp-alt-box .repl-row + .repl-row { border-top-color: #ddd2f6; }
 .fp-opt-main { flex: 1; min-width: 0; }

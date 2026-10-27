@@ -689,6 +689,8 @@
     "Use the alternative instead": "改用替代零件",
     "If out of stock, use": "缺货时改用",
     "Add an alternative part": "添加替代零件",
+    // A replacement recorded in a parts book, listed with them (27 Oct 2026).
+    "From parts book": "来自零件图册",
     "Another alternative": "再添加替代零件",
     "Alternative part": "替代零件",
     "Alternative recorded": "已记录替代零件",

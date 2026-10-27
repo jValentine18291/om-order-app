@@ -157,6 +157,8 @@ module.exports = {
     counts: (...a) => sqliteRepo.partReplacements.countPartReplacements(...a),
     add: (...a) => sqliteRepo.partReplacements.addPartReplacement(...a),
     remove: (...a) => sqliteRepo.partReplacements.deletePartReplacement(...a),
+    // Shown with the alternatives in Find Part (27 Oct 2026).
+    forCodes: (...a) => sqliteRepo.partReplacements.replacementsFor(...a),
   },
   requests: {
     createPartRequest: (...a) => sqliteRepo.partRequests.createPartRequest(...a),

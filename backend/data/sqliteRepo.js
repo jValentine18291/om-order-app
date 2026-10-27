@@ -4153,8 +4153,32 @@ function deletePartReplacement(id) {
   return { ok: true, removed: row };
 }
 
+// { item_code: [{ item_code, description }, ...] } - the replacements recorded
+// in the parts books against these AutoCount items, for Find Part's "If out of
+// stock, use" (John, 27 Oct 2026). Only by part_key: Find Part knows a part by
+// its item code, and a replacement is keyed to the item code whenever the
+// book's part resolved to one. One recorded against a part AutoCount does not
+// hold is keyed to the book, and Find Part could never have shown that part.
+function replacementsFor(codes) {
+  const list = [...new Set((codes || []).map((c) => String(c || "").trim()).filter(Boolean))];
+  if (!list.length) return {};
+  const out = {};
+  const CHUNK = 900;          // under SQLite's bound-variable ceiling
+  for (let i = 0; i < list.length; i += CHUNK) {
+    const part = list.slice(i, i + CHUNK);
+    const rows = db.prepare(
+      `SELECT part_key, item_code, description FROM part_replacements
+        WHERE part_key IN (${part.map(() => "?").join(",")}) ORDER BY created_at, id`
+    ).all(...part);
+    for (const r of rows) {
+      (out[r.part_key] = out[r.part_key] || []).push({ item_code: r.item_code, description: r.description || "" });
+    }
+  }
+  return out;
+}
+
 const partReplacements = {
-  getPartReplacements, countPartReplacements, addPartReplacement, deletePartReplacement,
+  getPartReplacements, countPartReplacements, addPartReplacement, deletePartReplacement, replacementsFor,
 };
 module.exports.partReplacements = partReplacements;
 
