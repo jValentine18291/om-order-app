@@ -922,6 +922,7 @@
     "Enter the customer's details and the machines brought in.": "请输入客户资料与送修的机器。",
     "Company": "公司",
     "Contact name": "联络人",
+    "no number": "没有号码",
     "Contact number": "联络电话",
     "WhatsApp number": "WhatsApp 号码",
     "(for sending the slip)": "（用于发送服务单）",
@@ -1202,6 +1203,9 @@
     [/^Sales Order (.+) created \((.+)\)$/, "销售订单 $1 已生成（$2）"],
     [/^Slip (.+) · (.+)$/, "服务单 $1 · $2"],
     [/^Contact: (.+)$/, "联络人：$1"],
+    // The second contact on a slip's header (27 Oct 2026). "no number" is
+    // its own span, so it arrives here as the trailing " ·" - kept as is.
+    [/^Contact 2: (.+)$/, "第二联络人：$1"],
     [/^Couldn't save comment: (.+)$/, "无法保存维修说明：$1"],
     [/^Couldn't build PDF: (.+)$/, "无法生成 PDF：$1"],
     [/^Request failed \((\d+)\)$/, "请求失败（$1）"],

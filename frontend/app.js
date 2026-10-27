@@ -3436,13 +3436,31 @@ function slipSoLine(slip) {
     sos.map((n) => `<strong>${escapeHtml(n)}</strong>`).join(", ")}</div>`;
 }
 
+// The people to ring about a slip, a line each, for the slip's header - the
+// technician's slip screen and View Slips' window (John, 27 Oct 2026). The
+// second contact used to appear on neither; it shows now whenever it has a
+// name OR a number, and a name with no number says so, so nobody hunts for a
+// number that was never taken. The first keeps its old wording exactly.
+function slipContactsHtml(slip) {
+  const lines = [];
+  const name1 = String(slip.contact_name || "").trim();
+  const num1 = String(slip.contact_number || "").trim();
+  const one = [];
+  if (name1) one.push(`Contact: ${escapeHtml(name1)}`);
+  if (num1) one.push(escapeHtml(num1));
+  if (one.length) lines.push(one.join(" · "));
+  const name2 = String(slip.contact2_name || "").trim();
+  const num2 = String(slip.contact2_number || "").trim();
+  if (name2 || num2) {
+    lines.push(`Contact 2: ${escapeHtml(name2 || num2)}${
+      name2 ? (num2 ? ` · ${escapeHtml(num2)}` : ` · <span class="vs-nonum">no number</span>`) : ""}`);
+  }
+  return lines.map((l) => `<div class="vs-sub">${l}</div>`).join("");
+}
+
 function renderSlipScreen() {
   const slip = session.slip;
   if (!slip) return;
-
-  const meta = [];
-  if (slip.contact_name) meta.push(`Contact: ${escapeHtml(slip.contact_name)}`);
-  if (slip.contact_number) meta.push(escapeHtml(slip.contact_number));
   const created = formatDate(slip.created_at);
 
   $("sd-head").innerHTML = `
@@ -3455,7 +3473,7 @@ function renderSlipScreen() {
         <span class="vs-status vs-${escapeAttr(slip.status)}" id="os-status-badge">${escapeHtml(STATUS_LABEL[slip.status] || slip.status)}</span>
       </div>
       ${slipSoLine(slip)}
-      ${meta.length ? `<div class="vs-sub">${meta.join(" · ")}</div>` : ""}
+      ${slipContactsHtml(slip)}
       ${quotePills(slip)}
       ${slip.notes ? `<div class="vs-notes">${escapeHtml(slip.notes)}</div>` : ""}
     </div>
@@ -8543,9 +8561,6 @@ function renderSlipDetail(slip) {
   }
   slipAmount += slipLabour;
 
-  const meta = [];
-  if (slip.contact_name) meta.push(`Contact: ${escapeHtml(slip.contact_name)}`);
-  if (slip.contact_number) meta.push(escapeHtml(slip.contact_number));
 
   let html = `
     <div class="vs-card">
@@ -8575,7 +8590,7 @@ function renderSlipDetail(slip) {
            On THIS screen and not the technician's: a billing document is
            Sales' business, and this is where the closing reference is read. -->
       <div class="vs-chain" id="vs-chain"></div>
-      ${meta.length ? `<div class="vs-sub">${meta.join(" · ")}</div>` : ""}
+      ${slipContactsHtml(slip)}
       ${(slip.amendments || []).length ? `<div class="vs-amended"><b>Changed after the customer signed</b>${
         slip.amendments.map((a) => `<div>${escapeHtml(a.field)}: ${
           // A machine that was added has no "before" - it was not there. The
