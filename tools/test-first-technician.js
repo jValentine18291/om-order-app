@@ -67,6 +67,20 @@ const part = (id, tech) => data.slips.addPartToMachine(id,
     "00083 · BSG LANDSCAPE · 客户同意维修");
   check("title", translate("Repair: HBZ260EZ - 1/2", "zh"), "可以维修：HBZ260EZ - 1/2");
 
+  // WHOSE MACHINE, in the title (John, 28 Oct 2026). Go-ahead names the first
+  // technician; condemn names every technician with a part on it - not John,
+  // who scanned one at the counter.
+  console.log("\n-- whose machine, in the title --");
+  check("condemn names its technicians, not the counter", data.slips.techniciansForMachine(c), ["R"]);
+  await part(c, "WJ");
+  check("in order, each once", data.slips.techniciansForMachine(c), ["R", "WJ"]);
+  check("still translated with the initials on", translate("Condemn: HBZ260EZ - 1/2 · R, WJ", "zh"),
+    "报废：HBZ260EZ - 1/2 · R, WJ");
+  check("go-ahead too", translate("Repair: HBZ260EZ - 1/2 · XL", "zh"), "可以维修：HBZ260EZ - 1/2 · XL");
+  const server = require("fs").readFileSync(path.resolve(__dirname, "..", "backend", "server.js"), "utf8");
+  check("the server puts them there",
+    /const whose = techs\.length \? ` · \$\{techs\.join\(", "\)\}` : "";[\s\S]{0,200}title: `\$\{state === "TO_REPAIR" \? "Repair" : "Condemn"\}: \$\{desc\}\$\{whose\}`/.test(server), true);
+
   console.log(failures ? `\n${failures} FAILED` : "\nAll passed.");
   process.exit(failures ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });

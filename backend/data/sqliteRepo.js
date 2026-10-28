@@ -3686,11 +3686,16 @@ function machineRounds(machineId) {
 // Which technicians worked on a machine, by the initials on their part rows -
 // the only record of who touched it. A machine with nothing scanned yet has
 // none, and the caller decides what to do about that.
+// Only the technicians' codes, in order (28 Oct 2026): these initials are now
+// printed in the notification's title, and a part John scanned at the counter
+// does not make him one of them. With no users table, any initials.
 function techniciansForMachine(machineId) {
-  return db.prepare(
+  const codes = technicianCodes();
+  return [...new Set(db.prepare(
     `SELECT DISTINCT technician FROM machine_parts
       WHERE machine_id = ? AND TRIM(IFNULL(technician, '')) != ''`
-  ).all(machineId).map((r) => String(r.technician).trim());
+  ).all(machineId).map((r) => String(r.technician).trim()))]
+    .filter((w) => !codes.size || codes.has(w)).sort();
 }
 
 // THE TECHNICIAN WHO FIRST WORKED ON A MACHINE (John, 6 Oct 2026): the one

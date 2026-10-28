@@ -2298,8 +2298,13 @@ async function notifyStateChange(slip, machineId, before, state, actor = {}) {
         : await data.slips.techniciansForMachine(machineId);
       // Who confirmed it, in brackets, so they know who to ask.
       const by = actor && actor.who ? ` (${actor.who})` : "";
+      // And WHOSE machine it is, by initials, in the title (John, 28 Oct 2026):
+      // a phone that is shared, a message passed on, or one sent to every
+      // technician because nobody had started it, says who it is for. Those
+      // last name nobody - there is nobody to name.
+      const whose = techs.length ? ` · ${techs.join(", ")}` : "";
       await push.notifyTechs(pushDb, techs, {
-        title: `${state === "TO_REPAIR" ? "Repair" : "Condemn"}: ${desc}`,
+        title: `${state === "TO_REPAIR" ? "Repair" : "Condemn"}: ${desc}${whose}`,
         body: `${slip.slip_number} · ${slip.company} · the customer says ${
           state === "TO_REPAIR" ? "go ahead with the repair" : "do not repair - condemn it"
         }${by}`,
