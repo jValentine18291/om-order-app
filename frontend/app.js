@@ -8029,19 +8029,21 @@ function csNoInvoice() {
   return (csSlip.machines || []).some((m) => m.state !== "CONDEMNED" && !String(m.converted_at || "").trim());
 }
 
-// What was recorded but will not be billed, for that confirmation.
-function csUnbilledCharges() {
+// What was recorded but will not be billed, for that confirmation - and for
+// closing a slip the customer took back (28 Oct 2026), which asks the same.
+function unbilledCharges(slip) {
   const out = [];
   const sum = (parts) => (parts || []).reduce((t, p) => t + (Number(p.unit_price) || 0) * (Number(p.quantity) || 0), 0);
-  for (const m of (csSlip && csSlip.machines) || []) {
+  for (const m of (slip && slip.machines) || []) {
     if (m.state === "CONDEMNED" || String(m.converted_at || "").trim()) continue;
     const t = sum(m.parts) + (Number(m.labour_charge) || 0);
     if (t > 0) out.push(`${machineTitle(m)} ${money(t)}`);
   }
-  const loose = sum(((csSlip && csSlip.extras) || []).filter((p) => !String(p.converted_at || "").trim()));
+  const loose = sum(((slip && slip.extras) || []).filter((p) => !String(p.converted_at || "").trim()));
   if (loose > 0) out.push(`${tr("Slip parts")} ${money(loose)}`);
   return out;
 }
+function csUnbilledCharges() { return unbilledCharges(csSlip); }
 
 // AND A SLIP WHOSE SALES ORDERS ARE ALL $0 (John, 27 Oct 2026, slip 00030):
 // a free-of-charge machine put on an order at nothing, already with the
@@ -8307,6 +8309,8 @@ async function onViewSlipChosen(slipNumber) {
       b.addEventListener("click", () => openFixMachine(slip, b.dataset.fix)));
     const del = document.getElementById("vs-delete");
     if (del) del.addEventListener("click", () => deleteSlipFlow(slipNumber));
+    const back = document.getElementById("vs-takenback");
+    if (back) back.addEventListener("click", () => closeTakenBackFlow(slip));
     const editBtn = document.getElementById("vs-edit");
     if (editBtn) editBtn.addEventListener("click", () => openSlipEdit(slip));
     const repairBtn2 = document.getElementById("vs-repair");
@@ -8688,7 +8692,10 @@ function renderSlipDetail(slip) {
       ${slip.notes ? `<div class="vs-notes">${escapeHtml(slip.notes)}</div>` : ""}
       ${slip.status === "INVOICED" && slip.closing_ref ? `<div class="vs-sub">Invoiced with: <strong>${escapeHtml(slip.closing_ref)}</strong>${slip.invoiced_at ? " on " + escapeHtml(formatDate(slip.invoiced_at)) : ""}</div>` : ""}
       ${slip.status === "CLOSED" && slip.closing_ref ? `<div class="vs-sub">Closed with: <strong>${escapeHtml(slip.closing_ref)}</strong>${slip.closed_at ? " on " + escapeHtml(formatDate(slip.closed_at)) : ""}</div>` : ""}
-      ${slip.status === "CLOSED" && Number(slip.closed_no_invoice) ? `<div class="vs-sub"><strong>Closed without invoice</strong>${slip.closed_at ? " on " + escapeHtml(formatDate(slip.closed_at)) : ""}</div>` : ""}
+      ${slip.status === "CLOSED" && Number(slip.closed_no_invoice) ? `<div class="vs-sub"><strong>${
+        slip.closed_reason === "TAKEN_BACK" ? "Closed – customer took it back" : "Closed without invoice"}</strong>${
+        slip.closed_at ? " on " + escapeHtml(formatDate(slip.closed_at)) : ""}</div>${
+        String(slip.closed_note || "").trim() ? `<div class="vs-sub vs-closed-note">${escapeHtml(slip.closed_note)}</div>` : ""}` : ""}
       ${renderVsStatusActions(slip)}
     </div>`;
 
@@ -8918,6 +8925,15 @@ function renderSlipDetail(slip) {
   if (slip.status === "ALL_REPAIRED" || slip.status === "CLOSED") {
     html += `
       <button class="btn-secondary" id="vs-so" style="margin-top:10px;width:100%;">View Sales Order</button>`;
+  }
+
+  // THE CUSTOMER TOOK IT BACK before anything was done (John, 28 Oct 2026):
+  // they needed it for a job. Just above Delete, his placing. Sales and admin,
+  // on any open slip with no Sales Order - one with an order closes in Close
+  // Service, where its document is waited for.
+  if (canDecide() && slip.status !== "CLOSED" && !(slip.orders || []).length) {
+    html += `
+      <button type="button" class="vs-takenback" id="vs-takenback">Close – customer took it back</button>`;
   }
 
   // John's, and at the very bottom - it is the one thing on this screen that
@@ -9626,6 +9642,36 @@ async function refreshSlipDocuments(slipNumber, slip) {
 // and the button never becomes a dead end.
 function canDeleteSlips() {
   return !!(window.OM_FUNCTIONS && OM_FUNCTIONS.canDeleteSlips(getUser()));
+}
+
+// Closing a slip the customer took back before any work (28 Oct 2026). Asked
+// first, naming anything recorded on it that will not be billed; then an
+// optional note on why. Cancelling either closes nothing.
+async function closeTakenBackFlow(slip) {
+  const machines = slip.machines || [];
+  const unbilled = unbilledCharges(slip);
+  if (!confirmLines("Close this slip without servicing?", [
+    `${tr("Slip")} ${slip.slip_number} · ${slip.company || ""}`,
+    machines.length === 1
+      ? tr("1 machine goes back to the customer as it came in.")
+      : `${machines.length} ${tr("machines go back to the customer as they came in.")}`,
+    tr("No Sales Order, no invoice."),
+    ...(unbilled.length ? [`${tr("Recorded but will not be billed:")} ${unbilled.join(", ")}`] : []),
+  ])) return;
+  const note = prompt(tr("Note (optional) - why did they take it back?"), "");
+  if (note === null) return;
+  try {
+    await api(`/api/slips/${encodeURIComponent(slip.slip_number)}/close-taken-back`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ who: initialsFor(getUser()), note: note.trim(), role: getRole() }),
+    });
+    toast(`Slip ${slip.slip_number} closed`, "ok");
+    await onViewSlipChosen(slip.slip_number);
+    if (viewSearch) viewSearch.refresh();
+  } catch (e) {
+    toast(e.message || "Could not close the slip", "err");
+  }
 }
 
 async function deleteSlipFlow(slipNumber) {

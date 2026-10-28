@@ -1102,6 +1102,14 @@ try {
     db.exec("ALTER TABLE service_slips ADD COLUMN closed_no_invoice INTEGER DEFAULT 0");
     console.log("[db] migrated: added closed_no_invoice to service_slips");
   }
+  // WHY it closed that way, and anything said about it (John, 28 Oct 2026):
+  // 'TAKEN_BACK' when the customer took the machines back before anything was
+  // done - they needed them for a job - and closed_note for what was said.
+  if (cols.length && !cols.some((c) => c.name === "closed_reason")) {
+    db.exec("ALTER TABLE service_slips ADD COLUMN closed_reason TEXT DEFAULT ''");
+    db.exec("ALTER TABLE service_slips ADD COLUMN closed_note TEXT DEFAULT ''");
+    console.log("[db] migrated: added closed_reason/closed_note to service_slips");
+  }
 } catch (e) {
   console.error("[db] service_slips invoice migration check failed:", e.message);
 }

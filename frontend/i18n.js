@@ -746,6 +746,14 @@
     "Recorded but will not be billed:": "已记录但不会收费：",
     "Slip parts": "服务单零件",
     "Closed without invoice": "已结单（无发票）",
+    // The customer took it back before any work (28 Oct 2026).
+    "Close – customer took it back": "结单 – 客户已取回",
+    "Closed – customer took it back": "已结单 – 客户已取回",
+    "Close this slip without servicing?": "不维修直接结单？",
+    "1 machine goes back to the customer as it came in.": "1 台机器原样退还给客户。",
+    "machines go back to the customer as they came in.": "台机器原样退还给客户。",
+    "No Sales Order, no invoice.": "不开销售单，不开发票。",
+    "Note (optional) - why did they take it back?": "备注（可选）- 客户为什么取回？",
     // ...and a slip whose Sales Orders are all $0 (slip 00030).
     "None": "无",
     "at $0": "金额 $0",

@@ -3310,6 +3310,21 @@ app.post("/api/slips/:slip/close", async (req, res) => {
   }
 });
 
+// Closed because the customer took the machines back before any work was done
+// (John, 28 Oct 2026). From View Slips, sales and admin - the people at the
+// counter when the customer comes for it. See closeTakenBack in the repo.
+app.post("/api/slips/:slip/close-taken-back", async (req, res) => {
+  if (!needRole(req, res, ["sales", "admin"])) return;
+  try {
+    const { who = "", note = "" } = req.body || {};
+    res.json(await data.slips.closeTakenBack(req.params.slip, who, note));
+  } catch (err) {
+    if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
+    console.error("[POST /api/slips/:slip/close-taken-back]", err);
+    res.status(500).json({ error: "Could not close the slip." });
+  }
+});
+
 // ---- Start server ----------------------------------------------------------
 // Serve HTTPS when cert files are present (self-hosted on the office server,
 // needed for the camera/QR features). Falls back to plain HTTP otherwise — so

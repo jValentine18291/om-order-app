@@ -2162,6 +2162,55 @@ function closeWithoutInvoice(slip, who = "") {
   return getSlip(slip.slip_number);
 }
 
+// TAKEN BACK BEFORE SERVICE (John, 28 Oct 2026). A customer leaves a machine
+// for servicing, then needs it for a job and takes it back before anything is
+// done. Closed from View Slips by sales or admin, with an optional note.
+//
+// Any slip with no Sales Order on it, whatever its machines are doing - not
+// started, in progress, waiting on a quote. One with an order closes the
+// ordinary way: that order is in AutoCount waiting on its document. Anything
+// recorded on it is not billed, and the screen names it before asking.
+//
+// Every machine goes back to the customer, so each is marked collected unless
+// it already says where it went. A condemned machine still needs the
+// customer's signature, as it does at every other close.
+function closeTakenBack(slipNumber, who = "", note = "") {
+  const slip = db.prepare("SELECT * FROM service_slips WHERE slip_number = ?").get(slipNumber);
+  if (!slip) { const e = new Error("Service slip not found."); e.status = 404; throw e; }
+  if (slip.status === "CLOSED") { const e = new Error("Slip is already closed."); e.status = 400; throw e; }
+  const orderCount = db.prepare(
+    "SELECT COUNT(*) AS n FROM orders WHERE notes = ?"
+  ).get(`S/S: ${slip.slip_number}`).n;
+  if (orderCount) {
+    const e = new Error("This slip has a Sales Order. Close it in Close Service instead.");
+    e.status = 400; throw e;
+  }
+  const unsigned = unsignedCondemned(slip.id);
+  if (unsigned.length) {
+    const e = new Error(
+      `Condemned but not signed for: ${unsigned.join(", ")}. ` +
+      "The customer signs in person to confirm they want it condemned."
+    );
+    e.status = 400; throw e;
+  }
+  const by = String(who || "").trim();
+  db.transaction(() => {
+    db.prepare(
+      `UPDATE slip_machines
+          SET disposal = 'COLLECTED', disposal_by = ?, disposal_at = datetime('now','localtime')
+        WHERE slip_id = ? AND TRIM(IFNULL(disposal, '')) = ''`
+    ).run(by, slip.id);
+    db.prepare(
+      `UPDATE service_slips
+          SET status = 'CLOSED', closing_ref = '', closed_no_invoice = 1,
+              closed_reason = 'TAKEN_BACK', closed_note = ?,
+              closed_by = ?, closed_at = datetime('now','localtime')
+        WHERE id = ?`
+    ).run(String(note || "").trim().slice(0, 300), by, slip.id);
+  })();
+  return getSlip(slip.slip_number);
+}
+
 // Save a machine's repair comment (free text).
 function setMachineComment(machineId, comment) {
   const machine = db.prepare("SELECT * FROM slip_machines WHERE id = ?").get(machineId);
@@ -3695,7 +3744,7 @@ const slips = {
   createSlip, freeSlipNumbers, listSlips, searchSlips, getSlip, getSlipSignature, addPartToMachine, addPartToSlip, setSlipExtrasNote, slipContacts, setPartQuantity, setPartPrice, setPartDescription, isFreeTextPart, setMachineComment, setMachineLabour, updateSlipDetails, addMachineToSlip, setMachineState, undoMachineDecision, setAllMachineStates, finishRepair, saveMachineWork, setMachineDisposal, reopenMachine, deriveSlipStatus, correctMachine,
   setCondemnSignature, getCondemnSignature, unsignedCondemned,
   setMachineIplModel,
-  machineNeedsQuoteFirst, quoteAnswered, quoteBlockReason, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip,
+  machineNeedsQuoteFirst, quoteAnswered, quoteBlockReason, techniciansForMachine, setSlipInvoiced, slipOrderRefs, createSlipOrder, quotationForSlip, issueQuotation, slipQuotations, quotationByRef, setQuotationDrive, getSlipOrder, getSlipOrders, setOrderAutocountDocNo, setOrderAutocountError, ordersAwaitingAutoCount, renameOrder, setSlipDrive, closeSlip, closeTakenBack,
 };
 
 // ---- One-off: read the status of every open slip again ---------------------

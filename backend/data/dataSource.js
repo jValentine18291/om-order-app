@@ -118,6 +118,7 @@ module.exports = {
     setSlipDrive: (...a) => dataRepo.slips.setSlipDrive(...a),
     setSlipInvoiced: (...a) => dataRepo.slips.setSlipInvoiced(...a),
     closeSlip: (...a) => dataRepo.slips.closeSlip(...a),
+    closeTakenBack: (...a) => dataRepo.slips.closeTakenBack(...a),
   },
   // Purchase orders. The ORDER comes from AutoCount; this is only the app's
   // own note of whether it has been sent, so it is always the SQLite repo -

@@ -2512,6 +2512,19 @@ body.signin-brand .topbar .pill {
 }
 .vs-delete:active { background: #fbe9e9; }
 
+/* Closing a slip the customer took back before any work (28 Oct 2026). Just
+   above Delete, and in the slip colours rather than red: it is an ordinary
+   ending, not a destructive one. */
+.vs-takenback {
+  appearance: none; cursor: pointer; width: 100%; margin-top: 22px;
+  border: 1px solid #b6d6d8; background: var(--surface, #fff); border-radius: 10px;
+  padding: 11px 14px; font: inherit; font-size: .86rem; font-weight: 700;
+  color: #0A6B70;
+}
+.vs-takenback:active { background: #E2F4F3; }
+.vs-takenback + .vs-delete { margin-top: 10px; }
+.vs-closed-note { font-style: italic; }
+
 /* ---- Add a part, and what a machine is waiting for ----------------------- */
 /* The popup John asked for on 25 Sep 2026: search, pick, see the stock, and
    only then does the part go on the machine. Not under .mm-b - the sheet that
