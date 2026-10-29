@@ -460,7 +460,16 @@ const WORKING_SCOPE = `(
 // billed. Those used to wait for a Sales Order before Close Service would show
 // them, but a machine checked and found fine is handed back with no invoice at
 // all, and sales have to be able to find the slip to close it that way.
+//
+// NOT WHILE A MACHINE IS STILL IN THE WORKSHOP (John, 29 Oct 2026). Slip
+// 00239: the W80P 2/2 was billed, its DO recorded and the machine collected,
+// so the slip went to INVOICED and showed here - with the W80P 1/2 not yet
+// touched. Nothing on it can be closed. Such a slip stays off this list (and
+// its search) until the last machine is finished, UNLESS one of its Sales
+// Orders is still waiting for its DO/CS/INV number: sales record that here,
+// so 00209's first batch keeps it on until they have.
 const CLOSE_SCOPE = `(
+  (
        status IN ('REPAIRED', 'ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'PART_SO', 'READY_TO_CLOSE')
        OR (
          -- Everything on it is either billed or condemned: nothing left to do
@@ -475,7 +484,21 @@ const CLOSE_SCOPE = `(
               AND (m.converted_at IS NULL OR m.converted_at = '')
          )
        )
-     )`;
+  )
+  AND (
+    NOT EXISTS (
+      SELECT 1 FROM slip_machines m
+       WHERE m.slip_id = service_slips.id
+         AND TRIM(IFNULL(m.converted_at, '')) = ''
+         AND m.state NOT IN ('REPAIRED', 'CONDEMNED')
+    )
+    OR EXISTS (
+      SELECT 1 FROM orders o
+       WHERE o.notes = 'S/S: ' || service_slips.slip_number
+         AND TRIM(IFNULL(o.closing_ref, '')) = ''
+    )
+  )
+)`;
 
 // List slips filtered by status group. 'active' = everything not CLOSED.
 function listSlips(statusFilter = "active") {
