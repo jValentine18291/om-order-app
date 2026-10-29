@@ -7554,6 +7554,35 @@ async function makeMachinePrintout() {
   $("pr-go").disabled = false;
 }
 
+// ITEMS WITH NO PRICE about to go on a Sales Order (John, 29 Oct 2026): a
+// technician creating the order with a part still at $0 bills the customer
+// nothing for it. Asked at Create Sales Order, his choice - the last moment
+// before it goes into AutoCount - and a warning, not a stop: OK creates it
+// anyway, for the rare item that really is $0.
+//
+// Not asked for a condemned machine (it goes on at nothing by design), a
+// machine confirmed free of charge, or a common job that is $0 on purpose.
+// One line per item: "BK3410 - 1/2: M1618SK WS7F Bosch spark plug".
+function unpricedOnOrder(slip, machineIds, withExtras) {
+  const out = [];
+  const noPrice = (p) => !(Number(p.unit_price) > 0)
+    && !(window.OM_JOBS && window.OM_JOBS.zeroIsDeliberate(p));
+  for (const m of (slip && slip.machines) || []) {
+    if (!machineIds.includes(m.id) || m.state === "CONDEMNED" || m.foc) continue;
+    for (const p of m.parts || []) {
+      if (noPrice(p)) out.push(`${machineTitle(m)}: ${p.item_code} ${p.description || ""}`.trim());
+    }
+  }
+  if (withExtras) {
+    for (const p of (slip && slip.extras) || []) {
+      if (!String(p.converted_at || "").trim() && noPrice(p)) {
+        out.push(`${tr("Additional parts")}: ${p.item_code} ${p.description || ""}`.trim());
+      }
+    }
+  }
+  return out;
+}
+
 function closeConvertPicker() {
   $("conv-modal").style.display = "none";
   document.body.style.overflow = "";
@@ -7581,6 +7610,16 @@ async function createSalesOrder() {
   const going = ((session.slip && session.slip.machines) || [])
     .filter((m) => chosen.includes(m.id)).map(machineTitle);
   if (wantExtras) going.push(tr("Additional parts"));
+  const unpriced = unpricedOnOrder(session.slip, chosen, wantExtras);
+  if (unpriced.length && !confirmLines("Some items have no price", unpriced.concat([
+    "",
+    tr("The Sales Order will charge $0 for them."),
+    tr("OK creates it anyway. Cancel goes back so you can enter the prices."),
+  ]))) {
+    $("conv-status").innerHTML = statusErr(
+      unpriced.length === 1 ? "1 item has no price yet." : `${unpriced.length} items have no price yet.`);
+    return;
+  }
   if (!confirmLines("Create the Sales Order?", going.concat([
     tr("Each machine can only be put on a Sales Order once."),
   ]))) return;

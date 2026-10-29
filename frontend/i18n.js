@@ -746,6 +746,11 @@
     "Recorded but will not be billed:": "已记录但不会收费：",
     "Slip parts": "服务单零件",
     "Closed without invoice": "已结单（无发票）",
+    // Creating a Sales Order with items still at $0 (29 Oct 2026).
+    "Some items have no price": "有零件还没有价格",
+    "The Sales Order will charge $0 for them.": "销售单上这些零件会以 $0 收费。",
+    "OK creates it anyway. Cancel goes back so you can enter the prices.": "按确定仍然开单。按取消返回去填写价格。",
+    "1 item has no price yet.": "有 1 个零件还没有价格。",
     // The customer took it back before any work (28 Oct 2026).
     "Close – customer took it back": "结单 – 客户已取回",
     "Closed – customer took it back": "已结单 – 客户已取回",
@@ -1093,6 +1098,8 @@
     // Quotations: "3 items" on a quotation's card (23 Oct 2026)
     [/^(\d+) items?$/, function (_, n) { return n + " 项货品"; }],
     [/^(\d+) quotations?$/, function (_, n) { return n + " 份报价单"; }],
+    // Create Sales Order with items still at $0 (29 Oct 2026).
+    [/^(\d+) items have no price yet\.$/, function (_, n) { return "有 " + n + " 个零件还没有价格。"; }],
     // Dates, alone and inside the lines that carry them
     [new RegExp("^" + DATE + "$"), function (_, d, m, y) { return cnDate(d, m, y); }],
     [new RegExp("^Created: " + DATE + "$"), function (_, d, m, y) { return "创建日期：" + cnDate(d, m, y); }],
