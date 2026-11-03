@@ -1,0 +1,30 @@
+# AGZ5010 - callouts the drawings print that the export gave no box for.
+#
+#     <figure> add|unlisted|drop  <key> <x%> <y%>
+#
+# Positions measured off the rendered sheet: the centre of the printed digits'
+# ink, as a percentage of the 1240x1754 page. Figure numbers are the book's,
+# after --order.
+#
+# FUEL SUPPLY 28 TOOL HOLDER and 30 FILTER, printed inside the tank box beside
+# the cap (27), unringed.
+2 add 28 50.65 58.52
+2 add 30 52.54 58.24
+#
+# CARBURETOR 35 SPRING, 36 PISTON, 37 BALL - the three small parts printed in a
+# row above the body, unringed.
+4 add 35 46.69 40.31
+4 add 36 44.96 39.74
+4 add 37 43.27 39.22
+#
+# GEAR CASE 22, printed twice on the two washers either side of the shaft (19).
+# The export lists no 22; it lists a WASHER, quantity 2, under ref "0" - the
+# only row on the sheet with no Zenoah number beside it. Two washers, two 22s,
+# and the number missing from the list: it is the 22, exported without its
+# ref. Both printed 22s open it. Its own number stays as exported (0), so the
+# app shows what the export says rather than a number we supplied.
+6 add 0 40.77 38.48
+6 add 0 41.29 44.30
+#
+# NOT CORRECTED: CARBURETOR 32, SPRING, is listed but no drawing prints a 32.
+# It stays in the sheet's parts list with nothing to tap.

@@ -66,8 +66,8 @@ const figures = index.reduce((n, m) => n + (Number(m.figures) || 0), 0);
 const expected = 1 + index.length + drawings + logos.length;
 const actual = pngs.length + jsons.length + logos.length;
 check("the app's total matches the folder", expected, actual);
-// 825 since the Zenoah AGZ2600 (3 Nov 2026): its JSON and 6 drawings.
-check("and that is what it is", actual, 825);
+// 833 since the Zenoah AGZ5010 (3 Nov 2026): its JSON and 7 drawings.
+check("and that is what it is", actual, 833);
 
 console.log("\n-- every drawing a book names is there --");
 const named = new Set();

@@ -306,13 +306,13 @@ check("the CHT220-60 keeps its own book", match(machine("", "CHT220-60")), "cht2
 check("and so does the HT220-75", match(machine("", "HT220-75")), "ht220_75");
 
 console.log("\n-- the earth augers --");
-// Copied out of AutoCount, 3 Nov 2026. Only the AGZ2600 has a book; the
-// AGZ5010 beside it is a different machine and must not borrow it.
+// Copied out of AutoCount, 3 Nov 2026. Two augers, two books, and each
+// machine must open its own - the names differ by two digits.
 check("the AGZ2600",
   match(machine("UZEN AGZ2600EZ 967196901", "ZENOAH AGZ2600 Earth Auger 25.4cc (Power UN Only)")),
   "agz2600");
-check("the AGZ5010 has no book of its own and takes nobody else's",
-  match(machine("UZEN AGZ5010 X373253012", "ZENOAH AGZ5010 Earth Auger 50.6cc (Power UN Only)")), "");
+check("the AGZ5010",
+  match(machine("UZEN AGZ5010 X373253012", "ZENOAH AGZ5010 Earth Auger 50.6cc (Power UN Only)")), "agz5010");
 
 console.log("\n-- callouts with a lowercase letter after the number --");
 // Zenoah separates two builds of one part with a letter: on these brushcutters

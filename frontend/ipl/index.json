@@ -747,5 +747,14 @@
   "category": "Earth Auger",
   "figures": 6,
   "parts": 155
+ },
+ {
+  "id": "agz5010",
+  "name": "Zenoah AGZ5010 Earth Auger",
+  "short": "AGZ5010",
+  "brand": "Zenoah",
+  "category": "Earth Auger",
+  "figures": 7,
+  "parts": 223
  }
 ]

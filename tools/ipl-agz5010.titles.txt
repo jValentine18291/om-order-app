@@ -1,0 +1,20 @@
+# AGZ5010 sheet titles, in the BOOK's order (--order 7,5,1,3,2,6,4).
+#
+# Zenoah's Japanese originals, numbered 図1 to 図7, which the export lists in
+# no particular order. Names are the printed titles in English, matching the
+# AGZ2600 beside it where the two books share a sheet.
+#
+#   図1  エンジンブロック・電装・マフラ   engine block, ignition, muffler
+#   図2  燃料供給系                     fuel supply
+#   図3  外装・クラッチ・スタータ         covers, clutch, starter
+#   図4  キャブレタ                     carburettor
+#   図5  フレーム                       frame
+#   図6  ギヤケース・工具                gear case and tools
+#   図7  ドリル                         drill (the bits, by diameter)
+ENGINE, IGNITION & MUFFLER
+FUEL SUPPLY & AIR FILTER
+COVERS, CLUTCH & STARTER
+CARBURETOR
+FRAME
+GEAR CASE & TOOLS
+DRILL
