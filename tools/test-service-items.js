@@ -58,6 +58,19 @@ console.log("\n-- A3: the Husqvarna riders on John's list --");
 // for the day it does.
 check("R214C, which nothing stocks yet", key(M("", "Husqvarna R214C Rider")), "A3");
 
+console.log("\n-- A3: the chipper shredders and stump cutters (3 Nov 2026) --");
+// Straight out of AutoCount. Note the Rayco codes join with "_", not a space.
+[["UZEN SR3100 967634301", "ZENOAH SR3100 Chipper Shredder"],
+ ["URAY_RG27", "Rayco Super Jr RG27 Stump cutter (27hp Vanguard Engine)"],
+ ["URAY_RG37", "Rayco RG37 4x4 Super Jr Stump cutter with Swing-Out Controls"]].forEach(([c, d]) => {
+  check(d.slice(0, 44), key(M(c, d)), "A3");
+});
+check("SR3000, which AutoCount has no machine item for", key(M("", "Zenoah SR3000")), "A3");
+check("and the codes alone", [key(M("URAY_RG27", "")), key(M("UZEN SR3100 967634301", ""))], ["A3", "A3"]);
+check("the AGZ2600 auger beside them stays A1",
+  key(M("UZEN AGZ2600EZ 967196901", "ZENOAH AGZ2600 Earth Auger 25.4cc (Power UN Only)")), "A1");
+check("and a near miss does not count", [key(M("", "RG270")), key(M("", "SR31000"))], ["A1", "A1"]);
+
 console.log("\n-- and a model that is NOT on the list stays A1 --");
 // TS242D is listed; TS242 is not. Close is not the same, and a machine nobody
 // named should fall to A1 rather than be guessed into A3.

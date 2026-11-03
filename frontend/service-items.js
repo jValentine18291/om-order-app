@@ -55,6 +55,15 @@
     "P525DX", "R213C", "R214C", "R420TsX", "TS242D", "Z242F", "TS342",
   ];
 
+  // The big machines that are not ride-ons but are billed like one (John,
+  // 3 Nov 2026): the Zenoah chipper shredders and the Rayco stump cutters.
+  // Matched whole, the same as the riders.
+  //
+  // AutoCount holds them as UZEN SR3100 967634301, URAY_RG27 and URAY_RG37.
+  // SR3000 has no machine item today, so it only matches a slip written by
+  // hand - which is the one place it can turn up.
+  const LARGE_EQUIPMENT = ["SR3100", "SR3000", "RG27", "RG37"];
+
   // Everything a machine tells us about itself: the AutoCount code where there
   // is one, and whatever the workshop wrote on the slip. Both, because a slip
   // written by hand has no code and a code alone does not always carry the
@@ -85,7 +94,8 @@
     const t = textOf(machine);
     if (has(t, /\bferris\b/i) || has(t, /\bgrasshopper\b/i)) return true;
     if (has(t, /\bUGRH\b/i)) return true;
-    return HUSQVARNA_RIDE_ON.some((model) =>
+    // "_" counts as a break, so URAY_RG27 reads as RG27.
+    return HUSQVARNA_RIDE_ON.concat(LARGE_EQUIPMENT).some((model) =>
       new RegExp("(^|[^A-Z0-9])" + model + "([^A-Z0-9]|$)", "i").test(t));
   }
 
@@ -139,6 +149,7 @@
     ITEMS: ITEMS,
     KEYS: ["A1", "A2", "A3", "A12"],
     HUSQVARNA_RIDE_ON: HUSQVARNA_RIDE_ON,
+    LARGE_EQUIPMENT: LARGE_EQUIPMENT,
     isAutomower: isAutomower,
     isRideOn: isRideOn,
     keyFor: keyFor,
