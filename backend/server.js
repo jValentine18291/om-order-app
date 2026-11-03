@@ -877,6 +877,33 @@ app.get("/api/part-requests", async (req, res) => {
   }
 });
 
+// Changing or cancelling YOUR OWN request, from Order more (3 Nov 2026). Open
+// to every job - technicians order parts too - because the check that matters
+// is whose request it is, made in the repository. Signed in, that is the
+// session's name; with logins off, the name the phone was set to, which is
+// what the requester column was written from in the first place.
+const requesterOf = (req) => (req.user && req.user.name) || String((req.body || {}).requester || req.query.requester || "");
+
+app.patch("/api/part-requests/:id/mine", async (req, res) => {
+  try {
+    res.json(await data.requests.updateOwnPartRequest(req.params.id, requesterOf(req), req.body || {}));
+  } catch (err) {
+    if ([400, 403, 404, 409].includes(err.status)) return res.status(err.status).json({ error: err.message });
+    console.error("[PATCH /api/part-requests/:id/mine]", err);
+    res.status(500).json({ error: "Failed to change the request" });
+  }
+});
+
+app.delete("/api/part-requests/:id/mine", async (req, res) => {
+  try {
+    res.json(await data.requests.cancelOwnPartRequest(req.params.id, requesterOf(req)));
+  } catch (err) {
+    if ([403, 404, 409].includes(err.status)) return res.status(err.status).json({ error: err.message });
+    console.error("[DELETE /api/part-requests/:id/mine]", err);
+    res.status(500).json({ error: "Failed to cancel the request" });
+  }
+});
+
 app.patch("/api/part-requests/:id/ordered", async (req, res) => {
   try {
     const result = await data.requests.markPartRequestOrdered(Number(req.params.id));
@@ -1240,6 +1267,9 @@ app.get("/api/part-on-order/:code", async (req, res) => {
     let requests = [];
     try {
       requests = (data.requests.pendingRequestsFor(code) || []).map((r) => ({
+        // The id, so the person who asked can change it from the popup
+        // (3 Nov 2026).
+        id: r.id,
         qty: Number(r.qty_requested) || 0,
         requester: r.requester || "",
         // The date alone. Whoever is reading this wants "last Tuesday or this

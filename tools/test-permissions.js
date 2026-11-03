@@ -71,7 +71,8 @@ check("and every one of them is marked as following their job",
 // they open the app and a silent change here is a support call.
 check("a technician gets six buttons", of("kangmin").effective_functions,
   ["open", "view", "find", "ipl", "po", "ship"]);
-check("sales gets nine", of("carmen").effective_functions.length, 9);
+// Ten since 3 Nov 2026: Orders, for Carmen and Chiu Yan (John).
+check("sales gets ten", of("carmen").effective_functions.length, 10);
 check("the purchaser gets ten", of("iris").effective_functions.length, 10);
 check("an admin gets all eleven", of("john").effective_functions.length, 11);
 check("which is every button there is", FN.IDS.length, 11);

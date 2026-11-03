@@ -325,6 +325,15 @@
     "Engine": "发动机",
     "Other": "其他",
     "Request submitted": "申请已提交",
+    // Changing your own request from Order more (3 Nov 2026).
+    "Change my request": "修改我的申请",
+    "Cancel my request": "取消我的申请",
+    "Cancel my request?": "取消我的申请？",
+    "Save change": "保存修改",
+    "Confirm change": "确认修改",
+    "Request changed": "申请已修改",
+    "Request cancelled": "申请已取消",
+    "The purchaser will no longer see it.": "采购员将不会再看到这个申请。",
     "Mark ordered": "标记为已订购",
     "Marked as ordered": "已标记为已订购",
     "Purchasing": "采购",
@@ -878,6 +887,12 @@
     "Edit": "编辑",
     "Delete": "删除",
     "The other suppliers' parts on this order stay Need to Order.": "此单中其他供应商的零件仍为「需要订购」。",
+    // Orders search (3 Nov 2026).
+    "The other parts on this order stay Need to Order.": "此单中其他零件仍为「需要订购」。",
+    "Search part, code, who asked, remarks…": "搜索零件、编号、申请人、备注…",
+    "No orders match the search": "没有符合搜索的订单",
+    "Mark these parts as Ordered": "将这些零件标记为已下单",
+    "+ 1 other part on this order": "此单另有 1 件零件",
     "Subtotal": "小计",
     "Total": "总计",
     "GST 9%": "消费税 9%",
@@ -1154,6 +1169,10 @@
     // The part description comes from AutoCount and is left exactly as it is.
     [/^Order (\d+) × (.+)$/, "申请 $1 × $2"],
     [/^(.+) · requested by (.+)$/, "$1 · 申请人：$2"],
+    // Changing your own request (3 Nov 2026).
+    [/^Change to (\d+) × (.+)$/, "改为 $1 × $2"],
+    [/^(.+) · was (\d+)( · .+)?$/, "$1 · 原来 $2$3"],
+    [/^Only (.+) can change this request\.$/, "只有 $1 可以修改这个申请。"],
     [/^Nothing matches “(.+)”$/, "没有符合“$1”的型号"],
 
     // ---- Purchase orders ----
@@ -1273,6 +1292,7 @@
     [/^Slip (.+): save the parts on this machine first$/, "服务单 $1：请先保存这台机器上的零件"],
     // Orders, filtered to one supplier.
     [/^Mark (.+) parts as Ordered\??$/, "将 $1 零件标记为已下单"],
+    [/^\+ (\d+) other parts on this order$/, "此单另有 $1 件零件"],
     [/^\+ (\d+) (.+) parts? on this order, hidden by the filter$/, "此单另有 $1 件 $2 零件（已被筛选隐藏）"],
     [/^\+ (\d+) parts from other suppliers on this order, hidden by the filter$/, "此单另有 $1 件其他供应商的零件（已被筛选隐藏）"],
     // The pills on a slip card. They were English on a technician's screen

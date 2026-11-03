@@ -12436,6 +12436,12 @@ $("loc-submit").addEventListener("click", async () => {
 // Opened from two places now — the Find Part card and the IPL part sheet — so
 // the part being ordered is held here rather than read back off either screen.
 let orderPart = null;
+// CHANGING YOUR OWN REQUEST (John, 3 Nov 2026). When the part is already
+// asked for and the person asking was you, the popup offers to change it:
+// the same quantity and remarks boxes, filled in with what you asked for, and
+// a way to cancel it. Only while it is still Need to Order; anyone else's
+// request stays a line to read. Null when the popup is ordering as usual.
+let orderEditing = null;
 
 // Ordering runs in two steps: type the quantity, then confirm what is about to
 // be sent. A reorder request goes to the purchaser and gets acted on, so a
@@ -12445,12 +12451,28 @@ function showOrderStep(step) {
   $("om-qty-field").style.display = confirming ? "none" : "";
   $("om-confirm").style.display = confirming ? "" : "none";
   $("om-back").style.display = confirming ? "" : "none";
-  $("om-submit").textContent = confirming ? "Confirm order" : "Submit request";
+  // Cancelling is offered beside the quantity, not under "Confirm change".
+  $("om-cancel-mine").style.display = orderEditing && !confirming ? "" : "none";
+  $("om-submit").textContent = orderEditing
+    ? (confirming ? "Confirm change" : "Save change")
+    : (confirming ? "Confirm order" : "Submit request");
+}
+
+function setOrderEditing(req) {
+  orderEditing = req || null;
+  $("om-title").textContent = req ? "Change my request" : "Order more";
+  $("om-cancel-mine").style.display = req ? "" : "none";
+  // A placeholder's name is changed on the Orders screen, not here.
+  if (req) $("om-desc-field").style.display = "none";
+  $("om-qty").value = req ? String(req.qty) : "";
+  $("om-remarks").value = req ? (req.remarks || "") : "";
+  showOrderStep("qty");
 }
 
 function openOrderModal(part) {
   if (!part || !part.item_code) return;
   orderPart = part;
+  setOrderEditing(null);
   $("om-part-name").textContent = `${part.description} · ${part.item_code}`;
   $("om-qty").value = "";
   $("om-remarks").value = "";
@@ -12520,10 +12542,14 @@ async function renderOnOrder(itemCode) {
     // request for the same part, but only after the quantity had been typed
     // and sent - an error where a sentence would have done.
     const reqs = r.requests || [];
+    const me = userName();
+    const mine = (q) => !!me && q.id && q.requester === me;
     if (reqs.length) {
       const lines = reqs.map((q) =>
         `${q.qty} — ${escapeHtml(q.requester || "someone")}${q.date ? `, ${escapeHtml(q.date)}` : ""}${
-          q.remarks ? ` · ${escapeHtml(q.remarks)}` : ""}`).join("<br>");
+          q.remarks ? ` · ${escapeHtml(q.remarks)}` : ""}${
+          // Yours: change it here rather than asking Iris to.
+          mine(q) ? `<button type="button" class="om-mine" data-id="${escapeAttr(String(q.id))}">Change my request</button>` : ""}`).join("<br>");
       blocks.push(`<b>${Number(r.requested) || 0} waiting to be ordered</b>${lines}`);
     }
 
@@ -12543,6 +12569,10 @@ async function renderOnOrder(itemCode) {
     if (blocks.length) {
       box.innerHTML = blocks.join(`<div class="om-onorder-rule"></div>`);
       box.style.display = "block";
+      box.querySelectorAll(".om-mine").forEach((b) => b.addEventListener("click", () => {
+        const q = reqs.find((x) => String(x.id) === b.dataset.id);
+        if (q) { setOrderEditing(q); $("om-qty").focus(); }
+      }));
       return;
     }
 
@@ -12579,6 +12609,7 @@ $("om-submit").addEventListener("click", async () => {
   const qty = parseInt($("om-qty").value, 10);
   const requester = userName();
   if (!Number.isFinite(qty) || qty < 1) { toast("Enter an order quantity", "err"); return; }
+  if (orderEditing) { saveOwnRequest(qty, requester); return; }
   const placeholder = isFreeTextPart(orderPart.item_code, orderPart.description);
   const typedDesc = $("om-desc").value.trim();
   if (placeholder && !typedDesc) {
@@ -12622,6 +12653,51 @@ $("om-submit").addEventListener("click", async () => {
     toast(e.message, "err");
   }
   $("om-submit").disabled = false;
+});
+
+// Your own request, changed: the same two taps as ordering - what it will
+// become, then confirm - because the purchaser acts on this number too.
+async function saveOwnRequest(qty, requester) {
+  const was = orderEditing;
+  const rk = $("om-remarks").value.trim();
+  if ($("om-confirm").style.display === "none") {
+    $("om-check-line").textContent = `Change to ${qty} × ${orderPart.description}`;
+    $("om-check-who").textContent = `${orderPart.item_code} · was ${was.qty}` + (rk ? ` · “${rk}”` : "");
+    showOrderStep("confirm");
+    return;
+  }
+  $("om-submit").disabled = true;
+  try {
+    await api(`/api/part-requests/${encodeURIComponent(was.id)}/mine`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ qty_requested: qty, remarks: rk, requester }),
+    });
+    toast("Request changed", "ok");
+    closeOrderModal();
+  } catch (e) {
+    toast(e.message, "err");
+  }
+  $("om-submit").disabled = false;
+}
+
+$("om-cancel-mine").addEventListener("click", async () => {
+  const was = orderEditing;
+  if (!was || !orderPart) return;
+  if (!confirmLines("Cancel my request?", [
+    `${was.qty} × ${orderPart.description}`,
+    tr("The purchaser will no longer see it."),
+  ])) return;
+  $("om-cancel-mine").disabled = true;
+  try {
+    await api(`/api/part-requests/${encodeURIComponent(was.id)}/mine?requester=${encodeURIComponent(userName())}`,
+      { method: "DELETE" });
+    toast("Request cancelled", "ok");
+    closeOrderModal();
+  } catch (e) {
+    toast(e.message, "err");
+  }
+  $("om-cancel-mine").disabled = false;
 });
 
 // ---- Need to Quote: what the technicians have handed back -------------------
@@ -13085,7 +13161,33 @@ async function openSlipMachine(slipNumber, machineId) {
 // ---- Purchaser screen: pending reorder requests -----------------------------
 function enterPurchaser() {
   showScreen("purchase");
+  puQuery = "";
+  $("pu-search").value = "";
   loadPartRequests();
+}
+
+// SEARCH (John, 3 Nov 2026). Part name or code, who asked, and the remarks -
+// the part's own or the order's. While something is typed it searches Need to
+// Order and Ordered together, whichever chip is on: the question it answers
+// is usually "has this been asked for, or bought, already?", and that is both
+// tabs. Each card keeps its status label, so the answer is on it.
+//
+// A part matches on its own line. Who asked and the order's remark belong to
+// the whole order, so they match every line on it.
+let puQuery = "";
+let puSearchTimer = null;
+$("pu-search").addEventListener("input", () => {
+  clearTimeout(puSearchTimer);
+  puSearchTimer = setTimeout(() => {
+    puQuery = $("pu-search").value.trim();
+    loadPartRequests();
+  }, 250);
+});
+function puMatches(r, q) {
+  const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+  const hay = [r.description, r.item_code, String(r.item_code || "").replace(/\s+/g, ""),
+    r.requester, r.remarks, r.batch_remarks].join(" ").toLowerCase();
+  return words.every((w) => hay.includes(w));
 }
 
 // Which orders the purchaser is looking at. Need to Order is the default: it
@@ -13144,14 +13246,30 @@ async function loadPartRequests() {
   const wrap = $("pu-list");
   wrap.innerHTML = `<div class="fp-loading">Loading orders…</div>`;
   try {
-    const rows = await api(`/api/part-requests?status=${encodeURIComponent(puStatus)}`);
+    const q = puQuery;
+    // Searching looks across both tabs; the chips show which one is on again
+    // once the box is cleared.
+    $("pu-filters").classList.toggle("pu-filters-off", !!q);
+    const all = await api(`/api/part-requests?status=${encodeURIComponent(q ? "ALL" : puStatus)}`);
+    const rows = q ? all.filter((r) => puMatches(r, q)) : all;
     const activeBrand = rows.length ? renderBrandChips(rows) : "";
     if (!rows.length) $("pu-brands").innerHTML = "";
     if (!rows.length) {
       wrap.innerHTML = `<div class="fp-empty">${
-        puStatus === "PENDING" ? "Nothing waiting to be ordered"
+        q ? "No orders match the search"
+        : puStatus === "PENDING" ? "Nothing waiting to be ordered"
         : puStatus === "ORDERED" ? "Nothing has been ordered yet" : "No orders yet"}</div>`;
       return;
+    }
+    // The whole order, for the cards: a search shows only the lines it found,
+    // and says how many others the order holds.
+    const fullBatch = new Map();
+    if (q) {
+      for (const r of all) {
+        const key = r.batch_id || "R" + r.id;
+        if (!fullBatch.has(key)) fullBatch.set(key, []);
+        fullBatch.get(key).push(r);
+      }
     }
 
     // One card per ORDER, not per part: a bulk order was submitted together and
@@ -13164,6 +13282,15 @@ async function loadPartRequests() {
       if (!byId.has(key)) { byId.set(key, { key, rows: [] }); batches.push(byId.get(key)); }
       byId.get(key).rows.push(r);
     }
+    // Searching: the order's other lines come back in, marked as not found, so
+    // editing or marking the order works on the order as it really is.
+    if (q) {
+      for (const b of batches) {
+        const found = new Set(b.rows.map((r) => r.id));
+        b.found = found;
+        b.rows = fullBatch.get(b.key) || b.rows;
+      }
+    }
 
     const qty = (v) => (v === null || v === undefined ? "—"
       : Number.isInteger(Number(v)) ? String(v) : Number(v).toFixed(2));
@@ -13172,7 +13299,8 @@ async function loadPartRequests() {
     // Filtered to one supplier: an order shows only that supplier's lines, and
     // an order with none of them is not shown at all. The rest of the order is
     // still there, and the card says so.
-    const shownOf = (b) => activeBrand ? b.rows.filter((r) => rowBrand(r) === activeBrand) : b.rows;
+    const shownOf = (b) => b.rows.filter((r) =>
+      (!activeBrand || rowBrand(r) === activeBrand) && (!b.found || b.found.has(r.id)));
 
     wrap.innerHTML = batches.filter((b) => shownOf(b).length).map((b) => {
       const first = b.rows[b.rows.length - 1]; // oldest row carries the submission
@@ -13185,6 +13313,8 @@ async function loadPartRequests() {
       const hidden = b.rows.filter((r) => !shown.includes(r));
       const hiddenBrands = [...new Set(hidden.map(rowBrand))];
       const hiddenNote = !hidden.length ? ""
+        : q ? (hidden.length === 1 ? "+ 1 other part on this order"
+          : `+ ${hidden.length} other parts on this order`)
         : hiddenBrands.length === 1
           ? (hidden.length === 1 ? `+ 1 ${hiddenBrands[0]} part on this order, hidden by the filter`
             : `+ ${hidden.length} ${hiddenBrands[0]} parts on this order, hidden by the filter`)
@@ -13192,7 +13322,7 @@ async function loadPartRequests() {
       // Marking only the supplier on screen, when the rest of the order is
       // another supplier's (John's call): those stay Need to Order until Iris
       // orders them. With nothing hidden it is the whole order, as before.
-      const partial = !!activeBrand && hidden.some((r) => r.status === "PENDING");
+      const partial = (!!activeBrand || !!q) && hidden.some((r) => r.status === "PENDING");
 
       const lines = shown.slice().reverse().map((r) => {
         // The balance WHEN THE ORDER WAS MADE - the context of the decision.
@@ -13227,7 +13357,9 @@ async function loadPartRequests() {
         pending && canManage && shown.some((r) => r.status === "PENDING")
           ? `<button class="pu-done" data-batch="${escapeAttr(b.key)}"${partial
               ? ` data-ids="${shown.filter((r) => r.status === "PENDING").map((r) => r.id).join(",")}"` : ""}>${
-              partial ? `Mark ${escapeHtml(activeBrand)} parts as Ordered` : "Mark as Ordered"}</button>` : "",
+              !partial ? "Mark as Ordered"
+              : activeBrand && !q ? `Mark ${escapeHtml(activeBrand)} parts as Ordered`
+              : "Mark these parts as Ordered"}</button>` : "",
       ].filter(Boolean).join("");
 
       return `
@@ -13288,7 +13420,8 @@ async function loadPartRequests() {
           const what = b.rows.filter((r) => ids.includes(r.id))
             .map((r) => `${r.qty_requested} × ${r.description || r.item_code}`);
           if (!confirmLines(`${tr(btn.textContent.trim())}?`, [
-            ...what, tr("The other suppliers' parts on this order stay Need to Order."),
+            ...what, tr(q ? "The other parts on this order stay Need to Order."
+              : "The other suppliers' parts on this order stay Need to Order."),
           ])) return;
         } else if (!confirm("Mark this order as Ordered?\n\nDo this once it has been transferred to a Purchase Order.")) return;
         btn.disabled = true;

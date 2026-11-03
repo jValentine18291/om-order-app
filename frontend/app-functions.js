@@ -49,7 +49,10 @@
   // when it lands is a question anyone in the building gets asked, and only
   // the purchaser can change it.
   const ROLE_DEFAULTS = {
-    sales:     ["new", "close", "view", "find", "ipl", "quote", "bulk", "po", "ship"],
+    // "requests" since 3 Nov 2026 (John): Carmen and Chiu Yan see the Orders
+    // list and edit what is still Need to Order. Delete and Mark as Ordered
+    // stay the purchaser's and admin's - that is decided on the Orders screen.
+    sales:     ["new", "close", "view", "find", "ipl", "quote", "bulk", "requests", "po", "ship"],
     tech:      ["open", "view", "find", "ipl", "po", "ship"],
     // Sales plus the orders list, so it inherits the IPLs rather than being a
     // separate shorter list that has to be kept in step.

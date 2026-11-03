@@ -2330,6 +2330,9 @@ body.signin-brand .topbar .pill {
    The tint is on the card's edge and status pill rather than the whole card,
    so the parts stay readable. */
 .pu-filters { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+/* While searching, both tabs are searched: the chips step back. */
+.pu-filters-off .pu-chip { opacity: .45; }
+.pu-search-field { margin-bottom: 10px; }
 .pu-chip {
   padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border);
   background: var(--surface); font-size: .85rem; font-weight: 600;
@@ -2430,6 +2433,14 @@ body.signin-brand .topbar .pill {
 /* Where the order has got to. The one part of the line that is not a number,
    so it reads as a phrase rather than disappearing into the quantities. */
 .om-onorder-st { font-weight: 700; }
+/* "Change my request" on your own line (3 Nov 2026): a small button that
+   reads as part of the line, in the panel's own amber. */
+.om-mine {
+  display: inline-block; margin-left: 8px; padding: 2px 10px; border-radius: 999px;
+  border: 1px solid currentColor; background: transparent; color: inherit;
+  font: inherit; font-size: .8rem; font-weight: 600; cursor: pointer;
+}
+.om-cancel-mine { width: 100%; color: var(--danger, #b42318); }
 /* Between "waiting to be ordered" and "already on order" - two different
    answers to the same question, in one panel rather than two boxes competing
    for the same amber. */

@@ -655,6 +655,12 @@
       <div class="section-head page-head">
         <h2 class="page-title">Orders</h2>
       </div>
+      <!-- Search (3 Nov 2026): part name or code, who asked, remarks. Typing
+           searches Need to Order and Ordered together - "was this already
+           bought?" is one search, not two. -->
+      <div class="field pu-search-field">
+        <input id="pu-search" type="search" autocomplete="off" placeholder="Search part, code, who asked, remarks…" />
+      </div>
       <!-- Which orders to show. Need to Order is the work; Ordered is the
            record it leaves behind, kept so an old request can be looked up. -->
       <div class="pu-filters" id="pu-filters">
@@ -1163,7 +1169,7 @@
     <div class="modal-sheet">
       <div class="modal-head">
         <div>
-          <strong>Order more</strong>
+          <strong id="om-title">Order more</strong>
           <div class="mm-sub" id="om-part-name"></div>
         </div>
         <button class="modal-x" id="om-close" aria-label="Close">&#10005;</button>
@@ -1192,6 +1198,8 @@
       </div>
       <button class="btn-primary" id="om-submit" style="margin-top:8px;">Submit request</button>
       <button class="btn-secondary" id="om-back" style="display:none; margin-top:8px;">Back</button>
+      <!-- Changing your own request (3 Nov 2026): the way out of it entirely. -->
+      <button class="btn-secondary om-cancel-mine" id="om-cancel-mine" style="display:none; margin-top:8px;">Cancel my request</button>
     </div>
   </div>
 

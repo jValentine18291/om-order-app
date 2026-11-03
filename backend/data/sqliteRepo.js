@@ -4536,6 +4536,47 @@ function markPartRequestBatchOrdered(batchId) {
   return { ok: true };
 }
 
+// CHANGING YOUR OWN REQUEST from Order more (John, 3 Nov 2026). The popup
+// already said "10 waiting to be ordered - Carmen"; now Carmen can change the
+// quantity or remark, or cancel it, from there - while it is still Need to
+// Order, and only if it is hers. Anyone else's stays read-only in the popup;
+// sales, Iris and admin edit those on the Orders screen as before.
+//
+// One LINE, not the whole order: a request made in Bulk Order shares its
+// order with other parts, and changing the spark plug must not touch them.
+// Cancelling the last line of an order removes the order with it.
+function ownPendingRequest(id, requester) {
+  const row = db.prepare("SELECT * FROM part_requests WHERE id = ?").get(Number(id));
+  if (!row) { const e = new Error("That request is no longer there."); e.status = 404; throw e; }
+  if (row.status !== "PENDING") {
+    const e = new Error("This request has already been marked Ordered and can no longer be changed.");
+    e.status = 409; throw e;
+  }
+  const who = String(requester || "").trim();
+  if (!who || who !== String(row.requester || "").trim()) {
+    const e = new Error(`Only ${row.requester || "the person who asked"} can change this request.`);
+    e.status = 403; throw e;
+  }
+  return row;
+}
+
+function updateOwnPartRequest(id, requester, { qty_requested, remarks = "" } = {}) {
+  const row = ownPendingRequest(id, requester);
+  const qty = Number(qty_requested);
+  if (!Number.isFinite(qty) || qty < 1) { const e = new Error("Order quantity must be at least 1."); e.status = 400; throw e; }
+  db.prepare("UPDATE part_requests SET qty_requested = ?, remarks = ? WHERE id = ?")
+    .run(Math.floor(qty), String(remarks || "").trim().slice(0, 500), row.id);
+  console.log(`[orders] ${row.requester} changed request ${row.id} (${row.item_code}): ${row.qty_requested} -> ${Math.floor(qty)}`);
+  return db.prepare("SELECT * FROM part_requests WHERE id = ?").get(row.id);
+}
+
+function cancelOwnPartRequest(id, requester) {
+  const row = ownPendingRequest(id, requester);
+  db.prepare("DELETE FROM part_requests WHERE id = ?").run(row.id);
+  console.log(`[orders] ${row.requester} cancelled request ${row.id}: ${row.qty_requested} x ${row.item_code}`);
+  return { ok: true };
+}
+
 function listPartRequests(status = "PENDING") {
   const s = String(status || "PENDING").toUpperCase();
   if (s === "ALL") {
@@ -4590,7 +4631,7 @@ function localItemBrands(codes) {
   return out;
 }
 
-const partRequests = { createPartRequest, createPartRequestBatch, listPartRequests, markPartRequestOrdered, markPartRequestBatchOrdered, updatePartRequestBatch, deletePartRequestBatch, pendingRequestsFor, fillPartRequestBrands, localItemBrands };
+const partRequests = { createPartRequest, createPartRequestBatch, listPartRequests, markPartRequestOrdered, markPartRequestBatchOrdered, updatePartRequestBatch, deletePartRequestBatch, updateOwnPartRequest, cancelOwnPartRequest, pendingRequestsFor, fillPartRequestBrands, localItemBrands };
 module.exports.partRequests = partRequests;
 
 // Fast count of pending reorder requests (for the Purchaser notification).
