@@ -1,0 +1,20 @@
+# AGZ2600 sheet titles, in the BOOK's order (--order 1,2,3,4,6,5).
+#
+# The drawings are Zenoah's Japanese originals, numbered 図1 to 図6. The export
+# lists the drill sheet (図6) before the auger body (図5), so --order puts them
+# back the way the book runs. Names are the printed titles in English where
+# they say more than the export does: the export calls 図5 "FRAME", but it is
+# the whole auger body - gearbox, handlebar, throttle - and its accessories.
+#
+#   図1  エンジンブロック・電装・マフラ   engine block, ignition, muffler
+#   図2  燃料供給系                     fuel supply
+#   図3  外装・クラッチ・スタータ         covers, clutch, starter
+#   図4  キャブレタ                     carburettor
+#   図5  オーガー本体・付属品             auger body and accessories
+#   図6  ドリル                         drill (the bits, by diameter)
+ENGINE, IGNITION & MUFFLER
+FUEL SUPPLY & AIR FILTER
+COVERS, CLUTCH & STARTER
+CARBURETOR
+AUGER BODY & ACCESSORIES
+DRILL

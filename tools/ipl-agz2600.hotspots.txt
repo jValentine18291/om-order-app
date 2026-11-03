@@ -1,0 +1,23 @@
+# AGZ2600 - callouts the drawings print that the export gave no box for.
+#
+#     <figure> add|unlisted|drop  <key> <x%> <y%>
+#
+# Positions measured off the rendered sheet: the centre of the printed digits'
+# ink, as a percentage of the 1240x1754 page.
+#
+# COVERS 24 and 25, the starter pawl's RATCHET and SPRING. Both are listed in
+# the export with no coordinates; the drawing prints them side by side under
+# the pulley assembly (23), unringed.
+3 add 24 70.73 46.89
+3 add 25 68.91 46.32
+#
+# FUEL SUPPLY 24, printed beside the label (22) on the air filter cover. The
+# export lists 23 parts and stops; there is no 24 to order, so the app says
+# the book prints it and lists no part for it.
+2 unlisted 24 21.49 47.26
+#
+# NOT CORRECTED, deliberately. DRILL lists 10, TIP.S90, but no drawing prints a
+# 10: the 90mm bit carries a "9", the 80mm tip's number. It may well be a
+# misprint for 10 - but putting a 10 over a printed 9 would make the app
+# contradict the book in the technician's hands, so it stays as drawn. TIP.S90
+# is still in the sheet's parts list.

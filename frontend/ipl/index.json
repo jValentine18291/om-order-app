@@ -738,5 +738,14 @@
   "category": "Blower",
   "figures": 18,
   "parts": 227
+ },
+ {
+  "id": "agz2600",
+  "name": "Zenoah AGZ2600 Earth Auger",
+  "short": "AGZ2600",
+  "brand": "Zenoah",
+  "category": "Earth Auger",
+  "figures": 6,
+  "parts": 155
  }
 ]
