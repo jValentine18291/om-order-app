@@ -3138,9 +3138,12 @@ app.post("/api/slips/:slip/order", async (req, res) => {
     // extras: put the slip's loose parts on this order too. Explicit rather
     // than assumed - they are ticked on the same screen as the machines, and
     // once they are on one order they are never offered again.
+    // who: initials, for the machine's Activity ("Repaired - SO Created ·
+    // SO-... · XL"). Before 4 Nov 2026 nobody was recorded.
     const result = await data.slips.createSlipOrder(req.params.slip,
                      (req.body || {}).machine_ids,
-                     { extras: !!(req.body || {}).extras });
+                     { extras: !!(req.body || {}).extras,
+                       who: String((req.body || {}).who || "").trim() });
 
     // ---- Price write-back (guarded, best-effort) ----
     // The backstop pass. Most parts were already written when the technician

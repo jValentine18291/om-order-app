@@ -3276,6 +3276,10 @@ body.signin-brand .topbar .pill {
 
 /* The pill on a machine that the technician has finished with. */
 .machine-quote.mq-repaired, .mq-repaired { background: #E7F5EC; color: #1B7A42; }
+/* Repaired - SO Created (4 Nov 2026): between Repaired's pale green and With
+   Customer's dark green, in a blue of its own so it reads as a different
+   step rather than a shade of the same one. */
+.machine-quote.mq-so, .mq-so { background: #D7EEF5; color: #0C4F66; border: 1px solid #7FC3D9; }
 
 
 /* The price block on the Find Part stock card. The IPL sheet's own rules do

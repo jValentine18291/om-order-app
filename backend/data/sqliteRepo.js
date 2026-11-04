@@ -1133,7 +1133,7 @@ function createSlipOrder(slipNumber, machineIds, opts) {
 
   const so = createOrder({ notes: `S/S: ${slip.slip_number}`, lines });
 
-  return finishSlipOrder(slip, wanted, so, extras);
+  return finishSlipOrder(slip, wanted, so, extras, String((opts && opts.who) || "").trim());
 }
 
 // The block, exactly as it is keyed into AutoCount, one per machine:
@@ -1312,7 +1312,7 @@ function slipBlockLines(slip, wanted, all, extras = [], { physicalSs = false, qu
   return lines;
 }
 
-function finishSlipOrder(slip, wanted, so, extras = []) {
+function finishSlipOrder(slip, wanted, so, extras = [], who = "") {
   // Record which machines this order covered, then move the slip on only when
   // every machine has been converted - a partly converted slip is still work
   // in progress as far as the sales desk is concerned.
@@ -1324,8 +1324,21 @@ function finishSlipOrder(slip, wanted, so, extras = []) {
   const stampPart = db.prepare(
     "UPDATE machine_parts SET converted_at = datetime('now','localtime'), so_number = ? WHERE id = ?"
   );
+  // ON A SALES ORDER is a step in the machine's Activity (John, 4 Nov 2026):
+  // the technicians could not tell a billed machine from one still waiting,
+  // because the trail stopped at "Marked repaired". Not a state - the machine
+  // stays REPAIRED or CONDEMNED and every rule keyed on those is untouched -
+  // so it is written here rather than by the state trigger. from_value is the
+  // state it was billed in, which is what the step's wording reads.
+  const trail = db.prepare(
+    `INSERT INTO machine_status_history (machine_id, slip_id, field, from_value, to_value, who)
+     VALUES (?, ?, 'so', ?, ?, ?)`
+  );
   const finish = db.transaction(() => {
-    for (const m of wanted) stamp.run(so.so_number, m.id);
+    for (const m of wanted) {
+      stamp.run(so.so_number, m.id);
+      try { trail.run(m.id, slip.id, m.state || "", so.so_number, who); } catch (_) { /* no history table yet */ }
+    }
     for (const p of extras) stampPart.run(so.so_number, p.id);
     const left = db.prepare(
       "SELECT COUNT(*) AS n FROM slip_machines WHERE slip_id = ? AND (converted_at IS NULL OR converted_at = '')"

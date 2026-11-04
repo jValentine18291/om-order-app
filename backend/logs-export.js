@@ -24,6 +24,8 @@ const MACHINE_STATE = {
   TO_REPAIR: "In Progress", REPAIRED: "Repaired", CONDEMNED: "Condemned",
 };
 const DISPOSAL = { COLLECTED: "Customer collected", DISPOSED: "Disposed of" };
+// A machine on a Sales Order, as the app shows it (4 Nov 2026).
+const SO_CREATED = { REPAIRED: "Repaired – SO Created", CONDEMNED: "Condemned – SO Created" };
 const SLIP_STATUS = {
   OPEN: "Open", IN_PROGRESS: "In Progress", NEED_QUOTE: "Need to Quote", QUOTED: "Waiting on Customer",
   REPAIRED: "Repaired", ALL_REPAIRED: "All Repaired", PART_SO: "Partial SO", CALL_CUSTOMER: "All Repaired",
@@ -135,6 +137,13 @@ async function buildLogsWorkbook(db) {
       return [when(h.changed_at), h.slip_number || "(deleted)", h.company || "", h.machine_desc || "",
         "Reopened", `Repair ${h.from_value}`, `Repair ${h.to_value}`, h.who || "", h.note || ""];
     }
+    // Put on a Sales Order (4 Nov 2026): from the state it was billed in, to
+    // "Repaired – SO Created" and the order's number. Who only from that day.
+    if (h.field === "so") {
+      return [when(h.changed_at), h.slip_number || "(deleted)", h.company || "", h.machine_desc || "",
+        "Sales Order", MACHINE_STATE[h.from_value] || h.from_value || "",
+        `${SO_CREATED[h.from_value] || SO_CREATED.REPAIRED} (${h.to_value})`, h.who || "", ""];
+    }
     const label = h.field === "disposal" ? (v) => DISPOSAL[v] || (v ? v : "Not yet")
                                          : (v) => MACHINE_STATE[v] || v;
     return [when(h.changed_at), h.slip_number || "(deleted)", h.company || "", h.machine_desc || "",
@@ -157,7 +166,9 @@ async function buildLogsWorkbook(db) {
     ["Gone?", 20], ["By", 8], ["When", 18, "date"], ["Condemned because", 40, "wrap"],
   ], machines.map((m) => [
     m.slip_number, m.company, m.machine_desc, m.serial_no || "",
-    m.state === "REPAIRED" && m.disposal === "COLLECTED" ? "Repaired – With Customer" : (MACHINE_STATE[m.state] || m.state),
+    m.state === "REPAIRED" && m.disposal === "COLLECTED" ? "Repaired – With Customer"
+      : String(m.converted_at || "").trim() && SO_CREATED[m.state] ? SO_CREATED[m.state]
+      : (MACHINE_STATE[m.state] || m.state),
     m.decided_by || "", when(m.decided_at), m.so_number || "", when(m.converted_at),
     DISPOSAL[m.disposal] || "Still here", m.disposal_by || "", when(m.disposal_at),
     m.state === "CONDEMNED" ? whyText(m.condemn_reason, m.condemn_note) : "",

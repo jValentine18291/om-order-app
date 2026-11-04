@@ -825,6 +825,9 @@
     "Collected?": "已收回？",
     // ---- Collected, and what a collected machine is called (1 Oct 2026) ----
     "Repaired – With Customer": "已修好 · 客户已取回",
+    // On a Sales Order (4 Nov 2026). "SO" as the technicians say it (John).
+    "Repaired – SO Created": "已修好 · 已开SO",
+    "Condemned – SO Created": "已报废 · 已开SO",
     "Collected by the customer?": "客户已取回吗？",
     "Mark ticked as collected": "将勾选的标记为已取回",
     "Mark these machines as collected by the customer?": "确定将这些机器标记为客户已取回吗？",

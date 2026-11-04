@@ -1690,6 +1690,27 @@ function withCustomer(m) {
   return !!m && m.state === "REPAIRED" && m.disposal === "COLLECTED";
 }
 
+// ON A SALES ORDER (John, 4 Nov 2026). The technicians could not tell a
+// machine already billed from one still waiting for its SO - both read
+// "Repaired". Like WITH_CUSTOMER this is a reading of the machine, not a state
+// of its own: underneath it stays REPAIRED or CONDEMNED, so closing, Close
+// Service and the AutoCount transfer, which all ask for those, are untouched.
+//
+//   Repaired  ->  Repaired – SO Created  ->  Repaired – With Customer
+const SO_CREATED = {
+  REPAIRED:  { label: "Repaired – SO Created",  cls: "mq-so" },
+  CONDEMNED: { label: "Condemned – SO Created", cls: "mq-condemn" },
+};
+function onSalesOrder(m) {
+  return !!m && !!String(m.converted_at || "").trim() && !!SO_CREATED[m.state];
+}
+// What a machine reads as, in one place for every pill and list.
+function machineStatus(m) {
+  if (withCustomer(m)) return WITH_CUSTOMER;
+  if (onSalesOrder(m)) return SO_CREATED[m.state];
+  return MACHINE_STATE[m && m.state] || { label: (m && m.state) || "", cls: "mq-none" };
+}
+
 function machinePill(m) {
   if (withCustomer(m)) {
     return ` <span class="machine-quote ${WITH_CUSTOMER.cls}">${escapeHtml(WITH_CUSTOMER.label)}</span>`;
@@ -1698,8 +1719,11 @@ function machinePill(m) {
   if (!st) return "";
   if (m.state === "CONDEMNED") {
     const d = DISPOSAL_LABEL[m.disposal] || "Not yet collected";
-    return ` <span class="machine-quote mq-condemn">Condemned</span>` +
+    return ` <span class="machine-quote mq-condemn">${escapeHtml(machineStatus(m).label)}</span>` +
            ` <span class="machine-quote mq-none">${escapeHtml(d)}</span>`;
+  }
+  if (onSalesOrder(m)) {
+    return ` <span class="machine-quote ${SO_CREATED.REPAIRED.cls}">${escapeHtml(SO_CREATED.REPAIRED.label)}</span>`;
   }
   // "Need Repair" is the ordinary case and already the card's own default, so
   // it is left to the card rather than repeated as a pill.
@@ -6205,8 +6229,10 @@ function renderMachineQuoteRow() {
     row.style.display = "flex";
     const condemned = m.state === "CONDEMNED";
     $("mm-quote-state").innerHTML =
-      `<span class="machine-quote ${condemned ? "mq-condemn" : withCustomer(m) ? WITH_CUSTOMER.cls : "mq-repaired"}">${
-        condemned ? "Condemned" : withCustomer(m) ? WITH_CUSTOMER.label : "Repaired"}</span> <span>${escapeHtml(
+      // Billed by now (this is the converted branch), so it reads as such:
+      // "Repaired – SO Created", or With Customer once collected.
+      `<span class="machine-quote ${machineStatus(m).cls}">${
+        escapeHtml(machineStatus(m).label)}</span> <span>${escapeHtml(
         DISPOSAL_LABEL[m.disposal] ||
         (condemned ? "Still here — record where it goes before the slip can close."
                    : "Still here — tick it off when the customer collects it."))}</span>`;
@@ -7631,7 +7657,7 @@ async function createSalesOrder() {
     const result = await api(`/api/slips/${encodeURIComponent(session.slipNumber)}/order`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ machine_ids: chosen, extras: wantExtras }),
+      body: JSON.stringify({ machine_ids: chosen, extras: wantExtras, who: initialsFor(getUser()) }),
     });
     closeConvertPicker();
 
@@ -7848,8 +7874,7 @@ async function openSlipSummary(slipNumber) {
   // have been collected, and saying "still here" of it is simply true.
   const where = (m) => m.disposal === "COLLECTED" ? "With customer"
     : m.disposal === "DISPOSED" ? "Disposed of" : "Still here";
-  const label = (m) => withCustomer(m) ? WITH_CUSTOMER.label
-    : ((MACHINE_STATE[m.state] || {}).label || m.state);
+  const label = (m) => machineStatus(m).label;
   body.innerHTML = `
     <div class="sum-people">${people.length ? people.map(([n, p]) => `
       <div class="sum-person"><span>${escapeHtml(n || "—")}</span><b>${escapeHtml(p || "")}</b></div>`).join("")
@@ -7868,7 +7893,7 @@ async function openSlipSummary(slipNumber) {
         <div class="sum-m-main">
           <div class="sum-m-name">${escapeHtml(m.machine_desc)}${m.serial_no ? ` <span class="sum-m-sn">S/N ${escapeHtml(m.serial_no)}</span>` : ""}</div>
           <div class="sum-m-tags">
-            <span class="machine-quote ${withCustomer(m) ? WITH_CUSTOMER.cls : ((MACHINE_STATE[m.state] || {}).cls || "mq-none")}">${escapeHtml(label(m))}</span>
+            <span class="machine-quote ${machineStatus(m).cls}">${escapeHtml(label(m))}</span>
             ${m.so_number ? `<span class="sum-m-so mono">${escapeHtml(m.so_number)}</span>` : ""}
             ${withCustomer(m) ? "" : `<span class="sum-m-where">${escapeHtml(where(m))}</span>`}
           </div>
@@ -7917,7 +7942,7 @@ function csCollectHtml(slip) {
       const done = String(m.disposal || "").trim();
       const note = done === "COLLECTED"
         ? (m.state === "REPAIRED" ? WITH_CUSTOMER.label : "Customer collected it")
-        : done === "DISPOSED" ? "Disposed of" : (m.state === "CONDEMNED" ? "Condemned" : "Repaired");
+        : done === "DISPOSED" ? "Disposed of" : machineStatus(m).label;
       // A condemned one says whether the customer has signed for it, and can
       // be signed for right here (22 Oct 2026).
       const sig = m.state === "CONDEMNED" && done !== "DISPOSED"
@@ -8626,6 +8651,8 @@ document.addEventListener("toggle", (e) => {
 // its last recorded decision and says the rest was not kept.
 function vsStepLabel(h) {
   if (h.field === "reopen") return "Reopened for another repair";
+  // Put on a Sales Order; the SO number is drawn beside it, as its own text.
+  if (h.field === "so") return (SO_CREATED[h.from_value] || SO_CREATED.REPAIRED).label;
   if (h.field === "disposal") {
     return h.to_value === "COLLECTED" ? "Customer collected"
          : h.to_value === "DISPOSED" ? "Disposed of" : "Collection undone";
@@ -8649,7 +8676,15 @@ function vsActivityHtml(m) {
   // A reopening also moves the state and undoes a collection, in the same
   // instant; "Reopened for another repair" already says both.
   const reopenedAt = new Set((m.history || []).filter((h) => h.field === "reopen").map((h) => h.changed_at));
-  const steps = (m.history || []).filter((h) => h.field === "reopen" || !reopenedAt.has(h.changed_at)).reverse();
+  // A machine billed before the step was recorded (4 Nov 2026) still shows
+  // it, at the time it was billed - with no name, because none was kept.
+  const history = (m.history || []).slice();
+  const so = String(m.so_number || "").trim();
+  if (onSalesOrder(m) && !history.some((h) => h.field === "so" && h.to_value === so)) {
+    history.push({ field: "so", from_value: m.state, to_value: so, who: "", note: "", changed_at: m.converted_at });
+    history.sort((a, b) => String(a.changed_at).localeCompare(String(b.changed_at)));
+  }
+  const steps = history.filter((h) => h.field === "reopen" || !reopenedAt.has(h.changed_at)).reverse();
   // Date and time as two pieces of text: Chinese translates whole pieces,
   // and the date is one it knows.
   const when = (t) => {
@@ -8667,6 +8702,7 @@ function vsActivityHtml(m) {
       : [CONDEMN_REASON_LABEL[rc] || "", (rn || "").trim()].filter(Boolean);
     return `
       <div class="vs-step"><span class="vs-step-what">${escapeHtml(vsStepLabel(h))}</span>${
+        h.field === "so" && h.to_value ? ` <span class="vs-step-who mono">· ${escapeHtml(h.to_value)}</span>` : ""}${
         h.who ? ` <span class="vs-step-who">· ${escapeHtml(h.who)}</span>` : ""}${
         why.length ? ` <span class="vs-step-why">· ${why.map((w) => `<span>${escapeHtml(w)}</span>`).join(" · ")}</span>` : ""}<span class="vs-step-when">${when(h.changed_at)}</span></div>`;
   });

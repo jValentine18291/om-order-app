@@ -52,7 +52,11 @@ const trail = (id) => db.prepare(
   await data.slips.setMachineDisposal(s.slip_number, a, "COLLECTED", "CY");
   check("the whole trail of one machine", trail(a), [
     "state:>RECEIVED:Carmen", "state:RECEIVED>AWAITING_QUOTE:WJ", "state:AWAITING_QUOTE>QUOTED:KS",
-    "state:QUOTED>TO_REPAIR:WJ", "state:TO_REPAIR>REPAIRED:WJ", "disposal:>COLLECTED:CY",
+    "state:QUOTED>TO_REPAIR:WJ", "state:TO_REPAIR>REPAIRED:WJ",
+    // Put on its Sales Order (4 Nov 2026) - with nobody, as this test's call
+    // passes no initials.
+    "so:REPAIRED>SO-2026-00001:",
+    "disposal:>COLLECTED:CY",
   ]);
   // A different way in - the undo - is caught too: the trigger does not care
   // which function wrote the column.
