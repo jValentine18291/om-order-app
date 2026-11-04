@@ -166,6 +166,21 @@ async function notifyTechs(db, codes, payload) {
   return sendTo(db, rows, payload);
 }
 
+// Named people, by their user id, on every device each has turned on. For a
+// message that belongs to particular people rather than to a whole job -
+// "Ready to quote" is for the three who ring the customer (John, 4 Nov 2026),
+// not for every admin. The id is the one the app records on subscribing and
+// refreshes on every open (syncPushRegistration), so a phone handed to
+// somebody else follows its new owner.
+async function notifyUsers(db, ids, payload) {
+  const list = (ids || []).map((c) => String(c).trim()).filter(Boolean);
+  if (!list.length) return { sent: 0, gone: 0, failed: 0 };
+  const rows = db.prepare(
+    `SELECT * FROM push_subscriptions WHERE user_id IN (${list.map(() => "?").join(",")})`
+  ).all(...list);
+  return sendTo(db, rows, payload);
+}
+
 async function sendTo(db, rows, payload) {
   let sent = 0, gone = 0, failed = 0;
 
@@ -242,6 +257,7 @@ module.exports = {
   init,
   subscribe,
   unsubscribe,
+  notifyUsers,
   countFor,
   notify,
   notifyTechs,

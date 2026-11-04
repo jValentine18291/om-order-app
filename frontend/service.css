@@ -2353,6 +2353,13 @@ body.signin-brand .topbar .pill {
 .pu-bchip-on b { color: #135A31; }
 .pu-hidden-note { font-size: .78rem; color: var(--ink-faint); margin-top: 6px; }
 .pu-card-pending { border-left: 4px solid #C0392B; }
+/* The order a tapped notification was about (4 Nov 2026): picked out for a
+   moment, then it is just a card again. */
+.pu-flash { animation: pu-flash 4s ease-out; }
+@keyframes pu-flash {
+  0%, 75% { box-shadow: 0 0 0 3px rgba(242, 160, 7, .85); background: #FFF6E0; }
+  100% { box-shadow: 0 0 0 0 rgba(242, 160, 7, 0); }
+}
 .pu-card-ordered { border-left: 4px solid #1B7A42; }
 .pu-status {
   display: inline-block; font-size: .75rem; font-weight: 700;

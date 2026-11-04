@@ -282,6 +282,22 @@ app.get("/cert.pem", sendCertificate);
 // Who hears about a slip needing a quote. Not the technicians - they are the
 // ones who just marked it.
 const QUOTE_NOTIFY_ROLES = ["sales", "purchaser", "admin"];
+// "Ready to quote" itself goes to the three who ring the customer - Carmen,
+// Chiu Yan and John (John, 4 Nov 2026) - not to every admin and the purchaser.
+// By person, not by job: the job's list above still carries Proceed and
+// Condemned, which are news for the counter as a whole.
+const QUOTE_READY_USERS = ["carmen", "chiuyan", "john"];
+
+// WHERE A TAP LANDS (John, 4 Nov 2026). Every notification says which page it
+// belongs to, in `open`, and sw.js + app.js take the person there:
+//   quote     Need to Quote, with that slip's window open
+//   slip      that slip's window, from View Slips
+//   close     Close Service, with that slip open
+//   machine   that slip with that machine's repair sheet open (technicians)
+//   orders    Orders, Need to Order, with that order (`order`) picked out
+//   shipment  that shipment (`shipment`)
+// Before this, everything but the technicians' go-ahead landed on Need to
+// Quote - a shipment notice included, on phones that cannot open it.
 // Orders are the purchaser's job; admins cover for her when she is away, and
 // there is exactly one of her. Sales are the ones asking, so not them.
 const ORDER_NOTIFY_ROLES = ["purchaser", "admin"];
@@ -759,6 +775,9 @@ app.post("/api/part-requests", async (req, res) => {
       title: "New part order",
       body: `${row.qty_requested} × ${row.description || row.item_code} · from ${row.requester || "?"}`,
       slip: "",
+      // The card's own key on the Orders screen: its batch, or the one row.
+      open: "orders",
+      order: row.batch_id || `R${row.id}`,
     }).catch((e) => console.error("[push] notify failed:", e.message));
   } catch (err) {
     if (err.status === 400 || err.status === 409) return res.status(err.status).json({ error: err.message });
@@ -792,6 +811,8 @@ app.post("/api/part-requests/bulk", async (req, res) => {
       title: "New bulk order",
       body: `${what} · from ${rows[0].requester || "?"}`,
       slip: "",
+      open: "orders",
+      order: rows[0].batch_id || `R${rows[0].id}`,
     }).catch((e) => console.error("[push] notify failed:", e.message));
   } catch (err) {
     if (err.status === 400 || err.status === 409) return res.status(err.status).json({ error: err.message });
@@ -2286,6 +2307,7 @@ async function notifyStateChange(slip, machineId, before, state, actor = {}) {
           title: `Proceed: ${desc}`,
           body: `${slip.slip_number} · ${slip.company} · ${by}: customer agreed, repair going ahead`,
           slip: slip.slip_number,
+          open: "slip",
         });
         return;
       }
@@ -2298,6 +2320,7 @@ async function notifyStateChange(slip, machineId, before, state, actor = {}) {
             : why === "BEYOND_REPAIR" ? "beyond repair - condemned"
             : "condemned"),
           slip: slip.slip_number,
+          open: "slip",
         });
         return;
       }
@@ -2306,11 +2329,12 @@ async function notifyStateChange(slip, machineId, before, state, actor = {}) {
     if (state === "AWAITING_QUOTE" && before !== "AWAITING_QUOTE") {
       const waiting = (slip.machines || []).filter((x) => x.state === "AWAITING_QUOTE").length;
       const total = (slip.machines || []).length;
-      await push.notify(pushDb, QUOTE_NOTIFY_ROLES, {
+      await push.notifyUsers(pushDb, QUOTE_READY_USERS, {
         title: "Ready to quote",
         body: `${slip.slip_number} · ${slip.company} · ${desc}` +
               (total > 1 ? ` (${waiting} of ${total})` : ""),
         slip: slip.slip_number,
+        open: "quote",
       });
       return;
     }
@@ -2356,6 +2380,7 @@ async function notifyStateChange(slip, machineId, before, state, actor = {}) {
         title: `Condemned: ${desc}`,
         body: `${slip.slip_number} · ${slip.company} · not being repaired - it still has to leave the workshop`,
         slip: slip.slip_number,
+        open: "slip",
       });
     }
   } catch (e) {
@@ -2793,10 +2818,11 @@ async function handleSlipState(req, res) {
         .filter((m) => m.state !== "AWAITING_QUOTE").length;
       if (fresh) {
         const n = (slip.machines || []).length;
-        push.notify(pushDb, QUOTE_NOTIFY_ROLES, {
+        push.notifyUsers(pushDb, QUOTE_READY_USERS, {
           title: "Ready to quote",
           body: `${slip.slip_number} · ${slip.company} · ${n} machine${n === 1 ? "" : "s"}`,
           slip: slip.slip_number,
+          open: "quote",
         }).catch((e) => console.error("[push] notify failed:", e.message));
       }
     }

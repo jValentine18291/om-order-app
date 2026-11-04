@@ -9,7 +9,7 @@
 // on EVERY open, and opens outnumber deploys a hundred to one. Now the cached
 // copy is served instantly and the fresh one is fetched behind it, so a
 // deploy shows one open later and startup does not touch the network at all.
-const CACHE = "om-order-v420";
+const CACHE = "om-order-v421";
 
 // IPL artwork lives in its own cache, deliberately NOT version-stamped.
 // They are large, they are already fetched only when a section is opened, and
@@ -241,33 +241,57 @@ self.addEventListener("push", (e) => {
       body: d.body,
       icon: "./icon-192.png",
       badge: "./icon-192.png",
-      // Replaces rather than stacks when the same slip is marked twice.
-      tag: d.slip ? `slip-${d.slip}` : "om-service",
+      // Replaces rather than stacks when the same slip is marked twice. An
+      // order or a shipment is its own thing: two new orders are two
+      // notifications, or tapping the one left could only reach the second.
+      tag: d.slip ? `slip-${d.slip}`
+        : d.order ? `order-${d.order}`
+        : d.shipment ? `ship-${d.shipment}` : "om-service",
       renotify: true,
-      // `open` and `machine` say where a tap should land (6 Oct 2026): a
-      // technician's "go ahead" opens that slip at that machine.
-      data: { slip: d.slip || "", open: d.open || "", machine: d.machine || "" },
+      // Where a tap should land - see goFor() below and WHERE A TAP LANDS in
+      // server.js.
+      data: {
+        slip: d.slip || "", open: d.open || "", machine: d.machine || "",
+        order: d.order || "", shipment: d.shipment || "",
+      },
     })
   );
 });
 
-// Tapping it should land on the list, not just open the app somewhere.
-// A technician's "go ahead with the repair" lands on that slip at that machine
-// instead - the quote list is Sales', and a technician cannot open it.
+// WHERE A TAP LANDS (John, 4 Nov 2026). Each notification names its page in
+// `open`; the app does the landing (goTo() in app.js), because only the app
+// knows who is holding the phone and what they may open. Before this, every
+// tap but the technicians' go-ahead landed on Need to Quote.
+//
+// A notification sent before `open` existed and carrying a slip was always
+// one of Sales' and always went to Need to Quote, so that is still where it
+// goes. One with nothing to point at just opens the app.
+function goFor(d) {
+  const open = d.open || (d.slip ? "quote" : "");
+  if (!open) return null;
+  return {
+    open, slip: d.slip || "", machine: d.machine || "",
+    order: d.order || "", shipment: d.shipment || "",
+  };
+}
+
 self.addEventListener("notificationclick", (e) => {
   e.notification.close();
   const d = (e.notification && e.notification.data) || {};
-  const toMachine = d.open === "machine" && d.slip;
-  const target = new URL(toMachine
-    ? `./index.html?slip=${encodeURIComponent(d.slip)}&machine=${encodeURIComponent(d.machine || "")}`
-    : "./index.html?go=quote", self.location).href;
-  const message = toMachine
-    ? { type: "go", screen: "machine", slip: d.slip, machine: d.machine }
-    : { type: "go", screen: "quote" };
-  // Written down first, so the app finds it however it wakes up.
-  const note = toMachine
+  const go = goFor(d);
+  // The address carries it too, for an app that is opened cold and somehow
+  // misses the note. ?go= stays the key the app reads.
+  const q = go ? "?" + new URLSearchParams(Object.entries({ go: go.open, slip: go.slip,
+    machine: go.machine, order: go.order, shipment: go.shipment })
+    .filter(([, v]) => v)).toString() : "";
+  const target = new URL(`./index.html${q}`, self.location).href;
+  const message = { type: "go" };
+  // Written down first, so the app finds it however it wakes up: the
+  // worker's message, a cold start, waking from sleep - on an iPhone any one
+  // of those can be the only one that happens.
+  const note = go
     ? caches.open(GO_CACHE).then((c) => c.put(GO_KEY, new Response(JSON.stringify({
-        slip: d.slip, machine: d.machine || "", at: Date.now(),
+        ...go, at: Date.now(),
       }), { headers: { "Content-Type": "application/json" } }))).catch(() => {})
     : Promise.resolve();
   e.waitUntil(

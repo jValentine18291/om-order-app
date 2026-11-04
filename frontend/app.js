@@ -13073,15 +13073,11 @@ async function togglePush(which = "home") {
 }
 
 // Tapping a notification asks an already-open window to move, rather than
-// opening a second one.
+// opening a second one. Through the note the worker left, never a copy in the
+// message, so the message and the app coming to the front cannot both act.
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.addEventListener("message", (e) => {
-    if (e.data && e.data.type === "go" && e.data.screen === "quote") enterNeedToQuote();
-    // Through the note the worker left, not the message's own copy, so the
-    // message and the app coming to the front cannot both open it.
-    if (e.data && e.data.type === "go" && e.data.screen === "machine") {
-      takePendingGo().then((done) => { if (!done) openSlipMachine(e.data.slip, e.data.machine); });
-    }
+    if (e.data && e.data.type === "go") takePendingGo();
   });
 }
 
@@ -13104,9 +13100,9 @@ async function takePendingGo() {
     if (!hit) return false;
     const go = await hit.json().catch(() => null);
     await c.delete(GO_KEY);
-    if (!go || !go.slip || Date.now() - Number(go.at || 0) > 10 * 60 * 1000) return false;
-    await openSlipMachine(go.slip, go.machine);
-    return true;
+    if (!go || Date.now() - Number(go.at || 0) > 10 * 60 * 1000) return false;
+    // A note from before `open` existed was always a technician's machine.
+    return await goTo(go.open ? go : { open: "machine", slip: go.slip, machine: go.machine });
   } catch (_) {
     return false;
   } finally {
@@ -13135,26 +13131,91 @@ async function openSlipMachine(slipNumber, machineId) {
   }
 }
 
-// ...and a notification that opened the app cold arrives as ?go=quote, or
-// as ?slip=...&machine=... for a technician's go-ahead.
+// WHERE A TAPPED NOTIFICATION LANDS (John, 4 Nov 2026). One place for every
+// kind, named by the server in `open` - see WHERE A TAP LANDS in server.js.
+//
+// A page this person does not have on their home screen is not forced on
+// them (his call): a slip opens in View Slips' window instead, which every
+// job has; anything else just leaves them on the home screen.
+//
+// Returns true when it went somewhere, so the callers know the note is spent.
+function canOpen(fn) {
+  const allowed = rememberedFunctions()
+    || (window.OM_FUNCTIONS ? OM_FUNCTIONS.functionsFor({ role: getRole() }) : []);
+  return allowed.includes(fn);
+}
+async function goTo(go) {
+  if (!go || !getUser()) return false;
+  const slip = String(go.slip || "");
+  // Unsaved parts on whatever is open now are not thrown away, whatever the
+  // notification is about: the toast says why nothing moved.
+  if (session && session.pendingParts && session.pendingParts.length) {
+    toast(slip ? `Slip ${slip}: save the parts on this machine first`
+      : "Save the parts on this machine first", "err");
+    return true;
+  }
+  const slipWindow = async () => {
+    await enterViewSlips();
+    vsWindowScreen = "view";
+    await onViewSlipChosen(slip);
+  };
+  try {
+    switch (go.open) {
+      case "machine":
+        await openSlipMachine(slip, go.machine);
+        return true;
+      case "quote":
+        if (!canOpen("quote")) { if (slip) await slipWindow(); return !!slip; }
+        await enterNeedToQuote();
+        // Over the list, as tapping its card would: Mark as Quoted is on it,
+        // and closing it leaves them on Need to Quote.
+        if (slip) { vsWindowScreen = "quote"; await onViewSlipChosen(slip); }
+        return true;
+      case "close":
+        if (!canOpen("close")) { if (slip) await slipWindow(); return !!slip; }
+        await enterCloseService();
+        if (slip) await onCloseSlipChosen(slip);
+        return true;
+      case "slip":
+        if (!slip) return false;
+        await slipWindow();
+        return true;
+      case "orders":
+        if (!canOpen("requests")) return false;
+        await enterOrdersAt(go.order);
+        return true;
+      case "shipment":
+        if (!canOpen("ship")) return false;
+        enterShipments();
+        if (go.shipment) await openShipment(Number(go.shipment));
+        return true;
+      default:
+        return false;
+    }
+  } catch (e) {
+    toast(e.message || "Could not open that", "err");
+    return true;
+  }
+}
+
+// ...and a notification that opened the app cold. The note first: it is the
+// same place, and reading it crosses it off so waking up again cannot reopen
+// it. The address is the fallback, then cleared, so a reload later lands
+// where they are. ?slip=&machine= alone is the address an older worker gave
+// a technician's go-ahead.
 (function openFromNotification() {
   try {
     const q = new URLSearchParams(location.search);
-    const go = q.get("go");
-    if (go === "quote") {
-      // After the role has been read, or the screen is shown to nobody.
-      setTimeout(() => { if (getUser()) enterNeedToQuote(); }, 300);
-    } else if (q.get("slip")) {
-      // The note first (it is the same place, and reading it crosses it off
-      // so waking up again cannot reopen it); the address as the fallback.
-      // Then the address is cleared, so a reload later lands where they are.
-      setTimeout(async () => {
-        if (!(await takePendingGo())) await openSlipMachine(q.get("slip"), q.get("machine"));
-        try { history.replaceState(null, "", location.pathname); } catch (_) {}
-      }, 300);
-    } else {
-      setTimeout(() => takePendingGo(), 300);
-    }
+    const fromAddress = q.get("go")
+      ? { open: q.get("go"), slip: q.get("slip") || "", machine: q.get("machine") || "",
+          order: q.get("order") || "", shipment: q.get("shipment") || "" }
+      : q.get("slip") ? { open: "machine", slip: q.get("slip"), machine: q.get("machine") || "" }
+      : null;
+    // After the role has been read, or the screen is shown to nobody.
+    setTimeout(async () => {
+      if (!(await takePendingGo()) && fromAddress) await goTo(fromAddress);
+      if (fromAddress) { try { history.replaceState(null, "", location.pathname); } catch (_) {} }
+    }, 300);
   } catch (_) {}
 })();
 
@@ -13163,7 +13224,32 @@ function enterPurchaser() {
   showScreen("purchase");
   puQuery = "";
   $("pu-search").value = "";
-  loadPartRequests();
+  return loadPartRequests();
+}
+
+// From a "New part order" notification (John, 4 Nov 2026): Need to Order, every
+// supplier, and that order scrolled to and picked out. Every supplier for this
+// visit only - the one remembered on the phone is left as it was. An order
+// that has gone (marked Ordered or deleted since) simply isn't picked out.
+let puHighlight = "";
+async function enterOrdersAt(orderKey) {
+  puStatus = "PENDING";
+  $("pu-filters").querySelectorAll(".pu-chip").forEach((c) =>
+    c.classList.toggle("pu-chip-on", c.dataset.status === "PENDING"));
+  puBrand = "";
+  puHighlight = String(orderKey || "");
+  await enterPurchaser();
+}
+function showOrderHighlight(wrap) {
+  const key = puHighlight;
+  puHighlight = "";
+  if (!key) return;
+  const card = [...wrap.querySelectorAll(".pu-card[data-key]")]
+    .find((c) => c.dataset.key === key);
+  if (!card) return;
+  card.classList.add("pu-flash");
+  card.scrollIntoView({ block: "center", behavior: "smooth" });
+  setTimeout(() => card.classList.remove("pu-flash"), 4000);
 }
 
 // SEARCH (John, 3 Nov 2026). Part name or code, who asked, and the remarks -
@@ -13363,7 +13449,7 @@ async function loadPartRequests() {
       ].filter(Boolean).join("");
 
       return `
-      <div class="pu-card ${pending ? "pu-card-pending" : "pu-card-ordered"}">
+      <div class="pu-card ${pending ? "pu-card-pending" : "pu-card-ordered"}" data-key="${escapeAttr(b.key)}">
         <div class="pu-top">
           <span class="pu-status ${pending ? "pu-st-need" : "pu-st-done"}">${pending ? "Need to Order" : "Ordered"}</span>
           <span class="pu-meta">${escapeHtml(first.requester || "—")} · ${
@@ -13411,6 +13497,7 @@ async function loadPartRequests() {
       })
     );
     wireOrderEditCard(wrap);
+    showOrderHighlight(wrap);
     wrap.querySelectorAll(".pu-done").forEach((btn) =>
       btn.addEventListener("click", async () => {
         const ids = String(btn.dataset.ids || "").split(",").map(Number).filter(Boolean);

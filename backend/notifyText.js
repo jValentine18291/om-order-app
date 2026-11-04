@@ -35,6 +35,9 @@ function salesOrderMessage(slip, result, finalSo) {
           (Number.isFinite(amount) && amount > 0 ? ` · $${amount.toFixed(2)}` : "") +
           (left > 0 ? ` · ${left} still on the slip` : ""),
     slip: slip.slip_number,
+    // Close Service, where an order waits for its DO and invoice - the next
+    // job after a Sales Order (John, 4 Nov 2026).
+    open: "close",
   };
 }
 
@@ -74,6 +77,7 @@ function shipmentStatusMessage(shipment, before) {
     title: `${s.invoice_no || "Shipment"} · ${label(s.status)}`,
     body: bits.filter(Boolean).join(" · ") + (before ? ` (was ${label(before)})` : ""),
     shipment: s.id,
+    open: "shipment",
   };
 }
 
