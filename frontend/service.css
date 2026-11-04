@@ -3697,8 +3697,12 @@ details.vs-machine[open] > summary.vs-machine-name {
 .vs-m-amt { flex: none; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); }
 .vs-activity { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border); }
 .vs-activity-head { font-size: .78rem; font-weight: 700; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
+/* Two columns (4 Nov 2026): what happened on the left, wrapping if it must,
+   and the date and time always on the first line at the right - a long step
+   used to push its date down a line, out of step with the rest. */
 .vs-step {
-  position: relative; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px;
+  position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 8px; align-items: baseline;
   padding: 3px 0 3px 16px; font-size: .84rem; color: var(--ink);
 }
 .vs-step::before {
@@ -3710,8 +3714,10 @@ details.vs-machine[open] > summary.vs-machine-name {
 }
 .vs-step-what { font-weight: 600; }
 .vs-step-who { color: var(--ink-soft); }
-.vs-step-when { margin-left: auto; color: var(--ink-faint); font-size: .78rem; font-variant-numeric: tabular-nums; }
+.vs-step-when { color: var(--ink-faint); font-size: .78rem; font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
 .vs-step-note { font-size: .76rem; color: var(--ink-faint); margin-top: 4px; }
+/* A second line under the step: the SO number (4 Nov 2026). */
+.vs-step-sub { grid-column: 1; margin-top: -1px; font-size: .78rem; color: var(--ink-soft); }
 /* "Found under: Closed (1)" when a search has nothing under the chip on. */
 .slip-result-jump {
   font: inherit; font-size: .8rem; font-weight: 700; cursor: pointer;

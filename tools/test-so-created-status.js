@@ -99,9 +99,16 @@ const sig = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg==";
     app.slice(app.indexOf("function vsStepLabel("), app.indexOf("\n}\n", app.indexOf("function vsActivityHtml(")) + 2) +
     "\nreturn vsActivityHtml;")((x) => String(x), (t) => String(t).slice(0, 10), {}, null);
   const html = vs(older);
-  check("its Activity shows the step, with the SO number",
-    /Repaired – SO Created<\/span> <span class="vs-step-who mono">· SO-2610-127/.test(html), true);
-  check("and, honestly, nobody's name", /SO-2610-127<\/span> <span class="vs-step-who">/.test(html), false);
+  check("its Activity shows the step, the SO number on the line under it",
+    /Repaired – SO Created<\/span><\/span><span class="vs-step-when">[\s\S]*?<\/span><span class="vs-step-sub"><span class="mono">SO-2610-127<\/span><\/span>/.test(html), true);
+  check("and, honestly, nobody's name", /SO Created<\/span> <span class="vs-step-who">/.test(html), false);
+  const newer = { ...older, so_number: "SO-2611-026",
+    history: older.history.concat([{ field: "so", from_value: "REPAIRED", to_value: "SO-2611-026", who: "XL", changed_at: "2026-11-04 16:44:33" }]) };
+  check("a new one names who did it, on the SO number's line",
+    vs(newer).includes('<span class="vs-step-sub"><span class="mono">SO-2611-026</span> · XL</span>'), true);
+  check("and is not drawn twice", vs(newer).split("SO-2611-026").length - 1, 1);
+  check("the date keeps its own column, apart from what happened",
+    /<span class="vs-step-main">[\s\S]*?<\/span><\/span><span class="vs-step-when">/.test(html), true);
   check("placed at the time it was billed, above Marked repaired",
     html.indexOf("SO Created") < html.indexOf("Marked repaired"), true);
 

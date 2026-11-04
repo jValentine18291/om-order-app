@@ -8701,10 +8701,14 @@ function vsActivityHtml(m) {
       ? [String(h.note || "").trim()].filter(Boolean)
       : [CONDEMN_REASON_LABEL[rc] || "", (rn || "").trim()].filter(Boolean);
     return `
-      <div class="vs-step"><span class="vs-step-what">${escapeHtml(vsStepLabel(h))}</span>${
-        h.field === "so" && h.to_value ? ` <span class="vs-step-who mono">· ${escapeHtml(h.to_value)}</span>` : ""}${
-        h.who ? ` <span class="vs-step-who">· ${escapeHtml(h.who)}</span>` : ""}${
-        why.length ? ` <span class="vs-step-why">· ${why.map((w) => `<span>${escapeHtml(w)}</span>`).join(" · ")}</span>` : ""}<span class="vs-step-when">${when(h.changed_at)}</span></div>`;
+      <div class="vs-step"><span class="vs-step-main"><span class="vs-step-what">${escapeHtml(vsStepLabel(h))}</span>${
+        h.who && h.field !== "so" ? ` <span class="vs-step-who">· ${escapeHtml(h.who)}</span>` : ""}${
+        why.length ? ` <span class="vs-step-why">· ${why.map((w) => `<span>${escapeHtml(w)}</span>`).join(" · ")}</span>` : ""}</span><span class="vs-step-when">${when(h.changed_at)}</span>${
+        // The SO number on a line of its own under the label, with who did
+        // it (John, 4 Nov 2026): beside it, they pushed the date onto a second
+        // line out of step with every other row.
+        h.field === "so" && h.to_value ? `<span class="vs-step-sub"><span class="mono">${escapeHtml(h.to_value)}</span>${
+          h.who ? ` · ${escapeHtml(h.who)}` : ""}</span>` : ""}</div>`;
   });
   const older = !steps.some((h) => h.field === "state" && !h.from_value);
   const note = older
