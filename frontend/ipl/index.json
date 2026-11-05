@@ -51,7 +51,10 @@
   "brand": "Husqvarna",
   "category": "Chainsaw",
   "figures": 15,
-  "parts": 249
+  "parts": 249,
+  "aliases": [
+   "365 Chainsaw"
+  ]
  },
  {
   "id": "hus395xp",
@@ -168,7 +171,8 @@
   "parts": 214,
   "aliases": [
    "AM550",
-   "AM550 EPOS"
+   "AM550 EPOS",
+   "EPOS 550"
   ]
  },
  {
@@ -593,7 +597,10 @@
   "brand": "Husqvarna",
   "category": "Grass Trimmer",
   "figures": 7,
-  "parts": 59
+  "parts": 59,
+  "aliases": [
+   "520lLX"
+  ]
  },
  {
   "id": "hus525ilk",

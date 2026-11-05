@@ -94,8 +94,13 @@ check("searching carburetor asks for that exact part",
 check("a coded Husqvarna cannot match a Zenoah book",
   match(machine("UHUQ SOMETHING", "Husqvarna BK3410FL51 mislabelled")), "");
 // And a name too short to stand alone still needs its brand.
+//
+// Narrowed 5 Nov 2026: "365 chainsaw" used to be the example here, and it
+// is now the alias John asked for (slip 00138 reads exactly that, and no
+// other brand OM stocks sells a 365 chainsaw). The number on its own, or
+// with any other word, still finds nothing.
 check("365 alone, with no brand anywhere, is not enough",
-  match(machine("", "365 chainsaw")), "");
+  [match(machine("", "365")), match(machine("", "365 blower")), match(machine("", "365cc engine"))], ["", "", ""]);
 check("but with the brand it is",
   match(machine("", "Husqvarna 365 chainsaw")), "hus365");
 // The property, over every short key in the catalogue rather than the one or
@@ -185,10 +190,27 @@ check("another Automower claims none of them",
 // a slip is allowed to name the START of a key so that "BK3410" finds
 // "BK3410FL". Anything beginning "AM315" is claimed by "AM315". Its aliases
 // now begin at the 315X, which the 315 cannot be a prefix of.
+//
+// Three more on 5 Nov 2026 (John), each written on a real slip and finding no
+// book:
+//   hus365      "365 Chainsaw" (00138). Bare "365" is too short to stand without
+//               the brand; "365 Chainsaw" is not.
+//   hus520ilx   "520lLX" (00093) - a lower-case L typed for the i.
+//   am550epos   "EPOS 550" (00211), the words the other way round.
+// And three looked at and deliberately NOT given one: "365XP" is an older,
+// different saw (AutoCount holds none); "AM315" is the plain Automower 315,
+// which AutoCount holds apart from the Mark II; "CHT7500" is unconfirmed.
 const withAliases = INDEX.filter((e) => e.aliases);
 check("only the machines that needed them have aliases",
   withAliases.map((e) => e.id).sort(),
-  ["am105", "am315xmkii", "am420iq", "am450x", "am535epos", "am550epos", "hus536li"]);
+  ["am105", "am315xmkii", "am420iq", "am450x", "am535epos", "am550epos", "hus365", "hus520ilx", "hus536li"]);
+check("the spellings off real slips find their books",
+  [match(machine("", "365 Chainsaw")), match(machine("", "520lLX Battery Trimmer")), match(machine("", "EPOS 550"))],
+  ["hus365", "hus520ilx", "am550epos"]);
+check("and the look-alikes still find none",
+  [match(machine("", "365XP")), match(machine("", "AM315")),
+   match(machine("UHUQ AM315 967623421", "Robotic Automower 315 (967646021)")), match(machine("", "CHT7500"))],
+  ["", "", "", ""]);
 
 // The 536 saws, which are two machines one letter apart.
 //
