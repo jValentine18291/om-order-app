@@ -327,6 +327,14 @@ check("and the other machine in the same book",
 check("the CHT220-60 keeps its own book", match(machine("", "CHT220-60")), "cht220_60");
 check("and so does the HT220-75", match(machine("", "HT220-75")), "ht220_75");
 
+console.log("\n-- the EBZ4800, the workshop's most-seen blower without a book --");
+// Five machines on slips by 5 Nov 2026, all typed by hand - AutoCount holds no
+// EBZ4800 unit any more. Three Zenoah EBZ books now sit side by side.
+check("as the slips write it", [match(machine("", "EBZ4800 Backpack Blower")), match(machine("", "EBZ4800"))],
+  ["ebz4800", "ebz4800"]);
+check("and its neighbours keep their own", [match(machine("", "EBZ5100")), match(machine("", "EBZ8500"))],
+  ["ebz5100", "ebz8500"]);
+
 console.log("\n-- the Ferris IS600Z, the first Ferris book --");
 // AutoCount files Ferris under UBNS, Briggs & Stratton's prefix, which also
 // holds the engines - so the book is found by the name in the description,

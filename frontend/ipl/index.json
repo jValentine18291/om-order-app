@@ -1,5 +1,32 @@
 [
  {
+  "id": "ferrisis600z",
+  "name": "Ferris IS600Z Zero-Turn Mower",
+  "short": "IS600Z",
+  "brand": "Ferris",
+  "category": "Zero-Turn Mower",
+  "figures": 32,
+  "parts": 649
+ },
+ {
+  "id": "hus115ihd45",
+  "name": "Husqvarna 115iHD45 Hedge Trimmer",
+  "short": "115iHD45",
+  "brand": "Husqvarna",
+  "category": "Hedge Trimmer",
+  "figures": 7,
+  "parts": 50
+ },
+ {
+  "id": "hus115il",
+  "name": "Husqvarna 115iL Grass Trimmer",
+  "short": "115iL",
+  "brand": "Husqvarna",
+  "category": "Grass Trimmer",
+  "figures": 6,
+  "parts": 48
+ },
+ {
   "id": "hus120ib",
   "name": "Husqvarna 120iB Blower",
   "short": "120iB",
@@ -7,6 +34,15 @@
   "category": "Blower",
   "figures": 5,
   "parts": 29
+ },
+ {
+  "id": "hus122hd60",
+  "name": "Husqvarna 122HD60 Hedge Trimmer",
+  "short": "122HD60",
+  "brand": "Husqvarna",
+  "category": "Hedge Trimmer",
+  "figures": 13,
+  "parts": 140
  },
  {
   "id": "hus125b",
@@ -27,6 +63,15 @@
   "parts": 65
  },
  {
+  "id": "hus340ibt",
+  "name": "Husqvarna 340iBT Backpack Blower",
+  "short": "340iBT",
+  "brand": "Husqvarna",
+  "category": "Blower",
+  "figures": 7,
+  "parts": 59
+ },
+ {
   "id": "hus345bt",
   "name": "Husqvarna 345BT",
   "short": "345BT",
@@ -34,6 +79,15 @@
   "category": "Blower",
   "figures": 2,
   "parts": 44
+ },
+ {
+  "id": "hus350bt",
+  "name": "Husqvarna 350BT",
+  "short": "350BT",
+  "brand": "Husqvarna",
+  "category": "Blower",
+  "figures": 18,
+  "parts": 227
  },
  {
   "id": "hus360bt",
@@ -57,6 +111,15 @@
   ]
  },
  {
+  "id": "hus372xp",
+  "name": "Husqvarna 372XP Chainsaw",
+  "short": "372XP",
+  "brand": "Husqvarna",
+  "category": "Chainsaw",
+  "figures": 17,
+  "parts": 275
+ },
+ {
   "id": "hus395xp",
   "name": "Husqvarna 395XP",
   "short": "395XP",
@@ -64,6 +127,45 @@
   "category": "Chainsaw",
   "figures": 16,
   "parts": 338
+ },
+ {
+  "id": "hus520ihd60",
+  "name": "Husqvarna 520iHD60 Hedge Trimmer",
+  "short": "520iHD60",
+  "brand": "Husqvarna",
+  "category": "Hedge Trimmer",
+  "figures": 7,
+  "parts": 93
+ },
+ {
+  "id": "hus520ihe3",
+  "name": "Husqvarna 520iHE3 Long Reach Hedge Trimmer",
+  "short": "520iHE3",
+  "brand": "Husqvarna",
+  "category": "Pole Hedge Trimmer",
+  "figures": 8,
+  "parts": 131
+ },
+ {
+  "id": "hus520iht4",
+  "name": "Husqvarna 520iHT4 Long Reach Hedge Trimmer",
+  "short": "520iHT4",
+  "brand": "Husqvarna",
+  "category": "Pole Hedge Trimmer",
+  "figures": 6,
+  "parts": 104
+ },
+ {
+  "id": "hus520ilx",
+  "name": "Husqvarna 520iLX Grass Trimmer",
+  "short": "520iLX",
+  "brand": "Husqvarna",
+  "category": "Grass Trimmer",
+  "figures": 7,
+  "parts": 59,
+  "aliases": [
+   "520lLX"
+  ]
  },
  {
   "id": "hus525bx",
@@ -91,6 +193,24 @@
   "category": "Pole Hedge Trimmer",
   "figures": 15,
   "parts": 217
+ },
+ {
+  "id": "hus525ib",
+  "name": "Husqvarna 525iB Blower",
+  "short": "525iB",
+  "brand": "Husqvarna",
+  "category": "Blower",
+  "figures": 5,
+  "parts": 35
+ },
+ {
+  "id": "hus525ilk",
+  "name": "Husqvarna 525iLK Combi Trimmer",
+  "short": "525iLK",
+  "brand": "Husqvarna",
+  "category": "Grass Trimmer",
+  "figures": 6,
+  "parts": 79
  },
  {
   "id": "hus525pt5s",
@@ -141,6 +261,24 @@
   ]
  },
  {
+  "id": "hus536lip4",
+  "name": "Husqvarna 536LiP4 Pole Saw",
+  "short": "536LiP4",
+  "brand": "Husqvarna",
+  "category": "Pole Saw",
+  "figures": 6,
+  "parts": 79
+ },
+ {
+  "id": "hus536lipt5",
+  "name": "Husqvarna 536LiPT5 Pole Saw",
+  "short": "536LiPT5",
+  "brand": "Husqvarna",
+  "category": "Pole Saw",
+  "figures": 6,
+  "parts": 103
+ },
+ {
   "id": "hus541rb",
   "name": "Husqvarna 541RB Brushcutter",
   "short": "541RB",
@@ -148,6 +286,55 @@
   "category": "Brushcutter",
   "figures": 26,
   "parts": 270
+ },
+ {
+  "id": "hus550ibtx",
+  "name": "Husqvarna 550iBTX Backpack Blower",
+  "short": "550iBTX",
+  "brand": "Husqvarna",
+  "category": "Blower",
+  "figures": 9,
+  "parts": 83
+ },
+ {
+  "id": "am105",
+  "name": "Husqvarna Automower 105",
+  "short": "Automower 105",
+  "brand": "Husqvarna",
+  "category": "Robotic Mower",
+  "figures": 7,
+  "parts": 187,
+  "aliases": [
+   "AM105",
+   "AM 105"
+  ]
+ },
+ {
+  "id": "am315xmkii",
+  "name": "Husqvarna Automower 315X MKII",
+  "short": "Automower 315X MKII",
+  "brand": "Husqvarna",
+  "category": "Robotic Mower",
+  "figures": 7,
+  "parts": 168,
+  "aliases": [
+   "315X MKII",
+   "315XMKII"
+  ]
+ },
+ {
+  "id": "am420iq",
+  "name": "Husqvarna Automower 420 iQ",
+  "short": "Automower 420 iQ",
+  "brand": "Husqvarna",
+  "category": "Robotic Mower",
+  "figures": 8,
+  "parts": 147,
+  "aliases": [
+   "AM420iQ",
+   "AM 420 iQ",
+   "420iQ"
+  ]
  },
  {
   "id": "am450x",
@@ -159,6 +346,20 @@
   "parts": 257,
   "aliases": [
    "AM450X"
+  ]
+ },
+ {
+  "id": "am535epos",
+  "name": "Husqvarna Automower 535 AWD EPOS",
+  "short": "Automower 535 AWD EPOS",
+  "brand": "Husqvarna",
+  "category": "Robotic Mower",
+  "figures": 9,
+  "parts": 219,
+  "aliases": [
+   "AM535AWD",
+   "535AWD EPOS",
+   "535AWD"
   ]
  },
  {
@@ -176,6 +377,78 @@
   ]
  },
  {
+  "id": "amceora546",
+  "name": "Husqvarna CEORA 546 EPOS",
+  "short": "CEORA 546 EPOS",
+  "brand": "Husqvarna",
+  "category": "Robotic Mower",
+  "figures": 17,
+  "parts": 306
+ },
+ {
+  "id": "husexclusive54",
+  "name": "Husqvarna Exclusive 54 Manual Lawn Mower",
+  "short": "Exclusive 54",
+  "brand": "Husqvarna",
+  "category": "Lawn Mower",
+  "figures": 1,
+  "parts": 26
+ },
+ {
+  "id": "husgx560",
+  "name": "Husqvarna GX 560 Hover Lawn Mower",
+  "short": "GX 560",
+  "brand": "Husqvarna",
+  "category": "Lawn Mower",
+  "figures": 1,
+  "parts": 38
+ },
+ {
+  "id": "huslc118",
+  "name": "Husqvarna LC 118 Lawn Mower",
+  "short": "LC 118",
+  "brand": "Husqvarna",
+  "category": "Lawn Mower",
+  "figures": 1,
+  "parts": 39
+ },
+ {
+  "id": "huslc141c",
+  "name": "Husqvarna LC 141C Lawn Mower",
+  "short": "LC 141C",
+  "brand": "Husqvarna",
+  "category": "Lawn Mower",
+  "figures": 5,
+  "parts": 132
+ },
+ {
+  "id": "huslc142i",
+  "name": "Husqvarna LC 142i Lawn Mower",
+  "short": "LC 142i",
+  "brand": "Husqvarna",
+  "category": "Lawn Mower",
+  "figures": 5,
+  "parts": 38
+ },
+ {
+  "id": "huslc347ivx",
+  "name": "Husqvarna LC 347iVX Lawn Mower",
+  "short": "LC 347iVX",
+  "brand": "Husqvarna",
+  "category": "Lawn Mower",
+  "figures": 4,
+  "parts": 88
+ },
+ {
+  "id": "huslc419sp",
+  "name": "Husqvarna LC 419SP Lawn Mower",
+  "short": "LC 419SP",
+  "brand": "Husqvarna",
+  "category": "Lawn Mower",
+  "figures": 1,
+  "parts": 54
+ },
+ {
   "id": "husp525dx",
   "name": "Husqvarna P525DX Ride-on Mower",
   "short": "P525DX",
@@ -183,6 +456,24 @@
   "category": "Ride-on Mower",
   "figures": 16,
   "parts": 584
+ },
+ {
+  "id": "husr214c",
+  "name": "Husqvarna R 214C Ride-on Mower",
+  "short": "R 214C",
+  "brand": "Husqvarna",
+  "category": "Ride-on Mower",
+  "figures": 22,
+  "parts": 373
+ },
+ {
+  "id": "husr420tsxawd",
+  "name": "Husqvarna R 420TsX AWD Ride-on Mower",
+  "short": "R 420TsX AWD",
+  "brand": "Husqvarna",
+  "category": "Ride-on Mower",
+  "figures": 19,
+  "parts": 487
  },
  {
   "id": "hust525",
@@ -203,6 +494,24 @@
   "parts": 98
  },
  {
+  "id": "hustf230",
+  "name": "Husqvarna TF 230 Tiller",
+  "short": "TF 230",
+  "brand": "Husqvarna",
+  "category": "Tiller",
+  "figures": 20,
+  "parts": 294
+ },
+ {
+  "id": "husts242d",
+  "name": "Husqvarna TS 242D Tractor Mower",
+  "short": "TS 242D",
+  "brand": "Husqvarna",
+  "category": "Tractor Mower",
+  "figures": 12,
+  "parts": 424
+ },
+ {
   "id": "husz242f",
   "name": "Husqvarna Z242F Zero-Turn Mower",
   "short": "Z242F",
@@ -219,6 +528,24 @@
   "category": "Thermal Fogger",
   "figures": 4,
   "parts": 141
+ },
+ {
+  "id": "agz2600",
+  "name": "Zenoah AGZ2600 Earth Auger",
+  "short": "AGZ2600",
+  "brand": "Zenoah",
+  "category": "Earth Auger",
+  "figures": 6,
+  "parts": 155
+ },
+ {
+  "id": "agz5010",
+  "name": "Zenoah AGZ5010 Earth Auger",
+  "short": "AGZ5010",
+  "brand": "Zenoah",
+  "category": "Earth Auger",
+  "figures": 7,
+  "parts": 223
  },
  {
   "id": "bk3410fl",
@@ -275,6 +602,15 @@
   "parts": 165
  },
  {
+  "id": "ebz4800",
+  "name": "Zenoah EBZ4800 Backpack Blower",
+  "short": "EBZ4800",
+  "brand": "Zenoah",
+  "category": "Blower",
+  "figures": 4,
+  "parts": 182
+ },
+ {
   "id": "ebz5100",
   "name": "Zenoah EBZ5100 Backpack Blower",
   "short": "EBZ5100",
@@ -309,6 +645,15 @@
   "category": "Chainsaw",
   "figures": 6,
   "parts": 219
+ },
+ {
+  "id": "g2500",
+  "name": "Zenoah G2500",
+  "short": "G2500",
+  "brand": "Zenoah",
+  "category": "Chainsaw",
+  "figures": 7,
+  "parts": 264
  },
  {
   "id": "g3800",
@@ -445,341 +790,5 @@
   "category": "Chipper Shredder",
   "figures": 51,
   "parts": 1356
- },
- {
-  "id": "hus340ibt",
-  "name": "Husqvarna 340iBT Backpack Blower",
-  "short": "340iBT",
-  "brand": "Husqvarna",
-  "category": "Blower",
-  "figures": 7,
-  "parts": 59
- },
- {
-  "id": "hus525ib",
-  "name": "Husqvarna 525iB Blower",
-  "short": "525iB",
-  "brand": "Husqvarna",
-  "category": "Blower",
-  "figures": 5,
-  "parts": 35
- },
- {
-  "id": "hus550ibtx",
-  "name": "Husqvarna 550iBTX Backpack Blower",
-  "short": "550iBTX",
-  "brand": "Husqvarna",
-  "category": "Blower",
-  "figures": 9,
-  "parts": 83
- },
- {
-  "id": "hus115ihd45",
-  "name": "Husqvarna 115iHD45 Hedge Trimmer",
-  "short": "115iHD45",
-  "brand": "Husqvarna",
-  "category": "Hedge Trimmer",
-  "figures": 7,
-  "parts": 50
- },
- {
-  "id": "hus122hd60",
-  "name": "Husqvarna 122HD60 Hedge Trimmer",
-  "short": "122HD60",
-  "brand": "Husqvarna",
-  "category": "Hedge Trimmer",
-  "figures": 13,
-  "parts": 140
- },
- {
-  "id": "hus520ihd60",
-  "name": "Husqvarna 520iHD60 Hedge Trimmer",
-  "short": "520iHD60",
-  "brand": "Husqvarna",
-  "category": "Hedge Trimmer",
-  "figures": 7,
-  "parts": 93
- },
- {
-  "id": "hus520ihe3",
-  "name": "Husqvarna 520iHE3 Long Reach Hedge Trimmer",
-  "short": "520iHE3",
-  "brand": "Husqvarna",
-  "category": "Pole Hedge Trimmer",
-  "figures": 8,
-  "parts": 131
- },
- {
-  "id": "hus520iht4",
-  "name": "Husqvarna 520iHT4 Long Reach Hedge Trimmer",
-  "short": "520iHT4",
-  "brand": "Husqvarna",
-  "category": "Pole Hedge Trimmer",
-  "figures": 6,
-  "parts": 104
- },
- {
-  "id": "am105",
-  "name": "Husqvarna Automower 105",
-  "short": "Automower 105",
-  "brand": "Husqvarna",
-  "category": "Robotic Mower",
-  "figures": 7,
-  "parts": 187,
-  "aliases": [
-   "AM105",
-   "AM 105"
-  ]
- },
- {
-  "id": "am315xmkii",
-  "name": "Husqvarna Automower 315X MKII",
-  "short": "Automower 315X MKII",
-  "brand": "Husqvarna",
-  "category": "Robotic Mower",
-  "figures": 7,
-  "parts": 168,
-  "aliases": [
-   "315X MKII",
-   "315XMKII"
-  ]
- },
- {
-  "id": "am420iq",
-  "name": "Husqvarna Automower 420 iQ",
-  "short": "Automower 420 iQ",
-  "brand": "Husqvarna",
-  "category": "Robotic Mower",
-  "figures": 8,
-  "parts": 147,
-  "aliases": [
-   "AM420iQ",
-   "AM 420 iQ",
-   "420iQ"
-  ]
- },
- {
-  "id": "am535epos",
-  "name": "Husqvarna Automower 535 AWD EPOS",
-  "short": "Automower 535 AWD EPOS",
-  "brand": "Husqvarna",
-  "category": "Robotic Mower",
-  "figures": 9,
-  "parts": 219,
-  "aliases": [
-   "AM535AWD",
-   "535AWD EPOS",
-   "535AWD"
-  ]
- },
- {
-  "id": "amceora546",
-  "name": "Husqvarna CEORA 546 EPOS",
-  "short": "CEORA 546 EPOS",
-  "brand": "Husqvarna",
-  "category": "Robotic Mower",
-  "figures": 17,
-  "parts": 306
- },
- {
-  "id": "hus115il",
-  "name": "Husqvarna 115iL Grass Trimmer",
-  "short": "115iL",
-  "brand": "Husqvarna",
-  "category": "Grass Trimmer",
-  "figures": 6,
-  "parts": 48
- },
- {
-  "id": "hus520ilx",
-  "name": "Husqvarna 520iLX Grass Trimmer",
-  "short": "520iLX",
-  "brand": "Husqvarna",
-  "category": "Grass Trimmer",
-  "figures": 7,
-  "parts": 59,
-  "aliases": [
-   "520lLX"
-  ]
- },
- {
-  "id": "hus525ilk",
-  "name": "Husqvarna 525iLK Combi Trimmer",
-  "short": "525iLK",
-  "brand": "Husqvarna",
-  "category": "Grass Trimmer",
-  "figures": 6,
-  "parts": 79
- },
- {
-  "id": "hus536lip4",
-  "name": "Husqvarna 536LiP4 Pole Saw",
-  "short": "536LiP4",
-  "brand": "Husqvarna",
-  "category": "Pole Saw",
-  "figures": 6,
-  "parts": 79
- },
- {
-  "id": "hus536lipt5",
-  "name": "Husqvarna 536LiPT5 Pole Saw",
-  "short": "536LiPT5",
-  "brand": "Husqvarna",
-  "category": "Pole Saw",
-  "figures": 6,
-  "parts": 103
- },
- {
-  "id": "husexclusive54",
-  "name": "Husqvarna Exclusive 54 Manual Lawn Mower",
-  "short": "Exclusive 54",
-  "brand": "Husqvarna",
-  "category": "Lawn Mower",
-  "figures": 1,
-  "parts": 26
- },
- {
-  "id": "husgx560",
-  "name": "Husqvarna GX 560 Hover Lawn Mower",
-  "short": "GX 560",
-  "brand": "Husqvarna",
-  "category": "Lawn Mower",
-  "figures": 1,
-  "parts": 38
- },
- {
-  "id": "huslc118",
-  "name": "Husqvarna LC 118 Lawn Mower",
-  "short": "LC 118",
-  "brand": "Husqvarna",
-  "category": "Lawn Mower",
-  "figures": 1,
-  "parts": 39
- },
- {
-  "id": "huslc141c",
-  "name": "Husqvarna LC 141C Lawn Mower",
-  "short": "LC 141C",
-  "brand": "Husqvarna",
-  "category": "Lawn Mower",
-  "figures": 5,
-  "parts": 132
- },
- {
-  "id": "huslc142i",
-  "name": "Husqvarna LC 142i Lawn Mower",
-  "short": "LC 142i",
-  "brand": "Husqvarna",
-  "category": "Lawn Mower",
-  "figures": 5,
-  "parts": 38
- },
- {
-  "id": "huslc347ivx",
-  "name": "Husqvarna LC 347iVX Lawn Mower",
-  "short": "LC 347iVX",
-  "brand": "Husqvarna",
-  "category": "Lawn Mower",
-  "figures": 4,
-  "parts": 88
- },
- {
-  "id": "huslc419sp",
-  "name": "Husqvarna LC 419SP Lawn Mower",
-  "short": "LC 419SP",
-  "brand": "Husqvarna",
-  "category": "Lawn Mower",
-  "figures": 1,
-  "parts": 54
- },
- {
-  "id": "husr214c",
-  "name": "Husqvarna R 214C Ride-on Mower",
-  "short": "R 214C",
-  "brand": "Husqvarna",
-  "category": "Ride-on Mower",
-  "figures": 22,
-  "parts": 373
- },
- {
-  "id": "husr420tsxawd",
-  "name": "Husqvarna R 420TsX AWD Ride-on Mower",
-  "short": "R 420TsX AWD",
-  "brand": "Husqvarna",
-  "category": "Ride-on Mower",
-  "figures": 19,
-  "parts": 487
- },
- {
-  "id": "husts242d",
-  "name": "Husqvarna TS 242D Tractor Mower",
-  "short": "TS 242D",
-  "brand": "Husqvarna",
-  "category": "Tractor Mower",
-  "figures": 12,
-  "parts": 424
- },
- {
-  "id": "hustf230",
-  "name": "Husqvarna TF 230 Tiller",
-  "short": "TF 230",
-  "brand": "Husqvarna",
-  "category": "Tiller",
-  "figures": 20,
-  "parts": 294
- },
- {
-  "id": "g2500",
-  "name": "Zenoah G2500",
-  "short": "G2500",
-  "brand": "Zenoah",
-  "category": "Chainsaw",
-  "figures": 7,
-  "parts": 264
- },
- {
-  "id": "hus350bt",
-  "name": "Husqvarna 350BT",
-  "short": "350BT",
-  "brand": "Husqvarna",
-  "category": "Blower",
-  "figures": 18,
-  "parts": 227
- },
- {
-  "id": "agz2600",
-  "name": "Zenoah AGZ2600 Earth Auger",
-  "short": "AGZ2600",
-  "brand": "Zenoah",
-  "category": "Earth Auger",
-  "figures": 6,
-  "parts": 155
- },
- {
-  "id": "agz5010",
-  "name": "Zenoah AGZ5010 Earth Auger",
-  "short": "AGZ5010",
-  "brand": "Zenoah",
-  "category": "Earth Auger",
-  "figures": 7,
-  "parts": 223
- },
- {
-  "id": "hus372xp",
-  "name": "Husqvarna 372XP Chainsaw",
-  "short": "372XP",
-  "brand": "Husqvarna",
-  "category": "Chainsaw",
-  "figures": 17,
-  "parts": 275
- },
- {
-  "id": "ferrisis600z",
-  "name": "Ferris IS600Z Zero-Turn Mower",
-  "short": "IS600Z",
-  "brand": "Ferris",
-  "category": "Zero-Turn Mower",
-  "figures": 32,
-  "parts": 649
  }
 ]

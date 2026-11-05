@@ -218,7 +218,20 @@ function parseTableBlock(allWords, height, block) {
   }
 
   const out = [];
+  // A "[NOTE]" box printed under the table (EBZ4800, 5 Nov 2026): "26*-Body
+  // and 27*-Valve ass'y are not supplied as an individual part ... but
+  // supplied as a carburetor ass'y (P/NO. 848L388100)". Its lines landed in
+  // the columns like rows - five parts called "[NOTE]", "as", "as" - so
+  // everything from the box down is read as the note, whole, and given to the
+  // rows it is about: the starred ones.
+  let note = null;
   for (const r of rows) {
+    const line = Object.values(r.cells).flat().sort((a, b) => a.x1 - b.x1).map((w) => w.text).join(" ");
+    if (note !== null) { note += " " + line; continue; }
+    if (/^\[?NOTE\]?$/i.test(r.cells.key.map((w) => w.text).join("").trim()) || /^\[NOTE\]/i.test(line)) {
+      note = line.replace(/^\[?NOTE\]?\s*/i, "");
+      continue;
+    }
     // Keep each cell's words in reading order — clustering sorted by y, not x.
     const row = {};
     for (const c of ["key", "part", "desc", "qty", "remarks"]) {
@@ -257,6 +270,12 @@ function parseTableBlock(allWords, height, block) {
       qty,
       remarks,
     });
+  }
+  if (note) {
+    const text = note.replace(/^[・·•\s]+/, "").replace(/\s+/g, " ").trim();
+    for (const p of out) {
+      if (/\*$/.test(p.key)) p.remarks = (p.remarks ? p.remarks + " · " : "") + text;
+    }
   }
   return out;
 }
