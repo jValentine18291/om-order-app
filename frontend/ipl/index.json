@@ -756,5 +756,14 @@
   "category": "Earth Auger",
   "figures": 7,
   "parts": 223
+ },
+ {
+  "id": "hus372xp",
+  "name": "Husqvarna 372XP Chainsaw",
+  "short": "372XP",
+  "brand": "Husqvarna",
+  "category": "Chainsaw",
+  "figures": 17,
+  "parts": 275
  }
 ]

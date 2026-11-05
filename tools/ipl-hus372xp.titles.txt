@@ -1,0 +1,28 @@
+# 372XP sheet titles, in the order the export lists them (A to Q already).
+#
+# Husqvarna letter the sheets A-Q and the export drops the letter, so two
+# pairs arrive with the same name and nothing to tell them apart:
+#
+#   K1 / K2   both "HANDLE". K1 is the standard front handle; K2 is the
+#             wrap-around handle (comments: WRAP, WRAP G) with its spike.
+#   L1 / L2   both "HEATED HANDLES". The drawings say which: thermostat-
+#             controlled, or switched by hand.
+#
+# Everything else is the printed title, with "&" where the drawing has one.
+CHAIN BRAKE & CLUTCH COVER
+CLUTCH & OIL PUMP
+CYLINDER COVER
+CYLINDER & PISTON
+CRANKSHAFT
+MUFFLER
+CARBURETOR & AIR FILTER
+CRANKCASE
+FUEL TANK
+FRONT HANDLE (K1, standard)
+WRAP HANDLE (K2)
+HEATED HANDLES (L1, thermostat)
+HEATED HANDLES (L2, manual)
+IGNITION SYSTEM
+STARTER
+CARBURETOR (Walbro HD-12C)
+ACCESSORIES

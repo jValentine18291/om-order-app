@@ -305,6 +305,14 @@ check("and the other machine in the same book",
 check("the CHT220-60 keeps its own book", match(machine("", "CHT220-60")), "cht220_60");
 check("and so does the HT220-75", match(machine("", "HT220-75")), "ht220_75");
 
+console.log("\n-- the 372XP, on all three of its bars --");
+// AutoCount, 5 Nov 2026: one machine, three codes by bar length. The GZ3500T
+// carries "372" inside its code and must not be pulled in by it.
+check("20-inch bar", match(machine("UHUQ 372XP 965702694_20", 'Husqvarna "372XP Chainsaw 20"" 3/8"" H42 HN c/w Tools & Acc"')), "hus372xp");
+check("24-inch bar", match(machine("UHUQ 372XP 965702694", 'Husqvarna "372XP Chainsaw 24"" 3/8"" H42 HN c/w Tools & Acc"')), "hus372xp");
+check("28-inch bar", match(machine("UHUQ 372XP 965702694_28", 'Husqvarna "372XP Chainsaw 28"" 3/8"" H42 HN c/w Tools & Acc"')), "hus372xp");
+check("the GZ3500T keeps its own book", match(machine("UZEN GZ3500T X372335054", 'ZENOAH GZ3500T Top Handle Chainsaw 35.2cc 14" /w Bar & Chain')), "gz3500t");
+
 console.log("\n-- the earth augers --");
 // Copied out of AutoCount, 3 Nov 2026. Two augers, two books, and each
 // machine must open its own - the names differ by two digits.
