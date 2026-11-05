@@ -721,7 +721,7 @@ function buildPartsSearchSql(q, limit = 15, fit = {}) {
             ${fitRank} AS FitRank
        FROM Item i
       WHERE i.IsActive = 'T'
-        AND UPPER(i.ItemCode) NOT LIKE 'U%'
+        AND UPPER(i.ItemCode) ${fit.units ? "LIKE" : "NOT LIKE"} 'U%'
         AND ${conditions.join("\n        AND ")}
       ORDER BY ${fitOrder}CASE
                  WHEN REPLACE(UPPER(i.ItemCode), ' ', '') = @exact THEN 0
@@ -1611,6 +1611,19 @@ module.exports.partsForModel = partsForModel;
 module.exports.modelKey = modelKey;
 module.exports.fitsModel = fitsModel;
 module.exports.searchParts = searchParts;
+
+// UNITS - the U-coded items the parts search leaves out (John, 5 Nov 2026).
+// A ride-on's engine is filed as a unit - UBNS 44T9770054G1CX0001, "B&S
+// Commercial Series Engine (810cc)"; UZEN 589205401, the SR3100's Yanmar - so
+// a technician replacing one could not find it to put it on the slip. Rather
+// than guess which units are engines (half of the U-items that mention an
+// engine are whole machines described by theirs), every unit can be found,
+// listed apart and below the spare parts, so none can push a part down.
+async function searchUnits(q, limit = 5) {
+  const rows = await searchParts(q, limit, { units: true });
+  return rows.map((r) => ({ ...r, fit: 2, unit: true }));
+}
+module.exports.searchUnits = searchUnits;
 module.exports.getPartStock = getPartStock;
 
 // ---- Part prices -----------------------------------------------------------

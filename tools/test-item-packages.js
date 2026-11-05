@@ -73,7 +73,11 @@ const PKG = { item_code: "SZEN 140082002", description: "Cleaner Assy 4-35", uom
   check("a package is looked up as a package only", /if \(req\.query\.package === "1"\)/.test(server), true);
   const app = fs.readFileSync(path.resolve(__dirname, "..", "frontend", "app.js"), "utf8");
   check("both technician pickers ask for packages, and nothing else does",
-    (app.match(/&packages=1`/g) || []).length, 2);
+    (app.match(/&packages=1(&units=1)?`/g) || []).length, 2);
+  // And, since 5 Nov 2026, for units - an engine is one - drawn under the
+  // parts. The same two pickers, and nothing else: Find Part stays parts only.
+  check("the same two ask for units, and nothing else does",
+    (app.match(/&units=1`/g) || []).length, 2);
   check("the saved line carries the flag to the server", /is_package: !!p\.is_package,/.test(app), true);
 
   console.log(failures ? `\n${failures} FAILED` : "\nall passed");

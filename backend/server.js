@@ -1638,7 +1638,19 @@ app.get("/api/parts-search", async (req, res) => {
     } catch (e) {
       console.error("[parts-search] alternatives:", e.message);
     }
-    res.json({ results });
+    // UNITS, for the technicians' pickers (units=1, 5 Nov 2026): engines and
+    // the other U-coded items, in a list of their own that the screen draws
+    // under the parts. A failure here costs the units, never the parts.
+    let units;
+    if (req.query.units === "1") {
+      try {
+        units = await acRepo.searchUnits(String(req.query.q || ""), 5);
+      } catch (e) {
+        console.error("[parts-search] units:", e.message);
+        units = [];
+      }
+    }
+    res.json(units ? { results, units } : { results });
   } catch (err) {
     // Say that it BROKE, rather than answering with an empty list.
     //

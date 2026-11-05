@@ -4755,21 +4755,9 @@ $("ap-q").addEventListener("input", () => {
   apDebounce = setTimeout(async () => {
     try {
       // packages=1: Item Packages too, for technicians only (27 Oct 2026).
-      const data = await api(`/api/parts-search?q=${encodeURIComponent(q)}${fitQuery(q)}&packages=1`);
-      const list = data.results || [];
-      if (!list.length) {
-        const machines = await machineMatches(q);
-        box.innerHTML = machines.length
-          ? `<div class="fp-machine-note">Not a spare part — this is a machine:</div>` +
-            machines.map((m) => `
-              <div class="fp-machine-row">
-                <span class="fp-opt-desc">${escapeHtml(m.description)}</span>
-                <span class="fp-opt-code mono">${escapeHtml(m.item_code)}</span>
-              </div>`).join("")
-          : `<div class="fp-empty">No matching parts</div>`;
-        return;
-      }
-      box.innerHTML = list.map((p) => partOptionHtml(p)).join("");
+      // units=1: engines and other U-coded units, under the parts (5 Nov 2026).
+      const data = await api(`/api/parts-search?q=${encodeURIComponent(q)}${fitQuery(q)}&packages=1&units=1`);
+      const list = pickerResultsHtml(box, data.results || [], data.units || []);
       box.querySelectorAll(".company-option").forEach((btn) => {
         btn.addEventListener("click", (e) => {
           const code = pickedCode(e, btn);
@@ -10658,7 +10646,9 @@ function partOptionHtml(p, { extraClass = "" } = {}) {
     : p.fit === 0.5 ? `<span class="fp-opt-fit fp-opt-fit-eq">Equivalent model</span>`
     // An Item Package (27 Oct 2026): what is in it, and its price. Its figure
     // is how many whole sets the stock of its items would make up.
-    : p.is_package ? `<span class="pkg-tag">Package</span>` : "";
+    : p.is_package ? `<span class="pkg-tag">Package</span>`
+    // An engine or other U-coded unit (5 Nov 2026), listed under the parts.
+    : p.unit ? `<span class="pkg-tag unit-tag">Unit</span>` : "";
   const inside = p.is_package && (p.items || []).length
     ? `<span class="pkg-items">${escapeHtml(`${p.items.length} item${p.items.length === 1 ? "" : "s"} · ${money(p.unit_price)} · `)}${
         escapeHtml(p.items.map((i) => i.description).join(", "))}</span>` : "";
@@ -10698,6 +10688,23 @@ function partAltHtml(p) {
 function pickedCode(e, row) {
   const alt = e && e.target && e.target.closest && e.target.closest("[data-alt-code]");
   return alt ? alt.dataset.altCode : row.dataset.code;
+}
+
+// THE TECHNICIANS' PICKERS: spare parts, then units (John, 5 Nov 2026). The
+// engine of a ride-on is a U-coded unit in AutoCount, and the parts search
+// leaves every U-code out so that "525" does not open on eleven machines - so
+// the engine could not be found to be put on the slip. Units now come back in
+// a list of their own, drawn under the parts with a heading, five at most:
+// they can be found and added, and can never push a part down.
+//
+// Returns every row drawn, parts then units, for the caller's click handler.
+function pickerResultsHtml(box, parts, units) {
+  const head = units.length
+    ? `<div class="fp-machine-note">Engines and machine units</div>` : "";
+  box.innerHTML = parts.length || units.length
+    ? parts.map((p) => partOptionHtml(p)).join("") + head + units.map((p) => partOptionHtml(p)).join("")
+    : `<div class="fp-empty">No matching parts</div>`;
+  return parts.concat(units);
 }
 
 // A number that matches no spare part may still be something AutoCount holds:
@@ -14101,25 +14108,9 @@ $("code-input").addEventListener("input", () => {
   codeDebounce = setTimeout(async () => {
     try {
       // packages=1: Item Packages too, for technicians only (27 Oct 2026).
-      const data = await api(`/api/parts-search?q=${encodeURIComponent(q)}${fitQuery(q)}&packages=1`);
-      const list = data.results || [];
-      if (!list.length) {
-        // Named rather than offered. A machine is not something that can be
-        // fitted to a machine, so there is nothing to tap - but leaving the
-        // technician with "No matching parts" tells them the catalogue has
-        // never heard of a number they are holding, which is not true.
-        const machines = await machineMatches(q);
-        box.innerHTML = machines.length
-          ? `<div class="fp-machine-note">Not a spare part — this is a machine:</div>` +
-            machines.map((m) => `
-              <div class="fp-machine-row">
-                <span class="fp-opt-desc">${escapeHtml(m.description)}</span>
-                <span class="fp-opt-code mono">${escapeHtml(m.item_code)}</span>
-              </div>`).join("")
-          : `<div class="fp-empty">No matching parts</div>`;
-        return;
-      }
-      box.innerHTML = list.map((p) => partOptionHtml(p)).join("");
+      // units=1: an engine is a U-coded unit, and can be fitted (5 Nov 2026).
+      const data = await api(`/api/parts-search?q=${encodeURIComponent(q)}${fitQuery(q)}&packages=1&units=1`);
+      const list = pickerResultsHtml(box, data.results || [], data.units || []);
       box.querySelectorAll(".company-option").forEach((btn) =>
         btn.addEventListener("click", (e) => {
           const code = pickedCode(e, btn);

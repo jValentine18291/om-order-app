@@ -35,6 +35,12 @@ const captureSql = async (q, limit, fit) => buildPartsSearchSql(q, limit, fit) |
     console.log(`  (could not capture SQL: ${c && c.error}) - the SQLite part below still runs`);
   } else {
     check("machine units are excluded", /NOT LIKE 'U%'/.test(sql), true);
+    // ...from the parts. Units have a search of their own since 5 Nov 2026
+    // (an engine is a U-coded unit), the same query turned round, which the
+    // technicians' pickers draw under the parts.
+    const units = ((await captureSql("vanguard 18", 5, { units: true })) || {}).sql || "";
+    check("the units search asks for the U-codes and only them",
+      [/UPPER\(i\.ItemCode\) LIKE 'U%'/.test(units), /NOT LIKE 'U%'/.test(units)], [true, false]);
 
     // The two shapes that have actually taken this query down, both only
     // reachable with NO machine - which is every search on Find Part.

@@ -702,6 +702,9 @@
     "From parts book": "来自零件图册",
     // An AutoCount Item Package (27 Oct 2026).
     "Package": "配套组合",
+    // Engines and other U-coded units in the technicians' pickers (5 Nov 2026).
+    "Unit": "整机",
+    "Engines and machine units": "发动机和整机",
     "Another alternative": "再添加替代零件",
     "Alternative part": "替代零件",
     "Alternative recorded": "已记录替代零件",
