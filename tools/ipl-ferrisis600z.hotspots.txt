@@ -1,0 +1,61 @@
+# Ferris IS600Z (5902112) - corrections to the callouts read off the drawings.
+#
+#     <figure> add|unlisted|drop  <key> <x%> <y%>
+#
+# <figure> is the sheet's position in the book, 1-32 (the transaxle is 30 and
+# 31). Every one of the 786 callouts read was checked by eye against the
+# printed number, 5 Nov 2026; these are what that found. Positions of the
+# added ones were read off the page by Tesseract or measured from the ink.
+#
+# ENGINE & PTO. The top "0010" was read as 0070 - a tap that opened the wrong
+# part. (The real 0010 there, and 0111, 0130 and 0150, printed clear of any
+# leader line, are found by the page search - see stragglers() in
+# ipl-extract-ferris.py.) The second 0190 is the one it cannot see.
+14 drop 0070 35.319 9.919
+14 add  0190 63.76 62.37
+#
+# MOTION CONTROL, S/N 4002340028 and below - the older drawing, numbered 1-29.
+# Two of its readings are not callouts: a chain link read as "6", and the 8 of
+# a dimension "8-3/4". The real 6 and 8 are ringed elsewhere on the sheet.
+20 drop 6 67.067 55.291
+20 drop 8 76.975 23.174
+#
+# MOTION CONTROL - HANDLES. 0700 and a second 0140, side by side in the middle
+# of the sheet, unringed.
+22 add 0700 51.19 38.93
+22 add 0140 46.75 40.33
+#
+# TRANSAXLE, sheet 1. Hydro-Gear's own drawing, plain numbers on leader
+# lines. The printed notes - "ITEMS NOT SHOWN: 13 SEALANT, 14 OIL" and "PARTS
+# INCLUDED IN 200 SEAL KIT: 10,30,31..." - were read as part 1 and part 30;
+# and the 211 below the axle was read as "1". The real 1 (40.45, 32.30) stays.
+30 drop 1 7.275 26.023
+30 drop 1 7.275 19.628
+30 drop 1 7.275 20.686
+30 drop 1 7.275 24.965
+30 drop 1 10.023 26.012
+30 drop 1 23.766 53.5
+30 drop 1 24.424 24.942
+30 drop 1 25.806 24.965
+30 drop 30 8.344 26.012
+30 add 11 76.50 18.09
+30 add 81 54.77 29.35
+30 add 82 57.95 27.88
+30 add 90 17.81 43.14
+30 add 141 40.55 43.60
+30 add 106 45.31 51.14
+# The 200 seal kit has no callout on the drawing; it is named in the notes,
+# "200 SEAL KIT", and that is where it is tapped.
+30 add 200 11.09 21.74
+#
+# TRANSAXLE, sheet 2: the same drawing, with the five kits its table lists.
+# 1000, the whole transaxle service kit, is not printed, so has nothing to tap.
+31 add 207 61.75 14.13
+31 add 210 55.41 25.90
+31 add 211 23.12 53.49
+31 add 212 30.74 37.87
+31 add 215 71.36 31.42
+#
+# NOT GIVEN ONE: transaxle 41, SEAL, LIP 18 X 32 X 7, which the drawing does
+# not number; and the electrical schematics, whose one part - the harness,
+# 5105536 - is the whole drawing rather than a callout on it.

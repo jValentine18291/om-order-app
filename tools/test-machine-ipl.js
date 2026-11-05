@@ -327,6 +327,20 @@ check("and the other machine in the same book",
 check("the CHT220-60 keeps its own book", match(machine("", "CHT220-60")), "cht220_60");
 check("and so does the HT220-75", match(machine("", "HT220-75")), "ht220_75");
 
+console.log("\n-- the Ferris IS600Z, the first Ferris book --");
+// AutoCount files Ferris under UBNS, Briggs & Stratton's prefix, which also
+// holds the engines - so the book is found by the name in the description,
+// not the code. Both IS600Z model numbers AutoCount holds open it; the book is
+// 5902112's, and covers the earlier serials too. The IS2600Z is another
+// machine and must not.
+check("5902112, the book's own", match(machine("UBNS IS600ZB2548 5902112", 'Ferris IS600Z - Zero-Turn Mower (48" Deck)')), "ferrisis600z");
+check("5901915, the earlier one", match(machine("UBNS IS600ZB2548 5901915", 'Ferris IS600Z - Zero-Turn Mower (48" Deck)')), "ferrisis600z");
+check("as the workshop wrote it on 00261 and 00106", [match(machine("", "IS600")), match(machine("", "IS600Z"))], ["ferrisis600z", "ferrisis600z"]);
+check("the IS2600Z is not it", [match(machine("", "IS2600")),
+  match(machine("UBNS IS2600ZY24D61 5901722", 'FERRIS IS2600Z Zero-Turn Mower (61" iCD Deck)'))], ["", ""]);
+check("nor is a B&S engine under the same prefix",
+  match(machine("UBNS 44T9770054G1CX0001", "B&S Commercial Series Engine. (810cc)")), "");
+
 console.log("\n-- the 372XP, on all three of its bars --");
 // AutoCount, 5 Nov 2026: one machine, three codes by bar length. The GZ3500T
 // carries "372" inside its code and must not be pulled in by it.

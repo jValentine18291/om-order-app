@@ -772,5 +772,14 @@
   "category": "Chainsaw",
   "figures": 17,
   "parts": 275
+ },
+ {
+  "id": "ferrisis600z",
+  "name": "Ferris IS600Z Zero-Turn Mower",
+  "short": "IS600Z",
+  "brand": "Ferris",
+  "category": "Zero-Turn Mower",
+  "figures": 32,
+  "parts": 649
  }
 ]
