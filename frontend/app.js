@@ -3745,9 +3745,16 @@ function renderSaveBar() {
   const quoteFirst = !billed && !!(session.slip && session.slip.quote_first) && !String(m.quote_approved_at || "").trim();
   const past = m.state === "CONDEMNED" || (billed && !billedUnfinished);
   done.disabled = past || quoteFirst;
-  quote.disabled = past || billedUnfinished || m.state === "AWAITING_QUOTE";
+  // Quoted and approved, and nothing changed since (John, 6 Nov 2026): no
+  // second quote. A part scanned or the labour typed but not yet saved is a
+  // change - Save stores it first, and the server then agrees.
+  const unsaved = session.pendingParts.length > 0 ||
+    currentLabourValue() !== (Number(m.labour_charge) || 0);
+  const requoteLocked = !!m.requote_block && !unsaved;
+  quote.disabled = past || billedUnfinished || m.state === "AWAITING_QUOTE" || requoteLocked;
   let why = "";
   if (billedUnfinished) why = "Already on a Sales Order - mark it fully repaired when the work is done.";
+  else if (requoteLocked && !past) why = m.requote_block;
   else if (past) why = billed ? "Already on a Sales Order - only the parts can change." : "Condemned - Sales can put it back to repair.";
   else if (quoteFirst) why = "Customer wants a quote first - send it for quotation, and mark it repaired once they have said yes.";
   if (hint) { hint.textContent = why; hint.style.display = why ? "" : "none"; }
@@ -3849,7 +3856,7 @@ async function closeMachineModal(outcome) {
   renderSlipScreen();
 }
 // Labour feeds the machine total, so recompute as it is typed.
-$("os-labour").addEventListener("input", () => updateSlipFooter());
+$("os-labour").addEventListener("input", () => { updateSlipFooter(); renderSaveBar(); });
 
 $("mm-save").addEventListener("click", () => closeMachineModal("extras"));
 $("mm-save-progress").addEventListener("click", () => closeMachineModal("progress"));
@@ -5909,6 +5916,8 @@ function tubeQtyDisplay(part) {
 }
 
 function renderMachineParts() {
+  // The quote button turns on and off with the parts (6 Nov 2026).
+  renderSaveBar();
   const wrap = $("machine-parts");
   const machine = currentPartHolder();
   const parts = machine ? (machine.parts || []) : [];
@@ -6476,7 +6485,9 @@ function renderSlipStatusUI() {
                status === "NEED_QUOTE" || status === "QUOTED";
   // Machines are sent for quoting one at a time, so this button is the "all of
   // them together" case: offered while any machine is still not waiting.
-  const someLeft = machines.some((m) => m.state !== "AWAITING_QUOTE" && !m.converted_at);
+  // Not one whose quote was approved and has not changed (6 Nov 2026): the
+  // server leaves those alone, so the button is not offered for them alone.
+  const someLeft = machines.some((m) => m.state !== "AWAITING_QUOTE" && !m.converted_at && !m.requote_block);
   const showQuote = live && someLeft;
   const showQuoted = status === "NEED_QUOTE";
   const showNoQuote = live;
@@ -8399,9 +8410,14 @@ async function onViewSlipChosen(slipNumber) {
 // detail so sales can manage quoting from here too.
 function renderVsStatusActions(slip) {
   const s = slip.status;
-  const showQuote = s === "OPEN" || s === "IN_PROGRESS";
+  // Only while some machine could be quoted: not one approved and unchanged
+  // (6 Nov 2026), which the server would leave alone.
+  const quotable = (slip.machines || []).some((m) =>
+    m.state !== "AWAITING_QUOTE" && !m.converted_at && m.state !== "CONDEMNED" && !m.requote_block);
+  const showQuote = (s === "OPEN" || s === "IN_PROGRESS") && quotable;
   const showQuoted = s === "NEED_QUOTE";
-  const showNoQuote = showQuote || showQuoted || s === "QUOTED";
+  // As before 6 Nov 2026 - not tied to "Need to Quote" being offered.
+  const showNoQuote = s === "OPEN" || s === "IN_PROGRESS" || showQuoted || s === "QUOTED";
   if (!showQuote && !showQuoted && !showNoQuote) return "";
   return `<div class="status-actions">
     ${showQuote ? `<button class="status-btn status-btn-quote" data-vs-state="AWAITING_QUOTE">Need to Quote</button>` : ""}
@@ -8825,9 +8841,15 @@ function renderSlipDetail(slip) {
       html += `<button type="button" class="vs-fix" data-fix="${m.id}">Correct status</button>`;
     }
     if (acts.length) {
+      // Quoted and approved, nothing changed since (6 Nov 2026): "Send for
+      // quoting" is shown greyed with the reason, not hidden - a button that
+      // vanishes reads as a fault, one that says why does not.
+      const requote = m.requote_block && acts.some(([to]) => to === "AWAITING_QUOTE");
       html += `<div class="decide-row" data-decide="${m.id}">${acts.map(([to, label, cls]) =>
-        `<button type="button" class="decide-btn ${cls}" data-state="${escapeAttr(to)}">${escapeHtml(label)}</button>`
-      ).join("")}</div>`;
+        to === "AWAITING_QUOTE" && m.requote_block
+          ? `<button type="button" class="decide-btn ${cls}" disabled>${escapeHtml(label)}</button>`
+          : `<button type="button" class="decide-btn ${cls}" data-state="${escapeAttr(to)}">${escapeHtml(label)}</button>`
+      ).join("")}</div>${requote ? `<div class="decide-note">${escapeHtml(m.requote_block)}</div>` : ""}`;
     }
 
     // Finished with. Its own row rather than folded into the decisions above,

@@ -705,6 +705,9 @@
     // Engines and other U-coded units in the technicians' pickers (5 Nov 2026).
     "Unit": "整机",
     "Engines and machine units": "发动机和整机",
+    // One quote per change (6 Nov 2026): the reason the quote button is grey.
+    "Quoted and approved - nothing has changed since. Add a part or change a price to quote it again.":
+      "已报价并获客户同意，之后没有任何更改。添加零件或更改价格后才能再次报价。",
     "Another alternative": "再添加替代零件",
     "Alternative part": "替代零件",
     "Alternative recorded": "已记录替代零件",

@@ -431,6 +431,21 @@ try {
   console.error("[db] quote_approved_at migration failed:", e.message);
 }
 
+// WHAT THE CUSTOMER SAID YES TO (John, 6 Nov 2026): the machine's parts, their
+// quantities and prices, and its labour, as they stood when the quote was
+// approved. "Send for quoting" stays greyed out until they differ - see
+// requoteBlockReason() in sqliteRepo.js. Filled for machines approved before
+// this existed by sqliteRepo on start-up, from their parts as they stand.
+try {
+  const cols = db.prepare("PRAGMA table_info(slip_machines)").all().map((c) => c.name);
+  if (!cols.includes("quoted_fp")) {
+    db.exec("ALTER TABLE slip_machines ADD COLUMN quoted_fp TEXT DEFAULT ''");
+    console.log("[db] migrated: added quoted_fp to slip_machines");
+  }
+} catch (e) {
+  console.error("[db] quoted_fp migration failed:", e.message);
+}
+
 try {
   const cols = db.prepare("PRAGMA table_info(slip_machines)").all().map((c) => c.name);
   if (!cols.includes("ipl_model")) {

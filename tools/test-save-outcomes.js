@@ -108,7 +108,11 @@ const stateOf = async (no, id) => (await data.slips.getSlip(no)).machines.find((
     !!(await data.slips.getSlip(fn)).machines[0].quote_approved_at, true);
   r = await data.slips.saveMachineWork(fid, "repaired", "KM");
   check("and NOW it can be fully repaired", [r.moved, await stateOf(fn, fid)], [true, "REPAIRED"]);
-  // Sent back for a revised price: the answer no longer stands.
+  // Sent back for a revised price: the answer no longer stands. The price has
+  // to have changed first - since 6 Nov 2026 an approved machine with nothing
+  // changed cannot be quoted again (test-requote-lock.js).
+  const was = (await data.slips.getSlip(fn)).machines[0];
+  await data.slips.setMachineLabour(fid, (Number(was.labour_charge) || 0) + 10);
   await data.slips.setMachineState(fn, fid, "AWAITING_QUOTE", "CY");
   check("re-quoting withdraws the go-ahead",
     (await data.slips.getSlip(fn)).machines[0].quote_approved_at, "");

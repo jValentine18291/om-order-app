@@ -2445,7 +2445,7 @@ async function handleMachineState(req, res) {
     };
     notifyStateChange(slip, machineId, before ? before.state : "", state, actor);
   } catch (err) {
-    if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
+    if (err.status === 400 || err.status === 404 || err.status === 409) return res.status(err.status).json({ error: err.message });
     console.error("[PATCH /api/slips/:slip/machines/:id/state]", err);
     res.status(err.status || 500).json({ error: err.message || "Failed to update the machine" });
   }
@@ -2839,7 +2839,7 @@ async function handleSlipState(req, res) {
       }
     }
   } catch (err) {
-    if (err.status === 400 || err.status === 404) return res.status(err.status).json({ error: err.message });
+    if (err.status === 400 || err.status === 404 || err.status === 409) return res.status(err.status).json({ error: err.message });
     console.error("[PATCH /api/slips/:slip/state]", err);
     res.status(err.status || 500).json({ error: err.message || "Failed to update the slip" });
   }

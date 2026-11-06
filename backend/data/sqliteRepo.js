@@ -605,6 +605,10 @@ function getSlip(slipNumber, includeSignature = false) {
     // Why it cannot go on a Sales Order yet, or "". The picker greys the box
     // with this and the server refuses with it, so they cannot drift apart.
     m.quote_block = quoteBlockReason(slip, m);
+    // Why it cannot be sent for quoting again, or "" (6 Nov 2026). The same
+    // sentence the server refuses with, so the grey button and the refusal
+    // say the same thing.
+    m.requote_block = requoteBlockReason(m);
     // Whether its status can be put back - see undoMachineDecision(). Decided
     // here rather than in the app so the button and the rule that refuses it
     // are the same sentence; the app only has to read the answer.
@@ -3208,10 +3212,68 @@ function condemnedNote(m) {
        : CONDEMNED_NOTE;
 }
 
+// ONE QUOTE PER CHANGE (John, 6 Nov 2026). Once the customer has approved a
+// quote - "Proceed with repair", or "No quote needed" - sending the same
+// machine for quoting again is a mistake: it lands back on Sales' list and
+// tells three people a machine is waiting that is not. So it is refused until
+// something the customer would pay for has changed: a part added or removed,
+// a quantity, a price, or the labour. His choices: anything that changes the
+// price counts; it holds through Repaired; and nobody can override it.
+//
+// The fingerprint is what the customer said yes to, taken at that moment and
+// kept on the machine (quoted_fp). Parts are named by item code, or by their
+// description when they have none, and sorted, so the order they were added
+// in does not matter.
+function quoteFingerprint(machineId) {
+  const m = db.prepare("SELECT labour_charge FROM slip_machines WHERE id = ?").get(machineId) || {};
+  const money = (v) => (Number(v) || 0).toFixed(2);
+  const parts = db.prepare(
+    "SELECT item_code, description, variant, quantity, unit_price FROM machine_parts WHERE machine_id = ?"
+  ).all(machineId).map((p) =>
+    [String(p.item_code || "").trim() || "~" + String(p.description || "").trim(),
+     String(p.variant || ""), String(Number(p.quantity) || 0), money(p.unit_price)].join("|")
+  ).sort();
+  return JSON.stringify({ parts, labour: money(m.labour_charge) });
+}
+
+const REQUOTE_LOCKED =
+  "Quoted and approved - nothing has changed since. Add a part or change a price to quote it again.";
+
+// Why this machine cannot be sent for quoting again, or "".
+function requoteBlockReason(m) {
+  if (!m || (m.state !== "TO_REPAIR" && m.state !== "REPAIRED")) return "";
+  if (!String(m.quote_approved_at || "").trim() || !String(m.quoted_fp || "").trim()) return "";
+  return quoteFingerprint(m.id) === m.quoted_fp ? REQUOTE_LOCKED : "";
+}
+
+// Machines approved before the fingerprint existed take theirs from their
+// parts as they stand - the best record there is of what was agreed. Only
+// those with none, so this does nothing once it has run.
+try {
+  const owed = db.prepare(
+    `SELECT id FROM slip_machines
+      WHERE TRIM(IFNULL(quote_approved_at, '')) <> '' AND TRIM(IFNULL(quoted_fp, '')) = ''
+        AND state IN ('TO_REPAIR', 'REPAIRED')`
+  ).all();
+  const put = db.prepare("UPDATE slip_machines SET quoted_fp = ? WHERE id = ?");
+  for (const r of owed) put.run(quoteFingerprint(r.id), r.id);
+  if (owed.length) console.log(`[db] quote fingerprints recorded for ${owed.length} approved machine(s)`);
+} catch (e) {
+  console.error("[db] quote fingerprint backfill failed:", e.message);
+}
+
 function setMachineState(slipNumber, machineId, state, who = "", { reason, note } = {}) {
   const st = String(state || "").toUpperCase();
   if (!MACHINE_STATES.has(st)) { const e = new Error("Invalid machine state."); e.status = 400; throw e; }
   const { slip, machine } = machineOnSlip(slipNumber, machineId);
+
+  // Approved, and nothing has changed since: no second quote. Here rather
+  // than at each button, so the technician's Save, Sales' button and an old
+  // copy of the app are all refused the same way.
+  if (st === "AWAITING_QUOTE" && machine.state !== "AWAITING_QUOTE") {
+    const block = requoteBlockReason(machine);
+    if (block) { const e = new Error(block); e.status = 409; throw e; }
+  }
 
   // Leaving CONDEMNED clears the disposal with it: the machine is staying
   // after all, so how it was going to leave no longer means anything.
@@ -3237,11 +3299,13 @@ function setMachineState(slipNumber, machineId, state, who = "", { reason, note 
     `UPDATE slip_machines
         SET state = ?, decided_by = ?, decided_at = datetime('now','localtime')
             ${clearDisposal ? ", disposal = '', disposal_at = '', disposal_by = ''" : ""}
-            ${approved ? ", quote_approved_at = datetime('now','localtime')" : ""}
-            ${unapproved ? ", quote_approved_at = ''" : ""}
+            ${approved ? ", quote_approved_at = datetime('now','localtime'), quoted_fp = ?" : ""}
+            ${unapproved ? ", quote_approved_at = '', quoted_fp = ''" : ""}
             ${touchReason ? ", condemn_reason = ?, condemn_note = ?" : ""}
       WHERE id = ?`
-  ).run(...[st, String(who || "").trim(), ...(touchReason ? [condemnReason, condemnNote] : []), machine.id]);
+  ).run(...[st, String(who || "").trim(),
+            ...(approved ? [quoteFingerprint(machine.id)] : []),
+            ...(touchReason ? [condemnReason, condemnNote] : []), machine.id]);
   deriveSlipStatus(slip.id);
   return getSlip(slipNumber);
 }
@@ -3571,8 +3635,33 @@ function setAllMachineStates(slipNumber, state, who = "") {
   const upd = db.prepare(
     "UPDATE slip_machines SET state = ?, decided_by = ?, decided_at = datetime('now','localtime') WHERE id = ?"
   );
+  // The approval goes the way it does one machine at a time (6 Nov 2026):
+  // "No quote needed" over a waiting machine records it, with what was agreed;
+  // sending one back to be quoted withdraws it. Before this the slip-wide
+  // buttons moved the state alone, so a machine re-quoted from here still
+  // carried its old go-ahead.
+  const approve = db.prepare(
+    "UPDATE slip_machines SET quote_approved_at = datetime('now','localtime'), quoted_fp = ? WHERE id = ?"
+  );
+  const withdraw = db.prepare("UPDATE slip_machines SET quote_approved_at = '', quoted_fp = '' WHERE id = ?");
+  // "Quote all" leaves alone a machine whose quote was approved and has not
+  // changed since - the rule requoteBlockReason() states - as it already
+  // leaves the finished ones. If that is every machine it would have moved,
+  // it says so rather than doing nothing silently.
+  const open = rows.filter((m) => !machineSettled(m));
+  const moving = st === "AWAITING_QUOTE"
+    ? open.filter((m) => m.state === "AWAITING_QUOTE" || !requoteBlockReason(m)) : open;
+  if (st === "AWAITING_QUOTE" && open.length && !moving.some((m) => m.state !== "AWAITING_QUOTE")) {
+    const locked = open.find((m) => requoteBlockReason(m));
+    if (locked) { const e = new Error(REQUOTE_LOCKED); e.status = 409; throw e; }
+  }
   const tx = db.transaction(() => {
-    for (const m of rows) if (!machineSettled(m)) upd.run(st, String(who || "").trim(), m.id);
+    for (const m of moving) {
+      if (m.state === st) continue;
+      upd.run(st, String(who || "").trim(), m.id);
+      if (st === "TO_REPAIR" && (m.state === "QUOTED" || m.state === "AWAITING_QUOTE")) approve.run(quoteFingerprint(m.id), m.id);
+      if (st === "AWAITING_QUOTE" || st === "RECEIVED") withdraw.run(m.id);
+    }
   });
   tx();
   deriveSlipStatus(slip.id);
@@ -3685,6 +3774,8 @@ function reopenMachine(slipNumber, machineId, { state = "TO_REPAIR", note = "", 
       `UPDATE slip_machines
           SET state = ?, decided_by = ?, decided_at = datetime('now','localtime'),
               converted_at = NULL, so_number = '', foc = 0,
+              -- A new repair is a new quote, if it needs one.
+              quoted_fp = '',
               disposal = '', disposal_by = '', disposal_at = '',
               -- A condemned machine is not condemned any more: its note would
               -- otherwise print on the new SO (12 Oct 2026).

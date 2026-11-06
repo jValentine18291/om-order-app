@@ -3013,6 +3013,8 @@ body.signin-brand .topbar .pill {
 .decide-quoted  { color: #8A4B00; border-color: #e8c99b; }
 .decide-btn:active { filter: brightness(.96); }
 .decide-btn:disabled { opacity: .55; cursor: default; }
+/* Why "Send for quoting" is greyed: quoted, approved, unchanged (6 Nov 2026). */
+.decide-note { font-size: .78rem; color: var(--ink-soft); margin-top: 4px; }
 
 /* Putting a status back is not a step in the job - it says this machine never
    left the start - so it is deliberately the quietest thing in the stack:
