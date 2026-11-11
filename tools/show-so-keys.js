@@ -30,7 +30,9 @@ const { query } = require(path.resolve(__dirname, "..", "backend", "data", "auto
 const { KEY_TABLES } = require(path.resolve(__dirname, "..", "backend", "data", "autocountSalesOrder.js"));
 const say = (s = "") => console.log("  " + s);
 const cut = (s, n) => String(s == null ? "" : s).replace(/\s+/g, " ").trim().slice(0, n);
-const when = (v) => (v instanceof Date ? v.toISOString().replace("T", " ").slice(0, 19) + "Z" : String(v || ""));
+// AutoCount keeps plain Singapore time; the driver hands it back as if it were
+// UTC, so the UTC parts ARE the time AutoCount shows. No "Z": it is not UTC.
+const when = (v) => (v instanceof Date ? v.toISOString().replace("T", " ").slice(0, 19) : String(v || ""));
 
 (async () => {
   console.log("");
@@ -42,7 +44,7 @@ const when = (v) => (v instanceof Date ? v.toISOString().replace("T", " ").slice
     const head = await query("SELECT DocKey, DocNo, DocDate, Cancelled, CreatedUserID, LastModifiedUserID, CreatedTimeStamp, LastModified FROM SO WHERE DocNo = @d", { d: docNo });
     if (!head.length) { say(`${docNo}: not in AutoCount.`); say(""); continue; }
     const h = head[0];
-    say(`${docNo}   DocKey ${h.DocKey}   created ${when(h.CreatedTimeStamp)} by ${cut(h.CreatedUserID, 12)}, last saved ${when(h.LastModified)} by ${cut(h.LastModifiedUserID, 12)}${String(h.Cancelled).trim() === "T" ? "   CANCELLED" : ""}`);
+    say(`${docNo}   DocKey ${h.DocKey}   dated ${when(h.DocDate).slice(0, 10)}   created ${when(h.CreatedTimeStamp)} by ${cut(h.CreatedUserID, 12)}, last saved ${when(h.LastModified)} by ${cut(h.LastModifiedUserID, 12)}${String(h.Cancelled).trim() === "T" ? "   CANCELLED" : ""}`);
     const lines = await query("SELECT DtlKey, DocKey, Seq, ItemCode, Description, Guid FROM SODTL WHERE DocKey = @k ORDER BY Seq, DtlKey", { k: h.DocKey });
     for (const l of lines) say(`   DtlKey ${l.DtlKey}  Seq ${String(l.Seq).padStart(4)}  ${cut(l.ItemCode, 18).padEnd(18)} ${cut(l.Description, 40).padEnd(40)} ${cut(l.Guid, 36)}`);
     if (!lines.length) say("   (no lines)");
