@@ -3867,3 +3867,8 @@ details.vs-machine[open] > summary.vs-machine-name {
 .pkg-tag { display: inline-block; margin-left: 4px; padding: 0 6px; border-radius: 6px; font-size: .7rem;
   font-weight: 700; background: #E6F1FB; color: #185FA5; border: 1px solid #B5D4F4; white-space: nowrap; vertical-align: 1px; }
 .pkg-items { display: block; font-size: .75rem; color: #5F5E5A; margin-top: 2px; }
+
+/* Need to Quote's two sections, To quote and Waiting on customer (11 Nov 2026). */
+.q-sec { display: flex; justify-content: space-between; align-items: baseline; margin: 16px 2px 8px; font-size: .85rem; color: #55665f; }
+.q-sec:first-child { margin-top: 4px; }
+.q-sec b { font-weight: 600; }

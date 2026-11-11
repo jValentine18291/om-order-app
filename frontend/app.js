@@ -12796,34 +12796,44 @@ async function enterNeedToQuote() {
       refreshQuoteCount();
       return;
     }
-    // OLDEST FIRST, by how long a machine has actually been waiting rather
-    // than by slip number. The server has said "oldest first" since this
-    // screen was written and ordered by slip number, which is only the same
-    // thing while nobody sends a machine back a second time. The one the
-    // customer has been waiting on longest belongs at the top.
-    const waitDays = (s) => {
+    // TWO SECTIONS (John, 11 Nov 2026): machines still to be priced, and
+    // machines already quoted, waiting on the customer's answer - which used
+    // to drop off this page once "Mark as Quoted" was pressed. A slip with
+    // both is in both, each card naming only the machines that belong there.
+    //
+    // OLDEST FIRST in each, by how long a machine has actually been waiting
+    // rather than by slip number. The server has said "oldest first" since
+    // this screen was written and ordered by slip number, which is only the
+    // same thing while nobody sends a machine back a second time. The one the
+    // customer has been waiting on longest belongs at the top. For a machine
+    // waiting on the customer, that is since it was marked quoted.
+    const waitDays = (s, state) => {
       const times = (s.machines || [])
-        .filter((m) => m.state === "AWAITING_QUOTE")
+        .filter((m) => m.state === state)
         .map((m) => daysSince(m.decided_at || s.created_at))
         .filter((d) => d !== null);
       return times.length ? Math.max(...times) : (daysSince(s.created_at) || 0);
     };
-    rows.sort((a, b) => waitDays(b) - waitDays(a));
-
-    wrap.innerHTML = rows.map((s) => {
+    const card = (s, state) => {
       const all = s.machines || [];
       // Machines are quoted one at a time now, so the count on its own would be
       // misleading: two machines, one waiting, reads as two to price.
-      const waiting = all.filter((m) => m.state === "AWAITING_QUOTE");
+      const waiting = all.filter((m) => m.state === state);
       const list = (waiting.length ? waiting : all).map((m) => m.machine_desc);
       const machines = all.length;
-      const created = formatDate(s.created_at);
-      const waited = waitDays(s);
+      // To quote: when the slip came in. Waiting on the customer: when it was
+      // quoted, which is the date anyone ringing them will be asked about.
+      const quotedOn = waiting.map((m) => String(m.decided_at || "")).filter(Boolean).sort()[0];
+      const when = state === "QUOTED" && quotedOn
+        ? `<span>quoted</span> ${escapeHtml(formatDate(quotedOn))}` : escapeHtml(formatDate(s.created_at));
+      const pill = state === "QUOTED"
+        ? `<span class="vs-status vs-QUOTED">Waiting on customer</span>`
+        : `<span class="vs-status vs-NEED_QUOTE">Need to Quote</span>`;
       return `
       <button type="button" class="slip-card" data-slip="${escapeAttr(s.slip_number)}">
         <div class="slip-card-top">
           <strong>${escapeHtml(s.slip_number)}</strong>
-          <span class="vs-status vs-NEED_QUOTE">Need to Quote</span>
+          ${pill}
         </div>
         <div class="slip-card-co">${escapeHtml(s.company)}</div>
         <div class="slip-card-sub">${escapeHtml(list.join(", "))}${
@@ -12832,14 +12842,22 @@ async function enterNeedToQuote() {
           // date this could never be seen.
           waiting.length && waiting.length < machines
             ? ` · <span>${waiting.length} of ${machines}</span>` : ""
-        }${created ? " · " + escapeHtml(created) : ""}</div>
+        }${when ? " · " + when : ""}</div>
         <div class="slip-card-sub">${
           // The number this screen exists for. Marked past QUOTE_STALE_DAYS,
           // because a customer waiting on a price is what goes stale fastest.
-          waitedHtml(waited)
+          waitedHtml(waitDays(s, state))
         }</div>
       </button>`;
-    }).join("");
+    };
+    const section = (title, state) => {
+      const these = rows.filter((s) => (s.machines || []).some((m) => m.state === state))
+        .sort((a, b) => waitDays(b, state) - waitDays(a, state));
+      if (!these.length) return "";
+      return `<div class="q-sec"><span>${escapeHtml(title)}</span><b>${these.length}</b></div>` +
+        these.map((s) => card(s, state)).join("");
+    };
+    wrap.innerHTML = section("To quote", "AWAITING_QUOTE") + section("Waiting on customer", "QUOTED");
     // The View Slips slip window, opened over this list (John, 6 Oct 2026) -
     // every part with its price and the "Mark as Quoted" button, without
     // leaving Need to Quote. Closing it reads the list again.
@@ -12865,7 +12883,10 @@ async function refreshQuoteCount() {
   if (!tile || tile.style.display === "none") return;
   try {
     const rows = await api(`/api/slips?status=need_quote`);
-    const n = rows.length;
+    // Only the slips with something to price (John, 11 Nov 2026). The page
+    // also lists those waiting on the customer, but the number on the tile
+    // means what it always has: quotes sales still have to work out.
+    const n = rows.filter((s) => Number(s.to_quote) > 0).length;
     badge.textContent = String(n);
     badge.style.display = n ? "grid" : "none";
   } catch (_) {

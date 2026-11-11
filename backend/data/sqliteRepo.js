@@ -533,11 +533,18 @@ function listSlips(statusFilter = "active") {
     // which worked only while one machine's state was allowed to become the
     // whole slip's. It no longer is, and this is the truer question in any
     // case: what is on this screen is machines waiting to be quoted.
+    //
+    // AND machines already quoted, waiting on the customer's answer (John,
+    // 11 Nov 2026): they used to drop off once "Mark as Quoted" was pressed,
+    // and a customer who never rang back was then on no list sales look at.
+    // The page shows them in a section of their own; each row's to_quote and
+    // quote_waiting (withQuoteCounts) say which section, and the home tile
+    // counts only the slips with something to quote.
     rows = db.prepare(
       `SELECT * FROM service_slips s
         WHERE s.status != 'CLOSED'
           AND EXISTS (SELECT 1 FROM slip_machines m
-                       WHERE m.slip_id = s.id AND m.state = 'AWAITING_QUOTE')
+                       WHERE m.slip_id = s.id AND m.state IN ('AWAITING_QUOTE', 'QUOTED'))
         ORDER BY s.slip_number`
     ).all();
   } else if (statusFilter === "repaired" || statusFilter === "call_customer") {

@@ -91,12 +91,18 @@ data.slips.setMachineState(SLIP, m1, "QUOTED", "KS");
 data.slips.setMachineState(SLIP, m2, "QUOTED", "KS");
 check("the slip has not moved", statusOf(), "IN_PROGRESS");
 check("nothing left to quote, two waiting on the customer", counts(), [0, 2]);
-// Nothing is waiting on Sales any more, so it comes off their screen.
-check("and it leaves the Need to Quote screen", onQuoteScreen(), false);
+// It used to leave Need to Quote here. Since 11 Nov 2026 (John) it stays, in
+// the page's "Waiting on customer" section, until the customer answers - and
+// the home tile, which counts only slips with something to quote, drops it.
+const quoteRow = () => data.slips.listSlips("need_quote").find((s) => s.slip_number === SLIP);
+check("it stays on Need to Quote, waiting on the customer", onQuoteScreen(), true);
+check("with nothing to quote, so the home tile does not count it",
+  [quoteRow().to_quote, quoteRow().quote_waiting], [0, 2]);
 
 console.log("\n-- the customer answers: one repair, one condemned --");
 data.slips.setMachineState(SLIP, m1, "TO_REPAIR", "KS");
 data.slips.setMachineState(SLIP, m2, "CONDEMNED", "KS");
+check("once they have, it leaves Need to Quote", onQuoteScreen(), false);
 check("STILL in progress, which is the whole point", statusOf(), "IN_PROGRESS");
 check("and the counts are clear", counts(), [0, 0]);
 

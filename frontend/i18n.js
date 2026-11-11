@@ -361,6 +361,9 @@
     "Quote the rest too": "其余机器也要报价",
     "Waiting to quote": "等待报价",
     "Quoted": "已报价",
+    // Need to Quote's two sections (11 Nov 2026).
+    "To quote": "待报价",
+    "quoted": "报价于",
     "Mark as Quoted": "标记为已报价",
     "No quote needed": "无需报价",
     "Slip total": "服务单总额",
