@@ -192,11 +192,12 @@ const refs = (slip) => (slip.orders || []).map((o) => `${o.so_number}=${o.closin
   const who = async (no) => [await seen(no, "working"), await seen(no, "repaired")];
 
   // 00007 as it stands: four billed (two of them condemned), one on the bench,
-  // and the first order already invoiced. Since 29 Oct 2026 (John, slip 00239)
-  // that is the technicians' alone: its one order has its number, so there is
-  // nothing for sales to do until the bench machine is finished.
-  check("invoiced, one machine still on the bench: the technicians only",
-    await who(no7), [true, false]);
+  // and the first order already invoiced. From 29 Oct 2026 (John, slip 00239)
+  // that was the technicians' alone. Since 11 Nov 2026 (John, slip 00269) a
+  // billed machine nobody has collected yet keeps it in Close Service too, so
+  // sales can tick it off when the customer takes it.
+  check("invoiced, one machine still on the bench, billed ones not collected: both lists",
+    await who(no7), [true, true]);
 
   // Nothing has been taken away by that. Every other stage is unchanged.
   const mk = async (label, n) => data.slips.createSlip({

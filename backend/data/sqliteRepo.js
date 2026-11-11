@@ -468,6 +468,15 @@ const WORKING_SCOPE = `(
 // its search) until the last machine is finished, UNLESS one of its Sales
 // Orders is still waiting for its DO/CS/INV number: sales record that here,
 // so 00209's first batch keeps it on until they have.
+//
+// OR UNLESS A BILLED MACHINE IS STILL WAITING TO BE COLLECTED (John, 11 Nov
+// 2026). Slip 00269: seven of ten machines billed, both DOs recorded, the
+// customer collecting them in batches - and Close Service, the only place a
+// collection is ticked, did not show the slip because two machines were still
+// untouched. It stays on now until everything billed has gone; it still cannot
+// CLOSE until the last machine is billed (closeSlip says so, and so does the
+// slip's window). 00239's own case - its billed machine already collected -
+// still stays off.
 const CLOSE_SCOPE = `(
   (
        status IN ('REPAIRED', 'ALL_REPAIRED', 'CONVERTED', 'INVOICED', 'PART_SO', 'READY_TO_CLOSE')
@@ -496,6 +505,12 @@ const CLOSE_SCOPE = `(
       SELECT 1 FROM orders o
        WHERE o.notes = 'S/S: ' || service_slips.slip_number
          AND TRIM(IFNULL(o.closing_ref, '')) = ''
+    )
+    OR EXISTS (
+      SELECT 1 FROM slip_machines m
+       WHERE m.slip_id = service_slips.id
+         AND TRIM(IFNULL(m.converted_at, '')) != ''
+         AND TRIM(IFNULL(m.disposal, '')) = ''
     )
   )
 )`;

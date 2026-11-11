@@ -53,8 +53,16 @@ const where = async (no) => [await inList(no, "repaired"), await inSearch(no), a
   check("SO waiting for its number: sales see it, to record it", await where(a.slip_number), [true, true, true]);
   let slip = await data.slips.setSlipInvoiced(a.slip_number, "DO-TEST-1", "KS");
   check("its number recorded, so the slip says INVOICED", slip.status, "INVOICED");
-  check("and it leaves Close Service, list and search, but not the workshop",
+  // 00269, 11 Nov 2026: the billed machine is not collected yet, and Close
+  // Service is where that gets ticked - so the slip stays there for it.
+  check("its billed machine not collected yet: still in Close Service, to tick it",
+    await where(a.slip_number), [true, true, true]);
+  await data.slips.setMachineDisposal(a.slip_number, a2, "COLLECTED", "KS");
+  check("collected (00239 as it was): it leaves Close Service, list and search, but not the workshop",
     await where(a.slip_number), [false, false, true]);
+  let refused = "";
+  try { await data.slips.closeSlip(a.slip_number, "DO-TEST-1", "KS"); } catch (e) { refused = e.message; }
+  check("and it still cannot be closed with a machine on the bench", /Not on a Sales Order yet: W80P - 1\/2/.test(refused), true);
 
   console.log("\n-- the last machine is finished --");
   await data.slips.setMachineLabour(a1, 40);

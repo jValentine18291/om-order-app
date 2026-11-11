@@ -7777,6 +7777,14 @@ async function onCloseSlipChosen(slipNumber) {
       (m) => m.state === "CONDEMNED" && !String(m.disposal || "").trim()
         && String(m.converted_at || "").trim()
     );
+    // Machines not on any Sales Order (John, 11 Nov 2026, slip 00269). A slip
+    // now stays here while a billed machine waits to be collected, even with
+    // others still in the workshop, so say up front that it cannot close yet
+    // rather than only when Close is pressed. Condemned ones are covered above
+    // and in their own block below.
+    const unbilled = (slip.machines || []).filter(
+      (m) => m.state !== "CONDEMNED" && !String(m.converted_at || "").trim()
+    );
     // Company, slip and status are the window's own header now.
     $("cs-context").innerHTML =
       (String(slip.notes || "").trim() ? `<div class="cs-notes"><span>Notes</span>: ${escapeHtml(slip.notes)}</div>` : "") +
@@ -7791,6 +7799,10 @@ async function onCloseSlipChosen(slipNumber) {
           ? "was condemned and is still here. Tick it below if the customer took it, or record it under View Slips if we disposed of it."
           : "were condemned and are still here. Tick each one below if the customer took it, or record it under View Slips if we disposed of it."
       }</div>` : "") +
+      (unbilled.length && (slip.machines || []).some((m) => String(m.converted_at || "").trim()) ? `<div class="cs-blocked"><b>Cannot close yet</b>${
+        escapeHtml(unbilled.map((m) => machineLabel(slip, m)).join(", "))} ${
+        unbilled.length === 1 ? "is" : "are"} not on a Sales Order yet. Tick off below what the customer has collected; the slip can close once ${
+        unbilled.length === 1 ? "it is" : "they are"} billed too.</div>` : "") +
       csCondemnedHtml(slip) +
       csCollectHtml(slip) +
       (csNoInvoice() ? `<div class="sub cs-noinv">No Sales Order on this slip. If the customer is being charged, create the Sales Order first. If not, close it without an invoice.</div>` : "") +
