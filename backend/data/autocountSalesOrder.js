@@ -26,7 +26,7 @@
 // it can never write a duplicate.
 // ============================================================================
 
-const { query, execute } = require("./autocountConnection");
+const { query, execute, inTransaction } = require("./autocountConnection");
 
 const SR9 = { code: "SR9", rate: 9 };
 const SEQ_STEP = 16;      // AutoCount numbers lines 16, 32, 48 - room to insert
@@ -136,6 +136,55 @@ function clean(v, max = 200) {
     .trim()
     .slice(0, max);
 }
+// HOW WIDE A LINE'S DESCRIPTION MAY BE, asked of AutoCount once (11 Nov 2026).
+// Lines were cut at 200 characters, but SODTL.Description is narrower, and a
+// 160-character repair comment on slip 00289 was refused with "String or
+// binary data would be truncated". Read rather than assumed, the same as the
+// shelf width in autocountRepo.js; a conservative 60 if it cannot be read.
+let descWidthCache = null;
+async function descriptionWidth() {
+  if (descWidthCache !== null) return descWidthCache;
+  try {
+    const rows = await query(
+      `SELECT CHARACTER_MAXIMUM_LENGTH AS Len FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME = 'SODTL' AND COLUMN_NAME = 'Description'`
+    );
+    const n = rows.length ? Number(rows[0].Len) : 0;
+    descWidthCache = n === -1 ? 200 : (Number.isFinite(n) && n > 0 ? n : 60);
+  } catch (_) {
+    descWidthCache = 60;
+  }
+  return descWidthCache;
+}
+
+// A note too long for one line becomes several, rather than being cut short:
+// the technician's comment is the one thing on the order the customer reads
+// word for word. Its own line breaks are kept - a blank line between two
+// paragraphs starts a new line here too - and each line breaks between words.
+function noteLines(text, width) {
+  const out = [];
+  const paragraphs = String(text == null ? "" : text).replace(/\r/g, "").split(/\n+/)
+    .map((p) => p.replace(/[\t ]+/g, " ").trim()).filter(Boolean);
+  for (const p of paragraphs) {
+    let line = "";
+    for (const word of p.split(" ")) {
+      // A single word longer than a line is cut where it must be.
+      let w = word;
+      while (w.length > width) {
+        if (line) { out.push(line); line = ""; }
+        out.push(w.slice(0, width));
+        w = w.slice(width);
+      }
+      if (!w) continue;
+      if (!line) line = w;
+      else if (line.length + 1 + w.length <= width) line += " " + w;
+      else { out.push(line); line = w; }
+    }
+    if (line) out.push(line);
+  }
+  return out.length ? out : [""];
+}
+
 const guid = () =>
   "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
@@ -268,7 +317,7 @@ async function packagesFor(codes) {
 // the package's own; if the slip's price for the package differs from the sum
 // of them, they are scaled to it and the last item takes the odd cent, so the
 // items always add up to the package line exactly - as AutoCount's do.
-function packageRows(l, pkg, seq, date, desc2) {
+function packageRows(l, pkg, seq, date, desc2, width = 200) {
   const qty = Number(l.quantity) || 0;
   const price = money(l.unit_price);
   const sub = money(qty * price);
@@ -294,7 +343,7 @@ function packageRows(l, pkg, seq, date, desc2) {
 
   const parent = {
     Seq: seq, MainItem: "T", Location: LOCATION,
-    Description: clean(l.description || pkg.Description, 200),
+    Description: clean(l.description || pkg.Description, width),
     ...(pkg.UserUOM ? { UserUOM: pkg.UserUOM } : {}),
     Qty: qty, Rate: 1, SmallestQty: qty,
     UnitPrice: price, SmallestUnitPrice: price,
@@ -309,7 +358,7 @@ function packageRows(l, pkg, seq, date, desc2) {
   const children = kids.map((k, n) => ({
     Seq: (n + 1) * SEQ_STEP, MainItem: "T",
     ItemCode: k.i.ItemCode, Location: LOCATION,
-    Description: clean(k.i.Description || k.i.ItemCode, 200),
+    Description: clean(k.i.Description || k.i.ItemCode, width),
     Desc2: desc2[k.i.ItemCode] || "",
     UOM: k.i.UOM || "UNIT", UserUOM: k.i.UOM || "UNIT",
     Qty: k.kq, Rate: 1, SmallestQty: k.kq, SubQty: k.per,
@@ -391,6 +440,8 @@ async function buildRows({ slipNumber, debtorCode, contactName, contactNumber, s
   let totalTax = 0;
   const details = [];
   const subtotalAt = [];   // indexes of the subtotal rows, filled in afterwards
+  // AutoCount's own width for a line's description - see descriptionWidth().
+  const width = await descriptionWidth();
 
   lines.forEach((l, i) => {
     const seq = (i + 1) * SEQ_STEP;
@@ -419,18 +470,24 @@ async function buildRows({ slipNumber, debtorCode, contactName, contactNumber, s
     if (isNote) {
       // Note rows carry no item, quantity or price, but AutoCount still fills
       // in the tax code and the flags - an existing order shows exactly this.
-      details.push({
-        Seq: seq, MainItem: "T", Description: clean(l.description, 200),
-        Rate: 1, TaxType: SR9.code, TaxRate: SR9.rate,
-        Transferable: "T", PrintOut: "T", DtlType: "N", AddToSubTotal: "T",
-        StockReceived: "F", TransferedQty: 0,
-        DeliveryDate: date, Guid: guid(),
+      //
+      // One row per line of the note (11 Nov 2026), numbered on from this
+      // row's Seq into the gap before the next - SEQ_STEP leaves room for
+      // fifteen, far more than any comment has needed.
+      noteLines(l.description, width).slice(0, SEQ_STEP).forEach((text, n) => {
+        details.push({
+          Seq: seq + n, MainItem: "T", Description: text,
+          Rate: 1, TaxType: SR9.code, TaxRate: SR9.rate,
+          Transferable: "T", PrintOut: "T", DtlType: "N", AddToSubTotal: "T",
+          StockReceived: "F", TransferedQty: 0,
+          DeliveryDate: date, Guid: guid(),
+        });
       });
       return;
     }
 
     if (Number(l.is_package)) {
-      const r = packageRows(l, packages[l.item_code], seq, date, desc2);
+      const r = packageRows(l, packages[l.item_code], seq, date, desc2, width);
       const at = details.length;
       details.push(r.parent);
       for (const c of r.children) details.push({ ...c, _parent: at });
@@ -449,7 +506,7 @@ async function buildRows({ slipNumber, debtorCode, contactName, contactNumber, s
     details.push({
       Seq: seq, MainItem: "T",
       ItemCode: l.item_code, Location: LOCATION,
-      Description: clean(l.description, 200),
+      Description: clean(l.description, width),
       Desc2: desc2[l.item_code] || "",
       UOM: l.uom || "UNIT", UserUOM: l.uom || "UNIT",
       Qty: qty, Rate: 1, SmallestQty: qty,
@@ -608,13 +665,16 @@ async function createSalesOrder(payload, { dryRun = false } = {}) {
       LastModified: new Date(), CreatedTimeStamp: new Date(),
       LastModifiedUserID: who, CreatedUserID: who };
     try {
-      const h = insertSql("SO", header);
-      await execute(h.sql, h.params);
-
-      for (const row of keyedRows(built.details, docKey)) {
-        const q = insertSql("SODTL", row);
-        await execute(q.sql, q.params);
-      }
+      // All of it or none of it: a line AutoCount refuses takes the header
+      // and every line before it back out with it.
+      await inTransaction(async (run) => {
+        const h = insertSql("SO", header);
+        await run(h.sql, h.params);
+        for (const row of keyedRows(built.details, docKey)) {
+          const q = insertSql("SODTL", row);
+          await run(q.sql, q.params);
+        }
+      });
       return {
         dry_run: false,
         doc_no: built.docNo,

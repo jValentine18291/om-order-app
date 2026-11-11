@@ -118,4 +118,32 @@ async function execute(sqlText, params = {}) {
   return { rowsAffected: affected, recordset: result.recordset };
 }
 
-module.exports = { getPool, query, sql, execute };
+// Several writes as ONE: all of them land, or none do (11 Nov 2026). The
+// Sales Order writer inserted its header and then each line on its own, so
+// when line 8 of slip 00289's order was refused, the header and seven lines
+// stayed in AutoCount as SO-2611-040 while the app reported a failure and
+// kept its own placeholder number. `run` is execute() bound to the
+// transaction; anything thrown inside `fn` rolls the lot back.
+async function inTransaction(fn) {
+  const pool = await getPool();
+  const tx = new sql.Transaction(pool);
+  await tx.begin();
+  const run = async (sqlText, params = {}) => {
+    const request = new sql.Request(tx);
+    for (const [name, value] of Object.entries(params)) request.input(name, value);
+    const result = await request.query(sqlText);
+    const affected = Array.isArray(result.rowsAffected)
+      ? result.rowsAffected.reduce((a, b) => a + b, 0) : 0;
+    return { rowsAffected: affected, recordset: result.recordset };
+  };
+  try {
+    const out = await fn(run);
+    await tx.commit();
+    return out;
+  } catch (e) {
+    try { await tx.rollback(); } catch (_) { /* already gone: nothing was kept */ }
+    throw e;
+  }
+}
+
+module.exports = { getPool, query, sql, execute, inTransaction };
