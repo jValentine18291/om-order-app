@@ -656,12 +656,25 @@ async function buildRows({ slipNumber, debtorCode, contactName, contactNumber, s
 // column out entirely lets the default or NULL apply instead.
 const CODED = new Set(["SalesAgent", "BranchCode", "ShipVia", "ProjNo", "DeptNo", "Area", "SalesExemptionNo"]);
 
+// AutoCount's dates and times are Singapore wall-clock time, with no time zone
+// stored. The SQL driver turns a JavaScript Date into UTC on the way in, so
+// every date this file wrote landed eight hours early (found 11 Nov 2026):
+// SO-2611-044, sent at 11:16, showed as created at 03:16, and the DocDate of
+// SO-2611-039, sent on 10 Nov, read 9 Nov 16:00 - the day before. AutoCount's
+// own documents sit at midnight on the right day. So each Date is moved by the
+// server's own offset first, and the driver writes back exactly the wall-clock
+// time the server sees. Reading is unaffected: docDate() in autocountRepo.js
+// builds a date from its local parts, which come out the same either way.
+function wallClock(d) {
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+}
+
 function insertSql(table, row) {
   const cols = Object.keys(row).filter((c) => !(CODED.has(c) && String(row[c] || "") === ""));
   return {
     sql: `INSERT INTO [${table}] (${cols.map((c) => `[${c}]`).join(", ")}) ` +
          `VALUES (${cols.map((c) => "@" + c).join(", ")})`,
-    params: Object.fromEntries(cols.map((c) => [c, row[c]])),
+    params: Object.fromEntries(cols.map((c) => [c, row[c] instanceof Date ? wallClock(row[c]) : row[c]])),
   };
 }
 

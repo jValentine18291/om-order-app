@@ -40,6 +40,7 @@ async function query(sql, params = {}) {
 // A transaction that records what happened to it, and refuses the Nth line.
 // The counter is only moved if the transaction commits, as in SQL Server.
 let refuseLine = 0, linesSeen = 0, committed = false, rolledBack = false, inserted = [], keys = [], locked = false;
+let soParams = null, lineParams = null;
 async function inTransaction(fn) {
   committed = false; rolledBack = false; linesSeen = 0; inserted = []; keys = []; locked = false;
   let pending = counter;
@@ -55,6 +56,8 @@ async function inTransaction(fn) {
       if (linesSeen === refuseLine) throw new Error("String or binary data would be truncated.");
     }
     if (/INSERT INTO/.test(sql)) keys.push(params.DtlKey !== undefined ? params.DtlKey : params.DocKey);
+    if (/INSERT INTO \[SO\]/.test(sql)) soParams = params;
+    if (/INSERT INTO \[SODTL\]/.test(sql)) lineParams = params;
     inserted.push(sql.slice(0, 22));
     return { rowsAffected: 1 };
   };
@@ -146,6 +149,20 @@ const PAYLOAD = { slipNumber: "00289", debtorCode: "C0260", lines: LINES };
   const ahead = await so.createSalesOrder(PAYLOAD);
   check("with the counter ahead, keys start above the counter", ahead.doc_key, 2260001);
   check("and it moves on again", counter, 2260001 + keys.length);
+
+  console.log("\n-- dates and times go in as Singapore wall-clock time (11 Nov 2026) --");
+  // What the SQL driver does with a Date (useUTC, its default): it writes the
+  // UTC parts. AutoCount reads the column as plain local time.
+  const stored = (d) => d.toISOString().slice(0, 19).replace("T", " ");
+  const pad = (n) => String(n).padStart(2, "0");
+  const now = new Date();
+  const localDay = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  check("DocDate is today at midnight, not 4 pm the day before",
+    stored(soParams.DocDate), `${localDay} 00:00:00`);
+  check("a line's DeliveryDate likewise", stored(lineParams.DeliveryDate), `${localDay} 00:00:00`);
+  const localNow = `${localDay} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  check("created and last-saved read as the time on the server's clock, not 8 hours early",
+    [stored(soParams.CreatedTimeStamp).slice(0, 16), stored(soParams.LastModified).slice(0, 16)], [localNow, localNow]);
 
   check("the dry run's preview starts where a real write would, and moves nothing",
     [await so.nextKey(), counter], [counter + 1, 2260001 + keys.length]);
