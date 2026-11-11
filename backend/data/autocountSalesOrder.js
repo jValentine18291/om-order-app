@@ -693,4 +693,4 @@ async function createSalesOrder(payload, { dryRun = false } = {}) {
   throw new Error(`Could not allocate a document key after 4 tries: ${lastError && lastError.message}`);
 }
 
-module.exports = { createSalesOrder, buildRows, nextKey, nextDocNo, writebackEnabled, keyedRows };
+module.exports = { createSalesOrder, buildRows, nextKey, nextDocNo, writebackEnabled, keyedRows, KEY_TABLES };
