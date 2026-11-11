@@ -21,31 +21,44 @@ process.env.AUTOCOUNT_SO_WRITEBACK = "true";
 process.env.AUTOCOUNT_SO_USER = "ADMIN";
 
 const WIDTH = 100;   // what INFORMATION_SCHEMA is made to answer
+// AutoCount's key counter (Registry 32768) and the highest key in its tables.
+// The counter BEHIND the tables is what really happened on 10 Nov 2026.
+let counter = 2254929, maxInTables = 2254949;
 async function query(sql, params = {}) {
   if (/INFORMATION_SCHEMA/.test(sql)) return [{ Len: WIDTH }];
+  if (/FROM Registry/.test(sql)) return [{ RegValue: String(counter) }];
   if (/FROM Debtor/.test(sql)) return [{ CompanyName: "GREEN FOREST LANDSCAPE PTE LTD", DisplayTerm: "30 DAYS" }];
   if (/SELECT ItemCode, Desc2 FROM Item/.test(sql)) return [];
   if (/SELECT DocNo FROM SO/.test(sql)) return [{ DocNo: "SO-2611-042" }];
   if (/SELECT UserID FROM Users/.test(sql)) return [{ UserID: "ADMIN" }];
-  if (/MAX\(\[/.test(sql)) return [{ k: 2254914 }];
+  if (/MAX\(\[/.test(sql)) return [{ k: maxInTables }, { k: null }];
   if (/FROM ItemUOM WHERE/.test(sql)) return [{ UOM: "NOS" }];
   if (/SELECT TOP 1/.test(sql)) return [{ ok: 1 }];   // currency, terms, location, GL, tax
   throw new Error("unexpected query: " + sql.slice(0, 80));
 }
 
 // A transaction that records what happened to it, and refuses the Nth line.
-let refuseLine = 0, linesSeen = 0, committed = false, rolledBack = false, inserted = [];
+// The counter is only moved if the transaction commits, as in SQL Server.
+let refuseLine = 0, linesSeen = 0, committed = false, rolledBack = false, inserted = [], keys = [], locked = false;
 async function inTransaction(fn) {
-  committed = false; rolledBack = false; linesSeen = 0; inserted = [];
-  const run = async (sql, params) => {
+  committed = false; rolledBack = false; linesSeen = 0; inserted = []; keys = []; locked = false;
+  let pending = counter;
+  const run = async (sql, params = {}) => {
+    if (/SELECT RegValue FROM Registry/.test(sql)) {
+      locked = /UPDLOCK/.test(sql);
+      return { rowsAffected: 1, recordset: [{ RegValue: String(pending) }] };
+    }
+    if (/MAX\(\[/.test(sql)) return { rowsAffected: 0, recordset: [{ k: maxInTables }, { k: null }] };
+    if (/UPDATE Registry/.test(sql)) { pending = Number(params.v); return { rowsAffected: 1 }; }
     if (/INSERT INTO \[SODTL\]/.test(sql)) {
       linesSeen++;
       if (linesSeen === refuseLine) throw new Error("String or binary data would be truncated.");
     }
+    if (/INSERT INTO/.test(sql)) keys.push(params.DtlKey !== undefined ? params.DtlKey : params.DocKey);
     inserted.push(sql.slice(0, 22));
     return { rowsAffected: 1 };
   };
-  try { const out = await fn(run); committed = true; return out; }
+  try { const out = await fn(run); counter = pending; committed = true; return out; }
   catch (e) { rolledBack = true; inserted = []; throw e; }
 }
 const conn = path.resolve(__dirname, "..", "backend", "data", "autocountConnection.js");
@@ -109,10 +122,33 @@ const PAYLOAD = { slipNumber: "00289", debtorCode: "C0260", lines: LINES };
   check("and the header and earlier lines are rolled back, nothing committed",
     [rolledBack, committed, inserted.length], [true, false, 0]);
 
+  check("and AutoCount's key counter is left where it was", counter, 2254929);
+
   refuseLine = 0;
   const ok = await so.createSalesOrder(PAYLOAD);
   check("with nothing refused, it all goes in and is committed",
     [committed, rolledBack, ok.doc_no, inserted.filter((s) => /\[SO\]/.test(s)).length], [true, false, "SO-2611-043", 1]);
+
+  console.log("\n-- keys come from AutoCount's own counter (SO-2611-041, 11 Nov 2026) --");
+  // The counter was BEHIND keys already in use: start above both.
+  const n = keys.length;
+  check("the counter row is locked while the keys are taken", locked, true);
+  check("keys start above the highest in use, not at the stale counter",
+    [ok.doc_key, keys[0], keys[1]], [2254950, 2254950, 2254951]);
+  check("one key each, in a single unbroken run",
+    keys.every((k, i) => k === keys[0] + i), true);
+  check("the counter is moved past them all, with one to spare",
+    counter, keys[0] + n);
+
+  // The other way round: AutoCount's counter AHEAD of anything in the tables
+  // (keys it has handed out but not used yet). They must not be taken.
+  counter = 2260000; maxInTables = 2254949;
+  const ahead = await so.createSalesOrder(PAYLOAD);
+  check("with the counter ahead, keys start above the counter", ahead.doc_key, 2260001);
+  check("and it moves on again", counter, 2260001 + keys.length);
+
+  check("the dry run's preview starts where a real write would, and moves nothing",
+    [await so.nextKey(), counter], [counter + 1, 2260001 + keys.length]);
 
   console.log(failures ? `\n${failures} FAILED` : "\nall passed");
   process.exit(failures ? 1 : 0);

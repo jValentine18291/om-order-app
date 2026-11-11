@@ -14,16 +14,21 @@
 //     the columns, which are mandatory, how an existing order fills them in,
 //     and how AutoCount allocates its keys.
 //
-// KEY ALLOCATION
-// AutoCount has no counter table. Watching it create an order showed the next
-// key is simply the highest key anywhere in the document system plus one -
-// DocKey is a single sequence shared by every document type, so a Sales Order
-// and the Delivery Order it becomes sit either side of the same run.
+// KEY ALLOCATION (corrected 11 Nov 2026)
+// DocKey and DtlKey are one sequence shared by every document type, and
+// AutoCount keeps the counter for it in its Registry table, RegID 32768. The
+// app used to take "highest key in use + 1" instead, believing there was no
+// counter - so the counter never moved past the app's keys, AutoCount later
+// handed those same numbers to its own users, and an edit to SO-2611-041 was
+// refused with "Primary Key Error" (found with tools\show-so-keys.js and
+// tools\find-key-counter.js).
 //
-// Two people saving at the same moment could therefore pick the same key.
-// AutoCount has that race itself; we do better by letting the primary key
-// catch the clash and retrying with a fresh number. A collision costs a retry;
-// it can never write a duplicate.
+// Now the app RESERVES its keys from that counter inside the same transaction
+// as the insert, the counter row locked while it does: it starts above both
+// the counter and the highest key in use, and leaves the counter one past the
+// last key it took. That is safe whether AutoCount reads the value as "last
+// key used" or "next key free", and if the insert fails the reservation rolls
+// back with it.
 // ============================================================================
 
 const { query, execute, inTransaction } = require("./autocountConnection");
@@ -204,14 +209,48 @@ const KEY_TABLES = [
   ["ADJ", "DocKey"], ["ADJDTL", "DtlKey"], ["XFER", "DocKey"], ["XFERDTL", "DtlKey"],
   ["ISS", "DocKey"], ["ISSDTL", "DtlKey"], ["RCV", "DocKey"], ["RCVDTL", "DtlKey"],
   ["StockDTL", "DocKey"], ["StockTake", "DocKey"], ["XS", "DocKey"], ["XP", "DocKey"],
+  ["ASM", "DocKey"], ["ASMDTL", "DtlKey"], ["APDN", "DocKey"], ["APDNDTL", "DtlKey"],
 ];
 
+// AutoCount's own counter for that sequence (see KEY ALLOCATION at the top).
+const KEY_REG_ID = 32768;
+const MAX_KEY_SQL = KEY_TABLES.map(([t, c]) => `SELECT MAX([${c}]) AS k FROM [${t}]`).join(" UNION ALL ");
+const COUNTER_SQL = `SELECT RegValue FROM Registry WHERE RegID = ${KEY_REG_ID}`;
+
+function highest(rows) {
+  return (rows || []).reduce((m, r) => (r.k !== null && r.k !== undefined && Number(r.k) > m ? Number(r.k) : m), 0);
+}
+function counterValue(rows) {
+  if (!rows || !rows.length) throw new Error(`AutoCount's key counter (Registry ${KEY_REG_ID}) is missing.`);
+  const v = String(rows[0].RegValue == null ? "" : rows[0].RegValue).trim();
+  if (!/^\d+$/.test(v)) throw new Error(`AutoCount's key counter (Registry ${KEY_REG_ID}) reads "${v}", not a number.`);
+  return Number(v);
+}
+
+// Where the next reservation would start - for the dry run, which writes
+// nothing and so reserves nothing.
 async function nextKey() {
-  const parts = KEY_TABLES.map(([t, c]) => `SELECT MAX([${c}]) AS k FROM [${t}]`);
-  const rows = await query(parts.join(" UNION ALL "));
-  const top = rows.reduce((m, r) => (r.k !== null && Number(r.k) > m ? Number(r.k) : m), 0);
+  const counter = counterValue(await query(COUNTER_SQL));
+  const top = highest(await query(MAX_KEY_SQL));
   if (!top) throw new Error("Could not read AutoCount's document keys.");
-  return top + 1;
+  return Math.max(counter, top) + 1;
+}
+
+// Take `count` keys from AutoCount's counter, inside the caller's transaction.
+// The counter row is locked (UPDLOCK, HOLDLOCK) until that transaction ends, so
+// AutoCount and the app cannot both take the same block. Returns the first key;
+// the block is first .. first + count - 1, and the counter is left at
+// first + count - one spare, so either reading of the counter is safe.
+async function reserveKeys(run, count) {
+  const cur = await run(`SELECT RegValue FROM Registry WITH (UPDLOCK, HOLDLOCK) WHERE RegID = ${KEY_REG_ID}`);
+  const counter = counterValue(cur.recordset);
+  const top = highest((await run(MAX_KEY_SQL)).recordset);
+  if (!top) throw new Error("Could not read AutoCount's document keys.");
+  const first = Math.max(counter, top) + 1;
+  const done = await run(`UPDATE Registry SET RegValue = @v WHERE RegID = ${KEY_REG_ID}`,
+    { v: String(first + count) });
+  if (done.rowsAffected !== 1) throw new Error(`Could not move AutoCount's key counter (Registry ${KEY_REG_ID}).`);
+  return first;
 }
 
 // Numbered the way OM's other documents are: SO-YYMM-NNN, so August 2026 runs
@@ -647,9 +686,9 @@ async function createSalesOrder(payload, { dryRun = false } = {}) {
     };
   }
 
-  // Optimistic allocation: take the next key, and if another document claimed
-  // it in the meantime the primary key rejects the insert and we try again.
-  // A clash costs a retry; it can never write a duplicate.
+  // Keys are reserved from AutoCount's own counter inside the transaction (see
+  // reserveKeys). A clash should now be impossible; if one still happens the
+  // primary key refuses it, everything rolls back, and we try once more.
   const who = await resolveUser();
 
   const problems = await preflight(built.details, built.header);
@@ -660,14 +699,16 @@ async function createSalesOrder(payload, { dryRun = false } = {}) {
 
   let lastError = null;
   for (let attempt = 1; attempt <= 4; attempt++) {
-    const docKey = await nextKey();
-    const header = { DocKey: docKey, ...built.header,
-      LastModified: new Date(), CreatedTimeStamp: new Date(),
-      LastModifiedUserID: who, CreatedUserID: who };
+    let docKey = 0;
     try {
-      // All of it or none of it: a line AutoCount refuses takes the header
-      // and every line before it back out with it.
+      // All of it or none of it: a line AutoCount refuses takes the header,
+      // every line before it and the key reservation back out with it.
       await inTransaction(async (run) => {
+        // The header and one key per line, as one block.
+        docKey = await reserveKeys(run, 1 + built.details.length);
+        const header = { DocKey: docKey, ...built.header,
+          LastModified: new Date(), CreatedTimeStamp: new Date(),
+          LastModifiedUserID: who, CreatedUserID: who };
         const h = insertSql("SO", header);
         await run(h.sql, h.params);
         for (const row of keyedRows(built.details, docKey)) {
@@ -693,4 +734,4 @@ async function createSalesOrder(payload, { dryRun = false } = {}) {
   throw new Error(`Could not allocate a document key after 4 tries: ${lastError && lastError.message}`);
 }
 
-module.exports = { createSalesOrder, buildRows, nextKey, nextDocNo, writebackEnabled, keyedRows, KEY_TABLES };
+module.exports = { createSalesOrder, buildRows, nextKey, reserveKeys, nextDocNo, writebackEnabled, keyedRows, KEY_TABLES, KEY_REG_ID };
