@@ -1,0 +1,823 @@
+{
+ "id": "husa100",
+ "name": "Husqvarna A 100 Air Cleaner",
+ "source": "Husqvarna portal CSV export (A 100 Air Cleaner.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "ACCESSORIES",
+   "image": "husa100-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 19.655,
+     "y": 31.192,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 48.874,
+     "y": 31.086,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 80.63,
+     "y": 34.147,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 19.541,
+     "y": 61.654,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 36.06,
+     "y": 30.905,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 25.77,
+     "y": 64.488,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 77.074,
+     "y": 66.28,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 52.359,
+     "y": 68.192,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 85.326,
+     "y": 68.192,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "540228801",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER",
+     "qty": "1",
+     "remarks": "",
+     "search": "540228801"
+    },
+    {
+     "key": "2",
+     "part_number": "541543603",
+     "depth": 0,
+     "sub": false,
+     "description": "DUST COVER",
+     "qty": "1",
+     "remarks": "15-pack",
+     "search": "541543603"
+    },
+    {
+     "key": "3",
+     "part_number": "540215701",
+     "depth": 0,
+     "sub": false,
+     "description": "PREFILTER",
+     "qty": "1",
+     "remarks": "Washable  prefilter",
+     "search": "540215701"
+    },
+    {
+     "key": "4",
+     "part_number": "547029301",
+     "depth": 0,
+     "sub": false,
+     "description": "AIR FILTER",
+     "qty": "1",
+     "remarks": "H 13",
+     "search": "547029301"
+    },
+    {
+     "key": "4",
+     "part_number": "547029302",
+     "depth": 0,
+     "sub": false,
+     "description": "AIR FILTER",
+     "qty": "1",
+     "remarks": "H14",
+     "search": "547029302"
+    },
+    {
+     "key": "5",
+     "part_number": "547677501",
+     "depth": 0,
+     "sub": false,
+     "description": "FILTER",
+     "qty": "1",
+     "remarks": "PRE-FILTER, 15 pack",
+     "search": "547677501"
+    },
+    {
+     "key": "6",
+     "part_number": "548712603",
+     "depth": 0,
+     "sub": false,
+     "description": "INLET",
+     "qty": "1",
+     "remarks": "",
+     "search": "548712603"
+    },
+    {
+     "key": "7",
+     "part_number": "547677301",
+     "depth": 0,
+     "sub": false,
+     "description": "FILTER",
+     "qty": "1",
+     "remarks": "5-pack",
+     "search": "547677301"
+    },
+    {
+     "key": "8",
+     "part_number": "540215401",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER KIT",
+     "qty": "1",
+     "remarks": "20- pack",
+     "search": "540215401"
+    },
+    {
+     "key": "9",
+     "part_number": "540228901",
+     "depth": 0,
+     "sub": false,
+     "description": "RETAINER",
+     "qty": "1",
+     "remarks": "A 100",
+     "search": "540228901"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 ACCESSORIES"
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "CHASSIS COMPLETE",
+   "image": "husa100-fig2.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 34.236,
+     "y": 19.248,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 17.567,
+     "y": 23.677,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 79.304,
+     "y": 51.421,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 60.961,
+     "y": 72.838,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 75.078,
+     "y": 18.281,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 90.536,
+     "y": 39.155,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 63.947,
+     "y": 25.62,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 38.17,
+     "y": 27.417,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 17.809,
+     "y": 50.888,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 27.943,
+     "y": 55.609,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 34.92,
+     "y": 58.352,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 30.095,
+     "y": 62.525,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "540230801",
+     "depth": 0,
+     "sub": false,
+     "description": "FRAME ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "540230801"
+    },
+    {
+     "key": "2",
+     "part_number": "540230901",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "540230901"
+    },
+    {
+     "key": "3",
+     "part_number": "540231001",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "540231001"
+    },
+    {
+     "key": "4",
+     "part_number": "540231101",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "540231101"
+    },
+    {
+     "key": "5",
+     "part_number": "540231301",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "540231301"
+    },
+    {
+     "key": "6",
+     "part_number": "547096901",
+     "depth": 0,
+     "sub": false,
+     "description": "STRAP",
+     "qty": "1",
+     "remarks": "",
+     "search": "547096901"
+    },
+    {
+     "key": "7",
+     "part_number": "540199001",
+     "depth": 0,
+     "sub": false,
+     "description": "GUIDE PLATE",
+     "qty": "1",
+     "remarks": "",
+     "search": "540199001"
+    },
+    {
+     "key": "8",
+     "part_number": "540230501",
+     "depth": 0,
+     "sub": false,
+     "description": "HANDLE KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "540230501"
+    },
+    {
+     "key": "9",
+     "part_number": "548725401",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "548725401"
+    },
+    {
+     "key": "10",
+     "part_number": "540231201",
+     "depth": 0,
+     "sub": false,
+     "description": "FOOT",
+     "qty": "1",
+     "remarks": "",
+     "search": "540231201"
+    },
+    {
+     "key": "11",
+     "part_number": "540230701",
+     "depth": 0,
+     "sub": false,
+     "description": "BRAKE ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "540230701"
+    },
+    {
+     "key": "12",
+     "part_number": "540230601",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "540230601"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 CHASSIS COMPLETE"
+  },
+  {
+   "id": "3",
+   "number": "3",
+   "title": "DECAL KIT",
+   "image": "husa100-fig3.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 25.991,
+     "y": 93.777,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "540231401",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "540231401"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.3 DECAL KIT"
+  },
+  {
+   "id": "4",
+   "number": "4",
+   "title": "ELECTRICAL",
+   "image": "husa100-fig4.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 61.488,
+     "y": 22.087,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 86.709,
+     "y": 28.67,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 79.625,
+     "y": 38.546,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 94.299,
+     "y": 35.888,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 92.396,
+     "y": 41.928,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 86.16,
+     "y": 40.544,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 64.795,
+     "y": 40.71,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 77.737,
+     "y": 68.686,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 55.915,
+     "y": 40.519,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 47.634,
+     "y": 31.64,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 87.842,
+     "y": 62.837,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 55.637,
+     "y": 44.203,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 56.2,
+     "y": 33.87,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 59.635,
+     "y": 46.614,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 63.191,
+     "y": 51.945,
+     "conf": 100
+    },
+    {
+     "key": "15",
+     "x": 54.304,
+     "y": 49.649,
+     "conf": 100
+    },
+    {
+     "key": "16",
+     "x": 16.983,
+     "y": 51.95,
+     "conf": 100
+    },
+    {
+     "key": "17",
+     "x": 37.92,
+     "y": 50.782,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "540230001",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "540230001"
+    },
+    {
+     "key": "2",
+     "part_number": "540229001",
+     "depth": 0,
+     "sub": false,
+     "description": "PRINTED CIRCUIT BOARD",
+     "qty": "1",
+     "remarks": "EU/AU/JP/UK",
+     "search": "540229001"
+    },
+    {
+     "key": "2",
+     "part_number": "540229101",
+     "depth": 0,
+     "sub": false,
+     "description": "PRINTED CIRCUIT BOARD",
+     "qty": "1",
+     "remarks": "NA",
+     "search": "540229101"
+    },
+    {
+     "key": "3",
+     "part_number": "540229201",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATE KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "540229201"
+    },
+    {
+     "key": "4",
+     "part_number": "540229301",
+     "depth": 0,
+     "sub": false,
+     "description": "SENSOR",
+     "qty": "1",
+     "remarks": "",
+     "search": "540229301"
+    },
+    {
+     "key": "5",
+     "part_number": "540229401",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUR METER",
+     "qty": "1",
+     "remarks": "",
+     "search": "540229401"
+    },
+    {
+     "key": "6",
+     "part_number": "540229501",
+     "depth": 0,
+     "sub": false,
+     "description": "INLET",
+     "qty": "1",
+     "remarks": "",
+     "search": "540229501"
+    },
+    {
+     "key": "7",
+     "part_number": "540229601",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE KIT",
+     "qty": "1",
+     "remarks": "",
+     "search": "540229601"
+    },
+    {
+     "key": "8",
+     "part_number": "540229701",
+     "depth": 0,
+     "sub": false,
+     "description": "DIFFUSER",
+     "qty": "1",
+     "remarks": "",
+     "search": "540229701"
+    },
+    {
+     "key": "9",
+     "part_number": "540229801",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER ASSY",
+     "qty": "1",
+     "remarks": "EU/RoW/UK/JP",
+     "search": "540229801"
+    },
+    {
+     "key": "9",
+     "part_number": "540229901",
+     "depth": 0,
+     "sub": false,
+     "description": "COVER ASSY",
+     "qty": "1",
+     "remarks": "NA",
+     "search": "540229901"
+    },
+    {
+     "key": "10",
+     "part_number": "547574501",
+     "depth": 0,
+     "sub": false,
+     "description": "POWER CORD",
+     "qty": "1",
+     "remarks": "UK",
+     "search": "547574501"
+    },
+    {
+     "key": "10",
+     "part_number": "593741301",
+     "depth": 0,
+     "sub": false,
+     "description": "POWER CORD",
+     "qty": "1",
+     "remarks": "AU 10A",
+     "search": "593741301"
+    },
+    {
+     "key": "10",
+     "part_number": "593741302",
+     "depth": 0,
+     "sub": false,
+     "description": "POWER CORD",
+     "qty": "1",
+     "remarks": "EU/RoW",
+     "search": "593741302"
+    },
+    {
+     "key": "10",
+     "part_number": "593741304",
+     "depth": 0,
+     "sub": false,
+     "description": "POWER CORD",
+     "qty": "1",
+     "remarks": "JP",
+     "search": "593741304"
+    },
+    {
+     "key": "10",
+     "part_number": "593741306",
+     "depth": 0,
+     "sub": false,
+     "description": "POWER CORD",
+     "qty": "1",
+     "remarks": "NA",
+     "search": "593741306"
+    },
+    {
+     "key": "11",
+     "part_number": "546553106",
+     "depth": 0,
+     "sub": false,
+     "description": "KEYPAD",
+     "qty": "1",
+     "remarks": "EU/AU",
+     "search": "546553106"
+    },
+    {
+     "key": "11",
+     "part_number": "546553108",
+     "depth": 0,
+     "sub": false,
+     "description": "KEYPAD",
+     "qty": "1",
+     "remarks": "JP",
+     "search": "546553108"
+    },
+    {
+     "key": "11",
+     "part_number": "546553109",
+     "depth": 0,
+     "sub": false,
+     "description": "KEYPAD",
+     "qty": "1",
+     "remarks": "UK",
+     "search": "546553109"
+    },
+    {
+     "key": "11",
+     "part_number": "546553110",
+     "depth": 0,
+     "sub": false,
+     "description": "KEYPAD",
+     "qty": "1",
+     "remarks": "NA",
+     "search": "546553110"
+    },
+    {
+     "key": "12",
+     "part_number": "540973601",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "EU/AU/JP/UK",
+     "search": "540973601"
+    },
+    {
+     "key": "12",
+     "part_number": "548347402",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE KIT",
+     "qty": "1",
+     "remarks": "NA",
+     "search": "548347402"
+    },
+    {
+     "key": "13",
+     "part_number": "547080501",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH",
+     "qty": "1",
+     "remarks": "",
+     "search": "547080501"
+    },
+    {
+     "key": "14",
+     "part_number": "548227001",
+     "depth": 0,
+     "sub": false,
+     "description": "LIGHT",
+     "qty": "1",
+     "remarks": "",
+     "search": "548227001"
+    },
+    {
+     "key": "15",
+     "part_number": "546553202",
+     "depth": 0,
+     "sub": false,
+     "description": "KEYPAD",
+     "qty": "1",
+     "remarks": "",
+     "search": "546553202"
+    },
+    {
+     "key": "16",
+     "part_number": "540230101",
+     "depth": 0,
+     "sub": false,
+     "description": "INLET",
+     "qty": "1",
+     "remarks": "",
+     "search": "540230101"
+    },
+    {
+     "key": "17",
+     "part_number": "540230201",
+     "depth": 0,
+     "sub": false,
+     "description": "FAN MOTOR ASSY",
+     "qty": "1",
+     "remarks": "EU/RoW",
+     "search": "540230201"
+    },
+    {
+     "key": "17",
+     "part_number": "540230301",
+     "depth": 0,
+     "sub": false,
+     "description": "FAN MOTOR ASSY",
+     "qty": "1",
+     "remarks": "JP/UK",
+     "search": "540230301"
+    },
+    {
+     "key": "17",
+     "part_number": "540230401",
+     "depth": 0,
+     "sub": false,
+     "description": "FAN MOTOR ASSY",
+     "qty": "1",
+     "remarks": "NA",
+     "search": "540230401"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.4 ELECTRICAL"
+  }
+ ]
+}

@@ -790,5 +790,14 @@
   "category": "Chipper Shredder",
   "figures": 51,
   "parts": 1356
+ },
+ {
+  "id": "husa100",
+  "name": "Husqvarna A 100 Air Cleaner",
+  "short": "A 100",
+  "brand": "Husqvarna Construction",
+  "category": "Air Cleaner",
+  "figures": 4,
+  "parts": 52
  }
 ]

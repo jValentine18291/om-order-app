@@ -334,6 +334,11 @@ def main():
                                     "export does not list them the way the book runs.")
     ap.add_argument("--titles", help="text file of sheet titles, one per sheet, "
                                      "in the order --dry-run lists them")
+    ap.add_argument("--page-width", type=float,
+                    help="the width of the page the boxes were measured on, "
+                         "when it is NOT the image the portal serves. The A 100 "
+                         "(Nov 2026) serves 2472px sheets but measured its boxes "
+                         "on a 7016px page; its height follows the image's shape.")
     ap.add_argument("--cache", default=os.path.join(HERE, ".ipl-cache"))
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
@@ -459,6 +464,10 @@ def main():
         # still checks the hotspots.
         src = fetch(img_url, a.cache, cache_index[img_url])
         page_w, page_h = page_size(src)
+        # Usually the boxes ARE in the image's pixels. When they are not, the
+        # off-the-sheet check below stops the run and says to pass this.
+        if a.page_width:
+            page_w, page_h = a.page_width, page_h * a.page_width / page_w
 
         parts, spots = [], []
         for r in group:
@@ -523,8 +532,10 @@ def main():
         if off:
             sys.exit(
                 f"{label}: {len(off)} of {len(spots)} hotspots fall outside the "
-                f"{page_w}x{page_h} sheet (worst {max(max(h['x'], h['y']) for h in off):.1f}%). "
-                "Nothing written."
+                f"{page_w:.0f}x{page_h:.0f} sheet (worst {max(max(h['x'], h['y']) for h in off):.1f}%). "
+                "Nothing written. If the boxes were measured on a bigger page "
+                "than the image, draw them over it at a few scales and pass "
+                "the one that fits as --page-width."
             )
 
         if not a.dry_run:
