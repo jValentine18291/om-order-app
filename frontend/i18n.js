@@ -1023,6 +1023,7 @@
       "客户已签署此服务单。在此所做的任何修改都会记录在单上。",
     "Open the parts diagram": "打开零件图",
     "Open in Find Part": "在查找零件中打开",
+    "Back to": "返回",
 
     // ---- The Sales Order ----
     "Convert to Sales Order": "转为销售单",

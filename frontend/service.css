@@ -3872,3 +3872,12 @@ details.vs-machine[open] > summary.vs-machine-name {
 .q-sec { display: flex; justify-content: space-between; align-items: baseline; margin: 16px 2px 8px; font-size: .85rem; color: #55665f; }
 .q-sec:first-child { margin-top: 4px; }
 .q-sec b { font-weight: 600; }
+
+/* Find Part: the way back to the part an alternative was tapped from. */
+.fp-back {
+  display: block; width: 100%; margin: 0 0 10px; padding: 10px 12px;
+  border: 1px solid #cfe6d8; border-radius: 10px; background: #f3faf6;
+  color: #0a7f86; font: inherit; font-weight: 600; text-align: left; cursor: pointer;
+}
+.fp-back .mono { font-weight: 700; }
+.fp-back:active { opacity: .6; }

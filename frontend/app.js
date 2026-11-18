@@ -10863,8 +10863,14 @@ $("fp-q").addEventListener("input", () => {
 
 let fpCurrentPart = null; // the part shown in the Find Part detail card
 
-async function showPartStock(code) {
+// `trail` is the parts this one was reached from, oldest first - each an "If
+// out of stock, use" alternative tapped on the card before (John, 18 Nov
+// 2026). The last of them gets a link back at the top of the card, and going
+// back keeps the rest, so A -> B -> C walks back C -> B -> A.
+async function showPartStock(code, { trail = [] } = {}) {
   const detail = $("fp-detail");
+  const from = trail.length ? trail[trail.length - 1] : "";
+  if (from) $("fp-q").value = code;
   $("fp-results").innerHTML = "";
   detail.style.display = "block";
   $("fp-order-more").style.display = "none";
@@ -10877,7 +10883,9 @@ async function showPartStock(code) {
     renderRecentParts();          // now reading a part: stand the list down
     const qty = Number(p.bal_qty);
     const qtyStr = Number.isInteger(qty) ? String(qty) : qty.toFixed(2);
-    detail.innerHTML = `
+    detail.innerHTML = `${from
+        ? `<button type="button" class="fp-back" data-fp-back>&larr; ${escapeHtml(tr("Back to"))} <span class="mono">${escapeHtml(from)}</span></button>`
+        : ""}
       <div class="fp-row"><span class="fp-lbl">Part No.</span><span class="fp-val mono">${escapeHtml(p.item_code)}</span></div>
       <div class="fp-row"><span class="fp-lbl">Description</span><span class="fp-val">${escapeHtml(p.description)}</span></div>
       ${fitsRowHtml(p)}
@@ -10890,10 +10898,17 @@ async function showPartStock(code) {
     // is nothing to disambiguate before the button can be offered.
     iplPriceState = { code: p.item_code, itemCode: p.item_code };
     renderIplPriceButton(p.item_code, $("fp-part-price"));
-    wireShelfEdit(detail, p, (shelf) => { p.shelf = shelf; showPartStock(p.item_code); });
+    const back = detail.querySelector("[data-fp-back]");
+    if (back) back.addEventListener("click", () => {
+      $("fp-q").value = from;
+      showPartStock(from, { trail: trail.slice(0, -1) });
+    });
+    // A save re-opens the card; it keeps its way back.
+    const again = () => showPartStock(p.item_code, { trail });
+    wireShelfEdit(detail, p, (shelf) => { p.shelf = shelf; again(); });
     wireFits(detail);
-    renderPartNote(detail, p, () => showPartStock(p.item_code));
-    renderPartAlternatives(detail, p, () => showPartStock(p.item_code));
+    renderPartNote(detail, p, again);
+    renderPartAlternatives(detail, p, again, { trail });
   } catch (e) {
     detail.innerHTML = `<div class="fp-empty">${escapeHtml(e.message || "Lookup failed")}</div>`;
   }
@@ -11126,7 +11141,7 @@ function partNoteHtml(note, addIfEmpty = true) {
 // picker replacements use. Added at the foot of the card, below the price.
 // The parts books' replacements are listed here too (27 Oct 2026), tagged
 // "From parts book".
-async function renderPartAlternatives(container, part, onSaved) {
+async function renderPartAlternatives(container, part, onSaved, { trail = [] } = {}) {
   if (!container || !part || !part.item_code) return;
   let list = [];
   try { list = (await api(`/api/part-alternatives/${encodeURIComponent(part.item_code)}`)).results || []; } catch (_) {}
@@ -11151,8 +11166,14 @@ async function renderPartAlternatives(container, part, onSaved) {
   box.innerHTML = `<b class="repl-head">If out of stock, use</b>${rows || `<div class="mut">None yet.</div>`}${
     can ? `<button type="button" class="repl-add" data-alt-add>+ <span>${list.length ? "Another alternative" : "Add an alternative part"}</span></button>` : ""}`;
   container.appendChild(box);
+  // Straight to that part's own card, not a pop-up about it (John, 18 Nov
+  // 2026): out of stock, the next question is where the alternative is and
+  // whether to order it, and the card answers both.
   box.querySelectorAll("[data-part-code]").forEach((el) =>
-    el.addEventListener("click", () => peekAtPart(el.dataset.partCode)));
+    el.addEventListener("click", () => {
+      showPartStock(el.dataset.partCode, { trail: [...trail, part.item_code] });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }));
   const add = box.querySelector("[data-alt-add]");
   if (add) add.addEventListener("click", () =>
     openReplModal({ part_key: part.item_code, description: part.description, mode: "alt" }, onSaved));
@@ -11181,10 +11202,17 @@ async function renderPartNote(container, part, onSaved, { addIfEmpty = true } = 
   // above the details and before you have read them, is not that answer.
   const html = partNoteHtml(note, addIfEmpty);
   if (!html) return;
-  container.insertAdjacentHTML("afterbegin", html);
-  const btn = container.querySelector("[data-note-edit]");
+  // Under Find Part's "Back to" link, if the card has one: the way out first.
+  const back = container.querySelector(":scope > .fp-back");
+  if (back) back.insertAdjacentHTML("afterend", html);
+  else container.insertAdjacentHTML("afterbegin", html);
+  const noteEl = back ? back.nextElementSibling : container.firstElementChild;
+  const btn = noteEl.querySelector("[data-note-edit]") || (noteEl.matches("[data-note-edit]") ? noteEl : null);
   if (btn) btn.addEventListener("click", () => openNoteModal(part, note, onSaved));
-  container.querySelectorAll("[data-part-code]").forEach((el) =>
+  // Only the note's OWN codes. The alternatives box loads alongside this and
+  // can land first; wiring the whole card gave its codes a pop-up as well as
+  // their own card (18 Nov 2026).
+  noteEl.querySelectorAll("[data-part-code]").forEach((el) =>
     el.addEventListener("click", () => peekAtPart(el.dataset.partCode))
   );
 }
