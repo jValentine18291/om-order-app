@@ -105,10 +105,16 @@ check("but with the brand it is",
   match(machine("", "Husqvarna 365 chainsaw")), "hus365");
 // The property, over every short key in the catalogue rather than the one or
 // two worth naming: a name too short to stand alone never matches on its own.
-// "365" and "FLS" are both that short, and neither may carry a match by itself.
+// "365", "FLS" and "RS5" are all that short, and none may carry a match by
+// itself. RS5 is the EPOS Reference Station (19 Nov 2026): "Husqvarna RS5" finds
+// it, a bare "RS5" does not. Its short name is "RS5" as the drawing prints it,
+// not "RS 5" as the export's file name has it - written with the space it is
+// two words, "RS" and "5", and neither is the key.
 const shortKeys = [...new Set(INDEX.flatMap((e) => M.modelKeys(e))
   .filter((k) => k.length < M.STANDS_ALONE))];
-check("there are some, and they are the ones expected", shortKeys.sort(), ["365", "FLS"]);
+check("there are some, and they are the ones expected", shortKeys.sort(), ["365", "FLS", "RS5"]);
+check("RS5 needs its brand too",
+  [match(machine("", "RS5")), match(machine("", "Husqvarna RS5"))], ["", "husrs5"]);
 
 // The T525, which is why the line sits at four rather than five.
 //
@@ -200,10 +206,19 @@ check("another Automower claims none of them",
 // And three looked at and deliberately NOT given one: "365XP" is an older,
 // different saw (AutoCount holds none); "AM315" is the plain Automower 315,
 // which AutoCount holds apart from the Mark II; "CHT7500" is unconfirmed.
+//
+// And one on 19 Nov 2026, the EPOS Reference Station RS5. Its short name is
+// too short to stand alone, so a slip that says what the thing IS - "EPOS RS5",
+// "Reference Station" - would find nothing without these. "RS5" and
+// "Reference Station RS5" were tried and dropped: neither changed a match.
+//   husrs5      "EPOS RS5", "Reference Station"
 const withAliases = INDEX.filter((e) => e.aliases);
 check("only the machines that needed them have aliases",
   withAliases.map((e) => e.id).sort(),
-  ["am105", "am315xmkii", "am420iq", "am450x", "am535epos", "am550epos", "hus365", "hus520ilx", "hus536li"]);
+  ["am105", "am315xmkii", "am420iq", "am450x", "am535epos", "am550epos", "hus365", "hus520ilx", "hus536li", "husrs5"]);
+check("the Reference Station answers to what it is",
+  [match(machine("", "EPOS RS5")), match(machine("", "EPOS Reference Station")), match(machine("", "Automower 550 EPOS"))],
+  ["husrs5", "husrs5", "am550epos"]);
 check("the spellings off real slips find their books",
   [match(machine("", "365 Chainsaw")), match(machine("", "520lLX Battery Trimmer")), match(machine("", "EPOS 550"))],
   ["hus365", "hus520ilx", "am550epos"]);

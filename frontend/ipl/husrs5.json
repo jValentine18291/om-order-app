@@ -1,0 +1,405 @@
+{
+ "id": "husrs5",
+ "name": "Husqvarna EPOS Reference Station RS5",
+ "source": "Husqvarna portal CSV export (RS 5 EPOS Reference Station IPL.csv)",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "REFERENCE STATION",
+   "image": "husrs5-fig1.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 10.339,
+     "y": 38.712,
+     "conf": 100
+    },
+    {
+     "key": "2",
+     "x": 61.649,
+     "y": 34.92,
+     "conf": 100
+    },
+    {
+     "key": "3",
+     "x": 17.15,
+     "y": 61.759,
+     "conf": 100
+    },
+    {
+     "key": "4",
+     "x": 21.02,
+     "y": 72.363,
+     "conf": 100
+    },
+    {
+     "key": "5",
+     "x": 26.018,
+     "y": 81.77,
+     "conf": 100
+    },
+    {
+     "key": "6",
+     "x": 43.672,
+     "y": 67.375,
+     "conf": 100
+    },
+    {
+     "key": "7",
+     "x": 41.495,
+     "y": 86.588,
+     "conf": 100
+    },
+    {
+     "key": "8",
+     "x": 59.029,
+     "y": 56.2,
+     "conf": 100
+    },
+    {
+     "key": "9",
+     "x": 79.625,
+     "y": 40.009,
+     "conf": 100
+    },
+    {
+     "key": "10",
+     "x": 67.755,
+     "y": 89.039,
+     "conf": 100
+    },
+    {
+     "key": "11",
+     "x": 72.813,
+     "y": 9.122,
+     "conf": 100
+    },
+    {
+     "key": "12",
+     "x": 73.438,
+     "y": 19.57,
+     "conf": 100
+    },
+    {
+     "key": "13",
+     "x": 77.751,
+     "y": 29.433,
+     "conf": 100
+    },
+    {
+     "key": "14",
+     "x": 58.202,
+     "y": 5.544,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "529440101",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUSING ASSY",
+     "qty": "1",
+     "remarks": "Enclosure Kit",
+     "search": "529440101"
+    },
+    {
+     "key": "2",
+     "part_number": "599139803",
+     "depth": 0,
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY",
+     "qty": "1",
+     "remarks": "RTK module EU",
+     "search": "599139803"
+    },
+    {
+     "key": "2",
+     "part_number": "599139802",
+     "depth": 0,
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY",
+     "qty": "1",
+     "remarks": "RTK module US",
+     "search": "599139802"
+    },
+    {
+     "key": "2",
+     "part_number": "599139805",
+     "depth": 0,
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY",
+     "qty": "1",
+     "remarks": "RTK module AU",
+     "search": "599139805"
+    },
+    {
+     "key": "2",
+     "part_number": "599139806",
+     "depth": 0,
+     "sub": false,
+     "description": "PRINTED CIRCUIT ASSY",
+     "qty": "1",
+     "remarks": "RTK module NZ",
+     "search": "599139806"
+    },
+    {
+     "key": "3",
+     "part_number": "599911801",
+     "depth": 0,
+     "sub": false,
+     "description": "SEAL",
+     "qty": "1",
+     "remarks": "EPDM Seal",
+     "search": "599911801"
+    },
+    {
+     "key": "4",
+     "part_number": "599631901",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANM",
+     "qty": "4",
+     "remarks": "Screw",
+     "search": "599631901"
+    },
+    {
+     "key": "5",
+     "part_number": "598960502",
+     "depth": 0,
+     "sub": false,
+     "description": "ANTENNA",
+     "qty": "1",
+     "remarks": "Antenna",
+     "search": "598960502"
+    },
+    {
+     "key": "6",
+     "part_number": "577753702",
+     "depth": 0,
+     "sub": false,
+     "description": "AIR FILTER",
+     "qty": "1",
+     "remarks": "Air Filter, Goretext 14mm 10 pcs",
+     "search": "577753702"
+    },
+    {
+     "key": "7",
+     "part_number": "588222201",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW ITXPANM",
+     "qty": "1",
+     "remarks": "Screw",
+     "search": "588222201"
+    },
+    {
+     "key": "8",
+     "part_number": "529413201",
+     "depth": 0,
+     "sub": false,
+     "description": "ARM",
+     "qty": "1",
+     "remarks": "Link Arm kit",
+     "search": "529413201"
+    },
+    {
+     "key": "9",
+     "part_number": "529650701",
+     "depth": 0,
+     "sub": false,
+     "description": "BRACKET",
+     "qty": "1",
+     "remarks": "Post Bracker Kit",
+     "search": "529650701"
+    },
+    {
+     "key": "10",
+     "part_number": "599661501",
+     "depth": 0,
+     "sub": false,
+     "description": "PACKING ASSY",
+     "qty": "1",
+     "remarks": "Fixing Kit",
+     "search": "599661501"
+    },
+    {
+     "key": "11",
+     "part_number": "599354401",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE ASSY",
+     "qty": "1",
+     "remarks": "Low Voltage Cable, 20 m",
+     "search": "599354401"
+    },
+    {
+     "key": "12",
+     "part_number": "599677321",
+     "depth": 0,
+     "sub": false,
+     "description": "POWER UNIT",
+     "qty": "1",
+     "remarks": "Power Supply Unit EU",
+     "search": "599677321"
+    },
+    {
+     "key": "12",
+     "part_number": "599677322",
+     "depth": 0,
+     "sub": false,
+     "description": "POWER UNIT",
+     "qty": "1",
+     "remarks": "Power Supply Unit UK",
+     "search": "599677322"
+    },
+    {
+     "key": "12",
+     "part_number": "529532623",
+     "depth": 0,
+     "sub": false,
+     "description": "POWER UNIT",
+     "qty": "1",
+     "remarks": "Power Supply Unit CH",
+     "search": "529532623"
+    },
+    {
+     "key": "12",
+     "part_number": "529532624",
+     "depth": 0,
+     "sub": false,
+     "description": "POWER UNIT",
+     "qty": "1",
+     "remarks": "Power Supply Unit US",
+     "search": "529532624"
+    },
+    {
+     "key": "12",
+     "part_number": "599677325",
+     "depth": 0,
+     "sub": false,
+     "description": "POWER UNIT",
+     "qty": "1",
+     "remarks": "Power Supply Unit AU/NZ",
+     "search": "599677325"
+    },
+    {
+     "key": "13",
+     "part_number": "598936501",
+     "depth": 0,
+     "sub": false,
+     "description": "WIRING ASSY",
+     "qty": "1",
+     "remarks": "Power Cable",
+     "search": "598936501"
+    },
+    {
+     "key": "14",
+     "part_number": "970468201",
+     "depth": 0,
+     "sub": false,
+     "description": "REFERENCE STATION",
+     "qty": "1",
+     "remarks": "EU",
+     "search": "970468201"
+    },
+    {
+     "key": "14",
+     "part_number": "970468203",
+     "depth": 0,
+     "sub": false,
+     "description": "REFERENCE STATION",
+     "qty": "1",
+     "remarks": "GB, IE",
+     "search": "970468203"
+    },
+    {
+     "key": "14",
+     "part_number": "970468204",
+     "depth": 0,
+     "sub": false,
+     "description": "REFERENCE STATION",
+     "qty": "1",
+     "remarks": "CH",
+     "search": "970468204"
+    },
+    {
+     "key": "14",
+     "part_number": "970468205",
+     "depth": 0,
+     "sub": false,
+     "description": "REFERENCE STATION",
+     "qty": "1",
+     "remarks": "US, CA",
+     "search": "970468205"
+    },
+    {
+     "key": "14",
+     "part_number": "970468206",
+     "depth": 0,
+     "sub": false,
+     "description": "REFERENCE STATION",
+     "qty": "1",
+     "remarks": "NZ",
+     "search": "970468206"
+    },
+    {
+     "key": "14",
+     "part_number": "970468207",
+     "depth": 0,
+     "sub": false,
+     "description": "REFERENCE STATION",
+     "qty": "1",
+     "remarks": "AU",
+     "search": "970468207"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.1 REFERENCE STATION"
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "ACCESSORIES",
+   "image": "husrs5-fig2.png",
+   "ocr": false,
+   "hotspots": [
+    {
+     "key": "1",
+     "x": 49.879,
+     "y": 18.401,
+     "conf": 100
+    }
+   ],
+   "parts": [
+    {
+     "key": "1",
+     "part_number": "534971901",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER ASSY",
+     "qty": "1",
+     "remarks": "",
+     "search": "534971901"
+    },
+    {
+     "key": "1",
+     "part_number": "534971910",
+     "depth": 0,
+     "sub": false,
+     "description": "HOLDER ASSY",
+     "qty": "1",
+     "remarks": "US",
+     "search": "534971910"
+    }
+   ],
+   "sheets": 1,
+   "sheet": 1,
+   "label": "Fig.2 ACCESSORIES"
+  }
+ ]
+}

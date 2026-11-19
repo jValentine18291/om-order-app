@@ -66,8 +66,8 @@ const figures = index.reduce((n, m) => n + (Number(m.figures) || 0), 0);
 const expected = 1 + index.length + drawings + logos.length;
 const actual = pngs.length + jsons.length + logos.length;
 check("the app's total matches the folder", expected, actual);
-// 894 since the Husqvarna A 100 (16 Nov 2026): its JSON and 4 drawings.
-check("and that is what it is", actual, 894);
+// 897 since the Husqvarna RS 5 EPOS Reference Station (19 Nov 2026): its JSON and 2 drawings.
+check("and that is what it is", actual, 897);
 
 console.log("\n-- every drawing a book names is there --");
 const named = new Set();

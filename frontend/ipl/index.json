@@ -799,5 +799,18 @@
   "category": "Air Cleaner",
   "figures": 4,
   "parts": 52
+ },
+ {
+  "id": "husrs5",
+  "name": "Husqvarna EPOS Reference Station RS5",
+  "short": "RS5",
+  "brand": "Husqvarna",
+  "category": "Robotic Mower",
+  "figures": 2,
+  "parts": 28,
+  "aliases": [
+   "EPOS RS5",
+   "Reference Station"
+  ]
  }
 ]
