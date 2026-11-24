@@ -298,8 +298,10 @@ function signedShape(slip, machines) {
 // ---- The paper booklet's number ---------------------------------------------
 // John, 1 Oct 2026: slips are still written in the booklet too, and staff
 // quote both numbers. Optional, numbers only (his mock-up), kept as text so a
-// leading nought survives. Printed on the Sales Order only, ahead of the
-// app's: "S/S: 37016 / 00095".
+// leading nought survives. Printed ahead of the app's: "S/S: 37016 / 00095".
+// On the Sales Order from the start; on the Repair Quotation too since 24 Nov
+// 2026 (John) - the customer reads the quotation with the booklet's copy in
+// hand, and the two documents are meant to read the same.
 function cleanPhysicalSs(v) {
   const s = String(v == null ? "" : v).replace(/\s+/g, "");
   if (!s) return "";
@@ -1568,7 +1570,7 @@ function quotationForSlip(slipNumber, machineIds, opts) {
     e.status = 400; throw e;
   }
 
-  let lines = slipBlockLines(slip, wanted, all, extras, { quotation: true });
+  let lines = slipBlockLines(slip, wanted, all, extras, { quotation: true, physicalSs: true });
 
   // Sales can force one service item across the whole quotation, for a slip
   // written before the app knew a rider from a brushcutter.

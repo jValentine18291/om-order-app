@@ -5,8 +5,9 @@
 //
 // John, 1 Oct 2026: slips are written in the booklet as well, and staff quote
 // both numbers. Optional, numbers only, typed at registration and editable
-// later; printed on the Sales Order ONLY, ahead of the app's number -
-// "S/S: 37016 / 00095" - and searchable.
+// later; printed ahead of the app's number - "S/S: 37016 / 00095" - and
+// searchable. On the Sales Order, and since 24 Nov 2026 (John) on the Repair
+// Quotation as well, the same way.
 const path = require("path");
 const target = process.argv[2];
 const live = path.resolve(__dirname, "..", "backend", "om_orders.db");
@@ -55,7 +56,10 @@ async function billedSlip(company, physical_ss) {
   const a = await billedSlip("PHYSICAL SS A", " 37016 ");
   check("stored, spaces trimmed", (await data.slips.getSlip(a.s.slip_number)).physical_ss, "37016");
   const q = data.slips.quotationForSlip(a.s.slip_number);
-  check("NOT on the quotation", JSON.stringify(q.lines).includes("37016"), false);
+  const qLine = q.lines.find((l) => /S\/S:/.test(l.description || "")).description;
+  check("on the quotation, ahead of the app's number",
+    / S\/S: 37016 \/ \d{5}/.test(qLine), true);
+  console.log("        " + qLine);
   const so = await data.slips.createSlipOrder(a.s.slip_number, [a.id], "KS");
   check("on the Sales Order, ahead of the app's number",
     / S\/S: 37016 \/ \d{5}/.test(await machineLine(a.s.slip_number)), true);
