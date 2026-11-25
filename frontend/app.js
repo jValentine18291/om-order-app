@@ -3326,11 +3326,17 @@ async function enterOpenService() {
   }
 }
 
-// Render the active-slip list, filtered by the search box (number or company).
+// Render the active-slip list, filtered by the search box: the slip number,
+// the company, or the paper booklet's number (John, 25 Nov 2026 - View Slips
+// and Close Service already found a slip by it, Open Service did not). The
+// numbers are matched with spaces taken out, as the server's search does.
 function renderSlipList() {
   const q = ($("os-search").value || "").trim().toLowerCase();
+  const qn = q.replace(/\s+/g, "");
   const list = (session.allSlips || []).filter((s) =>
-    !q || s.slip_number.includes(q) || (s.company || "").toLowerCase().includes(q)
+    !q || s.slip_number.includes(qn) ||
+    (!!qn && String(s.physical_ss || "").includes(qn)) ||
+    (s.company || "").toLowerCase().includes(q)
   );
   const wrap = $("os-slip-list");
   if (!list.length) {
