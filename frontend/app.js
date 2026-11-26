@@ -14958,6 +14958,8 @@ const IPL_BRAND_COLOUR = {
   grasshopper: { fill: "#e01020", ink: "#d20f1e", logo: "grasshopper", w: 63 },
   pulsfog:     { fill: "#e12d3c", ink: "#d32a38", logo: "pulsfog",     w: 84 },
   rayco:       { fill: "#91691a", ink: "#886218", logo: "rayco",       w: 84 },
+  // Logo yellow #fdbb30 is 1.7:1 on white; darkened to clear 4.5:1 (26 Nov 2026).
+  wright:      { fill: "#956e1c", ink: "#956e1c", logo: "wright",      w: 79 },
 };
 // An unknown brand falls back to the app's own teal rather than to grey, so a
 // new brand looks deliberate on the day it lands.
@@ -15270,7 +15272,11 @@ function renderIplList() {
           <span class="k">${escapeHtml(p.key)}</span>
           <span class="d">
             <span class="n">${iplIndent(p)}${escapeHtml(p.description)}</span>
-            <span class="c mono">${escapeHtml(p.part_number)}${p.remarks ? " &middot; " + escapeHtml(p.remarks) : ""}</span>
+            <span class="c mono">${
+              // Wright books call parts out by their own number (26 Nov 2026),
+              // so the key on the left already IS the part number.
+              [p.part_number === p.key ? "" : escapeHtml(p.part_number),
+               p.remarks ? escapeHtml(p.remarks) : ""].filter(Boolean).join(" &middot; ")}</span>
           </span>
           <span class="q">${p.qty ? "&times;" + escapeHtml(p.qty) : ""}</span>
         </button>`).join("")

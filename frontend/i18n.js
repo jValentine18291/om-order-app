@@ -320,6 +320,8 @@
     "Grass Trimmer": "打草机",
     "Robotic Mower": "智能割草机",
     "Lawn Mower": "草坪机",
+    // The Wright Stander, driven standing up (26 Nov 2026).
+    "Stand-on Mower": "站立式割草机",
     "Power Cutter": "切割机",
     "Outboard": "舷外机",
     "Engine": "发动机",

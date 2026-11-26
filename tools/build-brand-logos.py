@@ -9,7 +9,12 @@ files marketing keeps at:
 
 Run it when a brand is added or its logo is redrawn:
 
-    python tools/build-brand-logos.py
+    python tools/build-brand-logos.py            <- every brand
+    python tools/build-brand-logos.py wright     <- just the ones named
+
+Naming the brand leaves the other plates alone: rebuilding them with a newer
+Pillow changes their bytes, and every phone then downloads seven logos that
+did not change.
 
 Writes frontend/ipl/brands/<brand>.png, one per brand, and prints the CSS width
 of each - which has to go into IPL_BRAND_COLOUR in frontend/app.js so the
@@ -47,6 +52,10 @@ BRANDS = [
     ("rayco",       f"{BRAND_DIR}/Rayco/Rayco.jpg",                       "#ffffff"),
     ("ferris",      f"{BRAND_DIR}/Ferris/Ferris Logo.png",                "#ffffff"),
     ("billygoat",   f"{BRAND_DIR}/Billygoat/Billy Goat Logo.jpg",         "#ffffff"),
+    # Wright (26 Nov 2026): John sent the logo for the first Wright book; the
+    # Wright folder under Brand Logos was empty, so it is read from where he
+    # saved it. Yellow artwork made for white.
+    ("wright",      os.path.expanduser("~/Downloads/Wright Logo.png"),   "#ffffff"),
 ]
 
 
@@ -78,7 +87,10 @@ def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     widths, total = [], 0
 
+    only = set(a.lower() for a in sys.argv[1:])
     for key, src, bg_hex in BRANDS:
+        if only and key not in only:
+            continue
         if not os.path.exists(src):
             print(f"  {key:12s} SKIPPED - not found: {src}")
             continue

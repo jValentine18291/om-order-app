@@ -1,0 +1,16 @@
+# Wright Stander B 36 (WSB36SFS600E1B) figure titles, in book order.
+# The book heads each with its assembly number and "(not sellable)"; the
+# number is kept in brackets so a figure can be found on parts.wrightmfg.com.
+Upright (WMI08016)
+Tractor (WMI08020)
+Decals (WMI08025)
+Electrical (WMI08017)
+Deck Lift (WMI08021)
+Fuel (WMI08011)
+Caster, Flat Free (WMI08018)
+Rear Drive (WMI08023)
+Engine, FS600V, Electric (WMI08028)
+Cutter Deck 36 (WMI08015)
+Engine, FS600, Electric (WMI08019)
+Hydro (WMI08024)
+Decal, 36in Deck Size

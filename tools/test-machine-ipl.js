@@ -212,10 +212,22 @@ check("another Automower claims none of them",
 // "Reference Station" - would find nothing without these. "RS5" and
 // "Reference Station RS5" were tried and dropped: neither changed a match.
 //   husrs5      "EPOS RS5", "Reference Station"
+//
+// And the first Wright, 26 Nov 2026. AutoCount holds two Stander B 36s that
+// differ only in the engine - UWRI WSB36SFS600E1B (FS600, this book) and UWRI
+// WSB36SFX6001B (FX600) - and both descriptions read "Stander B 36". So the
+// short name says "Stander B 36 FS600", which neither description contains,
+// and the book is reached by the FS600's own model code instead. The FX600 is
+// left without a book rather than given the wrong engine's parts.
+//   wrightsb36  "WSB36SFS600E1B"
 const withAliases = INDEX.filter((e) => e.aliases);
 check("only the machines that needed them have aliases",
   withAliases.map((e) => e.id).sort(),
-  ["am105", "am315xmkii", "am420iq", "am450x", "am535epos", "am550epos", "hus365", "hus520ilx", "hus536li", "husrs5"]);
+  ["am105", "am315xmkii", "am420iq", "am450x", "am535epos", "am550epos", "hus365", "hus520ilx", "hus536li", "husrs5", "wrightsb36"]);
+check("the FS600 Stander finds its book, the FX600 does not",
+  [match(machine("UWRI WSB36SFS600E1B", "WRIGHT WSB-36 Stander B 36'' Deck, 18.5hp KAWASAKI FS600 Electric Stand On Mower")),
+   match(machine("UWRI WSB36SFX6001B", "WRIGHT WSB-36 Stander B 36'' Deck, 19hp KAWASAKI FX600 Electric Stand On Mower"))],
+  ["wrightsb36", ""]);
 check("the Reference Station answers to what it is",
   [match(machine("", "EPOS RS5")), match(machine("", "EPOS Reference Station")), match(machine("", "Automower 550 EPOS"))],
   ["husrs5", "husrs5", "am550epos"]);

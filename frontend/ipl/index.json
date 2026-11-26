@@ -812,5 +812,17 @@
    "EPOS RS5",
    "Reference Station"
   ]
+ },
+ {
+  "id": "wrightsb36",
+  "name": "Wright Stander B 36 (Kawasaki FS600)",
+  "short": "Stander B 36 FS600",
+  "brand": "Wright",
+  "category": "Stand-on Mower",
+  "figures": 13,
+  "parts": 285,
+  "aliases": [
+   "WSB36SFS600E1B"
+  ]
  }
 ]

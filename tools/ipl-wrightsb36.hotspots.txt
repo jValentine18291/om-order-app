@@ -1,0 +1,24 @@
+# Wright Stander B 36 (WSB36SFS600E1B) - callouts placed by hand.
+# <figure> add <part number> <x%> <y%>, percentages of the drawing.
+# Each was looked at on the drawing (26 Nov 2026): every one has a line
+# running into its digits, which is why no reading pass finds it.
+#
+# Fig 1, Upright. The numbers the reader misses entirely...
+1 add 25470014 5.6 49.4
+1 add 93420222 19.7 48.9
+1 add 25470017 6.4 59.3
+1 add 12990052 49.3 60.6
+1 add 93490052 88.1 54.5
+1 add 93420246 95.7 55.1
+# ...and second callouts of parts it found once.
+1 add 11990027 12.2 48.9
+1 add 11990016 78.4 46.9
+1 add 93420242 35.7 81.3
+1 add 16410008 35.8 84.6
+1 add 13990010 18.4 62.4
+#
+# Fig 13 is the one sellable decal, drawn alone with no callout.
+13 add 76490015 48.4 48.3
+#
+# Not on any drawing, list only: 98420171 (fig 1), 36490001 the engine oil
+# (figs 9 and 11), 91410463 (fig 11).

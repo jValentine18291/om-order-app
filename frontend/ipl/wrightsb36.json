@@ -1,0 +1,4986 @@
+{
+ "id": "wrightsb36",
+ "name": "Wright Stander B 36 (Kawasaki FS600)",
+ "source": "Wright Stander B - WSB36SFS600E1B Kawasaki Engine.pdf",
+ "figures": [
+  {
+   "id": "1",
+   "number": "1",
+   "title": "Upright (WMI08016)",
+   "image": "wrightsb36-fig1.png",
+   "ocr": true,
+   "parts": [
+    {
+     "key": "11990012",
+     "part_number": "11990012",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, FLANGE 5/16-18 X 3/4 Z5",
+     "qty": "8",
+     "remarks": "",
+     "search": "11990012"
+    },
+    {
+     "key": "11990013",
+     "part_number": "11990013",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, FLANGE 5/16-18 X 1 Z5",
+     "qty": "1",
+     "remarks": "",
+     "search": "11990013"
+    },
+    {
+     "key": "11990016",
+     "part_number": "11990016",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE 3/8-16 X 1 Z5",
+     "qty": "7",
+     "remarks": "",
+     "search": "11990016"
+    },
+    {
+     "key": "11990024",
+     "part_number": "11990024",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW, TRUSS HD, PHILIPS 1/4-20 X 3/4 SS",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990024"
+    },
+    {
+     "key": "11990027",
+     "part_number": "11990027",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, HEX 5/16-18 X 1 Z5",
+     "qty": "5",
+     "remarks": "",
+     "search": "11990027"
+    },
+    {
+     "key": "11990028",
+     "part_number": "11990028",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, HEX 5/16-18 X 3/4 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990028"
+    },
+    {
+     "key": "11990063",
+     "part_number": "11990063",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW, TRUSS HD, PHILIPS 1/4-20 X 1/2 SS",
+     "qty": "4",
+     "remarks": "",
+     "search": "11990063"
+    },
+    {
+     "key": "11990065",
+     "part_number": "11990065",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, HEX 5/16-18 X 1 1/4 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990065"
+    },
+    {
+     "key": "11990068",
+     "part_number": "11990068",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, HEX 3/8-16 X 2 1/4 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990068"
+    },
+    {
+     "key": "11990070",
+     "part_number": "11990070",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, HEX 3/8-16 X 1 1/2 Z5",
+     "qty": "1",
+     "remarks": "",
+     "search": "11990070"
+    },
+    {
+     "key": "11990074",
+     "part_number": "11990074",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE, SHORT NECK, 3/8-16 X 3/4 Z5",
+     "qty": "3",
+     "remarks": "",
+     "search": "11990074"
+    },
+    {
+     "key": "11990129",
+     "part_number": "11990129",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE 3/8-16 X 1 1/4 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990129"
+    },
+    {
+     "key": "11990139",
+     "part_number": "11990139",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, TORX PLUS 1/4-20 X 1/2 TT 2000",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990139"
+    },
+    {
+     "key": "12990006",
+     "part_number": "12990006",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGE 1/4-20 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "12990006"
+    },
+    {
+     "key": "12990007",
+     "part_number": "12990007",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGE 5/16-18 Z5",
+     "qty": "3",
+     "remarks": "",
+     "search": "12990007"
+    },
+    {
+     "key": "12990008",
+     "part_number": "12990008",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGE 3/8-16 Z5",
+     "qty": "6",
+     "remarks": "",
+     "search": "12990008"
+    },
+    {
+     "key": "12990012",
+     "part_number": "12990012",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, U, 1/4-20, 11GA",
+     "qty": "4",
+     "remarks": "",
+     "search": "12990012"
+    },
+    {
+     "key": "12990021",
+     "part_number": "12990021",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, NYLOCK 5/16-18 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "12990021"
+    },
+    {
+     "key": "12990033",
+     "part_number": "12990033",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, NYLOCK, JAM 5/16-18 Z5",
+     "qty": "4",
+     "remarks": "",
+     "search": "12990033"
+    },
+    {
+     "key": "12990051",
+     "part_number": "12990051",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, NYLOCK 5/16-24 Z5",
+     "qty": "4",
+     "remarks": "",
+     "search": "12990051"
+    },
+    {
+     "key": "12990052",
+     "part_number": "12990052",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, JAM, 5/16-24, LH, Z",
+     "qty": "2",
+     "remarks": "",
+     "search": "12990052"
+    },
+    {
+     "key": "12990053",
+     "part_number": "12990053",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, JAM, 5/16-24 Z",
+     "qty": "2",
+     "remarks": "",
+     "search": "12990053"
+    },
+    {
+     "key": "12990065",
+     "part_number": "12990065",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGED NYLOCK, 3/8-16 Z5",
+     "qty": "10",
+     "remarks": "",
+     "search": "12990065"
+    },
+    {
+     "key": "12990086",
+     "part_number": "12990086",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, U, 5/16 - 18",
+     "qty": "8",
+     "remarks": "",
+     "search": "12990086"
+    },
+    {
+     "key": "13990010",
+     "part_number": "13990010",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER, FLAT USS 5/16 Z5",
+     "qty": "6",
+     "remarks": "",
+     "search": "13990010"
+    },
+    {
+     "key": "13990013",
+     "part_number": "13990013",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER, LOCK 5/16 Z5",
+     "qty": "4",
+     "remarks": "",
+     "search": "13990013"
+    },
+    {
+     "key": "13990041",
+     "part_number": "13990041",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER 3/8 X 1 1/2 X 0.15 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "13990041"
+    },
+    {
+     "key": "13990070",
+     "part_number": "13990070",
+     "depth": 0,
+     "sub": false,
+     "description": "TRIPLE WAVE WASHER, 1/2\"",
+     "qty": "3",
+     "remarks": "",
+     "search": "13990070"
+    },
+    {
+     "key": "14990014",
+     "part_number": "14990014",
+     "depth": 0,
+     "sub": false,
+     "description": "BUSHING, IGUS, CLIP 1/2 X .25",
+     "qty": "2",
+     "remarks": "",
+     "search": "14990014"
+    },
+    {
+     "key": "16410008",
+     "part_number": "16410008",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING, EXTENSION 5/8 X 2 1/2",
+     "qty": "3",
+     "remarks": "",
+     "search": "16410008"
+    },
+    {
+     "key": "16420002",
+     "part_number": "16420002",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING, EXTENSION 1 X 2 3/4",
+     "qty": "2",
+     "remarks": "",
+     "search": "16420002"
+    },
+    {
+     "key": "17460012",
+     "part_number": "17460012",
+     "depth": 0,
+     "sub": false,
+     "description": "BUMPER, RUBBER, BLACK",
+     "qty": "2",
+     "remarks": "",
+     "search": "17460012"
+    },
+    {
+     "key": "17470003",
+     "part_number": "17470003",
+     "depth": 0,
+     "sub": false,
+     "description": "GROMMET, 1.0 X 1.375 X 0.1875",
+     "qty": "1",
+     "remarks": "",
+     "search": "17470003"
+    },
+    {
+     "key": "18410012",
+     "part_number": "18410012",
+     "depth": 0,
+     "sub": false,
+     "description": "KNOB, PLASTIC, T",
+     "qty": "1",
+     "remarks": "",
+     "search": "18410012"
+    },
+    {
+     "key": "24420079",
+     "part_number": "24420079",
+     "depth": 0,
+     "sub": false,
+     "description": "ROD, THREADED 5/16-24 x 26.3125",
+     "qty": "2",
+     "remarks": "",
+     "search": "24420079"
+    },
+    {
+     "key": "25470014",
+     "part_number": "25470014",
+     "depth": 0,
+     "sub": false,
+     "description": "PM SS, 0.625 X 0.120 X 1.563",
+     "qty": "2",
+     "remarks": "",
+     "search": "25470014"
+    },
+    {
+     "key": "25470017",
+     "part_number": "25470017",
+     "depth": 0,
+     "sub": false,
+     "description": "PM, SS, STEPPED SPACER, 0.5 X 0.39 x 0.055",
+     "qty": "2",
+     "remarks": "",
+     "search": "25470017"
+    },
+    {
+     "key": "77410008",
+     "part_number": "77410008",
+     "depth": 0,
+     "sub": false,
+     "description": "ROD END, 5/16-24",
+     "qty": "2",
+     "remarks": "",
+     "search": "77410008"
+    },
+    {
+     "key": "77410009",
+     "part_number": "77410009",
+     "depth": 0,
+     "sub": false,
+     "description": "ROD END, 5/16-24 LH",
+     "qty": "2",
+     "remarks": "",
+     "search": "77410009"
+    },
+    {
+     "key": "93420118",
+     "part_number": "93420118",
+     "depth": 0,
+     "sub": false,
+     "description": "STATIONARY HANDLEBAR",
+     "qty": "1",
+     "remarks": "",
+     "search": "93420118"
+    },
+    {
+     "key": "93420222",
+     "part_number": "93420222",
+     "depth": 0,
+     "sub": false,
+     "description": "BRAKE INTERLOCK LINK",
+     "qty": "1",
+     "remarks": "",
+     "search": "93420222"
+    },
+    {
+     "key": "93420239",
+     "part_number": "93420239",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROLS THROUGH PIN WELDMENT, WSB, 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93420239"
+    },
+    {
+     "key": "93420240",
+     "part_number": "93420240",
+     "depth": 0,
+     "sub": false,
+     "description": "BRAKE RTN, RIGHT WSB, 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93420240"
+    },
+    {
+     "key": "93420241",
+     "part_number": "93420241",
+     "depth": 0,
+     "sub": false,
+     "description": "BRAKE RTN, LEFT, WSB, 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93420241"
+    },
+    {
+     "key": "93420242",
+     "part_number": "93420242",
+     "depth": 0,
+     "sub": false,
+     "description": "BRAKE PULL, LOWER, WSB 32/36",
+     "qty": "2",
+     "remarks": "",
+     "search": "93420242"
+    },
+    {
+     "key": "93420243",
+     "part_number": "93420243",
+     "depth": 0,
+     "sub": false,
+     "description": "BRAKE PULL, UPPER, WSB 32/36",
+     "qty": "2",
+     "remarks": "",
+     "search": "93420243"
+    },
+    {
+     "key": "93420244",
+     "part_number": "93420244",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL LEVER LOCK, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93420244"
+    },
+    {
+     "key": "93420245",
+     "part_number": "93420245",
+     "depth": 0,
+     "sub": false,
+     "description": "UPRIGHT PAD HINGE, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93420245"
+    },
+    {
+     "key": "93420246",
+     "part_number": "93420246",
+     "depth": 0,
+     "sub": false,
+     "description": "UPRIGHT BACK BRACE, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93420246"
+    },
+    {
+     "key": "93420247",
+     "part_number": "93420247",
+     "depth": 0,
+     "sub": false,
+     "description": "INSTRUMENT PANEL, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93420247"
+    },
+    {
+     "key": "93490052",
+     "part_number": "93490052",
+     "depth": 0,
+     "sub": false,
+     "description": "SERIAL LABEL COVER",
+     "qty": "1",
+     "remarks": "",
+     "search": "93490052"
+    },
+    {
+     "key": "98420167",
+     "part_number": "98420167",
+     "depth": 0,
+     "sub": false,
+     "description": "BRAKE HANDLE ASSEMBLY, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "98420167"
+    },
+    {
+     "key": "98420168",
+     "part_number": "98420168",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL LEVER ASSEMBLY, LEFT, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "98420168"
+    },
+    {
+     "key": "98420169",
+     "part_number": "98420169",
+     "depth": 0,
+     "sub": false,
+     "description": "CONTROL LEVER ASSEMBLY, RIGHT, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "98420169"
+    },
+    {
+     "key": "98420170",
+     "part_number": "98420170",
+     "depth": 0,
+     "sub": false,
+     "description": "UPRIGHT PAD, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "98420170"
+    },
+    {
+     "key": "98420171",
+     "part_number": "98420171",
+     "depth": 0,
+     "sub": false,
+     "description": "UPRIGHT FRAME, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "98420171"
+    }
+   ],
+   "hotspots": [
+    {
+     "key": "11990012",
+     "x": 95.916,
+     "y": 52.445,
+     "conf": 96
+    },
+    {
+     "key": "11990013",
+     "x": 70.348,
+     "y": 32.282,
+     "conf": 96
+    },
+    {
+     "key": "11990016",
+     "x": 55.172,
+     "y": 58.776,
+     "conf": 96
+    },
+    {
+     "key": "11990016",
+     "x": 78.4,
+     "y": 46.9,
+     "byHand": true
+    },
+    {
+     "key": "11990024",
+     "x": 36.733,
+     "y": 62.202,
+     "conf": 96
+    },
+    {
+     "key": "11990027",
+     "x": 73.248,
+     "y": 29.148,
+     "conf": 96
+    },
+    {
+     "key": "11990027",
+     "x": 12.2,
+     "y": 48.9,
+     "byHand": true
+    },
+    {
+     "key": "11990028",
+     "x": 57.492,
+     "y": 14.542,
+     "conf": 96
+    },
+    {
+     "key": "11990063",
+     "x": 56.622,
+     "y": 25.972,
+     "conf": 96
+    },
+    {
+     "key": "11990065",
+     "x": 16.796,
+     "y": 89.804,
+     "conf": 96
+    },
+    {
+     "key": "11990068",
+     "x": 9.014,
+     "y": 63.999,
+     "conf": 96
+    },
+    {
+     "key": "11990070",
+     "x": 52.876,
+     "y": 55.077,
+     "conf": 96
+    },
+    {
+     "key": "11990074",
+     "x": 80.232,
+     "y": 48.746,
+     "conf": 96
+    },
+    {
+     "key": "11990129",
+     "x": 4.012,
+     "y": 55.036,
+     "conf": 96
+    },
+    {
+     "key": "11990139",
+     "x": 81.779,
+     "y": 56.77,
+     "conf": 96
+    },
+    {
+     "key": "12990006",
+     "x": 36.781,
+     "y": 60.113,
+     "conf": 96
+    },
+    {
+     "key": "12990007",
+     "x": 82.141,
+     "y": 40.577,
+     "conf": 96
+    },
+    {
+     "key": "12990007",
+     "x": 35.814,
+     "y": 64.793,
+     "conf": 96
+    },
+    {
+     "key": "12990008",
+     "x": 67.811,
+     "y": 48.12,
+     "conf": 96
+    },
+    {
+     "key": "12990008",
+     "x": 54.954,
+     "y": 28.437,
+     "conf": 96
+    },
+    {
+     "key": "12990012",
+     "x": 59.401,
+     "y": 37.129,
+     "conf": 96
+    },
+    {
+     "key": "12990021",
+     "x": 59.304,
+     "y": 19.578,
+     "conf": 96
+    },
+    {
+     "key": "12990033",
+     "x": 36.781,
+     "y": 98.245,
+     "conf": 96
+    },
+    {
+     "key": "12990033",
+     "x": 22.62,
+     "y": 93.272,
+     "conf": 96
+    },
+    {
+     "key": "12990051",
+     "x": 42.847,
+     "y": 87.275,
+     "conf": 96
+    },
+    {
+     "key": "12990051",
+     "x": 55.099,
+     "y": 57.188,
+     "conf": 96
+    },
+    {
+     "key": "12990052",
+     "x": 49.3,
+     "y": 60.6,
+     "byHand": true
+    },
+    {
+     "key": "12990053",
+     "x": 50.314,
+     "y": 81.028,
+     "conf": 96
+    },
+    {
+     "key": "12990065",
+     "x": 81.271,
+     "y": 65.42,
+     "conf": 96
+    },
+    {
+     "key": "12990065",
+     "x": 36.805,
+     "y": 69.891,
+     "conf": 96
+    },
+    {
+     "key": "12990065",
+     "x": 3.601,
+     "y": 51.776,
+     "conf": 96
+    },
+    {
+     "key": "12990065",
+     "x": 21.17,
+     "y": 65.88,
+     "conf": 96
+    },
+    {
+     "key": "12990086",
+     "x": 59.546,
+     "y": 55.892,
+     "conf": 96
+    },
+    {
+     "key": "13990010",
+     "x": 43.958,
+     "y": 85.917,
+     "conf": 96
+    },
+    {
+     "key": "13990010",
+     "x": 18.4,
+     "y": 62.4,
+     "byHand": true
+    },
+    {
+     "key": "13990013",
+     "x": 75.568,
+     "y": 27.079,
+     "conf": 96
+    },
+    {
+     "key": "13990041",
+     "x": 74.553,
+     "y": 50.188,
+     "conf": 95
+    },
+    {
+     "key": "13990070",
+     "x": 51.184,
+     "y": 61.617,
+     "conf": 96
+    },
+    {
+     "key": "14990014",
+     "x": 20.203,
+     "y": 67.718,
+     "conf": 96
+    },
+    {
+     "key": "16410008",
+     "x": 19.768,
+     "y": 46.49,
+     "conf": 96
+    },
+    {
+     "key": "16410008",
+     "x": 35.8,
+     "y": 84.6,
+     "byHand": true
+    },
+    {
+     "key": "16420002",
+     "x": 5.196,
+     "y": 71.814,
+     "conf": 96
+    },
+    {
+     "key": "17460012",
+     "x": 88.183,
+     "y": 35.583,
+     "conf": 96
+    },
+    {
+     "key": "17470003",
+     "x": 82.189,
+     "y": 62.223,
+     "conf": 96
+    },
+    {
+     "key": "18410012",
+     "x": 83.905,
+     "y": 42.541,
+     "conf": 96
+    },
+    {
+     "key": "24420079",
+     "x": 50.193,
+     "y": 79.043,
+     "conf": 96
+    },
+    {
+     "key": "24420079",
+     "x": 35.017,
+     "y": 55.641,
+     "conf": 96
+    },
+    {
+     "key": "25470014",
+     "x": 5.6,
+     "y": 49.4,
+     "byHand": true
+    },
+    {
+     "key": "25470017",
+     "x": 6.4,
+     "y": 59.3,
+     "byHand": true
+    },
+    {
+     "key": "77410008",
+     "x": 50.024,
+     "y": 82.094,
+     "conf": 96
+    },
+    {
+     "key": "77410009",
+     "x": 38.014,
+     "y": 44.463,
+     "conf": 96
+    },
+    {
+     "key": "93420118",
+     "x": 63.436,
+     "y": 22.566,
+     "conf": 96
+    },
+    {
+     "key": "93420222",
+     "x": 19.7,
+     "y": 48.9,
+     "byHand": true
+    },
+    {
+     "key": "93420239",
+     "x": 78.927,
+     "y": 69.912,
+     "conf": 96
+    },
+    {
+     "key": "93420240",
+     "x": 11.213,
+     "y": 83.702,
+     "conf": 96
+    },
+    {
+     "key": "93420241",
+     "x": 20.42,
+     "y": 91.099,
+     "conf": 96
+    },
+    {
+     "key": "93420242",
+     "x": 26.535,
+     "y": 95.424,
+     "conf": 96
+    },
+    {
+     "key": "93420242",
+     "x": 35.7,
+     "y": 81.3,
+     "byHand": true
+    },
+    {
+     "key": "93420243",
+     "x": 34.026,
+     "y": 75.784,
+     "conf": 96
+    },
+    {
+     "key": "93420243",
+     "x": 9.087,
+     "y": 65.88,
+     "conf": 96
+    },
+    {
+     "key": "93420244",
+     "x": 35.114,
+     "y": 58.211,
+     "conf": 96
+    },
+    {
+     "key": "93420245",
+     "x": 93.934,
+     "y": 34.246,
+     "conf": 96
+    },
+    {
+     "key": "93420246",
+     "x": 95.7,
+     "y": 55.1,
+     "byHand": true
+    },
+    {
+     "key": "93420247",
+     "x": 26.051,
+     "y": 21.96,
+     "conf": 96
+    },
+    {
+     "key": "93490052",
+     "x": 88.1,
+     "y": 54.5,
+     "byHand": true
+    },
+    {
+     "key": "98420167",
+     "x": 33.978,
+     "y": 72.608,
+     "conf": 96
+    },
+    {
+     "key": "98420168",
+     "x": 32.939,
+     "y": 33.974,
+     "conf": 96
+    },
+    {
+     "key": "98420169",
+     "x": 21.774,
+     "y": 38.822,
+     "conf": 96
+    },
+    {
+     "key": "98420170",
+     "x": 68.149,
+     "y": 10.071,
+     "conf": 96
+    }
+   ]
+  },
+  {
+   "id": "2",
+   "number": "2",
+   "title": "Tractor (WMI08020)",
+   "image": "wrightsb36-fig2.png",
+   "ocr": true,
+   "parts": [
+    {
+     "key": "11990004",
+     "part_number": "11990004",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, HEX 3/8-16 X 2 1/2 Z5",
+     "qty": "1",
+     "remarks": "",
+     "search": "11990004"
+    },
+    {
+     "key": "11990012",
+     "part_number": "11990012",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, FLANGE 5/16-18 X 3/4 Z5",
+     "qty": "4",
+     "remarks": "",
+     "search": "11990012"
+    },
+    {
+     "key": "11990016",
+     "part_number": "11990016",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE 3/8-16 X 1 Z5",
+     "qty": "10",
+     "remarks": "",
+     "search": "11990016"
+    },
+    {
+     "key": "11990051",
+     "part_number": "11990051",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, HEX 1/2-13 X 4 Z5",
+     "qty": "1",
+     "remarks": "",
+     "search": "11990051"
+    },
+    {
+     "key": "11990059",
+     "part_number": "11990059",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE 5/16-18 X 3/4 Z5",
+     "qty": "5",
+     "remarks": "",
+     "search": "11990059"
+    },
+    {
+     "key": "11990060",
+     "part_number": "11990060",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE 5/16-18 X 1 Z5",
+     "qty": "1",
+     "remarks": "",
+     "search": "11990060"
+    },
+    {
+     "key": "11990066",
+     "part_number": "11990066",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, HEX 3/8-16 X 1 3/4 Z5",
+     "qty": "1",
+     "remarks": "",
+     "search": "11990066"
+    },
+    {
+     "key": "11990122",
+     "part_number": "11990122",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, EYE 1/2-13 X 4",
+     "qty": "1",
+     "remarks": "",
+     "search": "11990122"
+    },
+    {
+     "key": "11990183",
+     "part_number": "11990183",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE, 3/8-16 X 4 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990183"
+    },
+    {
+     "key": "11990199",
+     "part_number": "11990199",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, FLANGE 3/8 - 16 X 2.25",
+     "qty": "8",
+     "remarks": "",
+     "search": "11990199"
+    },
+    {
+     "key": "12990007",
+     "part_number": "12990007",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGE 5/16-18 Z5",
+     "qty": "4",
+     "remarks": "",
+     "search": "12990007"
+    },
+    {
+     "key": "12990065",
+     "part_number": "12990065",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGED NYLOCK, 3/8-16 Z5",
+     "qty": "22",
+     "remarks": "",
+     "search": "12990065"
+    },
+    {
+     "key": "12990066",
+     "part_number": "12990066",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGED NYLOCK, 5/16-18 Z5",
+     "qty": "6",
+     "remarks": "",
+     "search": "12990066"
+    },
+    {
+     "key": "12990076",
+     "part_number": "12990076",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGED NYLOCK, 1/2-13",
+     "qty": "2",
+     "remarks": "",
+     "search": "12990076"
+    },
+    {
+     "key": "13990010",
+     "part_number": "13990010",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER, FLAT USS 5/16 Z5",
+     "qty": "3",
+     "remarks": "",
+     "search": "13990010"
+    },
+    {
+     "key": "13990047",
+     "part_number": "13990047",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER, FENDER 1/2 X 1-1/2 X 16GA Z",
+     "qty": "1",
+     "remarks": "",
+     "search": "13990047"
+    },
+    {
+     "key": "14990007",
+     "part_number": "14990007",
+     "depth": 0,
+     "sub": false,
+     "description": "BUSHING, SYNTHETIC, 7/8ID X 1.14OD X 1",
+     "qty": "2",
+     "remarks": "",
+     "search": "14990007"
+    },
+    {
+     "key": "16460009",
+     "part_number": "16460009",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING, DIE, 2.5",
+     "qty": "1",
+     "remarks": "",
+     "search": "16460009"
+    },
+    {
+     "key": "17470003",
+     "part_number": "17470003",
+     "depth": 0,
+     "sub": false,
+     "description": "GROMMET, 1.0 X 1.375 X 0.1875",
+     "qty": "1",
+     "remarks": "",
+     "search": "17470003"
+    },
+    {
+     "key": "18410012",
+     "part_number": "18410012",
+     "depth": 0,
+     "sub": false,
+     "description": "KNOB, PLASTIC, T",
+     "qty": "1",
+     "remarks": "",
+     "search": "18410012"
+    },
+    {
+     "key": "25470009",
+     "part_number": "25470009",
+     "depth": 0,
+     "sub": false,
+     "description": "PM, ZINC, 0.875 X .188 X 1.5",
+     "qty": "2",
+     "remarks": "",
+     "search": "25470009"
+    },
+    {
+     "key": "71460189",
+     "part_number": "71460189",
+     "depth": 0,
+     "sub": false,
+     "description": "PULLEY, IDLER, 4 X 3/4 X 3/8 BORE, SHORT LIP",
+     "qty": "1",
+     "remarks": "",
+     "search": "71460189"
+    },
+    {
+     "key": "71460190",
+     "part_number": "71460190",
+     "depth": 0,
+     "sub": false,
+     "description": "BELT, EPDM, A SECTION, 61.04 EL",
+     "qty": "1",
+     "remarks": "",
+     "search": "71460190"
+    },
+    {
+     "key": "71460191",
+     "part_number": "71460191",
+     "depth": 0,
+     "sub": false,
+     "description": "PULLEY, V-IDLER, A/B GROOVE, 5 OD X 3/8 BORE",
+     "qty": "1",
+     "remarks": "",
+     "search": "71460191"
+    },
+    {
+     "key": "72490005",
+     "part_number": "72490005",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL, PLASTIC, HOOSIER, SPHERICAL, 5IN",
+     "qty": "2",
+     "remarks": "",
+     "search": "72490005"
+    },
+    {
+     "key": "91410466",
+     "part_number": "91410466",
+     "depth": 0,
+     "sub": false,
+     "description": "HEAT SHIELD, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "91410466"
+    },
+    {
+     "key": "91490022",
+     "part_number": "91490022",
+     "depth": 0,
+     "sub": false,
+     "description": "DOM, BLACK, 0.625 X 0.120 X 3.000",
+     "qty": "2",
+     "remarks": "",
+     "search": "91490022"
+    },
+    {
+     "key": "93410568",
+     "part_number": "93410568",
+     "depth": 0,
+     "sub": false,
+     "description": "UPPER WELDMENT, FRAME, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93410568"
+    },
+    {
+     "key": "93410569",
+     "part_number": "93410569",
+     "depth": 0,
+     "sub": false,
+     "description": "TRACTOR WELDMENT, WSBB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93410569"
+    },
+    {
+     "key": "93410571",
+     "part_number": "93410571",
+     "depth": 0,
+     "sub": false,
+     "description": "TOE PLATE, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93410571"
+    },
+    {
+     "key": "93410572",
+     "part_number": "93410572",
+     "depth": 0,
+     "sub": false,
+     "description": "FENDER, RIGHT, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93410572"
+    },
+    {
+     "key": "93410573",
+     "part_number": "93410573",
+     "depth": 0,
+     "sub": false,
+     "description": "FENDER, LEFT, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93410573"
+    },
+    {
+     "key": "93410574",
+     "part_number": "93410574",
+     "depth": 0,
+     "sub": false,
+     "description": "FUEL TANK SUPPORT, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93410574"
+    },
+    {
+     "key": "93410575",
+     "part_number": "93410575",
+     "depth": 0,
+     "sub": false,
+     "description": "ROLLER SUPPORT BRACKET, WSB 32/36",
+     "qty": "2",
+     "remarks": "",
+     "search": "93410575"
+    },
+    {
+     "key": "93410576",
+     "part_number": "93410576",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRO DRIVE TENSIONER ARM, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93410576"
+    },
+    {
+     "key": "93410578",
+     "part_number": "93410578",
+     "depth": 0,
+     "sub": false,
+     "description": "GUARD, HYDRO V-IDLER, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93410578"
+    },
+    {
+     "key": "98410431",
+     "part_number": "98410431",
+     "depth": 0,
+     "sub": false,
+     "description": "PLATFORM ASSEMBLY, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "98410431"
+    }
+   ],
+   "hotspots": [
+    {
+     "key": "11990004",
+     "x": 22.897,
+     "y": 85.542,
+     "conf": 96
+    },
+    {
+     "key": "11990012",
+     "x": 15.861,
+     "y": 46.375,
+     "conf": 96
+    },
+    {
+     "key": "11990016",
+     "x": 42.626,
+     "y": 33.792,
+     "conf": 96
+    },
+    {
+     "key": "11990016",
+     "x": 74.855,
+     "y": 54.25,
+     "conf": 96
+    },
+    {
+     "key": "11990051",
+     "x": 48.114,
+     "y": 92.458,
+     "conf": 96
+    },
+    {
+     "key": "11990059",
+     "x": 40.305,
+     "y": 66.75,
+     "conf": 96
+    },
+    {
+     "key": "11990059",
+     "x": 35.856,
+     "y": 21.0,
+     "conf": 96
+    },
+    {
+     "key": "11990060",
+     "x": 61.992,
+     "y": 18.708,
+     "conf": 96
+    },
+    {
+     "key": "11990066",
+     "x": 42.988,
+     "y": 68.375,
+     "conf": 96
+    },
+    {
+     "key": "11990122",
+     "x": 59.792,
+     "y": 84.0,
+     "conf": 96
+    },
+    {
+     "key": "11990183",
+     "x": 88.588,
+     "y": 43.958,
+     "conf": 96
+    },
+    {
+     "key": "11990199",
+     "x": 56.576,
+     "y": 58.833,
+     "conf": 96
+    },
+    {
+     "key": "12990007",
+     "x": 15.45,
+     "y": 44.958,
+     "conf": 96
+    },
+    {
+     "key": "12990065",
+     "x": 50.363,
+     "y": 60.792,
+     "conf": 96
+    },
+    {
+     "key": "12990065",
+     "x": 83.341,
+     "y": 60.542,
+     "conf": 96
+    },
+    {
+     "key": "12990065",
+     "x": 27.901,
+     "y": 89.625,
+     "conf": 96
+    },
+    {
+     "key": "12990065",
+     "x": 39.072,
+     "y": 64.375,
+     "conf": 96
+    },
+    {
+     "key": "12990065",
+     "x": 24.855,
+     "y": 23.583,
+     "conf": 96
+    },
+    {
+     "key": "12990066",
+     "x": 45.841,
+     "y": 13.625,
+     "conf": 96
+    },
+    {
+     "key": "12990066",
+     "x": 39.942,
+     "y": 62.5,
+     "conf": 96
+    },
+    {
+     "key": "12990066",
+     "x": 62.573,
+     "y": 17.0,
+     "conf": 96
+    },
+    {
+     "key": "12990076",
+     "x": 50.556,
+     "y": 71.625,
+     "conf": 96
+    },
+    {
+     "key": "12990076",
+     "x": 60.227,
+     "y": 90.583,
+     "conf": 96
+    },
+    {
+     "key": "13990010",
+     "x": 43.617,
+     "y": 69.792,
+     "conf": 96
+    },
+    {
+     "key": "13990010",
+     "x": 18.883,
+     "y": 73.792,
+     "conf": 96
+    },
+    {
+     "key": "13990010",
+     "x": 21.228,
+     "y": 83.75,
+     "conf": 96
+    },
+    {
+     "key": "13990047",
+     "x": 48.138,
+     "y": 89.0,
+     "conf": 96
+    },
+    {
+     "key": "14990007",
+     "x": 32.398,
+     "y": 91.625,
+     "conf": 96
+    },
+    {
+     "key": "16460009",
+     "x": 59.091,
+     "y": 87.0,
+     "conf": 96
+    },
+    {
+     "key": "17470003",
+     "x": 51.838,
+     "y": 63.208,
+     "conf": 96
+    },
+    {
+     "key": "18410012",
+     "x": 88.588,
+     "y": 13.625,
+     "conf": 95
+    },
+    {
+     "key": "25470009",
+     "x": 60.179,
+     "y": 81.583,
+     "conf": 96
+    },
+    {
+     "key": "71460189",
+     "x": 20.334,
+     "y": 82.083,
+     "conf": 96
+    },
+    {
+     "key": "71460190",
+     "x": 18.738,
+     "y": 79.458,
+     "conf": 96
+    },
+    {
+     "key": "71460191",
+     "x": 18.714,
+     "y": 76.625,
+     "conf": 96
+    },
+    {
+     "key": "72490005",
+     "x": 94.56,
+     "y": 45.417,
+     "conf": 96
+    },
+    {
+     "key": "91410466",
+     "x": 8.704,
+     "y": 42.125,
+     "conf": 96
+    },
+    {
+     "key": "91490022",
+     "x": 94.367,
+     "y": 48.75,
+     "conf": 96
+    },
+    {
+     "key": "93410568",
+     "x": 5.924,
+     "y": 67.167,
+     "conf": 96
+    },
+    {
+     "key": "93410569",
+     "x": 58.366,
+     "y": 55.083,
+     "conf": 92
+    },
+    {
+     "key": "93410571",
+     "x": 88.346,
+     "y": 16.75,
+     "conf": 96
+    },
+    {
+     "key": "93410572",
+     "x": 30.368,
+     "y": 28.792,
+     "conf": 96
+    },
+    {
+     "key": "93410573",
+     "x": 77.563,
+     "y": 38.167,
+     "conf": 96
+    },
+    {
+     "key": "93410574",
+     "x": 37.234,
+     "y": 16.75,
+     "conf": 96
+    },
+    {
+     "key": "93410575",
+     "x": 78.796,
+     "y": 57.625,
+     "conf": 96
+    },
+    {
+     "key": "93410576",
+     "x": 25.0,
+     "y": 87.833,
+     "conf": 96
+    },
+    {
+     "key": "93410578",
+     "x": 18.738,
+     "y": 72.042,
+     "conf": 96
+    },
+    {
+     "key": "98410431",
+     "x": 91.344,
+     "y": 22.75,
+     "conf": 96
+    }
+   ]
+  },
+  {
+   "id": "3",
+   "number": "3",
+   "title": "Decals (WMI08025)",
+   "image": "wrightsb36-fig3.png",
+   "ocr": true,
+   "parts": [
+    {
+     "key": "76490101",
+     "part_number": "76490101",
+     "depth": 0,
+     "sub": false,
+     "description": "MOWER PATENT NUMBERS REV. 7/7/11",
+     "qty": "1",
+     "remarks": "",
+     "search": "76490101"
+    },
+    {
+     "key": "76490154",
+     "part_number": "76490154",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL, HYDRO GEAR",
+     "qty": "1",
+     "remarks": "",
+     "search": "76490154"
+    },
+    {
+     "key": "76490223",
+     "part_number": "76490223",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL, KIT, CUTTER DECK",
+     "qty": "1",
+     "remarks": "",
+     "search": "76490223"
+    },
+    {
+     "key": "76490224",
+     "part_number": "76490224",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL, SERIAL LABEL, 3 X 8.79",
+     "qty": "1",
+     "remarks": "",
+     "search": "76490224"
+    },
+    {
+     "key": "76490225",
+     "part_number": "76490225",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL,UV SERIAL LAMINATE 2.75 X 4",
+     "qty": "1",
+     "remarks": "",
+     "search": "76490225"
+    },
+    {
+     "key": "76490226",
+     "part_number": "76490226",
+     "depth": 0,
+     "sub": false,
+     "description": "THERMAL RESIN RIBBON, BLACK, 4.10IN, SERIAL",
+     "qty": "12 IN",
+     "remarks": "",
+     "search": "76490226"
+    },
+    {
+     "key": "76490253",
+     "part_number": "76490253",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL, DASH, WSB",
+     "qty": "1",
+     "remarks": "",
+     "search": "76490253"
+    },
+    {
+     "key": "76490257",
+     "part_number": "76490257",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL, WRIGHT BRAND, BLACK",
+     "qty": "1",
+     "remarks": "",
+     "search": "76490257"
+    },
+    {
+     "key": "76490261",
+     "part_number": "76490261",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL, UV SERIAL LAMINATE, 1.25\" X 2.75\"",
+     "qty": "1",
+     "remarks": "",
+     "search": "76490261"
+    },
+    {
+     "key": "76490265",
+     "part_number": "76490265",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL, MASTER KIT, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "76490265"
+    }
+   ],
+   "hotspots": [
+    {
+     "key": "76490101",
+     "x": 13.515,
+     "y": 74.958,
+     "conf": 96
+    },
+    {
+     "key": "76490154",
+     "x": 15.45,
+     "y": 64.0,
+     "conf": 96
+    },
+    {
+     "key": "76490223",
+     "x": 88.225,
+     "y": 45.333,
+     "conf": 96
+    },
+    {
+     "key": "76490224",
+     "x": 87.427,
+     "y": 60.708,
+     "conf": 96
+    },
+    {
+     "key": "76490225",
+     "x": 48.259,
+     "y": 57.375,
+     "conf": 96
+    },
+    {
+     "key": "76490226",
+     "x": 15.691,
+     "y": 68.875,
+     "conf": 96
+    },
+    {
+     "key": "76490253",
+     "x": 85.953,
+     "y": 87.875,
+     "conf": 96
+    },
+    {
+     "key": "76490257",
+     "x": 90.667,
+     "y": 74.333,
+     "conf": 96
+    },
+    {
+     "key": "76490261",
+     "x": 13.515,
+     "y": 86.917,
+     "conf": 96
+    },
+    {
+     "key": "76490265",
+     "x": 88.225,
+     "y": 26.917,
+     "conf": 96
+    }
+   ]
+  },
+  {
+   "id": "4",
+   "number": "4",
+   "title": "Electrical (WMI08017)",
+   "image": "wrightsb36-fig4.png",
+   "ocr": true,
+   "parts": [
+    {
+     "key": "11990001",
+     "part_number": "11990001",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, HEX 1/4-20 X 5/8 Z",
+     "qty": "3",
+     "remarks": "",
+     "search": "11990001"
+    },
+    {
+     "key": "11990059",
+     "part_number": "11990059",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE 5/16-18 X 3/4 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990059"
+    },
+    {
+     "key": "12990007",
+     "part_number": "12990007",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGE 5/16-18 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "12990007"
+    },
+    {
+     "key": "12990019",
+     "part_number": "12990019",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGE NYLOCK 1/4-20 Z5",
+     "qty": "1",
+     "remarks": "",
+     "search": "12990019"
+    },
+    {
+     "key": "12990045",
+     "part_number": "12990045",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, TOPLOCK 1/4-20 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "12990045"
+    },
+    {
+     "key": "13990009",
+     "part_number": "13990009",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER, FLAT, USS 1/4 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "13990009"
+    },
+    {
+     "key": "15990014",
+     "part_number": "15990014",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE TIE, 11IN",
+     "qty": "14",
+     "remarks": "",
+     "search": "15990014"
+    },
+    {
+     "key": "52410003",
+     "part_number": "52410003",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH, OPC, 2 LB INT SPRING, BLK",
+     "qty": "1",
+     "remarks": "",
+     "search": "52410003"
+    },
+    {
+     "key": "52410019",
+     "part_number": "52410019",
+     "depth": 0,
+     "sub": false,
+     "description": "NO/NC SWITCH, SEALED, OPC, RAIL MOUNT",
+     "qty": "1",
+     "remarks": "",
+     "search": "52410019"
+    },
+    {
+     "key": "52420008",
+     "part_number": "52420008",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH, IGN, ELECT START W/ BELL KEY",
+     "qty": "1",
+     "remarks": "",
+     "search": "52420008"
+    },
+    {
+     "key": "52420014",
+     "part_number": "52420014",
+     "depth": 0,
+     "sub": false,
+     "description": "SWITCH, SEALED, BLADE, ON/OFF, RED",
+     "qty": "1",
+     "remarks": "",
+     "search": "52420014"
+    },
+    {
+     "key": "53490063",
+     "part_number": "53490063",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE, BATTERY, RED 42IN",
+     "qty": "1",
+     "remarks": "",
+     "search": "53490063"
+    },
+    {
+     "key": "53490072",
+     "part_number": "53490072",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE, BATTERY, BLACK, 32IN",
+     "qty": "1",
+     "remarks": "",
+     "search": "53490072"
+    },
+    {
+     "key": "53490078",
+     "part_number": "53490078",
+     "depth": 0,
+     "sub": false,
+     "description": "CHARGE WIRE, ENGINE CARBURETED, KAWASAKI",
+     "qty": "1",
+     "remarks": "",
+     "search": "53490078"
+    },
+    {
+     "key": "53490082",
+     "part_number": "53490082",
+     "depth": 0,
+     "sub": false,
+     "description": "HARNESS, ELECTRIC START, INTEGRATED",
+     "qty": "1",
+     "remarks": "",
+     "search": "53490082"
+    },
+    {
+     "key": "54420003",
+     "part_number": "54420003",
+     "depth": 0,
+     "sub": false,
+     "description": "HOUR METER, DIGITAL",
+     "qty": "1",
+     "remarks": "",
+     "search": "54420003"
+    },
+    {
+     "key": "54420038",
+     "part_number": "54420038",
+     "depth": 0,
+     "sub": false,
+     "description": "RETAINER, HOUR METER",
+     "qty": "1",
+     "remarks": "",
+     "search": "54420038"
+    },
+    {
+     "key": "56410001",
+     "part_number": "56410001",
+     "depth": 0,
+     "sub": false,
+     "description": "BATTERY, 12V 300 CCA MAINT FREE",
+     "qty": "1",
+     "remarks": "",
+     "search": "56410001"
+    },
+    {
+     "key": "91410468",
+     "part_number": "91410468",
+     "depth": 0,
+     "sub": false,
+     "description": "BATTERY TRAY, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "91410468"
+    },
+    {
+     "key": "96420003",
+     "part_number": "96420003",
+     "depth": 0,
+     "sub": false,
+     "description": "FUSE BOX BRACKET",
+     "qty": "1",
+     "remarks": "",
+     "search": "96420003"
+    },
+    {
+     "key": "98410025",
+     "part_number": "98410025",
+     "depth": 0,
+     "sub": false,
+     "description": "BATTERY STRAP",
+     "qty": "1",
+     "remarks": "",
+     "search": "98410025"
+    },
+    {
+     "key": "98410432",
+     "part_number": "98410432",
+     "depth": 0,
+     "sub": false,
+     "description": "BATTERY COVER, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "98410432"
+    }
+   ],
+   "hotspots": [
+    {
+     "key": "11990001",
+     "x": 85.977,
+     "y": 87.167,
+     "conf": 96
+    },
+    {
+     "key": "11990001",
+     "x": 55.73,
+     "y": 16.333,
+     "conf": 96
+    },
+    {
+     "key": "11990059",
+     "x": 50.967,
+     "y": 68.625,
+     "conf": 96
+    },
+    {
+     "key": "12990007",
+     "x": 53.361,
+     "y": 78.375,
+     "conf": 96
+    },
+    {
+     "key": "12990019",
+     "x": 55.827,
+     "y": 26.042,
+     "conf": 96
+    },
+    {
+     "key": "12990045",
+     "x": 69.681,
+     "y": 61.625,
+     "conf": 96
+    },
+    {
+     "key": "13990009",
+     "x": 84.792,
+     "y": 90.667,
+     "conf": 96
+    },
+    {
+     "key": "15990014",
+     "x": 37.307,
+     "y": 65.083,
+     "conf": 96
+    },
+    {
+     "key": "52410003",
+     "x": 53.288,
+     "y": 50.417,
+     "conf": 96
+    },
+    {
+     "key": "52410019",
+     "x": 62.403,
+     "y": 60.333,
+     "conf": 96
+    },
+    {
+     "key": "52420008",
+     "x": 29.473,
+     "y": 6.375,
+     "conf": 96
+    },
+    {
+     "key": "52420014",
+     "x": 50.629,
+     "y": 6.292,
+     "conf": 96
+    },
+    {
+     "key": "53490063",
+     "x": 46.881,
+     "y": 72.792,
+     "conf": 96
+    },
+    {
+     "key": "53490072",
+     "x": 64.144,
+     "y": 92.792,
+     "conf": 96
+    },
+    {
+     "key": "53490078",
+     "x": 20.164,
+     "y": 92.792,
+     "conf": 96
+    },
+    {
+     "key": "53490082",
+     "x": 32.084,
+     "y": 40.625,
+     "conf": 96
+    },
+    {
+     "key": "54420003",
+     "x": 22.05,
+     "y": 18.0,
+     "conf": 96
+    },
+    {
+     "key": "54420038",
+     "x": 20.164,
+     "y": 24.125,
+     "conf": 96
+    },
+    {
+     "key": "56410001",
+     "x": 93.81,
+     "y": 64.042,
+     "conf": 96
+    },
+    {
+     "key": "91410468",
+     "x": 94.004,
+     "y": 82.583,
+     "conf": 95
+    },
+    {
+     "key": "96420003",
+     "x": 53.989,
+     "y": 19.25,
+     "conf": 96
+    },
+    {
+     "key": "98410025",
+     "x": 64.168,
+     "y": 17.042,
+     "conf": 96
+    },
+    {
+     "key": "98410432",
+     "x": 60.01,
+     "y": 30.083,
+     "conf": 96
+    }
+   ]
+  },
+  {
+   "id": "5",
+   "number": "5",
+   "title": "Deck Lift (WMI08021)",
+   "image": "wrightsb36-fig5.png",
+   "ocr": true,
+   "parts": [
+    {
+     "key": "11990006",
+     "part_number": "11990006",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, HEX 3/8-16 X 2 3/4 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990006"
+    },
+    {
+     "key": "11990016",
+     "part_number": "11990016",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE 3/8-16 X 1 Z5",
+     "qty": "8",
+     "remarks": "",
+     "search": "11990016"
+    },
+    {
+     "key": "11990080",
+     "part_number": "11990080",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, HEX 1/2-20 X 2 1/2 Z8",
+     "qty": "1",
+     "remarks": "",
+     "search": "11990080"
+    },
+    {
+     "key": "11990137",
+     "part_number": "11990137",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, HEX 1/2-13 X2 Z5",
+     "qty": "1",
+     "remarks": "",
+     "search": "11990137"
+    },
+    {
+     "key": "11990190",
+     "part_number": "11990190",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE, 3/8 - 16 X 2 3/4 Z5",
+     "qty": "6",
+     "remarks": "",
+     "search": "11990190"
+    },
+    {
+     "key": "11990192",
+     "part_number": "11990192",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, HEX, 1/2-13 X 1.5",
+     "qty": "1",
+     "remarks": "",
+     "search": "11990192"
+    },
+    {
+     "key": "12990038",
+     "part_number": "12990038",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, NYLOCK 1/2-20 Z5",
+     "qty": "1",
+     "remarks": "",
+     "search": "12990038"
+    },
+    {
+     "key": "12990065",
+     "part_number": "12990065",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGED NYLOCK, 3/8-16 Z5",
+     "qty": "16",
+     "remarks": "",
+     "search": "12990065"
+    },
+    {
+     "key": "12990076",
+     "part_number": "12990076",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGED NYLOCK, 1/2-13",
+     "qty": "2",
+     "remarks": "",
+     "search": "12990076"
+    },
+    {
+     "key": "13990010",
+     "part_number": "13990010",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER, FLAT USS 5/16 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "13990010"
+    },
+    {
+     "key": "13990034",
+     "part_number": "13990034",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER, FLAT .5 X 1 1/2 X 1/4 Z",
+     "qty": "1",
+     "remarks": "",
+     "search": "13990034"
+    },
+    {
+     "key": "13990047",
+     "part_number": "13990047",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER, FENDER 1/2 X 1-1/2 X 16GA Z",
+     "qty": "9",
+     "remarks": "",
+     "search": "13990047"
+    },
+    {
+     "key": "14990008",
+     "part_number": "14990008",
+     "depth": 0,
+     "sub": false,
+     "description": "BUSHING, SPLIT, 1.0 X 0.875",
+     "qty": "4",
+     "remarks": "",
+     "search": "14990008"
+    },
+    {
+     "key": "15990061",
+     "part_number": "15990061",
+     "depth": 0,
+     "sub": false,
+     "description": "CHAIN, 5/16 X 3 LINK",
+     "qty": "4",
+     "remarks": "",
+     "search": "15990061"
+    },
+    {
+     "key": "25470011",
+     "part_number": "25470011",
+     "depth": 0,
+     "sub": false,
+     "description": "PM, ZINC, 0.875 X 0.188 X 0.625",
+     "qty": "1",
+     "remarks": "",
+     "search": "25470011"
+    },
+    {
+     "key": "25470012",
+     "part_number": "25470012",
+     "depth": 0,
+     "sub": false,
+     "description": "PM, ZINC, 0.750 X 0.125 X 0.406",
+     "qty": "4",
+     "remarks": "",
+     "search": "25470012"
+    },
+    {
+     "key": "93410545",
+     "part_number": "93410545",
+     "depth": 0,
+     "sub": false,
+     "description": "FRONT DECK LIFT AXLE, WSB",
+     "qty": "1",
+     "remarks": "",
+     "search": "93410545"
+    },
+    {
+     "key": "93410546",
+     "part_number": "93410546",
+     "depth": 0,
+     "sub": false,
+     "description": "REAR DECK LIFT AXLE, WSB",
+     "qty": "1",
+     "remarks": "",
+     "search": "93410546"
+    },
+    {
+     "key": "93410550",
+     "part_number": "93410550",
+     "depth": 0,
+     "sub": false,
+     "description": "DECK ADJUSTER, 5/16 CHAIN",
+     "qty": "4",
+     "remarks": "",
+     "search": "93410550"
+    },
+    {
+     "key": "93410553",
+     "part_number": "93410553",
+     "depth": 0,
+     "sub": false,
+     "description": "BUSHING CRADLE, WSB",
+     "qty": "4",
+     "remarks": "",
+     "search": "93410553"
+    },
+    {
+     "key": "93410583",
+     "part_number": "93410583",
+     "depth": 0,
+     "sub": false,
+     "description": "FRONT PUSH PLATE, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93410583"
+    },
+    {
+     "key": "93410584",
+     "part_number": "93410584",
+     "depth": 0,
+     "sub": false,
+     "description": "REAR PUSH PLATE, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93410584"
+    },
+    {
+     "key": "98410149",
+     "part_number": "98410149",
+     "depth": 0,
+     "sub": false,
+     "description": "PIN, HEIGHT SELECT .5 X 1.625 W LANYARD",
+     "qty": "1",
+     "remarks": "",
+     "search": "98410149"
+    },
+    {
+     "key": "98410433",
+     "part_number": "98410433",
+     "depth": 0,
+     "sub": false,
+     "description": "GEAR BOX, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "98410433"
+    },
+    {
+     "key": "98410434",
+     "part_number": "98410434",
+     "depth": 0,
+     "sub": false,
+     "description": "TARILING ARM ASSEMBLY, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "98410434"
+    },
+    {
+     "key": "98410435",
+     "part_number": "98410435",
+     "depth": 0,
+     "sub": false,
+     "description": "HEIGHT SELECT ASSEMBLY, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "98410435"
+    }
+   ],
+   "hotspots": [
+    {
+     "key": "11990006",
+     "x": 9.043,
+     "y": 60.458,
+     "conf": 96
+    },
+    {
+     "key": "11990016",
+     "x": 31.794,
+     "y": 71.917,
+     "conf": 96
+    },
+    {
+     "key": "11990016",
+     "x": 77.103,
+     "y": 60.792,
+     "conf": 96
+    },
+    {
+     "key": "11990080",
+     "x": 88.298,
+     "y": 51.375,
+     "conf": 96
+    },
+    {
+     "key": "11990137",
+     "x": 60.348,
+     "y": 49.167,
+     "conf": 96
+    },
+    {
+     "key": "11990190",
+     "x": 11.557,
+     "y": 71.5,
+     "conf": 96
+    },
+    {
+     "key": "11990192",
+     "x": 34.115,
+     "y": 50.542,
+     "conf": 96
+    },
+    {
+     "key": "12990038",
+     "x": 72.872,
+     "y": 26.5,
+     "conf": 96
+    },
+    {
+     "key": "12990065",
+     "x": 59.357,
+     "y": 71.417,
+     "conf": 96
+    },
+    {
+     "key": "12990065",
+     "x": 8.438,
+     "y": 67.792,
+     "conf": 96
+    },
+    {
+     "key": "12990076",
+     "x": 28.457,
+     "y": 28.917,
+     "conf": 96
+    },
+    {
+     "key": "12990076",
+     "x": 11.46,
+     "y": 36.458,
+     "conf": 96
+    },
+    {
+     "key": "13990010",
+     "x": 9.26,
+     "y": 63.208,
+     "conf": 96
+    },
+    {
+     "key": "13990034",
+     "x": 69.463,
+     "y": 48.583,
+     "conf": 96
+    },
+    {
+     "key": "13990047",
+     "x": 28.989,
+     "y": 31.042,
+     "conf": 96
+    },
+    {
+     "key": "13990047",
+     "x": 13.685,
+     "y": 39.167,
+     "conf": 96
+    },
+    {
+     "key": "13990047",
+     "x": 33.897,
+     "y": 35.5,
+     "conf": 96
+    },
+    {
+     "key": "13990047",
+     "x": 73.332,
+     "y": 29.542,
+     "conf": 96
+    },
+    {
+     "key": "13990047",
+     "x": 58.849,
+     "y": 46.833,
+     "conf": 96
+    },
+    {
+     "key": "13990047",
+     "x": 46.494,
+     "y": 40.75,
+     "conf": 96
+    },
+    {
+     "key": "13990047",
+     "x": 66.344,
+     "y": 43.833,
+     "conf": 96
+    },
+    {
+     "key": "13990047",
+     "x": 30.561,
+     "y": 48.875,
+     "conf": 96
+    },
+    {
+     "key": "13990047",
+     "x": 8.075,
+     "y": 51.333,
+     "conf": 96
+    },
+    {
+     "key": "14990008",
+     "x": 9.067,
+     "y": 58.25,
+     "conf": 96
+    },
+    {
+     "key": "15990061",
+     "x": 57.012,
+     "y": 65.0,
+     "conf": 96
+    },
+    {
+     "key": "25470011",
+     "x": 67.698,
+     "y": 46.208,
+     "conf": 96
+    },
+    {
+     "key": "25470012",
+     "x": 7.423,
+     "y": 48.875,
+     "conf": 96
+    },
+    {
+     "key": "25470012",
+     "x": 49.178,
+     "y": 42.792,
+     "conf": 96
+    },
+    {
+     "key": "25470012",
+     "x": 64.894,
+     "y": 41.583,
+     "conf": 96
+    },
+    {
+     "key": "25470012",
+     "x": 33.801,
+     "y": 33.125,
+     "conf": 96
+    },
+    {
+     "key": "93410545",
+     "x": 36.605,
+     "y": 55.25,
+     "conf": 96
+    },
+    {
+     "key": "93410546",
+     "x": 36.63,
+     "y": 53.417,
+     "conf": 95
+    },
+    {
+     "key": "93410550",
+     "x": 57.616,
+     "y": 68.667,
+     "conf": 96
+    },
+    {
+     "key": "93410553",
+     "x": 7.979,
+     "y": 65.542,
+     "conf": 96
+    },
+    {
+     "key": "93410583",
+     "x": 24.226,
+     "y": 44.792,
+     "conf": 96
+    },
+    {
+     "key": "93410584",
+     "x": 46.47,
+     "y": 37.875,
+     "conf": 96
+    },
+    {
+     "key": "98410149",
+     "x": 38.902,
+     "y": 17.917,
+     "conf": 96
+    },
+    {
+     "key": "98410433",
+     "x": 68.158,
+     "y": 13.417,
+     "conf": 96
+    },
+    {
+     "key": "98410434",
+     "x": 15.982,
+     "y": 81.458,
+     "conf": 96
+    },
+    {
+     "key": "98410435",
+     "x": 95.309,
+     "y": 28.292,
+     "conf": 96
+    }
+   ]
+  },
+  {
+   "id": "6",
+   "number": "6",
+   "title": "Fuel (WMI08011)",
+   "image": "wrightsb36-fig6.png",
+   "ocr": true,
+   "parts": [
+    {
+     "key": "15990014",
+     "part_number": "15990014",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE TIE, 111N",
+     "qty": "7",
+     "remarks": "",
+     "search": "15990014"
+    },
+    {
+     "key": "15990074",
+     "part_number": "15990074",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE TIE, 1/2 X 40",
+     "qty": "2",
+     "remarks": "",
+     "search": "15990074"
+    },
+    {
+     "key": "17410006",
+     "part_number": "17410006",
+     "depth": 0,
+     "sub": false,
+     "description": "NITRIL SHEET, PROTECTOR, 3 X 6 X 1/16",
+     "qty": "2",
+     "remarks": "",
+     "search": "17410006"
+    },
+    {
+     "key": "41410054",
+     "part_number": "41410054",
+     "depth": 0,
+     "sub": false,
+     "description": "FUEL TANK ASSY, 5 GAL CL",
+     "qty": "1",
+     "remarks": "",
+     "search": "41410054"
+    },
+    {
+     "key": "42420002",
+     "part_number": "42420002",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE, FUEL 1/4 ID LOW PERM, PER FT",
+     "qty": "8.04 IN",
+     "remarks": "",
+     "search": "42420002"
+    },
+    {
+     "key": "42420004",
+     "part_number": "42420004",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE, FUEL 3/16 ID NOT LOW PERM, PER FT",
+     "qty": "36 IN",
+     "remarks": "",
+     "search": "42420004"
+    },
+    {
+     "key": "43410001",
+     "part_number": "43410001",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE CLAMP, 1/4",
+     "qty": "2",
+     "remarks": "",
+     "search": "43410001"
+    },
+    {
+     "key": "43410004",
+     "part_number": "43410004",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE, EAR CLAMP, 3/16",
+     "qty": "1",
+     "remarks": "",
+     "search": "43410004"
+    }
+   ],
+   "hotspots": [
+    {
+     "key": "15990014",
+     "x": 17.215,
+     "y": 31.708,
+     "conf": 96
+    },
+    {
+     "key": "15990074",
+     "x": 77.273,
+     "y": 79.833,
+     "conf": 96
+    },
+    {
+     "key": "15990074",
+     "x": 54.279,
+     "y": 20.542,
+     "conf": 96
+    },
+    {
+     "key": "17410006",
+     "x": 37.863,
+     "y": 67.583,
+     "conf": 96
+    },
+    {
+     "key": "41410054",
+     "x": 90.812,
+     "y": 34.0,
+     "conf": 96
+    },
+    {
+     "key": "42420002",
+     "x": 34.502,
+     "y": 49.875,
+     "conf": 96
+    },
+    {
+     "key": "42420004",
+     "x": 30.754,
+     "y": 29.396,
+     "conf": 96
+    },
+    {
+     "key": "43410001",
+     "x": 23.332,
+     "y": 43.875,
+     "conf": 96
+    },
+    {
+     "key": "43410004",
+     "x": 15.111,
+     "y": 64.625,
+     "conf": 96
+    }
+   ]
+  },
+  {
+   "id": "7",
+   "number": "7",
+   "title": "Caster, Flat Free (WMI08018)",
+   "image": "wrightsb36-fig7.png",
+   "ocr": true,
+   "parts": [
+    {
+     "key": "11990016",
+     "part_number": "11990016",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE 3/8-16 X 1 Z5",
+     "qty": "4",
+     "remarks": "",
+     "search": "11990016"
+    },
+    {
+     "key": "11990184",
+     "part_number": "11990184",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE, 5/8-11 X 7 Z5",
+     "qty": "1",
+     "remarks": "",
+     "search": "11990184"
+    },
+    {
+     "key": "11990186",
+     "part_number": "11990186",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE, 3/4- 10 X 8",
+     "qty": "1",
+     "remarks": "",
+     "search": "11990186"
+    },
+    {
+     "key": "12990065",
+     "part_number": "12990065",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGED NYLOCK, 3/8-16 Z5",
+     "qty": "4",
+     "remarks": "",
+     "search": "12990065"
+    },
+    {
+     "key": "12990077",
+     "part_number": "12990077",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGED NYLOCK, 3/4-10 Z5",
+     "qty": "1",
+     "remarks": "",
+     "search": "12990077"
+    },
+    {
+     "key": "12990084",
+     "part_number": "12990084",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGED NYLOC, 5/8 - 11",
+     "qty": "1",
+     "remarks": "",
+     "search": "12990084"
+    },
+    {
+     "key": "14990012",
+     "part_number": "14990012",
+     "depth": 0,
+     "sub": false,
+     "description": "BUSHING, SYNTHETIC, 1.25 ID X 1.5 OD X 1.0",
+     "qty": "2",
+     "remarks": "",
+     "search": "14990012"
+    },
+    {
+     "key": "17410007",
+     "part_number": "17410007",
+     "depth": 0,
+     "sub": false,
+     "description": "CASTER WHEEL BEARING SHEILD",
+     "qty": "2",
+     "remarks": "",
+     "search": "17410007"
+    },
+    {
+     "key": "17410021",
+     "part_number": "17410021",
+     "depth": 0,
+     "sub": false,
+     "description": "DUST CAP, 3/4",
+     "qty": "1",
+     "remarks": "",
+     "search": "17410021"
+    },
+    {
+     "key": "25410028",
+     "part_number": "25410028",
+     "depth": 0,
+     "sub": false,
+     "description": "SPANNER, 1.248 OD X .766 ID X 6.6125",
+     "qty": "1",
+     "remarks": "",
+     "search": "25410028"
+    },
+    {
+     "key": "72460032",
+     "part_number": "72460032",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL ASSY, CASTER, 11 X 4.00 - 5, BALL BRG",
+     "qty": "1",
+     "remarks": "",
+     "search": "72460032"
+    },
+    {
+     "key": "93410534",
+     "part_number": "93410534",
+     "depth": 0,
+     "sub": false,
+     "description": "CASTER ARM WELDMENT, SST",
+     "qty": "1",
+     "remarks": "",
+     "search": "93410534"
+    },
+    {
+     "key": "93410558",
+     "part_number": "93410558",
+     "depth": 0,
+     "sub": false,
+     "description": "CASTER YOKE, WSB, FOR USE WITH 72460032 TIRE",
+     "qty": "1",
+     "remarks": "",
+     "search": "93410558"
+    }
+   ],
+   "hotspots": [
+    {
+     "key": "11990016",
+     "x": 74.178,
+     "y": 37.667,
+     "conf": 96
+    },
+    {
+     "key": "11990184",
+     "x": 82.132,
+     "y": 66.833,
+     "conf": 96
+    },
+    {
+     "key": "11990186",
+     "x": 25.435,
+     "y": 77.708,
+     "conf": 96
+    },
+    {
+     "key": "12990065",
+     "x": 70.213,
+     "y": 41.542,
+     "conf": 96
+    },
+    {
+     "key": "12990077",
+     "x": 58.922,
+     "y": 7.708,
+     "conf": 96
+    },
+    {
+     "key": "12990084",
+     "x": 20.189,
+     "y": 57.208,
+     "conf": 96
+    },
+    {
+     "key": "14990012",
+     "x": 60.227,
+     "y": 17.083,
+     "conf": 96
+    },
+    {
+     "key": "17410007",
+     "x": 33.559,
+     "y": 81.458,
+     "conf": 96
+    },
+    {
+     "key": "17410021",
+     "x": 59.284,
+     "y": 11.833,
+     "conf": 96
+    },
+    {
+     "key": "25410028",
+     "x": 59.429,
+     "y": 24.583,
+     "conf": 96
+    },
+    {
+     "key": "72460032",
+     "x": 70.455,
+     "y": 77.333,
+     "conf": 95
+    },
+    {
+     "key": "93410534",
+     "x": 63.709,
+     "y": 45.75,
+     "conf": 96
+    },
+    {
+     "key": "93410558",
+     "x": 70.189,
+     "y": 69.917,
+     "conf": 96
+    }
+   ]
+  },
+  {
+   "id": "8",
+   "number": "8",
+   "title": "Rear Drive (WMI08023)",
+   "image": "wrightsb36-fig8.png",
+   "ocr": true,
+   "parts": [
+    {
+     "key": "12990082",
+     "part_number": "12990082",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, LUG, 1/2-20",
+     "qty": "4",
+     "remarks": "",
+     "search": "12990082"
+    },
+    {
+     "key": "72410099",
+     "part_number": "72410099",
+     "depth": 0,
+     "sub": false,
+     "description": "WHEEL ASSEMBLY, 20 X 8 - 10, BLACK",
+     "qty": "1",
+     "remarks": "",
+     "search": "72410099"
+    }
+   ],
+   "hotspots": [
+    {
+     "key": "12990082",
+     "x": 10.155,
+     "y": 66.667,
+     "conf": 96
+    },
+    {
+     "key": "72410099",
+     "x": 17.166,
+     "y": 52.875,
+     "conf": 96
+    }
+   ]
+  },
+  {
+   "id": "9",
+   "number": "9",
+   "title": "Engine, FS600V, Electric (WMI08028)",
+   "image": "wrightsb36-fig9.png",
+   "ocr": true,
+   "parts": [
+    {
+     "key": "11990010",
+     "part_number": "11990010",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, HEX 7/16-20 X 2 3/4 25",
+     "qty": "1",
+     "remarks": "",
+     "search": "11990010"
+    },
+    {
+     "key": "11990013",
+     "part_number": "11990013",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, FLANGE 5/16-18 X 1 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990013"
+    },
+    {
+     "key": "11990023",
+     "part_number": "11990023",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW, TRUSS HD, PHILIPS 10-32 X 1/2 Z",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990023"
+    },
+    {
+     "key": "11990060",
+     "part_number": "11990060",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE 5/16-18 X 1 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990060"
+    },
+    {
+     "key": "11990067",
+     "part_number": "11990067",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, FLANGE M8-1.25 X 16mm Z10.9",
+     "qty": "4",
+     "remarks": "",
+     "search": "11990067"
+    },
+    {
+     "key": "11990170",
+     "part_number": "11990170",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, FLANGE, SMOOTH 3/8-16 X 1 1/4 ZB8",
+     "qty": "4",
+     "remarks": "",
+     "search": "11990170"
+    },
+    {
+     "key": "12990015",
+     "part_number": "12990015",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, KEP 10-32 Z",
+     "qty": "2",
+     "remarks": "",
+     "search": "12990015"
+    },
+    {
+     "key": "12990041",
+     "part_number": "12990041",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, HEX, M8-1.25 SS",
+     "qty": "1",
+     "remarks": "",
+     "search": "12990041"
+    },
+    {
+     "key": "12990066",
+     "part_number": "12990066",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGED NYLOCK, 5/16-18 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "12990066"
+    },
+    {
+     "key": "12990094",
+     "part_number": "12990094",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, TOPLOCK, 5/16-18",
+     "qty": "2",
+     "remarks": "",
+     "search": "12990094"
+    },
+    {
+     "key": "13990031",
+     "part_number": "13990031",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER, LOCK, M8 SS",
+     "qty": "5",
+     "remarks": "",
+     "search": "13990031"
+    },
+    {
+     "key": "13990060",
+     "part_number": "13990060",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER, SPRING, 1.142OD X .512",
+     "qty": "1",
+     "remarks": "",
+     "search": "13990060"
+    },
+    {
+     "key": "13990066",
+     "part_number": "13990066",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER, SPRING, 0.945 OD X 0.413 X 0.118 X 0.146",
+     "qty": "4",
+     "remarks": "",
+     "search": "13990066"
+    },
+    {
+     "key": "15990003",
+     "part_number": "15990003",
+     "depth": 0,
+     "sub": false,
+     "description": "MACHINE KEY 1/4 X 1/4 X 1",
+     "qty": "1",
+     "remarks": "",
+     "search": "15990003"
+    },
+    {
+     "key": "15990014",
+     "part_number": "15990014",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE TIE, 11IN",
+     "qty": "3",
+     "remarks": "",
+     "search": "15990014"
+    },
+    {
+     "key": "35410059",
+     "part_number": "35410059",
+     "depth": 0,
+     "sub": false,
+     "description": "OIL DRAIN VALVE M20 X 2.5 THD",
+     "qty": "1",
+     "remarks": "",
+     "search": "35410059"
+    },
+    {
+     "key": "36490001",
+     "part_number": "36490001",
+     "depth": 0,
+     "sub": false,
+     "description": "OIL, MOTOR SYNTHETIC SAE 15W50",
+     "qty": "128 OZ",
+     "remarks": "",
+     "search": "36490001"
+    },
+    {
+     "key": "51410085",
+     "part_number": "51410085",
+     "depth": 0,
+     "sub": false,
+     "description": "ENGINE, FS600V, SHIFT START",
+     "qty": "1",
+     "remarks": "",
+     "search": "51410085"
+    },
+    {
+     "key": "51410099",
+     "part_number": "51410099",
+     "depth": 0,
+     "sub": false,
+     "description": "MUFFLER, KAWASAKI 726CC HORZ HIGH MOUNT",
+     "qty": "1",
+     "remarks": "",
+     "search": "51410099"
+    },
+    {
+     "key": "52420002",
+     "part_number": "52420002",
+     "depth": 0,
+     "sub": false,
+     "description": "THROTTLE CABLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "52420002"
+    },
+    {
+     "key": "52460002",
+     "part_number": "52460002",
+     "depth": 0,
+     "sub": false,
+     "description": "CHOKE CABLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "52460002"
+    },
+    {
+     "key": "71410002",
+     "part_number": "71410002",
+     "depth": 0,
+     "sub": false,
+     "description": "PULLEY, 4.5 X A GRV X 1 (ENGINE)",
+     "qty": "1",
+     "remarks": "",
+     "search": "71410002"
+    },
+    {
+     "key": "71410031",
+     "part_number": "71410031",
+     "depth": 0,
+     "sub": false,
+     "description": "CLUTCH, 1X6.75 125FT-LB CCW, ASSEMBLY W/ CABLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "71410031"
+    },
+    {
+     "key": "91410461",
+     "part_number": "91410461",
+     "depth": 0,
+     "sub": false,
+     "description": "11GA MUFFLER BRACKET, TRIM, WSB",
+     "qty": "1",
+     "remarks": "",
+     "search": "91410461"
+    },
+    {
+     "key": "91410462",
+     "part_number": "91410462",
+     "depth": 0,
+     "sub": false,
+     "description": "11GA MUFFLER BRACKET, DISCHARGE, WSB",
+     "qty": "1",
+     "remarks": "",
+     "search": "91410462"
+    },
+    {
+     "key": "93410570",
+     "part_number": "93410570",
+     "depth": 0,
+     "sub": false,
+     "description": "CLUTCH STOP, WARNER, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93410570"
+    }
+   ],
+   "hotspots": [
+    {
+     "key": "11990010",
+     "x": 73.755,
+     "y": 92.98,
+     "conf": 96
+    },
+    {
+     "key": "11990013",
+     "x": 16.747,
+     "y": 49.937,
+     "conf": 96
+    },
+    {
+     "key": "11990023",
+     "x": 77.332,
+     "y": 6.08,
+     "conf": 96
+    },
+    {
+     "key": "11990060",
+     "x": 82.6,
+     "y": 64.501,
+     "conf": 96
+    },
+    {
+     "key": "11990067",
+     "x": 19.14,
+     "y": 40.911,
+     "conf": 96
+    },
+    {
+     "key": "11990170",
+     "x": 81.779,
+     "y": 62.077,
+     "conf": 96
+    },
+    {
+     "key": "12990015",
+     "x": 61.89,
+     "y": 20.247,
+     "conf": 96
+    },
+    {
+     "key": "12990041",
+     "x": 52.465,
+     "y": 64.542,
+     "conf": 96
+    },
+    {
+     "key": "12990066",
+     "x": 82.6,
+     "y": 70.455,
+     "conf": 96
+    },
+    {
+     "key": "12990094",
+     "x": 40.865,
+     "y": 57.438,
+     "conf": 96
+    },
+    {
+     "key": "13990031",
+     "x": 48.067,
+     "y": 61.889,
+     "conf": 96
+    },
+    {
+     "key": "13990060",
+     "x": 73.707,
+     "y": 86.189,
+     "conf": 96
+    },
+    {
+     "key": "13990066",
+     "x": 81.754,
+     "y": 49.519,
+     "conf": 96
+    },
+    {
+     "key": "15990003",
+     "x": 55.317,
+     "y": 62.787,
+     "conf": 96
+    },
+    {
+     "key": "15990014",
+     "x": 93.378,
+     "y": 57.438,
+     "conf": 96
+    },
+    {
+     "key": "35410059",
+     "x": 84.34,
+     "y": 51.755,
+     "conf": 96
+    },
+    {
+     "key": "51410085",
+     "x": 52.827,
+     "y": 27.706,
+     "conf": 96
+    },
+    {
+     "key": "51410099",
+     "x": 7.032,
+     "y": 67.677,
+     "conf": 96
+    },
+    {
+     "key": "52420002",
+     "x": 77.67,
+     "y": 14.668,
+     "conf": 96
+    },
+    {
+     "key": "52460002",
+     "x": 57.661,
+     "y": 3.155,
+     "conf": 96
+    },
+    {
+     "key": "71410002",
+     "x": 53.432,
+     "y": 66.298,
+     "conf": 96
+    },
+    {
+     "key": "71410031",
+     "x": 78.83,
+     "y": 79.294,
+     "conf": 96
+    },
+    {
+     "key": "91410461",
+     "x": 47.873,
+     "y": 59.695,
+     "conf": 96
+    },
+    {
+     "key": "91410462",
+     "x": 20.13,
+     "y": 52.528,
+     "conf": 96
+    },
+    {
+     "key": "93410570",
+     "x": 83.446,
+     "y": 66.318,
+     "conf": 96
+    }
+   ]
+  },
+  {
+   "id": "10",
+   "number": "10",
+   "title": "Cutter Deck 36 (WMI08015)",
+   "image": "wrightsb36-fig10.png",
+   "ocr": true,
+   "parts": [
+    {
+     "key": "11990012",
+     "part_number": "11990012",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, FLANGE 5/16-18 X 3/4 Z5",
+     "qty": "3",
+     "remarks": "",
+     "search": "11990012"
+    },
+    {
+     "key": "11990055",
+     "part_number": "11990055",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, HEX 1/2-20 X 1 1/2 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990055"
+    },
+    {
+     "key": "11990059",
+     "part_number": "11990059",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE 5/16-18 X 3/4 Z5",
+     "qty": "4",
+     "remarks": "",
+     "search": "11990059"
+    },
+    {
+     "key": "11990060",
+     "part_number": "11990060",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE 5/16-18 X 1 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990060"
+    },
+    {
+     "key": "11990114",
+     "part_number": "11990114",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, HEX 3/8-16 X 3 1/4 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990114"
+    },
+    {
+     "key": "11990129",
+     "part_number": "11990129",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE 3/8-16 X 1 1/4 Z5",
+     "qty": "8",
+     "remarks": "",
+     "search": "11990129"
+    },
+    {
+     "key": "11990134",
+     "part_number": "11990134",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE 1/2-13 X3 1/2 Z5",
+     "qty": "1",
+     "remarks": "",
+     "search": "11990134"
+    },
+    {
+     "key": "11990200",
+     "part_number": "11990200",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, HEX, 5/8 - 18 X 2 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990200"
+    },
+    {
+     "key": "12990007",
+     "part_number": "12990007",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGE 5/16-18 Z5",
+     "qty": "9",
+     "remarks": "",
+     "search": "12990007"
+    },
+    {
+     "key": "12990017",
+     "part_number": "12990017",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, HEX, CENTERLOCK 1/2-13NC",
+     "qty": "1",
+     "remarks": "",
+     "search": "12990017"
+    },
+    {
+     "key": "12990065",
+     "part_number": "12990065",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGED NYLOCK, 3/8-16 Z5",
+     "qty": "10",
+     "remarks": "",
+     "search": "12990065"
+    },
+    {
+     "key": "13990007",
+     "part_number": "13990007",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE SPACER, 5/8 X 1/4",
+     "qty": "8",
+     "remarks": "",
+     "search": "13990007"
+    },
+    {
+     "key": "13990032",
+     "part_number": "13990032",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER 1/2 X 2 X 0.062 Z5",
+     "qty": "1",
+     "remarks": "",
+     "search": "13990032"
+    },
+    {
+     "key": "13990034",
+     "part_number": "13990034",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER, FLAT .5 X 1 1/2 X 1/4Z",
+     "qty": "2",
+     "remarks": "",
+     "search": "13990034"
+    },
+    {
+     "key": "13990041",
+     "part_number": "13990041",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER 3/8 X 1 1/2 X 0.15 Z5",
+     "qty": "12",
+     "remarks": "",
+     "search": "13990041"
+    },
+    {
+     "key": "13990076",
+     "part_number": "13990076",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER, BELLEVILLE, .692 X 2.0 OD X 0.125",
+     "qty": "2",
+     "remarks": "",
+     "search": "13990076"
+    },
+    {
+     "key": "15990022",
+     "part_number": "15990022",
+     "depth": 0,
+     "sub": false,
+     "description": "MACHINE KEY 3/16 X 3/16 X 1",
+     "qty": "2",
+     "remarks": "",
+     "search": "15990022"
+    },
+    {
+     "key": "16460009",
+     "part_number": "16460009",
+     "depth": 0,
+     "sub": false,
+     "description": "SPRING, DIE, 2.5",
+     "qty": "1",
+     "remarks": "",
+     "search": "16460009"
+    },
+    {
+     "key": "18410012",
+     "part_number": "18410012",
+     "depth": 0,
+     "sub": false,
+     "description": "KNOB, PLASTIC, T",
+     "qty": "2",
+     "remarks": "",
+     "search": "18410012"
+    },
+    {
+     "key": "25470013",
+     "part_number": "25470013",
+     "depth": 0,
+     "sub": false,
+     "description": "IDLER ARM MOUNTING SPACER",
+     "qty": "1",
+     "remarks": "",
+     "search": "25470013"
+    },
+    {
+     "key": "25470015",
+     "part_number": "25470015",
+     "depth": 0,
+     "sub": false,
+     "description": "PM, ZINC, 1.0 X 0.305 X 0.8125",
+     "qty": "1",
+     "remarks": "",
+     "search": "25470015"
+    },
+    {
+     "key": "71440001",
+     "part_number": "71440001",
+     "depth": 0,
+     "sub": false,
+     "description": "BLADE, 18",
+     "qty": "2",
+     "remarks": "",
+     "search": "71440001"
+    },
+    {
+     "key": "71460040",
+     "part_number": "71460040",
+     "depth": 0,
+     "sub": false,
+     "description": "BELT, EPDM, B SECTION 102.25 EL",
+     "qty": "1",
+     "remarks": "",
+     "search": "71460040"
+    },
+    {
+     "key": "71460128",
+     "part_number": "71460128",
+     "depth": 0,
+     "sub": false,
+     "description": "CAP, PULLEY DUST CAP",
+     "qty": "2",
+     "remarks": "",
+     "search": "71460128"
+    },
+    {
+     "key": "71460183",
+     "part_number": "71460183",
+     "depth": 0,
+     "sub": false,
+     "description": "SPINDLE ASSEMBLY, BOLT-ON",
+     "qty": "2",
+     "remarks": "",
+     "search": "71460183"
+    },
+    {
+     "key": "71460191",
+     "part_number": "71460191",
+     "depth": 0,
+     "sub": false,
+     "description": "PULLEY, V-IDLER, A/B GROOVE, 5 OD X 3/8 BORE",
+     "qty": "1",
+     "remarks": "",
+     "search": "71460191"
+    },
+    {
+     "key": "71460192",
+     "part_number": "71460192",
+     "depth": 0,
+     "sub": false,
+     "description": "PULLEY, BSI, 5 1/4 X 2 1/2 X 3/8 BORE",
+     "qty": "1",
+     "remarks": "",
+     "search": "71460192"
+    },
+    {
+     "key": "71460194",
+     "part_number": "71460194",
+     "depth": 0,
+     "sub": false,
+     "description": "PULLEY, DEEP, SINGLE SPLIT, B, 7/8IDX6 5/16OD",
+     "qty": "2",
+     "remarks": "",
+     "search": "71460194"
+    },
+    {
+     "key": "93460227",
+     "part_number": "93460227",
+     "depth": 0,
+     "sub": false,
+     "description": "FRONT DECK COVER, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93460227"
+    },
+    {
+     "key": "93460230",
+     "part_number": "93460230",
+     "depth": 0,
+     "sub": false,
+     "description": "CUTTER DECK WELDMENT, WSB 36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93460230"
+    },
+    {
+     "key": "93460233",
+     "part_number": "93460233",
+     "depth": 0,
+     "sub": false,
+     "description": "INTERNAL BENT BAFFLE, WSB 36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93460233"
+    },
+    {
+     "key": "93460234",
+     "part_number": "93460234",
+     "depth": 0,
+     "sub": false,
+     "description": "AIR DEFLECTOR, WSB 36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93460234"
+    },
+    {
+     "key": "98460048",
+     "part_number": "98460048",
+     "depth": 0,
+     "sub": false,
+     "description": "IDLER ARM ASSY, RIGHT",
+     "qty": "1",
+     "remarks": "",
+     "search": "98460048"
+    },
+    {
+     "key": "98460086",
+     "part_number": "98460086",
+     "depth": 0,
+     "sub": false,
+     "description": "FLEXIBLE CHUTE DEFLECTOR ASSEMBLY, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "98460086"
+    },
+    {
+     "key": "98460087",
+     "part_number": "98460087",
+     "depth": 0,
+     "sub": false,
+     "description": "DECK COVER ASSEMBLY, TRIM, WSB 36",
+     "qty": "1",
+     "remarks": "",
+     "search": "98460087"
+    },
+    {
+     "key": "98460088",
+     "part_number": "98460088",
+     "depth": 0,
+     "sub": false,
+     "description": "DECK COVER ASSEMBLY, DISCHARGE, WSB 36",
+     "qty": "1",
+     "remarks": "",
+     "search": "98460088"
+    }
+   ],
+   "hotspots": [
+    {
+     "key": "11990012",
+     "x": 27.332,
+     "y": 74.676,
+     "conf": 96
+    },
+    {
+     "key": "11990055",
+     "x": 48.502,
+     "y": 2.716,
+     "conf": 96
+    },
+    {
+     "key": "11990059",
+     "x": 27.791,
+     "y": 56.937,
+     "conf": 96
+    },
+    {
+     "key": "11990059",
+     "x": 50.362,
+     "y": 79.21,
+     "conf": 96
+    },
+    {
+     "key": "11990060",
+     "x": 45.771,
+     "y": 39.469,
+     "conf": 96
+    },
+    {
+     "key": "11990114",
+     "x": 68.826,
+     "y": 5.746,
+     "conf": 96
+    },
+    {
+     "key": "11990129",
+     "x": 89.077,
+     "y": 68.638,
+     "conf": 96
+    },
+    {
+     "key": "11990134",
+     "x": 50.532,
+     "y": 77.121,
+     "conf": 96
+    },
+    {
+     "key": "11990200",
+     "x": 89.004,
+     "y": 81.07,
+     "conf": 96
+    },
+    {
+     "key": "12990007",
+     "x": 49.033,
+     "y": 74.676,
+     "conf": 96
+    },
+    {
+     "key": "12990007",
+     "x": 29.725,
+     "y": 88.571,
+     "conf": 95
+    },
+    {
+     "key": "12990017",
+     "x": 46.544,
+     "y": 26.557,
+     "conf": 96
+    },
+    {
+     "key": "12990065",
+     "x": 63.968,
+     "y": 79.168,
+     "conf": 96
+    },
+    {
+     "key": "12990065",
+     "x": 83.591,
+     "y": 42.687,
+     "conf": 96
+    },
+    {
+     "key": "13990007",
+     "x": 87.192,
+     "y": 71.312,
+     "conf": 0
+    },
+    {
+     "key": "13990032",
+     "x": 46.617,
+     "y": 29.482,
+     "conf": 96
+    },
+    {
+     "key": "13990034",
+     "x": 48.453,
+     "y": 5.746,
+     "conf": 96
+    },
+    {
+     "key": "13990041",
+     "x": 74.19,
+     "y": 34.329,
+     "conf": 0
+    },
+    {
+     "key": "13990041",
+     "x": 84.389,
+     "y": 51.107,
+     "conf": 0
+    },
+    {
+     "key": "13990076",
+     "x": 89.004,
+     "y": 77.706,
+     "conf": 96
+    },
+    {
+     "key": "15990022",
+     "x": 83.591,
+     "y": 39.469,
+     "conf": 96
+    },
+    {
+     "key": "16460009",
+     "x": 75.085,
+     "y": 29.022,
+     "conf": 96
+    },
+    {
+     "key": "18410012",
+     "x": 36.346,
+     "y": 39.574,
+     "conf": 96
+    },
+    {
+     "key": "25470013",
+     "x": 45.602,
+     "y": 36.168,
+     "conf": 96
+    },
+    {
+     "key": "25470015",
+     "x": 83.422,
+     "y": 49.227,
+     "conf": 96
+    },
+    {
+     "key": "71440001",
+     "x": 89.319,
+     "y": 74.634,
+     "conf": 96
+    },
+    {
+     "key": "71460040",
+     "x": 81.054,
+     "y": 5.83,
+     "conf": 96
+    },
+    {
+     "key": "71460128",
+     "x": 74.674,
+     "y": 22.9,
+     "conf": 96
+    },
+    {
+     "key": "71460183",
+     "x": 83.47,
+     "y": 45.487,
+     "conf": 96
+    },
+    {
+     "key": "71460191",
+     "x": 47.076,
+     "y": 21.082,
+     "conf": 96
+    },
+    {
+     "key": "71460192",
+     "x": 47.173,
+     "y": 23.527,
+     "conf": 96
+    },
+    {
+     "key": "71460194",
+     "x": 45.022,
+     "y": 9.444,
+     "conf": 96
+    },
+    {
+     "key": "93460227",
+     "x": 27.09,
+     "y": 72.566,
+     "conf": 96
+    },
+    {
+     "key": "93460230",
+     "x": 27.574,
+     "y": 52.549,
+     "conf": 96
+    },
+    {
+     "key": "93460233",
+     "x": 73.538,
+     "y": 95.069,
+     "conf": 96
+    },
+    {
+     "key": "93460234",
+     "x": 41.711,
+     "y": 95.988,
+     "conf": 96
+    },
+    {
+     "key": "98460048",
+     "x": 46.448,
+     "y": 32.073,
+     "conf": 96
+    },
+    {
+     "key": "98460086",
+     "x": 10.246,
+     "y": 27.1,
+     "conf": 96
+    },
+    {
+     "key": "98460087",
+     "x": 39.995,
+     "y": 5.85,
+     "conf": 96
+    },
+    {
+     "key": "98460088",
+     "x": 30.909,
+     "y": 2.674,
+     "conf": 96
+    }
+   ]
+  },
+  {
+   "id": "11",
+   "number": "11",
+   "title": "Engine, FS600, Electric (WMI08019)",
+   "image": "wrightsb36-fig11.png",
+   "ocr": true,
+   "parts": [
+    {
+     "key": "11990010",
+     "part_number": "11990010",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, HEX 7/16-20 X 2 3/4 25",
+     "qty": "1",
+     "remarks": "",
+     "search": "11990010"
+    },
+    {
+     "key": "11990012",
+     "part_number": "11990012",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, FLANGE 5/16-18 X 3/4 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990012"
+    },
+    {
+     "key": "11990023",
+     "part_number": "11990023",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW, TRUSS HD, PHILIPS 10-32 X 1/2 Z",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990023"
+    },
+    {
+     "key": "11990060",
+     "part_number": "11990060",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE 5/16-18 X 1 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990060"
+    },
+    {
+     "key": "11990067",
+     "part_number": "11990067",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, FLANGE M8-1.25 X 16mm Z10.9",
+     "qty": "4",
+     "remarks": "",
+     "search": "11990067"
+    },
+    {
+     "key": "11990170",
+     "part_number": "11990170",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, FLANGE, SMOOTH 3/8-16 X 1 1/4 ZB8",
+     "qty": "4",
+     "remarks": "",
+     "search": "11990170"
+    },
+    {
+     "key": "12990007",
+     "part_number": "12990007",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGE 5/16-18 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "12990007"
+    },
+    {
+     "key": "12990015",
+     "part_number": "12990015",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, KEP 10-32 Z",
+     "qty": "2",
+     "remarks": "",
+     "search": "12990015"
+    },
+    {
+     "key": "12990066",
+     "part_number": "12990066",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGED NYLOCK, 5/16-18 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "12990066"
+    },
+    {
+     "key": "13990060",
+     "part_number": "13990060",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER, SPRING, 1.142OD X .512",
+     "qty": "1",
+     "remarks": "",
+     "search": "13990060"
+    },
+    {
+     "key": "13990066",
+     "part_number": "13990066",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER, SPRING, 0.945 OD X 0.413 X 0.118 X 0.146",
+     "qty": "4",
+     "remarks": "",
+     "search": "13990066"
+    },
+    {
+     "key": "15990003",
+     "part_number": "15990003",
+     "depth": 0,
+     "sub": false,
+     "description": "MACHINE KEY 1/4 X 1/4 X 1",
+     "qty": "1",
+     "remarks": "",
+     "search": "15990003"
+    },
+    {
+     "key": "15990014",
+     "part_number": "15990014",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE TIE, 11IN",
+     "qty": "3",
+     "remarks": "",
+     "search": "15990014"
+    },
+    {
+     "key": "35410059",
+     "part_number": "35410059",
+     "depth": 0,
+     "sub": false,
+     "description": "OIL DRAIN VALVE M20 X 2.5 THD",
+     "qty": "1",
+     "remarks": "",
+     "search": "35410059"
+    },
+    {
+     "key": "36490001",
+     "part_number": "36490001",
+     "depth": 0,
+     "sub": false,
+     "description": "OIL, MOTOR SYNTHETIC SAE 15W50",
+     "qty": "128 OZ",
+     "remarks": "",
+     "search": "36490001"
+    },
+    {
+     "key": "51410085",
+     "part_number": "51410085",
+     "depth": 0,
+     "sub": false,
+     "description": "ENGINE, FS600V, SHIFT START",
+     "qty": "1",
+     "remarks": "",
+     "search": "51410085"
+    },
+    {
+     "key": "51410099",
+     "part_number": "51410099",
+     "depth": 0,
+     "sub": false,
+     "description": "MUFFLER, KAWASAKI 726CC HORZ HIGH MOUNT",
+     "qty": "1",
+     "remarks": "",
+     "search": "51410099"
+    },
+    {
+     "key": "52420002",
+     "part_number": "52420002",
+     "depth": 0,
+     "sub": false,
+     "description": "THROTTLE CABLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "52420002"
+    },
+    {
+     "key": "52460002",
+     "part_number": "52460002",
+     "depth": 0,
+     "sub": false,
+     "description": "CHOKE CABLE",
+     "qty": "1",
+     "remarks": "",
+     "search": "52460002"
+    },
+    {
+     "key": "71410002",
+     "part_number": "71410002",
+     "depth": 0,
+     "sub": false,
+     "description": "PULLEY, 4.5 X A GRV X 1 (ENGINE)",
+     "qty": "1",
+     "remarks": "",
+     "search": "71410002"
+    },
+    {
+     "key": "71410030",
+     "part_number": "71410030",
+     "depth": 0,
+     "sub": false,
+     "description": "CLUTCH, 1 X 6.75 105FT-LB CCW,#1I-5219-233",
+     "qty": "1",
+     "remarks": "",
+     "search": "71410030"
+    },
+    {
+     "key": "91410461",
+     "part_number": "91410461",
+     "depth": 0,
+     "sub": false,
+     "description": "11GA MUFFLER BRACKET, TRIM, WSB",
+     "qty": "1",
+     "remarks": "",
+     "search": "91410461"
+    },
+    {
+     "key": "91410462",
+     "part_number": "91410462",
+     "depth": 0,
+     "sub": false,
+     "description": "11GA MUFFLER BRACKET, DISCHARGE, WSB",
+     "qty": "1",
+     "remarks": "",
+     "search": "91410462"
+    },
+    {
+     "key": "91410463",
+     "part_number": "91410463",
+     "depth": 0,
+     "sub": false,
+     "description": "11GA MUFFLER BRACKET, SPACER, WSB",
+     "qty": "2",
+     "remarks": "",
+     "search": "91410463"
+    },
+    {
+     "key": "93410570",
+     "part_number": "93410570",
+     "depth": 0,
+     "sub": false,
+     "description": "CLUTCH STOP, WARNER, WSB 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93410570"
+    }
+   ],
+   "hotspots": [
+    {
+     "key": "11990010",
+     "x": 73.791,
+     "y": 92.625,
+     "conf": 96
+    },
+    {
+     "key": "11990012",
+     "x": 16.9,
+     "y": 49.833,
+     "conf": 96
+    },
+    {
+     "key": "11990023",
+     "x": 77.321,
+     "y": 6.25,
+     "conf": 96
+    },
+    {
+     "key": "11990060",
+     "x": 82.568,
+     "y": 64.333,
+     "conf": 96
+    },
+    {
+     "key": "11990067",
+     "x": 19.221,
+     "y": 40.875,
+     "conf": 96
+    },
+    {
+     "key": "11990170",
+     "x": 81.721,
+     "y": 61.917,
+     "conf": 96
+    },
+    {
+     "key": "12990007",
+     "x": 23.574,
+     "y": 54.125,
+     "conf": 96
+    },
+    {
+     "key": "12990015",
+     "x": 61.896,
+     "y": 20.333,
+     "conf": 96
+    },
+    {
+     "key": "12990066",
+     "x": 82.544,
+     "y": 70.25,
+     "conf": 96
+    },
+    {
+     "key": "13990060",
+     "x": 73.694,
+     "y": 85.875,
+     "conf": 96
+    },
+    {
+     "key": "13990066",
+     "x": 81.697,
+     "y": 49.417,
+     "conf": 96
+    },
+    {
+     "key": "15990003",
+     "x": 55.343,
+     "y": 62.625,
+     "conf": 96
+    },
+    {
+     "key": "15990014",
+     "x": 93.303,
+     "y": 57.333,
+     "conf": 96
+    },
+    {
+     "key": "35410059",
+     "x": 84.309,
+     "y": 51.667,
+     "conf": 96
+    },
+    {
+     "key": "51410085",
+     "x": 52.901,
+     "y": 27.75,
+     "conf": 96
+    },
+    {
+     "key": "51410099",
+     "x": 7.205,
+     "y": 67.458,
+     "conf": 96
+    },
+    {
+     "key": "52420002",
+     "x": 77.635,
+     "y": 14.792,
+     "conf": 96
+    },
+    {
+     "key": "52460002",
+     "x": 57.713,
+     "y": 3.333,
+     "conf": 96
+    },
+    {
+     "key": "71410002",
+     "x": 55.247,
+     "y": 68.667,
+     "conf": 96
+    },
+    {
+     "key": "71410030",
+     "x": 76.958,
+     "y": 79.583,
+     "conf": 96
+    },
+    {
+     "key": "91410461",
+     "x": 47.921,
+     "y": 59.542,
+     "conf": 96
+    },
+    {
+     "key": "91410462",
+     "x": 20.237,
+     "y": 52.417,
+     "conf": 96
+    },
+    {
+     "key": "93410570",
+     "x": 83.414,
+     "y": 66.125,
+     "conf": 96
+    }
+   ]
+  },
+  {
+   "id": "12",
+   "number": "12",
+   "title": "Hydro (WMI08024)",
+   "image": "wrightsb36-fig12.png",
+   "ocr": true,
+   "parts": [
+    {
+     "key": "11990024",
+     "part_number": "11990024",
+     "depth": 0,
+     "sub": false,
+     "description": "SCREW, TRUSS HD, PHILIPS 1/4-20 X 3/4 SS",
+     "qty": "4",
+     "remarks": "",
+     "search": "11990024"
+    },
+    {
+     "key": "11990074",
+     "part_number": "11990074",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE, SHORT NECK, 3/8-16 X 3/4 Z5",
+     "qty": "2",
+     "remarks": "",
+     "search": "11990074"
+    },
+    {
+     "key": "11990123",
+     "part_number": "11990123",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, CARRIAGE 3/8-16 X 2 1/2 Z5",
+     "qty": "4",
+     "remarks": "",
+     "search": "11990123"
+    },
+    {
+     "key": "11990135",
+     "part_number": "11990135",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, FLANGE, SMOOTH 5/16 - 18 X 3 Z8",
+     "qty": "8",
+     "remarks": "",
+     "search": "11990135"
+    },
+    {
+     "key": "11990198",
+     "part_number": "11990198",
+     "depth": 0,
+     "sub": false,
+     "description": "BOLT, HEX, 3/8-16 X 6 Z5",
+     "qty": "1",
+     "remarks": "",
+     "search": "11990198"
+    },
+    {
+     "key": "12990012",
+     "part_number": "12990012",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, U, 1/4-20, 11GA",
+     "qty": "2",
+     "remarks": "",
+     "search": "12990012"
+    },
+    {
+     "key": "12990044",
+     "part_number": "12990044",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, U 1/4-20 - 7GA",
+     "qty": "2",
+     "remarks": "",
+     "search": "12990044"
+    },
+    {
+     "key": "12990065",
+     "part_number": "12990065",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGED NYLOCK, 3/8-16 Z5",
+     "qty": "7",
+     "remarks": "",
+     "search": "12990065"
+    },
+    {
+     "key": "12990066",
+     "part_number": "12990066",
+     "depth": 0,
+     "sub": false,
+     "description": "NUT, FLANGED NYLOCK, 5/16-18 Z5",
+     "qty": "8",
+     "remarks": "",
+     "search": "12990066"
+    },
+    {
+     "key": "13990010",
+     "part_number": "13990010",
+     "depth": 0,
+     "sub": false,
+     "description": "WASHER, FLAT USS 5/16 Z5",
+     "qty": "1",
+     "remarks": "",
+     "search": "13990010"
+    },
+    {
+     "key": "15990014",
+     "part_number": "15990014",
+     "depth": 0,
+     "sub": false,
+     "description": "CABLE TIE, 11IN",
+     "qty": "4",
+     "remarks": "",
+     "search": "15990014"
+    },
+    {
+     "key": "15990025",
+     "part_number": "15990025",
+     "depth": 0,
+     "sub": false,
+     "description": "HITCH PIN CLIP #3",
+     "qty": "2",
+     "remarks": "",
+     "search": "15990025"
+    },
+    {
+     "key": "15990030",
+     "part_number": "15990030",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE CLAMP, SAE #6, SS",
+     "qty": "2",
+     "remarks": "",
+     "search": "15990030"
+    },
+    {
+     "key": "33410098",
+     "part_number": "33410098",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE, GP, 1/2 ORDER PER FT",
+     "qty": "1.79",
+     "remarks": "",
+     "search": "33410098"
+    },
+    {
+     "key": "33410098",
+     "part_number": "33410098",
+     "depth": 0,
+     "sub": false,
+     "description": "HOSE, GP, 1/2 ORDER PER FT",
+     "qty": "1.79",
+     "remarks": "",
+     "search": "33410098"
+    },
+    {
+     "key": "34410001",
+     "part_number": "34410001",
+     "depth": 0,
+     "sub": false,
+     "description": "HYDRO, RESERVOIR, 350ML W/CAP",
+     "qty": "2",
+     "remarks": "",
+     "search": "34410001"
+    },
+    {
+     "key": "35410065",
+     "part_number": "35410065",
+     "depth": 0,
+     "sub": false,
+     "description": "CLAMP, HOSE, 1/2IN BAND",
+     "qty": "2",
+     "remarks": "",
+     "search": "35410065"
+    },
+    {
+     "key": "35410083",
+     "part_number": "35410083",
+     "depth": 0,
+     "sub": false,
+     "description": "FITTING, 90 DEGREE, -6 MORB X -8 BARB",
+     "qty": "2",
+     "remarks": "",
+     "search": "35410083"
+    },
+    {
+     "key": "39410400",
+     "part_number": "39410400",
+     "depth": 0,
+     "sub": false,
+     "description": "TRANS, ZT-3100 RIGHT, ZL-GCEE-SNDB-2PXX",
+     "qty": "1",
+     "remarks": "",
+     "search": "39410400"
+    },
+    {
+     "key": "39410401",
+     "part_number": "39410401",
+     "depth": 0,
+     "sub": false,
+     "description": "TRANS, ZT-3100 LEFT, ZL-KCEE-SNDC-3PXX",
+     "qty": "1",
+     "remarks": "",
+     "search": "39410401"
+    },
+    {
+     "key": "91490042",
+     "part_number": "91490042",
+     "depth": 0,
+     "sub": false,
+     "description": "DOM, BLACK, .625 X .120W X 2.625",
+     "qty": "1",
+     "remarks": "",
+     "search": "91490042"
+    },
+    {
+     "key": "93410566",
+     "part_number": "93410566",
+     "depth": 0,
+     "sub": false,
+     "description": "TRANSAXLE NEUTRAL ENGAGE, WSB, 32/36",
+     "qty": "2",
+     "remarks": "",
+     "search": "93410566"
+    },
+    {
+     "key": "93410567",
+     "part_number": "93410567",
+     "depth": 0,
+     "sub": false,
+     "description": "SKID PLATE, WSB, 32/36",
+     "qty": "1",
+     "remarks": "",
+     "search": "93410567"
+    }
+   ],
+   "hotspots": [
+    {
+     "key": "11990024",
+     "x": 11.793,
+     "y": 15.608,
+     "conf": 96
+    },
+    {
+     "key": "11990024",
+     "x": 81.15,
+     "y": 28.228,
+     "conf": 96
+    },
+    {
+     "key": "11990074",
+     "x": 24.432,
+     "y": 72.44,
+     "conf": 96
+    },
+    {
+     "key": "11990123",
+     "x": 78.323,
+     "y": 55.307,
+     "conf": 96
+    },
+    {
+     "key": "11990123",
+     "x": 3.842,
+     "y": 52.925,
+     "conf": 96
+    },
+    {
+     "key": "11990135",
+     "x": 83.349,
+     "y": 87.568,
+     "conf": 96
+    },
+    {
+     "key": "11990198",
+     "x": 90.285,
+     "y": 83.702,
+     "conf": 96
+    },
+    {
+     "key": "12990012",
+     "x": 5.486,
+     "y": 7.334,
+     "conf": 96
+    },
+    {
+     "key": "12990044",
+     "x": 76.317,
+     "y": 21.542,
+     "conf": 96
+    },
+    {
+     "key": "12990065",
+     "x": 88.352,
+     "y": 64.292,
+     "conf": 96
+    },
+    {
+     "key": "12990065",
+     "x": 9.618,
+     "y": 83.473,
+     "conf": 96
+    },
+    {
+     "key": "12990065",
+     "x": 35.186,
+     "y": 67.217,
+     "conf": 96
+    },
+    {
+     "key": "12990065",
+     "x": 8.217,
+     "y": 40.995,
+     "conf": 96
+    },
+    {
+     "key": "12990066",
+     "x": 84.074,
+     "y": 68.136,
+     "conf": 96
+    },
+    {
+     "key": "13990010",
+     "x": 64.741,
+     "y": 90.911,
+     "conf": 96
+    },
+    {
+     "key": "15990014",
+     "x": 78.613,
+     "y": 46.824,
+     "conf": 96
+    },
+    {
+     "key": "15990025",
+     "x": 49.976,
+     "y": 46.908,
+     "conf": 96
+    },
+    {
+     "key": "15990030",
+     "x": 28.492,
+     "y": 34.246,
+     "conf": 96
+    },
+    {
+     "key": "33410098",
+     "x": 29.773,
+     "y": 29.064,
+     "conf": 96
+    },
+    {
+     "key": "33410098",
+     "x": 74.529,
+     "y": 41.726,
+     "conf": 96
+    },
+    {
+     "key": "34410001",
+     "x": 76.148,
+     "y": 35.29,
+     "conf": 96
+    },
+    {
+     "key": "35410065",
+     "x": 72.112,
+     "y": 37.254,
+     "conf": 96
+    },
+    {
+     "key": "35410083",
+     "x": 41.324,
+     "y": 38.759,
+     "conf": 96
+    },
+    {
+     "key": "39410400",
+     "x": 5.824,
+     "y": 66.883,
+     "conf": 96
+    },
+    {
+     "key": "39410401",
+     "x": 47.753,
+     "y": 89.887,
+     "conf": 96
+    },
+    {
+     "key": "91490042",
+     "x": 51.957,
+     "y": 61.617,
+     "conf": 96
+    },
+    {
+     "key": "93410566",
+     "x": 43.838,
+     "y": 34.455,
+     "conf": 95
+    },
+    {
+     "key": "93410567",
+     "x": 16.82,
+     "y": 88.884,
+     "conf": 96
+    }
+   ]
+  },
+  {
+   "id": "13",
+   "number": "13",
+   "title": "Decal, 36in Deck Size",
+   "image": "wrightsb36-fig13.png",
+   "ocr": true,
+   "parts": [
+    {
+     "key": "76490015",
+     "part_number": "76490015",
+     "depth": 0,
+     "sub": false,
+     "description": "DECAL, 36IN DECK SIZE",
+     "qty": "1",
+     "remarks": "",
+     "search": "76490015"
+    }
+   ],
+   "hotspots": [
+    {
+     "key": "76490015",
+     "x": 48.4,
+     "y": 48.3,
+     "byHand": true
+    }
+   ]
+  }
+ ]
+}

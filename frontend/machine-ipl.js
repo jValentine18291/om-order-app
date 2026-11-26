@@ -52,6 +52,8 @@
     UHUQ: "Husqvarna", UZEN: "Zenoah", UPUL: "PulsFOG",
     UBLG: "Billy Goat", UFER: "Ferris", UGRA: "Grasshopper",
     UPER: "Peruzzo", UVIC: "Victa", URAY: "Rayco", UHCN: "Husqvarna Construction",
+    // AutoCount holds Wright as UWRI machines and SWRI parts (26 Nov 2026).
+    UWRI: "Wright",
   };
 
   // The parts prefix for a brand NAME, for machines that were typed in by hand
